@@ -26,11 +26,11 @@ func fetchUrl(url []byte,success chan Task,failure chan string){
 
 	resp, err := http.Get(resource)
 	if err != nil {
-		log.Println("We have an error!: ", err)
+		log.Println("we have an error!: ", err)
 		return
 	}
 	defer resp.Body.Close()
-	log.Printf("Getting %v\n", resource)
+	log.Printf("getting %v\n", resource)
 	body, _ := ioutil.ReadAll(resp.Body)
 	task := Task{url,nil, body}
 //	log.Printf("Response %v\n",string(body))
@@ -51,6 +51,7 @@ func ThrottledCrawl(curl chan []byte, success chan Task, failure chan string, vi
 		if _, ok := visited[url]; !ok {
 			go fetchUrl([]byte(url), success, failure)
 			numGos += 1
+			log.Print("gos +1, ",numGos);
 		}
 		visited[url] += 1
 	}
@@ -61,7 +62,7 @@ func Seed(curl chan []byte,seed string) {
 }
 
 func GetUrls(curl chan []byte, task Task, regex *regexp.Regexp) {
-	log.Print("Parsing external links:",string(task.Url))
+	log.Print("parsing external links:",string(task.Url))
 	matches := regex.FindAllSubmatch(task.Response, -1)
 	for _, match := range matches {
 		curl <- match[1]

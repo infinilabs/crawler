@@ -35,3 +35,4 @@ target/
 *.log
 */*/proguard_logs/**
 private_test
+*.exe
