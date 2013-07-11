@@ -13,4 +13,7 @@ after building the project run `./gopa -h` for a list of commandline options
 
 
 
-some parts of code were copied from weedfs and some other project,i just forget,thanks.
+parts of code were copied from other projects,thanks for these goodies.
+https://github.com/pmylund/go-bloom
+https://github.com/pmylund/go-bitset
+http://code.google.com/p/weed-fs
