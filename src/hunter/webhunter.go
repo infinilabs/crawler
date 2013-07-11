@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"util/bloom"
 	"sync"
+	"util/stringutil"
 )
 
 type SiteConfig struct{
@@ -78,13 +79,17 @@ var f *bloom.Filter64
 var l sync.Mutex
 
 func init(){
-	log.Print("webhunter init")
+	log.Print("[webhunter] initializing")
 
 	// Create a bloom filter which will contain an expected 100,000 items, and which
 	// allows a false positive rate of 1%.
 	f = bloom.New64(1000000, 0.01)
 
 }
+
+//func ContainStr(s, substr string) bool {
+//	return Index(s, substr) != -1
+//}
 
 func GetUrls(curl chan []byte, task Task, siteConfig SiteConfig) {
 	log.Print("parsing external links:",string(task.Url))
@@ -96,15 +101,35 @@ func GetUrls(curl chan []byte, task Task, siteConfig SiteConfig) {
 	for _, match := range matches {
 		url := match[1]
 
+		hit := false
 		l.Lock();
-		if(!f.Test([]byte(url))){
+		if(f.Test(url)){
+			hit=true
+		}
+		l.Unlock();
+
+		if(!hit){
+			myurl:=string(url)
+			if(len(siteConfig.LinkUrlMustContain)>0){
+				if(!stringutil.ContainStr(myurl,siteConfig.LinkUrlMustContain)){
+					log.Print("link does not hit must-contain,ignore,",myurl,",",siteConfig.LinkUrlMustNotContain)
+					break;
+				}
+			}
+
+			if(len(siteConfig.LinkUrlMustNotContain)>0){
+				if(stringutil.ContainStr(myurl,siteConfig.LinkUrlMustNotContain)){
+					log.Print("link hit must-not-contain,ignore,",myurl,",",siteConfig.LinkUrlMustNotContain)
+					break;
+				}
+			}
+
 			log.Print("enqueue:",string(url))
 			curl <- match[1]
 			f.Add([]byte(url))
 		}else{
-			log.Print("hit bloom filter,",string(url))
+			log.Print("hit bloom filter,ignore,",string(url))
 		}
-		l.Unlock();
 
 		//TODO 判断url是否已经请求过，并且判断url pattern，如果满足处理条件，则继续进行处理，否则放弃
 

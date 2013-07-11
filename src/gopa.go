@@ -29,10 +29,13 @@ func main() {
 
 	visited := make(map[string]int)
 
+	// Setting siteConfig
 	reg := regexp.MustCompile("<a.*?href=[\"'](http.*?)[\"']")
 	siteConfig.LinkUrlExtractRegex = reg
+	siteConfig.LinkUrlMustContain = "baidu"
+	siteConfig.LinkUrlMustNotContain = "wenku"
 
-	// Give our crawler a place to start.
+	// Giving a seed to gopa
 	go Seed(curl, *seed_url)
 
 	// Start the throttled crawling.
