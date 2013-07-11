@@ -13,3 +13,4 @@ after building the project run `./gopa -h` for a list of commandline options
 
 
 
+some parts of code were copied from weedfs and some other project,i just forget,thanks.

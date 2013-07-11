@@ -10,8 +10,22 @@ import (
 	"log"
 	"io/ioutil"
 	"regexp"
+	"util/bloom"
+	"sync"
 )
 
+type SiteConfig struct{
+
+	//walking around pattern
+	LinkUrlExtractRegex *regexp.Regexp
+	LinkUrlMustContain string
+	LinkUrlMustNotContain string
+
+	//downloading pattern
+	DownloadUrlPattern *regexp.Regexp
+	DownloadUrlMustContain string
+	DownloadUrlMustNotContain string
+}
 
 type  Task struct{
   Url,Request,Response []byte
@@ -51,7 +65,6 @@ func ThrottledCrawl(curl chan []byte, success chan Task, failure chan string, vi
 		if _, ok := visited[url]; !ok {
 			go fetchUrl([]byte(url), success, failure)
 			numGos += 1
-			log.Print("gos +1, ",numGos);
 		}
 		visited[url] += 1
 	}
@@ -61,10 +74,48 @@ func Seed(curl chan []byte,seed string) {
 	curl <- []byte(seed)
 }
 
-func GetUrls(curl chan []byte, task Task, regex *regexp.Regexp) {
+var f *bloom.Filter64
+var l sync.Mutex
+
+func init(){
+	log.Print("webhunter init")
+	// Normal bloom filter
+
+	// Create a bloom filter which will contain an expected 100,000 items, and which
+	// allows a false positive rate of 1%.
+	f = bloom.New64(1000000, 0.01)
+
+//	// Add an item to the filter
+//	f.Add([]byte("foo"))
+//
+//	// Check if an item has been added to the filter (if true, subject to the
+//	// false positive chance; if false, then the item definitely has not been
+//	// added to the filter.)
+//	log.Printf("%v", bool(f.Test([]byte("foo"))))
+}
+
+func GetUrls(curl chan []byte, task Task, siteConfig SiteConfig) {
 	log.Print("parsing external links:",string(task.Url))
-	matches := regex.FindAllSubmatch(task.Response, -1)
+	if(siteConfig.LinkUrlExtractRegex==nil){
+		log.Print("use default linkUrlExtractRegex,",siteConfig.LinkUrlExtractRegex)
+		siteConfig.LinkUrlExtractRegex=regexp.MustCompile("<a.*?href=[\"'](http.*?)[\"']")
+	}
+	matches := siteConfig.LinkUrlExtractRegex.FindAllSubmatch(task.Response, -1)
 	for _, match := range matches {
-		curl <- match[1]
+		url := match[1]
+
+		l.Lock();
+		if(!f.Test([]byte(url))){
+			log.Print("enqueue:",string(url))
+			curl <- match[1]
+//			log.Print("missing")
+			f.Add([]byte(url))
+		}else{
+			log.Print("hit bloom filter,",string(url))
+		}
+		l.Unlock();
+
+		//TODO 判断url是否已经请求过，并且判断url pattern，如果满足处理条件，则继续进行处理，否则放弃
+
 	}
 }
