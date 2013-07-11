@@ -10,7 +10,6 @@ import (
 	. "hunter"
 	"log"
 	"regexp"
-	"util/bloom"
 )
 
 var seed_url = flag.String("seed", "", "Seed URL")
@@ -18,20 +17,6 @@ var siteConfig SiteConfig
 
 func main() {
 	log.Print("[gopa] is on.")
-
-	// Normal bloom filter
-
-	// Create a bloom filter which will contain an expected 100,000 items, and which
-	// allows a false positive rate of 1%.
-	f := bloom.New64(1000000, 0.01)
-
-	// Add an item to the filter
-	f.Add([]byte("foo"))
-
-	// Check if an item has been added to the filter (if true, subject to the
-	// false positive chance; if false, then the item definitely has not been
-	// added to the filter.)
-	log.Printf("%v", bool(f.Test([]byte("foo"))))
 
 	flag.Parse()
 	if *seed_url == "" {

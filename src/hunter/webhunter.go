@@ -79,19 +79,11 @@ var l sync.Mutex
 
 func init(){
 	log.Print("webhunter init")
-	// Normal bloom filter
 
 	// Create a bloom filter which will contain an expected 100,000 items, and which
 	// allows a false positive rate of 1%.
 	f = bloom.New64(1000000, 0.01)
 
-//	// Add an item to the filter
-//	f.Add([]byte("foo"))
-//
-//	// Check if an item has been added to the filter (if true, subject to the
-//	// false positive chance; if false, then the item definitely has not been
-//	// added to the filter.)
-//	log.Printf("%v", bool(f.Test([]byte("foo"))))
 }
 
 func GetUrls(curl chan []byte, task Task, siteConfig SiteConfig) {
@@ -108,7 +100,6 @@ func GetUrls(curl chan []byte, task Task, siteConfig SiteConfig) {
 		if(!f.Test([]byte(url))){
 			log.Print("enqueue:",string(url))
 			curl <- match[1]
-//			log.Print("missing")
 			f.Add([]byte(url))
 		}else{
 			log.Print("hit bloom filter,",string(url))
