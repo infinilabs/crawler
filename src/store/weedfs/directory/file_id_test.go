@@ -2,7 +2,7 @@ package directory
 
 import (
     "testing"
-    "log"
+	log "github.com/cihub/seelog"
 )
 
 func TestSerialDeserialization(t *testing.T) {

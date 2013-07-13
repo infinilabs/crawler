@@ -2,7 +2,7 @@ package directory
 
 import (
 	"encoding/hex"
-	"log"
+	log "github.com/cihub/seelog"
 	"store/weedfs/storage"
 	"strconv"
 	"strings"
@@ -21,7 +21,7 @@ func NewFileId(VolumeId uint32, Key uint64, Hashcode uint32) *FileId {
 func ParseFileId(fid string) *FileId{
 	a := strings.Split(fid, ",")
 	if len(a) != 2 {
-		log.Println("Invalid fid", fid, ", split length", len(a))
+		log.Error("Invalid fid", fid, ", split length", len(a))
 		return nil
 	}
 	vid_string, key_hash_string := a[0], a[1]

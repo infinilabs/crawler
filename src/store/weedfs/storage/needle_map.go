@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"log"
+	log "github.com/cihub/seelog"
 	"os"
 	"util"
 )
@@ -36,7 +36,7 @@ func LoadNeedleMap(file *os.File) *NeedleMap {
 	count, e := nm.indexFile.Read(bytes)
 	if count > 0 {
 		fstat, _ := file.Stat()
-		log.Println("Loading index file", fstat.Name(), "size", fstat.Size())
+		log.Info("Loading index file", fstat.Name(), "size", fstat.Size())
 	}
 	for count > 0 && e == nil {
 		for i := 0; i < count; i += 16 {

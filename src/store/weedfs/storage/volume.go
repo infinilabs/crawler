@@ -2,7 +2,7 @@ package storage
 
 import (
 	"io"
-	"log"
+	log "github.com/cihub/seelog"
 	"os"
 	"path"
 	"strconv"
@@ -28,12 +28,12 @@ func NewVolume(dirname string, id uint32) (v *Volume) {
 	fileName := strconv.FormatUint(uint64(v.Id), 10)
 	v.dataFile, e = os.OpenFile(path.Join(v.dir, fileName+".dat"), os.O_RDWR|os.O_CREATE, 0644)
 	if e != nil {
-		log.Fatalf("New Volume [ERROR] %s\n", e)
+		log.Error("New Volume [ERROR] %s\n", e)
 	}
 	v.maybeWriteSuperBlock()
 	indexFile, ie := os.OpenFile(path.Join(v.dir, fileName+".idx"), os.O_RDWR|os.O_CREATE, 0644)
 	if ie != nil {
-		log.Fatalf("Write Volume Index [ERROR] %s\n", ie)
+		log.Error("Write Volume Index [ERROR] %s\n", ie)
 	}
 	v.nm = LoadNeedleMap(indexFile)
 

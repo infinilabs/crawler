@@ -36,3 +36,5 @@ target/
 */*/proguard_logs/**
 private_test
 *.exe
+log
+out

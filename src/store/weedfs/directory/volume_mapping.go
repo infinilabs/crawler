@@ -3,7 +3,7 @@ package directory
 import (
 	"encoding/gob"
 	"errors"
-	"log"
+	log "github.com/cihub/seelog"
 	"math/rand"
 	"os"
 	"path"
@@ -55,12 +55,12 @@ func NewMapper(dirname string, filename string, volumeSizeLimit uint64) (m *Mapp
 	seqFile, se := os.OpenFile(path.Join(m.dir, m.fileName+".seq"), os.O_RDONLY, 0644)
 	if se != nil {
 		m.FileIdSequence = FileIdSaveInterval
-		log.Println("Setting file id sequence", m.FileIdSequence)
+		log.Info("Setting file id sequence", m.FileIdSequence)
 	} else {
 		decoder := gob.NewDecoder(seqFile)
 		defer seqFile.Close()
 		decoder.Decode(&m.FileIdSequence)
-		log.Println("Loading file id sequence", m.FileIdSequence, "=>", m.FileIdSequence+FileIdSaveInterval)
+		log.Info("Loading file id sequence", m.FileIdSequence, "=>", m.FileIdSequence+FileIdSaveInterval)
 		//in case the server stops between intervals
 		m.FileIdSequence += FileIdSaveInterval
 	}
@@ -69,7 +69,7 @@ func NewMapper(dirname string, filename string, volumeSizeLimit uint64) (m *Mapp
 func (m *Mapper) PickForWrite(c string) (string, int, MachineInfo, error) {
 	len_writers := len(m.Writers)
 	if len_writers <= 0 {
-		log.Println("No more writable volumes!")
+		log.Info("No more writable volumes!")
 		return "", 0, m.Machines[rand.Intn(len(m.Machines))].Server, errors.New("No more writable volumes!")
 	}
 	vid := m.Writers[rand.Intn(len_writers)]
@@ -145,10 +145,10 @@ func (m *Mapper) Add(machine Machine) {
 	m.Writers = writers
 }
 func (m *Mapper) saveSequence() {
-	log.Println("Saving file id sequence", m.FileIdSequence, "to", path.Join(m.dir, m.fileName+".seq"))
+	log.Info("Saving file id sequence", m.FileIdSequence, "to", path.Join(m.dir, m.fileName+".seq"))
 	seqFile, e := os.OpenFile(path.Join(m.dir, m.fileName+".seq"), os.O_CREATE|os.O_WRONLY, 0644)
 	if e != nil {
-		log.Fatalf("Sequence File Save [ERROR] %s\n", e)
+		log.Error("Sequence File Save [ERROR] %s,", e)
 	}
 	defer seqFile.Close()
 	encoder := gob.NewEncoder(seqFile)

@@ -7,12 +7,14 @@ package hunter
 
 import (
 	"net/http"
-	"log"
+	 log "github.com/cihub/seelog"
 	"io/ioutil"
 	"regexp"
 	"util/bloom"
 	"sync"
 	"util/stringutil"
+	"time"
+
 )
 
 type SiteConfig struct{
@@ -32,29 +34,53 @@ type  Task struct{
   Url,Request,Response []byte
 }
 
-func fetchUrl(url []byte,success chan Task,failure chan string){
+func fetchUrl(url []byte,success chan Task,failure chan string,timeout time.Duration){
+	t := time.NewTimer(timeout)
+	defer t.Stop()
+
 	resource := string(url)
-	defer func () {
-		failure <- resource
+	flg := make(chan bool, 1)
+
+	go func() {
+
+		defer func () {
+			failure <- resource
+		}()
+
+		resp, err := http.Get(resource)
+		if err != nil {
+			log.Error("we have an error!: ", err)
+			return
+		}
+		defer resp.Body.Close()
+		log.Debug("getting,", resource)
+		body, _ := ioutil.ReadAll(resp.Body)
+		task := Task{url,nil, body}
+
+		savePage(url,body)
+
+		success <- task
+		flg <- true
 	}()
 
-
-	resp, err := http.Get(resource)
-	if err != nil {
-		log.Println("we have an error!: ", err)
+	//监听通道，由于设有超时，不可能泄露
+	select {
+	case <-t.C:
+		log.Error("fetching url time out,",resource)
+	case <-flg:
+		log.Debug("fetching url normal exit,",resource)
 		return
 	}
-	defer resp.Body.Close()
-	log.Printf("getting %v\n", resource)
-	body, _ := ioutil.ReadAll(resp.Body)
-	task := Task{url,nil, body}
-//	log.Printf("Response %v\n",string(body))
-	success <- task
 
 }
 
 
-func ThrottledCrawl(curl chan []byte, success chan Task, failure chan string, visited map[string]int) {
+func savePage(url []byte,body []byte){
+	log.Info("saving page,",string(url),string(body))
+}
+
+
+func ThrottledCrawl(curl chan []byte, success chan Task, failure chan string) {
 	maxGos := 10
 	numGos := 0
 	for {
@@ -63,11 +89,12 @@ func ThrottledCrawl(curl chan []byte, success chan Task, failure chan string, vi
 			numGos -= 1
 		}
 		url := string(<-curl)
-		if _, ok := visited[url]; !ok {
-			go fetchUrl([]byte(url), success, failure)
+//		if _, ok := visited[url]; !ok {
+		timeout := 20 * time.Second
+		go fetchUrl([]byte(url), success, failure,timeout)
 			numGos += 1
-		}
-		visited[url] += 1
+//		}
+//		visited[url] += 1
 	}
 }
 
@@ -79,7 +106,8 @@ var f *bloom.Filter64
 var l sync.Mutex
 
 func init(){
-	log.Print("[webhunter] initializing")
+
+//	log.Debug("[webhunter] initializing")
 
 	// Create a bloom filter which will contain an expected 100,000 items, and which
 	// allows a false positive rate of 1%.
@@ -87,14 +115,10 @@ func init(){
 
 }
 
-//func ContainStr(s, substr string) bool {
-//	return Index(s, substr) != -1
-//}
-
 func GetUrls(curl chan []byte, task Task, siteConfig SiteConfig) {
-	log.Print("parsing external links:",string(task.Url))
+	log.Debug("parsing external links:",string(task.Url))
 	if(siteConfig.LinkUrlExtractRegex==nil){
-		log.Print("use default linkUrlExtractRegex,",siteConfig.LinkUrlExtractRegex)
+		log.Debug("use default linkUrlExtractRegex,",siteConfig.LinkUrlExtractRegex)
 		siteConfig.LinkUrlExtractRegex=regexp.MustCompile("<a.*?href=[\"'](http.*?)[\"']")
 	}
 	matches := siteConfig.LinkUrlExtractRegex.FindAllSubmatch(task.Response, -1)
@@ -112,23 +136,23 @@ func GetUrls(curl chan []byte, task Task, siteConfig SiteConfig) {
 			myurl:=string(url)
 			if(len(siteConfig.LinkUrlMustContain)>0){
 				if(!stringutil.ContainStr(myurl,siteConfig.LinkUrlMustContain)){
-					log.Print("link does not hit must-contain,ignore,",myurl,",",siteConfig.LinkUrlMustNotContain)
+					log.Debug("link does not hit must-contain,ignore,",myurl,",",siteConfig.LinkUrlMustNotContain)
 					break;
 				}
 			}
 
 			if(len(siteConfig.LinkUrlMustNotContain)>0){
 				if(stringutil.ContainStr(myurl,siteConfig.LinkUrlMustNotContain)){
-					log.Print("link hit must-not-contain,ignore,",myurl,",",siteConfig.LinkUrlMustNotContain)
+					log.Debug("link hit must-not-contain,ignore,",myurl,",",siteConfig.LinkUrlMustNotContain)
 					break;
 				}
 			}
 
-			log.Print("enqueue:",string(url))
+			log.Info("enqueue:",string(url))
 			curl <- match[1]
 			f.Add([]byte(url))
 		}else{
-			log.Print("hit bloom filter,ignore,",string(url))
+			log.Debug("hit bloom filter,ignore,",string(url))
 		}
 
 		//TODO 判断url是否已经请求过，并且判断url pattern，如果满足处理条件，则继续进行处理，否则放弃

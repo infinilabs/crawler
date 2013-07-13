@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"log"
+	 log "github.com/cihub/seelog"
 	"net/http"
 	"store/weedfs/storage"
 	"strconv"
@@ -49,7 +49,7 @@ func dirLookupHandler(w http.ResponseWriter, r *http.Request) {
 	if e == nil {
 		writeJson(w, r, machine.Server)
 	} else {
-		log.Println("Invalid volume id", volumeId)
+		log.Error("Invalid volume id", volumeId)
 		writeJson(w, r, map[string]string{"error": "volume id " + strconv.FormatUint(volumeId, 10) + " not found"})
 	}
 }
@@ -59,7 +59,7 @@ func dirAssignHandler(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		writeJson(w, r, map[string]string{"fid": fid, "url": machine.Url, "publicUrl":machine.PublicUrl, "count":strconv.Itoa(count)})
 	} else {
-		log.Println(err)
+		log.Error(err)
 		writeJson(w, r, map[string]string{"error": err.Error()})
 	}
 }
@@ -69,7 +69,7 @@ func dirJoinHandler(w http.ResponseWriter, r *http.Request) {
 	volumes := new([]storage.VolumeInfo)
 	json.Unmarshal([]byte(r.FormValue("volumes")), volumes)
 	if *IsDebug {
-		log.Println(s, "volumes", r.FormValue("volumes"))
+		log.Info(s, "volumes", r.FormValue("volumes"))
 	}
 	mapper.Add(*directory.NewMachine(s, publicUrl, *volumes))
 }
@@ -118,15 +118,15 @@ func GetHandler(w http.ResponseWriter, r *http.Request) {
 	n.ParsePath(fid)
 
 	if *IsDebug {
-		log.Println("volume", volumeId, "reading", n)
+		log.Info("volume", volumeId, "reading", n)
 	}
 	cookie := n.Cookie
 	count, e := store.Read(volumeId, n)
 	if *IsDebug {
-		log.Println("read bytes", count, "error", e)
+		log.Info("read bytes", count, "error", e)
 	}
 	if n.Cookie != cookie {
-		log.Println("request with unmaching cookie from ", r.RemoteAddr, "agent", r.UserAgent())
+		log.Info("request with unmaching cookie from ", r.RemoteAddr, "agent", r.UserAgent())
 		return
 	}
 	if ext != "" {
@@ -158,7 +158,7 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	n.ParsePath(fid)
 
 	if *IsDebug {
-		log.Println("deleting", n)
+		log.Info("deleting", n)
 	}
 
 	cookie := n.Cookie
@@ -172,7 +172,7 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if n.Cookie != cookie {
-		log.Println("delete with unmaching cookie from ", r.RemoteAddr, "agent", r.UserAgent())
+		log.Info("delete with unmaching cookie from ", r.RemoteAddr, "agent", r.UserAgent())
 		return
 	}
 
@@ -188,7 +188,7 @@ func parseURLPath(path string) (vid, fid, ext string) {
 	commaIndex := strings.LastIndex(path[sepIndex:], ",")
 	if commaIndex <= 0 {
 		if "favicon.ico" != path[sepIndex+1:] {
-			log.Println("unknown file id", path[sepIndex+1:])
+			log.Info("unknown file id", path[sepIndex+1:])
 		}
 		return
 	}
@@ -208,7 +208,7 @@ func main() {
 	flag.Parse()
 
 	//volume master block
-	log.Println("Volume Size Limit is", *volumeSizeLimitMB, "MB")
+	log.Info("Volume Size Limit is", *volumeSizeLimitMB, "MB")
 	mapper = directory.NewMapper(*metaFolder, "directory", uint64(*volumeSizeLimitMB)*1024*1024)
 
 	//weedfs master handler
@@ -219,10 +219,10 @@ func main() {
 
 	//start weedfs master
 	go func() {
-		log.Println("Start directory service at http://127.0.0.1:" + strconv.Itoa(*port))
+		log.Info("Start directory service at http://127.0.0.1:" + strconv.Itoa(*port))
 		e := http.ListenAndServe(":"+strconv.Itoa(*port), nil)
 		if e != nil {
-			log.Fatal("Fail to start:", e)
+			log.Error("Fail to start:", e)
 		}
 	}()
 
@@ -243,14 +243,14 @@ func main() {
 			time.Sleep(time.Duration(float32(*pulse*1e3)*(1+rand.Float32())) * time.Millisecond)
 		}
 	}()
-	log.Println("store joined at", *metaServer)
+	log.Info("store joined at", *metaServer)
 
 	//start weedfs volume
 	go func() {
-		log.Println("Start storage service at http://127.0.0.1:"+strconv.Itoa(*storePort), "public url", *publicUrl)
+		log.Info("Start storage service at http://127.0.0.1:"+strconv.Itoa(*storePort), "public url", *publicUrl)
 		e := http.ListenAndServe(":"+strconv.Itoa(*storePort), nil)
 		if e != nil {
-			log.Fatalf("Fail to start:", e)
+			log.Error("Fail to start:", e)
 		}
 	}()
 

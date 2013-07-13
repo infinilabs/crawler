@@ -3,7 +3,7 @@ package storage
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	log "github.com/cihub/seelog"
 	"net/url"
 	"strconv"
 	"strings"
@@ -27,7 +27,7 @@ func NewStore(port int, publicUrl, dirname string, volumeListString string) (s *
 
 	s.AddVolume(volumeListString)
 
-	log.Println("Store started on dir:", dirname, "with", len(s.volumes), "volumes")
+	log.Info("Store started on dir:", dirname, "with", len(s.volumes), "volumes")
 	return
 }
 func (s *Store) AddVolume(volumeListString string) error {
