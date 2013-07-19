@@ -195,7 +195,7 @@ func formatUrlForFilter(url []byte) []byte{
 func GetUrls(curl chan []byte, task Task, siteConfig SiteConfig) {
 
    if(siteConfig.SkipPageParsePattern==nil){
-	   siteConfig.SkipPageParsePattern=regexp.MustCompile(".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(apk))\\b")   //end with js,css,apk,zip,ignore
+	   siteConfig.SkipPageParsePattern=regexp.MustCompile(".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b")   //end with js,css,apk,zip,ignore
 	   log.Debug("use default SkipPageParsePattern,",siteConfig.SkipPageParsePattern)
    }
 
@@ -315,9 +315,5 @@ func GetUrls(curl chan []byte, task Task, siteConfig SiteConfig) {
 		}else{
 			log.Debug("hit bloom filter,ignore,",string(url))
 		}
-
-
-		//TODO 判断url是否已经请求过，并且判断url pattern，如果满足处理条件，则继续进行处理，否则放弃
-
 	}
 }
