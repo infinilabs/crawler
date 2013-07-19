@@ -38,17 +38,18 @@ func main() {
 //	visited := make(map[string]int)
 
 	// Setting siteConfig
-	reg := regexp.MustCompile("<a.*?href=[\"'](http.*?)[\"']")
+	reg := regexp.MustCompile("(src2|src|href|HREF|SRC)\\s*=\\s*[\"']?(.*?)[\"']")
 
 
 
-	MaxGoRouting:= 10
+	MaxGoRouting:= 1
 
 	siteConfig.LinkUrlExtractRegex = reg
 	siteConfig.FollowSameDomain=true
 	siteConfig.FollowSubDomain=true
 	siteConfig.LinkUrlMustContain = "moko.cc"
 //	siteConfig.LinkUrlMustNotContain = "wenku"
+
 
 	// Giving a seed to gopa
 	go Seed(curl, *seed_url)

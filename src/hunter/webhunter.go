@@ -26,6 +26,9 @@ type SiteConfig struct{
 	LinkUrlMustContain string
 	LinkUrlMustNotContain string
 
+	//parsing url pattern,when url match this pattern,gopa will not parse urls from response of this url
+	SkipPageParsePattern *regexp.Regexp
+
 	//downloading pattern
 	DownloadUrlPattern *regexp.Regexp
 	DownloadUrlMustContain string
@@ -80,13 +83,28 @@ func fetchUrl(url []byte,success chan Task,failure chan string,timeout time.Dura
 
 }
 
+func getRootUrl(source *URL)string{
+	if(strings.HasSuffix(source.Path,"/")){
+		return source.Host+source.Path
+	}else{
+		index:= strings.LastIndex(source.Path,"/")
+		if index>0{
+			path:= source.Path[0:index]
+			return source.Host+path
+		}else{
+			return source.Host+"/"
+		}
+	}
+	return ""
+}
+
 
 func savePage(myurl []byte,body []byte){
 	myurl1,_:=ParseRequestURI(string(myurl))
 	log.Debug("url->path:",myurl1.Host," ",myurl1.Path)
 
 	baseDir:="data/"+myurl1.Host+"/"
-	path:=baseDir
+	path:=""
 
 	//making folders
 	if(strings.HasSuffix(myurl1.Path,"/")){
@@ -112,11 +130,7 @@ func savePage(myurl []byte,body []byte){
 			log.Debug("making dir:",path)
 			path=path+"/default.html"
 		}
-
-
 	}
-
-
 
 
 	log.Debug("touch file,",path)
@@ -179,66 +193,129 @@ func formatUrlForFilter(url []byte) []byte{
 }
 
 func GetUrls(curl chan []byte, task Task, siteConfig SiteConfig) {
-	log.Debug("parsing external links:",string(task.Url))
-	if(siteConfig.LinkUrlExtractRegex==nil){
-		log.Debug("use default linkUrlExtractRegex,",siteConfig.LinkUrlExtractRegex)
-		siteConfig.LinkUrlExtractRegex=regexp.MustCompile("<a.*?href=[\"'](http.*?)[\"']")
+
+   if(siteConfig.SkipPageParsePattern==nil){
+	   siteConfig.SkipPageParsePattern=regexp.MustCompile(".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(apk))\\b")   //end with js,css,apk,zip,ignore
+	   log.Debug("use default SkipPageParsePattern,",siteConfig.SkipPageParsePattern)
+   }
+
+	if(siteConfig.SkipPageParsePattern.Match(task.Url)){
+		log.Info("hit skip pattern,",string(task.Url))
+		return
 	}
+
+
+	log.Debug("parsing external links:",string(task.Url),",using:",siteConfig.LinkUrlExtractRegex)
+	if(siteConfig.LinkUrlExtractRegex==nil){
+		siteConfig.LinkUrlExtractRegex=regexp.MustCompile("src=\"(?<url1>.*?)\"|href=\"(?<url2>.*?)\"")
+		log.Debug("use default linkUrlExtractRegex,",siteConfig.LinkUrlExtractRegex)
+	}
+
 	matches := siteConfig.LinkUrlExtractRegex.FindAllSubmatch(task.Response, -1)
 	for _, match := range matches {
-		url := match[1]
+		url := match[2]
 
 		log.Debug("original filter url,",string(url))
 		filterUrl:=formatUrlForFilter(url)
 		log.Debug("format filter url,",string(filterUrl))
 
+		filteredUrl:=string(filterUrl)
+
+		//filter error link
+		if(filteredUrl==""){
+		  continue;
+		}
+
+		result1:=strings.HasPrefix(filteredUrl,"#")
+		if(result1){
+			continue;
+		}
+
+		result2:=strings.HasPrefix(filteredUrl,"javascript:")
+		if(result2){
+			continue;
+		}
+
+
 		hit := false
-		l.Lock();
+//		l.Lock();
+//		defer l.Unlock();
+
 		if(f.Test(filterUrl)){
 			hit=true
 		}
 
 		if(!hit){
-			myurl:=string(url)
-			seedUrl:=string(task.Url)
+			currentUrlStr:=string(url)
+			seedUrlStr:=string(task.Url)
 
-			myurl1,_:=ParseRequestURI(seedUrl)
-			myurl2,_:=ParseRequestURI(myurl)
-			if(siteConfig.FollowSameDomain){
+			seedURI,err:=ParseRequestURI(seedUrlStr)
+			if err != nil {
+				log.Error("we have an error!: ", err)
+				continue
+			}
+			currentURI,err:=ParseRequestURI(currentUrlStr)
+			if err != nil {
+				log.Error("we have an error!: ", err)
+				continue
+			}
 
-				if(siteConfig.FollowSubDomain){
 
-				   //TODO handler com.cn and .com,using a TLC-domain list
+			//relative links
+			if(currentURI.Host==""){
+			 if(strings.HasPrefix(currentURI.Path,"/") ){
+				//root based relative urls
+				 log.Debug("old relatived url,",currentUrlStr)
+				 currentUrlStr:=seedURI.Host+currentUrlStr;
+				 log.Debug("new relatived url,",currentUrlStr)
+			}else{
+				 log.Debug("old relatived url,",currentUrlStr)
+				 //page based relative urls
+				 urlPath:=getRootUrl(currentURI)
+				 currentUrlStr:=urlPath+currentUrlStr
+				 log.Debug("new relatived url,",currentUrlStr)
+			 }
+			}else{
+				log.Debug("host:",currentURI.Host," ",currentURI.Host=="")
 
-				}else if(myurl1.Host !=myurl2.Host){
-					log.Debug("domain mismatch,",myurl1.Host," vs ",myurl2.Host)
-					break;
+				//resolve domain specific filter
+				if(siteConfig.FollowSameDomain){
+
+					if(siteConfig.FollowSubDomain){
+
+						//TODO handler com.cn and .com,using a TLC-domain list
+
+					}else if(seedURI.Host !=currentURI.Host){
+						log.Debug("domain mismatch,",seedURI.Host," vs ",currentURI.Host)
+						continue;
+					}
 				}
 			}
 
 
+
+
 			if(len(siteConfig.LinkUrlMustContain)>0){
-				if(!stringutil.ContainStr(myurl,siteConfig.LinkUrlMustContain)){
-					log.Debug("link does not hit must-contain,ignore,",myurl,",",siteConfig.LinkUrlMustNotContain)
-					break;
+				if(!stringutil.ContainStr(currentUrlStr,siteConfig.LinkUrlMustContain)){
+					log.Debug("link does not hit must-contain,ignore,",currentUrlStr," , ",siteConfig.LinkUrlMustNotContain)
+					continue;
 				}
 			}
 
 			if(len(siteConfig.LinkUrlMustNotContain)>0){
-				if(stringutil.ContainStr(myurl,siteConfig.LinkUrlMustNotContain)){
-					log.Debug("link hit must-not-contain,ignore,",myurl,",",siteConfig.LinkUrlMustNotContain)
-					break;
+				if(stringutil.ContainStr(currentUrlStr,siteConfig.LinkUrlMustNotContain)){
+					log.Debug("link hit must-not-contain,ignore,",currentUrlStr," , ",siteConfig.LinkUrlMustNotContain)
+					continue;
 				}
 			}
 
 			log.Info("enqueue:",string(url))
-			curl <- match[1]
+			curl <- []byte(currentUrlStr)
 			f.Add([]byte(filterUrl))
 		}else{
 			log.Debug("hit bloom filter,ignore,",string(url))
 		}
 
-		l.Unlock();
 
 		//TODO 判断url是否已经请求过，并且判断url pattern，如果满足处理条件，则继续进行处理，否则放弃
 
