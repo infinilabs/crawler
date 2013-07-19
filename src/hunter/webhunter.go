@@ -16,7 +16,7 @@ import (
 	"time"
 	"strings"
 	"os"
-	"net/url"
+.	"net/url"
 )
 
 type SiteConfig struct{
@@ -30,6 +30,10 @@ type SiteConfig struct{
 	DownloadUrlPattern *regexp.Regexp
 	DownloadUrlMustContain string
 	DownloadUrlMustNotContain string
+
+	//Crawling within domain
+	FollowSameDomain  bool
+	FollowSubDomain  bool
 }
 
 type  Task struct{
@@ -78,10 +82,10 @@ func fetchUrl(url []byte,success chan Task,failure chan string,timeout time.Dura
 
 
 func savePage(myurl []byte,body []byte){
-	myurl1,_:=url.ParseRequestURI(string(myurl))
+	myurl1,_:=ParseRequestURI(string(myurl))
 	log.Debug("url->path:",myurl1.Host," ",myurl1.Path)
 
-	baseDir:="data/"+myurl1.Host
+	baseDir:="data/"+myurl1.Host+"/"
 	path:=baseDir
 
 	//making folders
@@ -129,8 +133,8 @@ func savePage(myurl []byte,body []byte){
 }
 
 
-func ThrottledCrawl(curl chan []byte, success chan Task, failure chan string) {
-	maxGos := 1   //TODO set to 10,and configable
+func ThrottledCrawl(curl chan []byte,maxGoR int, success chan Task, failure chan string) {
+	maxGos := maxGoR
 	numGos := 0
 	for {
 		if numGos > maxGos {
@@ -196,6 +200,23 @@ func GetUrls(curl chan []byte, task Task, siteConfig SiteConfig) {
 
 		if(!hit){
 			myurl:=string(url)
+			seedUrl:=string(task.Url)
+
+			myurl1,_:=ParseRequestURI(seedUrl)
+			myurl2,_:=ParseRequestURI(myurl)
+			if(siteConfig.FollowSameDomain){
+
+				if(siteConfig.FollowSubDomain){
+
+				   //TODO handler com.cn and .com,using a TLC-domain list
+
+				}else if(myurl1.Host !=myurl2.Host){
+					log.Debug("domain mismatch,",myurl1.Host," vs ",myurl2.Host)
+					break;
+				}
+			}
+
+
 			if(len(siteConfig.LinkUrlMustContain)>0){
 				if(!stringutil.ContainStr(myurl,siteConfig.LinkUrlMustContain)){
 					log.Debug("link does not hit must-contain,ignore,",myurl,",",siteConfig.LinkUrlMustNotContain)

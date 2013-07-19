@@ -39,8 +39,15 @@ func main() {
 
 	// Setting siteConfig
 	reg := regexp.MustCompile("<a.*?href=[\"'](http.*?)[\"']")
+
+
+
+	MaxGoRouting:= 10
+
 	siteConfig.LinkUrlExtractRegex = reg
-//	siteConfig.LinkUrlMustContain = "news"
+	siteConfig.FollowSameDomain=true
+	siteConfig.FollowSubDomain=true
+	siteConfig.LinkUrlMustContain = "moko.cc"
 //	siteConfig.LinkUrlMustNotContain = "wenku"
 
 	// Giving a seed to gopa
@@ -48,7 +55,7 @@ func main() {
 
 	// Start the throttled crawling.
 //	go ThrottledCrawl(curl, success, failure, visited)
-	go ThrottledCrawl(curl, success, failure)
+	go ThrottledCrawl(curl,MaxGoRouting, success, failure)
 
 	// Main loop that never exits and blocks on the data of a page.
 	for {
