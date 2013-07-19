@@ -1,6 +1,6 @@
 build:
-	go build main.go
+	go build gopa.go
 format:
-	gofmt -s -w -tabs=false -tabwidth=4 main.go
+	gofmt -s -w -tabs=false -tabwidth=4 gopa.go
 clean:
 	rm -f main

@@ -20,6 +20,7 @@ Standing on the shoulders of giants,thanks for these goodies.
 * https://github.com/pmylund/go-bloom
 * https://github.com/pmylund/go-bitset
 * http://code.google.com/p/weed-fs
+* https://github.com/Unknwon/goconfig
 
 
 license

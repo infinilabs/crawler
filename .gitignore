@@ -38,3 +38,4 @@ private_test
 *.exe
 log
 out
+data

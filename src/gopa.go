@@ -11,6 +11,7 @@ import (
 	  log "github.com/cihub/seelog"
 	"regexp"
 	"os"
+
 )
 
 var seed_url = flag.String("seed", "", "Seed URL")
@@ -18,8 +19,8 @@ var siteConfig SiteConfig
 
 func main() {
 	defer log.Flush()
-
 	setLogging();
+
 
 	flag.Parse()
 
@@ -39,7 +40,7 @@ func main() {
 	// Setting siteConfig
 	reg := regexp.MustCompile("<a.*?href=[\"'](http.*?)[\"']")
 	siteConfig.LinkUrlExtractRegex = reg
-//	siteConfig.LinkUrlMustContain = "baidu"
+//	siteConfig.LinkUrlMustContain = "news"
 //	siteConfig.LinkUrlMustNotContain = "wenku"
 
 	// Giving a seed to gopa
@@ -60,17 +61,17 @@ func main() {
 func setLogging() {
 
 	testConfig := `
-<seelog type="sync" minlevel="info">
-	<outputs formatid="main">
-		<filter levels="error">
-			<file path="./log/filter.log"/>
-		</filter>
-		<console />
-	</outputs>
-	<formats>
-		<format id="main" format="[%LEV] %Msg%n"/>
-	</formats>
-</seelog>`
+	<seelog type="sync" minlevel="debug">
+		<outputs formatid="main">
+			<filter levels="error">
+				<file path="./log/filter.log"/>
+			</filter>
+			<console />
+		</outputs>
+		<formats>
+			<format id="main" format="[%LEV] %Msg%n"/>
+		</formats>
+	</seelog>`
 
 	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
 	log.ReplaceLogger(logger)

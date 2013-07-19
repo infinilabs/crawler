@@ -5,3 +5,9 @@
  */
 package store
 
+//func store(url string,data []byte){
+
+//	myurl,_:=url.ParseRequestURI(url)
+//	log.Info(myurl.Path)
+//	io.WriteFile("/tmp/a",data,os.O_CREATE)
+//}

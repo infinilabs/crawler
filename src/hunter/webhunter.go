@@ -14,7 +14,9 @@ import (
 	"sync"
 	"util/stringutil"
 	"time"
-
+	"strings"
+	"os"
+	"net/url"
 )
 
 type SiteConfig struct{
@@ -75,13 +77,60 @@ func fetchUrl(url []byte,success chan Task,failure chan string,timeout time.Dura
 }
 
 
-func savePage(url []byte,body []byte){
-	log.Info("saving page,",string(url),string(body))
+func savePage(myurl []byte,body []byte){
+	myurl1,_:=url.ParseRequestURI(string(myurl))
+	log.Debug("url->path:",myurl1.Host," ",myurl1.Path)
+
+	baseDir:="data/"+myurl1.Host
+	path:=baseDir
+
+	//making folders
+	if(strings.HasSuffix(myurl1.Path,"/")){
+		path=baseDir+myurl1.Path
+		os.MkdirAll(path,0777)
+		log.Debug("making dir:",path)
+		path=(path+"default.html")
+		log.Debug("no page name,use default.html:",path)
+
+	}else{
+	    index:= strings.LastIndex(myurl1.Path,"/")
+		log.Info("index of last /:",index)
+		if index>0{
+			path= myurl1.Path[0:index]
+			path=baseDir+path
+			log.Debug("new path:",path)
+			os.MkdirAll(path,0777)
+			log.Debug("making dir:",path)
+			path=(baseDir+myurl1.Path)
+		}else{
+			path= baseDir+path+"/"
+			os.MkdirAll(path,0777)
+			log.Debug("making dir:",path)
+			path=path+"/default.html"
+		}
+
+
+	}
+
+
+
+
+	log.Debug("touch file,",path)
+	fout,error:=os.Create(path)
+	if error!=nil{
+		log.Error(path,error)
+		return
+	}
+
+	defer  fout.Close()
+	log.Info("file saved:",path)
+	fout.Write(body)
+
 }
 
 
 func ThrottledCrawl(curl chan []byte, success chan Task, failure chan string) {
-	maxGos := 10
+	maxGos := 1   //TODO set to 10,and configable
 	numGos := 0
 	for {
 		if numGos > maxGos {
@@ -115,6 +164,16 @@ func init(){
 
 }
 
+func formatUrlForFilter(url []byte) []byte{
+	src:=string(url)
+	if(strings.HasSuffix(src,"/")){
+		src= strings.TrimRight(src,"/");
+	}
+	src=strings.TrimSpace(src)
+	src=strings.ToLower(src)
+	return []byte(src)
+}
+
 func GetUrls(curl chan []byte, task Task, siteConfig SiteConfig) {
 	log.Debug("parsing external links:",string(task.Url))
 	if(siteConfig.LinkUrlExtractRegex==nil){
@@ -125,12 +184,15 @@ func GetUrls(curl chan []byte, task Task, siteConfig SiteConfig) {
 	for _, match := range matches {
 		url := match[1]
 
+		log.Debug("original filter url,",string(url))
+		filterUrl:=formatUrlForFilter(url)
+		log.Debug("format filter url,",string(filterUrl))
+
 		hit := false
 		l.Lock();
-		if(f.Test(url)){
+		if(f.Test(filterUrl)){
 			hit=true
 		}
-		l.Unlock();
 
 		if(!hit){
 			myurl:=string(url)
@@ -150,10 +212,12 @@ func GetUrls(curl chan []byte, task Task, siteConfig SiteConfig) {
 
 			log.Info("enqueue:",string(url))
 			curl <- match[1]
-			f.Add([]byte(url))
+			f.Add([]byte(filterUrl))
 		}else{
 			log.Debug("hit bloom filter,ignore,",string(url))
 		}
+
+		l.Unlock();
 
 		//TODO 判断url是否已经请求过，并且判断url pattern，如果满足处理条件，则继续进行处理，否则放弃
 
