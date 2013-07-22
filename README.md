@@ -3,7 +3,8 @@
 
 
 ## Building Gopa ##
-Run `make build` to build the project
+linux: Run `make build` to build the Gopa
+windows: Run `build` to build the Gopa
 
 ## Running Gopa ##
 
