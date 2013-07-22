@@ -18,9 +18,9 @@ after building the project run `./gopa -h` for a list of commandline options
 Standing on the shoulders of giants,thanks for these goodies.
 
 * https://github.com/zeebo/sbloom
-* https://github.com/pmylund/go-bitset
 * http://code.google.com/p/weed-fs
 * https://github.com/Unknwon/goconfig
+* https://github.com/PuerkitoBio/purell
 
 
 license

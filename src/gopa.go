@@ -32,7 +32,7 @@ func persistBloomFilter(bloomFilterPersistFileName string){
 	if err != nil {
 		panic(err)
 	}
-	log.Info("bloomFilter is persisted.")
+	log.Info("bloomFilter safety persisted.")
 }
 
 func main() {
@@ -127,7 +127,7 @@ func main() {
 
 func setLogging() {
 	testConfig := `
-	<seelog type="sync" minlevel="info">
+	<seelog type="sync" minlevel="debug">
 		<outputs formatid="main">
 			<filter levels="error">
 				<file path="./log/filter.log"/>

@@ -1,4 +1,4 @@
-/** 
+/**
  * User: Medcl
  * Date: 13-7-8
  * Time: 下午5:42 
@@ -17,6 +17,7 @@ import (
 	"time"
 	. "github.com/zeebo/sbloom"
 	util "util"
+	. "github.com/PuerkitoBio/purell"
 )
 
 type SiteConfig struct {
@@ -177,6 +178,7 @@ func Seed(curl chan []byte, seed string) {
 
 func formatUrlForFilter(url []byte) []byte {
 	src := string(url)
+	log.Debug("start to normalize url:",src)
 	if strings.HasSuffix(src, "/") {
 		src = strings.TrimRight(src, "/")
 	}
@@ -192,45 +194,55 @@ func GetUrls(bloomFilter *Filter,curl chan []byte, task Task, siteConfig SiteCon
 		log.Debug("use default SkipPageParsePattern,", siteConfig.SkipPageParsePattern)
 	}
 
+	siteUrlStr := string(task.Url)
 	if siteConfig.SkipPageParsePattern.Match(task.Url) {
-		log.Debug("hit skip pattern,", string(task.Url))
+		log.Debug("hit skip pattern,", siteUrlStr)
 		return
 	}
 
-	log.Debug("parsing external links:", string(task.Url), ",using:", siteConfig.LinkUrlExtractRegex)
+	log.Debug("parsing external links:", siteUrlStr, ",using:", siteConfig.LinkUrlExtractRegex)
 	if siteConfig.LinkUrlExtractRegex == nil {
 		siteConfig.LinkUrlExtractRegex = regexp.MustCompile("src=\"(?<url1>.*?)\"|href=\"(?<url2>.*?)\"")
 		log.Debug("use default linkUrlExtractRegex,", siteConfig.LinkUrlExtractRegex)
 	}
 
 	matches := siteConfig.LinkUrlExtractRegex.FindAllSubmatch(task.Response, -1)
+	log.Debug("extract links with pattern:", len(matches), " match result")
+	xIndex := 0
 	for _, match := range matches {
+		log.Debug("dealing with match result,", xIndex)
+		xIndex = xIndex + 1
 		url := match[2]
 		filterUrl := formatUrlForFilter(url)
-		log.Debug("url clean result:", string(filterUrl),",original url:", string(url))
+		log.Debug("url clean result:", string(filterUrl), ",original url:", string(url))
 		filteredUrl := string(filterUrl)
 
 		//filter error link
 		if filteredUrl == "" {
+			log.Debug("filteredUrl is empty,continue")
 			continue
 		}
 
 		result1 := strings.HasPrefix(filteredUrl, "#")
 		if result1 {
+			log.Debug("filteredUrl started with: # ,continue")
 			continue
 		}
 
 		result2 := strings.HasPrefix(filteredUrl, "javascript:")
 		if result2 {
+			log.Debug("filteredUrl started with: javascript: ,continue")
 			continue
 		}
 
 		hit := false
 
+
 		//		l.Lock();
 		//		defer l.Unlock();
 
 		if bloomFilter.Lookup(filterUrl) {
+			log.Debug("hit bloomFilter,continue")
 			hit = true
 			continue
 		}
@@ -238,7 +250,7 @@ func GetUrls(bloomFilter *Filter,curl chan []byte, task Task, siteConfig SiteCon
 		if !hit {
 			currentUrlStr := string(url)
 
-			seedUrlStr := string(task.Url)
+			seedUrlStr := siteUrlStr
 			seedURI, err := ParseRequestURI(seedUrlStr)
 
 			if err != nil {
@@ -248,6 +260,7 @@ func GetUrls(bloomFilter *Filter,curl chan []byte, task Task, siteConfig SiteCon
 
 			result3 := strings.HasPrefix(currentUrlStr, "/")
 			if result3 {
+				log.Error("currentUrlStr started with / ,continue,", currentUrlStr)
 				continue
 			}
 
@@ -320,11 +333,21 @@ func GetUrls(bloomFilter *Filter,curl chan []byte, task Task, siteConfig SiteCon
 				}
 			}
 
-			log.Info("enqueue:", string(currentUrlStr))
-			curl <- []byte(currentUrlStr)
+			//normalize url
+			currentUrlStr = MustNormalizeURLString(currentUrlStr, FlagLowercaseScheme | FlagLowercaseHost | FlagUppercaseEscapes |
+						FlagsUsuallySafeGreedy | FlagRemoveDuplicateSlashes | FlagRemoveFragment)
+			log.Debug("normalized url:", currentUrlStr)
+			currentUrlByte := []byte(currentUrlStr)
+			if (!bloomFilter.Lookup(currentUrlByte)) {
+				log.Info("enqueue:", currentUrlStr)
+				curl <- currentUrlByte
+				bloomFilter.Add(currentUrlByte)
+			}
 			bloomFilter.Add([]byte(filterUrl))
 		} else {
 			log.Debug("hit bloom filter,ignore,", string(url))
 		}
 	}
+
+	log.Info("all links within ", siteUrlStr," is done")
 }
