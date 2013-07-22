@@ -16,6 +16,7 @@ import (
 	"io/ioutil"
 	"util"
 	"os/signal"
+	"strings"
 )
 
 var seedUrl = flag.String("seed", "http://example.com", "the seed url,where everything begins")
@@ -107,6 +108,10 @@ func main() {
 	siteConfig.FollowSubDomain = true
 	siteConfig.LinkUrlMustContain = "moko.cc"
 	//	siteConfig.LinkUrlMustNotContain = "wenku"
+
+	if !strings.HasPrefix(*seedUrl,"http"){
+		*seedUrl="http://"+*seedUrl
+	}
 
 	// Giving a seed to gopa
 	go Seed(curl, *seedUrl)

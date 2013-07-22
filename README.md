@@ -10,7 +10,7 @@ windows: Run `build` to build the Gopa
 
 after building the project run `./gopa -h` for a list of commandline options
 
-* -seed option : start a crawling. begin with "http://" , ie: `./gopa -seed=http://www.baidu.com`
+* -seed option : start a crawling, giving a seed url to Gopa. ie: `./gopa -seed=http://www.baidu.com`
 * -log option : logging level,can be set to `trace`,`debug`,`info`,`warn`,`error` ,default is `info`
 
 
