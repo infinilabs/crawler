@@ -258,12 +258,6 @@ func GetUrls(bloomFilter *Filter,curl chan []byte, task Task, siteConfig SiteCon
 				continue
 			}
 
-			result3 := strings.HasPrefix(currentUrlStr, "/")
-			if result3 {
-				log.Error("currentUrlStr started with / ,continue,", currentUrlStr)
-				continue
-			}
-
 			currentURI1, err := ParseRequestURI(currentUrlStr)
 			currentURI := currentURI1
 			if err != nil {

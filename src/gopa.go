@@ -18,7 +18,8 @@ import (
 	"os/signal"
 )
 
-var seed_url = flag.String("seed", "", "Seed URL")
+var seedUrl = flag.String("seed", "http://example.com", "the seed url,where everything begins")
+var logLevel = flag.String("log", "info", "setting log level,ie:trace,debug,info,warn,error")
 var siteConfig SiteConfig
 var bloomFilter *Filter
 
@@ -37,14 +38,16 @@ func persistBloomFilter(bloomFilterPersistFileName string){
 
 func main() {
 	defer log.Flush()
-	setLogging()
 
 	flag.Parse()
 
+	setLogging()
+
+
 	log.Info("[gopa] is on.")
 
-	if *seed_url == "" {
-		log.Error("no seed was given.")
+	if *seedUrl == "" || *seedUrl =="http://example.com" {
+		log.Error("no seed was given. type:\"gopa -h\" for help.")
 		os.Exit(1)
 	}
 
@@ -106,7 +109,7 @@ func main() {
 	//	siteConfig.LinkUrlMustNotContain = "wenku"
 
 	// Giving a seed to gopa
-	go Seed(curl, *seed_url)
+	go Seed(curl, *seedUrl)
 
 	// Start the throttled crawling.
 	go ThrottledCrawl(bloomFilter,curl, MaxGoRouting, success, failure)
@@ -127,7 +130,9 @@ func main() {
 
 func setLogging() {
 	testConfig := `
-	<seelog type="sync" minlevel="debug">
+	<seelog type="sync" minlevel="`
+	testConfig =testConfig + *logLevel
+	testConfig =testConfig +`">
 		<outputs formatid="main">
 			<filter levels="error">
 				<file path="./log/filter.log"/>
