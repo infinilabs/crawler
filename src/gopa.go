@@ -106,7 +106,7 @@ func main() {
 	siteConfig.LinkUrlExtractRegex = reg
 	siteConfig.FollowSameDomain = true
 	siteConfig.FollowSubDomain = true
-	siteConfig.LinkUrlMustContain = "moko.cc"
+//	siteConfig.LinkUrlMustContain = "moko.cc"
 	//	siteConfig.LinkUrlMustNotContain = "wenku"
 
 	if !strings.HasPrefix(*seedUrl,"http"){
