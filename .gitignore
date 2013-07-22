@@ -40,3 +40,5 @@ log
 out
 data
 bloomfilter.bin
+bin
+src/bin
