@@ -1,7 +1,5 @@
 build:
-    export GOPATH="`pwd`:$GOPATH"
-    echo $GOPATH
-	go build gopa.go
+	go build  -o gopa
 format:
 	gofmt -s -w -tabs=false -tabwidth=4 gopa.go
 clean:
