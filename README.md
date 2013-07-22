@@ -2,10 +2,10 @@
 [狗爬],A High Performance Distributed  Spider Written in GO.
 
 
-## Building ##
+## Building Gopa ##
 Run `make build` to build the project
 
-## Running the project ##
+## Running Gopa ##
 
 after building the project run `./gopa -h` for a list of commandline options
 
@@ -13,10 +13,15 @@ after building the project run `./gopa -h` for a list of commandline options
 * -log option : logging level,can be set to `trace`,`debug`,`info`,`warn`,`error`  default is `info`
 
 
+## Stopping Gopa ##
 
-## Blocks ##
+it's safety to press `ctrl+c to` stop the current running Gopa,Gopa will handle this,saving the checkpoint,
+you may restore the job later,the world is still in your hand.
 
-Standing on the shoulders of giants,thanks for these goodies.
+
+## Loving By Gopa ##
+
+Gopa is standing on the shoulders of giants,thanks for the following goodies.
 
 * https://github.com/zeebo/sbloom
 * http://code.google.com/p/weed-fs

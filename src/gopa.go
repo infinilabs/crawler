@@ -19,7 +19,7 @@ import (
 )
 
 var seedUrl = flag.String("seed", "http://example.com", "the seed url,where everything begins")
-var logLevel = flag.String("log", "info", "setting log level,ie:trace,debug,info,warn,error")
+var logLevel = flag.String("log", "info", "setting log level,options:trace,debug,info,warn,error")
 var siteConfig SiteConfig
 var bloomFilter *Filter
 
