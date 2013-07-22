@@ -10,6 +10,7 @@ Run `make build` to build the project
 after building the project run `./gopa -h` for a list of commandline options
 
 * -seed option : start a crawling. begin with "http://" , ie: `./gopa -seed=http://www.baidu.com`
+* -log option : logging level,can be set to `trace`,`debug`,`info`,`warn`,`error`  default is `info`
 
 
 
