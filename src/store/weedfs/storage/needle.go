@@ -2,14 +2,14 @@ package storage
 
 import (
 	"encoding/hex"
+	log "github.com/cihub/seelog"
 	"io"
 	"io/ioutil"
-	log "github.com/cihub/seelog"
 	"net/http"
 	"os"
-	"util"
 	"strconv"
 	"strings"
+	"util"
 )
 
 type Needle struct {

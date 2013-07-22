@@ -1,8 +1,8 @@
 package util
 
 import (
-	"io/ioutil"
 	log "github.com/cihub/seelog"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 )

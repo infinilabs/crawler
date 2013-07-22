@@ -3,7 +3,7 @@
  * Date: 13-7-11
  * Time: 下午9:51 
  */
-package stringutil
+package util
 
 import . "strings"
 

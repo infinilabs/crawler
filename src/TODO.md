@@ -2,7 +2,7 @@
 [狗爬],A Spider Written in GO.
 
 核心
-    bloom持久化
+    持久化抓取队列，恢复抓取队列
 
 存储
     使用weedfs存储

@@ -29,8 +29,8 @@ type Mapper struct {
 	dir      string
 	fileName string
 
-	volumeLock          sync.Mutex
-  sequenceLock          sync.Mutex
+	volumeLock    sync.Mutex
+	sequenceLock  sync.Mutex
 	Machines      []*Machine
 	vid2machineId map[uint32]int //machineId is +1 of the index of []*Machine, to detect not found entries
 	Writers       []uint32       // transient array of Writers volume id
@@ -77,23 +77,23 @@ func (m *Mapper) PickForWrite(c string) (string, int, MachineInfo, error) {
 	if machine_id > 0 {
 		machine := m.Machines[machine_id-1]
 		fileId, count := m.NextFileId(c)
-		if count==0 {
-      return "", 0, m.Machines[rand.Intn(len(m.Machines))].Server, errors.New("Strange count:" + c)
+		if count == 0 {
+			return "", 0, m.Machines[rand.Intn(len(m.Machines))].Server, errors.New("Strange count:" + c)
 		}
 		return NewFileId(vid, fileId, rand.Uint32()).String(), count, machine.Server, nil
 	}
 	return "", 0, m.Machines[rand.Intn(len(m.Machines))].Server, errors.New("Strangely vid " + strconv.FormatUint(uint64(vid), 10) + " is on no machine!")
 }
-func (m *Mapper) NextFileId(c string) (uint64,int) {
-  count, parseError := strconv.ParseUint(c,10,64)
-  if parseError!=nil {
-    if len(c)>0{
-      return 0,0
-    }
-    count = 1
-  }
-  m.sequenceLock.Lock()
-  defer m.sequenceLock.Unlock()
+func (m *Mapper) NextFileId(c string) (uint64, int) {
+	count, parseError := strconv.ParseUint(c, 10, 64)
+	if parseError != nil {
+		if len(c) > 0 {
+			return 0, 0
+		}
+		count = 1
+	}
+	m.sequenceLock.Lock()
+	defer m.sequenceLock.Unlock()
 	if m.fileIdCounter < count {
 		m.fileIdCounter = FileIdSaveInterval
 		m.FileIdSequence += FileIdSaveInterval

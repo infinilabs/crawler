@@ -18,7 +18,7 @@ type FileId struct {
 func NewFileId(VolumeId uint32, Key uint64, Hashcode uint32) *FileId {
 	return &FileId{VolumeId: VolumeId, Key: Key, Hashcode: Hashcode}
 }
-func ParseFileId(fid string) *FileId{
+func ParseFileId(fid string) *FileId {
 	a := strings.Split(fid, ",")
 	if len(a) != 2 {
 		log.Error("Invalid fid", fid, ", split length", len(a))

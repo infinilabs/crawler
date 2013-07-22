@@ -43,17 +43,17 @@ func LoadNeedleMap(file *os.File) *NeedleMap {
 			key := util.BytesToUint64(bytes[i : i+8])
 			offset := util.BytesToUint32(bytes[i+8 : i+12])
 			size := util.BytesToUint32(bytes[i+12 : i+16])
-			if offset>0 {
-   			nm.m[key] = &NeedleValue{util.Offset: offset, Size: size}
-   	  }else{
-        delete(nm.m, key)
-   	  }
-		}     
-		
+			if offset > 0 {
+				nm.m[key] = &NeedleValue{util.Offset: offset, Size: size}
+			} else {
+				delete(nm.m, key)
+			}
+		}
+
 		count, e = nm.indexFile.Read(bytes)
-	}	
+	}
 	return nm
-}     
+}
 
 func (nm *NeedleMap) Put(key uint64, offset uint32, size uint32) (int, error) {
 	nm.m[key] = &NeedleValue{Offset: offset, Size: size}

@@ -1,23 +1,23 @@
 package main
 
 import (
-	"store/weedfs/directory"
 	"encoding/json"
 	"flag"
 	"fmt"
-	 log "github.com/cihub/seelog"
+	log "github.com/cihub/seelog"
+	"math/rand"
+	"mime"
 	"net/http"
+	"store/weedfs/directory"
 	"store/weedfs/storage"
 	"strconv"
 	"strings"
-	"math/rand"
-	"mime"
 	"time"
 )
 
 var (
 	//master
-	clusterName              = flag.String("cluster", "gopa", "cluster name")
+	clusterName       = flag.String("cluster", "gopa", "cluster name")
 	port              = flag.Int("port", 9333, "http listen port")
 	metaFolder        = flag.String("mdir", "/tmp", "data directory to store mappings")
 	capacity          = flag.Int("capacity", 100, "maximum number of volumes to hold")
@@ -26,13 +26,13 @@ var (
 	volumeSizeLimitMB = flag.Uint("volumeSizeLimitMB", 32*1024, "Default Volume Size in MegaBytes")
 
 	//volume
-	storePort    = flag.Int("storePort", 8080, "http listen port")
+	storePort   = flag.Int("storePort", 8080, "http listen port")
 	chunkFolder = flag.String("dir", "/tmp", "data directory to store files")
 	volumes     = flag.String("volumes", "0,1-3,4", "comma-separated list of volume ids or range of ids")
 	publicUrl   = flag.String("publicUrl", "localhost:8080", "public url to serve data read")
 	metaServer  = flag.String("mserver", "localhost:9333", "master directory server to store mappings")
 
-	pulse       = flag.Int("pulseSeconds", 5, "number of seconds between heartbeats")
+	pulse = flag.Int("pulseSeconds", 5, "number of seconds between heartbeats")
 
 	store *storage.Store
 )
@@ -54,10 +54,10 @@ func dirLookupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func dirAssignHandler(w http.ResponseWriter, r *http.Request) {
-  c:=r.FormValue("count")
+	c := r.FormValue("count")
 	fid, count, machine, err := mapper.PickForWrite(c)
 	if err == nil {
-		writeJson(w, r, map[string]string{"fid": fid, "url": machine.Url, "publicUrl":machine.PublicUrl, "count":strconv.Itoa(count)})
+		writeJson(w, r, map[string]string{"fid": fid, "url": machine.Url, "publicUrl": machine.PublicUrl, "count": strconv.Itoa(count)})
 	} else {
 		log.Error(err)
 		writeJson(w, r, map[string]string{"error": err.Error()})
@@ -77,7 +77,6 @@ func dirStatusHandler(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, r, mapper)
 }
 
-
 func writeJson(w http.ResponseWriter, r *http.Request, obj interface{}) {
 	w.Header().Set("Content-Type", "application/javascript")
 	bytes, _ := json.Marshal(obj)
@@ -91,7 +90,6 @@ func writeJson(w http.ResponseWriter, r *http.Request, obj interface{}) {
 		w.Write([]uint8(")"))
 	}
 }
-
 
 //weedfs volume
 func statusHandler(w http.ResponseWriter, r *http.Request) {
@@ -203,7 +201,6 @@ func parseURLPath(path string) (vid, fid, ext string) {
 	return
 }
 
-
 func main() {
 	flag.Parse()
 
@@ -225,7 +222,6 @@ func main() {
 			log.Error("Fail to start:", e)
 		}
 	}()
-
 
 	//volume block
 	//TODO: now default to 1G, this value should come from server?
@@ -253,7 +249,5 @@ func main() {
 			log.Error("Fail to start:", e)
 		}
 	}()
-
-
 
 }
