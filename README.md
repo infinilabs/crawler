@@ -11,12 +11,12 @@ windows: Run `build` to build the Gopa
 after building the project run `./gopa -h` for a list of commandline options
 
 * -seed option : start a crawling. begin with "http://" , ie: `./gopa -seed=http://www.baidu.com`
-* -log option : logging level,can be set to `trace`,`debug`,`info`,`warn`,`error`  default is `info`
+* -log option : logging level,can be set to `trace`,`debug`,`info`,`warn`,`error` ,default is `info`
 
 
 ## Stopping Gopa ##
 
-it's safety to press `ctrl+c to` stop the current running Gopa,Gopa will handle this,saving the checkpoint,
+it's safety to press `ctrl+c` stop the current running Gopa,Gopa will handle this,saving the checkpoint,
 you may restore the job later,the world is still in your hand.
 
 
