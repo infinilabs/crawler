@@ -188,12 +188,6 @@ func formatUrlForFilter(url []byte) []byte {
 }
 
 func GetUrls(bloomFilter *Filter,curl chan []byte, task Task, siteConfig SiteConfig) {
-
-	if siteConfig.SkipPageParsePattern == nil {
-		siteConfig.SkipPageParsePattern = regexp.MustCompile(".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b") //end with js,css,apk,zip,ignore
-		log.Debug("use default SkipPageParsePattern,", siteConfig.SkipPageParsePattern)
-	}
-
 	siteUrlStr := string(task.Url)
 	if siteConfig.SkipPageParsePattern.Match(task.Url) {
 		log.Debug("hit skip pattern,", siteUrlStr)

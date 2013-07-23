@@ -9,7 +9,6 @@ import (
 	"flag"
 	log "github.com/cihub/seelog"
 	"os"
-	"regexp"
 	. "webhunter"
 	. "github.com/zeebo/sbloom"
 	"hash/fnv"
@@ -19,6 +18,8 @@ import (
 	"strings"
  _ "net/http/pprof"
 	"net/http"
+	"regexp"
+	config "config"
 )
 
 var seedUrl = flag.String("seed", "http://example.com", "the seed url,where everything begins")
@@ -39,6 +40,7 @@ func persistBloomFilter(bloomFilterPersistFileName string){
 	log.Info("bloomFilter safety persisted.")
 }
 
+
 func main() {
 	defer log.Flush()
 
@@ -46,13 +48,14 @@ func main() {
 
 	setLogging()
 
-	log.Info("[gopa] is on.")
-
-
 	//pprof serves
 	go func() {
 		log.Info(http.ListenAndServe("localhost:6060", nil))
+		log.Info("pprof server is up,http://localhost:6060/debug/pprof")
 	}()
+
+
+	log.Info("[gopa] is on.")
 
 
 	if *seedUrl == "" || *seedUrl =="http://example.com" {
@@ -65,12 +68,11 @@ func main() {
 	failure := make(chan string)
 
 	// Setting siteConfig
-	reg := regexp.MustCompile("(src2|src|href|HREF|SRC)\\s*=\\s*[\"']?(.*?)[\"']")
-
 	MaxGoRouting := 1
 
 	//loading or initializing bloom filter
-	bloomFilterPersistFileName:="bloomfilter.bin"
+	bloomFilterPersistFileName:=config.GetStringConfig("BloomFilter", "fileName","bloomfilter.bin")
+
 	if util.CheckFileExists(bloomFilterPersistFileName){
 		log.Debug("found bloomFilter,start reload")
 		n,err := ioutil.ReadFile(bloomFilterPersistFileName)
@@ -84,19 +86,17 @@ func main() {
 
 		log.Info("bloomFilter successfully reloaded")
 	}else{
-		probItems:=1000000
+		probItems:=config.GetIntConfig("BloomFilter", "itemSize",100000)
 		log.Debug("initializing bloom-filter,virual size is,",probItems)
 		bloomFilter = NewFilter(fnv.New64(), probItems)
 		log.Info("bloomFilter successfully initialized")
 	}
 
 
+	//handle exit event
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
-
 	go func(){
-//		for sig := range c {
-			// sig is a ^C, handle it
 			s := <-c
 			log.Debug("got signal:", s)
 		    if(s == os.Interrupt){
@@ -106,16 +106,17 @@ func main() {
 				log.Info("[gopa] is down")
 
 			}
-//			persistBloomFilter(bloomFilterPersistFileName)
-//		}
 	}()
 
 
-	siteConfig.LinkUrlExtractRegex = reg
-	siteConfig.FollowSameDomain = true
-	siteConfig.FollowSubDomain = true
-//	siteConfig.LinkUrlMustContain = "moko.cc"
-	//	siteConfig.LinkUrlMustNotContain = "wenku"
+	siteConfig.LinkUrlExtractRegex = regexp.MustCompile(
+	config.GetStringConfig("CrawlerRule","LinkUrlExtractRegex","(src2|src|href|HREF|SRC)\\s*=\\s*[\"']?(.*?)[\"']"))
+
+	siteConfig.FollowSameDomain = config.GetBoolConfig("CrawlerRule","FollowSameDomain",true)
+	siteConfig.FollowSubDomain  =  config.GetBoolConfig("CrawlerRule","FollowSubDomain",true)
+	siteConfig.LinkUrlMustContain =config.GetStringConfig("CrawlerRule","LinkUrlMustContain","")
+	siteConfig.LinkUrlMustNotContain = config.GetStringConfig("CrawlerRule","LinkUrlMustNotContain","")
+	siteConfig.SkipPageParsePattern = regexp.MustCompile(config.GetStringConfig("CrawlerRule","SkipPageParsePattern",".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b"))//end with js,css,apk,zip,ignore
 
 	if !strings.HasPrefix(*seedUrl,"http"){
 		*seedUrl="http://"+*seedUrl
@@ -126,9 +127,6 @@ func main() {
 
 	// Start the throttled crawling.
 	go ThrottledCrawl(bloomFilter,curl, MaxGoRouting, success, failure)
-
-
-
 
 
 	// Main loop that never exits and blocks on the data of a page.
