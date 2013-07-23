@@ -19,7 +19,7 @@ func  init(){
 
 func GetStringConfig(configSection string,configKey string ,defaultValue string) string{
 	if(loadingConfig ==nil){
-		log.Debug("loadingConfig is nil,just return")
+		log.Trace("loadingConfig is nil,just return")
 		return defaultValue
 	}
 
@@ -28,13 +28,13 @@ func GetStringConfig(configSection string,configKey string ,defaultValue string)
 	if(error!=nil){
 		value=defaultValue
 	}
-	log.Debug("get config value,",configSection,".",configKey,":",value)
+	log.Trace("get config value,",configSection,".",configKey,":",value)
 	return value
 }
 
 func GetIntConfig(configSection string,configKey string ,defaultValue int) int{
 	if(loadingConfig ==nil){
-		log.Debug("loadingConfig is nil,just return")
+		log.Trace("loadingConfig is nil,just return")
 		return defaultValue
 	}
 
@@ -43,13 +43,13 @@ func GetIntConfig(configSection string,configKey string ,defaultValue int) int{
 	if(error!=nil){
 		value=defaultValue
 	}
-	log.Debug("get config value,",configSection,".",configKey,":",value)
+	log.Trace("get config value,",configSection,".",configKey,":",value)
 	return value
 }
 
 func GetBoolConfig(configSection string,configKey string ,defaultValue bool) bool{
 	if(loadingConfig ==nil){
-		log.Debug("loadingConfig is nil,just return")
+		log.Trace("loadingConfig is nil,just return")
 		return defaultValue
 	}
 
@@ -58,7 +58,7 @@ func GetBoolConfig(configSection string,configKey string ,defaultValue bool) boo
 	if(error!=nil){
 		value=defaultValue
 	}
-	log.Debug("get config value,",configSection,".",configKey,":",value)
+	log.Trace("get config value,",configSection,".",configKey,":",value)
 	return value
 }
 

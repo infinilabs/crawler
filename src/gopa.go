@@ -24,7 +24,7 @@ import (
 
 var seedUrl = flag.String("seed", "http://example.com", "the seed url,where everything begins")
 var logLevel = flag.String("log", "info", "setting log level,options:trace,debug,info,warn,error")
-var siteConfig SiteConfig
+var siteConfig *SiteConfig
 var bloomFilter *Filter
 
 func persistBloomFilter(bloomFilterPersistFileName string){
@@ -71,7 +71,7 @@ func main() {
 	MaxGoRouting := 1
 
 	//loading or initializing bloom filter
-	bloomFilterPersistFileName:=config.GetStringConfig("BloomFilter", "fileName","bloomfilter.bin")
+	bloomFilterPersistFileName:=config.GetStringConfig("BloomFilter", "FileName","bloomfilter.bin")
 
 	if util.CheckFileExists(bloomFilterPersistFileName){
 		log.Debug("found bloomFilter,start reload")
@@ -86,7 +86,7 @@ func main() {
 
 		log.Info("bloomFilter successfully reloaded")
 	}else{
-		probItems:=config.GetIntConfig("BloomFilter", "itemSize",100000)
+		probItems:=config.GetIntConfig("BloomFilter", "ItemSize",100000)
 		log.Debug("initializing bloom-filter,virual size is,",probItems)
 		bloomFilter = NewFilter(fnv.New64(), probItems)
 		log.Info("bloomFilter successfully initialized")
@@ -108,7 +108,7 @@ func main() {
 			}
 	}()
 
-
+	siteConfig=new (SiteConfig)
 	siteConfig.LinkUrlExtractRegex = regexp.MustCompile(
 	config.GetStringConfig("CrawlerRule","LinkUrlExtractRegex","(src2|src|href|HREF|SRC)\\s*=\\s*[\"']?(.*?)[\"']"))
 
@@ -116,8 +116,14 @@ func main() {
 	siteConfig.FollowSubDomain  =  config.GetBoolConfig("CrawlerRule","FollowSubDomain",true)
 	siteConfig.LinkUrlMustContain =config.GetStringConfig("CrawlerRule","LinkUrlMustContain","")
 	siteConfig.LinkUrlMustNotContain = config.GetStringConfig("CrawlerRule","LinkUrlMustNotContain","")
+
 	siteConfig.SkipPageParsePattern = regexp.MustCompile(config.GetStringConfig("CrawlerRule","SkipPageParsePattern",".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b"))//end with js,css,apk,zip,ignore
 
+	siteConfig.DownloadUrlPattern= regexp.MustCompile(config.GetStringConfig("CrawlerRule","DownloadUrlPattern",".*"))
+	siteConfig.DownloadUrlMustContain=config.GetStringConfig("CrawlerRule","DownloadUrlMustContain","")
+	siteConfig.DownloadUrlMustNotContain=config.GetStringConfig("CrawlerRule","DownloadUrlMustNotContain","")
+
+	//adding default http protocol
 	if !strings.HasPrefix(*seedUrl,"http"){
 		*seedUrl="http://"+*seedUrl
 	}
@@ -126,7 +132,7 @@ func main() {
 	go Seed(curl, *seedUrl)
 
 	// Start the throttled crawling.
-	go ThrottledCrawl(bloomFilter,curl, MaxGoRouting, success, failure)
+	go ThrottledCrawl(bloomFilter,siteConfig,curl, MaxGoRouting, success, failure)
 
 
 	// Main loop that never exits and blocks on the data of a page.
