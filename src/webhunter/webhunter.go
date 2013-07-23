@@ -70,26 +70,29 @@ func fetchUrl(url []byte, success chan Task, failure chan string, timeout time.D
 		body, _ := ioutil.ReadAll(resp.Body)
 		task := Task{url, nil, body}
 
-		if !config.DownloadUrlPattern.Match(url){
+		if config.DownloadUrlPattern.Match(url){
 
 			if len(config.DownloadUrlMustNotContain) > 0 {
-				if util.ContainStr(resource, config.DownloadUrlMustContain) {
-					log.Debug("link does not hit DownloadUrlMustContain,ignore,", resource, " , ", config.DownloadUrlMustNotContain)
+				if util.ContainStr(resource, config.DownloadUrlMustNotContain) {
+					log.Debug("hit DownloadUrlMustNotContain,ignore,", resource, " , ", config.DownloadUrlMustNotContain)
 					goto exitPage
 				}
 			}
 
 			if len(config.DownloadUrlMustContain) > 0 {
 				if !util.ContainStr(resource, config.DownloadUrlMustContain) {
-					log.Debug("link does not hit DownloadUrlMustContain,ignore,", resource, " , ", config.DownloadUrlMustContain)
+					log.Debug("not hit DownloadUrlMustContain,ignore,", resource, " , ", config.DownloadUrlMustContain)
 					goto exitPage
 				}
 			}
 
-
 			savePage(url, body)
-		}
 		exitPage:
+		}else{
+			log.Debug("does not hit DownloadUrlPattern ignoring",resource)
+		}
+
+
 		success <- task
 		flg <- true
 	}()
@@ -161,7 +164,7 @@ func savePage(myurl []byte, body []byte) {
 	}
 
 	defer fout.Close()
-	log.Info("file saved:", path)
+	log.Info("saved:", path)
 	fout.Write(body)
 
 }
@@ -212,7 +215,7 @@ func formatUrlForFilter(url []byte) []byte {
 func GetUrls(bloomFilter *Filter,curl chan []byte, task Task, siteConfig *SiteConfig) {
 	siteUrlStr := string(task.Url)
 	if siteConfig.SkipPageParsePattern.Match(task.Url) {
-		log.Debug("hit skip pattern,", siteUrlStr)
+		log.Debug("hit SkipPageParsePattern pattern,", siteUrlStr)
 		return
 	}
 
@@ -349,6 +352,9 @@ func GetUrls(bloomFilter *Filter,curl chan []byte, task Task, siteConfig *SiteCo
 			log.Debug("normalized url:", currentUrlStr)
 			currentUrlByte := []byte(currentUrlStr)
 			if (!bloomFilter.Lookup(currentUrlByte)) {
+
+//				if(CheckIgnore(currentUrlStr)){}
+
 				log.Info("enqueue:", currentUrlStr)
 				curl <- currentUrlByte
 				bloomFilter.Add(currentUrlByte)
