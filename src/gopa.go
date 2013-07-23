@@ -17,6 +17,8 @@ import (
 	"util"
 	"os/signal"
 	"strings"
+ _ "net/http/pprof"
+	"net/http"
 )
 
 var seedUrl = flag.String("seed", "http://example.com", "the seed url,where everything begins")
@@ -44,8 +46,14 @@ func main() {
 
 	setLogging()
 
-
 	log.Info("[gopa] is on.")
+
+
+	//pprof serves
+	go func() {
+		log.Info(http.ListenAndServe("localhost:6060", nil))
+	}()
+
 
 	if *seedUrl == "" || *seedUrl =="http://example.com" {
 		log.Error("no seed was given. type:\"gopa -h\" for help.")
