@@ -199,9 +199,15 @@ func main() {
 
 	siteConfig.SkipPageParsePattern = regexp.MustCompile(config.GetStringConfig("CrawlerRule","SkipPageParsePattern",".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b"))//end with js,css,apk,zip,ignore
 
-	siteConfig.DownloadUrlPattern= regexp.MustCompile(config.GetStringConfig("CrawlerRule","DownloadUrlPattern",".*"))
-	siteConfig.DownloadUrlMustContain=config.GetStringConfig("CrawlerRule","DownloadUrlMustContain","")
-	siteConfig.DownloadUrlMustNotContain=config.GetStringConfig("CrawlerRule","DownloadUrlMustNotContain","")
+
+	siteConfig.FetchUrlPattern= regexp.MustCompile(config.GetStringConfig("CrawlerRule","FetchUrlPattern",".*"))
+	siteConfig.FetchUrlMustContain=config.GetStringConfig("CrawlerRule","FetchUrlMustContain","")
+	siteConfig.FetchUrlMustNotContain=config.GetStringConfig("CrawlerRule","FetchUrlMustNotContain","")
+
+
+	siteConfig.SavingUrlPattern= regexp.MustCompile(config.GetStringConfig("CrawlerRule","SavingUrlPattern",".*"))
+	siteConfig.SavingUrlMustContain=config.GetStringConfig("CrawlerRule","SavingUrlMustContain","")
+	siteConfig.SavingUrlMustNotContain=config.GetStringConfig("CrawlerRule","SavingUrlMustNotContain","")
 
 
 	kafkaConfig=new (config.KafkaConfig)

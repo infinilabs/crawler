@@ -39,10 +39,15 @@ type TaskConfig struct {
 	//parsing url pattern,when url match this pattern,gopa will not parse urls from response of this url
 	SkipPageParsePattern *regexp.Regexp
 
-	//downloading pattern
-	DownloadUrlPattern        *regexp.Regexp
-	DownloadUrlMustContain    string
-	DownloadUrlMustNotContain string
+	//fetch url pattern
+	FetchUrlPattern        *regexp.Regexp
+	FetchUrlMustContain    string
+	FetchUrlMustNotContain string
+
+	//saving pattern
+	SavingUrlPattern        *regexp.Regexp
+	SavingUrlMustContain    string
+	SavingUrlMustNotContain string
 
 	//Crawling within domain
 	FollowSameDomain bool
@@ -64,6 +69,32 @@ func fetchUrl(url []byte, success chan Task, failure chan string, timeout time.D
 	defer t.Stop()
 
 	resource := string(url)
+
+
+	//checking fetchUrlPattern
+	log.Debug("started check fetchUrlPattern,",config.FetchUrlPattern,",",string(url))
+	if config.FetchUrlPattern.Match(url){
+		log.Debug("match fetch url pattern,",resource)
+		if len(config.FetchUrlMustNotContain) > 0 {
+			if util.ContainStr(resource, config.FetchUrlMustNotContain) {
+				log.Debug("hit FetchUrlMustNotContain,ignore,", resource, " , ", config.FetchUrlMustNotContain)
+				return
+			}
+		}
+
+		if len(config.FetchUrlMustContain) > 0 {
+			if !util.ContainStr(resource, config.FetchUrlMustContain) {
+				log.Debug("not hit FetchUrlMustContain,ignore,", resource, " , ", config.FetchUrlMustContain)
+				return
+			}
+		}
+	}else{
+		log.Debug("does not hit FetchUrlPattern ignoring,",resource)
+	}
+
+
+
+	log.Debug("start fetch url,",resource)
 	flg := make(chan bool, 1)
 
 	go func() {
@@ -82,19 +113,19 @@ func fetchUrl(url []byte, success chan Task, failure chan string, timeout time.D
 		body, _ := ioutil.ReadAll(resp.Body)
 		task := Task{url, nil, body}
 
-		log.Debug("started check downloadUrlPattern,",config.DownloadUrlPattern,",",string(url))
-		if config.DownloadUrlPattern.Match(url){
-
-			if len(config.DownloadUrlMustNotContain) > 0 {
-				if util.ContainStr(resource, config.DownloadUrlMustNotContain) {
-					log.Debug("hit DownloadUrlMustNotContain,ignore,", resource, " , ", config.DownloadUrlMustNotContain)
+		log.Debug("started check savingUrlPattern,",config.SavingUrlPattern,",",string(url))
+		if config.SavingUrlPattern.Match(url){
+			log.Debug("match saving url pattern,",resource)
+			if len(config.SavingUrlMustNotContain) > 0 {
+				if util.ContainStr(resource, config.SavingUrlMustNotContain) {
+					log.Debug("hit SavingUrlMustNotContain,ignore,", resource, " , ", config.SavingUrlMustNotContain)
 					goto exitPage
 				}
 			}
 
-			if len(config.DownloadUrlMustContain) > 0 {
-				if !util.ContainStr(resource, config.DownloadUrlMustContain) {
-					log.Debug("not hit DownloadUrlMustContain,ignore,", resource, " , ", config.DownloadUrlMustContain)
+			if len(config.SavingUrlMustContain) > 0 {
+				if !util.ContainStr(resource, config.SavingUrlMustContain) {
+					log.Debug("not hit SavingUrlMustContain,ignore,", resource, " , ", config.SavingUrlMustContain)
 					goto exitPage
 				}
 			}
@@ -102,7 +133,7 @@ func fetchUrl(url []byte, success chan Task, failure chan string, timeout time.D
 			savePage(url, body)
 		exitPage:
 		}else{
-			log.Debug("does not hit DownloadUrlPattern ignoring,",resource)
+			log.Debug("does not hit SavingUrlPattern ignoring,",resource)
 		}
 
 
@@ -206,6 +237,7 @@ maxGoR int, success chan Task, failure chan string,quit []*chan bool,offsets []*
 						timeout := 10 * time.Second
 						if !bloomFilter.Lookup(url){
 							fetchUrl(url, success, failure, timeout,taskConfig)
+							bloomFilter.Add(url)
 						}else{
 							log.Debug("hit bloom filter,skipping,",string(url))
 						}
