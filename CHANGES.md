@@ -10,6 +10,12 @@ v0.3
     go tool pprof http://localhost:6060/debug/pprof/profile
     go tool pprof http://localhost:6060/debug/pprof/block
 
+2.integrate with kafka to make task controllable and recoverable
+3.parameters configable
+4.goroutine canbe controlled now
+
+
+
 
 v0.2
 1.bloom-filter persistence
