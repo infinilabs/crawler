@@ -70,6 +70,7 @@ func fetchUrl(url []byte, success chan Task, failure chan string, timeout time.D
 		body, _ := ioutil.ReadAll(resp.Body)
 		task := Task{url, nil, body}
 
+		log.Debug("started check downloadUrlPattern,",config.DownloadUrlPattern,",",string(url))
 		if config.DownloadUrlPattern.Match(url){
 
 			if len(config.DownloadUrlMustNotContain) > 0 {
@@ -89,7 +90,7 @@ func fetchUrl(url []byte, success chan Task, failure chan string, timeout time.D
 			savePage(url, body)
 		exitPage:
 		}else{
-			log.Debug("does not hit DownloadUrlPattern ignoring",resource)
+			log.Debug("does not hit DownloadUrlPattern ignoring,",resource)
 		}
 
 
@@ -174,11 +175,11 @@ func ThrottledCrawl(bloomFilter *Filter,config *SiteConfig,curl chan []byte, max
 	numGos := 0
 	for {
 		if numGos > maxGos {
+			log.Error("exceed maxGos,failure,")
 			<-failure
 			numGos -= 1
 		}
 		url := <-curl
-		//		if _, ok := visited[url]; !ok {
 		timeout := 20 * time.Second
 		if !bloomFilter.Lookup(url){
 			go fetchUrl(url, success, failure, timeout,config)
@@ -186,8 +187,6 @@ func ThrottledCrawl(bloomFilter *Filter,config *SiteConfig,curl chan []byte, max
 		}else{
 			log.Debug("hit bloom filter,skipping,",string(url))
 		}
-		//		}
-		//		visited[url] += 1
 	}
 }
 
@@ -212,7 +211,7 @@ func formatUrlForFilter(url []byte) []byte {
 	return []byte(src)
 }
 
-func GetUrls(bloomFilter *Filter,curl chan []byte, task Task, siteConfig *SiteConfig) {
+func ExtractLinksFromTaskResponse(bloomFilter *Filter,curl chan []byte, task Task, siteConfig *SiteConfig) {
 	siteUrlStr := string(task.Url)
 	if siteConfig.SkipPageParsePattern.Match(task.Url) {
 		log.Debug("hit SkipPageParsePattern pattern,", siteUrlStr)
@@ -367,3 +366,4 @@ func GetUrls(bloomFilter *Filter,curl chan []byte, task Task, siteConfig *SiteCo
 
 	log.Info("all links within ", siteUrlStr," is done")
 }
+

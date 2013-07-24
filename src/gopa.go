@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"regexp"
 	config "config"
+	"fmt"
 )
 
 var seedUrl = flag.String("seed", "http://example.com", "the seed url,where everything begins")
@@ -38,6 +39,19 @@ func persistBloomFilter(bloomFilterPersistFileName string){
 		panic(err)
 	}
 	log.Info("bloomFilter safety persisted.")
+}
+
+func getSeqStr(start []byte,end []byte,mix bool) []byte{
+	if(len(start)) == len(end){
+		for i:=range start {
+			fmt.Println(start[i])
+		}
+//		if(start>64 && end < 123){
+
+//		}
+	}
+
+	return nil
 }
 
 
@@ -63,12 +77,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	//urls need to be fetch
 	curl := make(chan []byte)
+	//tasks fetched,need to be parse
 	success := make(chan Task)
+	//urls failure
 	failure := make(chan string)
 
 	// Setting siteConfig
-	MaxGoRouting := 1
+	MaxGoRouting := config.GetIntConfig("Global", "MaxGoRouting",10)
 
 	//loading or initializing bloom filter
 	bloomFilterPersistFileName:=config.GetStringConfig("BloomFilter", "FileName","bloomfilter.bin")
@@ -108,6 +125,19 @@ func main() {
 			}
 	}()
 
+
+//	atr:="AZaz"
+//	btr:=[]byte(atr)
+//	fmt.Println(btr)
+//
+//	id:= getSeqStr([]byte("AA"),[]byte("ZZ"),false)
+//	fmt.Println(id)
+
+
+
+
+
+	//setting siteConfig
 	siteConfig=new (SiteConfig)
 	siteConfig.LinkUrlExtractRegex = regexp.MustCompile(
 	config.GetStringConfig("CrawlerRule","LinkUrlExtractRegex","(src2|src|href|HREF|SRC)\\s*=\\s*[\"']?(.*?)[\"']"))
@@ -137,8 +167,8 @@ func main() {
 
 	// Main loop that never exits and blocks on the data of a page.
 	for {
-		site := <-success
-		go GetUrls(bloomFilter,curl, site, siteConfig)
+		taskItem := <-success
+		go ExtractLinksFromTaskResponse(bloomFilter,curl, taskItem, siteConfig)
 	}
 
 }
