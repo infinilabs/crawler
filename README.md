@@ -5,12 +5,13 @@
 ## Building Gopa ##
 
 linux: Run `make build` to build the Gopa
+
 windows: Run `build` to build the Gopa
 
 ## Required By Gopa ##
 
-Gopa using kafka or jafka to store urls,so you need start a kafka server,
-a pre-compled jafka can download from here:
+Gopa using kafka or jafka to store urls,so you need running another kafka server,
+a pre-compled jafka can be download from here:
 https://github.com/medcl/gopa-release/tree/master/kafka
 
 <pre>
@@ -24,17 +25,19 @@ cd jafka-1.3.0-SNAPSHOT/bin
 ## Running Gopa ##
 
 after building the project run `./gopa -h` for a list of commandline options
+
 tips: you can download the pre-compiled [Gopa] from here: https://github.com/medcl/gopa-release
 
 * -seed option : start a crawling, giving a seed url to Gopa. ie: `./gopa -seed=http://www.baidu.com`
 * -log option : logging level,can be set to `trace`,`debug`,`info`,`warn`,`error` ,default is `info`
 
-Gopa to support more specified crawling task settings,there is a config file called: `config.ini`
-download the sample file,and changes the default value to your own setting,BTW put this config stay with gopa to make it work..
+Gopa allow you to specify more detailed crawling-task settings by config a file called: `config.ini`
+you can download the sample file,and changes the default value to your own setting,
+BTW,do not forget to put this config stay with gopa,and to make it work..
 
 ## Stopping Gopa ##
 
-it's safety to press `ctrl+c` stop the current running Gopa,Gopa will handle this,saving the checkpoint,
+it's safety to press `ctrl+c` stop the current running Gopa,Gopa will handle the rest,saving the checkpoint,
 you may restore the job later,the world is still in your hand.
 
 
