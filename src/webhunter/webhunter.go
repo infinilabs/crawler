@@ -13,14 +13,20 @@ import (
 	"os"
 	"regexp"
 	"strings"
-//	"sync"
 	"time"
 	. "github.com/zeebo/sbloom"
 	util "util"
 	. "github.com/PuerkitoBio/purell"
+	"kafka"
+config	"config"
+	"strconv"
+	utils "util"
 )
 
-type SiteConfig struct {
+type TaskConfig struct {
+
+	//name of this task
+	Name string
 
 	//follow page link,and walk around
 	FollowLink bool
@@ -47,7 +53,13 @@ type Task struct {
 	Url, Request, Response []byte
 }
 
-func fetchUrl(url []byte, success chan Task, failure chan string, timeout time.Duration,config *SiteConfig) {
+type RoutingOffset struct {
+	Partition int
+	Offset uint64
+}
+
+//fetch url's content
+func fetchUrl(url []byte, success chan Task, failure chan string, timeout time.Duration,config *TaskConfig) {
 	t := time.NewTimer(timeout)
 	defer t.Stop()
 
@@ -109,6 +121,7 @@ func fetchUrl(url []byte, success chan Task, failure chan string, timeout time.D
 
 }
 
+//parse to get url root
 func getRootUrl(source *URL) string {
 	if strings.HasSuffix(source.Path, "/") {
 		return source.Host + source.Path
@@ -124,6 +137,7 @@ func getRootUrl(source *URL) string {
 	return ""
 }
 
+//saving page
 func savePage(myurl []byte, body []byte) {
 	myurl1, _ := ParseRequestURI(string(myurl))
 	log.Debug("url->path:", myurl1.Host, " ", myurl1.Path)
@@ -170,28 +184,65 @@ func savePage(myurl []byte, body []byte) {
 
 }
 
-func ThrottledCrawl(bloomFilter *Filter,config *SiteConfig,curl chan []byte, maxGoR int, success chan Task, failure chan string) {
-	maxGos := maxGoR
-	numGos := 0
-	for {
-		if numGos > maxGos {
-			log.Error("exceed maxGos,failure,")
-			<-failure
-			numGos -= 1
-		}
-		url := <-curl
-		timeout := 20 * time.Second
-		if !bloomFilter.Lookup(url){
-			go fetchUrl(url, success, failure, timeout,config)
-			numGos += 1
-		}else{
-			log.Debug("hit bloom filter,skipping,",string(url))
-		}
-	}
-}
 
-func Seed(curl chan []byte, seed string) {
-	curl <- []byte(seed)
+
+//crawl with limited gorouting
+func ThrottledCrawl(bloomFilter *Filter,taskConfig *TaskConfig,kafkaConfig *config.KafkaConfig,curl chan []byte,
+maxGoR int, success chan Task, failure chan string,quit []*chan bool,offsets []*RoutingOffset) {
+
+	for i := 0; i < maxGoR; i++ {
+	  log.Debug("init go routing,",i)
+
+		offset:= *offsets[i]
+
+		broker := kafka.NewBrokerConsumer(kafkaConfig.Hostname,taskConfig.Name , i, offset.Offset, kafkaConfig.MaxSize)
+
+		printmessage:=true
+
+		consumerCallback := func(msg *kafka.Message) {
+			if printmessage {
+						url :=  msg.Payload()
+				        log.Debug("kafka message offset: " + strconv.FormatUint(msg.Offset(), 10) )
+						timeout := 10 * time.Second
+						if !bloomFilter.Lookup(url){
+							fetchUrl(url, success, failure, timeout,taskConfig)
+						}else{
+							log.Debug("hit bloom filter,skipping,",string(url))
+						}
+				offsetV:=msg.Offset()
+				offset.Offset=offsetV
+
+				path:="offset_"+strconv.FormatInt(int64(i),10)+".tmp"
+				path_new:="offset_"+strconv.FormatInt(int64(i),10)
+				fout, error := os.Create(path)
+				if error != nil {
+					log.Error(path, error)
+					return
+				}
+
+				defer fout.Close()
+				log.Debug("saved offset:", offsetV)
+				fout.Write([]byte(strconv.FormatUint(msg.Offset(), 10)))
+				utils.CopyFile(path,path_new)
+			}
+		}
+
+		consumerForever:=true
+		if consumerForever {
+			msgChan := make(chan *kafka.Message)
+			go broker.ConsumeOnChannel(msgChan, 10, *quit[i])
+			for msg := range msgChan {
+				if msg != nil {
+					consumerCallback(msg)
+				} else {
+					break
+				}
+			}
+		} else {
+			broker.Consume(consumerCallback)
+		}
+
+	}
 }
 
 //var l sync.Mutex
@@ -200,6 +251,7 @@ func Seed(curl chan []byte, seed string) {
 //	log.Debug("[webhunter] initializing")
 //}
 
+//format url,prepare for bloom filter
 func formatUrlForFilter(url []byte) []byte {
 	src := string(url)
 	log.Debug("start to normalize url:",src)
@@ -211,7 +263,8 @@ func formatUrlForFilter(url []byte) []byte {
 	return []byte(src)
 }
 
-func ExtractLinksFromTaskResponse(bloomFilter *Filter,curl chan []byte, task Task, siteConfig *SiteConfig) {
+//func ExtractLinksFromTaskResponse(bloomFilter *Filter,curl chan []byte, task Task, siteConfig *SiteConfig) {
+func ExtractLinksFromTaskResponse(bloomFilter *Filter,broker *kafka.BrokerPublisher, task Task, siteConfig *TaskConfig) {
 	siteUrlStr := string(task.Url)
 	if siteConfig.SkipPageParsePattern.Match(task.Url) {
 		log.Debug("hit SkipPageParsePattern pattern,", siteUrlStr)
@@ -355,7 +408,12 @@ func ExtractLinksFromTaskResponse(bloomFilter *Filter,curl chan []byte, task Tas
 //				if(CheckIgnore(currentUrlStr)){}
 
 				log.Info("enqueue:", currentUrlStr)
-				curl <- currentUrlByte
+
+				//TODO 如果使用分布式队列，则不使用go的channel，抽象出接口
+//				curl <- currentUrlByte
+
+				broker.Publish(kafka.NewMessage(currentUrlByte))
+
 				bloomFilter.Add(currentUrlByte)
 			}
 			bloomFilter.Add([]byte(filterUrl))
