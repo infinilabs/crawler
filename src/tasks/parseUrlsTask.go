@@ -38,7 +38,6 @@ func loadFileContent(fileName string) []byte{
 	return nil
 }
 
-//func ExtractLinksFromTaskResponse(bloomFilter *Filter,curl chan []byte, task Task, siteConfig *SiteConfig) {
 func extractLinks(bloomFilter *Filter,broker *kafka.BrokerPublisher,fileName []byte,body []byte,siteConfig *TaskConfig) {
 
 
@@ -194,8 +193,6 @@ func extractLinks(bloomFilter *Filter,broker *kafka.BrokerPublisher,fileName []b
 
 				log.Info("enqueue fetch: ", currentUrlStr)
 
-				//TODO 如果使用分布式队列，则不使用go的channel，抽象出接口
-				//				curl <- currentUrlByte
 
 				broker.Publish(kafka.NewMessage(currentUrlByte))
 
