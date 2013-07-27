@@ -16,3 +16,10 @@
     处理跳转：<meta http-equiv="refresh" content="0;url=http://www.baidu.com/">
 
 检查内存泄露的原因
+
+taskItem任务未接收到新的，没有进行下载操作
+
+配置文件支持多个参数，通过，分割，转换成fields
+
+任务
+    每个gopa能够注册一系列partition，具体是否执行partition下的任务，由集群来分配

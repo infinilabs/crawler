@@ -9,3 +9,5 @@ type KafkaConfig struct{
  Hostname string
  MaxSize uint32
 }
+
+
