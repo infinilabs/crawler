@@ -8,29 +8,30 @@ package tasks
 
 import (
 	log "github.com/cihub/seelog"
-		"io/ioutil"
+	"io/ioutil"
 	//	"net/http"
 	. "net/url"
-		"os"
+	"os"
 	"regexp"
 	"strings"
-//		"time"
-	. "github.com/zeebo/sbloom"
-	util "util"
+	//		"time"
+	config "config"
 	. "github.com/PuerkitoBio/purell"
+	. "github.com/zeebo/sbloom"
 	"kafka"
-	config	"config"
-		"strconv"
-		utils "util"
+//	"math/rand"
+	"strconv"
 	. "types"
+	util "util"
+	utils "util"
 )
 
-func loadFileContent(fileName string) []byte{
-	if util.CheckFileExists(fileName){
-		log.Trace("found fileName,start loading:",fileName)
-		n,err := ioutil.ReadFile(fileName)
+func loadFileContent(fileName string) []byte {
+	if util.CheckFileExists(fileName) {
+		log.Trace("found fileName,start loading:", fileName)
+		n, err := ioutil.ReadFile(fileName)
 		if err != nil {
-			log.Error("loadFile",err,",",fileName)
+			log.Error("loadFile", err, ",", fileName)
 			return nil
 		}
 		return n
@@ -38,17 +39,16 @@ func loadFileContent(fileName string) []byte{
 	return nil
 }
 
-func extractLinks(bloomFilter *Filter,broker *kafka.BrokerPublisher,fileName []byte,body []byte,siteConfig *TaskConfig) {
-
+func extractLinks(pendingUrls chan []byte, bloomFilter *Filter, fileName []byte, body []byte, siteConfig *TaskConfig) {
 
 	siteUrlStr := string(fileName)
-//	log.Debug("fileName:",siteUrlStr)
-	siteUrlStr=strings.TrimLeft(siteUrlStr,"data/")
-	siteUrlStr="http://"+siteUrlStr
-	log.Debug("fileName to Url:",string(fileName),",",siteUrlStr)
+	//	log.Debug("fileName:",siteUrlStr)
+	siteUrlStr = strings.TrimLeft(siteUrlStr, "data/")
+	siteUrlStr = "http://" + siteUrlStr
+	log.Debug("fileName to Url:", string(fileName), ",", siteUrlStr)
 
-	siteUrlByte   :=[]byte(siteUrlStr)
-	log.Debug("enter links extract,",siteUrlStr)
+	siteUrlByte := []byte(siteUrlStr)
+	log.Debug("enter links extract,", siteUrlStr)
 	if siteConfig.SkipPageParsePattern.Match(siteUrlByte) {
 		log.Debug("hit SkipPageParsePattern pattern,", siteUrlStr)
 		return
@@ -61,12 +61,12 @@ func extractLinks(bloomFilter *Filter,broker *kafka.BrokerPublisher,fileName []b
 	}
 
 	matches := siteConfig.LinkUrlExtractRegex.FindAllSubmatch(body, -1)
-	log.Debug("extract links with pattern:", len(matches), " match result,",string(fileName))
+	log.Debug("extract links with pattern:", len(matches), " match result,", string(fileName))
 	xIndex := 0
 	for _, match := range matches {
 		log.Debug("dealing with match result,", xIndex)
 		xIndex = xIndex + 1
-		url := match[2]
+		url := match[1] //TODO match index is configable
 		filterUrl := formatUrlForFilter(url)
 		log.Debug("url clean result:", string(filterUrl), ",original url:", string(url))
 		filteredUrl := string(filterUrl)
@@ -91,7 +91,6 @@ func extractLinks(bloomFilter *Filter,broker *kafka.BrokerPublisher,fileName []b
 
 		hit := false
 
-
 		//		l.Lock();
 		//		defer l.Unlock();
 
@@ -103,7 +102,7 @@ func extractLinks(bloomFilter *Filter,broker *kafka.BrokerPublisher,fileName []b
 
 		if !hit {
 			currentUrlStr := string(url)
-			currentUrlStr=strings.Trim(currentUrlStr," ")
+			currentUrlStr = strings.Trim(currentUrlStr, " ")
 
 			seedUrlStr := siteUrlStr
 			seedURI, err := ParseRequestURI(seedUrlStr)
@@ -137,7 +136,7 @@ func extractLinks(bloomFilter *Filter,broker *kafka.BrokerPublisher,fileName []b
 				}
 			}
 
-//			relative links
+			//			relative links
 			if currentURI == nil || currentURI.Host == "" {
 				if strings.HasPrefix(currentURI.Path, "/") {
 					//root based relative urls
@@ -183,68 +182,72 @@ func extractLinks(bloomFilter *Filter,broker *kafka.BrokerPublisher,fileName []b
 			}
 
 			//normalize url
-			currentUrlStr = MustNormalizeURLString(currentUrlStr, FlagLowercaseScheme | FlagLowercaseHost | FlagUppercaseEscapes |
-						FlagRemoveUnnecessaryHostDots |FlagRemoveDuplicateSlashes | FlagRemoveFragment)
+			currentUrlStr = MustNormalizeURLString(currentUrlStr, FlagLowercaseScheme|FlagLowercaseHost|FlagUppercaseEscapes|
+				FlagRemoveUnnecessaryHostDots|FlagRemoveDuplicateSlashes|FlagRemoveFragment)
 			log.Debug("normalized url:", currentUrlStr)
 			currentUrlByte := []byte(currentUrlStr)
-			if (!bloomFilter.Lookup(currentUrlByte)) {
+			if !bloomFilter.Lookup(currentUrlByte) {
 
-//								if(CheckIgnore(currentUrlStr)){}
+				//								if(CheckIgnore(currentUrlStr)){}
 
 				log.Info("enqueue fetch: ", currentUrlStr)
 
+//				broker.Publish(kafka.NewMessage(currentUrlByte))
+				pendingUrls <- currentUrlByte
 
-				broker.Publish(kafka.NewMessage(currentUrlByte))
-
-								bloomFilter.Add(currentUrlByte)
+//				bloomFilter.Add(currentUrlByte)
 			}
-						bloomFilter.Add([]byte(filterUrl))
+//			bloomFilter.Add([]byte(filterUrl))
 		} else {
 			log.Debug("hit bloom filter,ignore,", string(url))
 		}
-		log.Debug("exit links extract,",siteUrlStr)
+		log.Debug("exit links extract,", siteUrlStr)
 
 	}
 
-	log.Debug("all links within ", siteUrlStr," is done")
+	log.Debug("all links within ", siteUrlStr, " is done")
 }
 
+func ParseLinks(pendingUrls chan []byte, bloomFilter *Filter, taskConfig *TaskConfig, kafkaConfig *config.KafkaConfig, quit *chan bool, offsets *RoutingOffset, MaxGoRoutine int) {
 
+	partition := 0
 
-
-func ParseLinks(bloomFilter *Filter,taskConfig *TaskConfig,kafkaConfig *config.KafkaConfig, quit *chan bool,offsets *RoutingOffset,partition int) {
-	log.Debug("partition:",partition,"start parse local file")
+	log.Debug("partition:", partition, "start parse local file")
 	//		partition:=0
-	log.Debug("partition:",partition,",init go routing")
+	log.Debug("partition:", partition, ",init go routing")
 
-	offset:= *offsets
+	offset := *offsets
 
-	broker := kafka.NewBrokerConsumer(kafkaConfig.Hostname,taskConfig.Name+"_parse" , partition, offset.Offset, kafkaConfig.MaxSize)
-	publisher := kafka.NewBrokerPublisher(kafkaConfig.Hostname, taskConfig.Name+"_fetch", partition)
+	broker := kafka.NewBrokerConsumer(kafkaConfig.Hostname, taskConfig.Name+"_parse", partition, offset.Offset, kafkaConfig.MaxSize)
 
-
+//	randomPartition := 0
+//	if MaxGoRoutine > 1 {
+//		randomPartition = rand.Intn(MaxGoRoutine - 1)
+//	}
+//	//		log.Debug("random partition:",random)
+//	publisher := kafka.NewBrokerPublisher(kafkaConfig.Hostname, taskConfig.Name+"_fetch", randomPartition)
 
 	consumerCallback := func(msg *kafka.Message) {
 
-		fileName :=  msg.Payload()
-		fileContent:=loadFileContent(string(fileName))
+		fileName := msg.Payload()
+		fileContent := loadFileContent(string(fileName))
 
-		if(fileContent!=nil){
-//			timeout := 10 * time.Second
-			log.Debug("partition:",partition,",parse fileName:",string(fileName))
+		if fileContent != nil {
+			//			timeout := 10 * time.Second
+			log.Debug("partition:", partition, ",parse fileName:", string(fileName))
 
-			extractLinks(bloomFilter,publisher,fileName,fileContent,taskConfig)
+			extractLinks(pendingUrls, bloomFilter, fileName, fileContent, taskConfig)
 			//			if !bloomFilter.Lookup(fileName){
 			//		fetchUrl(fileName, timeout,taskConfig,kafkaConfig,bloomFilter,partition)
 			//		bloomFilter.Add(fileName)
 			//			}else{
 			//				log.Debug("hit bloom filter,skipping,",string(fileName))
 			//			}
-			offsetV:=msg.Offset()
-			offset.Offset=offsetV
+			offsetV := msg.Offset()
+			offset.Offset = offsetV
 
-			path:="parse_offset_"+strconv.FormatInt(int64(partition),10)+".tmp"
-			path_new:="parse_offset_"+strconv.FormatInt(int64(partition),10)
+			path := "parse_offset_" + strconv.FormatInt(int64(partition), 10) + ".tmp"
+			path_new := "parse_offset_" + strconv.FormatInt(int64(partition), 10)
 			fout, error := os.Create(path)
 			if error != nil {
 				log.Error(path, error)
@@ -252,25 +255,21 @@ func ParseLinks(bloomFilter *Filter,taskConfig *TaskConfig,kafkaConfig *config.K
 			}
 
 			defer fout.Close()
-			log.Debug("partition:",partition,",saved offset:", offsetV)
+			log.Debug("partition:", partition, ",saved offset:", offsetV)
 			fout.Write([]byte(strconv.FormatUint(msg.Offset(), 10)))
-			utils.CopyFile(path,path_new)
+			utils.CopyFile(path, path_new)
 		}
-
 
 	}
 	msgChan := make(chan *kafka.Message)
 	go broker.ConsumeOnChannel(msgChan, 10, *quit)
 	for msg := range msgChan {
 		if msg != nil {
-			log.Debug("partition:",partition,",consume messaging.",string(msg.Payload()))
+			log.Debug("partition:", partition, ",consume messaging.", string(msg.Payload()))
 			consumerCallback(msg)
 		} else {
 			break
 		}
 	}
-	log.Debug("partition:",partition,",exit parse local file")
+	log.Debug("partition:", partition, ",exit parse local file")
 }
-
-
-

@@ -7,23 +7,22 @@ package tasks
 
 import (
 	log "github.com/cihub/seelog"
-//	"io/ioutil"
-//	"net/http"
+	//	"io/ioutil"
+	//	"net/http"
 	. "net/url"
-//	"os"
+	//	"os"
 	"regexp"
 	"strings"
-//	"time"
-	. "github.com/zeebo/sbloom"
-	util "util"
+	//	"time"
 	. "github.com/PuerkitoBio/purell"
+	. "github.com/zeebo/sbloom"
 	"kafka"
-//config	"config"
-//	"strconv"
-//	utils "util"
+	util "util"
+	//config	"config"
+	//	"strconv"
+	//	utils "util"
 	. "types"
 )
-
 
 //parse to get url root
 func getRootUrl(source *URL) string {
@@ -44,7 +43,7 @@ func getRootUrl(source *URL) string {
 //format url,prepare for bloom filter
 func formatUrlForFilter(url []byte) []byte {
 	src := string(url)
-	log.Debug("start to normalize url:",src)
+	log.Debug("start to normalize url:", src)
 	if strings.HasSuffix(src, "/") {
 		src = strings.TrimRight(src, "/")
 	}
@@ -54,9 +53,9 @@ func formatUrlForFilter(url []byte) []byte {
 }
 
 //func ExtractLinksFromTaskResponse(bloomFilter *Filter,curl chan []byte, task Task, siteConfig *SiteConfig) {
-func ExtractLinksFromTaskResponse(bloomFilter *Filter,broker *kafka.BrokerPublisher, task Task, siteConfig *TaskConfig) {
+func ExtractLinksFromTaskResponse(bloomFilter *Filter, broker *kafka.BrokerPublisher, task Task, siteConfig *TaskConfig) {
 	siteUrlStr := string(task.Url)
-	log.Debug("enter links extract,",siteUrlStr)
+	log.Debug("enter links extract,", siteUrlStr)
 	if siteConfig.SkipPageParsePattern.Match(task.Url) {
 		log.Debug("hit SkipPageParsePattern pattern,", siteUrlStr)
 		return
@@ -99,7 +98,6 @@ func ExtractLinksFromTaskResponse(bloomFilter *Filter,broker *kafka.BrokerPublis
 
 		hit := false
 
-
 		//		l.Lock();
 		//		defer l.Unlock();
 
@@ -111,7 +109,7 @@ func ExtractLinksFromTaskResponse(bloomFilter *Filter,broker *kafka.BrokerPublis
 
 		if !hit {
 			currentUrlStr := string(url)
-			currentUrlStr=strings.Trim(currentUrlStr," ")
+			currentUrlStr = strings.Trim(currentUrlStr, " ")
 
 			seedUrlStr := siteUrlStr
 			seedURI, err := ParseRequestURI(seedUrlStr)
@@ -191,31 +189,30 @@ func ExtractLinksFromTaskResponse(bloomFilter *Filter,broker *kafka.BrokerPublis
 			}
 
 			//normalize url
-			currentUrlStr = MustNormalizeURLString(currentUrlStr, FlagLowercaseScheme | FlagLowercaseHost | FlagUppercaseEscapes |
-						FlagRemoveUnnecessaryHostDots |FlagRemoveDuplicateSlashes | FlagRemoveFragment)
+			currentUrlStr = MustNormalizeURLString(currentUrlStr, FlagLowercaseScheme|FlagLowercaseHost|FlagUppercaseEscapes|
+				FlagRemoveUnnecessaryHostDots|FlagRemoveDuplicateSlashes|FlagRemoveFragment)
 			log.Debug("normalized url:", currentUrlStr)
 			currentUrlByte := []byte(currentUrlStr)
-			if (!bloomFilter.Lookup(currentUrlByte)) {
+			if !bloomFilter.Lookup(currentUrlByte) {
 
-//				if(CheckIgnore(currentUrlStr)){}
+				//				if(CheckIgnore(currentUrlStr)){}
 
 				log.Debug("enqueue:", currentUrlStr)
 
 				//TODO 如果使用分布式队列，则不使用go的channel，抽象出接口
-//				curl <- currentUrlByte
+				//				curl <- currentUrlByte
 
 				broker.Publish(kafka.NewMessage(currentUrlByte))
 
-//				bloomFilter.Add(currentUrlByte)
+				//				bloomFilter.Add(currentUrlByte)
 			}
-//			bloomFilter.Add([]byte(filterUrl))
+			//			bloomFilter.Add([]byte(filterUrl))
 		} else {
 			log.Debug("hit bloom filter,ignore,", string(url))
 		}
-		log.Debug("exit links extract,",siteUrlStr)
+		log.Debug("exit links extract,", siteUrlStr)
 
 	}
 
-	log.Info("all links within ", siteUrlStr," is done")
+	log.Info("all links within ", siteUrlStr, " is done")
 }
-

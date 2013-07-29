@@ -11,11 +11,11 @@ import (
 	"os"
 	"strings"
 	//	. "github.com/zeebo/sbloom"
-//	. "github.com/PuerkitoBio/purell"
+	//	. "github.com/PuerkitoBio/purell"
 	"kafka"
 )
 
-func Save(myurl []byte, body []byte,publisher *kafka.BrokerPublisher) {
+func Save(myurl []byte, body []byte, publisher *kafka.BrokerPublisher) {
 	urlStr := string(myurl)
 	log.Debug("start saving url,", urlStr)
 	myurl1, _ := ParseRequestURI(urlStr)
@@ -37,7 +37,7 @@ func Save(myurl []byte, body []byte,publisher *kafka.BrokerPublisher) {
 
 	} else {
 		index := strings.LastIndex(myurl1.Path, "/")
-		log.Debug("index of last /:", index,",",myurl1.Path)
+		log.Debug("index of last /:", index, ",", myurl1.Path)
 		if index >= 0 {
 			path = myurl1.Path[0:index]
 			path = baseDir + path
@@ -61,14 +61,12 @@ func Save(myurl []byte, body []byte,publisher *kafka.BrokerPublisher) {
 	}
 
 	defer fout.Close()
-	log.Info("saved:", urlStr,",", path)
+	log.Info("saved:", urlStr, ",", path)
 	fout.Write(body)
 
 	publisher.Publish(kafka.NewMessage([]byte(path)))
 
-//	log.Info("enqueue parse,", path)
+	//	log.Info("enqueue parse,", path)
 	log.Debug("end saving url,", urlStr)
 
 }
-
-
