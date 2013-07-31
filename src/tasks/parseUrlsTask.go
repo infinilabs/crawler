@@ -116,8 +116,8 @@ func extractLinks(pendingUrls chan []byte, bloomFilter *Filter, fileName []byte,
 			currentURI := currentURI1
 			if err != nil {
 				if strings.Contains(err.Error(), "invalid URI for request") {
-					log.Warn("invalid URI for request,fix relative url,original:", currentUrlStr)
-					log.Debug("old relatived url,", currentUrlStr)
+					log.Debug("invalid URI for request,fix relative url,original:", currentUrlStr)
+//					log.Debug("old relatived url,", currentUrlStr)
 					//page based relative urls
 
 					currentUrlStr = "http://" + seedURI.Host + "/" + currentUrlStr
