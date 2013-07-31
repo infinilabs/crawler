@@ -73,7 +73,7 @@ func ExtractLinksFromTaskResponse(bloomFilter *Filter, broker *kafka.BrokerPubli
 	for _, match := range matches {
 		log.Debug("dealing with match result,", xIndex)
 		xIndex = xIndex + 1
-		url := match[2]
+		url := match[siteConfig.LinkUrlExtractRegexGroupIndex]
 		filterUrl := formatUrlForFilter(url)
 		log.Debug("url clean result:", string(filterUrl), ",original url:", string(url))
 		filteredUrl := string(filterUrl)

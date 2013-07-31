@@ -19,6 +19,7 @@ type TaskConfig struct {
 
 	//walking around pattern
 	LinkUrlExtractRegex   *regexp.Regexp
+	LinkUrlExtractRegexGroupIndex   int
 	LinkUrlMustContain    string
 	LinkUrlMustNotContain string
 

@@ -66,7 +66,7 @@ func extractLinks(pendingUrls chan []byte, bloomFilter *Filter, fileName []byte,
 	for _, match := range matches {
 		log.Debug("dealing with match result,", xIndex)
 		xIndex = xIndex + 1
-		url := match[1] //TODO match index is configable
+		url := match[siteConfig.LinkUrlExtractRegexGroupIndex]
 		filterUrl := formatUrlForFilter(url)
 		log.Debug("url clean result:", string(filterUrl), ",original url:", string(url))
 		filteredUrl := string(filterUrl)
@@ -190,7 +190,7 @@ func extractLinks(pendingUrls chan []byte, bloomFilter *Filter, fileName []byte,
 
 				//								if(CheckIgnore(currentUrlStr)){}
 
-				log.Info("enqueue fetch: ", currentUrlStr)
+//				log.Info("enqueue fetch: ", currentUrlStr)
 
 //				broker.Publish(kafka.NewMessage(currentUrlByte))
 				pendingUrls <- currentUrlByte

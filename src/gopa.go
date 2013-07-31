@@ -122,6 +122,7 @@ func parseConfig() {
     taskConfig.LinkUrlExtractRegex = regexp.MustCompile(
         config.GetStringConfig("CrawlerRule", "LinkUrlExtractRegex", "(src2|src|href|HREF|SRC)\\s*=\\s*[\"']?(.*?)[\"']"))
 
+	taskConfig.LinkUrlExtractRegexGroupIndex=config.GetIntConfig("CrawlerRule", "LinkUrlExtractRegexGroupIndex", 2)
     taskConfig.Name = config.GetStringConfig("CrawlerRule", "Name", "GopaTask")
 
     taskConfig.FollowSameDomain = config.GetBoolConfig("CrawlerRule", "FollowSameDomain", true)
@@ -295,6 +296,8 @@ func main() {
 				publisher := kafka.NewBrokerPublisher(kafkaConfig.Hostname, taskConfig.Name+"_fetch", randomPartition)
 				publisher.Publish(kafka.NewMessage(url))
 				bloomFilter.Add(url)
+			}else{
+				log.Trace("hit bloomfilter,ignore,",string(url))
 			}
 
         }
