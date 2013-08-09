@@ -15,7 +15,7 @@ a pre-compled jafka can be download from here:
 https://github.com/medcl/gopa-release/tree/master/kafka
 
 <pre>
-wget https://github.com/medcl/gopa-release/raw/master/kafka/jafka-1.3.0-SNAPSHOT-all.tar.gz
+wget --accept=gz --no-check-certificate https://github.com/medcl/gopa-release/raw/master/kafka/jafka-1.3.0-SNAPSHOT-all.tar.gz
 tar vxzf jafka-1.3.0-SNAPSHOT-all.tar.gz
 cd jafka-1.3.0-SNAPSHOT/bin
 ./jafka
