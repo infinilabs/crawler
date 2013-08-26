@@ -14,6 +14,10 @@ Suffix []string
 
 }
 
+type ShouldMatchRule struct {
+	*MatchRule
+}
+
 type MustMatchRule struct {
 	*MatchRule
 }

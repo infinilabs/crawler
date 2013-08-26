@@ -7,20 +7,13 @@ package tasks
 
 import (
 	log "github.com/cihub/seelog"
-	//	"io/ioutil"
-	//	"net/http"
 	. "net/url"
-	//	"os"
 	"regexp"
 	"strings"
-	//	"time"
 	. "github.com/PuerkitoBio/purell"
 	. "github.com/zeebo/sbloom"
 	"kafka"
 	util "util"
-	//config	"config"
-	//	"strconv"
-	//	utils "util"
 	. "types"
 )
 
@@ -94,6 +87,14 @@ func ExtractLinksFromTaskResponse(bloomFilter *Filter, broker *kafka.BrokerPubli
 		if result2 {
 			log.Debug("filteredUrl started with: javascript: ,continue")
 			continue
+		}
+
+		//判断是否满足FetchRule
+		if(siteConfig.FetchUrlPattern!=nil){
+			 if(!siteConfig.FetchUrlPattern.Match(filterUrl)){
+				 log.Debug("filteredUrl does not match fetchUrlPattern,continue")
+				 continue
+			 }
 		}
 
 		hit := false

@@ -14,7 +14,6 @@ import (
     "hash/fnv"
     "io/ioutil"
     "kafka"
-    //	"net/http"
     _ "net/http/pprof"
     "os"
     "os/signal"
@@ -22,9 +21,8 @@ import (
     "strconv"
     "strings"
     "syscall"
-//    "time"
     "util"
-    	"math/rand"
+	"math/rand"
     "runtime"
     task "tasks"
     . "types"
@@ -122,6 +120,9 @@ func parseConfig() {
     taskConfig.LinkUrlExtractRegex = regexp.MustCompile(
         config.GetStringConfig("CrawlerRule", "LinkUrlExtractRegex", "(src2|src|href|HREF|SRC)\\s*=\\s*[\"']?(.*?)[\"']"))
 
+	taskConfig.ArrayStringSplitter=config.GetStringConfig("CrawlerRule","ArrayStringSplitter","##");
+	log.Debug("ArrayStringSplitter:",taskConfig.ArrayStringSplitter)
+
 	taskConfig.LinkUrlExtractRegexGroupIndex=config.GetIntConfig("CrawlerRule", "LinkUrlExtractRegexGroupIndex", 2)
     taskConfig.Name = config.GetStringConfig("CrawlerRule", "Name", "GopaTask")
 
@@ -139,6 +140,8 @@ func parseConfig() {
     taskConfig.SavingUrlPattern = regexp.MustCompile(config.GetStringConfig("CrawlerRule", "SavingUrlPattern", ".*"))
     taskConfig.SavingUrlMustContain = config.GetStringConfig("CrawlerRule", "SavingUrlMustContain", "")
     taskConfig.SavingUrlMustNotContain = config.GetStringConfig("CrawlerRule", "SavingUrlMustNotContain", "")
+
+
 
     kafkaConfig = new(config.KafkaConfig)
     kafkaConfig.Hostname = config.GetStringConfig("Kafka", "Hostname", "localhost:9092")
@@ -292,7 +295,6 @@ func main() {
 					randomPartition = rand.Intn(MaxGoRoutine - 1)
 				}
 				log.Debug("publish:",string(url),",partition:",randomPartition)
-				//		log.Debug("random partition:",random)
 				publisher := kafka.NewBrokerPublisher(kafkaConfig.Hostname, taskConfig.Name+"_fetch", randomPartition)
 				publisher.Publish(kafka.NewMessage(url))
 				bloomFilter.Add(url)
@@ -302,12 +304,6 @@ func main() {
 
         }
     }()
-
-    //	go func() {
-    //		for i:=0;i<=100;i++ {
-    //			pendingUrls   <- strconv.FormatUint(uint64(i),10)
-    //		}
-    //	}()
 
     <-finalQuitSignal
     log.Info("[gopa] is down")

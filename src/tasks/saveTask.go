@@ -10,8 +10,6 @@ import (
 	. "net/url"
 	"os"
 	"strings"
-	//	. "github.com/zeebo/sbloom"
-	//	. "github.com/PuerkitoBio/purell"
 	"kafka"
 )
 

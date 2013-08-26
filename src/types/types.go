@@ -14,6 +14,9 @@ type TaskConfig struct {
 	//name of this task
 	Name string
 
+	//splitter of joined array string
+	ArrayStringSplitter string
+
 	//follow page link,and walk around
 	FollowLink bool
 

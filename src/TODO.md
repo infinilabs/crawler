@@ -23,3 +23,9 @@ taskItem任务未接收到新的，没有进行下载操作
 
 任务
     每个gopa能够注册一系列partition，具体是否执行partition下的任务，由集群来分配
+
+Random U-A
+Random Refer
+
+Parsed 和 Download的 BloomFilter 分开
+Offset文件放项目文件夹里面
