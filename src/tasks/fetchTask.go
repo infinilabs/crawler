@@ -54,6 +54,7 @@ func fetchUrl(url []byte, timeout time.Duration, config *TaskConfig, kafkaConfig
 		}
 	} else {
 		log.Debug("does not hit FetchUrlPattern ignoring,", resource)
+		return
 	}
 
 	log.Debug("start fetch url,", resource)

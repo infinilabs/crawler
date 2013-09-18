@@ -34,8 +34,6 @@ func Save(siteConfig *TaskConfig,myurl []byte, body []byte, publisher *kafka.Bro
 
 	baseDir :=  myurl1.Host + "/"
 	baseDir = strings.Replace(baseDir, `:`, `_`, -1)
-	baseDir = siteConfig.BaseStoragePath+"store/" +baseDir
-
 
 	log.Debug("replaced:", baseDir)
 	path := ""
