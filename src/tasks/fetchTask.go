@@ -22,6 +22,8 @@ import (
 	"strconv"
 	. "types"
 	utils "util"
+	bloom "github.com/zeebo/sbloom"
+	"hash/fnv"
 )
 
 //fetch url's content
@@ -116,9 +118,12 @@ func fetchUrl(url []byte, timeout time.Duration, config *TaskConfig, kafkaConfig
 
 }
 
+var fetchFilter  *bloom.Filter
+func init() {
+	fetchFilter = bloom.NewFilter(fnv.New64(), 1000000)
+}
 func Fetch(bloomFilter *Filter, taskConfig *TaskConfig, kafkaConfig *config.KafkaConfig, quit *chan bool, offsets *RoutingOffset, partition int) {
-	log.Debug("enter kafka consume,partiton:", partition)
-	//		partition:=0
+
 	log.Debug("partition:", partition, ",init go routing")
 
 	offset := *offsets
@@ -130,6 +135,13 @@ func Fetch(bloomFilter *Filter, taskConfig *TaskConfig, kafkaConfig *config.Kafk
 		url := msg.Payload()
 		//			log.Debug("kafka message offset: " + strconv.FormatUint(msg.Offset(), 10) )
 		timeout := 10 * time.Second
+
+		if(fetchFilter.Lookup(url)){
+			log.Debug("hit fetch filter ,ignore,",string(url))
+			return
+		}
+		fetchFilter.Add(url)
+
 		log.Debug("partition:", partition, ",fetch url:", string(url))
 		//			if !bloomFilter.Lookup(url){
 		fetchUrl(url, timeout, taskConfig, kafkaConfig, bloomFilter, partition)

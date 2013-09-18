@@ -27,7 +27,6 @@ import (
     task "tasks"
     . "types"
 	"net/http"
-
 )
 
 var seedUrl string
@@ -120,7 +119,7 @@ func closeKafkaConsumer(offsets []*RoutingOffset, quitChannels []*chan bool, off
 func parseConfig() {
     taskConfig = new(TaskConfig)
     taskConfig.LinkUrlExtractRegex = regexp.MustCompile(
-        config.GetStringConfig("CrawlerRule", "LinkUrlExtractRegex", "(src2|src|href|HREF|SRC)\\s*=\\s*[\"']?(.*?)[\"']"))
+        config.GetStringConfig("CrawlerRule", "LinkUrlExtractRegex", "(\\s+(src2|src|href|HREF|SRC))\\s*=\\s*[\"']?(.*?)[\"']"))
 
 	taskConfig.ArrayStringSplitter=config.GetStringConfig("CrawlerRule","ArrayStringSplitter","##")
 	taskConfig.SplitByUrlParameter=config.GetStringConfig("CrawlerRule","SplitByUrlParameter","p")
@@ -330,7 +329,7 @@ func setLogging() {
     testConfig = testConfig + logLevel
     testConfig = testConfig + `">
 		<outputs formatid="main">
-			<filter levels="error">
+			<filter levels="`+logLevel+`">
 				<file path="`+logPath+`"/>
 			</filter>
 			<console />

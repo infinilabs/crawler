@@ -12,10 +12,21 @@ import (
 	"strings"
 	"kafka"
 	. "types"
-
+	bloom "github.com/zeebo/sbloom"
+	"hash/fnv"
 )
+var saveFilter  *bloom.Filter
+func init() {
+	saveFilter = bloom.NewFilter(fnv.New64(), 1000000)
+}
 
 func Save(siteConfig *TaskConfig,myurl []byte, body []byte, publisher *kafka.BrokerPublisher) {
+	if(saveFilter.Lookup(myurl)){
+		log.Debug("hit save filter ignore,",string(myurl))
+		return
+	}
+	saveFilter.Add(myurl)
+
 	urlStr := string(myurl)
 	log.Info("start saving url,", urlStr)
 	myurl1, _ := Parse(urlStr)

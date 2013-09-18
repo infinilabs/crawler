@@ -3,6 +3,9 @@
 
 CHANGES
 
+v0.4
+1.align storage path,store paged webpage
+2.disable pprof by default
 
 v0.3
 1.adding golang pprof,http://localhost:6060/debug/pprof/
