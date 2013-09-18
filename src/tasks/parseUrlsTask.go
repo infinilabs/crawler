@@ -24,7 +24,14 @@ import (
 	. "types"
 	util "util"
 	utils "util"
+	bloom "github.com/zeebo/sbloom"
+	"hash/fnv"
 )
+
+var parseFilter  *bloom.Filter
+func init() {
+	parseFilter = bloom.NewFilter(fnv.New64(), 1000000)
+}
 
 func loadFileContent(fileName string) []byte {
 	if util.CheckFileExists(fileName) {
@@ -61,7 +68,7 @@ func extractLinks(pendingUrls chan []byte, bloomFilter *Filter, fileName []byte,
 	}
 
 	matches := siteConfig.LinkUrlExtractRegex.FindAllSubmatch(body, -1)
-	log.Debug("extract links with pattern:", len(matches), " match result,", string(fileName))
+	log.Debug("extract links with pattern,total matchs:", len(matches), " match result,", string(fileName))
 	xIndex := 0
 	for _, match := range matches {
 		log.Debug("dealing with match result,", xIndex)
@@ -193,6 +200,32 @@ func extractLinks(pendingUrls chan []byte, bloomFilter *Filter, fileName []byte,
 //				log.Info("enqueue fetch: ", currentUrlStr)
 
 //				broker.Publish(kafka.NewMessage(currentUrlByte))
+
+
+				//copied form fetchTask,TODO refactor
+				//checking fetchUrlPattern
+				log.Debug("started check fetchUrlPattern,", siteConfig.FetchUrlPattern, ",", currentUrlStr)
+				if siteConfig.FetchUrlPattern.Match(currentUrlByte) {
+					log.Debug("match fetch url pattern,", currentUrlStr)
+					if len(siteConfig.FetchUrlMustNotContain) > 0 {
+						if util.ContainStr(currentUrlStr, siteConfig.FetchUrlMustNotContain) {
+							log.Debug("hit FetchUrlMustNotContain,ignore,", currentUrlStr, " , ", siteConfig.FetchUrlMustNotContain)
+							continue
+						}
+					}
+
+					if len(siteConfig.FetchUrlMustContain) > 0 {
+						if !util.ContainStr(currentUrlStr, siteConfig.FetchUrlMustContain) {
+							log.Debug("not hit FetchUrlMustContain,ignore,", currentUrlStr, " , ", siteConfig.FetchUrlMustContain)
+							continue
+						}
+					}
+				} else {
+					log.Debug("does not hit FetchUrlPattern ignoring,", currentUrlStr)
+					continue
+				}
+
+
 				pendingUrls <- currentUrlByte
 
 //				bloomFilter.Add(currentUrlByte)
@@ -205,7 +238,7 @@ func extractLinks(pendingUrls chan []byte, bloomFilter *Filter, fileName []byte,
 
 	}
 
-	log.Debug("all links within ", siteUrlStr, " is done")
+	log.Info("all links within ", siteUrlStr, " is done")
 }
 
 func ParseLinks(pendingUrls chan []byte, bloomFilter *Filter, taskConfig *TaskConfig, kafkaConfig *config.KafkaConfig, quit *chan bool, offsets *RoutingOffset, MaxGoRoutine int) {
@@ -214,7 +247,7 @@ func ParseLinks(pendingUrls chan []byte, bloomFilter *Filter, taskConfig *TaskCo
 
 	log.Debug("partition:", partition, "start parse local file")
 	//		partition:=0
-	log.Debug("partition:", partition, ",init go routing")
+//	log.Debug("partition:", partition, ",init go routing")
 
 	offset := *offsets
 
@@ -230,6 +263,13 @@ func ParseLinks(pendingUrls chan []byte, bloomFilter *Filter, taskConfig *TaskCo
 	consumerCallback := func(msg *kafka.Message) {
 
 		fileName := msg.Payload()
+
+		if(parseFilter.Lookup(fileName)){
+			log.Debug("hit parse filter ignore,",string(fileName))
+			return
+		}
+		parseFilter.Add(fileName)
+
 		fileContent := loadFileContent(string(fileName))
 
 		if fileContent != nil {
@@ -265,7 +305,7 @@ func ParseLinks(pendingUrls chan []byte, bloomFilter *Filter, taskConfig *TaskCo
 	go broker.ConsumeOnChannel(msgChan, 10, *quit)
 	for msg := range msgChan {
 		if msg != nil {
-			log.Debug("partition:", partition, ",consume messaging.", string(msg.Payload()))
+			log.Debug("partition:", partition, ",consume messaging,parsing.", string(msg.Payload()))
 			consumerCallback(msg)
 		} else {
 			break

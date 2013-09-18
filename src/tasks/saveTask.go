@@ -28,7 +28,7 @@ func Save(siteConfig *TaskConfig,myurl []byte, body []byte, publisher *kafka.Bro
 	saveFilter.Add(myurl)
 
 	urlStr := string(myurl)
-	log.Info("start saving url,", urlStr)
+	log.Debug("start saving url,", urlStr)
 	myurl1, _ := Parse(urlStr)
 	log.Debug("url->path:", myurl1.Host, " ", myurl1.Path)
 
@@ -94,6 +94,15 @@ func Save(siteConfig *TaskConfig,myurl []byte, body []byte, publisher *kafka.Bro
 	}
 
 
+	pathArray:=[]byte(path)
+
+	if(saveFilter.Lookup(pathArray)){
+		log.Debug("hit save-path filter ignore,",string(path))
+		return
+	}
+	saveFilter.Add(pathArray)
+
+
 	log.Debug("touch file,", path)
 	fout, error := os.Create(path)
 	if error != nil {
@@ -105,7 +114,7 @@ func Save(siteConfig *TaskConfig,myurl []byte, body []byte, publisher *kafka.Bro
 	log.Info("saved:", urlStr, ",", path)
 	fout.Write(body)
 
-	publisher.Publish(kafka.NewMessage([]byte(path)))
+	publisher.Publish(kafka.NewMessage(pathArray))
 
 	//	log.Info("enqueue parse,", path)
 	log.Debug("end saving url,", urlStr)

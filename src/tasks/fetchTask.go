@@ -170,7 +170,7 @@ func Fetch(bloomFilter *Filter, taskConfig *TaskConfig, kafkaConfig *config.Kafk
 	go broker.ConsumeOnChannel(msgChan, 10, *quit)
 	for msg := range msgChan {
 		if msg != nil {
-			log.Debug("partition:", partition, ",consume messaging.", string(msg.Payload()))
+			log.Debug("partition:", partition, ",consume messaging,fetching.", string(msg.Payload()))
 			consumerCallback(msg)
 		} else {
 			break
