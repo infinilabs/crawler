@@ -11,15 +11,17 @@ import (
 	"os"
 	"strings"
 	"kafka"
+	. "types"
+
 )
 
-func Save(myurl []byte, body []byte, publisher *kafka.BrokerPublisher) {
+func Save(siteConfig *TaskConfig,myurl []byte, body []byte, publisher *kafka.BrokerPublisher) {
 	urlStr := string(myurl)
-	log.Debug("start saving url,", urlStr)
-	myurl1, _ := ParseRequestURI(urlStr)
+	log.Info("start saving url,", urlStr)
+	myurl1, _ := Parse(urlStr)
 	log.Debug("url->path:", myurl1.Host, " ", myurl1.Path)
 
-	baseDir := "data/" + myurl1.Host + "/"
+	baseDir := siteConfig.BaseStoragePath+"store/" + myurl1.Host + "/"
 	baseDir = strings.Replace(baseDir, `:`, `_`, -1)
 
 	log.Debug("replaced:", baseDir)
@@ -43,6 +45,30 @@ func Save(myurl []byte, body []byte, publisher *kafka.BrokerPublisher) {
 			os.MkdirAll(path, 0777)
 			log.Debug("making dir:", path)
 			path = (baseDir + myurl1.Path)
+			log.Trace("fileUrl:",urlStr)
+//			myurl1.Query().Encode();
+//			log.Error("fileArgs:",myurl1.Query().Get("pn"))
+//			log.Error("fileArgs:",myurl1.Query().Get("p"))
+
+//			log.Error("fileArgs:",myurl1.Path)
+			log.Trace("fileArgs:",myurl1.RawQuery)
+			//check to see if we have paging info，TODO configable
+//			if strings.Contains(myurl1.RawQuery, "p"){
+//		      	getParameters:=strings.Split(myurl1.RawQuery, "&")
+//				strings.
+//			}
+			if siteConfig.SplitByUrlParameter!=""{
+
+				breakTag:=myurl1.Query().Get(siteConfig.SplitByUrlParameter)
+				if breakTag!="" {
+					log.Debug("url with page parameter")
+					path=path+"_"+breakTag+".html"
+				}
+			}
+
+
+//			log.Error("fileArgs:",myurl1.Query().Encode())
+			log.Trace("fileName:",path)
 		} else {
 			path = baseDir + path + "/"
 			os.MkdirAll(path, 0777)

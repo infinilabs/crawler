@@ -26,6 +26,8 @@ import (
     "runtime"
     task "tasks"
     . "types"
+	"net/http"
+
 )
 
 var seedUrl string
@@ -70,7 +72,7 @@ func init() {
 func initOffset(typeName string, partition int) uint64 {
     log.Info("start init offsets,partition:", partition)
 
-    path := typeName + "_offset_" + strconv.FormatInt(int64(partition), 10)
+    path := taskConfig.BaseStoragePath+"task/"+typeName + "_offset_" + strconv.FormatInt(int64(partition), 10)
     if util.CheckFileExists(path) {
         log.Debug("found offset file,start loading")
         n, err := ioutil.ReadFile(path)
@@ -120,11 +122,16 @@ func parseConfig() {
     taskConfig.LinkUrlExtractRegex = regexp.MustCompile(
         config.GetStringConfig("CrawlerRule", "LinkUrlExtractRegex", "(src2|src|href|HREF|SRC)\\s*=\\s*[\"']?(.*?)[\"']"))
 
-	taskConfig.ArrayStringSplitter=config.GetStringConfig("CrawlerRule","ArrayStringSplitter","##");
-	log.Debug("ArrayStringSplitter:",taskConfig.ArrayStringSplitter)
+	taskConfig.ArrayStringSplitter=config.GetStringConfig("CrawlerRule","ArrayStringSplitter","##")
+	taskConfig.SplitByUrlParameter=config.GetStringConfig("CrawlerRule","SplitByUrlParameter","p")
+
+
+	taskConfig.GoProfEnabled=config.GetBoolConfig("CrawlerRule","GoProfEnabled",false)
 
 	taskConfig.LinkUrlExtractRegexGroupIndex=config.GetIntConfig("CrawlerRule", "LinkUrlExtractRegexGroupIndex", 2)
     taskConfig.Name = config.GetStringConfig("CrawlerRule", "Name", "GopaTask")
+
+	taskConfig.BaseStoragePath="data/"+taskConfig.Name+"/";
 
     taskConfig.FollowSameDomain = config.GetBoolConfig("CrawlerRule", "FollowSameDomain", true)
     taskConfig.FollowSubDomain = config.GetBoolConfig("CrawlerRule", "FollowSubDomain", true)
@@ -149,8 +156,6 @@ func parseConfig() {
 
     // Setting taskConfig
     MaxGoRoutine = config.GetIntConfig("Global", "MaxGoRoutine", 1)
-
-    log.Debug("MaxGoRoutine:", MaxGoRoutine)
 
     if MaxGoRoutine < 0 {
         MaxGoRoutine = 1
@@ -191,15 +196,23 @@ func main() {
 
     defer log.Flush()
 
-    setLogging()
-
     runtime.GOMAXPROCS(2)
-
-    log.Info("[gopa] is on.")
 
     parseConfig()
 
-    bloomFilterPersistFileName := config.GetStringConfig("BloomFilter", "FileName", "bloomfilter.bin")
+	setLogging()
+	log.Info("[gopa] is on.")
+
+	log.Debug("ArrayStringSplitter:",taskConfig.ArrayStringSplitter)
+	log.Debug("MaxGoRoutine:",MaxGoRoutine)
+
+
+
+	os.MkdirAll(taskConfig.BaseStoragePath+     "task/",0777)
+	os.MkdirAll(taskConfig.BaseStoragePath+     "store/",0777)
+	os.MkdirAll(taskConfig.BaseStoragePath+      "log/",0777)
+
+    bloomFilterPersistFileName := config.GetStringConfig("BloomFilter", "FileName", taskConfig.BaseStoragePath+"task/bloomfilter.bin")
 
     if seedUrl == "" || seedUrl == "http://example.com" {
         log.Error("no seed was given. type:\"gopa -h\" for help.")
@@ -215,11 +228,13 @@ func main() {
     //	id:= getSeqStr([]byte("AA"),[]byte("ZZ"),false)
     //	fmt.Println(id)
 
-    //	//pprof serves
-    //	go func() {
-    //		log.Info(http.ListenAndServe("localhost:6060", nil))
-    //		log.Info("pprof server is up,http://localhost:6060/debug/pprof")
-    //	}()
+	if taskConfig.GoProfEnabled {
+    	//pprof serves
+    	go func() {
+    		log.Info(http.ListenAndServe("localhost:6060", nil))
+    		log.Info("pprof server is up,http://localhost:6060/debug/pprof")
+    	}()
+	}
 
     //adding default http protocol
     if !strings.HasPrefix(seedUrl, "http") {
@@ -288,7 +303,6 @@ func main() {
     go func() {
         for {
             url := <-pendingUrls
-
 			if !bloomFilter.Lookup(url) {
 				randomPartition := 0
 				if MaxGoRoutine > 1 {
@@ -310,13 +324,14 @@ func main() {
 }
 
 func setLogging() {
+	logPath:=taskConfig.BaseStoragePath+"log/filter.log";
     testConfig := `
 	<seelog type="sync" minlevel="`
     testConfig = testConfig + logLevel
     testConfig = testConfig + `">
 		<outputs formatid="main">
 			<filter levels="error">
-				<file path="./log/filter.log"/>
+				<file path="`+logPath+`"/>
 			</filter>
 			<console />
 		</outputs>

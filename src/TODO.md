@@ -29,3 +29,14 @@ Random Refer
 
 Parsed 和 Download的 BloomFilter 分开
 Offset文件放项目文件夹里面
+
+满足不了Save规则的，但是满足Fetch规则，需要在内存里面解析并记录url，只是不持久化
+
+GOPA集群化，每个gopa只设置一个cluster参数和node参数[可选]，
+通过集群web面板来管理任务
+每个gopa可以分别设置角色：fetch、parse、master
+gopa也分shard【考虑一致性hash】
+
+目录太大，自动shard，切分，需要统计目录文件大小
+
+分页参数，自动保存到文件，文件名自动重命名,broken_by_parameter

@@ -93,7 +93,7 @@ func fetchUrl(url []byte, timeout time.Duration, config *TaskConfig, kafkaConfig
 				}
 			}
 
-			Save(url, body, publisher)
+			Save(config,url, body, publisher)
 
 		exitPage:
 		} else {
@@ -140,8 +140,8 @@ func Fetch(bloomFilter *Filter, taskConfig *TaskConfig, kafkaConfig *config.Kafk
 		offsetV := msg.Offset()
 		offset.Offset = offsetV
 
-		path := "fetch_offset_" + strconv.FormatInt(int64(partition), 10) + ".tmp"
-		path_new := "fetch_offset_" + strconv.FormatInt(int64(partition), 10)
+		path := taskConfig.BaseStoragePath+     "task/fetch_offset_" + strconv.FormatInt(int64(partition), 10) + ".tmp"
+		path_new := taskConfig.BaseStoragePath+"task/fetch_offset_" + strconv.FormatInt(int64(partition), 10)
 		fout, error := os.Create(path)
 		if error != nil {
 			log.Error(path, error)

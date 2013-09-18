@@ -246,8 +246,8 @@ func ParseLinks(pendingUrls chan []byte, bloomFilter *Filter, taskConfig *TaskCo
 			offsetV := msg.Offset()
 			offset.Offset = offsetV
 
-			path := "parse_offset_" + strconv.FormatInt(int64(partition), 10) + ".tmp"
-			path_new := "parse_offset_" + strconv.FormatInt(int64(partition), 10)
+			path := taskConfig.BaseStoragePath+     "task/parse_offset_" + strconv.FormatInt(int64(partition), 10) + ".tmp"
+			path_new := taskConfig.BaseStoragePath+     "task/parse_offset_" + strconv.FormatInt(int64(partition), 10)
 			fout, error := os.Create(path)
 			if error != nil {
 				log.Error(path, error)

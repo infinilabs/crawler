@@ -42,6 +42,17 @@ type TaskConfig struct {
 	//Crawling within domain
 	FollowSameDomain bool
 	FollowSubDomain  bool
+
+
+	//global config. TODO remove to globalConfig
+	GoProfEnabled bool
+
+	//base storage path of all task related docs
+	BaseStoragePath string
+
+	//store page separately,such as url with paging,ie:http://baidu.com/?pn=10 http://baidu.com/?pn=20 ,here we can set value to "pn"
+	SplitByUrlParameter string
+
 }
 
 type Task struct {
