@@ -127,7 +127,7 @@ func parseConfig() {
 
 	taskConfig.GoProfEnabled=config.GetBoolConfig("CrawlerRule","GoProfEnabled",false)
 
-	taskConfig.LinkUrlExtractRegexGroupIndex=config.GetIntConfig("CrawlerRule", "LinkUrlExtractRegexGroupIndex", 2)
+	taskConfig.LinkUrlExtractRegexGroupIndex=config.GetIntConfig("CrawlerRule", "LinkUrlExtractRegexGroupIndex", 3)
     taskConfig.Name = config.GetStringConfig("CrawlerRule", "Name", "GopaTask")
 
 	taskConfig.BaseStoragePath="data/"+taskConfig.Name+"/";
@@ -274,7 +274,7 @@ func main() {
 
     //start parse local files' task
     go func() {
-        log.Error("sending feed to fetch queue,", seedUrl)
+        log.Debug("sending feed to fetch queue,", seedUrl)
         broker1 := kafka.NewBrokerPublisher(kafkaConfig.Hostname, taskConfig.Name+"_fetch", 0)
         broker1.Publish(kafka.NewMessage([]byte(seedUrl)))
     }()

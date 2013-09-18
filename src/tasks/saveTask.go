@@ -32,8 +32,10 @@ func Save(siteConfig *TaskConfig,myurl []byte, body []byte, publisher *kafka.Bro
 	myurl1, _ := Parse(urlStr)
 	log.Debug("url->path:", myurl1.Host, " ", myurl1.Path)
 
-	baseDir := siteConfig.BaseStoragePath+"store/" + myurl1.Host + "/"
+	baseDir :=  myurl1.Host + "/"
 	baseDir = strings.Replace(baseDir, `:`, `_`, -1)
+	baseDir = siteConfig.BaseStoragePath+"store/" +baseDir
+
 
 	log.Debug("replaced:", baseDir)
 	path := ""
@@ -68,14 +70,7 @@ func Save(siteConfig *TaskConfig,myurl []byte, body []byte, publisher *kafka.Bro
 //		      	getParameters:=strings.Split(myurl1.RawQuery, "&")
 //				strings.
 //			}
-			if siteConfig.SplitByUrlParameter!=""{
 
-				breakTag:=myurl1.Query().Get(siteConfig.SplitByUrlParameter)
-				if breakTag!="" {
-					log.Debug("url with page parameter")
-					path=path+"_"+breakTag+".html"
-				}
-			}
 
 
 //			log.Error("fileArgs:",myurl1.Query().Encode())
@@ -87,6 +82,19 @@ func Save(siteConfig *TaskConfig,myurl []byte, body []byte, publisher *kafka.Bro
 			path = path + "/default.html"
 		}
 	}
+
+
+
+
+	if siteConfig.SplitByUrlParameter!=""{
+
+		breakTag:=myurl1.Query().Get(siteConfig.SplitByUrlParameter)
+		if breakTag!="" {
+			log.Debug("url with page parameter")
+			path=path+"_"+breakTag+".html"
+		}
+	}
+
 
 	log.Debug("touch file,", path)
 	fout, error := os.Create(path)
