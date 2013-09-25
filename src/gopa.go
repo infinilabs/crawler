@@ -66,6 +66,7 @@ func getSeqStr(start []byte, end []byte, mix bool) []byte {
 }
 
 func init() {
+
 }
 
 func initOffset(typeName string, partition int) uint64 {
@@ -197,6 +198,8 @@ func main() {
 
     runtime.GOMAXPROCS(2)
 
+	setInitLogging()
+
     parseConfig()
 
 	setLogging()
@@ -322,8 +325,26 @@ func main() {
     log.Info("[gopa] is down")
 }
 
+func setInitLogging() {
+	testConfig := `
+	<seelog type="sync" minlevel="`
+	testConfig =testConfig + logLevel
+	testConfig =testConfig +`">
+		<outputs formatid="main">
+			<filter levels="error">
+				<file path="./log/filter.log"/>
+			</filter>
+			<console />
+		</outputs>
+		<formats>
+			<format id="main" format="[%LEV] %Msg%n"/>
+		</formats>
+	</seelog>`
+	logger, _ := log.LoggerFromConfigAsBytes([]byte(testConfig))
+	log.ReplaceLogger(logger)
+}
 func setLogging() {
-	logPath:=taskConfig.BaseStoragePath+"log/filter.log";
+	logPath:=taskConfig.BaseStoragePath+"log/gopa.log";
     testConfig := `
 	<seelog type="sync" minlevel="`
     testConfig = testConfig + logLevel

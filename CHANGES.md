@@ -4,10 +4,9 @@
 CHANGES
 
 v0.4
-1.align storage path,store paged webpage
+1.align storage path,save paged webpage
 2.disable pprof by default
 3.fix some critical bug and performance optimized
-5.save paged webpage
 
 v0.3
 1.adding golang pprof,http://localhost:6060/debug/pprof/
