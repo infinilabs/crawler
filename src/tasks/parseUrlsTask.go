@@ -12,7 +12,7 @@ import (
 	//	"net/http"
 	. "net/url"
 	"os"
-	"regexp"
+//	"regexp"
 	"strings"
 	//		"time"
 	config "config"
@@ -46,13 +46,16 @@ func loadFileContent(fileName string) []byte {
 	return nil
 }
 
-func extractLinks(pendingUrls chan []byte, bloomFilter *Filter, fileName []byte, body []byte, siteConfig *TaskConfig) {
+func extractLinks(pendingUrls chan []byte, bloomFilter *Filter,fileUrl string , fileName []byte, body []byte, siteConfig *TaskConfig) {
 
-	siteUrlStr := string(fileName)
-	//	log.Debug("fileName:",siteUrlStr)
-	siteUrlStr = strings.TrimLeft(siteUrlStr, "data/")
-	siteUrlStr = "http://" + siteUrlStr
-	log.Debug("fileName to Url:", string(fileName), ",", siteUrlStr)
+//	siteUrlStr := string(fileName)
+//	siteUrlStr = strings.TrimLeft(siteUrlStr, "data/")
+//	siteUrlStr = "http://" + siteUrlStr
+//	log.Debug("fileName to Url:", string(fileName), ",", siteUrlStr)
+
+	siteUrlStr := fileUrl
+
+
 
 	siteUrlByte := []byte(siteUrlStr)
 	log.Debug("enter links extract,", siteUrlStr)
@@ -62,10 +65,6 @@ func extractLinks(pendingUrls chan []byte, bloomFilter *Filter, fileName []byte,
 	}
 
 	log.Debug("parsing external links:", siteUrlStr, ",using:", siteConfig.LinkUrlExtractRegex)
-	if siteConfig.LinkUrlExtractRegex == nil {
-		siteConfig.LinkUrlExtractRegex = regexp.MustCompile("src=\"(?<url1>.*?)\"|href=\"(?<url2>.*?)\"")
-		log.Debug("use default linkUrlExtractRegex,", siteConfig.LinkUrlExtractRegex)
-	}
 
 	matches := siteConfig.LinkUrlExtractRegex.FindAllSubmatch(body, -1)
 	log.Debug("extract links with pattern,total matchs:", len(matches), " match result,", string(fileName))
@@ -204,19 +203,19 @@ func extractLinks(pendingUrls chan []byte, bloomFilter *Filter, fileName []byte,
 
 				//copied form fetchTask,TODO refactor
 				//checking fetchUrlPattern
-				log.Debug("started check fetchUrlPattern,", siteConfig.FetchUrlPattern, ",", currentUrlStr)
+				log.Debug("started check fetchUrlPattern,", currentUrlStr)
 				if siteConfig.FetchUrlPattern.Match(currentUrlByte) {
 					log.Debug("match fetch url pattern,", currentUrlStr)
 					if len(siteConfig.FetchUrlMustNotContain) > 0 {
 						if util.ContainStr(currentUrlStr, siteConfig.FetchUrlMustNotContain) {
-							log.Debug("hit FetchUrlMustNotContain,ignore,", currentUrlStr, " , ", siteConfig.FetchUrlMustNotContain)
+							log.Debug("hit FetchUrlMustNotContain,ignore,", currentUrlStr)
 							continue
 						}
 					}
 
 					if len(siteConfig.FetchUrlMustContain) > 0 {
 						if !util.ContainStr(currentUrlStr, siteConfig.FetchUrlMustContain) {
-							log.Debug("not hit FetchUrlMustContain,ignore,", currentUrlStr, " , ", siteConfig.FetchUrlMustContain)
+							log.Debug("not hit FetchUrlMustContain,ignore,", currentUrlStr)
 							continue
 						}
 					}
@@ -244,11 +243,7 @@ func extractLinks(pendingUrls chan []byte, bloomFilter *Filter, fileName []byte,
 func ParseLinks(pendingUrls chan []byte, bloomFilter *Filter, taskConfig *TaskConfig, kafkaConfig *config.KafkaConfig, quit *chan bool, offsets *RoutingOffset, MaxGoRoutine int) {
 
 	partition := 0
-
 	log.Debug("partition:", partition, "start parse local file")
-	//		partition:=0
-//	log.Debug("partition:", partition, ",init go routing")
-
 	offset := *offsets
 
 	broker := kafka.NewBrokerConsumer(kafkaConfig.Hostname, taskConfig.Name+"_parse", partition, offset.Offset, kafkaConfig.MaxSize)
@@ -262,7 +257,10 @@ func ParseLinks(pendingUrls chan []byte, bloomFilter *Filter, taskConfig *TaskCo
 
 	consumerCallback := func(msg *kafka.Message) {
 
-		fileName := msg.Payload()
+		message := msg.Payload()
+		stringArray:=strings.Split(string(message),"|||");
+		fileUrl:=stringArray[0]
+		fileName:=[]byte(stringArray[1])
 
 		if(parseFilter.Lookup(fileName)){
 			log.Debug("hit parse filter ignore,",string(fileName))
@@ -273,16 +271,9 @@ func ParseLinks(pendingUrls chan []byte, bloomFilter *Filter, taskConfig *TaskCo
 		fileContent := loadFileContent(string(fileName))
 
 		if fileContent != nil {
-			//			timeout := 10 * time.Second
 			log.Debug("partition:", partition, ",parse fileName:", string(fileName))
 
-			extractLinks(pendingUrls, bloomFilter, fileName, fileContent, taskConfig)
-			//			if !bloomFilter.Lookup(fileName){
-			//		fetchUrl(fileName, timeout,taskConfig,kafkaConfig,bloomFilter,partition)
-			//		bloomFilter.Add(fileName)
-			//			}else{
-			//				log.Debug("hit bloom filter,skipping,",string(fileName))
-			//			}
+			extractLinks(pendingUrls, bloomFilter,fileUrl, fileName, fileContent, taskConfig)
 			offsetV := msg.Offset()
 			offset.Offset = offsetV
 

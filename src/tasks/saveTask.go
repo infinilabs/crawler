@@ -86,10 +86,17 @@ func Save(siteConfig *TaskConfig,myurl []byte, body []byte, publisher *kafka.Bro
 
 	if siteConfig.SplitByUrlParameter!=""{
 
-		breakTag:=myurl1.Query().Get(siteConfig.SplitByUrlParameter)
-		if breakTag!="" {
-			log.Debug("url with page parameter")
-			path=path+"_"+breakTag+".html"
+		arrayStr:=strings.Split(siteConfig.SplitByUrlParameter,siteConfig.ArrayStringSplitter)
+		breakTag:=""
+		for i := 0; i < len(arrayStr); i++ {
+			breakTagTemp:=myurl1.Query().Get(arrayStr[i])
+			if breakTagTemp!="" {
+				log.Debug("url with page parameter")
+				breakTag=(breakTag+"_"+breakTagTemp)
+			}
+		}
+		if(breakTag!=""){
+			path=(path+breakTag+".html")
 		}
 	}
 
@@ -114,7 +121,8 @@ func Save(siteConfig *TaskConfig,myurl []byte, body []byte, publisher *kafka.Bro
 	log.Info("saved:", urlStr, ",", path)
 	fout.Write(body)
 
-	publisher.Publish(kafka.NewMessage(pathArray))
+	message:=urlStr+"|||"+path
+	publisher.Publish(kafka.NewMessage([]byte(message)))
 
 	//	log.Info("enqueue parse,", path)
 	log.Debug("end saving url,", urlStr)
