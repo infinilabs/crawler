@@ -1,12 +1,20 @@
 /**
-* User: Medcl
-* Date: 13-7-10
-* Time: 下午10:57
+ * Created with IntelliJ IDEA.
+ * User: medcl
+ * Date: 13-10-17
+ * Time: 下午12:14
  */
 package store
 
-type store interface {
-	store(url string, data []byte)
-	get(key string) []byte
-	list(from int, size int) [][]byte
+type Store interface {
+	Store(url string, data []byte)
+	Get(key string) []byte
+	List(from int, size int) [][]byte
+	TaskEnqueue([]byte)
 }
+
+//func (b *store) Store(any interface{}){
+//	return any.(store).get()
+//}
+
+

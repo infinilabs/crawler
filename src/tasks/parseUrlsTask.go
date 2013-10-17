@@ -240,6 +240,11 @@ func extractLinks(pendingUrls chan []byte, bloomFilter *Filter,fileUrl string , 
 	log.Info("all links within ", siteUrlStr, " is done")
 }
 
+func ParseGo(pendingUrls chan []byte, runtimeConfig config.RuntimeConfig, quit *chan bool, offsets *RoutingOffset) {
+	log.Info("parsing task started.")
+
+}
+
 func ParseLinks(pendingUrls chan []byte, bloomFilter *Filter, taskConfig *TaskConfig, kafkaConfig *config.KafkaConfig, quit *chan bool, offsets *RoutingOffset, MaxGoRoutine int) {
 
 	partition := 0

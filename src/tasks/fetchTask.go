@@ -123,6 +123,11 @@ var fetchFilter  *bloom.Filter
 func init() {
 	fetchFilter = bloom.NewFilter(fnv.New64(), 1000000)
 }
+
+func FetchGo(runtimeConfig config.RuntimeConfig, quit *chan bool, offsets *RoutingOffset, partition int) {
+	 log.Info("fetch task started.")
+}
+
 func Fetch(bloomFilter *Filter, taskConfig *TaskConfig, kafkaConfig *config.KafkaConfig, quit *chan bool, offsets *RoutingOffset, partition int) {
 
 	log.Debug("partition:", partition, ",init go routing")

@@ -53,6 +53,10 @@ type TaskConfig struct {
 	//store page separately,such as url with paging,ie:http://baidu.com/?pn=10 http://baidu.com/?pn=20 ,here we can set value to "pn"
 	SplitByUrlParameter string
 
+	MaxGoRoutine int
+
+
+
 }
 
 type Task struct {
