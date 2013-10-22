@@ -8,19 +8,9 @@ linux: Run `make build` to build the Gopa
 
 windows: Run `build` to build the Gopa
 
-## Required By Gopa ##
-
-Gopa using kafka or jafka to store urls,so you need running another kafka server,
 a pre-compled jafka can be download from here:
 https://github.com/medcl/gopa-release/tree/master/kafka
 
-<pre>
-wget --accept=gz --no-check-certificate https://github.com/medcl/gopa-release/raw/master/kafka/jafka-1.3.0-SNAPSHOT-all.tar.gz
-tar vxzf jafka-1.3.0-SNAPSHOT-all.tar.gz
-cd jafka-1.3.0-SNAPSHOT/bin
-./jafka
-#run [jafka.exe] if you are running windows
-</pre>
 
 ## Running Gopa ##
 
@@ -49,7 +39,6 @@ Gopa is standing on the shoulders of giants,thanks for the following goodies.
 * http://code.google.com/p/weed-fs
 * https://github.com/robfig/config
 * https://github.com/PuerkitoBio/purell
-* https://github.com/jdamick/kafka.go
 
 
 license
