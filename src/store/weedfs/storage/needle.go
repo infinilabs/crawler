@@ -2,7 +2,7 @@ package storage
 
 import (
 	"encoding/hex"
-	log "github.com/cihub/seelog"
+	log "logging"
 	"io"
 	"io/ioutil"
 	"net/http"

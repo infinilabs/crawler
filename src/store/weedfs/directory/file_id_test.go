@@ -1,7 +1,7 @@
 package directory
 
 import (
-	log "github.com/cihub/seelog"
+	log "logging"
 	"testing"
 )
 

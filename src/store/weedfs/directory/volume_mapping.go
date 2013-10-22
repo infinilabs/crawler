@@ -3,7 +3,7 @@ package directory
 import (
 	"encoding/gob"
 	"errors"
-	log "github.com/cihub/seelog"
+	log "logging"
 	"math/rand"
 	"os"
 	"path"

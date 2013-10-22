@@ -3,10 +3,11 @@ package util
 import (
 	"os"
 	"io"
-log	"github.com/cihub/seelog"
+	log "logging"
 	"io/ioutil"
 	"fmt"
 	"sort"
+	"bufio"
 )
 
 /**
@@ -222,3 +223,53 @@ func delFile(files []os.FileInfo, count int, fileDir string) {
 //	delFile(files, 1, file)
 //	fmt.Println("count", len(files))
 //}
+
+
+
+// Readln returns a single line (without the ending \n)
+// from the input buffered reader.
+// An error is returned iff there is an error with the
+// buffered reader.
+func Readln(r *bufio.Reader) (string, error) {
+	var (isPrefix bool = true
+		err error = nil
+		line, ln []byte
+	)
+	for isPrefix && err == nil {
+		line, isPrefix, err = r.ReadLine()
+		ln = append(ln, line...)
+	}
+	return string(ln),err
+}
+//f, err := os.Open(fi)
+//if err != nil {
+//fmt.Printf("error opening file: %v\n",err)
+//os.Exit(1)
+//}
+//r := bufio.NewReader(f)
+//s, e := Readln(r)
+//for e == nil {
+//fmt.Println(s)
+//s,e = Readln(r)
+//}
+
+func  ReadAllLines(file string) []string{
+	lines := []string{}
+	f, err := os.Open(file)
+	if err != nil {
+		log.Error("error opening file,",file," ",err)
+		os.Exit(1)
+	}
+
+	r := bufio.NewReader(f)
+	s, e := Readln(r)
+	lines=append(lines,s)
+	for e == nil {
+		s,e = Readln(r)
+		if(s!=""){
+			lines=append(lines,s)
+		}
+	}
+
+	return  lines
+}

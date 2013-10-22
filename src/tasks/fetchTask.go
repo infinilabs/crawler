@@ -6,37 +6,52 @@
 package tasks
 
 import (
-	log "github.com/cihub/seelog"
-	"io/ioutil"
-	"net/http"
+	log "logging"
+
 	//	. "net/url"
-	"os"
+//	"os"
 	//	"regexp"
 	//	"strings"
-	. "github.com/zeebo/sbloom"
+//	. "github.com/zeebo/sbloom"
 	"time"
 	util "util"
 	//	. "github.com/PuerkitoBio/purell"
-	config "config"
-	"kafka"
-	"strconv"
+//	"kafka"
+//	"strconv"
 	. "types"
-	utils "util"
-	bloom "github.com/zeebo/sbloom"
-	"hash/fnv"
+//	utils "util"
+//	bloom "github.com/zeebo/sbloom"
+//	"hash/fnv"
 )
 
 //fetch url's content
-func fetchUrl(url []byte, timeout time.Duration, config *TaskConfig, kafkaConfig *config.KafkaConfig, bloomFilter *Filter, partition int) {
+func fetchUrl(url []byte, timeout time.Duration, runtimeConfig RuntimeConfig,  partition int) {
 	t := time.NewTimer(timeout)
 	defer t.Stop()
-	log.Debug("enter fetchUrl method")
 
 	resource := string(url)
-	bloomFilter.Add(url)
+
+	log.Debug("enter fetchUrl method:",resource)
+
+	config:=runtimeConfig.TaskConfig
+
+	if(runtimeConfig.Storage.CheckFetchedUrl(url)){
+		return
+	}
+
+
+	path:=getSavedPath(runtimeConfig,url)
+
+	if(runtimeConfig.Storage.CheckSavedFile(path)){
+		log.Warn("file is already saved,skip fetch.",path)
+		runtimeConfig.Storage.AddFetchedUrl(url)
+		//todo re-parse local page
+	   return
+	}
+
 
 	//checking fetchUrlPattern
-	log.Debug("started check fetchUrlPattern,", config.FetchUrlPattern, ",", string(url))
+	log.Debug("started check fetchUrlPattern,", config.FetchUrlPattern, ",", resource)
 	if config.FetchUrlPattern.Match(url) {
 		log.Debug("match fetch url pattern,", resource)
 		if len(config.FetchUrlMustNotContain) > 0 {
@@ -62,49 +77,42 @@ func fetchUrl(url []byte, timeout time.Duration, config *TaskConfig, kafkaConfig
 
 	go func() {
 
-		defer func() {
-			//			failure <- resource  //TODO
-		}()
+		body,err:=HttpGet(resource)
 
-		resp, err := http.Get(resource)
-		if err != nil {
-			log.Error("http.Get error!: ", resource, " , ", err)
-			return
-		}
-		defer resp.Body.Close()
-		log.Debug("getting,", resource)
-		body, _ := ioutil.ReadAll(resp.Body)
-		//		task := Task{url, nil, body}
+		if err == nil {
+			if body != nil {
+				//todo parse urls from this page
+				log.Debug("started check savingUrlPattern,", config.SavingUrlPattern, ",", string(url))
+				if config.SavingUrlPattern.Match(url) {
+					log.Debug("match saving url pattern,", resource)
+					if len(config.SavingUrlMustNotContain) > 0 {
+						if util.ContainStr(resource, config.SavingUrlMustNotContain) {
+							log.Debug("hit SavingUrlMustNotContain,ignore,", resource, " , ", config.SavingUrlMustNotContain)
+							goto exitPage
+						}
+					}
 
-		//		publisher := kafka.NewBrokerPublisher(kafkaConfig.Hostname, config.Name+"_parse", partition)
-		publisher := kafka.NewBrokerPublisher(kafkaConfig.Hostname, config.Name+"_parse", 0)
+					if len(config.SavingUrlMustContain) > 0 {
+						if !util.ContainStr(resource, config.SavingUrlMustContain) {
+							log.Debug("not hit SavingUrlMustContain,ignore,", resource, " , ", config.SavingUrlMustContain)
+							goto exitPage
+						}
+					}
 
-		log.Debug("started check savingUrlPattern,", config.SavingUrlPattern, ",", string(url))
-		if config.SavingUrlPattern.Match(url) {
-			log.Debug("match saving url pattern,", resource)
-			if len(config.SavingUrlMustNotContain) > 0 {
-				if util.ContainStr(resource, config.SavingUrlMustNotContain) {
-					log.Debug("hit SavingUrlMustNotContain,ignore,", resource, " , ", config.SavingUrlMustNotContain)
-					goto exitPage
+
+					Save(path, body)
+
+				exitPage:
+				} else {
+					log.Debug("does not hit SavingUrlPattern ignoring,", resource)
 				}
 			}
 
-			if len(config.SavingUrlMustContain) > 0 {
-				if !util.ContainStr(resource, config.SavingUrlMustContain) {
-					log.Debug("not hit SavingUrlMustContain,ignore,", resource, " , ", config.SavingUrlMustContain)
-					goto exitPage
-				}
-			}
-
-			Save(config,url, body, publisher)
-
-		exitPage:
-		} else {
-			log.Debug("does not hit SavingUrlPattern ignoring,", resource)
+			runtimeConfig.Storage.AddFetchedUrl(url)
+			log.Debug("exit fetchUrl method:",resource)
+		}else{
+			runtimeConfig.Storage.AddFetchFailedUrl(url)
 		}
-
-		log.Debug("task enqueue,", resource)
-		//		success <- task
 		flg <- true
 	}()
 
@@ -119,67 +127,109 @@ func fetchUrl(url []byte, timeout time.Duration, config *TaskConfig, kafkaConfig
 
 }
 
-var fetchFilter  *bloom.Filter
+//var fetchFilter  *bloom.Filter
 func init() {
-	fetchFilter = bloom.NewFilter(fnv.New64(), 1000000)
+//	fetchFilter = bloom.NewFilter(fnv.New64(), 1000000)
+//	log.Warn("init bloom filter")
 }
 
-func FetchGo(runtimeConfig config.RuntimeConfig, quit *chan bool, offsets *RoutingOffset, partition int) {
-	 log.Info("fetch task started.")
+func FetchGo(runtimeConfig RuntimeConfig, taskC *chan []byte, quitC *chan bool, offsets *RoutingOffset, shard int) {
+	 log.Info("fetch task started.shard:",shard)
+	go func() {
+		for {
+			url := <-*taskC
+			log.Debug("shard:",shard,",url received:", string(url))
+
+				if !runtimeConfig.Storage.CheckFetchedUrl(url) {
+					timeout := 10 * time.Second
+
+//					if(fetchFilter.Lookup(url)){
+//						log.Debug("hit fetch filter ,ignore,",string(url))
+//						continue
+//					}
+//					fetchFilter.Add(url)
+
+					log.Debug("shard:",shard,",url cool,start fetching:", string(url))
+					fetchUrl(url, timeout, runtimeConfig, shard)
+
+					//TODO
+					//persist worker's offset
+	//				path := config.BaseStoragePath+     "task/fetch_offset_" + strconv.FormatInt(int64(shard), 10) + ".tmp"
+	//				path_new := config.BaseStoragePath+"task/fetch_offset_" + strconv.FormatInt(int64(shard), 10)
+	//				fout, error := os.Create(path)
+	//				if error != nil {
+	//					log.Error(path, error)
+	//					continue
+	//				}
+
+	//				defer fout.Close()
+	//				log.Debug("partition:", shard, ",saved offset:", offsetV)
+	//				fout.Write([]byte(strconv.FormatUint(msg.Offset(), 10)))
+	//				utils.CopyFile(path, path_new)
+
+				}else {
+					log.Debug("hit fetch-bloomfilter,ignore,", string(url))
+				}
+
+		}
+	}()
+
+	<-*quitC
+	log.Info("fetch task exit.shard:",shard)
 }
 
-func Fetch(bloomFilter *Filter, taskConfig *TaskConfig, kafkaConfig *config.KafkaConfig, quit *chan bool, offsets *RoutingOffset, partition int) {
-
-	log.Debug("partition:", partition, ",init go routing")
-
-	offset := *offsets
-
-	broker := kafka.NewBrokerConsumer(kafkaConfig.Hostname, taskConfig.Name+"_fetch", partition, offset.Offset, kafkaConfig.MaxSize)
-
-	consumerCallback := func(msg *kafka.Message) {
-
-		url := msg.Payload()
-		//			log.Debug("kafka message offset: " + strconv.FormatUint(msg.Offset(), 10) )
-		timeout := 10 * time.Second
-
-		if(fetchFilter.Lookup(url)){
-			log.Debug("hit fetch filter ,ignore,",string(url))
-			return
-		}
-		fetchFilter.Add(url)
-
-		log.Debug("partition:", partition, ",fetch url:", string(url))
-		//			if !bloomFilter.Lookup(url){
-		fetchUrl(url, timeout, taskConfig, kafkaConfig, bloomFilter, partition)
-		bloomFilter.Add(url)
-		//			}else{
-		//				log.Debug("hit bloom filter,skipping,",string(url))
-		//			}
-		offsetV := msg.Offset()
-		offset.Offset = offsetV
-
-		path := taskConfig.BaseStoragePath+     "task/fetch_offset_" + strconv.FormatInt(int64(partition), 10) + ".tmp"
-		path_new := taskConfig.BaseStoragePath+"task/fetch_offset_" + strconv.FormatInt(int64(partition), 10)
-		fout, error := os.Create(path)
-		if error != nil {
-			log.Error(path, error)
-			return
-		}
-
-		defer fout.Close()
-		log.Debug("partition:", partition, ",saved offset:", offsetV)
-		fout.Write([]byte(strconv.FormatUint(msg.Offset(), 10)))
-		utils.CopyFile(path, path_new)
-	}
-	msgChan := make(chan *kafka.Message)
-	go broker.ConsumeOnChannel(msgChan, 10, *quit)
-	for msg := range msgChan {
-		if msg != nil {
-			log.Debug("partition:", partition, ",consume messaging,fetching.", string(msg.Payload()))
-			consumerCallback(msg)
-		} else {
-			break
-		}
-	}
-	log.Debug("partition:", partition, ",exit kafka consume")
-}
+//func Fetch(bloomFilter *Filter, taskConfig *TaskConfig, kafkaConfig *config.KafkaConfig, quit *chan bool, offsets *RoutingOffset, partition int) {
+//
+//	log.Debug("partition:", partition, ",init go routing")
+//
+//	offset := *offsets
+//
+//	broker := kafka.NewBrokerConsumer(kafkaConfig.Hostname, taskConfig.Name+"_fetch", partition, offset.Offset, kafkaConfig.MaxSize)
+//
+//	consumerCallback := func(msg *kafka.Message) {
+//
+//		url := msg.Payload()
+//		//			log.Debug("kafka message offset: " + strconv.FormatUint(msg.Offset(), 10) )
+//		timeout := 10 * time.Second
+//
+//		if(fetchFilter.Lookup(url)){
+//			log.Debug("hit fetch filter ,ignore,",string(url))
+//			return
+//		}
+//		fetchFilter.Add(url)
+//
+//		log.Debug("partition:", partition, ",fetch url:", string(url))
+//		//			if !bloomFilter.Lookup(url){
+//		fetchUrl(url, timeout, taskConfig, kafkaConfig, bloomFilter, partition)
+//		bloomFilter.Add(url)
+//		//			}else{
+//		//				log.Debug("hit bloom filter,skipping,",string(url))
+//		//			}
+//		offsetV := msg.Offset()
+//		offset.Offset = offsetV
+//
+//		path := taskConfig.BaseStoragePath+     "task/fetch_offset_" + strconv.FormatInt(int64(partition), 10) + ".tmp"
+//		path_new := taskConfig.BaseStoragePath+"task/fetch_offset_" + strconv.FormatInt(int64(partition), 10)
+//		fout, error := os.Create(path)
+//		if error != nil {
+//			log.Error(path, error)
+//			return
+//		}
+//
+//		defer fout.Close()
+//		log.Debug("partition:", partition, ",saved offset:", offsetV)
+//		fout.Write([]byte(strconv.FormatUint(msg.Offset(), 10)))
+//		utils.CopyFile(path, path_new)
+//	}
+//	msgChan := make(chan *kafka.Message)
+//	go broker.ConsumeOnChannel(msgChan, 10, *quit)
+//	for msg := range msgChan {
+//		if msg != nil {
+//			log.Debug("partition:", partition, ",consume messaging,fetching.", string(msg.Payload()))
+//			consumerCallback(msg)
+//		} else {
+//			break
+//		}
+//	}
+//	log.Debug("partition:", partition, ",exit kafka consume")
+//}

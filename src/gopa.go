@@ -6,260 +6,268 @@
 package main
 
 import (
-    config "config"
-    "flag"
-    "fmt"
-    log "github.com/cihub/seelog"
-    . "github.com/zeebo/sbloom"
-    "hash/fnv"
-    "io/ioutil"
-//    "kafka"
-    _ "net/http/pprof"
-    "os"
-    "os/signal"
-    "regexp"
-    "strconv"
-    "strings"
-    "syscall"
-    "util"
+	"flag"
+	"fmt"
+	log "logging"
+	"io/ioutil"
+	_ "net/http/pprof"
+	"os"
+	"os/signal"
+	"regexp"
+	"strconv"
+	"strings"
+	"syscall"
+	"util"
 	"math/rand"
-    "runtime"
-    task "tasks"
-    . "types"
+	"runtime"
+	task "tasks"
+	. "types"
 	"net/http"
 	fsstore "store/fs"
+	config "config"
 )
 
 var seedUrl string
 var logLevel string
-//var taskConfig *TaskConfig
-//var kafkaConfig *config.KafkaConfig
-//var bloomFilter *Filter
-//var MaxGoRoutine int
-var runtimeConfig config.RuntimeConfig
-
-
-func persistBloomFilter(bloomFilterPersistFileName string) {
-
-    //save bloom-filter
-    m, err := runtimeConfig.BloomFilter.GobEncode()
-    if err != nil {
-        log.Error(err)
-        return
-    }
-    err = ioutil.WriteFile(bloomFilterPersistFileName, m, 0600)
-    if err != nil {
-        panic(err)
-        return
-    }
-    log.Info("bloomFilter safety persisted.")
-}
+var runtimeConfig RuntimeConfig
 
 func getSeqStr(start []byte, end []byte, mix bool) []byte {
-    if (len(start)) == len(end) {
-        for i := range start {
-            fmt.Println(start[i])
-        }
-        //		if(start>64 && end < 123){
+	if (len(start)) == len(end) {
+		for i := range start {
+			fmt.Println(start[i])
+		}
+		//		if(start>64 && end < 123){
 
-        //		}
-    }
+		//		}
+	}
 
-    return nil
+	return nil
 }
 
 func init() {
 
 }
 
-func initOffset(runtimeConfig config.RuntimeConfig,typeName string, partition int) uint64 {
-    log.Info("start init offsets,partition:", partition)
+func initOffset(runtimeConfig RuntimeConfig, typeName string, shard int) uint64 {
+	log.Info("start init offsets,", typeName, ",shard:", shard)
 
-    path := runtimeConfig.TaskConfig.BaseStoragePath+"task/"+typeName + "_offset_" + strconv.FormatInt(int64(partition), 10)
-    if util.CheckFileExists(path) {
-        log.Debug("found offset file,start loading")
-        n, err := ioutil.ReadFile(path)
-        if err != nil {
-            log.Error("offset", err)
-            return 0
-        }
-        ret, err := strconv.ParseInt(string(n), 10, 64)
-        if err != nil {
-            log.Error("offset", err)
-            return 0
-        }
-        log.Info("init offsets successfully,", partition, ":", ret)
-        return uint64(ret)
-    }
+	path := runtimeConfig.TaskConfig.TaskDataPath + "/" + typeName + "_offset_" + strconv.FormatInt(int64(shard), 10)
+	if util.CheckFileExists(path) {
+		log.Debug("found offset file,start loading")
+		n, err := ioutil.ReadFile(path)
+		if err != nil {
+			log.Error("offset", err)
+			return 0
+		}
+		ret, err := strconv.ParseInt(string(n), 10, 64)
+		if err != nil {
+			log.Error("offset", err)
+			return 0
+		}
+		log.Info("init offsets successfully,", shard, ":", ret)
+		return uint64(ret)
+	}
 
-    return 0
+	return 0
 }
 
 func shutdown(offsets []*RoutingOffset, quitChannels []*chan bool, offsets2 []*RoutingOffset, quitChannels2 []*chan bool, quit chan bool) {
-	 log.Debug("start shutting down")
-    for i := range quitChannels {
-        log.Debug("send exit signal to channel,", i)
-        *quitChannels[i] <- true
-    }
+	log.Debug("start shutting down")
+	for i := range quitChannels {
+		log.Debug("send exit signal to channel,", i)
+		*quitChannels[i] <- true
+	}
 
-    for i := range quitChannels2 {
-        log.Debug("send exit signal to channel,", i)
-        *quitChannels2[i] <- true
-    }
+	for i := range quitChannels2 {
+		log.Debug("send exit signal to channel,", i)
+		*quitChannels2[i] <- true
+	}
 
-    log.Info("sent quit signal to go routings done")
+	log.Info("sent quit signal to go routings done")
 
-    //	for i:=range offsets{
-    //		//TODO
-    //		log.Info("persist offset,",i,":",offsets[i].Offset,",",offsets[i].Partition)
-    //	}
+	//	for i:=range offsets{
+	//		//TODO
+	//		log.Info("persist offset,",i,":",offsets[i].Offset,",",offsets[i].shard)
+	//	}
 
-    //	log.Info("persist kafka offsets done")
+	//	log.Info("persist kafka offsets done")
 
-    quit <- true
+	quit <- true
 	log.Debug("finished shutting down")}
 
 //parse config setting
-func parseConfig() *TaskConfig{
-    log.Debug("start parsing taskConfig")
+func parseConfig() *TaskConfig {
+	log.Debug("start parsing taskConfig")
 	taskConfig := new(TaskConfig)
-    taskConfig.LinkUrlExtractRegex = regexp.MustCompile(
-        config.GetStringConfig("CrawlerRule", "LinkUrlExtractRegex", "(\\s+(src2|src|href|HREF|SRC))\\s*=\\s*[\"']?(.*?)[\"']"))
+	taskConfig.LinkUrlExtractRegex = regexp.MustCompile(
+	config.GetStringConfig("CrawlerRule", "LinkUrlExtractRegex", "(\\s+(src2|src|href|HREF|SRC))\\s*=\\s*[\"']?(.*?)[\"']"))
 
-	taskConfig.ArrayStringSplitter=config.GetStringConfig("CrawlerRule","ArrayStringSplitter",",")
-	taskConfig.SplitByUrlParameter=config.GetStringConfig("CrawlerRule","SplitByUrlParameter","p")
-
-
-	taskConfig.GoProfEnabled=config.GetBoolConfig("CrawlerRule","GoProfEnabled",false)
-
-	taskConfig.LinkUrlExtractRegexGroupIndex=config.GetIntConfig("CrawlerRule", "LinkUrlExtractRegexGroupIndex", 3)
-    taskConfig.Name = config.GetStringConfig("CrawlerRule", "Name", "GopaTask")
-
-	taskConfig.BaseStoragePath="data/"+taskConfig.Name+"/";
-
-    taskConfig.FollowSameDomain = config.GetBoolConfig("CrawlerRule", "FollowSameDomain", true)
-    taskConfig.FollowSubDomain = config.GetBoolConfig("CrawlerRule", "FollowSubDomain", true)
-    taskConfig.LinkUrlMustContain = config.GetStringConfig("CrawlerRule", "LinkUrlMustContain", "")
-    taskConfig.LinkUrlMustNotContain = config.GetStringConfig("CrawlerRule", "LinkUrlMustNotContain", "")
-
-    taskConfig.SkipPageParsePattern = regexp.MustCompile(config.GetStringConfig("CrawlerRule", "SkipPageParsePattern", ".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b")) //end with js,css,apk,zip,ignore
-
-    taskConfig.FetchUrlPattern = regexp.MustCompile(config.GetStringConfig("CrawlerRule", "FetchUrlPattern", ".*"))
-    taskConfig.FetchUrlMustContain = config.GetStringConfig("CrawlerRule", "FetchUrlMustContain", "")
-    taskConfig.FetchUrlMustNotContain = config.GetStringConfig("CrawlerRule", "FetchUrlMustNotContain", "")
-
-    taskConfig.SavingUrlPattern = regexp.MustCompile(config.GetStringConfig("CrawlerRule", "SavingUrlPattern", ".*"))
-    taskConfig.SavingUrlMustContain = config.GetStringConfig("CrawlerRule", "SavingUrlMustContain", "")
-    taskConfig.SavingUrlMustNotContain = config.GetStringConfig("CrawlerRule", "SavingUrlMustNotContain", "")
+	taskConfig.SplitByUrlParameter = config.GetStringConfig("CrawlerRule", "SplitByUrlParameter", "p")
 
 
+	taskConfig.LinkUrlExtractRegexGroupIndex = config.GetIntConfig("CrawlerRule", "LinkUrlExtractRegexGroupIndex", 3)
+	taskConfig.Name = config.GetStringConfig("CrawlerRule", "Name", "GopaTask")
 
-//    kafkaConfig = new(config.KafkaConfig)
-//    kafkaConfig.Hostname = config.GetStringConfig("Kafka", "Hostname", "localhost:9092")
-//    kafkaConfig.MaxSize = uint32(config.GetIntConfig("Kafka", "MaxSize", 1048576))
 
-    // Setting taskConfig
-    taskConfig.MaxGoRoutine = config.GetIntConfig("Global", "MaxGoRoutine", 1)
+	taskConfig.FollowSameDomain = config.GetBoolConfig("CrawlerRule", "FollowSameDomain", true)
+	taskConfig.FollowSubDomain = config.GetBoolConfig("CrawlerRule", "FollowSubDomain", true)
+	taskConfig.LinkUrlMustContain = config.GetStringConfig("CrawlerRule", "LinkUrlMustContain", "")
+	taskConfig.LinkUrlMustNotContain = config.GetStringConfig("CrawlerRule", "LinkUrlMustNotContain", "")
 
-    if taskConfig.MaxGoRoutine  < 0 {
-		taskConfig.MaxGoRoutine  = 1
-    }
+	taskConfig.SkipPageParsePattern = regexp.MustCompile(config.GetStringConfig("CrawlerRule", "SkipPageParsePattern", ".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b")) //end with js,css,apk,zip,ignore
 
-	log.Debug("MaxGoRoutine:",taskConfig.MaxGoRoutine)
+	taskConfig.FetchUrlPattern = regexp.MustCompile(config.GetStringConfig("CrawlerRule", "FetchUrlPattern", ".*"))
+	taskConfig.FetchUrlMustContain = config.GetStringConfig("CrawlerRule", "FetchUrlMustContain", "")
+	taskConfig.FetchUrlMustNotContain = config.GetStringConfig("CrawlerRule", "FetchUrlMustNotContain", "")
+
+	taskConfig.SavingUrlPattern = regexp.MustCompile(config.GetStringConfig("CrawlerRule", "SavingUrlPattern", ".*"))
+	taskConfig.SavingUrlMustContain = config.GetStringConfig("CrawlerRule", "SavingUrlMustContain", "")
+	taskConfig.SavingUrlMustNotContain = config.GetStringConfig("CrawlerRule", "SavingUrlMustNotContain", "")
+
+
+	taskConfig.TaskDataPath = config.GetStringConfig("CrawlerRule", "TaskData", runtimeConfig.PathConfig.TaskData + "/" + taskConfig.Name + "/")
+
+	defaultWebDataPath := runtimeConfig.PathConfig.WebData + "/" + taskConfig.Name + "/"
+	if (runtimeConfig.StoreWebPageTogether) {
+		defaultWebDataPath = runtimeConfig.PathConfig.WebData
+	}
+
+	taskConfig.WebDataPath = config.GetStringConfig("CrawlerRule", "WebData", defaultWebDataPath)
+
 
 	log.Debug("finished parsing taskConfig")
 	return taskConfig
 }
 
-func initBloomFilter(bloomFilterPersistFileName string) *Filter {
-	var bloomFilter *Filter
-    //loading or initializing bloom filter
-    if util.CheckFileExists(bloomFilterPersistFileName) {
-        log.Debug("found bloomFilter,start reload")
-        n, err := ioutil.ReadFile(bloomFilterPersistFileName)
-        if err != nil {
-            log.Error("bloomFilter", err)
-        }
-        if err := bloomFilter.GobDecode(n); err != nil {
-            log.Error("bloomFilter", err)
-        }
-        log.Info("bloomFilter successfully reloaded")
-    } else {
-        probItems := config.GetIntConfig("BloomFilter", "ItemSize", 100000)
-        log.Debug("initializing bloom-filter,virual size is,", probItems)
-        bloomFilter = NewFilter(fnv.New64(), probItems)
-        log.Info("bloomFilter successfully initialized")
-    }
-	return bloomFilter
-}
 
 func main() {
 	flag.StringVar(&seedUrl, "seed", "http://example.com", "the seed url,where everything starts")
-    flag.StringVar(&logLevel, "log", "info", "setting log level,options:trace,debug,info,warn,error")
+	flag.StringVar(&logLevel, "log", "info", "setting log level,options:trace,debug,info,warn,error")
 
-    flag.Parse()
+	flag.Parse()
 
-    defer log.Flush()
+	defer log.Flush()
 
-	runtimeConfig = config.RuntimeConfig{}
+	runtimeConfig = RuntimeConfig{}
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	util.SetInitLogging(logLevel)
-
-	runtimeConfig.TaskConfig=parseConfig()
-
-	logPath:=runtimeConfig.TaskConfig.BaseStoragePath+"log/gopa.log";
-	util.SetLogging(logLevel,logPath)
-	log.Info("[gopa] is on.")
-
-	log.Debug("ArrayStringSplitter:",runtimeConfig.TaskConfig.ArrayStringSplitter)
+	log.SetInitLogging(logLevel)
 
 
+	runtimeConfig.PathConfig = new(PathConfig)
+	runtimeConfig.ClusterConfig = new(ClusterConfig)
 
-	os.MkdirAll(runtimeConfig.TaskConfig.BaseStoragePath+     "task/",0777)
-	os.MkdirAll(runtimeConfig.TaskConfig.BaseStoragePath+     "store/",0777)
-	os.MkdirAll(runtimeConfig.TaskConfig.BaseStoragePath+      "log/",0777)
+	runtimeConfig.ClusterConfig.Name = config.GetStringConfig("cluster", "name", "gopa")
 
-    bloomFilterPersistFileName := config.GetStringConfig("BloomFilter", "FileName", runtimeConfig.TaskConfig.BaseStoragePath+"task/bloomfilter.bin")
+	// per cluster:data/gopa/
+	runtimeConfig.PathConfig.Home = config.GetStringConfig("path", "home", runtimeConfig.ClusterConfig.Name + "/")
 
-    if seedUrl == "" || seedUrl == "http://example.com" {
-        log.Error("no seed was given. type:\"gopa -h\" for help.")
-        os.Exit(1)
-    }
-	runtimeConfig.Storage=&fsstore.FsStore{}
-
-	runtimeConfig.BloomFilter=initBloomFilter(bloomFilterPersistFileName)
-
-    //	atr:="AZaz"
-    //	btr:=[]byte(atr)
-    //	fmt.Println(btr)
-    //
-    //	id:= getSeqStr([]byte("AA"),[]byte("ZZ"),false)
-    //	fmt.Println(id)
-
-	if runtimeConfig.TaskConfig.GoProfEnabled {
-    	//pprof serves
-    	go func() {
-    		log.Info(http.ListenAndServe("localhost:6060", nil))
-    		log.Info("pprof server is up,http://localhost:6060/debug/pprof")
-    	}()
+	runtimeConfig.PathConfig.Data = config.GetStringConfig("path", "data", "")
+	if (runtimeConfig.PathConfig.Data == "") {
+		runtimeConfig.PathConfig.Data = runtimeConfig.PathConfig.Home + "/" + "data/"
 	}
 
-    //adding default http protocol
-    if !strings.HasPrefix(seedUrl, "http") {
-        seedUrl = "http://" + seedUrl
-    }
+	runtimeConfig.PathConfig.Log = config.GetStringConfig("path", "log", "")
+	if (runtimeConfig.PathConfig.Log == "") {
+		runtimeConfig.PathConfig.Log = runtimeConfig.PathConfig.Home + "/" + "log/"
+	}
 
-	maxGoRoutine := runtimeConfig.TaskConfig.MaxGoRoutine
-	fetchQuitChannels := make([]*chan bool, maxGoRoutine) //kafkaQuitSignal signals for each go routing
+	runtimeConfig.PathConfig.WebData = config.GetStringConfig("path", "webdata", "")
+	if (runtimeConfig.PathConfig.WebData == "") {
+		runtimeConfig.PathConfig.WebData = runtimeConfig.PathConfig.Data + "/" + "webdata/"
+	}
+
+	runtimeConfig.PathConfig.TaskData = config.GetStringConfig("path", "taskdata", "")
+	if (runtimeConfig.PathConfig.TaskData == "") {
+		runtimeConfig.PathConfig.TaskData = runtimeConfig.PathConfig.Data + "/" + "taskdata/"
+	}
+
+	runtimeConfig.StoreWebPageTogether = config.GetBoolConfig("Global", "StoreWebPageTogether", true)
+
+
+	runtimeConfig.TaskConfig = parseConfig()
+
+
+	//set default logging
+	logPath := runtimeConfig.PathConfig.Log + "/task_" + runtimeConfig.TaskConfig.Name + ".log";
+	log.SetLogging(logLevel, logPath)
+
+
+	runtimeConfig.ParseUrlsFromSavedPage = config.GetBoolConfig("Switch", "ParseUrlsFromSavedPage", true)
+	runtimeConfig.ArrayStringSplitter = config.GetStringConfig("CrawlerRule", "ArrayStringSplitter", ",")
+
+	runtimeConfig.GoProfEnabled = config.GetBoolConfig("CrawlerRule", "GoProfEnabled", false)
+
+	runtimeConfig.WalkBloomFilterFileName = config.GetStringConfig("BloomFilter", "WalkBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath + "/walk.bloomfilter")
+	runtimeConfig.FetchBloomFilterFileName = config.GetStringConfig("BloomFilter", "FetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath + "/fetch.bloomfilte")
+
+	runtimeConfig.MaxGoRoutine = config.GetIntConfig("Global", "MaxGoRoutine", 1)
+	if runtimeConfig.MaxGoRoutine < 0 {
+		runtimeConfig.MaxGoRoutine = 1
+	}
+
+	log.Debug("maxGoRoutine:", runtimeConfig.MaxGoRoutine)
+	log.Debug("path.home:", runtimeConfig.PathConfig.Home)
+
+
+	os.MkdirAll(runtimeConfig.PathConfig.Home, 0777)
+	os.MkdirAll(runtimeConfig.PathConfig.Data, 0777)
+	os.MkdirAll(runtimeConfig.PathConfig.Log, 0777)
+	os.MkdirAll(runtimeConfig.PathConfig.WebData, 0777)
+	os.MkdirAll(runtimeConfig.PathConfig.TaskData, 0777)
+
+	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath, 0777)
+	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath + "/urls/", 0777)
+	os.MkdirAll(runtimeConfig.TaskConfig.WebDataPath, 0777)
+
+
+	if seedUrl == "" || seedUrl == "http://example.com" {
+		log.Error("no seed was given. type:\"gopa -h\" for help.")
+		os.Exit(1)
+	}
+
+
+	log.Info("[gopa] is on.")
+
+
+
+	runtimeConfig.Storage = &fsstore.FsStore{}
+
+	runtimeConfig.Storage.InitWalkBloomFilter(runtimeConfig.WalkBloomFilterFileName);
+	runtimeConfig.Storage.InitFetchBloomFilter(runtimeConfig.FetchBloomFilterFileName);
+
+
+	//	atr:="AZaz"
+	//	btr:=[]byte(atr)
+	//	fmt.Println(btr)
+	//
+	//	id:= getSeqStr([]byte("AA"),[]byte("ZZ"),false)
+	//	fmt.Println(id)
+
+	if runtimeConfig.GoProfEnabled {
+		//pprof serves
+		go func() {
+			log.Info(http.ListenAndServe("localhost:6060", nil))
+			log.Info("pprof server is up,http://localhost:6060/debug/pprof")
+		}()
+	}
+
+	//adding default http protocol
+	if !strings.HasPrefix(seedUrl, "http") {
+		seedUrl = "http://" + seedUrl
+	}
+
+	maxGoRoutine := runtimeConfig.MaxGoRoutine
+	fetchQuitChannels := make([]*chan bool, maxGoRoutine) //shutdownSignal signals for each go routing
+	fetchTaskChannels := make([]*chan []byte, maxGoRoutine) //fetchTask channels
 	fetchOffsets := make([]*RoutingOffset, maxGoRoutine)  //kafka fetchOffsets
 
-	parseQuitChannels := make([]*chan bool, 1) //kafkaQuitSignal signals for each go routing
-	//	parseQuitChannels := make([]*chan bool, MaxGoRoutine) //kafkaQuitSignal signals for each go routing
+	parseQuitChannels := make([]*chan bool, 1) //shutdownSignal signals for each go routing
+	//	parseQuitChannels := make([]*chan bool, MaxGoRoutine) //shutdownSignal signals for each go routing
 	parseOffsets := make([]*RoutingOffset, maxGoRoutine) //kafka fetchOffsets
 
-	kafkaQuitSignal := make(chan bool, 1)
+	shutdownSignal := make(chan bool, 1)
 	finalQuitSignal := make(chan bool, 1)
 
 
@@ -274,27 +282,30 @@ func main() {
 			log.Warn("got signal:os.Interrupt,saving data and exit")
 			//			defer  os.Exit(0)
 
-			persistBloomFilter(bloomFilterPersistFileName)
+			runtimeConfig.Storage.PersistBloomFilter()
 
-			//wait kafka to exit
-			log.Info("waiting kafka exit")
-			go shutdown(fetchOffsets, fetchQuitChannels, parseOffsets, parseQuitChannels, kafkaQuitSignal)
-			<-kafkaQuitSignal
-			log.Info("kafka worker is down")
+			//wait workers to exit
+			log.Info("waiting workers exit")
+			go shutdown(fetchOffsets, fetchQuitChannels, parseOffsets, parseQuitChannels, shutdownSignal)
+			<-shutdownSignal
+			log.Info("workers shutdown")
 			finalQuitSignal <- true
 		}
 	}()
 
 	//start fetcher
 	for i := 0; i < maxGoRoutine; i++ {
-		c := make(chan bool, 1)
-		fetchQuitChannels[i] = &c
+		quitC := make(chan bool, 1)
+		taskC := make(chan []byte)
+
+		fetchQuitChannels[i] = &quitC
+		fetchTaskChannels[i] = &taskC
 		offset := new(RoutingOffset)
 		offset.Offset = initOffset(runtimeConfig, "fetch", i)
-		offset.Partition = i
+		offset.Shard = i
 		fetchOffsets[i] = offset
 
-		go task.FetchGo(runtimeConfig, &c, offset, i)
+		go task.FetchGo(runtimeConfig, &taskC, &quitC, offset, i)
 	}
 
 
@@ -302,48 +313,79 @@ func main() {
 	parseQuitChannels[0] = &c2
 	offset2 := new(RoutingOffset)
 	offset2.Offset = initOffset(runtimeConfig, "parse", 0)
-	offset2.Partition = 0
+	offset2.Shard = 0
 	parseOffsets[0] = offset2
-	pendingUrls := make(chan []byte)
+	pendingFetchUrls := make(chan []byte)
+
+	//fetch rule:all urls -> persisted to sotre -> fetched from store -> pushed to pendingFetchUrls -> redistributed to sharded goroutines -> fetch -> save webpage to store -> done
+	//parse rule:url saved to store -> local path persisted to store -> fetched to pendingParseFiles -> redistributed to sharded goroutines -> parse -> clean urls -> enqueue to url store ->done
 
 	//sending feed to task queue
 	go func() {
 		//notice seed will not persisted to task queue
 		log.Debug("sending feed to fetch queue,", seedUrl)
-		//		broker1 := kafka.NewBrokerPublisher(kafkaConfig.Hostname, taskConfig.Name+"_fetch", 0)
-		//		broker1.Publish(kafka.NewMessage([]byte(seedUrl)))
-		//TODO replace to interface
-		pendingUrls <- []byte(seedUrl)
+		pendingFetchUrls <- []byte(seedUrl)
+	}()
+
+	go task.ParseGo(pendingFetchUrls, runtimeConfig, &c2, offset2)
+
+	//TODO parse local file  and store url to local and get local url
+	//runtimeConfig.Storage.TaskEnqueue(url)
+
+	//redistribute pendingFetchUrls to sharded workers
+	go func() {
+		for {
+			url := <-pendingFetchUrls
+			if !runtimeConfig.Storage.CheckWalkedUrl(url) {
+
+				if (runtimeConfig.Storage.CheckFetchedUrl(url)) {
+					log.Warn("dont hit walk bloomfilter but hit fetch bloomfilter,also ignore,", string(url))
+					runtimeConfig.Storage.AddWalkedUrl(url)
+					continue
+				}
+
+				randomShard := 0
+				if maxGoRoutine > 1 {
+					randomShard = rand.Intn(maxGoRoutine - 1)
+				}
+				log.Debug("publish:", string(url), ",shard:", randomShard)
+				runtimeConfig.Storage.AddWalkedUrl(url)
+				*fetchTaskChannels[randomShard] <- url
+			}else {
+				log.Trace("hit walk or fetch bloomfilter,just ignore,", string(url))
+			}
+		}
 	}()
 
 
 
-	go task.ParseGo(pendingUrls, runtimeConfig, &c2, offset2)
-
-
+	//load predefined urls
 	go func() {
-		for {
-			url := <-pendingUrls
-			if !runtimeConfig.BloomFilter.Lookup(url) {
-				randomPartition := 0
-				if maxGoRoutine > 1 {
-					randomPartition = rand.Intn(maxGoRoutine - 1)
+
+		if (util.CheckFileExists(runtimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt")) {
+
+			templates := util.ReadAllLines(runtimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt")
+			ids := util.ReadAllLines(runtimeConfig.TaskConfig.TaskDataPath + "/urls/id.txt")
+
+
+			for _, id := range ids {
+				for _, template := range templates {
+					log.Trace("id:", id)
+					log.Trace("template:", template)
+					url := strings.Replace(template, "{id}", id, -1)
+					log.Debug("new url:", url)
+					pendingFetchUrls <- []byte(url)
+					runtimeConfig.Storage.AddFetchedUrl([]byte(url + "a"))
 				}
-				log.Debug("publish:",string(url),",partition:",randomPartition)
-//				publisher := kafka.NewBrokerPublisher(kafkaConfig.Hostname, taskConfig.Name+"_fetch", randomPartition)
-//				publisher.Publish(kafka.NewMessage(url))
-				runtimeConfig.Storage.TaskEnqueue(url)
-				//TODO sharding
-				runtimeConfig.BloomFilter.Add(url)
-			}else{
-				log.Trace("hit bloomfilter,ignore,",string(url))
 			}
+			log.Info("templated download is done.")
 
-        }
-    }()
+		}
 
-    <-finalQuitSignal
-    log.Info("[gopa] is down")
+	}()
+
+	<-finalQuitSignal
+	log.Info("[gopa] is down")
 }
 
 

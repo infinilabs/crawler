@@ -1,7 +1,7 @@
 package storage
 
 import (
-	log "github.com/cihub/seelog"
+	log "logging"
 	"os"
 	"util"
 )
@@ -44,7 +44,7 @@ func LoadNeedleMap(file *os.File) *NeedleMap {
 			offset := util.BytesToUint32(bytes[i+8 : i+12])
 			size := util.BytesToUint32(bytes[i+12 : i+16])
 			if offset > 0 {
-				nm.m[key] = &NeedleValue{util.Offset: offset, Size: size}
+				nm.m[key] = &NeedleValue{Offset: offset, Size: size}
 			} else {
 				delete(nm.m, key)
 			}

@@ -1,19 +1,38 @@
-/**
- * Created with IntelliJ IDEA.
- * User: medcl
- * Date: 13-10-17
- * Time: 下午12:47
- */
-package util
+
+package logging
 
 import (
 	log "github.com/cihub/seelog"
-
 )
+
+
+func Flush(){
+	log.Flush()
+}
+
+func Trace(v ...interface{}) {
+	log.Trace(v)
+}
+
+func Debug(v ...interface{}) {
+	log.Debug(v)
+}
+
+func Info(v ...interface{}) {
+	log.Info(v)
+}
+
+func Warn(v ...interface{}) {
+	log.Warn(v)
+}
+func Error(v ...interface{}) {
+	log.Error(v)
+}
+
 
 func SetInitLogging(logLevel string) {
 	testConfig := `
-	<seelog type="sync" minlevel="`
+	<seelog  type="sync" minlevel="`
 	testConfig =testConfig + logLevel
 	testConfig =testConfig +`">
 		<outputs formatid="main">
@@ -32,7 +51,7 @@ func SetInitLogging(logLevel string) {
 
 func SetLogging(logLevel string,logFile string) {
 	testConfig := `
-	<seelog type="sync" minlevel="`
+	<seelog  type="sync" minlevel="`
 	testConfig = testConfig + logLevel
 	testConfig = testConfig + `">
 		<outputs formatid="main">

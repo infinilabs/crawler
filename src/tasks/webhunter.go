@@ -6,7 +6,7 @@
 package tasks
 
 import (
-	log "github.com/cihub/seelog"
+	log "logging"
 	. "net/url"
 	"regexp"
 	"strings"
@@ -15,6 +15,12 @@ import (
 	"kafka"
 	util "util"
 	. "types"
+	net "net"
+	"io/ioutil"
+	"net/http"
+	"time"
+	"io"
+	"compress/gzip"
 )
 
 //parse to get url root
@@ -216,4 +222,80 @@ func ExtractLinksFromTaskResponse(bloomFilter *Filter, broker *kafka.BrokerPubli
 	}
 
 	log.Info("all links within ", siteUrlStr, " is done")
+}
+
+
+func HttpGet(resource string)(msg []byte,err error){
+
+	//validate url
+	host, err := ParseRequestURI(resource)
+//	_, err := ParseRequestURI(resource)
+	if err != nil {
+		log.Error(resource,err)
+		return nil,err
+	}
+
+	//check domain
+	_, err =net.LookupIP(host.Host)
+	if err != nil {
+		log.Error(resource,err)
+		return nil,err
+	}
+
+	client := &http.Client{
+		Transport: &http.Transport{
+			Dial: func(netw, addr string) (net.Conn, error) {
+				deadline := time.Now().Add(10 * time.Second)
+				c, err := net.DialTimeout(netw, addr, 5*time.Second) //连接超时时间
+				if err != nil {
+					log.Error(resource,err)
+					return nil, err
+				}
+
+				c.SetDeadline(deadline)
+				return c, nil
+			},
+		},
+	}
+
+	req, err := http.NewRequest("GET", resource, nil)
+
+	if err != nil {
+		log.Error(resource,err)
+		return nil,err
+	}
+
+	//support gzip
+	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; gopa/0.1; +http://infinitbyte.com/gopa)")
+	req.Header.Set("Accept-Encoding", "gzip")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Error(resource,err)
+		return nil,err
+	}
+
+	defer resp.Body.Close()
+
+	var reader io.ReadCloser
+	switch resp.Header.Get("Content-Encoding") {
+	case "gzip":
+		reader, err = gzip.NewReader(resp.Body)
+		if err != nil {
+			log.Error(resource,err)
+			return nil,err
+		}
+		defer reader.Close()
+	default:
+		reader = resp.Body
+	}
+	if(reader!=nil){
+		body, err := ioutil.ReadAll(reader)
+		if err != nil {
+			log.Error(resource,err)
+			return nil,err
+		}
+		return body,nil
+	}
+	return nil,http.ErrNotSupported
 }

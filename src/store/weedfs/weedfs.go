@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	log "github.com/cihub/seelog"
+	log "logging"
 	"math/rand"
 	"mime"
 	"net/http"

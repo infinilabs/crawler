@@ -6,7 +6,7 @@
 package config
  import (
 	 config "github.com/robfig/config"
-	 log "github.com/cihub/seelog"
+	 log "logging"
  )
 
 var loadingConfig *config.Config
@@ -14,7 +14,6 @@ var loadingConfig *config.Config
 func  init(){
 	//parse main config
 	loadingConfig, _ = config.ReadDefault("config.ini")
-
 }
 
 func GetStringConfig(configSection string,configKey string ,defaultValue string) string{
@@ -31,7 +30,6 @@ func GetStringConfig(configSection string,configKey string ,defaultValue string)
 	log.Trace("get config value,",configSection,".",configKey,":",value)
 	return value
 }
-
 func GetFloatConfig(configSection string,configKey string ,defaultValue float64) float64{
 	if(loadingConfig ==nil){
 		log.Trace("loadingConfig is nil,just return")

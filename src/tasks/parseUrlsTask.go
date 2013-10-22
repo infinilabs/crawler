@@ -7,30 +7,30 @@
 package tasks
 
 import (
-	log "github.com/cihub/seelog"
+	log "logging"
 	"io/ioutil"
 	//	"net/http"
 	. "net/url"
-	"os"
+//	"os"
 //	"regexp"
 	"strings"
 	//		"time"
-	config "config"
 	. "github.com/PuerkitoBio/purell"
 	. "github.com/zeebo/sbloom"
-	"kafka"
+//	"kafka"
 //	"math/rand"
-	"strconv"
+//	"strconv"
 	. "types"
 	util "util"
-	utils "util"
-	bloom "github.com/zeebo/sbloom"
-	"hash/fnv"
+//	utils "util"
+//	bloom "github.com/zeebo/sbloom"
+//	"hash/fnv"
 )
 
-var parseFilter  *bloom.Filter
+//var parseFilter  *bloom.Filter
 func init() {
-	parseFilter = bloom.NewFilter(fnv.New64(), 1000000)
+//	parseFilter = bloom.NewFilter(fnv.New64(), 1000000)
+//	log.Warn("init bloom filter")
 }
 
 func loadFileContent(fileName string) []byte {
@@ -240,72 +240,73 @@ func extractLinks(pendingUrls chan []byte, bloomFilter *Filter,fileUrl string , 
 	log.Info("all links within ", siteUrlStr, " is done")
 }
 
-func ParseGo(pendingUrls chan []byte, runtimeConfig config.RuntimeConfig, quit *chan bool, offsets *RoutingOffset) {
+func ParseGo(pendingUrls chan []byte, runtimeConfig RuntimeConfig, quit *chan bool, offsets *RoutingOffset) {
 	log.Info("parsing task started.")
 
 }
 
-func ParseLinks(pendingUrls chan []byte, bloomFilter *Filter, taskConfig *TaskConfig, kafkaConfig *config.KafkaConfig, quit *chan bool, offsets *RoutingOffset, MaxGoRoutine int) {
-
-	partition := 0
-	log.Debug("partition:", partition, "start parse local file")
-	offset := *offsets
-
-	broker := kafka.NewBrokerConsumer(kafkaConfig.Hostname, taskConfig.Name+"_parse", partition, offset.Offset, kafkaConfig.MaxSize)
-
-//	randomPartition := 0
-//	if MaxGoRoutine > 1 {
-//		randomPartition = rand.Intn(MaxGoRoutine - 1)
+func ParseLinks(pendingUrls chan []byte, runtimeConfig *RuntimeConfig, quit *chan bool, offsets *RoutingOffset, MaxGoRoutine int) {
+//func ParseLinks(pendingUrls chan []byte, bloomFilter *Filter, taskConfig *TaskConfig, kafkaConfig *config.KafkaConfig, quit *chan bool, offsets *RoutingOffset, MaxGoRoutine int) {
+//
+//	partition := 0
+//	log.Debug("partition:", partition, "start parse local file")
+//	offset := *offsets
+//
+//	broker := kafka.NewBrokerConsumer(kafkaConfig.Hostname, taskConfig.Name+"_parse", partition, offset.Offset, kafkaConfig.MaxSize)
+//
+////	randomPartition := 0
+////	if MaxGoRoutine > 1 {
+////		randomPartition = rand.Intn(MaxGoRoutine - 1)
+////	}
+////	//		log.Debug("random partition:",random)
+////	publisher := kafka.NewBrokerPublisher(kafkaConfig.Hostname, taskConfig.Name+"_fetch", randomPartition)
+//
+//	consumerCallback := func(msg *kafka.Message) {
+//
+//		message := msg.Payload()
+//		stringArray:=strings.Split(string(message),"|||");
+//		fileUrl:=stringArray[0]
+//		fileName:=[]byte(stringArray[1])
+//
+//		if(parseFilter.Lookup(fileName)){
+//			log.Debug("hit parse filter ignore,",string(fileName))
+//			return
+//		}
+//		parseFilter.Add(fileName)
+//
+//		fileContent := loadFileContent(string(fileName))
+//
+//		if fileContent != nil {
+//			log.Debug("partition:", partition, ",parse fileName:", string(fileName))
+//
+//			extractLinks(pendingUrls, bloomFilter,fileUrl, fileName, fileContent, taskConfig)
+//			offsetV := msg.Offset()
+//			offset.Offset = offsetV
+//
+//			path := taskConfig.BaseStoragePath+     "task/parse_offset_" + strconv.FormatInt(int64(partition), 10) + ".tmp"
+//			path_new := taskConfig.BaseStoragePath+     "task/parse_offset_" + strconv.FormatInt(int64(partition), 10)
+//			fout, error := os.Create(path)
+//			if error != nil {
+//				log.Error(path, error)
+//				return
+//			}
+//
+//			defer fout.Close()
+//			log.Debug("partition:", partition, ",saved offset:", offsetV)
+//			fout.Write([]byte(strconv.FormatUint(msg.Offset(), 10)))
+//			utils.CopyFile(path, path_new)
+//		}
+//
 //	}
-//	//		log.Debug("random partition:",random)
-//	publisher := kafka.NewBrokerPublisher(kafkaConfig.Hostname, taskConfig.Name+"_fetch", randomPartition)
-
-	consumerCallback := func(msg *kafka.Message) {
-
-		message := msg.Payload()
-		stringArray:=strings.Split(string(message),"|||");
-		fileUrl:=stringArray[0]
-		fileName:=[]byte(stringArray[1])
-
-		if(parseFilter.Lookup(fileName)){
-			log.Debug("hit parse filter ignore,",string(fileName))
-			return
-		}
-		parseFilter.Add(fileName)
-
-		fileContent := loadFileContent(string(fileName))
-
-		if fileContent != nil {
-			log.Debug("partition:", partition, ",parse fileName:", string(fileName))
-
-			extractLinks(pendingUrls, bloomFilter,fileUrl, fileName, fileContent, taskConfig)
-			offsetV := msg.Offset()
-			offset.Offset = offsetV
-
-			path := taskConfig.BaseStoragePath+     "task/parse_offset_" + strconv.FormatInt(int64(partition), 10) + ".tmp"
-			path_new := taskConfig.BaseStoragePath+     "task/parse_offset_" + strconv.FormatInt(int64(partition), 10)
-			fout, error := os.Create(path)
-			if error != nil {
-				log.Error(path, error)
-				return
-			}
-
-			defer fout.Close()
-			log.Debug("partition:", partition, ",saved offset:", offsetV)
-			fout.Write([]byte(strconv.FormatUint(msg.Offset(), 10)))
-			utils.CopyFile(path, path_new)
-		}
-
-	}
-	msgChan := make(chan *kafka.Message)
-	go broker.ConsumeOnChannel(msgChan, 10, *quit)
-	for msg := range msgChan {
-		if msg != nil {
-			log.Debug("partition:", partition, ",consume messaging,parsing.", string(msg.Payload()))
-			consumerCallback(msg)
-		} else {
-			break
-		}
-	}
-	log.Debug("partition:", partition, ",exit parse local file")
+//	msgChan := make(chan *kafka.Message)
+//	go broker.ConsumeOnChannel(msgChan, 10, *quit)
+//	for msg := range msgChan {
+//		if msg != nil {
+//			log.Debug("partition:", partition, ",consume messaging,parsing.", string(msg.Payload()))
+//			consumerCallback(msg)
+//		} else {
+//			break
+//		}
+//	}
+//	log.Debug("partition:", partition, ",exit parse local file")
 }

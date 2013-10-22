@@ -2,7 +2,7 @@ package directory
 
 import (
 	"encoding/hex"
-	log "github.com/cihub/seelog"
+	log "logging"
 	"store/weedfs/storage"
 	"strconv"
 	"strings"

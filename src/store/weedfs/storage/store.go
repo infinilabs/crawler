@@ -3,7 +3,7 @@ package storage
 import (
 	"encoding/json"
 	"errors"
-	log "github.com/cihub/seelog"
+	log "logging"
 	"net/url"
 	"strconv"
 	"strings"

@@ -4,9 +4,16 @@
 CHANGES
 
 v0.4
-1.align storage path,save paged webpage
+improve:
+1.refactor storage interface,data path are now configable
 2.disable pprof by default
-3.fix some critical bug and performance optimized
+3.use local storage instead of kafka,kafka will be removed later
+5.check local file's exists first before fetch the remote page
+bugfix:
+resolve memory leak caused by sbloom filter
+feature:
+1.download by url template
+2.list page download
 
 v0.3
 1.adding golang pprof,http://localhost:6060/debug/pprof/
