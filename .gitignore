@@ -43,4 +43,3 @@ bloomfilter.bin
 bin
 src/bin
 src/github.com
-pkg

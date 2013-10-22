@@ -114,7 +114,7 @@ func (this *FsStore) AddFetchedUrl(url []byte ){
 }
 
 func (this *FsStore) AddFetchFailedUrl(url []byte ){
-//	this.FetchBloomFilter.Add(url)
+	//TODO
 	log.Error("fetch failed url:",string(url))
 }
 

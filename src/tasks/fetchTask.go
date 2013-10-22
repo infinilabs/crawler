@@ -7,21 +7,9 @@ package tasks
 
 import (
 	log "logging"
-
-	//	. "net/url"
-//	"os"
-	//	"regexp"
-	//	"strings"
-//	. "github.com/zeebo/sbloom"
 	"time"
 	util "util"
-	//	. "github.com/PuerkitoBio/purell"
-//	"kafka"
-//	"strconv"
 	. "types"
-//	utils "util"
-//	bloom "github.com/zeebo/sbloom"
-//	"hash/fnv"
 )
 
 //fetch url's content
@@ -177,59 +165,3 @@ func FetchGo(runtimeConfig RuntimeConfig, taskC *chan []byte, quitC *chan bool, 
 	<-*quitC
 	log.Info("fetch task exit.shard:",shard)
 }
-
-//func Fetch(bloomFilter *Filter, taskConfig *TaskConfig, kafkaConfig *config.KafkaConfig, quit *chan bool, offsets *RoutingOffset, partition int) {
-//
-//	log.Debug("partition:", partition, ",init go routing")
-//
-//	offset := *offsets
-//
-//	broker := kafka.NewBrokerConsumer(kafkaConfig.Hostname, taskConfig.Name+"_fetch", partition, offset.Offset, kafkaConfig.MaxSize)
-//
-//	consumerCallback := func(msg *kafka.Message) {
-//
-//		url := msg.Payload()
-//		//			log.Debug("kafka message offset: " + strconv.FormatUint(msg.Offset(), 10) )
-//		timeout := 10 * time.Second
-//
-//		if(fetchFilter.Lookup(url)){
-//			log.Debug("hit fetch filter ,ignore,",string(url))
-//			return
-//		}
-//		fetchFilter.Add(url)
-//
-//		log.Debug("partition:", partition, ",fetch url:", string(url))
-//		//			if !bloomFilter.Lookup(url){
-//		fetchUrl(url, timeout, taskConfig, kafkaConfig, bloomFilter, partition)
-//		bloomFilter.Add(url)
-//		//			}else{
-//		//				log.Debug("hit bloom filter,skipping,",string(url))
-//		//			}
-//		offsetV := msg.Offset()
-//		offset.Offset = offsetV
-//
-//		path := taskConfig.BaseStoragePath+     "task/fetch_offset_" + strconv.FormatInt(int64(partition), 10) + ".tmp"
-//		path_new := taskConfig.BaseStoragePath+"task/fetch_offset_" + strconv.FormatInt(int64(partition), 10)
-//		fout, error := os.Create(path)
-//		if error != nil {
-//			log.Error(path, error)
-//			return
-//		}
-//
-//		defer fout.Close()
-//		log.Debug("partition:", partition, ",saved offset:", offsetV)
-//		fout.Write([]byte(strconv.FormatUint(msg.Offset(), 10)))
-//		utils.CopyFile(path, path_new)
-//	}
-//	msgChan := make(chan *kafka.Message)
-//	go broker.ConsumeOnChannel(msgChan, 10, *quit)
-//	for msg := range msgChan {
-//		if msg != nil {
-//			log.Debug("partition:", partition, ",consume messaging,fetching.", string(msg.Payload()))
-//			consumerCallback(msg)
-//		} else {
-//			break
-//		}
-//	}
-//	log.Debug("partition:", partition, ",exit kafka consume")
-//}
