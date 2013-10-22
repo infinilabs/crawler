@@ -161,7 +161,7 @@ func main() {
 	runtimeConfig.ClusterConfig.Name = config.GetStringConfig("cluster", "name", "gopa")
 
 	// per cluster:data/gopa/
-	runtimeConfig.PathConfig.Home = config.GetStringConfig("path", "home", runtimeConfig.ClusterConfig.Name + "/")
+	runtimeConfig.PathConfig.Home = config.GetStringConfig("path", "home", "cluster/"+runtimeConfig.ClusterConfig.Name + "/")
 
 	runtimeConfig.PathConfig.Data = config.GetStringConfig("path", "data", "")
 	if (runtimeConfig.PathConfig.Data == "") {

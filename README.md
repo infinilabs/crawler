@@ -4,7 +4,7 @@
 
 ## Building Gopa ##
 
-linux: Run `./build.sh` to build the Gopa
+linux: Run `chmod a+x build.sh &./build.sh` to build the Gopa
 
 windows: Run `build.bat` to build the Gopa
 
