@@ -8,8 +8,8 @@ linux: Run `make build` to build the Gopa
 
 windows: Run `build` to build the Gopa
 
-a pre-compled jafka can be download from here:
-https://github.com/medcl/gopa-release/tree/master/kafka
+a pre-compled gopa can be download from here:
+https://github.com/medcl/gopa-release/
 
 
 ## Running Gopa ##
