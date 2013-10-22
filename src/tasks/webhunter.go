@@ -229,7 +229,6 @@ func HttpGet(resource string)(msg []byte,err error){
 
 	//validate url
 	host, err := ParseRequestURI(resource)
-//	_, err := ParseRequestURI(resource)
 	if err != nil {
 		log.Error(resource,err)
 		return nil,err

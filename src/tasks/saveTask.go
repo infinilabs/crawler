@@ -109,7 +109,6 @@ func getSavedPath(runtimeConfig RuntimeConfig,url []byte) string{
 }
 
 
-//func Save(siteConfig *TaskConfig,myurl []byte, body []byte, publisher *kafka.BrokerPublisher) {
 func Save(path string,body []byte) {
 
 
