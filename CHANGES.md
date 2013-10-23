@@ -3,6 +3,9 @@
 
 CHANGES
 
+v0.5
+
+
 v0.4
 improve:
 1.refactor storage interface,data path are now configable

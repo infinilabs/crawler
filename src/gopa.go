@@ -199,8 +199,8 @@ func main() {
 
 	runtimeConfig.GoProfEnabled = config.GetBoolConfig("CrawlerRule", "GoProfEnabled", false)
 
-	runtimeConfig.WalkBloomFilterFileName = config.GetStringConfig("BloomFilter", "WalkBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath + "/walk.bloomfilter")
-	runtimeConfig.FetchBloomFilterFileName = config.GetStringConfig("BloomFilter", "FetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath + "/fetch.bloomfilte")
+	runtimeConfig.WalkBloomFilterFileName = config.GetStringConfig("BloomFilter", "WalkBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath +   "/walk.bloomfilter")
+	runtimeConfig.FetchBloomFilterFileName = config.GetStringConfig("BloomFilter", "FetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath + "/fetch.bloomfilter")
 
 	runtimeConfig.MaxGoRoutine = config.GetIntConfig("Global", "MaxGoRoutine", 1)
 	if runtimeConfig.MaxGoRoutine < 0 {

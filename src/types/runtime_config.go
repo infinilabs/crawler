@@ -7,7 +7,6 @@
 package types
 
 
-
 type PathConfig struct {
 	Home string
 	Data string
