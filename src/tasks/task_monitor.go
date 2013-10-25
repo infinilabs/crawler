@@ -29,7 +29,7 @@ import (
 
 func LoadTaskFromLocalFile(pendingFetchUrls chan []byte, runtimeConfig RuntimeConfig, quit *chan bool, offsets *RoutingOffset){
 
-	log.Error("LoadTaskFromLocalFile task started.")
+	log.Trace("LoadTaskFromLocalFile task started.")
 	path := runtimeConfig.PathConfig.PendingFetchLog
 	//touch local's file
 	//read all of line
@@ -37,7 +37,7 @@ func LoadTaskFromLocalFile(pendingFetchUrls chan []byte, runtimeConfig RuntimeCo
 
 waitFile:
 	if (!util.CheckFileExists(path)) {
-		log.Error("waiting file crate",path)
+		log.Trace("waiting file create",path)
 		time.Sleep(2*time.Millisecond)
 		goto waitFile
 	}
@@ -53,11 +53,11 @@ func FetchFileWithOffset2(runtimeConfig RuntimeConfig,pendingFetchUrls chan []by
 
 	offset := 0
 	time1, _ := util.FileMTime(path)
-	log.Error("start touch time:", time1)
+	log.Trace("start touch time:", time1)
 
 	f, err := os.Open(path)
 	if err != nil {
-		log.Error("error opening file,", path, " ", err)
+		log.Trace("error opening file,", path, " ", err)
 		return
 	}
 

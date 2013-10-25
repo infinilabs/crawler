@@ -258,7 +258,7 @@ func ParseGo(pendingUrls chan []byte, runtimeConfig RuntimeConfig, quit *chan bo
 
 waitFile:
 	if (!util.CheckFileExists(path)) {
-		log.Trace("waiting file crate",path)
+		log.Trace("waiting file create",path)
 		time.Sleep(2*time.Millisecond)
 		goto waitFile
 	}
