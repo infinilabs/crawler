@@ -92,14 +92,40 @@ func FilePutContentWithByte(file string, content []byte) (int, error) {
 	return fs.Write(content)
 }
 
-//func FileAppendContentWithByte(file string,content []byte)(int,error){
-//	if(!os.IsExist(file)){
-//		fs,e :=os.Create(file)
-//	}else{
-//		fs,e:=os.OpenFile(file,os.O_APPEND)
+func FileAppendContentWithByte(file string,content []byte)(int,error){
+
+
+	f, err := os.OpenFile(file, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+
+//	if _, err = f.Write(content); err != nil {
+//		panic(err)
 //	}
-//	f.Seek(stat.Size, 0)
-//}
+	return f.Write(content)
+}
+
+func FileAppendNewLine(file string,content string)(int,error){
+	f, err := os.OpenFile(file, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+	return f.WriteString(content+"\n")
+}
+func FileAppendNewLineWithByte(file string,content []byte)(int,error){
+	f, err := os.OpenFile(file, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+	return f.WriteString(string(content)+"\n")
+}
 
 // get string from text file
 func FileGetContent(file string) ([]byte, error) {
@@ -242,6 +268,7 @@ func Readln(r *bufio.Reader) (string, error) {
 	}
 	return string(ln),err
 }
+
 //f, err := os.Open(fi)
 //if err != nil {
 //fmt.Printf("error opening file: %v\n",err)

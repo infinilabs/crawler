@@ -32,8 +32,12 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig RuntimeConfig,  p
 
 	if(runtimeConfig.Storage.CheckSavedFile(path)){
 		log.Warn("file is already saved,skip fetch.",path)
-		runtimeConfig.Storage.AddFetchedUrl(url)
-		//todo re-parse local page
+		runtimeConfig.Storage.AddSavedUrl(url)
+
+		//re-parse local's previous saved page
+		if(runtimeConfig.ParseUrlsFromPreviousSavedPage){
+			runtimeConfig.Storage.LogSavedFile(runtimeConfig.PathConfig.SavedFileLog,resource+"|||"+path)
+		}
 	   return
 	}
 
@@ -88,18 +92,26 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig RuntimeConfig,  p
 					}
 
 
-					Save(path, body)
+					_,err:=Save(runtimeConfig,path, body)
+					if(err==nil){
+						log.Info("saved:",path)
+						//todo saved per shard
+						runtimeConfig.Storage.LogSavedFile(runtimeConfig.PathConfig.SavedFileLog,resource+"|||"+path)
+					}else{
+						log.Info("error while saved:",path,",",err)
+						goto exitPage
+					}
 
-				exitPage:
 				} else {
 					log.Debug("does not hit SavingUrlPattern ignoring,", resource)
 				}
 			}
-
 			runtimeConfig.Storage.AddFetchedUrl(url)
+		exitPage:
 			log.Debug("exit fetchUrl method:",resource)
 		}else{
-			runtimeConfig.Storage.AddFetchFailedUrl(url)
+//			runtimeConfig.Storage.AddFetchFailedUrl(url)
+			runtimeConfig.Storage.LogFetchFailedUrl(runtimeConfig.PathConfig.FetchFailedLog,resource)
 		}
 		flg <- true
 	}()

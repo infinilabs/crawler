@@ -10,15 +10,11 @@ import (
 	. "net/url"
 	"os"
 	"strings"
-//	bloom "github.com/zeebo/sbloom"
-//	"hash/fnv"
 	. "types"
 
 )
-//var saveFilter  *bloom.Filter
+
 func init() {
-//	saveFilter = bloom.NewFilter(fnv.New64(), 1000000)
-//	log.Warn("init bloom filter")
 }
 
 
@@ -109,33 +105,16 @@ func getSavedPath(runtimeConfig RuntimeConfig,url []byte) string{
 }
 
 
-func Save(path string,body []byte) {
-
-
-//	pathArray:=[]byte(path)
-
-//	if(saveFilter.Lookup(pathArray)){
-//		log.Debug("hit save-path filter ignore,",string(path))
-//		return
-//	}
-//	saveFilter.Add(pathArray)
-
+func Save(runtimeConfig RuntimeConfig,path string,body []byte)(int,error) {
 
 	log.Trace("touch file,", path)
 	fout, error := os.Create(path)
 	if error != nil {
 		log.Error(path, error)
-		return
+		return 5,error
 	}
 
 	defer fout.Close()
-	log.Info("saved:",path)
-	fout.Write(body)
-
-//	message:=urlStr+"|||"+path
-//TODO	publisher.Publish(kafka.NewMessage([]byte(message)))
-
-	//	log.Info("enqueue parse,", path)
-//	log.Debug("end saving url,", urlStr)
-
+	rt,err:=fout.Write(body)
+	return rt,err
 }

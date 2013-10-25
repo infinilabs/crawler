@@ -227,19 +227,19 @@ func ExtractLinksFromTaskResponse(bloomFilter *Filter, broker *kafka.BrokerPubli
 
 func HttpGet(resource string)(msg []byte,err error){
 
-	//validate url
-	host, err := ParseRequestURI(resource)
-	if err != nil {
-		log.Error(resource,err)
-		return nil,err
-	}
+//	//validate url
+//	host, err := ParseRequestURI(resource)
+//	if err != nil {
+//		log.Error(resource,err)
+//		return nil,err
+//	}
 
-	//check domain
-	_, err =net.LookupIP(host.Host)
-	if err != nil {
-		log.Error(resource,err)
-		return nil,err
-	}
+//	//check domain
+//	_, err =net.LookupIP(host.Host)
+//	if err != nil {
+//		log.Error(resource,err)
+//		return nil,err
+//	}
 
 	client := &http.Client{
 		Transport: &http.Transport{

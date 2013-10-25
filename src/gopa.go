@@ -190,17 +190,26 @@ func main() {
 
 
 	//set default logging
-	logPath := runtimeConfig.PathConfig.Log + "/task_" + runtimeConfig.TaskConfig.Name + ".log";
+	logPath := runtimeConfig.PathConfig.Log + "/" + runtimeConfig.TaskConfig.Name + "/gopa.log";
 	log.SetLogging(logLevel, logPath)
 
 
 	runtimeConfig.ParseUrlsFromSavedPage = config.GetBoolConfig("Switch", "ParseUrlsFromSavedPage", true)
+	runtimeConfig.LoadTemplatedFetchJob = config.GetBoolConfig("Switch", "LoadTemplatedFetchJob", true)
+	runtimeConfig.FetchUrlsFromSavedPage = config.GetBoolConfig("Switch", "FetchUrlsFromSavedPage", true)
+	runtimeConfig.ParseUrlsFromPreviousSavedPage = config.GetBoolConfig("Switch", "ParseUrlsFromPreviousSavedPage", true)
 	runtimeConfig.ArrayStringSplitter = config.GetStringConfig("CrawlerRule", "ArrayStringSplitter", ",")
 
 	runtimeConfig.GoProfEnabled = config.GetBoolConfig("CrawlerRule", "GoProfEnabled", false)
 
-	runtimeConfig.WalkBloomFilterFileName = config.GetStringConfig("BloomFilter", "WalkBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath +   "/walk.bloomfilter")
-	runtimeConfig.FetchBloomFilterFileName = config.GetStringConfig("BloomFilter", "FetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath + "/fetch.bloomfilter")
+	runtimeConfig.WalkBloomFilterFileName = config.GetStringConfig("BloomFilter", "WalkBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath +   "/filters/walk.bloomfilter")
+	runtimeConfig.FetchBloomFilterFileName = config.GetStringConfig("BloomFilter", "FetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath + "/filters/fetch.bloomfilter")
+	runtimeConfig.ParseBloomFilterFileName = config.GetStringConfig("BloomFilter", "ParseBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath + "/filters/parse.bloomfilter")
+	runtimeConfig.PendingFetchBloomFilterFileName = config.GetStringConfig("BloomFilter", "PendingFetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath + "/filters/pending_fetch.bloomfilter")
+
+	runtimeConfig.PathConfig.SavedFileLog=runtimeConfig.TaskConfig.TaskDataPath+"/tasks/pending_parse.files"
+	runtimeConfig.PathConfig.PendingFetchLog=runtimeConfig.TaskConfig.TaskDataPath+"/tasks/pending_fetch.urls"
+	runtimeConfig.PathConfig.FetchFailedLog=runtimeConfig.TaskConfig.TaskDataPath+"/tasks/failed_fetch.urls"
 
 	runtimeConfig.MaxGoRoutine = config.GetIntConfig("Global", "MaxGoRoutine", 1)
 	if runtimeConfig.MaxGoRoutine < 0 {
@@ -218,6 +227,8 @@ func main() {
 	os.MkdirAll(runtimeConfig.PathConfig.TaskData, 0777)
 
 	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath, 0777)
+	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath + "/tasks/", 0777)
+	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath + "/filters/", 0777)
 	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath + "/urls/", 0777)
 	os.MkdirAll(runtimeConfig.TaskConfig.WebDataPath, 0777)
 
@@ -236,7 +247,8 @@ func main() {
 
 	runtimeConfig.Storage.InitWalkBloomFilter(runtimeConfig.WalkBloomFilterFileName);
 	runtimeConfig.Storage.InitFetchBloomFilter(runtimeConfig.FetchBloomFilterFileName);
-
+	runtimeConfig.Storage.InitParseBloomFilter(runtimeConfig.ParseBloomFilterFileName);
+	runtimeConfig.Storage.InitPendingFetchBloomFilter(runtimeConfig.PendingFetchBloomFilterFileName);
 
 	//	atr:="AZaz"
 	//	btr:=[]byte(atr)
@@ -263,7 +275,7 @@ func main() {
 	fetchTaskChannels := make([]*chan []byte, maxGoRoutine) //fetchTask channels
 	fetchOffsets := make([]*RoutingOffset, maxGoRoutine)  //kafka fetchOffsets
 
-	parseQuitChannels := make([]*chan bool, 1) //shutdownSignal signals for each go routing
+	parseQuitChannels := make([]*chan bool, 2) //shutdownSignal signals for each go routing
 	//	parseQuitChannels := make([]*chan bool, MaxGoRoutine) //shutdownSignal signals for each go routing
 	parseOffsets := make([]*RoutingOffset, maxGoRoutine) //kafka fetchOffsets
 
@@ -322,15 +334,16 @@ func main() {
 
 	//sending feed to task queue
 	go func() {
-		//notice seed will not persisted to task queue
+		//notice seed will not been persisted
 		log.Debug("sending feed to fetch queue,", seedUrl)
 		pendingFetchUrls <- []byte(seedUrl)
 	}()
 
-	go task.ParseGo(pendingFetchUrls, runtimeConfig, &c2, offset2)
+	//start local saved file parser
+	if runtimeConfig.ParseUrlsFromSavedPage{
+		go task.ParseGo(pendingFetchUrls, runtimeConfig, &c2, offset2)
+	}
 
-	//TODO parse local file  and store url to local and get local url
-	//runtimeConfig.Storage.TaskEnqueue(url)
 
 	//redistribute pendingFetchUrls to sharded workers
 	go func() {
@@ -357,32 +370,47 @@ func main() {
 		}
 	}()
 
+	//load predefined fetch jobs
+	if runtimeConfig.LoadTemplatedFetchJob{
+		go func() {
+
+			if (util.CheckFileExists(runtimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt")) {
+
+				templates := util.ReadAllLines(runtimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt")
+				ids := util.ReadAllLines(runtimeConfig.TaskConfig.TaskDataPath + "/urls/id.txt")
 
 
-	//load predefined urls
-	go func() {
-
-		if (util.CheckFileExists(runtimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt")) {
-
-			templates := util.ReadAllLines(runtimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt")
-			ids := util.ReadAllLines(runtimeConfig.TaskConfig.TaskDataPath + "/urls/id.txt")
-
-
-			for _, id := range ids {
-				for _, template := range templates {
-					log.Trace("id:", id)
-					log.Trace("template:", template)
-					url := strings.Replace(template, "{id}", id, -1)
-					log.Debug("new url:", url)
-					pendingFetchUrls <- []byte(url)
-					runtimeConfig.Storage.AddFetchedUrl([]byte(url + "a"))
+				for _, id := range ids {
+					for _, template := range templates {
+						log.Trace("id:", id)
+						log.Trace("template:", template)
+						url := strings.Replace(template, "{id}", id, -1)
+						log.Debug("new task from template:", url)
+						pendingFetchUrls <- []byte(url)
+					}
 				}
+				log.Info("templated download is done.")
+
 			}
-			log.Info("templated download is done.")
 
-		}
+		}()
+	}
 
-	}()
+
+	//fetch urls from saved pages
+	if runtimeConfig.FetchUrlsFromSavedPage{
+		c3 := make(chan bool, 1)
+		parseQuitChannels[1] = &c3
+		offset3 := new(RoutingOffset)
+		offset3.Offset = initOffset(runtimeConfig, "fetch_from_saved", 0)
+		offset3.Shard = 0
+		parseOffsets[1] = offset3
+		go task.LoadTaskFromLocalFile(pendingFetchUrls, runtimeConfig, &c3, offset3)
+	}
+
+
+	//parse fetch failed jobs,and will ignore the walk-filter
+	//TODO
 
 	<-finalQuitSignal
 	log.Info("[gopa] is down")

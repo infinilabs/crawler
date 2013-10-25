@@ -18,8 +18,12 @@ import (
 type FsStore struct{
 	WalkBloomFilterFileName string
 	FetchBloomFilterFileName string
+	ParseBloomFilterFileName string
+	PendingFetchBloomFilterFileName string
 	WalkBloomFilter *Filter
 	FetchBloomFilter *Filter
+	ParseBloomFilter *Filter
+	PendingFetchBloomFilter *Filter
 }
 
 func (this *FsStore) Store(url string, data []byte){
@@ -94,10 +98,22 @@ func (this *FsStore) InitFetchBloomFilter(fetchBloomFilterFileName string ){
 	this.FetchBloomFilter = initBloomFilter(this.FetchBloomFilterFileName)
 }
 
+func (this *FsStore) InitParseBloomFilter(parseBloomFilterFileName string ){
+	this.ParseBloomFilterFileName=parseBloomFilterFileName
+	this.ParseBloomFilter = initBloomFilter(this.ParseBloomFilterFileName)
+}
+
+func (this *FsStore) InitPendingFetchBloomFilter(filterName string ){
+	this.PendingFetchBloomFilterFileName=filterName
+	this.PendingFetchBloomFilter = initBloomFilter(this.PendingFetchBloomFilterFileName)
+}
+
 
 func (this *FsStore) PersistBloomFilter(){
 	persistBloomFilter(this.WalkBloomFilterFileName,this.WalkBloomFilter)
 	persistBloomFilter(this.FetchBloomFilterFileName,this.FetchBloomFilter)
+	persistBloomFilter(this.ParseBloomFilterFileName,this.ParseBloomFilter)
+	persistBloomFilter(this.PendingFetchBloomFilterFileName,this.PendingFetchBloomFilter)
 }
 
 func (this *FsStore) CheckWalkedUrl(url []byte) bool{
@@ -106,11 +122,50 @@ func (this *FsStore) CheckWalkedUrl(url []byte) bool{
 func (this *FsStore) CheckFetchedUrl(url []byte) bool{
 	return this.FetchBloomFilter.Lookup(url)
 }
+func (this *FsStore) CheckParsedFile(url []byte) bool{
+	return this.ParseBloomFilter.Lookup(url)
+}
+
+func (this *FsStore) CheckPendingFetchUrl(url []byte ) bool{
+	return this.PendingFetchBloomFilter.Lookup(url)
+}
+
 func (this *FsStore) AddWalkedUrl(url []byte ){
 	this.WalkBloomFilter.Add(url)
 }
+
+
+func (this *FsStore) AddPendingFetchUrl(url []byte ){
+	this.PendingFetchBloomFilter.Add(url)
+}
+
+func (this *FsStore) AddSavedUrl(url []byte ){
+	this.WalkBloomFilter.Add(url)
+	this.FetchBloomFilter.Add(url)
+}
+
+func (this *FsStore) LogSavedFile(path string,content string ){
+	util.FileAppendNewLine(path,content)
+}
+
+func (this *FsStore) LogPendingFetchUrl(path string,content string ){
+	util.FileAppendNewLine(path,content)
+}
+
+func (this *FsStore) LogFetchFailedUrl(path string,content string ){
+	util.FileAppendNewLine(path,content)
+}
+
 func (this *FsStore) AddFetchedUrl(url []byte ){
 	this.FetchBloomFilter.Add(url)
+}
+
+func (this *FsStore)saveFetchedUrlToLocalFile(path string,url string){
+	util.FileAppendNewLine(path,url)
+}
+
+func (this *FsStore) AddParsedFile(url []byte ){
+	this.ParseBloomFilter.Add(url)
 }
 
 func (this *FsStore) AddFetchFailedUrl(url []byte ){
@@ -122,3 +177,10 @@ func (this *FsStore) CheckSavedFile(file string)bool{
 	log.Debug("start check file:",file)
 	return  util.CheckFileExists(file)
 }
+
+
+
+//InitPendingFetchBloomFilter(fileName string)
+//CheckPendingFetchUrl(url []byte) bool
+//AddPendingFetchUrl(url []byte )
+//LogPendingFetchUrl(path,content string )
