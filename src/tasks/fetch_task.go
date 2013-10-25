@@ -36,7 +36,10 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig RuntimeConfig,  p
 
 		//re-parse local's previous saved page
 		if(runtimeConfig.ParseUrlsFromPreviousSavedPage){
-			runtimeConfig.Storage.LogSavedFile(runtimeConfig.PathConfig.SavedFileLog,resource+"|||"+path)
+			if(!runtimeConfig.Storage.CheckParsedFile([]byte(path))){
+				log.Debug("previous saved page send to parse-queue:",path)
+				runtimeConfig.Storage.LogSavedFile(runtimeConfig.PathConfig.SavedFileLog,resource+"|||"+path)
+			}
 		}
 	   return
 	}
