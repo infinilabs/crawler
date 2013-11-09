@@ -9,12 +9,12 @@ import (
 	"flag"
 	"fmt"
 	log "logging"
-	"io/ioutil"
+//	"io/ioutil"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"regexp"
-	"strconv"
+//	"strconv"
 	"strings"
 	"syscall"
 	"util"
@@ -25,6 +25,8 @@ import (
 	"net/http"
 	fsstore "store/fs"
 	config "config"
+	"strconv"
+	httpServ "http"
 )
 
 var seedUrl string
@@ -45,31 +47,11 @@ func getSeqStr(start []byte, end []byte, mix bool) []byte {
 }
 
 func init() {
-
+	runtimeConfig = RuntimeConfig{}
+	runtimeConfig.Version="0.5_SNAPSHOT"
 }
 
-func initOffset(runtimeConfig RuntimeConfig, typeName string, shard int) uint64 {
-	log.Info("start init offsets,", typeName, ",shard:", shard)
 
-	path := runtimeConfig.TaskConfig.TaskDataPath + "/" + typeName + "_offset_" + strconv.FormatInt(int64(shard), 10)
-	if util.CheckFileExists(path) {
-		log.Debug("found offset file,start loading")
-		n, err := ioutil.ReadFile(path)
-		if err != nil {
-			log.Error("offset", err)
-			return 0
-		}
-		ret, err := strconv.ParseInt(string(n), 10, 64)
-		if err != nil {
-			log.Error("offset", err)
-			return 0
-		}
-		log.Info("init offsets successfully,", shard, ":", ret)
-		return uint64(ret)
-	}
-
-	return 0
-}
 
 func shutdown(offsets []*RoutingOffset, quitChannels []*chan bool, offsets2 []*RoutingOffset, quitChannels2 []*chan bool, quit chan bool) {
 	log.Debug("start shutting down")
@@ -148,7 +130,6 @@ func main() {
 
 	defer log.Flush()
 
-	runtimeConfig = RuntimeConfig{}
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
@@ -194,10 +175,12 @@ func main() {
 	log.SetLogging(logLevel, logPath)
 
 
-	runtimeConfig.ParseUrlsFromSavedPage = config.GetBoolConfig("Switch", "ParseUrlsFromSavedPage", true)
+	runtimeConfig.ParseUrlsFromSavedFileLog = config.GetBoolConfig("Switch", "ParseUrlsFromSavedFileLog", true)
 	runtimeConfig.LoadTemplatedFetchJob = config.GetBoolConfig("Switch", "LoadTemplatedFetchJob", true)
-	runtimeConfig.FetchUrlsFromSavedPage = config.GetBoolConfig("Switch", "FetchUrlsFromSavedPage", true)
-	runtimeConfig.ParseUrlsFromPreviousSavedPage = config.GetBoolConfig("Switch", "ParseUrlsFromPreviousSavedPage", true)
+	runtimeConfig.LoadRuledFetchJob = config.GetBoolConfig("Switch", "LoadRuledFetchJob", true)
+	runtimeConfig.LoadPendingFetchJobs = config.GetBoolConfig("Switch", "LoadPendingFetchJobs", true)
+	runtimeConfig.HttpEnabled = config.GetBoolConfig("Switch", "HttpEnabled", true)
+	runtimeConfig.ParseUrlsFromPreviousSavedPage = config.GetBoolConfig("Switch", "ParseUrlsFromPreviousSavedPage", false)
 	runtimeConfig.ArrayStringSplitter = config.GetStringConfig("CrawlerRule", "ArrayStringSplitter", ",")
 
 	runtimeConfig.GoProfEnabled = config.GetBoolConfig("CrawlerRule", "GoProfEnabled", false)
@@ -211,7 +194,7 @@ func main() {
 	runtimeConfig.PathConfig.PendingFetchLog=runtimeConfig.TaskConfig.TaskDataPath+"/tasks/pending_fetch.urls"
 	runtimeConfig.PathConfig.FetchFailedLog=runtimeConfig.TaskConfig.TaskDataPath+"/tasks/failed_fetch.urls"
 
-	runtimeConfig.MaxGoRoutine = config.GetIntConfig("Global", "MaxGoRoutine", 1)
+	runtimeConfig.MaxGoRoutine = config.GetIntConfig("Global", "MaxGoRoutine", 2)
 	if runtimeConfig.MaxGoRoutine < 0 {
 		runtimeConfig.MaxGoRoutine = 1
 	}
@@ -232,6 +215,14 @@ func main() {
 	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath + "/urls/", 0777)
 	os.MkdirAll(runtimeConfig.TaskConfig.WebDataPath, 0777)
 
+	runtimeConfig.RuledFetchConfig=new(RuledFetchConfig)
+	runtimeConfig.RuledFetchConfig.UrlTemplate=config.GetStringConfig("RuledFetch", "UrlTemplate", "")
+	runtimeConfig.RuledFetchConfig.From=config.GetIntConfig("RuledFetch", "From", 0)
+	runtimeConfig.RuledFetchConfig.To=config.GetIntConfig("RuledFetch", "To", 10)
+	runtimeConfig.RuledFetchConfig.Step=config.GetIntConfig("RuledFetch", "Step", 1)
+	runtimeConfig.RuledFetchConfig.LinkExtractPattern=config.GetStringConfig("RuledFetch", "LinkExtractPattern", "")
+	runtimeConfig.RuledFetchConfig.LinkTemplate=config.GetStringConfig("RuledFetch", "LinkTemplate", "")
+
 
 	if seedUrl == "" || seedUrl == "http://example.com" {
 		log.Error("no seed was given. type:\"gopa -h\" for help.")
@@ -239,11 +230,13 @@ func main() {
 	}
 
 
-	log.Info("[gopa] is on.")
+	log.Info("[gopa] "+runtimeConfig.Version+" is on.",)
 
 
 
 	runtimeConfig.Storage = &fsstore.FsStore{}
+
+//	if(runtimeConfig.)
 
 	runtimeConfig.Storage.InitWalkBloomFilter(runtimeConfig.WalkBloomFilterFileName);
 	runtimeConfig.Storage.InitFetchBloomFilter(runtimeConfig.FetchBloomFilterFileName);
@@ -257,13 +250,21 @@ func main() {
 	//	id:= getSeqStr([]byte("AA"),[]byte("ZZ"),false)
 	//	fmt.Println(id)
 
+	//pprof serves
 	if runtimeConfig.GoProfEnabled {
-		//pprof serves
 		go func() {
 			log.Info(http.ListenAndServe("localhost:6060", nil))
 			log.Info("pprof server is up,http://localhost:6060/debug/pprof")
 		}()
 	}
+
+	//http serves
+	if(runtimeConfig.HttpEnabled){
+		go func() {
+			httpServ.Start(runtimeConfig)
+		}()
+	}
+
 
 	//adding default http protocol
 	if !strings.HasPrefix(seedUrl, "http") {
@@ -313,18 +314,18 @@ func main() {
 		fetchQuitChannels[i] = &quitC
 		fetchTaskChannels[i] = &taskC
 		offset := new(RoutingOffset)
-		offset.Offset = initOffset(runtimeConfig, "fetch", i)
+//		offset.Offset = initOffset(runtimeConfig, "fetch", i)
 		offset.Shard = i
 		fetchOffsets[i] = offset
 
-		go task.FetchGo(runtimeConfig, &taskC, &quitC, offset, i)
+		go task.FetchGo(runtimeConfig, &taskC, &quitC, offset)
 	}
 
 
 	c2 := make(chan bool, 1)
 	parseQuitChannels[0] = &c2
 	offset2 := new(RoutingOffset)
-	offset2.Offset = initOffset(runtimeConfig, "parse", 0)
+//	offset2.Offset = initOffset(runtimeConfig, "parse", 0)
 	offset2.Shard = 0
 	parseOffsets[0] = offset2
 	pendingFetchUrls := make(chan []byte)
@@ -340,7 +341,7 @@ func main() {
 	}()
 
 	//start local saved file parser
-	if runtimeConfig.ParseUrlsFromSavedPage{
+	if runtimeConfig.ParseUrlsFromSavedFileLog{
 		go task.ParseGo(pendingFetchUrls, runtimeConfig, &c2, offset2)
 	}
 
@@ -398,19 +399,33 @@ func main() {
 
 
 	//fetch urls from saved pages
-	if runtimeConfig.FetchUrlsFromSavedPage{
+	if runtimeConfig.LoadPendingFetchJobs{
 		c3 := make(chan bool, 1)
 		parseQuitChannels[1] = &c3
 		offset3 := new(RoutingOffset)
-		offset3.Offset = initOffset(runtimeConfig, "fetch_from_saved", 0)
+//		offset3.Offset = initOffset(runtimeConfig, "fetch_from_saved", 0)
 		offset3.Shard = 0
 		parseOffsets[1] = offset3
-		go task.LoadTaskFromLocalFile(pendingFetchUrls, runtimeConfig, &c3, offset3)
+		go task.LoadTaskFromLocalFile(pendingFetchUrls, &runtimeConfig, &c3, offset3)
 	}
 
 
 	//parse fetch failed jobs,and will ignore the walk-filter
 	//TODO
+
+	  if(runtimeConfig.LoadRuledFetchJob){
+
+		go func() {
+			if(runtimeConfig.RuledFetchConfig.UrlTemplate!=""){
+				for i := runtimeConfig.RuledFetchConfig.From; i <=  runtimeConfig.RuledFetchConfig.To; i+=runtimeConfig.RuledFetchConfig.Step {
+					url:=strings.Replace( runtimeConfig.RuledFetchConfig.UrlTemplate,"{id}",strconv.FormatInt(int64(i),10),-1)
+					log.Debug("add ruled url:",url)
+					pendingFetchUrls <- []byte(url)
+				}
+			}
+		}()
+
+	  }
 
 	<-finalQuitSignal
 	log.Info("[gopa] is down")

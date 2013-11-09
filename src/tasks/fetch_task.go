@@ -13,7 +13,7 @@ import (
 )
 
 //fetch url's content
-func fetchUrl(url []byte, timeout time.Duration, runtimeConfig RuntimeConfig,  partition int) {
+func fetchUrl(url []byte, timeout time.Duration, runtimeConfig RuntimeConfig,  offsets *RoutingOffset) {
 	t := time.NewTimer(timeout)
 	defer t.Stop()
 
@@ -136,8 +136,9 @@ func init() {
 //	log.Warn("init bloom filter")
 }
 
-func FetchGo(runtimeConfig RuntimeConfig, taskC *chan []byte, quitC *chan bool, offsets *RoutingOffset, shard int) {
-	 log.Info("fetch task started.shard:",shard)
+func FetchGo(runtimeConfig RuntimeConfig, taskC *chan []byte, quitC *chan bool, offsets *RoutingOffset) {
+	shard:=offsets.Shard
+	log.Info("fetch task started.shard:",shard)
 	go func() {
 		for {
 			url := <-*taskC
@@ -153,22 +154,7 @@ func FetchGo(runtimeConfig RuntimeConfig, taskC *chan []byte, quitC *chan bool, 
 //					fetchFilter.Add(url)
 
 					log.Debug("shard:",shard,",url cool,start fetching:", string(url))
-					fetchUrl(url, timeout, runtimeConfig, shard)
-
-					//TODO
-					//persist worker's offset
-	//				path := config.BaseStoragePath+     "task/fetch_offset_" + strconv.FormatInt(int64(shard), 10) + ".tmp"
-	//				path_new := config.BaseStoragePath+"task/fetch_offset_" + strconv.FormatInt(int64(shard), 10)
-	//				fout, error := os.Create(path)
-	//				if error != nil {
-	//					log.Error(path, error)
-	//					continue
-	//				}
-
-	//				defer fout.Close()
-	//				log.Debug("partition:", shard, ",saved offset:", offsetV)
-	//				fout.Write([]byte(strconv.FormatUint(msg.Offset(), 10)))
-	//				utils.CopyFile(path, path_new)
+					fetchUrl(url, timeout, runtimeConfig, offsets)
 
 				}else {
 					log.Debug("hit fetch-bloomfilter,ignore,", string(url))

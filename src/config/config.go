@@ -59,6 +59,7 @@ func GetIntConfig(configSection string,configKey string ,defaultValue int) int{
 	return value
 }
 
+
 func GetBoolConfig(configSection string,configKey string ,defaultValue bool) bool{
 	if(loadingConfig ==nil){
 		log.Trace("loadingConfig is nil,just return")

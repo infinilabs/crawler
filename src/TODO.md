@@ -5,8 +5,7 @@
 
 存储
     使用weedfs存储
-    domain or url hash，sharding
-    hash to kafka channel
+    domain or url hash，sharding,为避免bloom过大，优先处理部分domain，剩下的都入domain命名的队列，处理完一个domain，然后卸载bloom，加载其它的bloom，分别处理
     未保存文件，优先解析url，本地已存储文件，入解析url队列，使用本地路径作为url
     使用一个channel，处理多个事件，实现fetch及parser gorouting的优雅关闭      [done]
 
@@ -33,7 +32,7 @@ Offset文件放项目文件夹里面
 满足不了Save规则的，但是满足Fetch规则，需要在内存里面解析并记录url，只是不持久化
 
 GOPA集群化，每个gopa只设置一个cluster参数和node参数[可选]，
-通过集群web面板来管理任务
+通过集群web面板来管理任务，seed参数非必须，通过web来添加
 每个gopa可以分别设置角色：fetch、parse、master
 gopa也分shard【考虑一致性hash】
 

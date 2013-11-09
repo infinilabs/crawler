@@ -36,6 +36,9 @@ type Store interface {
 	CheckPendingFetchUrl(url []byte) bool
 	AddPendingFetchUrl(url []byte )
 	LogPendingFetchUrl(path,content string )
+
+	LoadOffset(fileName string) int64
+	PersistOffset(fileName string,offset int64)
 }
 
 //func (b *store) Store(any interface{}){

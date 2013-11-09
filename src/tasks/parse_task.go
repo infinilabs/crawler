@@ -246,6 +246,8 @@ func extractLinks(runtimeConfig RuntimeConfig, fileUrl string , fileName []byte,
 
 	}
 
+	//TODO 处理ruled fetch pattern
+
 	log.Info("all links within ", siteUrlStr, " is done")
 }
 
@@ -259,17 +261,18 @@ func ParseGo(pendingUrls chan []byte, runtimeConfig RuntimeConfig, quit *chan bo
 waitFile:
 	if (!util.CheckFileExists(path)) {
 		log.Trace("waiting file create",path)
-		time.Sleep(2*time.Millisecond)
+		time.Sleep(10*time.Millisecond)
 		goto waitFile
 	}
 
-	offset := 0
+	var offset int64= runtimeConfig.Storage.LoadOffset(runtimeConfig.PathConfig.SavedFileLog + ".offset")
 	FetchFileWithOffset(runtimeConfig,path, offset)
 }
 
-func FetchFileWithOffset(runtimeConfig RuntimeConfig,path string, skipOffset int) {
+func FetchFileWithOffset(runtimeConfig RuntimeConfig,path string, skipOffset int64) {
 
-	offset := 0
+	var offset int64= 0
+
 	time1, _ := util.FileMTime(path)
 	log.Debug("start touch time:", time1)
 
@@ -290,6 +293,9 @@ func FetchFileWithOffset(runtimeConfig RuntimeConfig,path string, skipOffset int
 		if (offset > skipOffset) {
 			ParsedSavedFileLog(runtimeConfig,s)
 		}
+
+		runtimeConfig.Storage.PersistOffset(runtimeConfig.PathConfig.SavedFileLog + ".offset",offset)
+
 		s, e = util.Readln(r)
 		//todo store offset
 	}
@@ -305,7 +311,7 @@ waitUpdate:
 		FetchFileWithOffset(runtimeConfig,path, offset)
 	}else {
 		log.Trace("waiting file update",path)
-		time.Sleep(3*time.Millisecond)
+		time.Sleep(10*time.Millisecond)
 		goto waitUpdate
 	}
 }

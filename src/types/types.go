@@ -56,6 +56,6 @@ type Task struct {
 
 type RoutingOffset struct {
 	Shard int
-	Offset uint64
+//	Offset uint64
 }
 

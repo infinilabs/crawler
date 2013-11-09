@@ -4,7 +4,10 @@
 CHANGES
 
 v0.5
-
+feature:
+1.ruled fetch
+2.fetch/parse offset can be persisted and reloadable
+3.http console
 
 v0.4
 improve:

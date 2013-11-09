@@ -23,13 +23,30 @@ type ClusterConfig struct {
 	Name string
 }
 
+type SaveConfig struct {
+	DefaultExtension string
+}
+
+type RuledFetchConfig struct {
+	UrlTemplate string
+	From  int
+	To int
+	Step int
+	LinkExtractPattern string
+	LinkTemplate string
+}
+
 type RuntimeConfig struct{
+
+	Version string
 
 	//cluster
 	ClusterConfig *ClusterConfig
 
 	//task
 	TaskConfig *TaskConfig
+
+	RuledFetchConfig *RuledFetchConfig
 
 	//splitter of joined array string
 	ArrayStringSplitter string
@@ -42,10 +59,12 @@ type RuntimeConfig struct{
 	MaxGoRoutine int
 
 	//switch config
-	ParseUrlsFromSavedPage bool
+	ParseUrlsFromSavedFileLog bool
 	LoadTemplatedFetchJob bool
-	FetchUrlsFromSavedPage bool //fetch url parse and extracted from saved page,load data from:"pending_fetch.urls"
+	LoadPendingFetchJobs bool //fetch url parse and extracted from saved page,load data from:"pending_fetch.urls"
 	ParseUrlsFromPreviousSavedPage bool //extract urls from previous saved page
+	LoadRuledFetchJob bool //extract urls from previous saved page
+	HttpEnabled bool //extract urls from previous saved page
 
 	//runtime variables
 	Storage Store

@@ -18,16 +18,16 @@ import (
 	//	. "github.com/zeebo/sbloom"
 	//	"kafka"
 	//	"math/rand"
-	//	"strconv"
+//		"strconv"
 	. "types"
 	util "util"
-	//	utils "util"
+//		utils "util"
 	//	bloom "github.com/zeebo/sbloom"
 	//	"hash/fnv"
 	"bufio"
 )
 
-func LoadTaskFromLocalFile(pendingFetchUrls chan []byte, runtimeConfig RuntimeConfig, quit *chan bool, offsets *RoutingOffset){
+func LoadTaskFromLocalFile(pendingFetchUrls chan []byte, runtimeConfig *RuntimeConfig, quit *chan bool, offsets *RoutingOffset){
 
 	log.Trace("LoadTaskFromLocalFile task started.")
 	path := runtimeConfig.PathConfig.PendingFetchLog
@@ -38,20 +38,21 @@ func LoadTaskFromLocalFile(pendingFetchUrls chan []byte, runtimeConfig RuntimeCo
 waitFile:
 	if (!util.CheckFileExists(path)) {
 		log.Trace("waiting file create",path)
-		time.Sleep(2*time.Millisecond)
+		time.Sleep(10*time.Millisecond)
 		goto waitFile
 	}
 
-	offset := 0
-	FetchFileWithOffset2(runtimeConfig,pendingFetchUrls,path, offset)
+	var offset int64= runtimeConfig.Storage.LoadOffset(runtimeConfig.PathConfig.PendingFetchLog + ".offset")
+	FetchFileWithOffset2(*runtimeConfig,pendingFetchUrls,path, offset)
 
 
 }
 
 
-func FetchFileWithOffset2(runtimeConfig RuntimeConfig,pendingFetchUrls chan []byte,path string, skipOffset int) {
+func FetchFileWithOffset2(runtimeConfig RuntimeConfig,pendingFetchUrls chan []byte,path string, skipOffset int64) {
 
-	offset := 0
+	var	offset int64
+	offset=0
 	time1, _ := util.FileMTime(path)
 	log.Trace("start touch time:", time1)
 
@@ -72,6 +73,9 @@ func FetchFileWithOffset2(runtimeConfig RuntimeConfig,pendingFetchUrls chan []by
 		if (offset > skipOffset) {
 			ParsedSavedFileLog2(runtimeConfig,pendingFetchUrls,s)
 		}
+
+		runtimeConfig.Storage.PersistOffset(runtimeConfig.PathConfig.PendingFetchLog + ".offset",offset)
+
 		s, e = util.Readln(r)
 		//todo store offset
 	}
@@ -87,10 +91,11 @@ waitUpdate:
 		FetchFileWithOffset2(runtimeConfig,pendingFetchUrls,path, offset)
 	}else {
 		log.Trace("waiting file update",path)
-		time.Sleep(3*time.Millisecond)
+		time.Sleep(10*time.Millisecond)
 		goto waitUpdate
 	}
 }
+
 
 func ParsedSavedFileLog2(runtimeConfig RuntimeConfig,pendingFetchUrls chan []byte,url string) {
 	if (url != "") {

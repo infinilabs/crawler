@@ -12,6 +12,8 @@ import (
 	"hash/fnv"
 	"io/ioutil"
 	config "config"
+	"strconv"
+	"os"
 )
 
 
@@ -177,6 +179,45 @@ func (this *FsStore) CheckSavedFile(file string)bool{
 	log.Debug("start check file:",file)
 	return  util.CheckFileExists(file)
 }
+
+func (this *FsStore) LoadOffset(fileName string) int64{
+	log.Debug("start init offsets,", fileName)
+	if util.CheckFileExists(fileName) {
+		log.Debug("found offset file,start loading,",fileName)
+		n, err := ioutil.ReadFile(fileName)
+		if err != nil {
+			log.Error("offset",fileName,",", err)
+			return 0
+		}
+		ret, err := strconv.ParseInt(string(n), 10, 64)
+		if err != nil {
+			log.Error("offset", fileName,",",err)
+			return 0
+		}
+		log.Info("init offsets successfully,",fileName,":", ret)
+		return int64(ret)
+	}
+
+	return 0
+}
+
+
+func (this *FsStore) PersistOffset(fileName string,offset int64){
+		//persist worker's offset
+	path := fileName+".tmp"
+	fout, error := os.Create(path)
+	if error != nil {
+		log.Error(path, error)
+		return
+	}
+
+	defer fout.Close()
+	log.Debug("saved offset:",fileName,":", offset)
+	fout.Write([]byte(strconv.FormatInt(offset, 10)))
+	util.CopyFile(path, fileName)
+}
+
+
 
 
 
