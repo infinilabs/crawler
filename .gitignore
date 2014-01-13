@@ -41,7 +41,7 @@ out
 data
 bloomfilter.bin
 bin
-src/bin
-src/github.com
+github.com
 pkg
 pkg/*
+cluster
