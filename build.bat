@@ -1,4 +1,4 @@
-set GOPATH=%CD%\..\;%CD%;%GOPATH%
+set GOPATH=%CD%;%GOPATH%
 echo %GOPATH%
 mkdir bin
 go get github.com/zeebo/sbloom

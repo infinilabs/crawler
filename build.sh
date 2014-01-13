@@ -1,4 +1,4 @@
-export GOPATH=`pwd`/../:`pwd`:$GOPATH
+export GOPATH=`pwd`:$GOPATH
 go env
 go get github.com/zeebo/sbloom
 go get github.com/cihub/seelog
