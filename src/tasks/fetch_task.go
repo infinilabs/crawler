@@ -155,6 +155,9 @@ func FetchGo(runtimeConfig RuntimeConfig, taskC *chan []byte, quitC *chan bool, 
 
 					log.Debug("shard:",shard,",url cool,start fetching:", string(url))
 					fetchUrl(url, timeout, runtimeConfig, offsets)
+					log.Debug("go to sleep to control crawling speed")
+					time.Sleep( time.Duration (500) * time.Millisecond)
+					log.Debug("wake up now,continue crawing")
 
 				}else {
 					log.Debug("hit fetch-bloomfilter,ignore,", string(url))
