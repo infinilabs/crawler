@@ -1,4 +1,9 @@
 SHELL=/bin/bash
+CWD=$(shell pwd)
+OLDGOPATH=${GOPATH}
+NEWGOPATH:=${CWD}:${OLDGOPATH}
+export GOPATH=$(NEWGOPATH)
+
 
 build: clean config
 	go build  -o bin/gopa
@@ -17,26 +22,21 @@ clean:
 	mkdir bin
 
 config:
-	echo "Prepare Go Path"
-
-	export GOPATH=`pwd`:$GOPATH
+	@echo "get Dependencies"
 	go env
-
-	echo "get Dependencies"
 	go get github.com/zeebo/sbloom
 	go get github.com/cihub/seelog
 	go get github.com/robfig/config
 	go get github.com/PuerkitoBio/purell
 
 dist: all
-	echo "Packaging"
+	@echo "Packaging"
 	tar cfz bin/darwin64.tar.gz bin/darwin64
 	tar cfz bin/linux64.tar.gz bin/linux64
 	tar cfz bin/windows64.tar.gz bin/windows64
 
 cross-compile:
-	echo "Prepare Cross Compiling"
-	CWD=`pwd`
+	@echo "Prepare Cross Compiling"
 	cd $(GOROOT)/src && GOOS=windows GOARCH=amd64 ./make.bash --no-clean 2> /dev/null 1> /dev/null
 	cd $(GOROOT)/src && GOOS=darwin  GOARCH=amd64 ./make.bash --no-clean 2> /dev/null 1> /dev/null
 	cd $(GOROOT)/src && GOOS=linux  GOARCH=amd64 ./make.bash --no-clean 2> /dev/null 1> /dev/null
