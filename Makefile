@@ -37,7 +37,7 @@ dist: all
 
 cross-compile:
 	@echo "Prepare Cross Compiling"
-	cd $(GOROOT)/src && GOOS=windows GOARCH=amd64 ./make.bash --no-clean 2> /dev/null 1> /dev/null
+	cd $(GOROOT)/src && GOOS=windows GOARCH=amd64 ./make.bash --no-clean 
 	cd $(GOROOT)/src && GOOS=darwin  GOARCH=amd64 ./make.bash --no-clean 2> /dev/null 1> /dev/null
 	cd $(GOROOT)/src && GOOS=linux  GOARCH=amd64 ./make.bash --no-clean 2> /dev/null 1> /dev/null
 
