@@ -8,6 +8,9 @@ export GOPATH=$(NEWGOPATH)
 build: clean config
 	go build  -o bin/gopa
 
+tar: build
+	tar cfz bin/gopa.tar.gz bin/gopa
+
 cross-build: clean config
 	go test
 	GOOS=windows GOARCH=amd64 go build -o bin/windows64/gopa.exe
