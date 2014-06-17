@@ -72,7 +72,7 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig RuntimeConfig,  o
 
 	go func() {
 
-		body,err:=HttpGet(resource)
+		body,err:=HttpGetWithCookie(resource,config.Cookie)
 
 		if err == nil {
 			if body != nil {
@@ -155,9 +155,11 @@ func FetchGo(runtimeConfig RuntimeConfig, taskC *chan []byte, quitC *chan bool, 
 
 					log.Debug("shard:",shard,",url cool,start fetching:", string(url))
 					fetchUrl(url, timeout, runtimeConfig, offsets)
-					log.Debug("go to sleep to control crawling speed")
-					time.Sleep( time.Duration (500) * time.Millisecond)
-					log.Debug("wake up now,continue crawing")
+					if(runtimeConfig.TaskConfig.FetchDelayThreshold >0){
+						log.Debug("sleep ",runtimeConfig.TaskConfig.FetchDelayThreshold,"ms to control crawling speed")
+						time.Sleep( time.Duration (runtimeConfig.TaskConfig.FetchDelayThreshold) * time.Millisecond)
+						log.Debug("wake up now,continue crawing")
+					}
 
 				}else {
 					log.Debug("hit fetch-bloomfilter,ignore,", string(url))

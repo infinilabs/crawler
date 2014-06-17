@@ -3,6 +3,11 @@
 
 CHANGES
 
+v0.6
+feature:
+1.crawling speed control
+2.cookie supported
+
 v0.5
 feature:
 1.ruled fetch
@@ -29,7 +34,7 @@ v0.3
 
 2.integrate with kafka to make task controllable and recoverable
 3.parameters configable
-4.goroutine canbe controlled now
+4.goroutine can be controlled now
 
 
 v0.2

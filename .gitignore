@@ -45,3 +45,5 @@ github.com
 pkg
 pkg/*
 cluster
+.DS_Store
+bin-run/

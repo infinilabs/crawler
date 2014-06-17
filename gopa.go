@@ -48,7 +48,7 @@ func getSeqStr(start []byte, end []byte, mix bool) []byte {
 
 func init() {
 	runtimeConfig = RuntimeConfig{}
-	runtimeConfig.Version="0.5_SNAPSHOT"
+	runtimeConfig.Version="0.6_SNAPSHOT"
 }
 
 
@@ -106,6 +106,8 @@ func parseConfig() *TaskConfig {
 	taskConfig.SavingUrlMustContain = config.GetStringConfig("CrawlerRule", "SavingUrlMustContain", "")
 	taskConfig.SavingUrlMustNotContain = config.GetStringConfig("CrawlerRule", "SavingUrlMustNotContain", "")
 
+	taskConfig.Cookie = config.GetStringConfig("CrawlerRule", "Cookie", "")
+	taskConfig.FetchDelayThreshold = config.GetIntConfig("CrawlerRule", "FetchDelayThreshold", 0)
 
 	taskConfig.TaskDataPath = config.GetStringConfig("CrawlerRule", "TaskData", runtimeConfig.PathConfig.TaskData + "/" + taskConfig.Name + "/")
 
@@ -195,8 +197,8 @@ func main() {
 	runtimeConfig.PathConfig.FetchFailedLog=runtimeConfig.TaskConfig.TaskDataPath+"/tasks/failed_fetch.urls"
 
 	runtimeConfig.MaxGoRoutine = config.GetIntConfig("Global", "MaxGoRoutine", 2)
-	if runtimeConfig.MaxGoRoutine < 0 {
-		runtimeConfig.MaxGoRoutine = 1
+	if runtimeConfig.MaxGoRoutine < 2 {
+		runtimeConfig.MaxGoRoutine = 2
 	}
 
 	log.Debug("maxGoRoutine:", runtimeConfig.MaxGoRoutine)
@@ -414,7 +416,7 @@ func main() {
 	//TODO
 
 	  if(runtimeConfig.LoadRuledFetchJob){
-
+		log.Debug("start ruled fetch")
 		go func() {
 			if(runtimeConfig.RuledFetchConfig.UrlTemplate!=""){
 				for i := runtimeConfig.RuledFetchConfig.From; i <=  runtimeConfig.RuledFetchConfig.To; i+=runtimeConfig.RuledFetchConfig.Step {
@@ -422,6 +424,8 @@ func main() {
 					log.Debug("add ruled url:",url)
 					pendingFetchUrls <- []byte(url)
 				}
+			}else{
+				log.Error("ruled template is empty,ignore")
 			}
 		}()
 

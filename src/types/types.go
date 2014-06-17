@@ -48,6 +48,12 @@ type TaskConfig struct {
 	TaskDataPath string
 	WebDataPath string
 
+	//User Cookie
+	Cookie string
+
+	//Fetch Speed Control
+	FetchDelayThreshold int
+
 }
 
 type Task struct {
