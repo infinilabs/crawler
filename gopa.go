@@ -179,7 +179,7 @@ func main() {
 
 	runtimeConfig.ParseUrlsFromSavedFileLog = config.GetBoolConfig("Switch", "ParseUrlsFromSavedFileLog", true)
 	runtimeConfig.LoadTemplatedFetchJob = config.GetBoolConfig("Switch", "LoadTemplatedFetchJob", true)
-	runtimeConfig.LoadRuledFetchJob = config.GetBoolConfig("Switch", "LoadRuledFetchJob", true)
+	runtimeConfig.LoadRuledFetchJob = config.GetBoolConfig("Switch", "LoadRuledFetchJob", false)
 	runtimeConfig.LoadPendingFetchJobs = config.GetBoolConfig("Switch", "LoadPendingFetchJobs", true)
 	runtimeConfig.HttpEnabled = config.GetBoolConfig("Switch", "HttpEnabled", true)
 	runtimeConfig.ParseUrlsFromPreviousSavedPage = config.GetBoolConfig("Switch", "ParseUrlsFromPreviousSavedPage", false)
