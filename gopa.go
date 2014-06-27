@@ -123,8 +123,21 @@ func parseConfig() *TaskConfig {
 	return taskConfig
 }
 
+func printVersion(){
+fmt.Println("  __ _  ___  _ __   __ _ ")
+fmt.Println(" / _` |/ _ \\| '_ \\ / _` |")
+fmt.Println("| (_| | (_) | |_) | (_| |")
+fmt.Println(" \\__, |\\___/| .__/ \\__,_|")
+fmt.Println(" |___/      |_|          ")
+	fmt.Println(" ")
+
+	fmt.Println("[gopa] "+runtimeConfig.Version+" is on",)
+	fmt.Println(" ")
+
+}
 
 func main() {
+
 	flag.StringVar(&seedUrl, "seed", "http://example.com", "the seed url,where everything starts")
 	flag.StringVar(&logLevel, "log", "info", "setting log level,options:trace,debug,info,warn,error")
 
@@ -225,15 +238,12 @@ func main() {
 	runtimeConfig.RuledFetchConfig.LinkExtractPattern=config.GetStringConfig("RuledFetch", "LinkExtractPattern", "")
 	runtimeConfig.RuledFetchConfig.LinkTemplate=config.GetStringConfig("RuledFetch", "LinkTemplate", "")
 
+	printVersion()
 
 	if seedUrl == "" || seedUrl == "http://example.com" {
 		log.Error("no seed was given. type:\"gopa -h\" for help.")
 		os.Exit(1)
 	}
-
-
-	log.Info("[gopa] "+runtimeConfig.Version+" is on.",)
-
 
 
 	runtimeConfig.Storage = &fsstore.FsStore{}
