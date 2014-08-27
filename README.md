@@ -12,7 +12,7 @@ linux: Run `chmod a+x build.sh &./build.sh` to build the Gopa
 windows: Run `build.bat` to build the Gopa
 
 a pre-compled gopa can be download from here:
-https://github.com/medcl/gopa-release/
+https://bintray.com/medcl/gopa-release/gopa/
 
 
 
