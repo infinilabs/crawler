@@ -57,13 +57,15 @@ func init() {
 func shutdown(offsets []*RoutingOffset, quitChannels []*chan bool, offsets2 []*RoutingOffset, quitChannels2 []*chan bool, quit chan bool) {
 	log.Debug("start shutting down")
 	for i := range quitChannels {
-		log.Debug("send exit signal to channel,", i)
 		*quitChannels[i] <- true
+		log.Debug("send exit signal to channel,", i)
 	}
 
-	for i := range quitChannels2 {
+	for i,item := range quitChannels2 {
+		if(item != nil){
+			*item <- true
+		}
 		log.Debug("send exit signal to channel,", i)
-		*quitChannels2[i] <- true
 	}
 
 	log.Info("sent quit signal to go routings done")
