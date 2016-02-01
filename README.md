@@ -12,7 +12,7 @@ linux: Run `chmod a+x build.sh &./build.sh` to build the Gopa
 windows: Run `build.bat` to build the Gopa
 
 a pre-compled gopa can be download from here:
-https://github.com/medcl/gopa-release/
+https://bintray.com/medcl/gopa-release/gopa/
 
 
 
@@ -20,7 +20,7 @@ https://github.com/medcl/gopa-release/
 
 after building the project run `./gopa -h` for a list of commandline options
 
-tips: you can download the pre-compiled [Gopa] from here: https://github.com/medcl/gopa-release
+tips: you can download the pre-compiled [Gopa] from here: https://bintray.com/medcl/gopa-release/gopa
 
 * -seed option : start a crawling, giving a seed url to Gopa. ie: `./gopa -seed=http://www.baidu.com`
 * -log option : logging level,can be set to `trace`,`debug`,`info`,`warn`,`error` ,default is `info`
