@@ -1,6 +1,6 @@
 # Gopa #
 
-[狗爬],A High Performance Distributed  Spider Written in GO. [![Total views](https://sourcegraph.com/api/repos/github.com/medcl/gopa/counters/views.png)](https://sourcegraph.com/github.com/medcl/gopa)
+[狗爬],A High Performance Distributed  Spider Written in GO.
 
 [![Build Status](https://drone.io/github.com/medcl/gopa/status.png)](https://drone.io/github.com/medcl/gopa/latest)
 
