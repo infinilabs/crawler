@@ -43,7 +43,8 @@ Gopa is standing on the shoulders of giants,thanks for the following goodies.
 * http://code.google.com/p/weed-fs
 * https://github.com/robfig/config
 * https://github.com/PuerkitoBio/purell
-
+* https://github.com/cihub/seelog
+* https://github.com/clarkduvall/hyperloglog
 
 license
 =======
