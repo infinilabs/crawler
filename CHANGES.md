@@ -7,6 +7,9 @@ v0.6
 feature:
 1.crawling speed control
 2.cookie supported
+3.brief logging format
+bugfix:
+1.shutdown nil exception
 
 v0.5
 feature:
