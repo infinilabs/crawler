@@ -39,6 +39,7 @@ config:
 	go get github.com/cihub/seelog
 	go get github.com/robfig/config
 	go get github.com/PuerkitoBio/purell
+	go get github.com/clarkduvall/hyperloglog
 
 dist: cross-build package
 

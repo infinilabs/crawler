@@ -9,7 +9,7 @@ package http
 
 import (
 	"net/http"
-	log "logging"
+	log "github.com/cihub/seelog"
 	. "types"
 )
 

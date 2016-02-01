@@ -6,7 +6,7 @@
 package tasks
 
 import (
-	log "logging"
+	log "github.com/cihub/seelog"
 	"time"
 	util "util"
 	. "types"

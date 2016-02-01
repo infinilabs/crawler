@@ -7,7 +7,7 @@ package fs
 
 import (
 	util "util"
-	log "logging"
+	log "github.com/cihub/seelog"
 	."github.com/zeebo/sbloom"
 	"hash/fnv"
 	"io/ioutil"

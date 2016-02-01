@@ -6,7 +6,7 @@
 package util
 
 import (
-	log "logging"
+	log "github.com/cihub/seelog"
 	"io/ioutil"
 	"net/http"
 	"net/url"

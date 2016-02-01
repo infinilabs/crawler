@@ -8,7 +8,7 @@ package util
 import (
 	"os"
 	"io"
-	log "logging"
+	log "github.com/cihub/seelog"
 	"io/ioutil"
 	"fmt"
 	"sort"

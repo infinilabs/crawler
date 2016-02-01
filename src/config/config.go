@@ -6,7 +6,7 @@
 package config
  import (
 	 config "github.com/robfig/config"
-	 log "logging"
+	 log "github.com/cihub/seelog"
  )
 
 var loadingConfig *config.Config

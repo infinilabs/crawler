@@ -8,7 +8,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	log "logging"
+	logging "logging"
 //	"io/ioutil"
 	_ "net/http/pprof"
 	"os"
@@ -27,6 +27,7 @@ import (
 	config "config"
 	"strconv"
 	httpServ "http"
+	log "github.com/cihub/seelog"
 )
 
 var seedUrl string
@@ -124,11 +125,11 @@ func parseConfig() *TaskConfig {
 }
 
 func printVersion(){
-fmt.Println("  __ _  ___  _ __   __ _ ")
-fmt.Println(" / _` |/ _ \\| '_ \\ / _` |")
-fmt.Println("| (_| | (_) | |_) | (_| |")
-fmt.Println(" \\__, |\\___/| .__/ \\__,_|")
-fmt.Println(" |___/      |_|          ")
+	fmt.Println("  __ _  ___  _ __   __ _ ")
+	fmt.Println(" / _` |/ _ \\| '_ \\ / _` |")
+	fmt.Println("| (_| | (_) | |_) | (_| |")
+	fmt.Println(" \\__, |\\___/| .__/ \\__,_|")
+	fmt.Println(" |___/      |_|          ")
 	fmt.Println(" ")
 
 	fmt.Println("[gopa] "+runtimeConfig.Version+" is on",)
@@ -143,12 +144,12 @@ func main() {
 
 	flag.Parse()
 
-	defer log.Flush()
+	defer logging.Flush()
 
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	log.SetInitLogging(logLevel)
+	logging.SetInitLogging(logLevel)
 
 
 	runtimeConfig.PathConfig = new(PathConfig)
@@ -187,7 +188,7 @@ func main() {
 
 	//set default logging
 	logPath := runtimeConfig.PathConfig.Log + "/" + runtimeConfig.TaskConfig.Name + "/gopa.log";
-	log.SetLogging(logLevel, logPath)
+	logging.SetLogging(logLevel, logPath)
 
 
 	runtimeConfig.ParseUrlsFromSavedFileLog = config.GetBoolConfig("Switch", "ParseUrlsFromSavedFileLog", true)
