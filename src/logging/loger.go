@@ -23,7 +23,7 @@ func SetInitLogging(logLevel string) {
 			<console formatid="main" />
 		</outputs>
 		<formats>
-			<format id="main" format="[%Date %Time] [%LEV] [%File:%Line,%FuncShort] %Msg%n"/>
+			<format id="main" format="[%Date(01-02) %Time] [%LEV] [%File:%Line,%FuncShort] %Msg%n"/>
 		</formats>
 	</seelog>`
 	logger, _ := log.LoggerFromConfigAsString(testConfig)
@@ -43,7 +43,7 @@ func SetLogging(logLevel string,logFile string) {
 			 <rollingfile formatid="main" type="size" filename="`+logFile+`" maxsize="100" maxrolls="5" />
 		</outputs>
 		<formats>
-			<format id="main" format="[%Date %Time] [%LEV] [%File:%Line,%FuncShort] %Msg%n"/>
+			<format id="main" format="[%Date(01-02) %Time] [%LEV] [%File:%Line,%FuncShort] %Msg%n"/>
 		</formats>
 	</seelog>`
 	logger, _ := log.LoggerFromConfigAsString(testConfig)

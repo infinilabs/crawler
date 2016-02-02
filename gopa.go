@@ -24,6 +24,7 @@ import (
 	httpServ "github.com/medcl/gopa/src/http"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/src/config"
+	"time"
 )
 
 var seedUrl string
@@ -69,7 +70,8 @@ func shutdown(offsets []*RoutingOffset, quitChannels []*chan bool, offsets2 []*R
 	quit <- true
 	log.Debug("finished shutting down")}
 
-func printVersion(){
+var startTime time.Time
+func printStartInfo(){
 	fmt.Println("  __ _  ___  _ __   __ _ ")
 	fmt.Println(" / _` |/ _ \\| '_ \\ / _` |")
 	fmt.Println("| (_| | (_) | |_) | (_| |")
@@ -79,7 +81,15 @@ func printVersion(){
 
 	fmt.Println("[gopa] "+runtimeConfig.Version+" is on",)
 	fmt.Println(" ")
-
+	startTime=time.Now()
+}
+func printShutdownInfo(){
+fmt.Println("                         |    |                ")
+fmt.Println("   _` |   _ \\   _ \\   _` |     _ \\  |  |   -_) ")
+fmt.Println(" \\__, | \\___/ \\___/ \\__,_|   _.__/ \\_, | \\___| ")
+fmt.Println(" ____/                             ___/        ")
+	fmt.Println("[gopa] "+runtimeConfig.Version+" is down, uptime:",time.Now().Sub(startTime))
+	fmt.Println(" ")
 }
 
 func main() {
@@ -99,7 +109,7 @@ func main() {
 
 	runtimeConfig.LogLevel=logLevel
 
-	printVersion()
+	printStartInfo()
 
 	if seedUrl == "" || seedUrl == "http://example.com" {
 		log.Error("no seed was given. type:\"gopa -h\" for help.")
@@ -300,7 +310,7 @@ func main() {
 	  }
 
 	<-finalQuitSignal
-	log.Info("[gopa] is down")
+	printShutdownInfo()
 }
 
 
