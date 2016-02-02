@@ -8,37 +8,39 @@ package tasks
 import (
 	log "github.com/cihub/seelog"
 	"time"
-	util "util"
-	. "types"
+	util "github.com/medcl/gopa/src/util"
+	. "github.com/medcl/gopa/src/config"
 )
 
 //fetch url's content
-func fetchUrl(url []byte, timeout time.Duration, runtimeConfig RuntimeConfig,  offsets *RoutingOffset) {
+func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig,  offsets *RoutingOffset) {
 	t := time.NewTimer(timeout)
 	defer t.Stop()
 
 	resource := string(url)
 
+	var storage = runtimeConfig.Storage
+
 	log.Debug("enter fetchUrl method:",resource)
 
 	config:=runtimeConfig.TaskConfig
 
-	if(runtimeConfig.Storage.CheckFetchedUrl(url)){
+	if(storage.CheckFetchedUrl(url)){
 		return
 	}
 
 
 	path:=getSavedPath(runtimeConfig,url)
 
-	if(runtimeConfig.Storage.CheckSavedFile(path)){
+	if(storage.CheckSavedFile(path)){
 		log.Warn("file is already saved,skip fetch.",path)
-		runtimeConfig.Storage.AddSavedUrl(url)
+		storage.AddSavedUrl(url)
 
 		//re-parse local's previous saved page
 		if(runtimeConfig.ParseUrlsFromPreviousSavedPage){
-			if(!runtimeConfig.Storage.CheckParsedFile([]byte(path))){
+			if(!storage.CheckParsedFile([]byte(path))){
 				log.Debug("previous saved page send to parse-queue:",path)
-				runtimeConfig.Storage.LogSavedFile(runtimeConfig.PathConfig.SavedFileLog,resource+"|||"+path)
+				storage.LogSavedFile(runtimeConfig.PathConfig.SavedFileLog,resource+"|||"+path)
 			}
 		}
 	   return
@@ -99,7 +101,7 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig RuntimeConfig,  o
 					if(err==nil){
 						log.Info("saved:",path)
 						//todo saved per shard
-						runtimeConfig.Storage.LogSavedFile(runtimeConfig.PathConfig.SavedFileLog,resource+"|||"+path)
+						storage.LogSavedFile(runtimeConfig.PathConfig.SavedFileLog,resource+"|||"+path)
 					}else{
 						log.Info("error while saved:",path,",",err)
 						goto exitPage
@@ -109,12 +111,12 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig RuntimeConfig,  o
 					log.Debug("does not hit SavingUrlPattern ignoring,", resource)
 				}
 			}
-			runtimeConfig.Storage.AddFetchedUrl(url)
+			storage.AddFetchedUrl(url)
 		exitPage:
 			log.Debug("exit fetchUrl method:",resource)
 		}else{
-//			runtimeConfig.Storage.AddFetchFailedUrl(url)
-			runtimeConfig.Storage.LogFetchFailedUrl(runtimeConfig.PathConfig.FetchFailedLog,resource)
+//			storage.AddFetchFailedUrl(url)
+			storage.LogFetchFailedUrl(runtimeConfig.PathConfig.FetchFailedLog,resource)
 		}
 		flg <- true
 	}()
@@ -136,15 +138,16 @@ func init() {
 //	log.Warn("init bloom filter")
 }
 
-func FetchGo(runtimeConfig RuntimeConfig, taskC *chan []byte, quitC *chan bool, offsets *RoutingOffset) {
+func FetchGo(runtimeConfig *RuntimeConfig, taskC *chan []byte, quitC *chan bool, offsets *RoutingOffset) {
 	shard:=offsets.Shard
 	log.Info("fetch task started.shard:",shard)
+	var storage = runtimeConfig.Storage
 	go func() {
 		for {
 			url := <-*taskC
 			log.Debug("shard:",shard,",url received:", string(url))
 
-				if !runtimeConfig.Storage.CheckFetchedUrl(url) {
+				if !storage.CheckFetchedUrl(url) {
 					timeout := 10 * time.Second
 
 //					if(fetchFilter.Lookup(url)){

@@ -9,8 +9,9 @@ package http
 
 import (
 	"net/http"
+	"github.com/pantsing/gograce/ghttp"
 	log "github.com/cihub/seelog"
-	. "types"
+	. "github.com/medcl/gopa/src/config"
 )
 
 func index(w http.ResponseWriter, req *http.Request) {
@@ -20,10 +21,10 @@ func index(w http.ResponseWriter, req *http.Request) {
 }
 
 var config RuntimeConfig
-func Start(runtimeConfig RuntimeConfig) {
-	config=runtimeConfig
+func Start(runtimeConfig *RuntimeConfig) {
+	config=*runtimeConfig
 	http.HandleFunc("/", index)
-	http.ListenAndServe(":8001", nil)
+	ghttp.ListenAndServe(":8001", nil)
 	log.Info("http server is up,http://localhost:8001/")
 
 }

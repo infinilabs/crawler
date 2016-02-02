@@ -10,7 +10,7 @@ import (
 	. "net/url"
 	"os"
 	"strings"
-	. "types"
+	. "github.com/medcl/gopa/src/config"
 
 )
 
@@ -18,7 +18,7 @@ func init() {
 }
 
 
-func getSavedPath(runtimeConfig RuntimeConfig,url []byte) string{
+func getSavedPath(runtimeConfig *RuntimeConfig,url []byte) string{
 
 	siteConfig:=runtimeConfig.TaskConfig
 
@@ -105,7 +105,7 @@ func getSavedPath(runtimeConfig RuntimeConfig,url []byte) string{
 }
 
 
-func Save(runtimeConfig RuntimeConfig,path string,body []byte)(int,error) {
+func Save(runtimeConfig *RuntimeConfig,path string,body []byte)(int,error) {
 
 	log.Trace("touch file,", path)
 	fout, error := os.Create(path)

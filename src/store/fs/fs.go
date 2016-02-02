@@ -6,14 +6,12 @@
 package fs
 
 import (
-	util "util"
+	util "github.com/medcl/gopa/src/util"
 	log "github.com/cihub/seelog"
-	."github.com/zeebo/sbloom"
-	"hash/fnv"
 	"io/ioutil"
-	config "config"
 	"strconv"
 	"os"
+	"github.com/medcl/gopa/src/config"
 )
 
 
@@ -22,10 +20,10 @@ type FsStore struct{
 	FetchBloomFilterFileName string
 	ParseBloomFilterFileName string
 	PendingFetchBloomFilterFileName string
-	WalkBloomFilter *Filter
-	FetchBloomFilter *Filter
-	ParseBloomFilter *Filter
-	PendingFetchBloomFilter *Filter
+	WalkBloomFilter  util.DeduplicatePlugin
+	FetchBloomFilter util.DeduplicatePlugin
+	ParseBloomFilter util.DeduplicatePlugin
+	PendingFetchBloomFilter util.DeduplicatePlugin
 }
 
 func (this *FsStore) Store(url string, data []byte){
@@ -48,67 +46,51 @@ func (this *FsStore) TaskEnqueue(url []byte){
 	 log.Info("task enqueue:",string(url))
 }
 
-
-
-func initBloomFilter(bloomFilterPersistFileName string) *Filter {
-	var bloomFilter = new(Filter)
-	//loading or initializing bloom filter
-	if util.CheckFileExists(bloomFilterPersistFileName) {
-		log.Debug("found bloomFilter,start reload,", bloomFilterPersistFileName)
-		n, err := ioutil.ReadFile(bloomFilterPersistFileName)
-		if err != nil {
-			log.Error("bloomFilter:",bloomFilterPersistFileName, err)
-		}
-		if err := bloomFilter.GobDecode(n); err != nil {
-			log.Error("bloomFilter:",bloomFilterPersistFileName, err)
-		}
-		log.Info("bloomFilter successfully reloaded:",bloomFilterPersistFileName)
-	} else {
-		probItems := config.GetIntConfig("BloomFilter", "ItemSize", 100000)
-		log.Debug("initializing bloom-filter",bloomFilterPersistFileName,",virual size is,", probItems)
-		bloomFilter = NewFilter(fnv.New64(), probItems)
-		log.Info("bloomFilter successfully initialized:",bloomFilterPersistFileName)
-	}
-	return bloomFilter
+func persistBloomFilter(bloomFilterPersistFileName string,bloomFilter util.DeduplicatePlugin) {
+	bloomFilter.Persist()
 }
 
+func (this *FsStore) Init() error{
 
-func persistBloomFilter(bloomFilterPersistFileName string,bloomFilter *Filter) {
+	var runtimeConfig= config.InitOrGetConfig()
+	this.FetchBloomFilterFileName=runtimeConfig.FetchBloomFilterFileName;
+	this.WalkBloomFilterFileName=runtimeConfig.WalkBloomFilterFileName;
+	this.ParseBloomFilterFileName=runtimeConfig.ParseBloomFilterFileName;
+	this.PendingFetchBloomFilterFileName=runtimeConfig.PendingFetchBloomFilterFileName;
 
-	//save bloom-filter
-	m, err := bloomFilter.GobEncode()
-	if err != nil {
-		log.Error(err)
-		return
-	}
-	err = ioutil.WriteFile(bloomFilterPersistFileName, m, 0600)
-	if err != nil {
-		panic(err)
-		return
-	}
-	log.Info("bloomFilter safety persisted.")
+	this.WalkBloomFilter = new(BloomFilter)
+	this.WalkBloomFilter.Init(this.WalkBloomFilterFileName)
+
+	this.FetchBloomFilter= new(BloomFilter)
+	this.FetchBloomFilter.Init(this.FetchBloomFilterFileName)
+
+	this.ParseBloomFilter= new(BloomFilter)
+	this.ParseBloomFilter.Init(this.ParseBloomFilterFileName)
+
+	this.PendingFetchBloomFilter= new(BloomFilter)
+	this.PendingFetchBloomFilter.Init(this.PendingFetchBloomFilterFileName)
+
+	return nil
 }
+//func (this *FsStore) InitWalkBloomFilter(walkBloomFilterFileName string ){
+//	this.WalkBloomFilterFileName= walkBloomFilterFileName
+//	this.WalkBloomFilter = initBloomFilter(this.WalkBloomFilterFileName)
+//}
 
+//func (this *FsStore) InitFetchBloomFilter(fetchBloomFilterFileName string ){
+//	this.FetchBloomFilterFileName=fetchBloomFilterFileName
+//	this.FetchBloomFilter = initBloomFilter(this.FetchBloomFilterFileName)
+//}
 
-func (this *FsStore) InitWalkBloomFilter(walkBloomFilterFileName string ){
-	this.WalkBloomFilterFileName= walkBloomFilterFileName
-	this.WalkBloomFilter = initBloomFilter(this.WalkBloomFilterFileName)
-}
+//func (this *FsStore) InitParseBloomFilter(parseBloomFilterFileName string ){
+//	this.ParseBloomFilterFileName=parseBloomFilterFileName
+//	this.ParseBloomFilter = initBloomFilter(this.ParseBloomFilterFileName)
+//}
 
-func (this *FsStore) InitFetchBloomFilter(fetchBloomFilterFileName string ){
-	this.FetchBloomFilterFileName=fetchBloomFilterFileName
-	this.FetchBloomFilter = initBloomFilter(this.FetchBloomFilterFileName)
-}
-
-func (this *FsStore) InitParseBloomFilter(parseBloomFilterFileName string ){
-	this.ParseBloomFilterFileName=parseBloomFilterFileName
-	this.ParseBloomFilter = initBloomFilter(this.ParseBloomFilterFileName)
-}
-
-func (this *FsStore) InitPendingFetchBloomFilter(filterName string ){
-	this.PendingFetchBloomFilterFileName=filterName
-	this.PendingFetchBloomFilter = initBloomFilter(this.PendingFetchBloomFilterFileName)
-}
+//func (this *FsStore) InitPendingFetchBloomFilter(filterName string ){
+//	this.PendingFetchBloomFilterFileName=filterName
+//	this.PendingFetchBloomFilter = initBloomFilter(this.PendingFetchBloomFilterFileName)
+//}
 
 
 func (this *FsStore) PersistBloomFilter(){
@@ -220,8 +202,4 @@ func (this *FsStore) PersistOffset(fileName string,offset int64){
 
 
 
-
-//InitPendingFetchBloomFilter(fileName string)
-//CheckPendingFetchUrl(url []byte) bool
-//AddPendingFetchUrl(url []byte )
-//LogPendingFetchUrl(path,content string )
+func (this *FsStore) InitPendingFetchBloomFilter(fileName string){}

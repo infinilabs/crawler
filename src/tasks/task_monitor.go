@@ -13,14 +13,14 @@ import (
 	"os"
 	//	"regexp"
 //	"strings"
-	time    "time"
+	"time"
 //	. "github.com/PuerkitoBio/purell"
 	//	. "github.com/zeebo/sbloom"
 	//	"kafka"
 	//	"math/rand"
 //		"strconv"
-	. "types"
-	util "util"
+	. "github.com/medcl/gopa/src/config"
+	util "github.com/medcl/gopa/src/util"
 //		utils "util"
 	//	bloom "github.com/zeebo/sbloom"
 	//	"hash/fnv"
@@ -37,12 +37,13 @@ func LoadTaskFromLocalFile(pendingFetchUrls chan []byte, runtimeConfig *RuntimeC
 
 waitFile:
 	if (!util.CheckFileExists(path)) {
-		log.Trace("waiting file create",path)
+		log.Trace("waiting file create:",path)
 		time.Sleep(10*time.Millisecond)
 		goto waitFile
 	}
+	var storage=runtimeConfig.Storage
 
-	var offset int64= runtimeConfig.Storage.LoadOffset(runtimeConfig.PathConfig.PendingFetchLog + ".offset")
+	var offset int64= storage.LoadOffset(runtimeConfig.PathConfig.PendingFetchLog + ".offset")
 	FetchFileWithOffset2(*runtimeConfig,pendingFetchUrls,path, offset)
 
 
@@ -61,6 +62,7 @@ func FetchFileWithOffset2(runtimeConfig RuntimeConfig,pendingFetchUrls chan []by
 		log.Trace("error opening file,", path, " ", err)
 		return
 	}
+	var storage=runtimeConfig.Storage
 
 	r := bufio.NewReader(f)
 	s, e := util.Readln(r)
@@ -74,7 +76,7 @@ func FetchFileWithOffset2(runtimeConfig RuntimeConfig,pendingFetchUrls chan []by
 			ParsedSavedFileLog2(runtimeConfig,pendingFetchUrls,s)
 		}
 
-		runtimeConfig.Storage.PersistOffset(runtimeConfig.PathConfig.PendingFetchLog + ".offset",offset)
+		storage.PersistOffset(runtimeConfig.PathConfig.PendingFetchLog + ".offset",offset)
 
 		s, e = util.Readln(r)
 		//todo store offset
@@ -101,7 +103,9 @@ func ParsedSavedFileLog2(runtimeConfig RuntimeConfig,pendingFetchUrls chan []byt
 	if (url != "") {
 		log.Trace("start parse filelog:", url)
 
-		if(runtimeConfig.Storage.CheckFetchedUrl([]byte(url))){
+		var storage=runtimeConfig.Storage
+
+		if(storage.CheckFetchedUrl([]byte(url))){
 			log.Debug("hit fetch filter ignore,",url)
 			return
 		}

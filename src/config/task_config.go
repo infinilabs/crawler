@@ -3,7 +3,7 @@
  * Date: 13-7-25
  * Time: 上午8:56 
  */
-package types
+package config
 
 import (
 	"regexp"

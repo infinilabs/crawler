@@ -4,7 +4,10 @@
  * Date: 13-10-17
  * Time: 下午5:21
  */
-package types
+package config
+import (
+	. "github.com/medcl/gopa/src/types"
+)
 
 
 type PathConfig struct {
@@ -39,6 +42,8 @@ type RuledFetchConfig struct {
 type RuntimeConfig struct{
 
 	Version string
+
+	LogLevel string `info`
 
 	//cluster
 	ClusterConfig *ClusterConfig
@@ -75,8 +80,3 @@ type RuntimeConfig struct{
 	PendingFetchBloomFilterFileName string
 
 }
-
-//type TaskChan struct {
-//	PendingFetchChan *chan []byte
-//}
-

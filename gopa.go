@@ -8,31 +8,27 @@ package main
 import (
 	"flag"
 	"fmt"
-	logging "logging"
-//	"io/ioutil"
+	logging "github.com/medcl/gopa/src/logging"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
-	"regexp"
-//	"strconv"
 	"strings"
 	"syscall"
-	"util"
+	"github.com/medcl/gopa/src/util"
 	"math/rand"
 	"runtime"
-	task "tasks"
-	. "types"
+	task "github.com/medcl/gopa/src/tasks"
 	"net/http"
-	fsstore "store/fs"
-	config "config"
+	fsstore "github.com/medcl/gopa/src/store/fs"
 	"strconv"
-	httpServ "http"
+	httpServ "github.com/medcl/gopa/src/http"
 	log "github.com/cihub/seelog"
+	. "github.com/medcl/gopa/src/config"
 )
 
 var seedUrl string
 var logLevel string
-var runtimeConfig RuntimeConfig
+var runtimeConfig *RuntimeConfig
 
 func getSeqStr(start []byte, end []byte, mix bool) []byte {
 	if (len(start)) == len(end) {
@@ -47,25 +43,18 @@ func getSeqStr(start []byte, end []byte, mix bool) []byte {
 	return nil
 }
 
-func init() {
-	runtimeConfig = RuntimeConfig{}
-	runtimeConfig.Version="0.6_SNAPSHOT"
-}
-
-
-
 func shutdown(offsets []*RoutingOffset, quitChannels []*chan bool, offsets2 []*RoutingOffset, quitChannels2 []*chan bool, quit chan bool) {
 	log.Debug("start shutting down")
 	for i := range quitChannels {
 		*quitChannels[i] <- true
-		log.Debug("send exit signal to channel,", i)
+		log.Debug("send exit signal to quit channel-1,", i)
 	}
 
 	for i,item := range quitChannels2 {
 		if(item != nil){
 			*item <- true
 		}
-		log.Debug("send exit signal to channel,", i)
+		log.Debug("send exit signal to quit channel-2,", i)
 	}
 
 	log.Info("sent quit signal to go routings done")
@@ -79,52 +68,6 @@ func shutdown(offsets []*RoutingOffset, quitChannels []*chan bool, offsets2 []*R
 
 	quit <- true
 	log.Debug("finished shutting down")}
-
-//parse config setting
-func parseConfig() *TaskConfig {
-	log.Debug("start parsing taskConfig")
-	taskConfig := new(TaskConfig)
-	taskConfig.LinkUrlExtractRegex = regexp.MustCompile(
-	config.GetStringConfig("CrawlerRule", "LinkUrlExtractRegex", "(\\s+(src2|src|href|HREF|SRC))\\s*=\\s*[\"']?(.*?)[\"']"))
-
-	taskConfig.SplitByUrlParameter = config.GetStringConfig("CrawlerRule", "SplitByUrlParameter", "p")
-
-
-	taskConfig.LinkUrlExtractRegexGroupIndex = config.GetIntConfig("CrawlerRule", "LinkUrlExtractRegexGroupIndex", 3)
-	taskConfig.Name = config.GetStringConfig("CrawlerRule", "Name", "GopaTask")
-
-
-	taskConfig.FollowSameDomain = config.GetBoolConfig("CrawlerRule", "FollowSameDomain", true)
-	taskConfig.FollowSubDomain = config.GetBoolConfig("CrawlerRule", "FollowSubDomain", true)
-	taskConfig.LinkUrlMustContain = config.GetStringConfig("CrawlerRule", "LinkUrlMustContain", "")
-	taskConfig.LinkUrlMustNotContain = config.GetStringConfig("CrawlerRule", "LinkUrlMustNotContain", "")
-
-	taskConfig.SkipPageParsePattern = regexp.MustCompile(config.GetStringConfig("CrawlerRule", "SkipPageParsePattern", ".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b")) //end with js,css,apk,zip,ignore
-
-	taskConfig.FetchUrlPattern = regexp.MustCompile(config.GetStringConfig("CrawlerRule", "FetchUrlPattern", ".*"))
-	taskConfig.FetchUrlMustContain = config.GetStringConfig("CrawlerRule", "FetchUrlMustContain", "")
-	taskConfig.FetchUrlMustNotContain = config.GetStringConfig("CrawlerRule", "FetchUrlMustNotContain", "")
-
-	taskConfig.SavingUrlPattern = regexp.MustCompile(config.GetStringConfig("CrawlerRule", "SavingUrlPattern", ".*"))
-	taskConfig.SavingUrlMustContain = config.GetStringConfig("CrawlerRule", "SavingUrlMustContain", "")
-	taskConfig.SavingUrlMustNotContain = config.GetStringConfig("CrawlerRule", "SavingUrlMustNotContain", "")
-
-	taskConfig.Cookie = config.GetStringConfig("CrawlerRule", "Cookie", "")
-	taskConfig.FetchDelayThreshold = config.GetIntConfig("CrawlerRule", "FetchDelayThreshold", 0)
-
-	taskConfig.TaskDataPath = config.GetStringConfig("CrawlerRule", "TaskData", runtimeConfig.PathConfig.TaskData + "/" + taskConfig.Name + "/")
-
-	defaultWebDataPath := runtimeConfig.PathConfig.WebData + "/" + taskConfig.Name + "/"
-	if (runtimeConfig.StoreWebPageTogether) {
-		defaultWebDataPath = runtimeConfig.PathConfig.WebData
-	}
-
-	taskConfig.WebDataPath = config.GetStringConfig("CrawlerRule", "WebData", defaultWebDataPath)
-
-
-	log.Debug("finished parsing taskConfig")
-	return taskConfig
-}
 
 func printVersion(){
 	fmt.Println("  __ _  ___  _ __   __ _ ")
@@ -148,98 +91,13 @@ func main() {
 
 	defer logging.Flush()
 
-
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	logging.SetInitLogging(logLevel)
 
+	runtimeConfig = InitOrGetConfig()
 
-	runtimeConfig.PathConfig = new(PathConfig)
-	runtimeConfig.ClusterConfig = new(ClusterConfig)
-
-	runtimeConfig.ClusterConfig.Name = config.GetStringConfig("cluster", "name", "gopa")
-
-	// per cluster:data/gopa/
-	runtimeConfig.PathConfig.Home = config.GetStringConfig("path", "home", "cluster/"+runtimeConfig.ClusterConfig.Name + "/")
-
-	runtimeConfig.PathConfig.Data = config.GetStringConfig("path", "data", "")
-	if (runtimeConfig.PathConfig.Data == "") {
-		runtimeConfig.PathConfig.Data = runtimeConfig.PathConfig.Home + "/" + "data/"
-	}
-
-	runtimeConfig.PathConfig.Log = config.GetStringConfig("path", "log", "")
-	if (runtimeConfig.PathConfig.Log == "") {
-		runtimeConfig.PathConfig.Log = runtimeConfig.PathConfig.Home + "/" + "log/"
-	}
-
-	runtimeConfig.PathConfig.WebData = config.GetStringConfig("path", "webdata", "")
-	if (runtimeConfig.PathConfig.WebData == "") {
-		runtimeConfig.PathConfig.WebData = runtimeConfig.PathConfig.Data + "/" + "webdata/"
-	}
-
-	runtimeConfig.PathConfig.TaskData = config.GetStringConfig("path", "taskdata", "")
-	if (runtimeConfig.PathConfig.TaskData == "") {
-		runtimeConfig.PathConfig.TaskData = runtimeConfig.PathConfig.Data + "/" + "taskdata/"
-	}
-
-	runtimeConfig.StoreWebPageTogether = config.GetBoolConfig("Global", "StoreWebPageTogether", true)
-
-
-	runtimeConfig.TaskConfig = parseConfig()
-
-
-	//set default logging
-	logPath := runtimeConfig.PathConfig.Log + "/" + runtimeConfig.TaskConfig.Name + "/gopa.log";
-	logging.SetLogging(logLevel, logPath)
-
-
-	runtimeConfig.ParseUrlsFromSavedFileLog = config.GetBoolConfig("Switch", "ParseUrlsFromSavedFileLog", true)
-	runtimeConfig.LoadTemplatedFetchJob = config.GetBoolConfig("Switch", "LoadTemplatedFetchJob", true)
-	runtimeConfig.LoadRuledFetchJob = config.GetBoolConfig("Switch", "LoadRuledFetchJob", false)
-	runtimeConfig.LoadPendingFetchJobs = config.GetBoolConfig("Switch", "LoadPendingFetchJobs", true)
-	runtimeConfig.HttpEnabled = config.GetBoolConfig("Switch", "HttpEnabled", true)
-	runtimeConfig.ParseUrlsFromPreviousSavedPage = config.GetBoolConfig("Switch", "ParseUrlsFromPreviousSavedPage", false)
-	runtimeConfig.ArrayStringSplitter = config.GetStringConfig("CrawlerRule", "ArrayStringSplitter", ",")
-
-	runtimeConfig.GoProfEnabled = config.GetBoolConfig("CrawlerRule", "GoProfEnabled", false)
-
-	runtimeConfig.WalkBloomFilterFileName = config.GetStringConfig("BloomFilter", "WalkBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath +   "/filters/walk.bloomfilter")
-	runtimeConfig.FetchBloomFilterFileName = config.GetStringConfig("BloomFilter", "FetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath + "/filters/fetch.bloomfilter")
-	runtimeConfig.ParseBloomFilterFileName = config.GetStringConfig("BloomFilter", "ParseBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath + "/filters/parse.bloomfilter")
-	runtimeConfig.PendingFetchBloomFilterFileName = config.GetStringConfig("BloomFilter", "PendingFetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath + "/filters/pending_fetch.bloomfilter")
-
-	runtimeConfig.PathConfig.SavedFileLog=runtimeConfig.TaskConfig.TaskDataPath+"/tasks/pending_parse.files"
-	runtimeConfig.PathConfig.PendingFetchLog=runtimeConfig.TaskConfig.TaskDataPath+"/tasks/pending_fetch.urls"
-	runtimeConfig.PathConfig.FetchFailedLog=runtimeConfig.TaskConfig.TaskDataPath+"/tasks/failed_fetch.urls"
-
-	runtimeConfig.MaxGoRoutine = config.GetIntConfig("Global", "MaxGoRoutine", 2)
-	if runtimeConfig.MaxGoRoutine < 2 {
-		runtimeConfig.MaxGoRoutine = 2
-	}
-
-	log.Debug("maxGoRoutine:", runtimeConfig.MaxGoRoutine)
-	log.Debug("path.home:", runtimeConfig.PathConfig.Home)
-
-
-	os.MkdirAll(runtimeConfig.PathConfig.Home, 0777)
-	os.MkdirAll(runtimeConfig.PathConfig.Data, 0777)
-	os.MkdirAll(runtimeConfig.PathConfig.Log, 0777)
-	os.MkdirAll(runtimeConfig.PathConfig.WebData, 0777)
-	os.MkdirAll(runtimeConfig.PathConfig.TaskData, 0777)
-
-	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath, 0777)
-	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath + "/tasks/", 0777)
-	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath + "/filters/", 0777)
-	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath + "/urls/", 0777)
-	os.MkdirAll(runtimeConfig.TaskConfig.WebDataPath, 0777)
-
-	runtimeConfig.RuledFetchConfig=new(RuledFetchConfig)
-	runtimeConfig.RuledFetchConfig.UrlTemplate=config.GetStringConfig("RuledFetch", "UrlTemplate", "")
-	runtimeConfig.RuledFetchConfig.From=config.GetIntConfig("RuledFetch", "From", 0)
-	runtimeConfig.RuledFetchConfig.To=config.GetIntConfig("RuledFetch", "To", 10)
-	runtimeConfig.RuledFetchConfig.Step=config.GetIntConfig("RuledFetch", "Step", 1)
-	runtimeConfig.RuledFetchConfig.LinkExtractPattern=config.GetStringConfig("RuledFetch", "LinkExtractPattern", "")
-	runtimeConfig.RuledFetchConfig.LinkTemplate=config.GetStringConfig("RuledFetch", "LinkTemplate", "")
+	runtimeConfig.LogLevel=logLevel
 
 	printVersion()
 
@@ -249,14 +107,11 @@ func main() {
 	}
 
 
-	runtimeConfig.Storage = &fsstore.FsStore{}
+	runtimeConfig.Storage =& fsstore.FsStore{}
+
+	runtimeConfig.Storage.Init()
 
 //	if(runtimeConfig.)
-
-	runtimeConfig.Storage.InitWalkBloomFilter(runtimeConfig.WalkBloomFilterFileName);
-	runtimeConfig.Storage.InitFetchBloomFilter(runtimeConfig.FetchBloomFilterFileName);
-	runtimeConfig.Storage.InitParseBloomFilter(runtimeConfig.ParseBloomFilterFileName);
-	runtimeConfig.Storage.InitPendingFetchBloomFilter(runtimeConfig.PendingFetchBloomFilterFileName);
 
 	//	atr:="AZaz"
 	//	btr:=[]byte(atr)
@@ -421,7 +276,7 @@ func main() {
 //		offset3.Offset = initOffset(runtimeConfig, "fetch_from_saved", 0)
 		offset3.Shard = 0
 		parseOffsets[1] = offset3
-		go task.LoadTaskFromLocalFile(pendingFetchUrls, &runtimeConfig, &c3, offset3)
+		go task.LoadTaskFromLocalFile(pendingFetchUrls, runtimeConfig, &c3, offset3)
 	}
 
 

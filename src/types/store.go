@@ -12,15 +12,13 @@ type Store interface {
 	Get(key string) []byte
 	List(from int, size int) [][]byte
 	TaskEnqueue([]byte)
-	InitWalkBloomFilter(fileName string)
-	InitFetchBloomFilter(fileName string)
-	InitParseBloomFilter(fileName string)
+	Init()error
 	PersistBloomFilter()
 	CheckWalkedUrl(url []byte) bool
 	CheckFetchedUrl(url []byte) bool
 	CheckParsedFile(url []byte) bool
 	AddWalkedUrl(url []byte )
-	AddFetchedUrl(url []byte )
+	AddFetchedUrl(url []byte)
 	AddSavedUrl(url []byte )   //the file already saved,but is missing in bloom filter,run this method
 	AddParsedFile(url []byte )
 
@@ -28,7 +26,7 @@ type Store interface {
 
 	LogFetchFailedUrl(path,content string )
 
-	AddFetchFailedUrl(url []byte )
+//	AddFetchFailedUrl(url []byte )
 
 	CheckSavedFile(file string)  bool
 

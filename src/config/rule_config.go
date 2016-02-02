@@ -3,7 +3,7 @@
  * Date: 13-7-25
  * Time: 下午9:52 
  */
-package types
+package config
 
 type MatchRule struct {
 

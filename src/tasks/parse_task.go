@@ -20,8 +20,8 @@ import (
 	//	"kafka"
 	//	"math/rand"
 	//	"strconv"
-	. "types"
-	util "util"
+	. "github.com/medcl/gopa/src/config"
+	util "github.com/medcl/gopa/src/util"
 	//	utils "util"
 	//	bloom "github.com/zeebo/sbloom"
 	//	"hash/fnv"
@@ -47,13 +47,15 @@ func loadFileContent(fileName string) []byte {
 	return nil
 }
 
-func extractLinks(runtimeConfig RuntimeConfig, fileUrl string , fileName []byte, body []byte) {
+func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string , fileName []byte, body []byte) {
 
 	//	siteUrlStr := string(fileName)
 	//	siteUrlStr = strings.TrimLeft(siteUrlStr, "data/")
 	//	siteUrlStr = "http://" + siteUrlStr
 	//	log.Debug("fileName to Url:", string(fileName), ",", siteUrlStr)
 
+	var storage = runtimeConfig.Storage
+	
 	siteUrlStr := fileUrl
 	siteConfig:=runtimeConfig.TaskConfig
 
@@ -100,7 +102,7 @@ func extractLinks(runtimeConfig RuntimeConfig, fileUrl string , fileName []byte,
 		//		l.Lock();
 		//		defer l.Unlock();
 
-		if runtimeConfig.Storage.CheckWalkedUrl(filterUrl)||runtimeConfig.Storage.CheckFetchedUrl(filterUrl)||runtimeConfig.Storage.CheckPendingFetchUrl(filterUrl) {
+		if storage.CheckWalkedUrl(filterUrl)||storage.CheckFetchedUrl(filterUrl)||storage.CheckPendingFetchUrl(filterUrl) {
 			log.Debug("hit bloomFilter,continue")
 			hit = true
 			continue
@@ -193,7 +195,7 @@ func extractLinks(runtimeConfig RuntimeConfig, fileUrl string , fileName []byte,
 						FlagRemoveUnnecessaryHostDots | FlagRemoveDuplicateSlashes | FlagRemoveFragment)
 			log.Debug("normalized url:", currentUrlStr)
 			currentUrlByte := []byte(currentUrlStr)
-			if !(runtimeConfig.Storage.CheckWalkedUrl(currentUrlByte)||runtimeConfig.Storage.CheckFetchedUrl(currentUrlByte)||runtimeConfig.Storage.CheckPendingFetchUrl(currentUrlByte)){
+			if !(storage.CheckWalkedUrl(currentUrlByte)||storage.CheckFetchedUrl(currentUrlByte)||storage.CheckPendingFetchUrl(currentUrlByte)){
 			//bloomFilter.Lookup(currentUrlByte) {
 
 				//								if(CheckIgnore(currentUrlStr)){}
@@ -226,10 +228,10 @@ func extractLinks(runtimeConfig RuntimeConfig, fileUrl string , fileName []byte,
 					continue
 				}
 
-				if(!runtimeConfig.Storage.CheckPendingFetchUrl(currentUrlByte)){
+				if(!storage.CheckPendingFetchUrl(currentUrlByte)){
 					log.Debug("log new pendingFetch url", currentUrlStr)
-					runtimeConfig.Storage.LogPendingFetchUrl(runtimeConfig.PathConfig.PendingFetchLog,currentUrlStr)
-					runtimeConfig.Storage.AddPendingFetchUrl(currentUrlByte)
+					storage.LogPendingFetchUrl(runtimeConfig.PathConfig.PendingFetchLog,currentUrlStr)
+					storage.AddPendingFetchUrl(currentUrlByte)
 				}else{
 					log.Debug("hit new pendingFetch filter,ignore:", currentUrlStr)
 				}
@@ -252,7 +254,7 @@ func extractLinks(runtimeConfig RuntimeConfig, fileUrl string , fileName []byte,
 	log.Info("all links within ", siteUrlStr, " is done")
 }
 
-func ParseGo(pendingUrls chan []byte, runtimeConfig RuntimeConfig, quit *chan bool, offsets *RoutingOffset) {
+func ParseGo(pendingUrls chan []byte, runtimeConfig *RuntimeConfig, quit *chan bool, offsets *RoutingOffset) {
 	log.Info("parsing task started.")
 	path := runtimeConfig.PathConfig.SavedFileLog
 	//touch local's file
@@ -266,11 +268,12 @@ waitFile:
 		goto waitFile
 	}
 
-	var offset int64= runtimeConfig.Storage.LoadOffset(runtimeConfig.PathConfig.SavedFileLog + ".offset")
+	var storage=runtimeConfig.Storage
+	var offset int64= storage.LoadOffset(runtimeConfig.PathConfig.SavedFileLog + ".offset")
 	FetchFileWithOffset(runtimeConfig,path, offset)
 }
 
-func FetchFileWithOffset(runtimeConfig RuntimeConfig,path string, skipOffset int64) {
+func FetchFileWithOffset(runtimeConfig *RuntimeConfig,path string, skipOffset int64) {
 
 	var offset int64= 0
 
@@ -282,6 +285,8 @@ func FetchFileWithOffset(runtimeConfig RuntimeConfig,path string, skipOffset int
 		log.Debug("error opening file,", path, " ", err)
 		return
 	}
+
+	var storage=runtimeConfig.Storage
 
 	r := bufio.NewReader(f)
 	s, e := util.Readln(r)
@@ -295,7 +300,7 @@ func FetchFileWithOffset(runtimeConfig RuntimeConfig,path string, skipOffset int
 			ParsedSavedFileLog(runtimeConfig,s)
 		}
 
-		runtimeConfig.Storage.PersistOffset(runtimeConfig.PathConfig.SavedFileLog + ".offset",offset)
+		storage.PersistOffset(runtimeConfig.PathConfig.SavedFileLog + ".offset",offset)
 
 		s, e = util.Readln(r)
 		//todo store offset
@@ -311,14 +316,15 @@ waitUpdate:
 		log.Trace("file has been changed,restart parse")
 		FetchFileWithOffset(runtimeConfig,path, offset)
 	}else {
-		log.Trace("waiting file update",path)
+		log.Trace("waiting file update:",path)
 		time.Sleep(10*time.Millisecond)
 		goto waitUpdate
 	}
 }
 
-func ParsedSavedFileLog(runtimeConfig RuntimeConfig,fileLog string) {
+func ParsedSavedFileLog(runtimeConfig *RuntimeConfig,fileLog string) {
 	if (fileLog != "") {
+		var storage=runtimeConfig.Storage
 		log.Debug("start parse filelog:", fileLog)
 		//load file's content,and extract links
 
@@ -326,13 +332,13 @@ func ParsedSavedFileLog(runtimeConfig RuntimeConfig,fileLog string) {
 		fileUrl:=stringArray[0]
 		fileName:=[]byte(stringArray[1])
 
-		if(runtimeConfig.Storage.CheckParsedFile(fileName)){
+		if(storage.CheckParsedFile(fileName)){
 			log.Debug("hit parse filter ignore,",string(fileName))
 			return
 		}
 
 		fileContent := loadFileContent(string(fileName))
-		runtimeConfig.Storage.AddParsedFile(fileName)
+		storage.AddParsedFile(fileName)
 
 		if fileContent != nil {
 //			log.Debug("partition:", partition, ",parse fileName:", string(fileName))
