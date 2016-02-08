@@ -117,6 +117,7 @@ func main() {
 	}
 
 
+//	runtimeConfig.Storage =& fsstore.FsStore{}
 	runtimeConfig.Storage =& fsstore.FsStore{}
 
 	runtimeConfig.Storage.Init()

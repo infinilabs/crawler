@@ -46,10 +46,6 @@ func (this *FsStore) TaskEnqueue(url []byte){
 	 log.Info("task enqueue:",string(url))
 }
 
-func persistBloomFilter(bloomFilterPersistFileName string,bloomFilter util.DeduplicatePlugin) {
-	bloomFilter.Persist()
-}
-
 func (this *FsStore) Init() error{
 
 	var runtimeConfig= config.InitOrGetConfig()
@@ -72,32 +68,12 @@ func (this *FsStore) Init() error{
 
 	return nil
 }
-//func (this *FsStore) InitWalkBloomFilter(walkBloomFilterFileName string ){
-//	this.WalkBloomFilterFileName= walkBloomFilterFileName
-//	this.WalkBloomFilter = initBloomFilter(this.WalkBloomFilterFileName)
-//}
-
-//func (this *FsStore) InitFetchBloomFilter(fetchBloomFilterFileName string ){
-//	this.FetchBloomFilterFileName=fetchBloomFilterFileName
-//	this.FetchBloomFilter = initBloomFilter(this.FetchBloomFilterFileName)
-//}
-
-//func (this *FsStore) InitParseBloomFilter(parseBloomFilterFileName string ){
-//	this.ParseBloomFilterFileName=parseBloomFilterFileName
-//	this.ParseBloomFilter = initBloomFilter(this.ParseBloomFilterFileName)
-//}
-
-//func (this *FsStore) InitPendingFetchBloomFilter(filterName string ){
-//	this.PendingFetchBloomFilterFileName=filterName
-//	this.PendingFetchBloomFilter = initBloomFilter(this.PendingFetchBloomFilterFileName)
-//}
-
 
 func (this *FsStore) PersistBloomFilter(){
-	persistBloomFilter(this.WalkBloomFilterFileName,this.WalkBloomFilter)
-	persistBloomFilter(this.FetchBloomFilterFileName,this.FetchBloomFilter)
-	persistBloomFilter(this.ParseBloomFilterFileName,this.ParseBloomFilter)
-	persistBloomFilter(this.PendingFetchBloomFilterFileName,this.PendingFetchBloomFilter)
+	this.WalkBloomFilter.Persist()
+	this.FetchBloomFilter.Persist()
+	this.ParseBloomFilter.Persist()
+	this.PendingFetchBloomFilter.Persist()
 }
 
 func (this *FsStore) CheckWalkedUrl(url []byte) bool{

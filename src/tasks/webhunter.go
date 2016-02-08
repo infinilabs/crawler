@@ -42,7 +42,18 @@ func getRootUrl(source *URL) string {
 //format url,prepare for bloom filter
 func formatUrlForFilter(url []byte) []byte {
 	src := string(url)
-	log.Debug("start to normalize url:", src)
+	log.Trace("start to normalize url:", src)
+	if strings.HasSuffix(src, "/") {
+		src = strings.TrimRight(src, "/")
+	}
+	src = strings.TrimSpace(src)
+	src = strings.ToLower(src)
+	return []byte(src)
+}
+
+func getUrlPathFolderWithoutFile(url []byte) []byte  {
+	src := string(url)
+	log.Trace("start to get url's path folder:", src)
 	if strings.HasSuffix(src, "/") {
 		src = strings.TrimRight(src, "/")
 	}

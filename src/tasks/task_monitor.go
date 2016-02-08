@@ -38,7 +38,7 @@ func LoadTaskFromLocalFile(pendingFetchUrls chan []byte, runtimeConfig *RuntimeC
 waitFile:
 	if (!util.CheckFileExists(path)) {
 		log.Trace("waiting file create:",path)
-		time.Sleep(10*time.Millisecond)
+		time.Sleep(100*time.Millisecond)
 		goto waitFile
 	}
 	var storage=runtimeConfig.Storage

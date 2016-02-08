@@ -66,6 +66,37 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string , fileName []byte
 		return
 	}
 
+	//parse parent url
+	seedUrlStr := siteUrlStr
+	seedURI, err := ParseRequestURI(seedUrlStr)
+
+	if err != nil {
+		log.Error("ParseSeedURI failed!: ", seedUrlStr, " , ", err)
+		return
+	}
+
+	var parentPath="/"
+
+	var parentUrlFullPath string
+
+	if(seedURI.Path!=""){
+		var index=strings.LastIndex(seedURI.Path,"/")
+
+		if(index>0){
+			parentPath=util.SubString(seedURI.Path,0,index)
+
+			if(!strings.HasSuffix(parentPath,"/")){
+				parentPath=parentPath+"/"
+			}
+		}
+		parentUrlFullPath="http://" + seedURI.Host +parentPath
+	}else {
+		parentUrlFullPath="http://" + seedURI.Host
+	}
+
+	log.Trace("parent url fullpath:",parentUrlFullPath)
+
+
 	log.Debug("parsing external links:", siteUrlStr, ",using:", siteConfig.LinkUrlExtractRegex)
 
 	matches := siteConfig.LinkUrlExtractRegex.FindAllSubmatch(body, -1)
@@ -112,23 +143,19 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string , fileName []byte
 			currentUrlStr := string(url)
 			currentUrlStr = strings.Trim(currentUrlStr, " ")
 
-			seedUrlStr := siteUrlStr
-			seedURI, err := ParseRequestURI(seedUrlStr)
-
-			if err != nil {
-				log.Error("ParseSeedURI failed!: ", seedUrlStr, " , ", err)
-				continue
-			}
-
 			currentURI1, err := ParseRequestURI(currentUrlStr)
 			currentURI := currentURI1
 			if err != nil {
+
+				log.Trace("invalid url,",err)
+
 				if strings.Contains(err.Error(), "invalid URI for request") {
 					log.Debug("invalid URI for request,fix relative url,original:", currentUrlStr)
 					//					log.Debug("old relatived url,", currentUrlStr)
 					//page based relative urls
 
-					currentUrlStr = "http://" + seedURI.Host + "/" + currentUrlStr
+
+					currentUrlStr = parentUrlFullPath+ currentUrlStr
 					currentURI1, err = ParseRequestURI(currentUrlStr)
 					currentURI = currentURI1
 					if err != nil {
@@ -148,15 +175,15 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string , fileName []byte
 			if currentURI == nil || currentURI.Host == "" {
 				if strings.HasPrefix(currentURI.Path, "/") {
 					//root based relative urls
-					log.Debug("old relatived url,", currentUrlStr)
-					currentUrlStr = "http://" + seedURI.Host + currentUrlStr
-					log.Debug("new relatived url,", currentUrlStr)
+					log.Trace("old relatived url1,", currentUrlStr)
+					currentUrlStr = parentUrlFullPath + currentUrlStr
+					log.Trace("new relatived url,", currentUrlStr)
 				} else {
-					log.Debug("old relatived url,", currentUrlStr)
+					log.Trace("old relatived url2,", currentUrlStr)
 					//page based relative urls
 					urlPath := getRootUrl(currentURI)
 					currentUrlStr = "http://" + urlPath + currentUrlStr
-					log.Debug("new relatived url,", currentUrlStr)
+					log.Trace("new relatived url,", currentUrlStr)
 				}
 			} else {
 				log.Debug("host:", currentURI.Host, " ", currentURI.Host == "")
@@ -263,8 +290,8 @@ func ParseGo(pendingUrls chan []byte, runtimeConfig *RuntimeConfig, quit *chan b
 
 waitFile:
 	if (!util.CheckFileExists(path)) {
-		log.Trace("waiting file create",path)
-		time.Sleep(10*time.Millisecond)
+		log.Trace("waiting file create:",path)
+		time.Sleep(100*time.Millisecond)
 		goto waitFile
 	}
 
@@ -317,7 +344,7 @@ waitUpdate:
 		FetchFileWithOffset(runtimeConfig,path, offset)
 	}else {
 		log.Trace("waiting file update:",path)
-		time.Sleep(10*time.Millisecond)
+		time.Sleep(5*time.Second)
 		goto waitUpdate
 	}
 }

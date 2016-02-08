@@ -25,15 +25,10 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig,  
 
 	config:=runtimeConfig.TaskConfig
 
-	if(storage.CheckFetchedUrl(url)){
-		return
-	}
-
-
 	path:=getSavedPath(runtimeConfig,url)
 
 	if(storage.CheckSavedFile(path)){
-		log.Warn("file is already saved,skip fetch.",path)
+		log.Warn("file already saved,skip fetch.",path)
 		storage.AddSavedUrl(url)
 
 		//re-parse local's previous saved page
@@ -141,13 +136,13 @@ func init() {
 func FetchGo(runtimeConfig *RuntimeConfig, taskC *chan []byte, quitC *chan bool, offsets *RoutingOffset) {
 	shard:=offsets.Shard
 	log.Info("fetch task started.shard:",shard)
-	var storage = runtimeConfig.Storage
+//	var storage = runtimeConfig.Storage
 	go func() {
 		for {
 			url := <-*taskC
 			log.Debug("shard:",shard,",url received:", string(url))
 
-				if !storage.CheckFetchedUrl(url) {
+//				if !storage.CheckFetchedUrl(url) {
 					timeout := 10 * time.Second
 
 //					if(fetchFilter.Lookup(url)){
@@ -163,10 +158,10 @@ func FetchGo(runtimeConfig *RuntimeConfig, taskC *chan []byte, quitC *chan bool,
 						time.Sleep( time.Duration (runtimeConfig.TaskConfig.FetchDelayThreshold) * time.Millisecond)
 						log.Debug("wake up now,continue crawing")
 					}
-
-				}else {
-					log.Debug("hit fetch-bloomfilter,ignore,", string(url))
-				}
+//
+//				}else {
+//					log.Debug("hit fetch-bloomfilter,ignore,", string(url))
+//				}
 
 		}
 	}()
