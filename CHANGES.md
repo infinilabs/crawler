@@ -10,6 +10,7 @@ feature:
 3.brief logging format
 bugfix:
 1.shutdown nil exception
+2.wrong relative link in parse phrase
 
 v0.5
 feature:
