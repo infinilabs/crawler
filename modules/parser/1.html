@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width,initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>2013年12月安阳空气质量指数AQI_PM2.5日历史数据_中国空气质量在线监测分析平台历史数据</title>
+<meta name="keywords" content="全国空气质量指数排名,PM2.5查询,空气质量指数查询,中国空气质量在线监测分析平台手机版">
+<meta name="description" content="PM2.5查询,空气质量指数查询,全国空气质量指数排名,中国空气质量在线监测分析平台手机版">
+<link rel="shortcut icon" href="../resource/icons/logo.png">
+<link rel="stylesheet" type="text/css" href="resource/css/bootstrap.css" rel="stylesheet">
+<link rel="stylesheet" href="resource/css/style.css?v=1.1" type="text/css">
+</head>
+<body>
+<!-- Fixed navbar -->
+<div class="navbar navbar-default navbar-fixed-top" role="navigation" >
+  <div class="container" style="padding:0px 0px 0 10px">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a href="index.php" style="padding:0px"><img src="resource/img/logo.png" width="148px" height="50px" /></a>
+    </div>
+    <div class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li><a href="index.php" >空气质量</a></li>
+        <li><a href="weather.php" >历史天气</a></li>
+        <li><a href="../" target="_blank">分析平台</a></li>
+<!--         <li><a href="http://blog.aqistudy.cn" target="_blank">官方博客</a></li> -->
+        <!-- <li><a href="http://bbs.aqistudy.cn" target="_blank">交流论坛</a></li> -->
+        <li><a href="weixin.php" >微信平台</a></li>
+        <li><a href="sponsor.php">友情赞助</a></li>
+        <li><a href="about.php">关于</a></li>
+      </ul>
+
+      <form class="navbar-form navbar-right" role="search" action="monthdata.php">
+         <div class="form-group">
+            <input type="text" class="form-control" placeholder="请输入要查询的城市名" name='city' value="安阳">
+         </div>
+         <button type="submit" class="btn btn-default">提交</button>
+      </form> 
+    </div><!--/.nav-collapse -->
+  </div>
+</div>
+
+  <div id="myCarousel" class="carousel slide hidden-xs" data-ride="carousel">
+     <!-- 轮播（Carousel）指标 -->
+     <ol class="carousel-indicators">
+        <li data-target="#myCarousel" data-slide-to="0"></li>
+        <li data-target="#myCarousel" data-slide-to="1"></li>
+        <li data-target="#myCarousel" data-slide-to="2"></li>
+     </ol>   
+     <!-- 轮播（Carousel）项目 -->
+     <div class="carousel-inner">        
+        <div class="item" style="height:300px;">
+           <img src="resource/img/air2.jpg" alt="Second slide" width="100%">
+           <div class="carousel-caption biaoyu">科学发展，生态优先，环境改善，环保先行！</div>
+        </div>
+        <div class="item " style="height:300px;">
+           <img src="resource/img/air1.jpg" alt="First slide" width="100%">
+           <div class="carousel-caption biaoyu">同呼吸、共担当、齐行动，改善空气质量，从我做起！</div>
+        </div>
+        <div class="item active" style="height:300px;">
+           <img src="resource/img/air3.jpg" alt="Third slide" width="100%">
+           <div class="carousel-caption biaoyu">生命来源自然，健康来自环保！</div>
+        </div>
+     </div>
+     <!-- 轮播（Carousel）导航 -->
+     <a class="carousel-control left" href="#myCarousel" 
+        data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a>
+     <a class="carousel-control right" href="#myCarousel" 
+        data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a>
+  </div> 
+<h2 id="title">2013年12月安阳空气质量指数日历史数据</h2>
+<div class="container">
+  <div class="row">
+  <div class="col-lg-9 col-md-8 col-sm-8 col-xs-12" style="padding:0 5px">
+  <table width="100%" class="table table-condensed table-bordered table-striped table-hover table-responsive" style="margin-bottom:5px">
+      <tr height=38px>
+        <th align="center" style="background:#d9edf7">日期</th>
+        <th align="center" style="background:#d9edf7">AQI</th>
+        <th align="center" style="background:#d9edf7" class="hidden-xs hidden-sm">范围</th>
+        <th align="center" style="background:#d9edf7" width="80px" >质量等级</th>
+        <th align="center" style="background:#d9edf7">PM2.5</th>
+        <th align="center" style="background:#d9edf7">PM10</th>
+        <th align="center" style="background:#d9edf7" class="hidden-xs">SO2</th>
+        <th align="center" style="background:#d9edf7" class="hidden-xs">CO</th>
+        <th align="center" style="background:#d9edf7" class="hidden-xs">NO2</th>
+        <th align="center" style="background:#d9edf7" class="hidden-xs">O3</th>
+        <th align="center" style="background:#d9edf7" >排名</th>
+      </tr>
+            <tr>
+          <td align="center">2013-12-31</td>
+          <td align="center">94 </td>
+          <td align="center" class="hidden-xs hidden-sm">93~96 </td>
+          <td align="center"><div style="width:65px;height:20px;background-color:#efdc31;color:black;">良</div></td>
+          <td align="center">67.2 </td>
+          <td align="center">124.9 </td>
+          <td align="center" class="hidden-xs">57.2 </td>
+          <td align="center" class="hidden-xs">1.605 </td>
+          <td align="center" class="hidden-xs">64.3 </td>
+          <td align="center" class="hidden-xs">59 </td>
+          <td align="center">38 </td>
+      </tr>
+        </table>
+  <span style="color:gray;font-size:12px">数值单位：μg/m3(CO为mg/m3)<br/></span>
+  <span style="color:gray;font-size:12px">每日AQI数据和PM2.5浓度数据是本站根据当天环保总站每小时数据计算求平均的结果，存在丢数据场景，仅供参考。如有疑问，可以去<a href='http://bbs.aqistudy.cn' target="_blank">论坛</a>发帖。</span>
+  <div id="container" style="min-width:200px;height:380px;"></div>
+  </div>
+  <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12" style="padding:0 5px" >
+      <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title" style="text-align:center">安阳2013年12月份统计数据</h3>
+      </div>
+      <div >
+        <div id="piecontainer" style="height:200px;"></div>
+        <table class="table table-condensed table-striped " style="margin-bottom:0px;display:none">
+          <tr>
+            <td align="center" width="70px" style="background-color:#43ce17;color:black;">优</td>
+            <td align="right">0天</td>
+            <td align="center" width="70px" style="background-color:#efdc31;color:black;">良</td>
+            <td align="right">1天</td>
+          </tr>
+          <tr>
+            <td align="center" style="background-color:#fa0;color:black;">轻度污染</td>
+            <td align="right">0天</td>
+            <td align="center" style="background-color:#ff401a;color:white;">中度污染</td>
+            <td align="right">0天</td>
+          </tr>
+          <tr>
+            <td align="center" style="background-color:#d20040;color:white;">重度污染</td>
+            <td align="right">0天</td>
+            <td align="center" style="background-color:#9c0a4e;color:white;">严重污染</td>
+            <td align="right">0天</td>
+          </tr>
+        </table>
+      </div>
+     </div>
+
+     <div class="panel panel-info">
+        <div class="panel-heading">
+          <h3 class="panel-title" style="text-align:center">安阳其他月份历史数据</h3>
+        </div>
+        <div style="padding:10px 10px 10px 10px">
+           <ul class="unstyled1">
+             <li><a href="daydata.php?city=安阳&month=201312">2013年12月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201401">2014年01月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201402">2014年02月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201403">2014年03月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201404">2014年04月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201405">2014年05月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201406">2014年06月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201407">2014年07月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201408">2014年08月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201409">2014年09月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201410">2014年10月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201411">2014年11月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201412">2014年12月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201501">2015年01月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201502">2015年02月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201503">2015年03月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201504">2015年04月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201505">2015年05月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201506">2015年06月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201507">2015年07月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201508">2015年08月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201509">2015年09月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201510">2015年10月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201511">2015年11月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201512">2015年12月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201601">2016年01月</a></li>
+                          <li><a href="daydata.php?city=安阳&month=201602">2016年02月</a></li>
+                        </ul>
+        </div>
+     </div>
+
+     <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title" style="text-align:center">全国主要城市历史数据</h3>
+      </div>
+      <div style="padding:10px 10px 0 10px">
+         <ul class="unstyled">
+            <li><a href='daydata.php?city=北京'>北京</a></li>
+            <li><a href='daydata.php?city=上海'>上海</a></li>
+            <li><a href='daydata.php?city=天津'>天津</a></li>
+            <li><a href='daydata.php?city=重庆'>重庆</a></li>
+            <li><a href='daydata.php?city=杭州'>杭州</a></li>
+            <li><a href='daydata.php?city=哈尔滨'>哈尔滨</a></li>
+            <li><a href='daydata.php?city=长春'>长春</a></li>
+            <li><a href='daydata.php?city=沈阳'>沈阳</a></li>
+            <li><a href='daydata.php?city=石家庄'>石家庄</a></li>
+            <li><a href='daydata.php?city=太原'>太原</a></li>
+            <li><a href='daydata.php?city=西安'>西安</a></li>
+            <li><a href='daydata.php?city=济南'>济南</a></li>
+            <li><a href='daydata.php?city=乌鲁木齐'>乌鲁木齐</a></li>
+            <li><a href='daydata.php?city=拉萨'>拉萨</a></li>
+            <li><a href='daydata.php?city=西宁'>西宁</a></li>
+            <li><a href='daydata.php?city=兰州'>兰州</a></li>
+            <li><a href='daydata.php?city=银川'>银川</a></li>
+            <li><a href='daydata.php?city=郑州'>郑州</a></li>
+            <li><a href='daydata.php?city=南京'>南京</a></li>
+            <li><a href='daydata.php?city=武汉'>武汉</a></li>
+            <li><a href='daydata.php?city=合肥'>合肥</a></li>
+            <li><a href='daydata.php?city=福州'>福州</a></li>
+            <li><a href='daydata.php?city=南昌'>南昌</a></li>
+            <li><a href='daydata.php?city=长沙'>长沙</a></li>
+            <li><a href='daydata.php?city=贵阳'>贵阳</a></li>
+            <li><a href='daydata.php?city=成都'>成都</a></li>
+            <li><a href='daydata.php?city=广州'>广州</a></li>
+            <li><a href='daydata.php?city=昆明'>昆明</a></li>
+            <li><a href='daydata.php?city=南宁'>南宁</a></li>
+            <li><a href='daydata.php?city=深圳'>深圳</a></li>
+        </ul>
+      </div>
+     </div>
+
+     <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title" style="text-align:center">微信公众平台</h3>
+      </div>
+      <div style="padding:10px 10px 10px 10px">
+         <a href="weixin.php"><img src="http://www.zq12369.com/resource/img/health/weixin/zhenqimove.jpg" width="100%" alt="真气运动二维码"/></a>
+         <a href="weixin.php"><img src="http://www.zq12369.com/resource/img/health/weixin/zhenqiweixin.jpg" width="100%" alt="真气环保二维码"/></a>
+      </div>
+     </div>
+
+  </div>
+  </div>
+  
+<br/>
+<hr style="margin-bottom:5px"/>
+<div class="container" >
+	<div class="row link">
+	    <div class="col-sm-5" style="padding:0px">
+		版权所有 &copy; 2013-2016 <a href="#" style="color:#333">PM2.5科学实验专家小组</a> 技术支持: <a href="http://weibo.com/wangjiezju/" target="_blank" style="color:#333">王杰</a>
+		<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1254317176'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/stat.php%3Fid%3D1254317176%26show%3Dpic' type='text/javascript'%3E%3C/script%3E"));</script>
+		</div>
+		<div class="col-sm-7" style="text-align:right;padding:0px">
+		<a href="http://www.aqistudy.cn/" target="_blank">分析平台</a>|
+		<a href="http://aqistudy.sinaapp.com/historydata/">历史数据</a>|
+		<a href="http://www.zq12369.com/" target="_blank">真气网</a>|
+        <a href="http://www.zc12369.com/" target="_blank">真财网</a>|
+		<a href="weixin.php">微信平台</a>|
+		<a href="sponsor.php">友情赞助</a>|
+		<a href="about.php">关于平台</a>
+		</div>		
+	</div>
+</div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"16"},"slide":{"type":"slide","bdImg":"2","bdPos":"right","bdTop":"179"},"image":{"viewList":["qzone","tsina","tqq","renren","weixin"],"viewText":"分享到：","viewSize":"16"},"selectShare":{"bdContainerClass":null,"bdSelectMiniList":["qzone","tsina","tqq","renren","weixin"]}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+
+</div>
+<script type="text/javascript" src="resource/js/jquery.min.js"></script>
+<script type="text/javascript" src="resource/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="resource/js/respond.js"></script>
+<script type="text/javascript" src="../resource/highcharts/highcharts.js"></script>
+<script type="text/javascript">
+$(function () {
+    var data = '[{"x":1388419200000,"y":94,"level":"\u826f"}]';
+  var data_min = '[{"x":1388419200000,"y":93,"level":"\u826f"}]';
+  var data_max = '[{"x":1388419200000,"y":96,"level":"\u826f"}]';
+  data = eval('(' + data + ')');
+  data_min = eval('(' + data_min + ')');
+  data_max = eval('(' + data_max + ')');
+
+  var alfa = 0.8;
+     
+  var valuePlotBaud = [{ // Light air
+      from: 0,
+      to: 50,
+      color: 'rgba(0, 254, 3, ' + alfa + ')',
+      label: {
+        text: '优',
+        style: {
+          color: '#606060'
+        }
+      }
+    }, { // Light breeze
+      from: 51,
+      to: 100,
+      color: 'rgba(254, 245, 0, ' + alfa + ')',
+      label: {
+        text: '良',
+        style: {
+          color: '#606060'
+        }
+      }
+    }, { // Gentle breeze
+      from: 101,
+      to: 150,
+      color: 'rgba(254, 125, 0, ' + alfa + ')',
+      label: {
+        text: '轻度污染',
+        style: {
+          color: '#606060'
+        }
+      }
+    }, { // Moderate breeze
+      from: 151,
+      to: 200,
+      color: 'rgba(255, 3, 3, ' + alfa + ')',
+      label: {
+        text: '中度污染',
+        style: {
+          color: '#606060'
+        }
+      }
+    }, { // Fresh breeze
+      from: 201,
+      to: 300,
+      color: 'rgba(188, 3,205 , ' + alfa + ')',
+      label: {
+        text: '重度污染',
+        style: {
+          color: '#606060'
+        }
+      }
+    }, { // Strong breeze
+      from: 301,
+      to: 600,
+      color: 'rgba(72, 0, 78, ' + alfa + ')',
+      label: {
+        text: '严重污染',
+        style: {
+          color: '#606060'
+        }
+      }
+    }];
+
+    Highcharts.setOptions({
+        global: {
+            useUTC: false
+        }
+     }); 
+
+  $('#container').highcharts({        
+  chart: {
+      type: 'spline',
+            zoomType: '',
+            spacingRight: 20
+        },
+        title: {
+            text: '安阳2013年12月份空气质量指数（AQI）变化趋势'
+        },
+        subtitle: {
+            text: '最小值：600 平均值：94 最大值：94'
+        },
+        xAxis: {
+            type: 'datetime',
+            dateTimeLabelFormats:{
+            millisecond: '%H:%M:%S.%L',
+            second: '%H:%M:%S',
+            minute: '%H:%M',
+            hour: '%H:%M',
+            day: '%m-%d',
+            week: '%m-%d',
+            month: '%Y-%m',
+            year: '%Y'
+            }               
+        },
+        yAxis: {
+            title: {
+                text: '空气质量指数(AQI)'
+            },
+            min:0,
+            plotBands:valuePlotBaud
+        },
+        tooltip: {
+            shared: true,
+            enabled: true,
+            useHTML: true,
+            formatter: function() {
+              tip = '' + Highcharts.dateFormat('%Y年%m月%d日', this.x) +'<br/>'
+                   + "<table width='160px' class='table-condensed table-bordered table-striped' style='margin:0px'>"
+                    for (i=this.points.length-1;i>=0;i--)
+                    {
+                      color = this.points[i].series.color;
+                    name = this.points[i].series.name;
+                    y = this.points[i].y; 
+                    level = this.points[i].point.level;
+                    tip = tip +  "<tr><td width='80px' style='color:" + color + "'>" + name +"</td><td align='right'><b>"+ y + "</b></td><td align='center' style='" + getAQIStyle(y) + "'>"+ level + "</td></tr>";               
+                    }
+                    tip = tip + "</table>";
+              return tip;
+
+            }
+        },
+        plotOptions:{             
+          series:{
+            marker: {
+                  enabled: true
+              },
+            turboThreshold: 0
+          }
+        },
+        legend: {
+            enabled: true
+        },
+        credits : {
+            enabled:false
+        },
+        series: [{
+            name: '最大值',
+            type:'spline',
+            color: '#FF0033',
+            data: data_max
+        },{
+            name: '平均值',
+            type:'spline',
+            color: '#008080',
+            data: data
+        },{
+            name: '最小值',
+            type:'spline',           
+            color: '#2e8b57',
+            data: data_min
+        }]
+    });
+
+    var ratioArray = [];
+    var level1= 0;
+    var level2= 1;
+    var level3= 0;
+    var level4= 0;
+    var level5= 0;
+    var level6= 0;
+
+    if(level1>0)
+      {
+        ratioArray.push({
+          name:'优',
+          color:'#43ce17',
+          y:level1
+        });
+      }
+      if(level2>0)
+      {
+        ratioArray.push({
+          name:'良',
+          color:'#efdc31',
+          y:level2
+        });
+      }
+      if(level3>0)
+      {
+        ratioArray.push({
+          name:'轻度污染',
+          color:'#fa0',
+          y:level3
+        });
+      }
+      if(level4>0)
+      {
+        ratioArray.push({
+          name:'中度污染',
+          color:'#ff401a',
+          y:level4
+        });
+      }
+      if(level5>0)
+      {
+        ratioArray.push({
+          name:'重度污染',
+          color:'#d20040',
+          y:level5
+        });
+      }
+      if(level6>0)
+      {
+        ratioArray.push({
+          name:'严重污染',
+          color:'#9c0a4e',
+          y:level6
+        });
+      }
+
+    $('#piecontainer').highcharts({
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false
+        },
+        title: {
+            text: ''
+        },
+        tooltip: {
+          pointFormat: '{series.name}: <b>{point.y}</b>天({point.percentage:.1f}%)'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    color: '#000000',
+                    connectorColor: '#000000',
+                    format: '<b>{point.name}</b>'
+                },
+                events: { 
+          click: function(e) { 
+          } 
+        } 
+            }
+        },
+        legend: {
+                enabled: true
+            },
+        credits: {
+                enabled:false
+         },
+        series: [{
+            type: 'pie',
+            name: '天数',
+            data: ratioArray
+        }]
+      });
+});
+
+function getAQIStyle(aqi)
+{
+   if(aqi<=0)
+   {
+     style = "background-color:#6E6E6E;color:black;";
+   }
+   else if(aqi<=50)
+   {
+     style = "background-color:#43ce17;color:black;";
+   }
+   else if(aqi<=100)
+   {
+    style = "background-color:#efdc31;color:black;";
+   }
+   else if(aqi<=150)
+   {
+    style = "background-color:#fa0;color:white;";
+   }
+   else if(aqi<=200)
+   {
+    style = "background-color:#ff401a;color:white;";
+   }
+   else if(aqi<=300)
+   {
+    style = "background-color:#d20040;color:white;";
+   }
+   else
+   {
+    style = "background-color:#9c0a4e;color:white;";
+   }
+   return style; 
+}
+</script>
+</body>
+</html>

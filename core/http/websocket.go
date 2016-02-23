@@ -12,7 +12,7 @@ import (
 	"io"
 	"log"
 	"net/http"
-    "github.com/medcl/gopa/src/code.google.com/p/go.net/websocket"
+    "github.com/medcl/gopa/core/code.google.com/p/go.net/websocket"
 )
 
 func ChatWith(ws *websocket.Conn) {

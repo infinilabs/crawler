@@ -26,8 +26,8 @@ taskItem任务未接收到新的，没有进行下载操作
 Random U-A
 Random Refer
 
-Parsed 和 Download的 BloomFilter 分开
-Offset文件放项目文件夹里面
+Parsed 和 Download的 BloomFilter 分开[done]
+Offset文件放项目文件夹里面[done]
 
 满足不了Save规则的，但是满足Fetch规则，需要在内存里面解析并记录url，只是不持久化
 
@@ -86,3 +86,8 @@ https://github.com/dgryski/go-minhash.git
 sharding、本地持久化、避免网络拷贝，默认不网络转发、如果其他节点该分片没有任务了则网络迁移过去
 
 保存前：404判断：1.状态码；2.标题：<title>404 Not Found</title>；3.其它自定义条件
+
+进度监控：parse、fetch
+
+
+COMMAND chan, 任务都进COMMAND 协程，然后统一分发处理

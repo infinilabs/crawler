@@ -4,8 +4,8 @@ import (
 	log "github.com/cihub/seelog"
 	. "github.com/zeebo/sbloom"
 	"io/ioutil"
-	"github.com/medcl/gopa/src/util"
-	"github.com/medcl/gopa/src/config"
+	"github.com/medcl/gopa/core/util"
+	"github.com/medcl/gopa/core/config"
 	"hash/fnv"
 )
 

@@ -8,22 +8,22 @@ package main
 import (
 	"flag"
 	"fmt"
-	logging "github.com/medcl/gopa/src/logging"
+	log "github.com/cihub/seelog"
+	. "github.com/medcl/gopa/core/config"
+	httpServ "github.com/medcl/gopa/core/http"
+	logging "github.com/medcl/gopa/core/logging"
+	fsstore "github.com/medcl/gopa/core/store/fs"
+	task "github.com/medcl/gopa/core/tasks"
+	"github.com/medcl/gopa/core/util"
+	"math/rand"
+	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
+	"runtime"
+	"strconv"
 	"strings"
 	"syscall"
-	"github.com/medcl/gopa/src/util"
-	"math/rand"
-	"runtime"
-	task "github.com/medcl/gopa/src/tasks"
-	"net/http"
-	fsstore "github.com/medcl/gopa/src/store/fs"
-	"strconv"
-	httpServ "github.com/medcl/gopa/src/http"
-	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/src/config"
 	"time"
 )
 
@@ -51,8 +51,8 @@ func shutdown(offsets []*RoutingOffset, quitChannels []*chan bool, offsets2 []*R
 		log.Debug("send exit signal to quit channel-1,", i)
 	}
 
-	for i,item := range quitChannels2 {
-		if(item != nil){
+	for i, item := range quitChannels2 {
+		if item != nil {
 			*item <- true
 		}
 		log.Debug("send exit signal to quit channel-2,", i)
@@ -68,10 +68,12 @@ func shutdown(offsets []*RoutingOffset, quitChannels []*chan bool, offsets2 []*R
 	//	log.Info("persist kafka offsets done")
 
 	quit <- true
-	log.Debug("finished shutting down")}
+	log.Debug("finished shutting down")
+}
 
 var startTime time.Time
-func printStartInfo(){
+
+func printStartInfo() {
 	fmt.Println("  __ _  ___  _ __   __ _ ")
 	fmt.Println(" / _` |/ _ \\| '_ \\ / _` |")
 	fmt.Println("| (_| | (_) | |_) | (_| |")
@@ -79,16 +81,17 @@ func printStartInfo(){
 	fmt.Println(" |___/      |_|          ")
 	fmt.Println(" ")
 
-	fmt.Println("[gopa] "+runtimeConfig.Version+" is on",)
+	fmt.Println("[gopa] " + runtimeConfig.Version + " is on")
 	fmt.Println(" ")
-	startTime=time.Now()
+	startTime = time.Now()
 }
-func printShutdownInfo(){
-fmt.Println("                         |    |                ")
-fmt.Println("   _` |   _ \\   _ \\   _` |     _ \\  |  |   -_) ")
-fmt.Println(" \\__, | \\___/ \\___/ \\__,_|   _.__/ \\_, | \\___| ")
-fmt.Println(" ____/                             ___/        ")
-	fmt.Println("[gopa] "+runtimeConfig.Version+" is down, uptime:",time.Now().Sub(startTime))
+
+func printShutdownInfo() {
+	fmt.Println("                         |    |                ")
+	fmt.Println("   _` |   _ \\   _ \\   _` |     _ \\  |  |   -_) ")
+	fmt.Println(" \\__, | \\___/ \\___/ \\__,_|   _.__/ \\_, | \\___| ")
+	fmt.Println(" ____/                             ___/        ")
+	fmt.Println("[gopa] "+runtimeConfig.Version+" is down, uptime:", time.Now().Sub(startTime))
 	fmt.Println(" ")
 }
 
@@ -107,7 +110,7 @@ func main() {
 
 	runtimeConfig = InitOrGetConfig()
 
-	runtimeConfig.LogLevel=logLevel
+	runtimeConfig.LogLevel = logLevel
 
 	printStartInfo()
 
@@ -116,13 +119,12 @@ func main() {
 		os.Exit(1)
 	}
 
-
-//	runtimeConfig.Storage =& fsstore.FsStore{}
-	runtimeConfig.Storage =& fsstore.FsStore{}
+	//	runtimeConfig.Storage =& fsstore.FsStore{}
+	runtimeConfig.Storage = &fsstore.FsStore{}
 
 	runtimeConfig.Storage.Init()
 
-//	if(runtimeConfig.)
+	//	if(runtimeConfig.)
 
 	//	atr:="AZaz"
 	//	btr:=[]byte(atr)
@@ -140,12 +142,11 @@ func main() {
 	}
 
 	//http serves
-	if(runtimeConfig.HttpEnabled){
+	if runtimeConfig.HttpEnabled {
 		go func() {
 			httpServ.Start(runtimeConfig)
 		}()
 	}
-
 
 	//adding default http protocol
 	if !strings.HasPrefix(seedUrl, "http") {
@@ -153,9 +154,9 @@ func main() {
 	}
 
 	maxGoRoutine := runtimeConfig.MaxGoRoutine
-	fetchQuitChannels := make([]*chan bool, maxGoRoutine) //shutdownSignal signals for each go routing
+	fetchQuitChannels := make([]*chan bool, maxGoRoutine)   //shutdownSignal signals for each go routing
 	fetchTaskChannels := make([]*chan []byte, maxGoRoutine) //fetchTask channels
-	fetchOffsets := make([]*RoutingOffset, maxGoRoutine)  //kafka fetchOffsets
+	fetchOffsets := make([]*RoutingOffset, maxGoRoutine)    //kafka fetchOffsets
 
 	parseQuitChannels := make([]*chan bool, 2) //shutdownSignal signals for each go routing
 	//	parseQuitChannels := make([]*chan bool, MaxGoRoutine) //shutdownSignal signals for each go routing
@@ -163,7 +164,6 @@ func main() {
 
 	shutdownSignal := make(chan bool, 1)
 	finalQuitSignal := make(chan bool, 1)
-
 
 	//handle exit event
 	exitEventChannel := make(chan os.Signal, 1)
@@ -195,18 +195,17 @@ func main() {
 		fetchQuitChannels[i] = &quitC
 		fetchTaskChannels[i] = &taskC
 		offset := new(RoutingOffset)
-//		offset.Offset = initOffset(runtimeConfig, "fetch", i)
+		//		offset.Offset = initOffset(runtimeConfig, "fetch", i)
 		offset.Shard = i
 		fetchOffsets[i] = offset
 
 		go task.FetchGo(runtimeConfig, &taskC, &quitC, offset)
 	}
 
-
 	c2 := make(chan bool, 1)
 	parseQuitChannels[0] = &c2
 	offset2 := new(RoutingOffset)
-//	offset2.Offset = initOffset(runtimeConfig, "parse", 0)
+	//	offset2.Offset = initOffset(runtimeConfig, "parse", 0)
 	offset2.Shard = 0
 	parseOffsets[0] = offset2
 	pendingFetchUrls := make(chan []byte)
@@ -222,10 +221,9 @@ func main() {
 	}()
 
 	//start local saved file parser
-	if runtimeConfig.ParseUrlsFromSavedFileLog{
+	if runtimeConfig.ParseUrlsFromSavedFileLog {
 		go task.ParseGo(pendingFetchUrls, runtimeConfig, &c2, offset2)
 	}
-
 
 	//redistribute pendingFetchUrls to sharded workers
 	go func() {
@@ -233,7 +231,7 @@ func main() {
 			url := <-pendingFetchUrls
 			if !runtimeConfig.Storage.CheckWalkedUrl(url) {
 
-				if (runtimeConfig.Storage.CheckFetchedUrl(url)) {
+				if runtimeConfig.Storage.CheckFetchedUrl(url) {
 					log.Warn("dont hit walk bloomfilter but hit fetch bloomfilter,also ignore,", string(url))
 					runtimeConfig.Storage.AddWalkedUrl(url)
 					continue
@@ -246,21 +244,20 @@ func main() {
 				log.Debug("publish:", string(url), ",shard:", randomShard)
 				runtimeConfig.Storage.AddWalkedUrl(url)
 				*fetchTaskChannels[randomShard] <- url
-			}else {
+			} else {
 				log.Trace("hit walk or fetch bloomfilter,just ignore,", string(url))
 			}
 		}
 	}()
 
 	//load predefined fetch jobs
-	if runtimeConfig.LoadTemplatedFetchJob{
+	if runtimeConfig.LoadTemplatedFetchJob {
 		go func() {
 
-			if (util.CheckFileExists(runtimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt")) {
+			if util.CheckFileExists(runtimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt") {
 
 				templates := util.ReadAllLines(runtimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt")
 				ids := util.ReadAllLines(runtimeConfig.TaskConfig.TaskDataPath + "/urls/id.txt")
-
 
 				for _, id := range ids {
 					for _, template := range templates {
@@ -278,40 +275,36 @@ func main() {
 		}()
 	}
 
-
 	//fetch urls from saved pages
-	if runtimeConfig.LoadPendingFetchJobs{
+	if runtimeConfig.LoadPendingFetchJobs {
 		c3 := make(chan bool, 1)
 		parseQuitChannels[1] = &c3
 		offset3 := new(RoutingOffset)
-//		offset3.Offset = initOffset(runtimeConfig, "fetch_from_saved", 0)
+		//		offset3.Offset = initOffset(runtimeConfig, "fetch_from_saved", 0)
 		offset3.Shard = 0
 		parseOffsets[1] = offset3
 		go task.LoadTaskFromLocalFile(pendingFetchUrls, runtimeConfig, &c3, offset3)
 	}
 
-
 	//parse fetch failed jobs,and will ignore the walk-filter
 	//TODO
 
-	  if(runtimeConfig.LoadRuledFetchJob){
+	if runtimeConfig.LoadRuledFetchJob {
 		log.Debug("start ruled fetch")
 		go func() {
-			if(runtimeConfig.RuledFetchConfig.UrlTemplate!=""){
-				for i := runtimeConfig.RuledFetchConfig.From; i <=  runtimeConfig.RuledFetchConfig.To; i+=runtimeConfig.RuledFetchConfig.Step {
-					url:=strings.Replace( runtimeConfig.RuledFetchConfig.UrlTemplate,"{id}",strconv.FormatInt(int64(i),10),-1)
-					log.Debug("add ruled url:",url)
+			if runtimeConfig.RuledFetchConfig.UrlTemplate != "" {
+				for i := runtimeConfig.RuledFetchConfig.From; i <= runtimeConfig.RuledFetchConfig.To; i += runtimeConfig.RuledFetchConfig.Step {
+					url := strings.Replace(runtimeConfig.RuledFetchConfig.UrlTemplate, "{id}", strconv.FormatInt(int64(i), 10), -1)
+					log.Debug("add ruled url:", url)
 					pendingFetchUrls <- []byte(url)
 				}
-			}else{
+			} else {
 				log.Error("ruled template is empty,ignore")
 			}
 		}()
 
-	  }
+	}
 
 	<-finalQuitSignal
 	printShutdownInfo()
 }
-
-

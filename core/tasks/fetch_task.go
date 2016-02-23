@@ -8,8 +8,8 @@ package tasks
 import (
 	log "github.com/cihub/seelog"
 	"time"
-	util "github.com/medcl/gopa/src/util"
-	. "github.com/medcl/gopa/src/config"
+	util "github.com/medcl/gopa/core/util"
+	. "github.com/medcl/gopa/core/config"
 )
 
 //fetch url's content

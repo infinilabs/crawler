@@ -40,6 +40,8 @@ config:
 	go get github.com/robfig/config
 	go get github.com/PuerkitoBio/purell
 	go get github.com/clarkduvall/hyperloglog
+	go get github.com/PuerkitoBio/goquery
+	go get github.com/pantsing/gograce/ghttp
 
 dist: cross-build package
 

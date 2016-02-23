@@ -12,7 +12,7 @@ package config
 
 	 "os"
 
-	 "github.com/medcl/gopa/src/logging"
+	 "github.com/medcl/gopa/core/logging"
  )
 
 var loadingConfig *cfg.Config

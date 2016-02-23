@@ -6,7 +6,7 @@
  */
 package config
 import (
-	. "github.com/medcl/gopa/src/types"
+	. "github.com/medcl/gopa/core/types"
 )
 
 

@@ -6,12 +6,12 @@
 package fs
 
 import (
-	util "github.com/medcl/gopa/src/util"
+	util "github.com/medcl/gopa/core/util"
 	log "github.com/cihub/seelog"
 	"io/ioutil"
 	"strconv"
 	"os"
-	"github.com/medcl/gopa/src/config"
+	"github.com/medcl/gopa/core/config"
 )
 
 

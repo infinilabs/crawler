@@ -1,6 +1,6 @@
 # Gopa #
 
-[狗爬],A High Performance Distributed  Spider Written in GO.
+[狗爬],A High Performance Distributed Spider Written in GO.
 
 [![Build Status](https://drone.io/github.com/medcl/gopa/status.png)](https://drone.io/github.com/medcl/gopa/latest)
 
@@ -45,6 +45,8 @@ Gopa is standing on the shoulders of giants,thanks for the following goodies.
 * https://github.com/PuerkitoBio/purell
 * https://github.com/cihub/seelog
 * https://github.com/clarkduvall/hyperloglog
+* https://github.com/PuerkitoBio/goquery
+* https://github.com/pantsing/gograce
 
 license
 =======

@@ -10,7 +10,7 @@ import (
 	. "net/url"
 	"os"
 	"strings"
-	. "github.com/medcl/gopa/src/config"
+	. "github.com/medcl/gopa/core/config"
 
 )
 
