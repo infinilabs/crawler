@@ -30,6 +30,7 @@ import (
 var seedUrl string
 var logLevel string
 var runtimeConfig *RuntimeConfig
+var version string
 
 func getSeqStr(start []byte, end []byte, mix bool) []byte {
 	if (len(start)) == len(end) {
@@ -81,7 +82,7 @@ func printStartInfo() {
 	fmt.Println(" |___/      |_|          ")
 	fmt.Println(" ")
 
-	fmt.Println("[gopa] " + runtimeConfig.Version + " is on")
+	fmt.Println("[gopa] " + version + " is on")
 	fmt.Println(" ")
 	startTime = time.Now()
 }
@@ -91,18 +92,21 @@ func printShutdownInfo() {
 	fmt.Println("   _` |   _ \\   _ \\   _` |     _ \\  |  |   -_) ")
 	fmt.Println(" \\__, | \\___/ \\___/ \\__,_|   _.__/ \\_, | \\___| ")
 	fmt.Println(" ____/                             ___/        ")
-	fmt.Println("[gopa] "+runtimeConfig.Version+" is down, uptime:", time.Now().Sub(startTime))
+	fmt.Println("[gopa] "+version+" is down, uptime:", time.Now().Sub(startTime))
 	fmt.Println(" ")
 }
 
 func main() {
 
+	version = "0.6_SNAPSHOT"
+
+	printStartInfo()
+	defer logging.Flush()
+
 	flag.StringVar(&seedUrl, "seed", "http://example.com", "the seed url,where everything starts")
 	flag.StringVar(&logLevel, "log", "info", "setting log level,options:trace,debug,info,warn,error")
 
 	flag.Parse()
-
-	defer logging.Flush()
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
@@ -110,9 +114,12 @@ func main() {
 
 	runtimeConfig = InitOrGetConfig()
 
+	runtimeConfig.Version= version
+
 	runtimeConfig.LogLevel = logLevel
 
-	printStartInfo()
+	logging.SetLogging(runtimeConfig.LogLevel, runtimeConfig.LogPath)
+
 
 	if seedUrl == "" || seedUrl == "http://example.com" {
 		log.Error("no seed was given. type:\"gopa -h\" for help.")

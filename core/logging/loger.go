@@ -3,6 +3,7 @@ package logging
 
 import (
 	log "github.com/cihub/seelog"
+"strings"
 )
 
 
@@ -12,6 +13,9 @@ func Flush(){
 
 
 func SetInitLogging(logLevel string) {
+
+	logLevel = strings.ToLower(logLevel)
+
 	testConfig := `
 	<seelog  type="sync" minlevel="`
 	testConfig =testConfig + logLevel
@@ -31,6 +35,9 @@ func SetInitLogging(logLevel string) {
 }
 
 func SetLogging(logLevel string,logFile string) {
+
+	logLevel = strings.ToLower(logLevel)
+
 	testConfig := `
 	<seelog  type="sync" minlevel="`
 	testConfig = testConfig + logLevel
@@ -40,7 +47,7 @@ func SetLogging(logLevel string,logFile string) {
 			<filter levels="`+logLevel+`">
 				<file path="`+logFile+`"/>
 			</filter>
-			 <rollingfile formatid="main" type="size" filename="`+logFile+`" maxsize="100" maxrolls="5" />
+			 <rollingfile formatid="main" type="size" filename="`+logFile+`" maxsize="10000000000" maxrolls="5" />
 		</outputs>
 		<formats>
 			<format id="main" format="[%Date(01-02) %Time] [%LEV] [%File:%Line,%FuncShort] %Msg%n"/>

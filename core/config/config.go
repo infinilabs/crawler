@@ -12,7 +12,6 @@ package config
 
 	 "os"
 
-	 "github.com/medcl/gopa/core/logging"
  )
 
 var loadingConfig *cfg.Config
@@ -25,7 +24,6 @@ func InitOrGetConfig() *RuntimeConfig  {
 
 	//parse main config
 	loadingConfig, _ = cfg.ReadDefault("config.ini")
-	runtimeConfig.Version="0.6_SNAPSHOT"
 	runtimeConfig.PathConfig = new(PathConfig)
 	runtimeConfig.ClusterConfig = new(ClusterConfig)
 	parseConfig()
@@ -65,8 +63,8 @@ func InitOrGetConfig() *RuntimeConfig  {
 
 	//set default logging
 	logPath := runtimeConfig.PathConfig.Log + "/" + runtimeConfig.TaskConfig.Name + "/gopa.log";
-	logging.SetLogging(runtimeConfig.LogLevel, logPath)
 
+	runtimeConfig.LogPath=logPath
 
 	runtimeConfig.ParseUrlsFromSavedFileLog = GetBoolConfig("Switch", "ParseUrlsFromSavedFileLog", true)
 	runtimeConfig.LoadTemplatedFetchJob = GetBoolConfig("Switch", "LoadTemplatedFetchJob", true)

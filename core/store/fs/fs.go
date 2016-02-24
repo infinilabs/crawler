@@ -79,9 +79,11 @@ func (this *FsStore) PersistBloomFilter(){
 func (this *FsStore) CheckWalkedUrl(url []byte) bool{
 	return this.WalkBloomFilter.Lookup(url)
 }
+
 func (this *FsStore) CheckFetchedUrl(url []byte) bool{
 	return this.FetchBloomFilter.Lookup(url)
 }
+
 func (this *FsStore) CheckParsedFile(url []byte) bool{
 	return this.ParseBloomFilter.Lookup(url)
 }
@@ -93,7 +95,6 @@ func (this *FsStore) CheckPendingFetchUrl(url []byte ) bool{
 func (this *FsStore) AddWalkedUrl(url []byte ){
 	this.WalkBloomFilter.Add(url)
 }
-
 
 func (this *FsStore) AddPendingFetchUrl(url []byte ){
 	this.PendingFetchBloomFilter.Add(url)
@@ -159,7 +160,6 @@ func (this *FsStore) LoadOffset(fileName string) int64{
 	return 0
 }
 
-
 func (this *FsStore) PersistOffset(fileName string,offset int64){
 		//persist worker's offset
 	path := fileName+".tmp"
@@ -174,8 +174,5 @@ func (this *FsStore) PersistOffset(fileName string,offset int64){
 	fout.Write([]byte(strconv.FormatInt(offset, 10)))
 	util.CopyFile(path, fileName)
 }
-
-
-
 
 func (this *FsStore) InitPendingFetchBloomFilter(fileName string){}

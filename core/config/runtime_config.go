@@ -44,6 +44,7 @@ type RuntimeConfig struct{
 	Version string
 
 	LogLevel string `info`
+	LogPath string `bin/gopa.log`
 
 	//cluster
 	ClusterConfig *ClusterConfig
