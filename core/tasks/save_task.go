@@ -56,7 +56,14 @@ func getSavedPath(runtimeConfig *RuntimeConfig,url []byte) string{
 			log.Trace("new path:", path)
 			os.MkdirAll(path, 0777)
 			log.Trace("making dir:", path)
-			path = (baseDir + myurl1.Path)
+
+			//if the page extension is missing
+			if(!strings.Contains(myurl1.Path,".")){
+				path = (baseDir + myurl1.Path + ".html")
+			}else{
+				path = (baseDir + myurl1.Path)
+			}
+
 			log.Trace("fileUrl:",urlStr)
 			//			myurl1.Query().Encode();
 			//			log.Error("fileArgs:",myurl1.Query().Get("pn"))
