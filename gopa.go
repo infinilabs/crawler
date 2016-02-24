@@ -131,15 +131,6 @@ func main() {
 
 	runtimeConfig.Storage.Init()
 
-	//	if(runtimeConfig.)
-
-	//	atr:="AZaz"
-	//	btr:=[]byte(atr)
-	//	fmt.Println(btr)
-	//
-	//	id:= getSeqStr([]byte("AA"),[]byte("ZZ"),false)
-	//	fmt.Println(id)
-
 	//pprof serves
 	if runtimeConfig.GoProfEnabled {
 		go func() {
@@ -181,7 +172,6 @@ func main() {
 		log.Debug("got signal:", s)
 		if s == os.Interrupt || s.(os.Signal) == syscall.SIGINT {
 			log.Warn("got signal:os.Interrupt,saving data and exit")
-			//			defer  os.Exit(0)
 
 			runtimeConfig.Storage.PersistBloomFilter()
 
