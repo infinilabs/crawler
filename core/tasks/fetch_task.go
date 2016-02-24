@@ -166,6 +166,7 @@ func FetchGo(runtimeConfig *RuntimeConfig, taskC *chan []byte, quitC *chan bool,
 		}
 	}()
 
-	log.Info("fetch task exit.shard:",shard)
 	<-*quitC
+	log.Info("fetch task exit.shard:",shard)
+
 }
