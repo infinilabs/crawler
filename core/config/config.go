@@ -116,7 +116,7 @@ func parseConfig() *TaskConfig {
 	taskConfig.LinkUrlExtractRegex = regexp.MustCompile(
 		GetStringConfig("CrawlerRule", "LinkUrlExtractRegex", "(\\s+(src2|src|href|HREF|SRC))\\s*=\\s*[\"']?(.*?)[\"']"))
 
-	taskConfig.SplitByUrlParameter = GetStringConfig("CrawlerRule", "SplitByUrlParameter", "")
+	taskConfig.SplitByUrlParameter = GetStringConfig("CrawlerRule", "SplitByUrlParameter", "p,pn,page,start,index")
 
 	taskConfig.LinkUrlExtractRegexGroupIndex = GetIntConfig("CrawlerRule", "LinkUrlExtractRegexGroupIndex", 3)
 	taskConfig.Name = GetStringConfig("CrawlerRule", "Name", "GopaTask")
