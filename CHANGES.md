@@ -4,6 +4,8 @@
 CHANGES
 
 v0.6
+breaking change:
+1.remove bloom, use leveldb to store urls
 feature:
 1.crawling speed control
 2.cookie supported
@@ -11,6 +13,7 @@ feature:
 bugfix:
 1.shutdown nil exception
 2.wrong relative link in parse phrase
+
 
 v0.5
 feature:
