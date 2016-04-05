@@ -9,7 +9,6 @@ package http
 
 import (
 	"net/http"
-	"github.com/pantsing/gograce/ghttp"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
 )
@@ -25,5 +24,5 @@ func Start(runtimeConfig *RuntimeConfig) {
 	config=*runtimeConfig
 	http.HandleFunc("/", index)
 	log.Info("http server listen at: http://localhost:8001/")
-	ghttp.ListenAndServe(":8001", nil)
+	http.ListenAndServe(":8001", nil)
 }
