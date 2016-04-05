@@ -110,7 +110,6 @@ func main() {
 	}
 
 	store := leveldb.LeveldbStore{}
-	defer store.Close()
 
 	store.Open()
 	runtimeConfig.Storage = &store
