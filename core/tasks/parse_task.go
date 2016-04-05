@@ -1,37 +1,25 @@
-/** 
+/**
  * User: Medcl
  * Date: 13-7-25
- * Time: 下午9:19 
+ * Time: 下午9:19
  */
 //subscribe local file channel,and parse urls
 package tasks
 
 import (
-	log "github.com/cihub/seelog"
-	"io/ioutil"
-	//	"net/http"
-	. "net/url"
-	"os"
-	//	"regexp"
-	"strings"
-	time    "time"
+	"bufio"
 	. "github.com/PuerkitoBio/purell"
-//	. "github.com/zeebo/sbloom"
-	//	"kafka"
-	//	"math/rand"
-	//	"strconv"
+	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
 	util "github.com/medcl/gopa/core/util"
-	//	utils "util"
-	//	bloom "github.com/zeebo/sbloom"
-	//	"hash/fnv"
-	"bufio"
+	"io/ioutil"
+	. "net/url"
+	"os"
+	"strings"
+	time "time"
 )
 
-//var parseFilter  *bloom.Filter
 func init() {
-	//	parseFilter = bloom.NewFilter(fnv.New64(), 1000000)
-	//	log.Warn("init bloom filter")
 }
 
 func loadFileContent(fileName string) []byte {
@@ -47,17 +35,12 @@ func loadFileContent(fileName string) []byte {
 	return nil
 }
 
-func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string , fileName []byte, body []byte) {
-
-	//	siteUrlStr := string(fileName)
-	//	siteUrlStr = strings.TrimLeft(siteUrlStr, "data/")
-	//	siteUrlStr = "http://" + siteUrlStr
-	//	log.Debug("fileName to Url:", string(fileName), ",", siteUrlStr)
+func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string, fileName []byte, body []byte) {
 
 	var storage = runtimeConfig.Storage
-	
+
 	siteUrlStr := fileUrl
-	siteConfig:=runtimeConfig.TaskConfig
+	siteConfig := runtimeConfig.TaskConfig
 
 	siteUrlByte := []byte(siteUrlStr)
 	log.Debug("enter links extract,", siteUrlStr)
@@ -75,27 +58,26 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string , fileName []byte
 		return
 	}
 
-	var parentPath="/"
+	var parentPath = "/"
 
 	var parentUrlFullPath string
 
-	if(seedURI.Path!=""){
-		var index=strings.LastIndex(seedURI.Path,"/")
+	if seedURI.Path != "" {
+		var index = strings.LastIndex(seedURI.Path, "/")
 
-		if(index>0){
-			parentPath=util.SubString(seedURI.Path,0,index)
+		if index > 0 {
+			parentPath = util.SubString(seedURI.Path, 0, index)
 
-			if(!strings.HasSuffix(parentPath,"/")){
-				parentPath=parentPath+"/"
+			if !strings.HasSuffix(parentPath, "/") {
+				parentPath = parentPath + "/"
 			}
 		}
-		parentUrlFullPath="http://" + seedURI.Host +parentPath
-	}else {
-		parentUrlFullPath="http://" + seedURI.Host
+		parentUrlFullPath = "http://" + seedURI.Host + parentPath
+	} else {
+		parentUrlFullPath = "http://" + seedURI.Host
 	}
 
-	log.Trace("parent url fullpath:",parentUrlFullPath)
-
+	log.Trace("parent url fullpath:", parentUrlFullPath)
 
 	log.Debug("parsing external links:", siteUrlStr, ",using:", siteConfig.LinkUrlExtractRegex)
 
@@ -103,7 +85,7 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string , fileName []byte
 	log.Debug("extract links with pattern,total matchs:", len(matches), " match result,", string(fileName))
 	xIndex := 0
 	for _, match := range matches {
-		log.Debug("dealing with match result,", xIndex)
+		log.Trace("dealing with match result,", xIndex)
 		xIndex = xIndex + 1
 		url := match[siteConfig.LinkUrlExtractRegexGroupIndex]
 		filterUrl := formatUrlForFilter(url)
@@ -112,29 +94,26 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string , fileName []byte
 
 		//filter error link
 		if filteredUrl == "" {
-			log.Debug("filteredUrl is empty,continue")
+			log.Trace("filteredUrl is empty,continue")
 			continue
 		}
 
 		result1 := strings.HasPrefix(filteredUrl, "#")
 		if result1 {
-			log.Debug("filteredUrl started with: # ,continue")
+			log.Trace("filteredUrl started with: # ,continue")
 			continue
 		}
 
 		result2 := strings.HasPrefix(filteredUrl, "javascript:")
 		if result2 {
-			log.Debug("filteredUrl started with: javascript: ,continue")
+			log.Trace("filteredUrl started with: javascript: ,continue")
 			continue
 		}
 
 		hit := false
 
-		//		l.Lock();
-		//		defer l.Unlock();
-
-		if storage.CheckWalkedUrl(filterUrl)||storage.CheckFetchedUrl(filterUrl)||storage.CheckPendingFetchUrl(filterUrl) {
-			log.Debug("hit bloomFilter,continue")
+		if storage.UrlHasWalked(filterUrl) || storage.UrlHasFetched(filterUrl) || storage.PendingFetchUrlHasAdded(filterUrl) {
+			log.Trace("hit Filter,continue")
 			hit = true
 			continue
 		}
@@ -147,15 +126,13 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string , fileName []byte
 			currentURI := currentURI1
 			if err != nil {
 
-				log.Trace("invalid url,",err)
+				log.Trace("invalid url,", err)
 
 				if strings.Contains(err.Error(), "invalid URI for request") {
 					log.Debug("invalid URI for request,fix relative url,original:", currentUrlStr)
-					//					log.Debug("old relatived url,", currentUrlStr)
+
 					//page based relative urls
-
-
-					currentUrlStr = parentUrlFullPath+ currentUrlStr
+					currentUrlStr = parentUrlFullPath + currentUrlStr
 					currentURI1, err = ParseRequestURI(currentUrlStr)
 					currentURI = currentURI1
 					if err != nil {
@@ -171,33 +148,31 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string , fileName []byte
 				}
 			}
 
-			//			relative links
+			//relative links
 			if currentURI == nil || currentURI.Host == "" {
+
 				if strings.HasPrefix(currentURI.Path, "/") {
 					//root based relative urls
-					log.Trace("old relatived url1,", currentUrlStr)
 					currentUrlStr = parentUrlFullPath + currentUrlStr
 					log.Trace("new relatived url,", currentUrlStr)
 				} else {
-					log.Trace("old relatived url2,", currentUrlStr)
 					//page based relative urls
 					urlPath := getRootUrl(currentURI)
 					currentUrlStr = "http://" + urlPath + currentUrlStr
 					log.Trace("new relatived url,", currentUrlStr)
 				}
 			} else {
-				log.Debug("host:", currentURI.Host, " ", currentURI.Host == "")
-
 				//resolve domain specific filter
 				if siteConfig.FollowSameDomain {
-
 					if siteConfig.FollowSubDomain {
 
 						//TODO handler com.cn and .com,using a TLC-domain list
 
-					} else if seedURI.Host != currentURI.Host {
+					}
+
+					if seedURI.Host != currentURI.Host {
 						log.Debug("domain mismatch,", seedURI.Host, " vs ", currentURI.Host)
-						//continue
+						continue
 					}
 					//TODO follow all or list of domain
 				}
@@ -205,83 +180,76 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string , fileName []byte
 
 			if len(siteConfig.LinkUrlMustContain) > 0 {
 				if !util.ContainStr(currentUrlStr, siteConfig.LinkUrlMustContain) {
-					log.Debug("link does not hit must-contain,ignore,", currentUrlStr, " , ", siteConfig.LinkUrlMustNotContain)
+					log.Trace("link does not hit must-contain,ignore,", currentUrlStr, " , ", siteConfig.LinkUrlMustNotContain)
 					continue
 				}
 			}
 
 			if len(siteConfig.LinkUrlMustNotContain) > 0 {
 				if util.ContainStr(currentUrlStr, siteConfig.LinkUrlMustNotContain) {
-					log.Debug("link hit must-not-contain,ignore,", currentUrlStr, " , ", siteConfig.LinkUrlMustNotContain)
+					log.Trace("link hit must-not-contain,ignore,", currentUrlStr, " , ", siteConfig.LinkUrlMustNotContain)
 					continue
 				}
 			}
 
 			//normalize url
-			currentUrlStr = MustNormalizeURLString(currentUrlStr, FlagLowercaseScheme | FlagLowercaseHost | FlagUppercaseEscapes |
-						FlagRemoveUnnecessaryHostDots | FlagRemoveDuplicateSlashes | FlagRemoveFragment)
-			log.Debug("normalized url:", currentUrlStr)
+			currentUrlStr = MustNormalizeURLString(currentUrlStr, FlagLowercaseScheme|FlagLowercaseHost|FlagUppercaseEscapes|
+				FlagRemoveUnnecessaryHostDots|FlagRemoveDuplicateSlashes|FlagRemoveFragment)
+			log.Trace("normalized url:", currentUrlStr)
 			currentUrlByte := []byte(currentUrlStr)
-			if !(storage.CheckWalkedUrl(currentUrlByte)||storage.CheckFetchedUrl(currentUrlByte)||storage.CheckPendingFetchUrl(currentUrlByte)){
-			//bloomFilter.Lookup(currentUrlByte) {
-
-				//								if(CheckIgnore(currentUrlStr)){}
-
-				//				log.Info("enqueue fetch: ", currentUrlStr)
-
-				//				broker.Publish(kafka.NewMessage(currentUrlByte))
-
+			if !(storage.UrlHasWalked(currentUrlByte) || storage.UrlHasFetched(currentUrlByte) || storage.PendingFetchUrlHasAdded(currentUrlByte)) {
 
 				//copied form fetchTask,TODO refactor
 				//checking fetchUrlPattern
-				log.Debug("started check fetchUrlPattern,", currentUrlStr)
+				log.Trace("started check fetchUrlPattern,", currentUrlStr)
 				if siteConfig.FetchUrlPattern.Match(currentUrlByte) {
-					log.Debug("match fetch url pattern,", currentUrlStr)
+					log.Trace("match fetch url pattern,", currentUrlStr)
 					if len(siteConfig.FetchUrlMustNotContain) > 0 {
 						if util.ContainStr(currentUrlStr, siteConfig.FetchUrlMustNotContain) {
-							log.Debug("hit FetchUrlMustNotContain,ignore,", currentUrlStr)
+							log.Trace("hit FetchUrlMustNotContain,ignore,", currentUrlStr)
 							continue
 						}
 					}
 
 					if len(siteConfig.FetchUrlMustContain) > 0 {
 						if !util.ContainStr(currentUrlStr, siteConfig.FetchUrlMustContain) {
-							log.Debug("not hit FetchUrlMustContain,ignore,", currentUrlStr)
+							log.Trace("not hit FetchUrlMustContain,ignore,", currentUrlStr)
 							continue
 						}
 					}
 				} else {
-					log.Debug("does not hit FetchUrlPattern ignoring,", currentUrlStr)
+					log.Trace("does not hit FetchUrlPattern ignoring,", currentUrlStr)
 					continue
 				}
 
-				if(!storage.CheckPendingFetchUrl(currentUrlByte)){
-					log.Debug("log new pendingFetch url", currentUrlStr)
-					storage.LogPendingFetchUrl(runtimeConfig.PathConfig.PendingFetchLog,currentUrlStr)
+				if !storage.PendingFetchUrlHasAdded(currentUrlByte) {
+					log.Trace("log new pendingFetch url,", currentUrlStr)
 					storage.AddPendingFetchUrl(currentUrlByte)
-				}else{
-					log.Debug("hit new pendingFetch filter,ignore:", currentUrlStr)
+					storage.LogPendingFetchUrl(runtimeConfig.PathConfig.PendingFetchLog, currentUrlStr)
+					log.Debug("check filter result:", currentUrlStr, ":", storage.PendingFetchUrlHasAdded(currentUrlByte))
+
+				} else {
+					log.Error("hit new pendingFetch filter,ignore:", currentUrlStr)
+					continue
 				}
-//				pendingUrls <- currentUrlByte
 
 				//	TODO pendingFetchFilter			bloomFilter.Add(currentUrlByte)
-			}else{
-				log.Debug("hit bloom filter,ignore:", currentUrlStr)
+			} else {
+				log.Trace("hit filter,ignore:", currentUrlStr)
 			}
-			//			bloomFilter.Add([]byte(filterUrl))
 		} else {
-			log.Debug("hit bloom filter,ignore,", string(url))
+			log.Trace("hit filter,ignore,", string(url))
 		}
-		log.Debug("exit links extract,", siteUrlStr)
+		log.Trace("exit links extract,", siteUrlStr)
 
 	}
 
 	//TODO 处理ruled fetch pattern
 
-	log.Info("all links within ", siteUrlStr, " is done")
+	log.Debug("all links within ", siteUrlStr, " is done")
 }
 
-func ParseGo(pendingUrls chan []byte, runtimeConfig *RuntimeConfig, quit *chan bool, offsets *RoutingOffset) {
+func ParseGo(pendingUrls chan []byte, runtimeConfig *RuntimeConfig, quit *chan bool, offsets *RoutingParameter) {
 	log.Info("parsing task started.")
 	path := runtimeConfig.PathConfig.SavedFileLog
 	//touch local's file
@@ -289,23 +257,24 @@ func ParseGo(pendingUrls chan []byte, runtimeConfig *RuntimeConfig, quit *chan b
 	//if hit the EOF,will wait 2s,and then reopen the file,and try again,may be check the time of last modified
 
 waitFile:
-	if (!util.CheckFileExists(path)) {
-		log.Trace("waiting file create:",path)
-		time.Sleep(100*time.Millisecond)
+	if !util.CheckFileExists(path) {
+		log.Trace("waiting file create:", path)
+		time.Sleep(1000 * time.Millisecond)
 		goto waitFile
 	}
 
-	var storage=runtimeConfig.Storage
-	var offset int64= storage.LoadOffset(runtimeConfig.PathConfig.SavedFileLog + ".offset")
-	FetchFileWithOffset(runtimeConfig,path, offset)
+	var storage = runtimeConfig.Storage
+	var offset int64 = storage.LoadOffset(runtimeConfig.PathConfig.SavedFileLog + ".offset")
+	log.Info("loaded parse offset:", offset)
+	FetchFileWithOffset(runtimeConfig, path, offset)
 }
 
-func FetchFileWithOffset(runtimeConfig *RuntimeConfig,path string, skipOffset int64) {
+func FetchFileWithOffset(runtimeConfig *RuntimeConfig, path string, skipOffset int64) {
 
-	var offset int64= 0
+	var offset int64 = 0
 
 	time1, _ := util.FileMTime(path)
-	log.Debug("start touch time:", time1)
+	log.Trace("start touch time:", time1)
 
 	f, err := os.Open(path)
 	if err != nil {
@@ -313,21 +282,19 @@ func FetchFileWithOffset(runtimeConfig *RuntimeConfig,path string, skipOffset in
 		return
 	}
 
-	var storage=runtimeConfig.Storage
+	var storage = runtimeConfig.Storage
 
 	r := bufio.NewReader(f)
 	s, e := util.Readln(r)
 	offset = 0
-	log.Trace("new offset:", offset)
 
 	for e == nil {
 		offset = offset + 1
 		//TODO use byte offset instead of lines
-		if (offset > skipOffset) {
-			ParsedSavedFileLog(runtimeConfig,s)
+		if offset > skipOffset {
+			ParsedSavedFileLog(runtimeConfig, s)
+			storage.PersistOffset(runtimeConfig.PathConfig.SavedFileLog+".offset", offset)
 		}
-
-		storage.PersistOffset(runtimeConfig.PathConfig.SavedFileLog + ".offset",offset)
 
 		s, e = util.Readln(r)
 		//todo store offset
@@ -339,28 +306,28 @@ waitUpdate:
 
 	log.Trace("2nd touch time:", time2)
 
-	if (time2 > time1) {
-		log.Trace("file has been changed,restart parse")
-		FetchFileWithOffset(runtimeConfig,path, offset)
-	}else {
-		log.Trace("waiting file update:",path)
-		time.Sleep(5*time.Second)
+	if time2 > time1 {
+		log.Debug("file has been changed,restart parse")
+		FetchFileWithOffset(runtimeConfig, path, offset)
+	} else {
+		log.Trace("waiting file update:", path)
+		time.Sleep(5 * time.Second)
 		goto waitUpdate
 	}
 }
 
-func ParsedSavedFileLog(runtimeConfig *RuntimeConfig,fileLog string) {
-	if (fileLog != "") {
-		var storage=runtimeConfig.Storage
+func ParsedSavedFileLog(runtimeConfig *RuntimeConfig, fileLog string) {
+	if fileLog != "" {
+		var storage = runtimeConfig.Storage
 		log.Debug("start parse filelog:", fileLog)
 		//load file's content,and extract links
 
-		stringArray:=strings.Split(fileLog,"|||");
-		fileUrl:=stringArray[0]
-		fileName:=[]byte(stringArray[1])
+		stringArray := strings.Split(fileLog, "|||")
+		fileUrl := stringArray[0]
+		fileName := []byte(stringArray[1])
 
-		if(storage.CheckParsedFile(fileName)){
-			log.Debug("hit parse filter ignore,",string(fileName))
+		if storage.FileHasParsed(fileName) {
+			log.Debug("hit parse filter ignore,", string(fileName))
 			return
 		}
 
@@ -368,91 +335,9 @@ func ParsedSavedFileLog(runtimeConfig *RuntimeConfig,fileLog string) {
 		storage.AddParsedFile(fileName)
 
 		if fileContent != nil {
-//			log.Debug("partition:", partition, ",parse fileName:", string(fileName))
 
 			//extract urls to fetch queue.
-			extractLinks(runtimeConfig,fileUrl, fileName, fileContent)
-//			offsetV := msg.Offset()
-//			offset.Offset = offsetV
-//
-//			path := taskConfig.BaseStoragePath+     "task/parse_offset_" + strconv.FormatInt(int64(partition), 10) + ".tmp"
-//			path_new := taskConfig.BaseStoragePath+     "task/parse_offset_" + strconv.FormatInt(int64(partition), 10)
-//			fout, error := os.Create(path)
-//			if error != nil {
-//				log.Error(path, error)
-//				return
-//			}
-//
-//			defer fout.Close()
-//			log.Debug("partition:", partition, ",saved offset:", offsetV)
-//			fout.Write([]byte(strconv.FormatUint(msg.Offset(), 10)))
-//			utils.CopyFile(path, path_new)
+			extractLinks(runtimeConfig, fileUrl, fileName, fileContent)
 		}
 	}
-}
-
-func ParseLinks(pendingUrls chan []byte, runtimeConfig *RuntimeConfig, quit *chan bool, offsets *RoutingOffset, MaxGoRoutine int) {
-	//func ParseLinks(pendingUrls chan []byte, bloomFilter *Filter, taskConfig *TaskConfig, kafkaConfig *config.KafkaConfig, quit *chan bool, offsets *RoutingOffset, MaxGoRoutine int) {
-	//
-	//	partition := 0
-	//	log.Debug("partition:", partition, "start parse local file")
-	//	offset := *offsets
-	//
-	//	broker := kafka.NewBrokerConsumer(kafkaConfig.Hostname, taskConfig.Name+"_parse", partition, offset.Offset, kafkaConfig.MaxSize)
-	//
-	////	randomPartition := 0
-	////	if MaxGoRoutine > 1 {
-	////		randomPartition = rand.Intn(MaxGoRoutine - 1)
-	////	}
-	////	//		log.Debug("random partition:",random)
-	////	publisher := kafka.NewBrokerPublisher(kafkaConfig.Hostname, taskConfig.Name+"_fetch", randomPartition)
-	//
-	//	consumerCallback := func(msg *kafka.Message) {
-	//
-	//		message := msg.Payload()
-	//		stringArray:=strings.Split(string(message),"|||");
-	//		fileUrl:=stringArray[0]
-	//		fileName:=[]byte(stringArray[1])
-	//
-	//		if(parseFilter.Lookup(fileName)){
-	//			log.Debug("hit parse filter ignore,",string(fileName))
-	//			return
-	//		}
-	//		parseFilter.Add(fileName)
-	//
-	//		fileContent := loadFileContent(string(fileName))
-	//
-	//		if fileContent != nil {
-	//			log.Debug("partition:", partition, ",parse fileName:", string(fileName))
-	//
-	//			extractLinks(pendingUrls, bloomFilter,fileUrl, fileName, fileContent, taskConfig)
-	//			offsetV := msg.Offset()
-	//			offset.Offset = offsetV
-	//
-	//			path := taskConfig.BaseStoragePath+     "task/parse_offset_" + strconv.FormatInt(int64(partition), 10) + ".tmp"
-	//			path_new := taskConfig.BaseStoragePath+     "task/parse_offset_" + strconv.FormatInt(int64(partition), 10)
-	//			fout, error := os.Create(path)
-	//			if error != nil {
-	//				log.Error(path, error)
-	//				return
-	//			}
-	//
-	//			defer fout.Close()
-	//			log.Debug("partition:", partition, ",saved offset:", offsetV)
-	//			fout.Write([]byte(strconv.FormatUint(msg.Offset(), 10)))
-	//			utils.CopyFile(path, path_new)
-	//		}
-	//
-	//	}
-	//	msgChan := make(chan *kafka.Message)
-	//	go broker.ConsumeOnChannel(msgChan, 10, *quit)
-	//	for msg := range msgChan {
-	//		if msg != nil {
-	//			log.Debug("partition:", partition, ",consume messaging,parsing.", string(msg.Payload()))
-	//			consumerCallback(msg)
-	//		} else {
-	//			break
-	//		}
-	//	}
-	//	log.Debug("partition:", partition, ",exit parse local file")
 }

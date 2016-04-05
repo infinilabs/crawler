@@ -10,6 +10,8 @@ go get github.com/errplane/errplane-go
 go get github.com/clarkduvall/hyperloglog
 go get github.com/PuerkitoBio/goquery
 go get github.com/pantsing/gograce/ghttp
+go get github.com/syndtr/goleveldb/leveldb
+go get github.com/dmuth/golang-stats
 
 
 go build -o bin/gopa.exe

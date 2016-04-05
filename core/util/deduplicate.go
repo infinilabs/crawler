@@ -1,6 +1,6 @@
 package util
 
-type DeduplicatePlugin interface{
+type DeduplicatePlugin interface {
 	Init(fileName string) error
 	Persist() error
 	Lookup(key []byte) bool

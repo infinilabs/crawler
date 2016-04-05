@@ -1,7 +1,7 @@
-/** 
+/**
  * User: Medcl
  * Date: 13-7-11
- * Time: 下午9:51 
+ * Time: 下午9:51
  */
 package util
 
@@ -18,7 +18,7 @@ func StringToUTF16(s string) []uint16 {
 	return utf16.Encode([]rune(s + "\x00"))
 }
 
-func SubString(str string,begin,length int) (substr string) {
+func SubString(str string, begin, length int) (substr string) {
 	// 将字符串的转换成[]rune
 	rs := []rune(str)
 	lth := len(rs)

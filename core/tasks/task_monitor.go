@@ -5,29 +5,30 @@
  * Time: 下午1:33
  */
 package tasks
+
 import (
 	log "github.com/cihub/seelog"
-//	"io/ioutil"
+	//	"io/ioutil"
 	//	"net/http"
-//	. "net/url"
+	//	. "net/url"
 	"os"
 	//	"regexp"
-//	"strings"
+	//	"strings"
 	"time"
-//	. "github.com/PuerkitoBio/purell"
+	//	. "github.com/PuerkitoBio/purell"
 	//	. "github.com/zeebo/sbloom"
 	//	"kafka"
 	//	"math/rand"
-//		"strconv"
+	//		"strconv"
 	. "github.com/medcl/gopa/core/config"
 	util "github.com/medcl/gopa/core/util"
-//		utils "util"
+	//		utils "util"
 	//	bloom "github.com/zeebo/sbloom"
 	//	"hash/fnv"
 	"bufio"
 )
 
-func LoadTaskFromLocalFile(pendingFetchUrls chan []byte, runtimeConfig *RuntimeConfig, quit *chan bool, offsets *RoutingOffset){
+func LoadTaskFromLocalFile(pendingFetchUrls chan []byte, runtimeConfig *RuntimeConfig, quit *chan bool, offsets *RoutingParameter) {
 
 	log.Trace("LoadTaskFromLocalFile task started.")
 	path := runtimeConfig.PathConfig.PendingFetchLog
@@ -36,24 +37,22 @@ func LoadTaskFromLocalFile(pendingFetchUrls chan []byte, runtimeConfig *RuntimeC
 	//if hit the EOF,will wait 2s,and then reopen the file,and try again,may be check the time of last modified
 
 waitFile:
-	if (!util.CheckFileExists(path)) {
-		log.Trace("waiting file create:",path)
-		time.Sleep(100*time.Millisecond)
+	if !util.CheckFileExists(path) {
+		log.Trace("waiting file create:", path)
+		time.Sleep(100 * time.Millisecond)
 		goto waitFile
 	}
-	var storage=runtimeConfig.Storage
+	var storage = runtimeConfig.Storage
 
-	var offset int64= storage.LoadOffset(runtimeConfig.PathConfig.PendingFetchLog + ".offset")
-	FetchFileWithOffset2(*runtimeConfig,pendingFetchUrls,path, offset)
-
+	var offset int64 = storage.LoadOffset(runtimeConfig.PathConfig.PendingFetchLog + ".offset")
+	FetchFileWithOffset2(*runtimeConfig, pendingFetchUrls, path, offset)
 
 }
 
+func FetchFileWithOffset2(runtimeConfig RuntimeConfig, pendingFetchUrls chan []byte, path string, skipOffset int64) {
 
-func FetchFileWithOffset2(runtimeConfig RuntimeConfig,pendingFetchUrls chan []byte,path string, skipOffset int64) {
-
-	var	offset int64
-	offset=0
+	var offset int64
+	offset = 0
 	time1, _ := util.FileMTime(path)
 	log.Trace("start touch time:", time1)
 
@@ -62,7 +61,7 @@ func FetchFileWithOffset2(runtimeConfig RuntimeConfig,pendingFetchUrls chan []by
 		log.Trace("error opening file,", path, " ", err)
 		return
 	}
-	var storage=runtimeConfig.Storage
+	var storage = runtimeConfig.Storage
 
 	r := bufio.NewReader(f)
 	s, e := util.Readln(r)
@@ -72,11 +71,11 @@ func FetchFileWithOffset2(runtimeConfig RuntimeConfig,pendingFetchUrls chan []by
 	for e == nil {
 		offset = offset + 1
 		//TODO use byte offset instead of lines
-		if (offset > skipOffset) {
-			ParsedSavedFileLog2(runtimeConfig,pendingFetchUrls,s)
+		if offset > skipOffset {
+			ParsedSavedFileLog2(runtimeConfig, pendingFetchUrls, s)
 		}
 
-		storage.PersistOffset(runtimeConfig.PathConfig.PendingFetchLog + ".offset",offset)
+		storage.PersistOffset(runtimeConfig.PathConfig.PendingFetchLog+".offset", offset)
 
 		s, e = util.Readln(r)
 		//todo store offset
@@ -88,25 +87,24 @@ waitUpdate:
 
 	log.Trace("2nd touch time:", time2)
 
-	if (time2 > time1) {
+	if time2 > time1 {
 		log.Debug("file has been changed,restart parse")
-		FetchFileWithOffset2(runtimeConfig,pendingFetchUrls,path, offset)
-	}else {
-		log.Trace("waiting file update",path)
-		time.Sleep(10*time.Millisecond)
+		FetchFileWithOffset2(runtimeConfig, pendingFetchUrls, path, offset)
+	} else {
+		log.Trace("waiting file update", path)
+		time.Sleep(10 * time.Millisecond)
 		goto waitUpdate
 	}
 }
 
-
-func ParsedSavedFileLog2(runtimeConfig RuntimeConfig,pendingFetchUrls chan []byte,url string) {
-	if (url != "") {
+func ParsedSavedFileLog2(runtimeConfig RuntimeConfig, pendingFetchUrls chan []byte, url string) {
+	if url != "" {
 		log.Trace("start parse filelog:", url)
 
-		var storage=runtimeConfig.Storage
+		var storage = runtimeConfig.Storage
 
-		if(storage.CheckFetchedUrl([]byte(url))){
-			log.Debug("hit fetch filter ignore,",url)
+		if storage.UrlHasFetched([]byte(url)) {
+			log.Debug("hit fetch filter ignore,", url)
 			return
 		}
 		log.Debug("new task extracted from saved page:", url)

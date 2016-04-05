@@ -1,16 +1,16 @@
-/** 
+/**
  * User: Medcl
  * Date: 13-9-17
- * Time: 下午6:18 
+ * Time: 下午6:18
  */
 package util
 
 //copied from http://git.oschina.net/Unknown/gowalker/blob/master/utils/path.go
 
 import (
+	"path"
 	"regexp"
 	"strings"
-	"path"
 )
 
 var validTLD = map[string]bool{

@@ -46,7 +46,7 @@ func (this *FsStore) TaskEnqueue(url []byte){
 	 log.Info("task enqueue:",string(url))
 }
 
-func (this *FsStore) Init() error{
+func (this *FsStore) Open() error{
 
 	var runtimeConfig= config.InitOrGetConfig()
 	this.FetchBloomFilterFileName=runtimeConfig.FetchBloomFilterFileName;
@@ -68,6 +68,9 @@ func (this *FsStore) Init() error{
 
 	return nil
 }
+
+func (this *FsStore) Close() error;
+
 
 func (this *FsStore) PersistBloomFilter(){
 	this.WalkBloomFilter.Persist()

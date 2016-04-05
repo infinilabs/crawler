@@ -60,8 +60,7 @@ type Task struct {
 	Url, Request, Response []byte
 }
 
-type RoutingOffset struct {
+type RoutingParameter struct {
 	Shard int
-//	Offset uint64
 }
 

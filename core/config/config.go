@@ -1,24 +1,21 @@
-/** 
+/**
  * User: Medcl
  * Date: 13-7-23
- * Time: 下午2:20 
+ * Time: 下午2:20
  */
 package config
- import (
-	 cfg "github.com/robfig/config"
-	 log "github.com/cihub/seelog"
 
-	 "regexp"
-
-	 "os"
-
- )
+import (
+	log "github.com/cihub/seelog"
+	cfg "github.com/robfig/config"
+	"regexp"
+	"os"
+)
 
 var loadingConfig *cfg.Config
 var runtimeConfig RuntimeConfig
 
-
-func InitOrGetConfig() *RuntimeConfig  {
+func InitOrGetConfig() *RuntimeConfig {
 
 	log.Trace("start init config")
 
@@ -28,43 +25,39 @@ func InitOrGetConfig() *RuntimeConfig  {
 	runtimeConfig.ClusterConfig = new(ClusterConfig)
 	parseConfig()
 
-
-
 	runtimeConfig.ClusterConfig.Name = GetStringConfig("cluster", "name", "gopa")
 
 	// per cluster:data/gopa/
-	runtimeConfig.PathConfig.Home = GetStringConfig("path", "home", "cluster/"+runtimeConfig.ClusterConfig.Name + "/")
+	runtimeConfig.PathConfig.Home = GetStringConfig("path", "home", "cluster/"+runtimeConfig.ClusterConfig.Name+"/")
 
 	runtimeConfig.PathConfig.Data = GetStringConfig("path", "data", "")
-	if (runtimeConfig.PathConfig.Data == "") {
+	if runtimeConfig.PathConfig.Data == "" {
 		runtimeConfig.PathConfig.Data = runtimeConfig.PathConfig.Home + "/" + "data/"
 	}
 
 	runtimeConfig.PathConfig.Log = GetStringConfig("path", "log", "")
-	if (runtimeConfig.PathConfig.Log == "") {
+	if runtimeConfig.PathConfig.Log == "" {
 		runtimeConfig.PathConfig.Log = runtimeConfig.PathConfig.Home + "/" + "log/"
 	}
 
 	runtimeConfig.PathConfig.WebData = GetStringConfig("path", "webdata", "")
-	if (runtimeConfig.PathConfig.WebData == "") {
+	if runtimeConfig.PathConfig.WebData == "" {
 		runtimeConfig.PathConfig.WebData = runtimeConfig.PathConfig.Data + "/" + "webdata/"
 	}
 
 	runtimeConfig.PathConfig.TaskData = GetStringConfig("path", "taskdata", "")
-	if (runtimeConfig.PathConfig.TaskData == "") {
+	if runtimeConfig.PathConfig.TaskData == "" {
 		runtimeConfig.PathConfig.TaskData = runtimeConfig.PathConfig.Data + "/" + "taskdata/"
 	}
 
 	runtimeConfig.StoreWebPageTogether = GetBoolConfig("Global", "StoreWebPageTogether", true)
 
-
 	runtimeConfig.TaskConfig = parseConfig()
 
-
 	//set default logging
-	logPath := runtimeConfig.PathConfig.Log + "/" + runtimeConfig.TaskConfig.Name + "/gopa.log";
+	logPath := runtimeConfig.PathConfig.Log + "/" + runtimeConfig.TaskConfig.Name + "/gopa.log"
 
-	runtimeConfig.LogPath=logPath
+	runtimeConfig.LogPath = logPath
 
 	runtimeConfig.ParseUrlsFromSavedFileLog = GetBoolConfig("Switch", "ParseUrlsFromSavedFileLog", true)
 	runtimeConfig.LoadTemplatedFetchJob = GetBoolConfig("Switch", "LoadTemplatedFetchJob", true)
@@ -74,16 +67,16 @@ func InitOrGetConfig() *RuntimeConfig  {
 	runtimeConfig.ParseUrlsFromPreviousSavedPage = GetBoolConfig("Switch", "ParseUrlsFromPreviousSavedPage", false)
 	runtimeConfig.ArrayStringSplitter = GetStringConfig("CrawlerRule", "ArrayStringSplitter", ",")
 
-	runtimeConfig.GoProfEnabled = GetBoolConfig("CrawlerRule", "GoProfEnabled", false)
+	runtimeConfig.GoProfEnabled = GetBoolConfig("DEFAULT", "GoProfEnabled", false)
 
-	runtimeConfig.WalkBloomFilterFileName = GetStringConfig("BloomFilter", "WalkBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath +   "/filters/walk.bloomfilter")
-	runtimeConfig.FetchBloomFilterFileName = GetStringConfig("BloomFilter", "FetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath + "/filters/fetch.bloomfilter")
-	runtimeConfig.ParseBloomFilterFileName = GetStringConfig("BloomFilter", "ParseBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath + "/filters/parse.bloomfilter")
-	runtimeConfig.PendingFetchBloomFilterFileName = GetStringConfig("BloomFilter", "PendingFetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath + "/filters/pending_fetch.bloomfilter")
+	runtimeConfig.WalkBloomFilterFileName = GetStringConfig("BloomFilter", "WalkBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/walk.bloomfilter")
+	runtimeConfig.FetchBloomFilterFileName = GetStringConfig("BloomFilter", "FetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/fetch.bloomfilter")
+	runtimeConfig.ParseBloomFilterFileName = GetStringConfig("BloomFilter", "ParseBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/parse.bloomfilter")
+	runtimeConfig.PendingFetchBloomFilterFileName = GetStringConfig("BloomFilter", "PendingFetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/pending_fetch.bloomfilter")
 
-	runtimeConfig.PathConfig.SavedFileLog=runtimeConfig.TaskConfig.TaskDataPath+"/tasks/pending_parse.files"
-	runtimeConfig.PathConfig.PendingFetchLog=runtimeConfig.TaskConfig.TaskDataPath+"/tasks/pending_fetch.urls"
-	runtimeConfig.PathConfig.FetchFailedLog=runtimeConfig.TaskConfig.TaskDataPath+"/tasks/failed_fetch.urls"
+	runtimeConfig.PathConfig.SavedFileLog = runtimeConfig.TaskConfig.TaskDataPath + "/tasks/pending_parse.files"
+	runtimeConfig.PathConfig.PendingFetchLog = runtimeConfig.TaskConfig.TaskDataPath + "/tasks/pending_fetch.urls"
+	runtimeConfig.PathConfig.FetchFailedLog = runtimeConfig.TaskConfig.TaskDataPath + "/tasks/failed_fetch.urls"
 
 	runtimeConfig.MaxGoRoutine = GetIntConfig("Global", "MaxGoRoutine", 2)
 	if runtimeConfig.MaxGoRoutine < 2 {
@@ -93,7 +86,6 @@ func InitOrGetConfig() *RuntimeConfig  {
 	log.Debug("maxGoRoutine:", runtimeConfig.MaxGoRoutine)
 	log.Debug("path.home:", runtimeConfig.PathConfig.Home)
 
-
 	os.MkdirAll(runtimeConfig.PathConfig.Home, 0777)
 	os.MkdirAll(runtimeConfig.PathConfig.Data, 0777)
 	os.MkdirAll(runtimeConfig.PathConfig.Log, 0777)
@@ -101,18 +93,18 @@ func InitOrGetConfig() *RuntimeConfig  {
 	os.MkdirAll(runtimeConfig.PathConfig.TaskData, 0777)
 
 	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath, 0777)
-	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath + "/tasks/", 0777)
-	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath + "/filters/", 0777)
-	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath + "/urls/", 0777)
+	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath+"/tasks/", 0777)
+	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath+"/filters/", 0777)
+	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath+"/urls/", 0777)
 	os.MkdirAll(runtimeConfig.TaskConfig.WebDataPath, 0777)
 
-	runtimeConfig.RuledFetchConfig=new(RuledFetchConfig)
-	runtimeConfig.RuledFetchConfig.UrlTemplate=GetStringConfig("RuledFetch", "UrlTemplate", "")
-	runtimeConfig.RuledFetchConfig.From=GetIntConfig("RuledFetch", "From", 0)
-	runtimeConfig.RuledFetchConfig.To=GetIntConfig("RuledFetch", "To", 10)
-	runtimeConfig.RuledFetchConfig.Step=GetIntConfig("RuledFetch", "Step", 1)
-	runtimeConfig.RuledFetchConfig.LinkExtractPattern=GetStringConfig("RuledFetch", "LinkExtractPattern", "")
-	runtimeConfig.RuledFetchConfig.LinkTemplate=GetStringConfig("RuledFetch", "LinkTemplate", "")
+	runtimeConfig.RuledFetchConfig = new(RuledFetchConfig)
+	runtimeConfig.RuledFetchConfig.UrlTemplate = GetStringConfig("RuledFetch", "UrlTemplate", "")
+	runtimeConfig.RuledFetchConfig.From = GetIntConfig("RuledFetch", "From", 0)
+	runtimeConfig.RuledFetchConfig.To = GetIntConfig("RuledFetch", "To", 10)
+	runtimeConfig.RuledFetchConfig.Step = GetIntConfig("RuledFetch", "Step", 1)
+	runtimeConfig.RuledFetchConfig.LinkExtractPattern = GetStringConfig("RuledFetch", "LinkExtractPattern", "")
+	runtimeConfig.RuledFetchConfig.LinkTemplate = GetStringConfig("RuledFetch", "LinkTemplate", "")
 
 	return &runtimeConfig
 }
@@ -124,12 +116,10 @@ func parseConfig() *TaskConfig {
 	taskConfig.LinkUrlExtractRegex = regexp.MustCompile(
 		GetStringConfig("CrawlerRule", "LinkUrlExtractRegex", "(\\s+(src2|src|href|HREF|SRC))\\s*=\\s*[\"']?(.*?)[\"']"))
 
-	taskConfig.SplitByUrlParameter = GetStringConfig("CrawlerRule", "SplitByUrlParameter", "p")
-
+	taskConfig.SplitByUrlParameter = GetStringConfig("CrawlerRule", "SplitByUrlParameter", "")
 
 	taskConfig.LinkUrlExtractRegexGroupIndex = GetIntConfig("CrawlerRule", "LinkUrlExtractRegexGroupIndex", 3)
 	taskConfig.Name = GetStringConfig("CrawlerRule", "Name", "GopaTask")
-
 
 	taskConfig.FollowSameDomain = GetBoolConfig("CrawlerRule", "FollowSameDomain", true)
 	taskConfig.FollowSubDomain = GetBoolConfig("CrawlerRule", "FollowSubDomain", true)
@@ -149,77 +139,75 @@ func parseConfig() *TaskConfig {
 	taskConfig.Cookie = GetStringConfig("CrawlerRule", "Cookie", "")
 	taskConfig.FetchDelayThreshold = GetIntConfig("CrawlerRule", "FetchDelayThreshold", 0)
 
-	taskConfig.TaskDataPath = GetStringConfig("CrawlerRule", "TaskData", runtimeConfig.PathConfig.TaskData + "/" + taskConfig.Name + "/")
+	taskConfig.TaskDataPath = GetStringConfig("CrawlerRule", "TaskData", runtimeConfig.PathConfig.TaskData+"/"+taskConfig.Name+"/")
 
 	defaultWebDataPath := runtimeConfig.PathConfig.WebData + "/" + taskConfig.Name + "/"
-	if (runtimeConfig.StoreWebPageTogether) {
+	if runtimeConfig.StoreWebPageTogether {
 		defaultWebDataPath = runtimeConfig.PathConfig.WebData
 	}
 
 	taskConfig.WebDataPath = GetStringConfig("CrawlerRule", "WebData", defaultWebDataPath)
 
-
 	log.Debug("finished parsing taskConfig")
 	return taskConfig
 }
 
-
-func GetStringConfig(configSection string,configKey string ,defaultValue string) string{
-	if(loadingConfig ==nil){
+func GetStringConfig(configSection string, configKey string, defaultValue string) string {
+	if loadingConfig == nil {
 		log.Trace("loadingConfig is nil,just return")
 		return defaultValue
 	}
 
 	//loading or initializing bloom filter
-	value,error:=loadingConfig.String(configSection, configKey)
-	if(error!=nil){
-		value=defaultValue
+	value, error := loadingConfig.String(configSection, configKey)
+	if error != nil {
+		value = defaultValue
 	}
-	log.Trace("get config value,",configSection,".",configKey,":",value)
+	log.Trace("get config value,", configSection, ".", configKey, ":", value)
 	return value
 }
-func GetFloatConfig(configSection string,configKey string ,defaultValue float64) float64{
-	if(loadingConfig ==nil){
+
+func GetFloatConfig(configSection string, configKey string, defaultValue float64) float64 {
+	if loadingConfig == nil {
 		log.Trace("loadingConfig is nil,just return")
 		return defaultValue
 	}
 
 	//loading or initializing bloom filter
-	value,error:=loadingConfig.Float(configSection, configKey)
-	if(error!=nil){
-		value=defaultValue
+	value, error := loadingConfig.Float(configSection, configKey)
+	if error != nil {
+		value = defaultValue
 	}
-	log.Trace("get config value,",configSection,".",configKey,":",value)
+	log.Trace("get config value,", configSection, ".", configKey, ":", value)
 	return value
 }
-func GetIntConfig(configSection string,configKey string ,defaultValue int) int{
-	if(loadingConfig ==nil){
+
+func GetIntConfig(configSection string, configKey string, defaultValue int) int {
+	if loadingConfig == nil {
 		log.Trace("loadingConfig is nil,just return")
 		return defaultValue
 	}
 
 	//loading or initializing bloom filter
-	value,error:=loadingConfig.Int(configSection, configKey)
-	if(error!=nil){
-		value=defaultValue
+	value, error := loadingConfig.Int(configSection, configKey)
+	if error != nil {
+		value = defaultValue
 	}
-	log.Trace("get config value,",configSection,".",configKey,":",value)
+	log.Trace("get config value,", configSection, ".", configKey, ":", value)
 	return value
 }
 
-
-func GetBoolConfig(configSection string,configKey string ,defaultValue bool) bool{
-	if(loadingConfig ==nil){
+func GetBoolConfig(configSection string, configKey string, defaultValue bool) bool {
+	if loadingConfig == nil {
 		log.Trace("loadingConfig is nil,just return")
 		return defaultValue
 	}
 
 	//loading or initializing bloom filter
-	value,error:=loadingConfig.Bool(configSection, configKey)
-	if(error!=nil){
-		value=defaultValue
+	value, error := loadingConfig.Bool(configSection, configKey)
+	if error != nil {
+		value = defaultValue
 	}
-	log.Trace("get config value,",configSection,".",configKey,":",value)
+	log.Trace("get config value,", configSection, ".", configKey, ":", value)
 	return value
 }
-

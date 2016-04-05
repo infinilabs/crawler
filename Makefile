@@ -42,6 +42,9 @@ config:
 	go get github.com/clarkduvall/hyperloglog
 	go get github.com/PuerkitoBio/goquery
 	go get github.com/pantsing/gograce/ghttp
+	go get github.com/syndtr/goleveldb/leveldb
+	go get github.com/dmuth/golang-stats
+
 
 dist: cross-build package
 
