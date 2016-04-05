@@ -18,7 +18,7 @@ cross-build: clean config
 	GOOS=linux  GOARCH=amd64 go build -o bin/linux64/gopa
 
 
-all: clean config cross-compile cross-build
+all: clean config cross-build
 
 
 

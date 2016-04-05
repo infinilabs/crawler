@@ -82,7 +82,7 @@ func printShutdownInfo() {
 
 func main() {
 
-	version = "0.6_SNAPSHOT"
+	version = "0.7_SNAPSHOT"
 
 	printStartInfo()
 	defer logging.Flush()

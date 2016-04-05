@@ -2,6 +2,7 @@
 
 [狗爬],A Spider Written in GO.
 
+[![Travis](https://travis-ci.org/elastic/beats.svg?branch=master)](https://travis-ci.org/elastic/beats)
 [![Build Status](https://drone.io/github.com/medcl/gopa/status.png)](https://drone.io/github.com/medcl/gopa/latest)
 
 
@@ -10,6 +11,11 @@
 linux: Run `chmod a+x build.sh &./build.sh` to build the Gopa
 
 windows: Run `build.bat` to build the Gopa
+
+
+## Download ##
+
+[Gopa Release](https://github.com/medcl/gopa/releases)
 
 
 ## Running Gopa ##
