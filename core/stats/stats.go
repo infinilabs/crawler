@@ -1,20 +1,23 @@
 package stats
-import stats "github.com/dmuth/golang-stats"
-//
-// Manipulate stats
-// The values will be initialized to zero if they do not already exist.
-//
-//stats.IncrStat("key")
-//stats.DercStat("key")
-//stats.AddStat("key2", 3)
-//stats.SubStat("key3", 4)
 
-//
-// Retrieve a stat
-//
-//value := stats.Stat("key")
+import (
+	stats "github.com/dmuth/golang-stats"
+	"encoding/json"
+)
 
-//
-// Retrieve all stats as a map[string]int array
-//
-//values := stats.StatAll()
+func Increment(key string )  {
+	stats.IncrStat(key)
+}
+
+func Decrement(key string)  {
+	stats.DecrStat(key)
+}
+
+func Stats(key string)  {
+	stats.Stat(key)
+}
+
+func StatsAll()string  {
+	obj,_ :=json.Marshal(stats.StatAll())
+	return string(obj)
+}

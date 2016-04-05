@@ -10,6 +10,7 @@ import (
 	. "github.com/medcl/gopa/core/config"
 	util "github.com/medcl/gopa/core/util"
 	"time"
+	"github.com/medcl/gopa/core/stats"
 )
 
 //fetch url's content
@@ -39,6 +40,7 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig, o
 			}
 		}
 		storage.AddFetchedUrl(url)
+		stats.Increment(stats.STATS_FETCH_IGNORE_COUNT)
 		return
 	}
 
@@ -50,6 +52,7 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig, o
 			if util.ContainStr(requestUrl, config.FetchUrlMustNotContain) {
 				log.Debug("hit FetchUrlMustNotContain,ignore,", requestUrl, " , ", config.FetchUrlMustNotContain)
 				storage.AddFetchedUrl(url)
+				stats.Increment(stats.STATS_FETCH_IGNORE_COUNT)
 				return
 			}
 		}
@@ -58,12 +61,14 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig, o
 			if !util.ContainStr(requestUrl, config.FetchUrlMustContain) {
 				log.Debug("not hit FetchUrlMustContain,ignore,", requestUrl, " , ", config.FetchUrlMustContain)
 				storage.AddFetchedUrl(url)
+				stats.Increment(stats.STATS_FETCH_IGNORE_COUNT)
 				return
 			}
 		}
 	} else {
 		log.Debug("does not hit FetchUrlPattern ignoring,", requestUrl)
 		storage.AddFetchedUrl(url)
+		stats.Increment(stats.STATS_FETCH_IGNORE_COUNT)
 		return
 	}
 
@@ -112,18 +117,26 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig, o
 		exitPage:
 			log.Debug("exit fetchUrl method:", requestUrl)
 			storage.AddFetchedUrl(url)
+			flg <- true
 		} else {
 			storage.LogFetchFailedUrl(runtimeConfig.PathConfig.FetchFailedLog, requestUrl)
+			flg <- false
 		}
-		flg <- true
 	}()
 
 	//监听通道，由于设有超时，不可能泄露
 	select {
 	case <-t.C:
 		log.Error("fetching url time out,", requestUrl)
-	case <-flg:
-		log.Debug("fetching url normal exit,", requestUrl)
+		stats.Increment(stats.STATS_FETCH_TIMEOUT_COUNT)
+	case value:=<-flg:
+		if(value){
+			log.Debug("fetching url normal exit,", requestUrl)
+			stats.Increment(stats.STATS_FETCH_SUCCESS_COUNT)
+		}else{
+			log.Debug("fetching url normal exit,", requestUrl)
+			stats.Increment(stats.STATS_FETCH_FAIL_COUNT)
+		}
 		return
 	}
 

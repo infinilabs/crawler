@@ -1,4 +1,5 @@
-Copyright 2013 Medcl (m AT medcl.net)
+/*
+Copyright 2016 Medcl (m AT medcl.net)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -11,3 +12,15 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+*/
+
+package handler
+
+import (
+	"net/http"
+	"github.com/medcl/gopa/core/stats"
+)
+
+func (this *Handler) StatsAction(w http.ResponseWriter, req *http.Request) {
+	w.Write([]byte(stats.StatsAll()))
+}
