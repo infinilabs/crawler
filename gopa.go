@@ -19,13 +19,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/config"
-	apiModule "github.com/medcl/gopa/modules/api"
-	logging "github.com/medcl/gopa/core/logging"
-	"github.com/medcl/gopa/core/store/leveldb"
-	task "github.com/medcl/gopa/core/tasks"
-	"github.com/medcl/gopa/core/util"
 	"math/rand"
 	"net/http"
 	_ "net/http/pprof"
@@ -36,6 +29,14 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	log "github.com/cihub/seelog"
+	. "github.com/medcl/gopa/core/config"
+	logging "github.com/medcl/gopa/core/logging"
+	"github.com/medcl/gopa/core/store/leveldb"
+	task "github.com/medcl/gopa/core/tasks"
+	"github.com/medcl/gopa/core/util"
+	apiModule "github.com/medcl/gopa/modules/api"
 )
 
 var seedUrl string
@@ -58,7 +59,6 @@ func shutdown(offsets []*RoutingParameter, quitChannels []*chan bool, offsets2 [
 	}
 
 	log.Info("sent quit signal to go routings done")
-
 
 	runtimeConfig.Storage.Close()
 	log.Info("storage closed")
@@ -144,7 +144,7 @@ func main() {
 	maxGoRoutine := runtimeConfig.MaxGoRoutine
 	fetchQuitChannels := make([]*chan bool, maxGoRoutine)   //shutdownSignal signals for each go routing
 	fetchTaskChannels := make([]*chan []byte, maxGoRoutine) //fetchTask channels
-	fetchOffsets := make([]*RoutingParameter, maxGoRoutine)    //kafka fetchOffsets
+	fetchOffsets := make([]*RoutingParameter, maxGoRoutine) //kafka fetchOffsets
 
 	parseQuitChannels := make([]*chan bool, 2) //shutdownSignal signals for each go routing
 	//	parseQuitChannels := make([]*chan bool, MaxGoRoutine) //shutdownSignal signals for each go routing

@@ -25,3 +25,17 @@ const STATS_PARSE_COUNT = "stats.count.parse.total"
 const STATS_PARSE_SUCCESS_COUNT = "stats.count.parse.success"
 const STATS_PARSE_FAIL_COUNT = "stats.count.parse.fail"
 const STATS_PARSE_IGNORE_COUNT = "stats.count.ignore.fail"
+
+
+type StatsCount struct {
+	TotalCount   int `json:"total,omitempty"`
+	SuccessCount int `json:"success,omitempty"`
+	FailCount    int `json:"fail,omitempty"`
+	Ignore       int `json:"ignore,omitempty"`
+	Timeout      int `json:"timeout,omitempty"`
+}
+
+type TaskStatus struct {
+	Fetch StatsCount `json:"fetch"`
+	Parse StatsCount `json:"parse"`
+}

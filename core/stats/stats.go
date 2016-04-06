@@ -17,8 +17,6 @@ limitations under the License.
 package stats
 
 import (
-	"encoding/json"
-
 	stats "github.com/dmuth/golang-stats"
 )
 
@@ -34,7 +32,6 @@ func Stats(key string) {
 	stats.Stat(key)
 }
 
-func StatsAll() string {
-	obj, _ := json.Marshal(stats.StatAll())
-	return string(obj)
+func StatsAll() map[string]int  {
+	return stats.StatAll()
 }
