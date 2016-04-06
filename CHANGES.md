@@ -3,6 +3,10 @@
 
 CHANGES
 
+v0.7
+features:
+1.add stats api to expose the task info, http://localhost:8001/stats
+
 v0.6
 breaking change:
 1.remove bloom, use leveldb to store urls

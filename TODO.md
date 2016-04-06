@@ -57,7 +57,7 @@ shard下载队列是主动获取，最外面的master分配任务的时候，只
 Cookie [done]
 
 速度控制,阀值控制  [done]
-    超时
+    超时 [done]
     返回错误页面
     自动控制速度，暂停，自动调整合适的速度
 
@@ -123,3 +123,5 @@ COMMAND chan, 任务都进COMMAND 协程，然后统一分发处理
 本地文件监控延迟机制同上
 
 stats "github.com/dmuth/golang-stats"
+
+Module 通过开关 开启/关闭, 如:动态关闭解析模块,动态关闭抓取模块
