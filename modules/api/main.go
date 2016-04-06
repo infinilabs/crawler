@@ -18,16 +18,15 @@ package http
 
 import (
 	"net/http"
+
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
 	. "github.com/medcl/gopa/modules/api/handler"
 )
 
-var config RuntimeConfig
+func internalStart(runtimeConfig *RuntimeConfig) {
 
-func internalStart(runtimeConfig *RuntimeConfig)  {
-	config=*runtimeConfig
-	handler:=Handler{Config:runtimeConfig}
+	handler := Handler{Config: runtimeConfig}
 
 	http.HandleFunc("/", handler.IndexAction)
 	http.HandleFunc("/stats", handler.StatsAction)
@@ -46,6 +45,6 @@ func Start(runtimeConfig *RuntimeConfig) {
 	}
 }
 
-func Stop()error  {
+func Stop() error {
 	return nil
 }

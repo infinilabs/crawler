@@ -1,16 +1,30 @@
+/*
+Copyright 2016 Medcl (m AT medcl.net)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 
 package logging
 
 import (
+	"strings"
+
 	log "github.com/cihub/seelog"
-"strings"
 )
 
-
-func Flush(){
+func Flush() {
 	log.Flush()
 }
-
 
 func SetInitLogging(logLevel string) {
 
@@ -18,8 +32,8 @@ func SetInitLogging(logLevel string) {
 
 	testConfig := `
 	<seelog  type="sync" minlevel="`
-	testConfig =testConfig + logLevel
-	testConfig =testConfig +`">
+	testConfig = testConfig + logLevel
+	testConfig = testConfig + `">
 		<outputs formatid="main">
 			<filter levels="error">
 				<file path="./log/gopa.log"/>
@@ -34,7 +48,7 @@ func SetInitLogging(logLevel string) {
 	log.ReplaceLogger(logger)
 }
 
-func SetLogging(logLevel string,logFile string) {
+func SetLogging(logLevel string, logFile string) {
 
 	logLevel = strings.ToLower(logLevel)
 
@@ -44,10 +58,10 @@ func SetLogging(logLevel string,logFile string) {
 	testConfig = testConfig + `">
 		<outputs formatid="main">
 			<console formatid="main"/>
-			<filter levels="`+logLevel+`">
-				<file path="`+logFile+`"/>
+			<filter levels="` + logLevel + `">
+				<file path="` + logFile + `"/>
 			</filter>
-			 <rollingfile formatid="main" type="size" filename="`+logFile+`" maxsize="10000000000" maxrolls="5" />
+			 <rollingfile formatid="main" type="size" filename="` + logFile + `" maxsize="10000000000" maxrolls="5" />
 		</outputs>
 		<formats>
 			<format id="main" format="[%Date(01-02) %Time] [%LEV] [%File:%Line,%FuncShort] %Msg%n"/>

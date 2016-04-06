@@ -1,23 +1,40 @@
+/*
+Copyright 2016 Medcl (m AT medcl.net)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package stats
 
 import (
-	stats "github.com/dmuth/golang-stats"
 	"encoding/json"
+
+	stats "github.com/dmuth/golang-stats"
 )
 
-func Increment(key string )  {
+func Increment(key string) {
 	stats.IncrStat(key)
 }
 
-func Decrement(key string)  {
+func Decrement(key string) {
 	stats.DecrStat(key)
 }
 
-func Stats(key string)  {
+func Stats(key string) {
 	stats.Stat(key)
 }
 
-func StatsAll()string  {
-	obj,_ :=json.Marshal(stats.StatAll())
+func StatsAll() string {
+	obj, _ := json.Marshal(stats.StatAll())
 	return string(obj)
 }

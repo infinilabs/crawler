@@ -1,8 +1,19 @@
-/** 
- * User: Medcl
- * Date: 13-7-25
- * Time: 上午8:56 
- */
+/*
+Copyright 2016 Medcl (m AT medcl.net)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package config
 
 import (
@@ -17,16 +28,14 @@ type TaskConfig struct {
 	//store page separately,such as url with paging,ie:http://baidu.com/?pn=10 http://baidu.com/?pn=20 ,here we can set value to "pn"
 	SplitByUrlParameter string
 
-
-
 	//follow page link,and walk around
 	FollowLink bool
 
 	//walking around pattern
-	LinkUrlExtractRegex   *regexp.Regexp
-	LinkUrlExtractRegexGroupIndex   int
-	LinkUrlMustContain    string
-	LinkUrlMustNotContain string
+	LinkUrlExtractRegex           *regexp.Regexp
+	LinkUrlExtractRegexGroupIndex int
+	LinkUrlMustContain            string
+	LinkUrlMustNotContain         string
 
 	//parsing url pattern,when url match this pattern,gopa will not parse urls from response of this url
 	SkipPageParsePattern *regexp.Regexp
@@ -46,14 +55,13 @@ type TaskConfig struct {
 	FollowSubDomain  bool
 
 	TaskDataPath string
-	WebDataPath string
+	WebDataPath  string
 
 	//User Cookie
 	Cookie string
 
 	//Fetch Speed Control
 	FetchDelayThreshold int
-
 }
 
 type Task struct {
@@ -63,4 +71,3 @@ type Task struct {
 type RoutingParameter struct {
 	Shard int
 }
-
