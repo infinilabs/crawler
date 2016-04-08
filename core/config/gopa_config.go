@@ -20,6 +20,11 @@ type GopaConfig struct {
 	SystemConfig  *SystemConfig
 	RuntimeConfig *RuntimeConfig
 	Settings      *map[string]interface{}
+	Channels      *Channels
+}
+
+type Channels struct {
+	PendingFetchUrl chan []byte
 }
 
 type SystemConfig struct {
@@ -30,5 +35,8 @@ func InitGopaConfig() *GopaConfig {
 	gopaConfig := &GopaConfig{}
 	gopaConfig.RuntimeConfig = &RuntimeConfig{}
 	gopaConfig.SystemConfig = &SystemConfig{}
+	gopaConfig.Channels = &Channels{}
+	gopaConfig.Channels.PendingFetchUrl = make(chan []byte)
+
 	return gopaConfig
 }

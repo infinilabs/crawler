@@ -195,7 +195,6 @@ func main() {
 	offset2 := new(RoutingParameter)
 	offset2.Shard = 0
 	parseOffsets[0] = offset2
-	pendingFetchUrls := make(chan []byte)
 
 	//fetch rule:all urls -> persisted to sotre -> fetched from store -> pushed to pendingFetchUrls -> redistributed to sharded goroutines -> fetch -> save webpage to store -> done
 	//parse rule:url saved to store -> local path persisted to store -> fetched to pendingParseFiles -> redistributed to sharded goroutines -> parse -> clean urls -> enqueue to url store ->done
@@ -204,18 +203,18 @@ func main() {
 	go func() {
 		//notice seed will not been persisted
 		log.Debug("sending feed to fetch queue,", seedUrl)
-		pendingFetchUrls <- []byte(seedUrl)
+		gopaConfig.Channels.PendingFetchUrl <- []byte(seedUrl)
 	}()
 
 	//start local saved file parser
 	if gopaConfig.RuntimeConfig.ParseUrlsFromSavedFileLog {
-		go task.ParseGo(pendingFetchUrls, gopaConfig.RuntimeConfig, &c2, offset2)
+		go task.ParseGo(gopaConfig.Channels.PendingFetchUrl, gopaConfig.RuntimeConfig, &c2, offset2)
 	}
 
 	//redistribute pendingFetchUrls to sharded workers
 	go func() {
 		for {
-			url := <-pendingFetchUrls
+			url := <-gopaConfig.Channels.PendingFetchUrl
 			if !gopaConfig.RuntimeConfig.Storage.UrlHasWalked(url) {
 
 				if gopaConfig.RuntimeConfig.Storage.UrlHasFetched(url) {
@@ -252,7 +251,7 @@ func main() {
 						log.Trace("template:", template)
 						url := strings.Replace(template, "{id}", id, -1)
 						log.Debug("new task from template:", url)
-						pendingFetchUrls <- []byte(url)
+						gopaConfig.Channels.PendingFetchUrl <- []byte(url)
 					}
 				}
 				log.Info("templated download is done.")
@@ -269,7 +268,7 @@ func main() {
 		offset3 := new(RoutingParameter)
 		offset3.Shard = 0
 		parseOffsets[1] = offset3
-		go task.LoadTaskFromLocalFile(pendingFetchUrls, gopaConfig.RuntimeConfig, &c3, offset3)
+		go task.LoadTaskFromLocalFile(gopaConfig.Channels.PendingFetchUrl, gopaConfig.RuntimeConfig, &c3, offset3)
 	}
 
 	//parse fetch failed jobs,and will ignore the walk-filter
@@ -282,7 +281,7 @@ func main() {
 				for i := gopaConfig.RuntimeConfig.RuledFetchConfig.From; i <= gopaConfig.RuntimeConfig.RuledFetchConfig.To; i += gopaConfig.RuntimeConfig.RuledFetchConfig.Step {
 					url := strings.Replace(gopaConfig.RuntimeConfig.RuledFetchConfig.UrlTemplate, "{id}", strconv.FormatInt(int64(i), 10), -1)
 					log.Debug("add ruled url:", url)
-					pendingFetchUrls <- []byte(url)
+					gopaConfig.Channels.PendingFetchUrl <- []byte(url)
 				}
 			} else {
 				log.Error("ruled template is empty,ignore")
