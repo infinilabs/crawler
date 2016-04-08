@@ -125,3 +125,5 @@ COMMAND chan, 任务都进COMMAND 协程，然后统一分发处理
 stats "github.com/dmuth/golang-stats"
 
 Module 通过开关 开启/关闭, 如:动态关闭解析模块,动态关闭抓取模块
+
+使用https://github.com/boltdb/bolt.git来存储任务信息,支持nested bucket

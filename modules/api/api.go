@@ -19,23 +19,26 @@ package http
 import (
 	"net/http"
 
-	"github.com/ant0ine/go-json-rest/rest"
 	log "github.com/cihub/seelog"
+	//"github.com/elazarl/go-bindata-assetfs"
 	. "github.com/medcl/gopa/core/config"
+	. "github.com/medcl/gopa/modules/api/handler"
+	websocket "github.com/medcl/gopa/modules/api/websocket"
+	ui "github.com/medcl/gopa/ui"
 )
 
 func internalStart(config *GopaConfig) {
+	handler := Handler{Config: config}
 
-	api := rest.NewApi()
-	api.Use(&rest.GzipMiddleware{}, &rest.JsonIndentMiddleware{},
-		&rest.ContentTypeCheckerMiddleware{})
-	router, err := getRouter(config)
-	if err != nil {
-		log.Error(err)
-	}
-	api.SetApp(router)
+	websocket.InitWebSocket()
+
+	http.HandleFunc("/", handler.IndexAction)
+	http.HandleFunc("/stats", handler.StatsAction)
+	http.Handle("/ui/", http.FileServer(ui.FS(false)))
+	http.HandleFunc("/ws", websocket.ServeWs)
+
 	log.Info("http server listen at: http://localhost:8001/")
-	log.Error(http.ListenAndServe(":8001", api.MakeHandler()))
+	http.ListenAndServe(":8001", nil)
 }
 
 func Start(config *GopaConfig) {

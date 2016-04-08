@@ -16,8 +16,64 @@ limitations under the License.
 
 package handler
 
-import . "github.com/medcl/gopa/core/config"
+import (
+	"encoding/json"
+	. "github.com/medcl/gopa/core/config"
+	"net/http"
+)
 
 type Handler struct {
-	Config *GopaConfig
+	Config      *GopaConfig
+	wroteHeader bool
+	http.ResponseWriter
+}
+
+func (w *Handler) WriteHeader(code int) {
+	w.ResponseWriter.WriteHeader(code)
+	w.wroteHeader = true
+}
+
+func (w *Handler) encodeJson(v interface{}) ([]byte, error) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
+func (this *Handler) WriteJsonHeader(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+}
+
+func (this *Handler) WriteJson(w http.ResponseWriter, v interface{}) error {
+	if !this.wroteHeader {
+		this.WriteJsonHeader(w)
+		w.WriteHeader(http.StatusOK)
+	}
+
+	b, err := this.encodeJson(v)
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(b)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (w *Handler) Write(b []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(b)
+}
+
+func (w *Handler) Flush() {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	flusher := w.ResponseWriter.(http.Flusher)
+	flusher.Flush()
 }

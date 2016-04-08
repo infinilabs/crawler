@@ -11,7 +11,7 @@ go get github.com/PuerkitoBio/goquery
 go get github.com/syndtr/goleveldb/leveldb
 go get github.com/dmuth/golang-stats
 go get gopkg.in/yaml.v2
-go get github.com/ant0ine/go-json-rest/rest
 
+esc -o ui/static.go -pkg server ui
 
 go build -o bin/gopa.exe

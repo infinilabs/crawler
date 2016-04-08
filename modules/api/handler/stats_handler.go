@@ -17,8 +17,8 @@ limitations under the License.
 package handler
 
 import (
-	"github.com/ant0ine/go-json-rest/rest"
 	"github.com/medcl/gopa/core/stats"
+	"net/http"
 )
 
 func getMapValue(mapData map[string]int, key string, defaultValue int32) int {
@@ -26,7 +26,7 @@ func getMapValue(mapData map[string]int, key string, defaultValue int32) int {
 	return data
 }
 
-func (this *Handler) StatsAction(w rest.ResponseWriter, req *rest.Request) {
+func (this *Handler) StatsAction(w http.ResponseWriter, req *http.Request) {
 
 	statsMap := stats.StatsAll()
 	fetch := stats.StatsCount{
@@ -43,5 +43,5 @@ func (this *Handler) StatsAction(w rest.ResponseWriter, req *rest.Request) {
 
 	stats := stats.TaskStatus{Fetch: fetch, Parse: parse}
 
-	w.WriteJson(stats)
+	this.WriteJson(w, &stats)
 }

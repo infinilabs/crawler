@@ -23,7 +23,7 @@ type GopaConfig struct {
 }
 
 type SystemConfig struct {
-	Version string `v1.0`
+	Version string `0.0.1`
 }
 
 func InitGopaConfig() *GopaConfig {
