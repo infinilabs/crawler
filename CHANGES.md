@@ -6,6 +6,7 @@ CHANGES
 v0.7
 features:
 1.add stats api to expose the task info, http://localhost:8001/stats
+2.add websocket and simple ui to interact with Gopa, http://localhost:8001/ui/
 
 v0.6
 breaking change:
