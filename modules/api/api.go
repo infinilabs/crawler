@@ -22,7 +22,7 @@ import (
 	log "github.com/cihub/seelog"
 	//"github.com/elazarl/go-bindata-assetfs"
 	. "github.com/medcl/gopa/core/config"
-	. "github.com/medcl/gopa/modules/api/handler"
+	. "github.com/medcl/gopa/modules/api/handlers"
 	websocket "github.com/medcl/gopa/modules/api/websocket"
 	ui "github.com/medcl/gopa/ui"
 )
@@ -35,6 +35,9 @@ func internalStart(config *GopaConfig) {
 	http.HandleFunc("/", handler.IndexAction)
 	http.HandleFunc("/stats", handler.StatsAction)
 	http.Handle("/ui/", http.FileServer(ui.FS(false)))
+
+	http.HandleFunc("/task/", handler.TaskAction)
+
 	http.HandleFunc("/ws", websocket.ServeWs)
 
 	log.Info("http server listen at: http://localhost:8001/")

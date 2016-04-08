@@ -18,8 +18,13 @@ package handler
 
 import (
 	"encoding/json"
+	logger "github.com/cihub/seelog"
+	"github.com/jmoiron/jsonq"
 	. "github.com/medcl/gopa/core/config"
+	types "github.com/medcl/gopa/core/types"
+	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 type Handler struct {
@@ -63,11 +68,38 @@ func (this *Handler) WriteJson(w http.ResponseWriter, v interface{}) error {
 	return nil
 }
 
+type ErrEmptyJson struct {
+}
+
+func (this *Handler) GetJson(r *http.Request) (*jsonq.JsonQuery, error) {
+
+	content, err := ioutil.ReadAll(r.Body)
+	r.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+	if len(content) == 0 {
+		return nil, types.JSONIsEmpty
+	}
+	logger.Trace("receive json:", string(content))
+
+	data := map[string]interface{}{}
+	dec := json.NewDecoder(strings.NewReader(string(content)))
+	dec.Decode(&data)
+	jq := jsonq.NewQuery(data)
+
+	return jq, nil
+}
+
 func (w *Handler) Write(b []byte) (int, error) {
 	if !w.wroteHeader {
 		w.WriteHeader(http.StatusOK)
 	}
 	return w.ResponseWriter.Write(b)
+}
+
+func (this *Handler) error404(w http.ResponseWriter) {
+	this.WriteJson(w, map[string]interface{}{"error": 404})
 }
 
 func (w *Handler) Flush() {

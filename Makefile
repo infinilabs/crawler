@@ -4,9 +4,9 @@ OLDGOPATH=${GOPATH}
 NEWGOPATH:=${CWD}:${OLDGOPATH}
 export GOPATH=$(NEWGOPATH)
 
-
 build: clean config
 	go build  -o bin/gopa
+
 
 tar: build
 	tar cfz bin/gopa.tar.gz bin/gopa
@@ -44,7 +44,8 @@ config:
 	go get github.com/dmuth/golang-stats
 	go get gopkg.in/yaml.v2
 	go get github.com/mjibson/esc
-
+	go get github.com/jmoiron/jsonq
+	export PATH=bin:$$PATH:$$OLDGOPATH/bin;echo $$PATH;
 	esc -o ui/static.go -pkg server ui
 
 

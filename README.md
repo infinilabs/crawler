@@ -34,6 +34,16 @@ BTW,do not forget to put this config stay with gopa to make it work..
 it's safety to press `ctrl+c` stop the current running Gopa,Gopa will handle the rest,saving the checkpoint,
 you may restore the job later,the world is still in your hand.
 
+## APIs
+
+* Send seed to Gopa
+
+    ```
+    curl -X POST "http://localhost:8001/task/" -d '{
+    "seed":"http://elasticsearch.cn"
+    }' 
+    ```
+
 
 license
 =======

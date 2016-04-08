@@ -117,11 +117,6 @@ func main() {
 
 	logging.SetLogging(gopaConfig.RuntimeConfig.LogLevel, gopaConfig.RuntimeConfig.LogPath)
 
-	if seedUrl == "" || seedUrl == "http://example.com" {
-		log.Warn("no seed was given. type:\"gopa -h\" for help.")
-		os.Exit(1)
-	}
-
 	store := leveldb.LeveldbStore{}
 
 	store.Open()
