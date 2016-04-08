@@ -49,3 +49,4 @@ target/
 /bin-run/
 /leveldb
 /ui/static.go
+ui/static.go
