@@ -14,19 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package handler
+package profiler
 
 import (
-	"github.com/ant0ine/go-json-rest/rest"
+	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/config"
+	"net/http"
 )
 
-func (this *Handler) IndexAction(w rest.ResponseWriter, req *rest.Request) {
-	data := map[string]interface{}{}
-	data["name"] = "007"
-	data["cluster_name"] = this.Config.RuntimeConfig.ClusterConfig.Name
-	data["version"] = this.Config.SystemConfig.Version
-	data["tagline"] = "You Know, for Web"
+func Start(config *config.GopaConfig) {
+	//pprof server
+	if config.RuntimeConfig.GoProfEnabled {
+		go func() {
+			log.Info(http.ListenAndServe("localhost:6060", nil))
+			log.Info("pprof server is up,http://localhost:6060/debug/pprof")
+		}()
+	}
+}
 
-	w.WriteJson(&data)
-
+func Stop() error {
+	return nil
 }

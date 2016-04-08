@@ -17,34 +17,16 @@ limitations under the License.
 package http
 
 import (
-	"net/http"
-
-	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/config"
+	"github.com/ant0ine/go-json-rest/rest"
+	"github.com/medcl/gopa/core/config"
 	. "github.com/medcl/gopa/modules/api/handler"
 )
 
-func internalStart(runtimeConfig *RuntimeConfig) {
+func getRouter(config *config.GopaConfig) (rest.App, error) {
+	handler := Handler{Config: config}
 
-	handler := Handler{Config: runtimeConfig}
-
-	http.HandleFunc("/", handler.IndexAction)
-	http.HandleFunc("/stats", handler.StatsAction)
-
-	log.Info("http server listen at: http://localhost:8001/")
-	http.ListenAndServe(":8001", nil)
-}
-
-func Start(runtimeConfig *RuntimeConfig) {
-	//API server
-	if runtimeConfig.HttpEnabled {
-		go func() {
-			internalStart(runtimeConfig)
-		}()
-		log.Debug("api module success started")
-	}
-}
-
-func Stop() error {
-	return nil
+	return rest.MakeRouter(
+		rest.Get("/", handler.IndexAction),
+		rest.Get("/stats", handler.StatsAction),
+	)
 }

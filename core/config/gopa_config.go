@@ -14,19 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package handler
+package config
 
-import (
-	"github.com/ant0ine/go-json-rest/rest"
-)
+type GopaConfig struct {
+	SystemConfig  *SystemConfig
+	RuntimeConfig *RuntimeConfig
+	Settings      *map[string]interface{}
+}
 
-func (this *Handler) IndexAction(w rest.ResponseWriter, req *rest.Request) {
-	data := map[string]interface{}{}
-	data["name"] = "007"
-	data["cluster_name"] = this.Config.RuntimeConfig.ClusterConfig.Name
-	data["version"] = this.Config.SystemConfig.Version
-	data["tagline"] = "You Know, for Web"
+type SystemConfig struct {
+	Version string `v1.0`
+}
 
-	w.WriteJson(&data)
-
+func InitGopaConfig() *GopaConfig {
+	gopaConfig := &GopaConfig{}
+	gopaConfig.RuntimeConfig = &RuntimeConfig{}
+	gopaConfig.SystemConfig = &SystemConfig{}
+	return gopaConfig
 }

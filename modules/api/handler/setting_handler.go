@@ -15,18 +15,3 @@ limitations under the License.
 */
 
 package handler
-
-import (
-	"github.com/ant0ine/go-json-rest/rest"
-)
-
-func (this *Handler) IndexAction(w rest.ResponseWriter, req *rest.Request) {
-	data := map[string]interface{}{}
-	data["name"] = "007"
-	data["cluster_name"] = this.Config.RuntimeConfig.ClusterConfig.Name
-	data["version"] = this.Config.SystemConfig.Version
-	data["tagline"] = "You Know, for Web"
-
-	w.WriteJson(&data)
-
-}

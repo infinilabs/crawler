@@ -17,38 +17,31 @@ limitations under the License.
 package handler
 
 import (
-	"net/http"
+	"github.com/ant0ine/go-json-rest/rest"
 	"github.com/medcl/gopa/core/stats"
-	"encoding/json"
-	logger "github.com/cihub/seelog"
 )
 
-func getMapValue(mapData map[string]int,key string,defaultValue int32) int  {
-	data:=mapData[key]
+func getMapValue(mapData map[string]int, key string, defaultValue int32) int {
+	data := mapData[key]
 	return data
 }
 
-func (this *Handler) StatsAction(w http.ResponseWriter, req *http.Request) {
+func (this *Handler) StatsAction(w rest.ResponseWriter, req *rest.Request) {
 
-	statsMap:=stats.StatsAll()
-	fetch:=stats.StatsCount{
-		TotalCount:getMapValue(statsMap,stats.STATS_FETCH_COUNT,0),
-		FailCount:getMapValue(statsMap,stats.STATS_FETCH_FAIL_COUNT,0),
-		SuccessCount:getMapValue(statsMap,stats.STATS_FETCH_SUCCESS_COUNT,0),
-		Ignore:getMapValue(statsMap,stats.STATS_FETCH_IGNORE_COUNT,0),
-		Timeout:getMapValue(statsMap,stats.STATS_FETCH_TIMEOUT_COUNT,0)}
-	parse:=stats.StatsCount{
-		TotalCount:getMapValue(statsMap,stats.STATS_PARSE_COUNT,0),
-		FailCount:getMapValue(statsMap,stats.STATS_PARSE_FAIL_COUNT,0),
-		SuccessCount:getMapValue(statsMap,stats.STATS_PARSE_SUCCESS_COUNT,0),
-		Ignore:getMapValue(statsMap,stats.STATS_PARSE_IGNORE_COUNT,0)}
+	statsMap := stats.StatsAll()
+	fetch := stats.StatsCount{
+		TotalCount:   getMapValue(statsMap, stats.STATS_FETCH_COUNT, 0),
+		FailCount:    getMapValue(statsMap, stats.STATS_FETCH_FAIL_COUNT, 0),
+		SuccessCount: getMapValue(statsMap, stats.STATS_FETCH_SUCCESS_COUNT, 0),
+		Ignore:       getMapValue(statsMap, stats.STATS_FETCH_IGNORE_COUNT, 0),
+		Timeout:      getMapValue(statsMap, stats.STATS_FETCH_TIMEOUT_COUNT, 0)}
+	parse := stats.StatsCount{
+		TotalCount:   getMapValue(statsMap, stats.STATS_PARSE_COUNT, 0),
+		FailCount:    getMapValue(statsMap, stats.STATS_PARSE_FAIL_COUNT, 0),
+		SuccessCount: getMapValue(statsMap, stats.STATS_PARSE_SUCCESS_COUNT, 0),
+		Ignore:       getMapValue(statsMap, stats.STATS_PARSE_IGNORE_COUNT, 0)}
 
-	stats:=stats.TaskStatus{Fetch:fetch,Parse:parse}
+	stats := stats.TaskStatus{Fetch: fetch, Parse: parse}
 
-	json,err:=json.Marshal(stats)
-	if(err!=nil){
-		logger.Error("json",err)
-	}
-
-	w.Write(json)
+	w.WriteJson(stats)
 }

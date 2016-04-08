@@ -19,6 +19,6 @@ package modules
 import . "github.com/medcl/gopa/core/config"
 
 type ModuleInterface interface {
-	Start(config *RuntimeConfig)
-	Stop()error
+	Start(config *GopaConfig)
+	Stop() error
 }

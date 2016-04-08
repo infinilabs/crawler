@@ -50,7 +50,7 @@ type RuledFetchConfig struct {
 }
 
 type RuntimeConfig struct {
-	Version string
+	Version string `v1.0`
 
 	LogLevel string `info`
 	LogPath  string `bin/gopa.log`

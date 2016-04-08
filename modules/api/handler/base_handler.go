@@ -16,8 +16,8 @@ limitations under the License.
 
 package handler
 
-import 	. "github.com/medcl/gopa/core/config"
+import . "github.com/medcl/gopa/core/config"
 
 type Handler struct {
-	Config *RuntimeConfig
+	Config *GopaConfig
 }

@@ -20,7 +20,6 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
-	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
@@ -37,11 +36,12 @@ import (
 	task "github.com/medcl/gopa/core/tasks"
 	"github.com/medcl/gopa/core/util"
 	apiModule "github.com/medcl/gopa/modules/api"
+	profilerModule "github.com/medcl/gopa/modules/profiler"
 )
 
 var seedUrl string
 var logLevel string
-var runtimeConfig *RuntimeConfig
+var gopaConfig *GopaConfig
 var version string
 
 func shutdown(offsets []*RoutingParameter, quitChannels []*chan bool, offsets2 []*RoutingParameter, quitChannels2 []*chan bool, quit chan bool) {
@@ -60,7 +60,7 @@ func shutdown(offsets []*RoutingParameter, quitChannels []*chan bool, offsets2 [
 
 	log.Info("sent quit signal to go routings done")
 
-	runtimeConfig.Storage.Close()
+	gopaConfig.RuntimeConfig.Storage.Close()
 	log.Info("storage closed")
 
 	quit <- true
@@ -107,41 +107,36 @@ func main() {
 
 	logging.SetInitLogging(logLevel)
 
-	runtimeConfig = InitOrGetConfig()
+	gopaConfig = InitGopaConfig()
 
-	runtimeConfig.Version = version
+	gopaConfig.RuntimeConfig = InitOrGetConfig()
 
-	runtimeConfig.LogLevel = logLevel
+	gopaConfig.SystemConfig.Version = version
 
-	logging.SetLogging(runtimeConfig.LogLevel, runtimeConfig.LogPath)
+	gopaConfig.RuntimeConfig.LogLevel = logLevel
+
+	logging.SetLogging(gopaConfig.RuntimeConfig.LogLevel, gopaConfig.RuntimeConfig.LogPath)
 
 	if seedUrl == "" || seedUrl == "http://example.com" {
-		log.Error("no seed was given. type:\"gopa -h\" for help.")
+		log.Warn("no seed was given. type:\"gopa -h\" for help.")
 		os.Exit(1)
 	}
 
 	store := leveldb.LeveldbStore{}
 
 	store.Open()
-	runtimeConfig.Storage = &store
-
-	//pprof server
-	if runtimeConfig.GoProfEnabled {
-		go func() {
-			log.Info(http.ListenAndServe("localhost:6060", nil))
-			log.Info("pprof server is up,http://localhost:6060/debug/pprof")
-		}()
-	}
+	gopaConfig.RuntimeConfig.Storage = &store
 
 	//start modules
-	apiModule.Start(runtimeConfig)
+	apiModule.Start(gopaConfig)
+	profilerModule.Start(gopaConfig)
 
 	//adding default http protocol
 	if !strings.HasPrefix(seedUrl, "http") {
 		seedUrl = "http://" + seedUrl
 	}
 
-	maxGoRoutine := runtimeConfig.MaxGoRoutine
+	maxGoRoutine := gopaConfig.RuntimeConfig.MaxGoRoutine
 	fetchQuitChannels := make([]*chan bool, maxGoRoutine)   //shutdownSignal signals for each go routing
 	fetchTaskChannels := make([]*chan []byte, maxGoRoutine) //fetchTask channels
 	fetchOffsets := make([]*RoutingParameter, maxGoRoutine) //kafka fetchOffsets
@@ -162,8 +157,6 @@ func main() {
 		log.Debug("got signal:", s)
 		if s == os.Interrupt || s.(os.Signal) == syscall.SIGINT {
 			log.Warn("got signal:os.Interrupt,saving data and exit")
-
-			runtimeConfig.Storage.Close()
 
 			//wait workers to exit
 			log.Info("waiting workers exit")
@@ -187,7 +180,7 @@ func main() {
 
 		fetchTask := new(task.FetchTask)
 		innerTaskConfig := new(task.InnerTaskConfig)
-		innerTaskConfig.RuntimeConfig = runtimeConfig
+		innerTaskConfig.RuntimeConfig = gopaConfig.RuntimeConfig
 		innerTaskConfig.MessageChan = &taskC
 		innerTaskConfig.QuitChan = &quitC
 		innerTaskConfig.Parameter = parameter
@@ -215,19 +208,19 @@ func main() {
 	}()
 
 	//start local saved file parser
-	if runtimeConfig.ParseUrlsFromSavedFileLog {
-		go task.ParseGo(pendingFetchUrls, runtimeConfig, &c2, offset2)
+	if gopaConfig.RuntimeConfig.ParseUrlsFromSavedFileLog {
+		go task.ParseGo(pendingFetchUrls, gopaConfig.RuntimeConfig, &c2, offset2)
 	}
 
 	//redistribute pendingFetchUrls to sharded workers
 	go func() {
 		for {
 			url := <-pendingFetchUrls
-			if !runtimeConfig.Storage.UrlHasWalked(url) {
+			if !gopaConfig.RuntimeConfig.Storage.UrlHasWalked(url) {
 
-				if runtimeConfig.Storage.UrlHasFetched(url) {
+				if gopaConfig.RuntimeConfig.Storage.UrlHasFetched(url) {
 					log.Warn("don't hit walk filter but hit fetch filter, also ignore,", string(url))
-					runtimeConfig.Storage.AddWalkedUrl(url)
+					gopaConfig.RuntimeConfig.Storage.AddWalkedUrl(url)
 					continue
 				}
 
@@ -236,7 +229,7 @@ func main() {
 					randomShard = rand.Intn(maxGoRoutine - 1)
 				}
 				log.Debug("publish:", string(url), ",shard:", randomShard)
-				runtimeConfig.Storage.AddWalkedUrl(url)
+				gopaConfig.RuntimeConfig.Storage.AddWalkedUrl(url)
 				*fetchTaskChannels[randomShard] <- url
 			} else {
 				log.Trace("hit walk or fetch filter,just ignore,", string(url))
@@ -245,13 +238,13 @@ func main() {
 	}()
 
 	//load predefined fetch jobs
-	if runtimeConfig.LoadTemplatedFetchJob {
+	if gopaConfig.RuntimeConfig.LoadTemplatedFetchJob {
 		go func() {
 
-			if util.CheckFileExists(runtimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt") {
+			if util.CheckFileExists(gopaConfig.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt") {
 
-				templates := util.ReadAllLines(runtimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt")
-				ids := util.ReadAllLines(runtimeConfig.TaskConfig.TaskDataPath + "/urls/id.txt")
+				templates := util.ReadAllLines(gopaConfig.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt")
+				ids := util.ReadAllLines(gopaConfig.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/id.txt")
 
 				for _, id := range ids {
 					for _, template := range templates {
@@ -270,24 +263,24 @@ func main() {
 	}
 
 	//fetch urls from saved pages
-	if runtimeConfig.LoadPendingFetchJobs {
+	if gopaConfig.RuntimeConfig.LoadPendingFetchJobs {
 		c3 := make(chan bool, 1)
 		parseQuitChannels[1] = &c3
 		offset3 := new(RoutingParameter)
 		offset3.Shard = 0
 		parseOffsets[1] = offset3
-		go task.LoadTaskFromLocalFile(pendingFetchUrls, runtimeConfig, &c3, offset3)
+		go task.LoadTaskFromLocalFile(pendingFetchUrls, gopaConfig.RuntimeConfig, &c3, offset3)
 	}
 
 	//parse fetch failed jobs,and will ignore the walk-filter
 	//TODO
 
-	if runtimeConfig.LoadRuledFetchJob {
+	if gopaConfig.RuntimeConfig.LoadRuledFetchJob {
 		log.Debug("start ruled fetch")
 		go func() {
-			if runtimeConfig.RuledFetchConfig.UrlTemplate != "" {
-				for i := runtimeConfig.RuledFetchConfig.From; i <= runtimeConfig.RuledFetchConfig.To; i += runtimeConfig.RuledFetchConfig.Step {
-					url := strings.Replace(runtimeConfig.RuledFetchConfig.UrlTemplate, "{id}", strconv.FormatInt(int64(i), 10), -1)
+			if gopaConfig.RuntimeConfig.RuledFetchConfig.UrlTemplate != "" {
+				for i := gopaConfig.RuntimeConfig.RuledFetchConfig.From; i <= gopaConfig.RuntimeConfig.RuledFetchConfig.To; i += gopaConfig.RuntimeConfig.RuledFetchConfig.Step {
+					url := strings.Replace(gopaConfig.RuntimeConfig.RuledFetchConfig.UrlTemplate, "{id}", strconv.FormatInt(int64(i), 10), -1)
 					log.Debug("add ruled url:", url)
 					pendingFetchUrls <- []byte(url)
 				}

@@ -14,19 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package handler
+package config
 
-import (
-	"github.com/ant0ine/go-json-rest/rest"
-)
+import "testing"
 
-func (this *Handler) IndexAction(w rest.ResponseWriter, req *rest.Request) {
-	data := map[string]interface{}{}
-	data["name"] = "007"
-	data["cluster_name"] = this.Config.RuntimeConfig.ClusterConfig.Name
-	data["version"] = this.Config.SystemConfig.Version
-	data["tagline"] = "You Know, for Web"
-
-	w.WriteJson(&data)
+func TestLoad(t *testing.T) {
+	//Load()
 
 }

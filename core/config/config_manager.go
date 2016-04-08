@@ -14,19 +14,36 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package handler
+package config
 
 import (
-	"github.com/ant0ine/go-json-rest/rest"
+	"fmt"
+	"io/ioutil"
+	"path/filepath"
+
+	"gopkg.in/yaml.v2"
 )
 
-func (this *Handler) IndexAction(w rest.ResponseWriter, req *rest.Request) {
-	data := map[string]interface{}{}
-	data["name"] = "007"
-	data["cluster_name"] = this.Config.RuntimeConfig.ClusterConfig.Name
-	data["version"] = this.Config.SystemConfig.Version
-	data["tagline"] = "You Know, for Web"
+func Load() {
 
-	w.WriteJson(&data)
+	//load external yaml config
+	filename, _ := filepath.Abs("./gopa.yml")
+	yamlFile, err := ioutil.ReadFile(filename)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var config RuntimeConfig
+
+	err = yaml.Unmarshal(yamlFile, &config)
+	if err != nil {
+		panic(err)
+	}
+	test, _ := yaml.Marshal(config)
+	fmt.Printf("Value: %#v\n", config)
+	fmt.Printf("Config: %#v\n", string(test))
+
+	//override built-in config
 
 }
