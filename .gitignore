@@ -48,5 +48,3 @@ target/
 .DS_Store
 /bin-run/
 /leveldb
-/ui/static.go
-ui/static.go
