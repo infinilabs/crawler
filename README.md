@@ -43,9 +43,18 @@ you may restore the job later,the world is still in your hand.
     "seed":"http://elasticsearch.cn"
     }' 
     ```
+    
+* Update logging config on the fly (visit https://github.com/cihub/seelog/wiki for more details)
+    ```
+    curl -X POST "http://localhost:8001/setting/seelog/" -d '
+    <seelog type="asynctimer" asyncinterval="5000000" minlevel="debug" maxlevel="error">
+        ... ...
+    </seelog>
+    ' 
+    ```
 
 
-license
+License
 =======
     Copyright 2013 Medcl (m^medcl.net)
 
