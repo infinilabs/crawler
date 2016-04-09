@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tasks
+package crawler
 
 import . "github.com/medcl/gopa/core/config"
 

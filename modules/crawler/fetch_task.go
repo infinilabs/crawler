@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tasks
+package crawler
 
 import (
 	"time"
@@ -22,6 +22,7 @@ import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
 	"github.com/medcl/gopa/core/stats"
+	task "github.com/medcl/gopa/core/tasks"
 	util "github.com/medcl/gopa/core/util"
 )
 
@@ -89,7 +90,7 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig, o
 
 	go func() {
 
-		body, err := HttpGetWithCookie(requestUrl, config.Cookie)
+		body, err := task.HttpGetWithCookie(requestUrl, config.Cookie)
 
 		if err == nil {
 			if body != nil {

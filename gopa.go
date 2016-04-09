@@ -19,8 +19,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"math/rand"
-	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"runtime"
@@ -36,6 +34,7 @@ import (
 	task "github.com/medcl/gopa/core/tasks"
 	"github.com/medcl/gopa/core/util"
 	apiModule "github.com/medcl/gopa/modules/api"
+	crawlerModule "github.com/medcl/gopa/modules/crawler"
 	profilerModule "github.com/medcl/gopa/modules/profiler"
 )
 
@@ -43,29 +42,6 @@ var seedUrl string
 var logLevel string
 var gopaConfig *GopaConfig
 var version string
-
-func shutdown(offsets []*RoutingParameter, quitChannels []*chan bool, offsets2 []*RoutingParameter, quitChannels2 []*chan bool, quit chan bool) {
-	log.Debug("start shutting down")
-	for i := range quitChannels {
-		*quitChannels[i] <- true
-		log.Debug("send exit signal to quit channel-1,", i)
-	}
-
-	for i, item := range quitChannels2 {
-		if item != nil {
-			*item <- true
-		}
-		log.Debug("send exit signal to quit channel-2,", i)
-	}
-
-	log.Info("sent quit signal to go routings done")
-
-	gopaConfig.RuntimeConfig.Storage.Close()
-	log.Info("storage closed")
-
-	quit <- true
-	log.Debug("finished shutting down")
-}
 
 var startTime time.Time
 
@@ -125,20 +101,15 @@ func main() {
 	//start modules
 	apiModule.Start(gopaConfig)
 	profilerModule.Start(gopaConfig)
+	crawlerModule.Start(gopaConfig)
 
 	//adding default http protocol
 	if !strings.HasPrefix(seedUrl, "http") {
 		seedUrl = "http://" + seedUrl
 	}
 
-	maxGoRoutine := gopaConfig.RuntimeConfig.MaxGoRoutine
-	fetchQuitChannels := make([]*chan bool, maxGoRoutine)   //shutdownSignal signals for each go routing
-	fetchTaskChannels := make([]*chan []byte, maxGoRoutine) //fetchTask channels
-	fetchOffsets := make([]*RoutingParameter, maxGoRoutine) //kafka fetchOffsets
-
 	parseQuitChannels := make([]*chan bool, 2) //shutdownSignal signals for each go routing
-	//	parseQuitChannels := make([]*chan bool, MaxGoRoutine) //shutdownSignal signals for each go routing
-	parseOffsets := make([]*RoutingParameter, maxGoRoutine) //kafka fetchOffsets
+	parseOffsets := make([]*RoutingParameter, gopaConfig.RuntimeConfig.MaxGoRoutine)
 
 	shutdownSignal := make(chan bool, 1)
 	finalQuitSignal := make(chan bool, 1)
@@ -147,6 +118,7 @@ func main() {
 	exitEventChannel := make(chan os.Signal, 1)
 	signal.Notify(exitEventChannel, syscall.SIGINT)
 	signal.Notify(exitEventChannel, os.Interrupt)
+
 	go func() {
 		s := <-exitEventChannel
 		log.Debug("got signal:", s)
@@ -155,35 +127,15 @@ func main() {
 
 			//wait workers to exit
 			log.Info("waiting workers exit")
-			shutdown(fetchOffsets, fetchQuitChannels, parseOffsets, parseQuitChannels, shutdownSignal)
+			shutdown(parseOffsets, parseQuitChannels, shutdownSignal)
+			apiModule.Stop()
+			crawlerModule.Stop()
+			apiModule.Stop()
 			<-shutdownSignal
 			log.Info("workers shutdown")
 			finalQuitSignal <- true
 		}
 	}()
-
-	//start fetcher
-	for i := 0; i < maxGoRoutine; i++ {
-		quitC := make(chan bool, 1)
-		taskC := make(chan []byte)
-
-		fetchQuitChannels[i] = &quitC
-		fetchTaskChannels[i] = &taskC
-		parameter := new(RoutingParameter)
-		parameter.Shard = i
-		fetchOffsets[i] = parameter
-
-		fetchTask := new(task.FetchTask)
-		innerTaskConfig := new(task.InnerTaskConfig)
-		innerTaskConfig.RuntimeConfig = gopaConfig.RuntimeConfig
-		innerTaskConfig.MessageChan = &taskC
-		innerTaskConfig.QuitChan = &quitC
-		innerTaskConfig.Parameter = parameter
-
-		fetchTask.Init(innerTaskConfig)
-		go fetchTask.Start()
-
-	}
 
 	c2 := make(chan bool, 1)
 	parseQuitChannels[0] = &c2
@@ -205,31 +157,6 @@ func main() {
 	if gopaConfig.RuntimeConfig.ParseUrlsFromSavedFileLog {
 		go task.ParseGo(gopaConfig.Channels.PendingFetchUrl, gopaConfig.RuntimeConfig, &c2, offset2)
 	}
-
-	//redistribute pendingFetchUrls to sharded workers
-	go func() {
-		for {
-			url := <-gopaConfig.Channels.PendingFetchUrl
-			if !gopaConfig.RuntimeConfig.Storage.UrlHasWalked(url) {
-
-				if gopaConfig.RuntimeConfig.Storage.UrlHasFetched(url) {
-					log.Warn("don't hit walk filter but hit fetch filter, also ignore,", string(url))
-					gopaConfig.RuntimeConfig.Storage.AddWalkedUrl(url)
-					continue
-				}
-
-				randomShard := 0
-				if maxGoRoutine > 1 {
-					randomShard = rand.Intn(maxGoRoutine - 1)
-				}
-				log.Debug("publish:", string(url), ",shard:", randomShard)
-				gopaConfig.RuntimeConfig.Storage.AddWalkedUrl(url)
-				*fetchTaskChannels[randomShard] <- url
-			} else {
-				log.Trace("hit walk or fetch filter,just ignore,", string(url))
-			}
-		}
-	}()
 
 	//load predefined fetch jobs
 	if gopaConfig.RuntimeConfig.LoadTemplatedFetchJob {
@@ -287,4 +214,23 @@ func main() {
 
 	<-finalQuitSignal
 	printShutdownInfo()
+}
+
+func shutdown(offsets2 []*RoutingParameter, quitChannels2 []*chan bool, quit chan bool) {
+	log.Debug("start shutting down")
+
+	for i, item := range quitChannels2 {
+		if item != nil {
+			*item <- true
+		}
+		log.Debug("send exit signal to quit channel-2,", i)
+	}
+
+	log.Info("sent quit signal to go routings done")
+
+	gopaConfig.RuntimeConfig.Storage.Close()
+	log.Info("storage closed")
+
+	quit <- true
+	log.Debug("finished shutting down")
 }
