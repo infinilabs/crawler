@@ -35,7 +35,9 @@ func internalStart(config *Env) {
 	http.HandleFunc("/stats", handler.StatsAction)
 	http.Handle("/ui/", http.FileServer(ui.FS(false)))
 
+	http.HandleFunc("/task", handler.TaskAction)
 	http.HandleFunc("/task/", handler.TaskAction)
+	http.HandleFunc("/setting/seelog", handler.LoggingSettingAction)
 	http.HandleFunc("/setting/seelog/", handler.LoggingSettingAction)
 
 	http.HandleFunc("/ws", websocket.ServeWs)
