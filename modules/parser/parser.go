@@ -19,14 +19,15 @@ package parser
 import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
+	. "github.com/medcl/gopa/core/env"
 )
 
 var quitChannels []*chan bool
 var started = false
 
-func Start(config *GopaConfig) {
+func Start(config *Env) {
 	if started {
-		log.Error("parser already started, please stop it first.")
+		log.Error("parser is already started, please stop it first.")
 	}
 	parseQuitChannels := make([]*chan bool, 2) //shutdownSignal signals for each go routing
 	parseOffsets := make([]*RoutingParameter, config.RuntimeConfig.MaxGoRoutine)
@@ -55,7 +56,7 @@ func Stop() error {
 			log.Error("send exit signal to parser channel: ", i)
 		}
 
-		log.Info("parser module success stoped")
+		log.Info("parser success stoped")
 
 		started = false
 	} else {

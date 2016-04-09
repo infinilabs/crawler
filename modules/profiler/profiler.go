@@ -18,13 +18,13 @@ package profiler
 
 import (
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/config"
+	. "github.com/medcl/gopa/core/env"
 	"net/http"
 )
 
-func Start(config *config.GopaConfig) {
+func Start(env *Env) {
 	//pprof server
-	if config.RuntimeConfig.GoProfEnabled {
+	if env.RuntimeConfig.GoProfEnabled {
 		go func() {
 			log.Info(http.ListenAndServe("localhost:6060", nil))
 			log.Info("pprof server is up,http://localhost:6060/debug/pprof")

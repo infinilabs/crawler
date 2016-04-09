@@ -20,15 +20,14 @@ import (
 	"net/http"
 
 	log "github.com/cihub/seelog"
-	//"github.com/elazarl/go-bindata-assetfs"
-	. "github.com/medcl/gopa/core/config"
+	. "github.com/medcl/gopa/core/env"
 	. "github.com/medcl/gopa/modules/api/handlers"
 	websocket "github.com/medcl/gopa/modules/api/websocket"
 	ui "github.com/medcl/gopa/ui"
 )
 
-func internalStart(config *GopaConfig) {
-	handler := Handler{Config: config}
+func internalStart(config *Env) {
+	handler := Handler{Env: config}
 
 	websocket.InitWebSocket()
 
@@ -37,6 +36,7 @@ func internalStart(config *GopaConfig) {
 	http.Handle("/ui/", http.FileServer(ui.FS(false)))
 
 	http.HandleFunc("/task/", handler.TaskAction)
+	http.HandleFunc("/setting/seelog/", handler.LoggingSettingAction)
 
 	http.HandleFunc("/ws", websocket.ServeWs)
 
@@ -44,7 +44,7 @@ func internalStart(config *GopaConfig) {
 	http.ListenAndServe(":8001", nil)
 }
 
-func Start(config *GopaConfig) {
+func Start(config *Env) {
 	//API server
 	if config.RuntimeConfig.HttpEnabled {
 		go func() {

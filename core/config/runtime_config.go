@@ -53,6 +53,9 @@ type RuntimeConfig struct {
 	LogLevel string `info`
 	LogPath  string `bin/gopa.log`
 
+	//config string of seelog
+	LoggingConfig string
+
 	//cluster
 	ClusterConfig *ClusterConfig
 

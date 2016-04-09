@@ -127,3 +127,5 @@ stats "github.com/dmuth/golang-stats"
 Module 通过开关 开启/关闭, 如:动态关闭解析模块,动态关闭抓取模块
 
 使用https://github.com/boltdb/bolt.git来存储任务信息,支持nested bucket
+
+动态配置日志,动态输出指定代码指定行的日志

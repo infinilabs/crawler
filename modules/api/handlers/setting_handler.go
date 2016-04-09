@@ -15,3 +15,37 @@ limitations under the License.
 */
 
 package handler
+
+import (
+	log "github.com/cihub/seelog"
+	logging "github.com/medcl/gopa/core/logging"
+	"net/http"
+)
+
+func (this *Handler) LoggingSettingAction(w http.ResponseWriter, req *http.Request) {
+	if req.Method == "GET" {
+
+		str := logging.GetLoggingConfig(this.Env)
+		if len(str) > 0 {
+			this.Write(w, []byte(str))
+		} else {
+			this.error500(w, "empty setting")
+		}
+
+	} else if req.Method == "PUT" || req.Method == "POST" {
+		body, err := this.GetRawBody(req)
+		if err != nil {
+			log.Error(err)
+			this.error500(w, "config replace failed")
+			return
+		}
+
+		configStr := string(body)
+
+		log.Info("receive new settings:", configStr)
+
+		logging.ReplaceConfig(this.Env, configStr)
+
+		this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
+	}
+}

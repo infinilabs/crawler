@@ -14,29 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package config
+package env
 
-type GopaConfig struct {
-	SystemConfig  *SystemConfig
-	RuntimeConfig *RuntimeConfig
-	Settings      *map[string]interface{}
-	Channels      *Channels
+import "sync"
+
+type Registrar struct {
+	values map[string]interface{}
+	sync.Mutex
 }
 
-type Channels struct {
-	PendingFetchUrl chan []byte
+func (r *Registrar) Register(k string, v interface{}) {
+	if r == nil {
+		return
+	}
+
+	r.Lock()
+	defer r.Unlock()
+	r.values[k] = v
 }
 
-type SystemConfig struct {
-	Version string `0.0.1`
-}
+func (r *Registrar) Lookup(k string) interface{} {
+	if r == nil {
+		return nil
+	}
 
-func InitGopaConfig() *GopaConfig {
-	gopaConfig := &GopaConfig{}
-	gopaConfig.RuntimeConfig = &RuntimeConfig{}
-	gopaConfig.SystemConfig = &SystemConfig{}
-	gopaConfig.Channels = &Channels{}
-	gopaConfig.Channels.PendingFetchUrl = make(chan []byte)
-
-	return gopaConfig
+	r.Lock()
+	defer r.Unlock()
+	return r.values[k]
 }

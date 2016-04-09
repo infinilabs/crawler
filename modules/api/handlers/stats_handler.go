@@ -43,5 +43,5 @@ func (this *Handler) StatsAction(w http.ResponseWriter, req *http.Request) {
 
 	stats := stats.TaskStatus{Fetch: fetch, Parse: parse}
 
-	this.WriteJson(w, &stats)
+	this.WriteJson(w, &stats, http.StatusOK)
 }

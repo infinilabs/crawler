@@ -56,6 +56,7 @@ func getSavedPath(runtimeConfig *RuntimeConfig, url []byte) string {
 
 	filenamePrefix := ""
 
+	// if the url have parameters
 	if len(myurl1.Query()) > 0 {
 
 		//TODO 不处理非网页内容，去除js 图片 css 压缩包等

@@ -19,16 +19,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
-	"os/signal"
-	"runtime"
-	"strconv"
-	"strings"
-	"syscall"
-	"time"
-
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
+	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/logging"
 	"github.com/medcl/gopa/core/store/leveldb"
 	task "github.com/medcl/gopa/core/tasks"
@@ -37,11 +30,18 @@ import (
 	crawlerModule "github.com/medcl/gopa/modules/crawler"
 	parserModule "github.com/medcl/gopa/modules/parser"
 	profilerModule "github.com/medcl/gopa/modules/profiler"
+	"os"
+	"os/signal"
+	"runtime"
+	"strconv"
+	"strings"
+	"syscall"
+	"time"
 )
 
 var seedUrl string
 var logLevel string
-var gopaConfig *GopaConfig
+var env *Env
 var version string
 
 var startTime time.Time
@@ -82,28 +82,24 @@ func main() {
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	logging.SetInitLogging(logLevel)
+	logging.SetInitLogging(NullEnv(), logLevel)
 
-	gopaConfig = InitGopaConfig()
+	env = Environment(&Registrar{}, &SystemConfig{Version: version}, InitOrGetConfig())
 
-	gopaConfig.RuntimeConfig = InitOrGetConfig()
+	env.RuntimeConfig.LogLevel = logLevel
 
-	gopaConfig.SystemConfig.Version = version
-
-	gopaConfig.RuntimeConfig.LogLevel = logLevel
-
-	logging.SetLogging(gopaConfig.RuntimeConfig.LogLevel, gopaConfig.RuntimeConfig.LogPath)
+	logging.SetLogging(env, env.RuntimeConfig.LogLevel, env.RuntimeConfig.LogPath)
 
 	store := leveldb.LeveldbStore{}
 
 	store.Open()
-	gopaConfig.RuntimeConfig.Storage = &store
+	env.RuntimeConfig.Storage = &store
 
 	//start modules
-	apiModule.Start(gopaConfig)
-	profilerModule.Start(gopaConfig)
-	crawlerModule.Start(gopaConfig)
-	parserModule.Start(gopaConfig)
+	apiModule.Start(env)
+	profilerModule.Start(env)
+	crawlerModule.Start(env)
+	parserModule.Start(env)
 
 	//adding default http protocol
 	if !strings.HasPrefix(seedUrl, "http") {
@@ -125,15 +121,14 @@ func main() {
 			log.Warn("got signal:os.Interrupt,start shutting down")
 
 			//wait workers to exit
-			log.Info("start stopping modules")
 			shutdownSignal <- true
 			crawlerModule.Stop()
 			apiModule.Stop()
 			profilerModule.Stop()
 			parserModule.Stop()
-			gopaConfig.RuntimeConfig.Storage.Close()
+			env.RuntimeConfig.Storage.Close()
 			<-shutdownSignal
-			log.Info("modules stopeed")
+			log.Info("all modules stopeed")
 			finalQuitSignal <- true
 		}
 	}()
@@ -145,17 +140,17 @@ func main() {
 	go func() {
 		//notice seed will not been persisted
 		log.Debug("sending feed to fetch queue,", seedUrl)
-		gopaConfig.Channels.PendingFetchUrl <- []byte(seedUrl)
+		env.Channels.PendingFetchUrl <- []byte(seedUrl)
 	}()
 
 	//load predefined fetch jobs
-	if gopaConfig.RuntimeConfig.LoadTemplatedFetchJob {
+	if env.RuntimeConfig.LoadTemplatedFetchJob {
 		go func() {
 
-			if util.CheckFileExists(gopaConfig.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt") {
+			if util.CheckFileExists(env.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt") {
 
-				templates := util.ReadAllLines(gopaConfig.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt")
-				ids := util.ReadAllLines(gopaConfig.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/id.txt")
+				templates := util.ReadAllLines(env.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt")
+				ids := util.ReadAllLines(env.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/id.txt")
 
 				for _, id := range ids {
 					for _, template := range templates {
@@ -163,7 +158,7 @@ func main() {
 						log.Trace("template:", template)
 						url := strings.Replace(template, "{id}", id, -1)
 						log.Debug("new task from template:", url)
-						gopaConfig.Channels.PendingFetchUrl <- []byte(url)
+						env.Channels.PendingFetchUrl <- []byte(url)
 					}
 				}
 				log.Info("templated download is done.")
@@ -174,26 +169,21 @@ func main() {
 	}
 
 	//fetch urls from saved pages
-	if gopaConfig.RuntimeConfig.LoadPendingFetchJobs {
-		//c3 := make(chan bool, 1)
-		//parseQuitChannels[1] = &c3
-		//offset3 := new(RoutingParameter)
-		//offset3.Shard = 0
-		//parseOffsets[1] = offset3
-		go task.LoadTaskFromLocalFile(gopaConfig.Channels.PendingFetchUrl, gopaConfig.RuntimeConfig)
+	if env.RuntimeConfig.LoadPendingFetchJobs {
+		go task.LoadTaskFromLocalFile(env.Channels.PendingFetchUrl, env.RuntimeConfig)
 	}
 
 	//parse fetch failed jobs,and will ignore the walk-filter
 	//TODO
 
-	if gopaConfig.RuntimeConfig.LoadRuledFetchJob {
+	if env.RuntimeConfig.LoadRuledFetchJob {
 		log.Debug("start ruled fetch")
 		go func() {
-			if gopaConfig.RuntimeConfig.RuledFetchConfig.UrlTemplate != "" {
-				for i := gopaConfig.RuntimeConfig.RuledFetchConfig.From; i <= gopaConfig.RuntimeConfig.RuledFetchConfig.To; i += gopaConfig.RuntimeConfig.RuledFetchConfig.Step {
-					url := strings.Replace(gopaConfig.RuntimeConfig.RuledFetchConfig.UrlTemplate, "{id}", strconv.FormatInt(int64(i), 10), -1)
+			if env.RuntimeConfig.RuledFetchConfig.UrlTemplate != "" {
+				for i := env.RuntimeConfig.RuledFetchConfig.From; i <= env.RuntimeConfig.RuledFetchConfig.To; i += env.RuntimeConfig.RuledFetchConfig.Step {
+					url := strings.Replace(env.RuntimeConfig.RuledFetchConfig.UrlTemplate, "{id}", strconv.FormatInt(int64(i), 10), -1)
 					log.Debug("add ruled url:", url)
-					gopaConfig.Channels.PendingFetchUrl <- []byte(url)
+					env.Channels.PendingFetchUrl <- []byte(url)
 				}
 			} else {
 				log.Error("ruled template is empty,ignore")

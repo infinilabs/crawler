@@ -19,13 +19,14 @@ package crawler
 import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
+	. "github.com/medcl/gopa/core/env"
 	"math/rand"
 )
 
 var fetchQuitChannels []*chan bool
 var started = false
 
-func Start(config *GopaConfig) {
+func Start(config *Env) {
 	if started {
 		log.Error("crawler already started, please stop it first.")
 	}
@@ -97,7 +98,7 @@ func Stop() error {
 			if item != nil {
 				*item <- true
 			}
-			log.Error("send exit signal to fetch channel: ", i)
+			log.Debug("send exit signal to fetch channel: ", i)
 		}
 
 		log.Info("crawler success stoped")

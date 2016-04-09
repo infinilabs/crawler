@@ -29,9 +29,9 @@ func (this *Handler) IndexAction(w http.ResponseWriter, req *http.Request) {
 
 	data := map[string]interface{}{}
 	data["name"] = "007"
-	data["cluster_name"] = this.Config.RuntimeConfig.ClusterConfig.Name
-	data["version"] = this.Config.SystemConfig.Version
+	data["cluster_name"] = this.Env.RuntimeConfig.ClusterConfig.Name
+	data["version"] = this.Env.SystemConfig.Version
 	data["tagline"] = "You Know, for Web"
 
-	this.WriteJson(w, &data)
+	this.WriteJson(w, &data, http.StatusOK)
 }

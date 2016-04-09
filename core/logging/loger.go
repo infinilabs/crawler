@@ -17,56 +17,71 @@ limitations under the License.
 package logging
 
 import (
-	"strings"
-
 	log "github.com/cihub/seelog"
 )
 
-func Flush() {
-	log.Flush()
+type Logger interface {
+	Trace(v ...interface{})
+
+	Debug(v ...interface{})
+
+	Info(v ...interface{})
+
+	Warn(v ...interface{}) error
+
+	Error(v ...interface{}) error
+
+	Critical(v ...interface{}) error
 }
 
-func SetInitLogging(logLevel string) {
+type RealLogger struct{}
 
-	logLevel = strings.ToLower(logLevel)
-
-	testConfig := `
-	<seelog  type="sync" minlevel="`
-	testConfig = testConfig + logLevel
-	testConfig = testConfig + `">
-		<outputs formatid="main">
-			<filter levels="error">
-				<file path="./log/gopa.log"/>
-			</filter>
-			<console formatid="main" />
-		</outputs>
-		<formats>
-			<format id="main" format="[%Date(01-02) %Time] [%LEV] [%File:%Line,%FuncShort] %Msg%n"/>
-		</formats>
-	</seelog>`
-	logger, _ := log.LoggerFromConfigAsString(testConfig)
-	log.ReplaceLogger(logger)
+func (rl RealLogger) Trace(v ...interface{}) {
+	log.Trace(v)
 }
 
-func SetLogging(logLevel string, logFile string) {
+func (rl RealLogger) Debug(v ...interface{}) {
+	log.Debug(v)
+}
 
-	logLevel = strings.ToLower(logLevel)
+func (rl RealLogger) Info(v ...interface{}) {
+	log.Info(v)
+}
 
-	testConfig := `
-	<seelog  type="sync" minlevel="`
-	testConfig = testConfig + logLevel
-	testConfig = testConfig + `">
-		<outputs formatid="main">
-			<console formatid="main"/>
-			<filter levels="` + logLevel + `">
-				<file path="` + logFile + `"/>
-			</filter>
-			 <rollingfile formatid="main" type="size" filename="` + logFile + `" maxsize="10000000000" maxrolls="5" />
-		</outputs>
-		<formats>
-			<format id="main" format="[%Date(01-02) %Time] [%LEV] [%File:%Line,%FuncShort] %Msg%n"/>
-		</formats>
-	</seelog>`
-	logger, _ := log.LoggerFromConfigAsString(testConfig)
-	log.ReplaceLogger(logger)
+func (rl RealLogger) Warn(v ...interface{}) error {
+	return log.Warn(v)
+}
+
+func (rl RealLogger) Error(v ...interface{}) error {
+	return log.Error(v)
+}
+
+func (rl RealLogger) Critical(v ...interface{}) error {
+	return log.Critical(v)
+}
+
+type NullLogger struct{}
+
+func (nl NullLogger) Trace(v ...interface{}) {
+
+}
+
+func (nl NullLogger) Debug(v ...interface{}) {
+
+}
+
+func (nl NullLogger) Info(v ...interface{}) {
+
+}
+
+func (nl NullLogger) Warn(v ...interface{}) error {
+	return nil
+}
+
+func (nl NullLogger) Error(v ...interface{}) error {
+	return nil
+}
+
+func (nl NullLogger) Critical(v ...interface{}) error {
+	return nil
 }

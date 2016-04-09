@@ -20,22 +20,21 @@ import (
 	"encoding/json"
 	logger "github.com/cihub/seelog"
 	"github.com/jmoiron/jsonq"
-	. "github.com/medcl/gopa/core/config"
-	types "github.com/medcl/gopa/core/types"
+	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/types"
 	"io/ioutil"
 	"net/http"
 	"strings"
 )
 
 type Handler struct {
-	Config      *GopaConfig
+	Env         *Env
 	wroteHeader bool
-	http.ResponseWriter
 }
 
-func (w *Handler) WriteHeader(code int) {
-	w.ResponseWriter.WriteHeader(code)
-	w.wroteHeader = true
+func (this *Handler) WriteHeader(w http.ResponseWriter, code int) {
+	w.WriteHeader(code)
+	this.wroteHeader = true
 }
 
 func (w *Handler) encodeJson(v interface{}) ([]byte, error) {
@@ -50,10 +49,10 @@ func (this *Handler) WriteJsonHeader(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 }
 
-func (this *Handler) WriteJson(w http.ResponseWriter, v interface{}) error {
+func (this *Handler) WriteJson(w http.ResponseWriter, v interface{}, statusCode int) error {
 	if !this.wroteHeader {
 		this.WriteJsonHeader(w)
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(statusCode)
 	}
 
 	b, err := this.encodeJson(v)
@@ -91,21 +90,38 @@ func (this *Handler) GetJson(r *http.Request) (*jsonq.JsonQuery, error) {
 	return jq, nil
 }
 
-func (w *Handler) Write(b []byte) (int, error) {
-	if !w.wroteHeader {
-		w.WriteHeader(http.StatusOK)
+func (this *Handler) GetRawBody(r *http.Request) ([]byte, error) {
+
+	content, err := ioutil.ReadAll(r.Body)
+	r.Body.Close()
+	if err != nil {
+		return nil, err
 	}
-	return w.ResponseWriter.Write(b)
+	if len(content) == 0 {
+		return nil, types.BodyEmpty
+	}
+	return content, nil
+}
+
+func (this *Handler) Write(w http.ResponseWriter, b []byte) (int, error) {
+	if !this.wroteHeader {
+		this.WriteHeader(w, http.StatusOK)
+	}
+	return w.Write(b)
 }
 
 func (this *Handler) error404(w http.ResponseWriter) {
-	this.WriteJson(w, map[string]interface{}{"error": 404})
+	this.WriteJson(w, map[string]interface{}{"error": 404}, http.StatusNotFound)
 }
 
-func (w *Handler) Flush() {
-	if !w.wroteHeader {
+func (this *Handler) error500(w http.ResponseWriter, msg string) {
+	this.WriteJson(w, map[string]interface{}{"error": msg}, http.StatusInternalServerError)
+}
+
+func (this *Handler) Flush(w http.ResponseWriter) {
+	if !this.wroteHeader {
 		w.WriteHeader(http.StatusOK)
 	}
-	flusher := w.ResponseWriter.(http.Flusher)
+	flusher := w.(http.Flusher)
 	flusher.Flush()
 }

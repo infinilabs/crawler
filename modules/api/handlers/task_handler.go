@@ -37,9 +37,9 @@ func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request) {
 
 		logger.Info("receive new seed:", seed)
 
-		this.Config.Channels.PendingFetchUrl <- []byte(seed)
+		this.Env.Channels.PendingFetchUrl <- []byte(seed)
 
-		this.WriteJson(w, map[string]interface{}{"ok": true})
+		this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
 	} else {
 		this.error404(w)
 	}

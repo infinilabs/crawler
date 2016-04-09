@@ -20,4 +20,5 @@ import "errors"
 
 var (
 	JSONIsEmpty = errors.New("Json is empty")
+	BodyEmpty   = errors.New("Body is empty")
 )
