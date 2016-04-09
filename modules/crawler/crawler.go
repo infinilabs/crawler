@@ -29,15 +29,15 @@ func Start(config *GopaConfig) {
 	if started {
 		log.Error("crawler already started, please stop it first.")
 	}
-	maxGoRoutine := config.RuntimeConfig.MaxGoRoutine
-	fetchQuitChannels = make([]*chan bool, maxGoRoutine)    //shutdownSignal signals for each go routing
-	fetchTaskChannels := make([]*chan []byte, maxGoRoutine) //fetchTask channels
-	fetchOffsets := make([]*RoutingParameter, maxGoRoutine) //kafka fetchOffsets
+	numGoRoutine := config.RuntimeConfig.MaxGoRoutine
+	fetchQuitChannels = make([]*chan bool, numGoRoutine)    //shutdownSignal signals for each go routing
+	fetchTaskChannels := make([]*chan []byte, numGoRoutine) //fetchTask channels
+	fetchOffsets := make([]*RoutingParameter, numGoRoutine) //kafka fetchOffsets
 	if config.RuntimeConfig.HttpEnabled {
 		go func() {
 
 			//start fetcher
-			for i := 0; i < maxGoRoutine; i++ {
+			for i := 0; i < numGoRoutine; i++ {
 				quitC := make(chan bool, 1)
 				taskC := make(chan []byte)
 
@@ -74,8 +74,8 @@ func Start(config *GopaConfig) {
 				}
 
 				randomShard := 0
-				if maxGoRoutine > 1 {
-					randomShard = rand.Intn(maxGoRoutine - 1)
+				if numGoRoutine >= 1 {
+					randomShard = rand.Intn(numGoRoutine)
 				}
 				log.Debug("publish:", string(url), ",shard:", randomShard)
 				config.RuntimeConfig.Storage.AddWalkedUrl(url)
@@ -86,12 +86,12 @@ func Start(config *GopaConfig) {
 		}
 	}()
 	started = true
-	log.Info("crawler module success started")
+	log.Info("crawler success started")
 }
 
 func Stop() error {
 	if started {
-		log.Debug("start shutting down fetcher")
+		log.Debug("start shutting down crawler")
 
 		for i, item := range fetchQuitChannels {
 			if item != nil {
@@ -100,7 +100,7 @@ func Stop() error {
 			log.Error("send exit signal to fetch channel: ", i)
 		}
 
-		log.Info("crawler module success stoped")
+		log.Info("crawler success stoped")
 
 		started = false
 	} else {

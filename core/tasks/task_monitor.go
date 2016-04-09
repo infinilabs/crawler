@@ -17,28 +17,15 @@ limitations under the License.
 package tasks
 
 import (
-	log "github.com/cihub/seelog"
-	//	"io/ioutil"
-	//	"net/http"
-	//	. "net/url"
-	"os"
-	//	"regexp"
-	//	"strings"
-	"time"
-	//	. "github.com/PuerkitoBio/purell"
-	//	. "github.com/zeebo/sbloom"
-	//	"kafka"
-	//	"math/rand"
-	//		"strconv"
-	. "github.com/medcl/gopa/core/config"
-	util "github.com/medcl/gopa/core/util"
-	//		utils "util"
-	//	bloom "github.com/zeebo/sbloom"
-	//	"hash/fnv"
 	"bufio"
+	log "github.com/cihub/seelog"
+	. "github.com/medcl/gopa/core/config"
+	"github.com/medcl/gopa/core/util"
+	"os"
+	"time"
 )
 
-func LoadTaskFromLocalFile(pendingFetchUrls chan []byte, runtimeConfig *RuntimeConfig, quit *chan bool, offsets *RoutingParameter) {
+func LoadTaskFromLocalFile(pendingFetchUrls chan []byte, runtimeConfig *RuntimeConfig) {
 
 	log.Trace("LoadTaskFromLocalFile task started.")
 	path := runtimeConfig.PathConfig.PendingFetchLog

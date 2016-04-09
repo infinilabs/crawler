@@ -22,8 +22,7 @@ import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
 	"github.com/medcl/gopa/core/stats"
-	task "github.com/medcl/gopa/core/tasks"
-	util "github.com/medcl/gopa/core/util"
+	"github.com/medcl/gopa/core/util"
 )
 
 //fetch url's content
@@ -90,7 +89,7 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig, o
 
 	go func() {
 
-		body, err := task.HttpGetWithCookie(requestUrl, config.Cookie)
+		body, err := util.HttpGetWithCookie(requestUrl, config.Cookie)
 
 		if err == nil {
 			if body != nil {

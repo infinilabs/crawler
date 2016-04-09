@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 //subscribe local file channel,and parse urls
-package tasks
+package parser
 
 import (
 	"bufio"
@@ -23,12 +23,12 @@ import (
 	. "net/url"
 	"os"
 	"strings"
-	time "time"
+	"time"
 
 	. "github.com/PuerkitoBio/purell"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
-	util "github.com/medcl/gopa/core/util"
+	"github.com/medcl/gopa/core/util"
 )
 
 func init() {
@@ -100,7 +100,7 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string, fileName []byte,
 		log.Trace("dealing with match result,", xIndex)
 		xIndex = xIndex + 1
 		url := match[siteConfig.LinkUrlExtractRegexGroupIndex]
-		filterUrl := formatUrlForFilter(url)
+		filterUrl := util.FormatUrlForFilter(url)
 		log.Debug("url clean result:", string(filterUrl), ",original url:", string(url))
 		filteredUrl := string(filterUrl)
 
@@ -169,7 +169,7 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string, fileName []byte,
 					log.Trace("new relatived url,", currentUrlStr)
 				} else {
 					//page based relative urls
-					urlPath := getRootUrl(currentURI)
+					urlPath := util.GetRootUrl(currentURI)
 					currentUrlStr = "http://" + urlPath + currentUrlStr
 					log.Trace("new relatived url,", currentUrlStr)
 				}

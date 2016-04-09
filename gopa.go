@@ -29,12 +29,13 @@ import (
 
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
-	logging "github.com/medcl/gopa/core/logging"
+	"github.com/medcl/gopa/core/logging"
 	"github.com/medcl/gopa/core/store/leveldb"
 	task "github.com/medcl/gopa/core/tasks"
 	"github.com/medcl/gopa/core/util"
 	apiModule "github.com/medcl/gopa/modules/api"
 	crawlerModule "github.com/medcl/gopa/modules/crawler"
+	parserModule "github.com/medcl/gopa/modules/parser"
 	profilerModule "github.com/medcl/gopa/modules/profiler"
 )
 
@@ -102,14 +103,12 @@ func main() {
 	apiModule.Start(gopaConfig)
 	profilerModule.Start(gopaConfig)
 	crawlerModule.Start(gopaConfig)
+	parserModule.Start(gopaConfig)
 
 	//adding default http protocol
 	if !strings.HasPrefix(seedUrl, "http") {
 		seedUrl = "http://" + seedUrl
 	}
-
-	parseQuitChannels := make([]*chan bool, 2) //shutdownSignal signals for each go routing
-	parseOffsets := make([]*RoutingParameter, gopaConfig.RuntimeConfig.MaxGoRoutine)
 
 	shutdownSignal := make(chan bool, 1)
 	finalQuitSignal := make(chan bool, 1)
@@ -123,25 +122,21 @@ func main() {
 		s := <-exitEventChannel
 		log.Debug("got signal:", s)
 		if s == os.Interrupt || s.(os.Signal) == syscall.SIGINT {
-			log.Warn("got signal:os.Interrupt,saving data and exit")
+			log.Warn("got signal:os.Interrupt,start shutting down")
 
 			//wait workers to exit
-			log.Info("waiting workers exit")
-			shutdown(parseOffsets, parseQuitChannels, shutdownSignal)
-			apiModule.Stop()
+			log.Info("start stopping modules")
+			shutdownSignal <- true
 			crawlerModule.Stop()
 			apiModule.Stop()
+			profilerModule.Stop()
+			parserModule.Stop()
+			gopaConfig.RuntimeConfig.Storage.Close()
 			<-shutdownSignal
-			log.Info("workers shutdown")
+			log.Info("modules stopeed")
 			finalQuitSignal <- true
 		}
 	}()
-
-	c2 := make(chan bool, 1)
-	parseQuitChannels[0] = &c2
-	offset2 := new(RoutingParameter)
-	offset2.Shard = 0
-	parseOffsets[0] = offset2
 
 	//fetch rule:all urls -> persisted to sotre -> fetched from store -> pushed to pendingFetchUrls -> redistributed to sharded goroutines -> fetch -> save webpage to store -> done
 	//parse rule:url saved to store -> local path persisted to store -> fetched to pendingParseFiles -> redistributed to sharded goroutines -> parse -> clean urls -> enqueue to url store ->done
@@ -152,11 +147,6 @@ func main() {
 		log.Debug("sending feed to fetch queue,", seedUrl)
 		gopaConfig.Channels.PendingFetchUrl <- []byte(seedUrl)
 	}()
-
-	//start local saved file parser
-	if gopaConfig.RuntimeConfig.ParseUrlsFromSavedFileLog {
-		go task.ParseGo(gopaConfig.Channels.PendingFetchUrl, gopaConfig.RuntimeConfig, &c2, offset2)
-	}
 
 	//load predefined fetch jobs
 	if gopaConfig.RuntimeConfig.LoadTemplatedFetchJob {
@@ -185,12 +175,12 @@ func main() {
 
 	//fetch urls from saved pages
 	if gopaConfig.RuntimeConfig.LoadPendingFetchJobs {
-		c3 := make(chan bool, 1)
-		parseQuitChannels[1] = &c3
-		offset3 := new(RoutingParameter)
-		offset3.Shard = 0
-		parseOffsets[1] = offset3
-		go task.LoadTaskFromLocalFile(gopaConfig.Channels.PendingFetchUrl, gopaConfig.RuntimeConfig, &c3, offset3)
+		//c3 := make(chan bool, 1)
+		//parseQuitChannels[1] = &c3
+		//offset3 := new(RoutingParameter)
+		//offset3.Shard = 0
+		//parseOffsets[1] = offset3
+		go task.LoadTaskFromLocalFile(gopaConfig.Channels.PendingFetchUrl, gopaConfig.RuntimeConfig)
 	}
 
 	//parse fetch failed jobs,and will ignore the walk-filter
@@ -213,24 +203,8 @@ func main() {
 	}
 
 	<-finalQuitSignal
-	printShutdownInfo()
-}
 
-func shutdown(offsets2 []*RoutingParameter, quitChannels2 []*chan bool, quit chan bool) {
-	log.Debug("start shutting down")
-
-	for i, item := range quitChannels2 {
-		if item != nil {
-			*item <- true
-		}
-		log.Debug("send exit signal to quit channel-2,", i)
-	}
-
-	log.Info("sent quit signal to go routings done")
-
-	gopaConfig.RuntimeConfig.Storage.Close()
-	log.Info("storage closed")
-
-	quit <- true
 	log.Debug("finished shutting down")
+
+	printShutdownInfo()
 }

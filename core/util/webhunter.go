@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package tasks
+package util
 
 import (
 	"bytes"
 	"compress/gzip"
 	"io"
 	"io/ioutil"
-	net "net"
+	"net"
 	"net/http"
 	. "net/url"
 	"strings"
@@ -31,7 +31,7 @@ import (
 )
 
 //parse to get url root
-func getRootUrl(source *URL) string {
+func GetRootUrl(source *URL) string {
 	if strings.HasSuffix(source.Path, "/") {
 		return source.Host + source.Path
 	} else {
@@ -46,8 +46,8 @@ func getRootUrl(source *URL) string {
 	return ""
 }
 
-//format url,prepare for bloom filter
-func formatUrlForFilter(url []byte) []byte {
+//format url, normalize url
+func FormatUrlForFilter(url []byte) []byte {
 	src := string(url)
 	log.Trace("start to normalize url:", src)
 	if strings.HasSuffix(src, "/") {
@@ -58,7 +58,7 @@ func formatUrlForFilter(url []byte) []byte {
 	return []byte(src)
 }
 
-func getUrlPathFolderWithoutFile(url []byte) []byte {
+func GetUrlPathFolderWithoutFile(url []byte) []byte {
 	src := string(url)
 	log.Trace("start to get url's path folder:", src)
 	if strings.HasSuffix(src, "/") {
