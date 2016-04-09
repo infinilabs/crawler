@@ -1,5 +1,5 @@
 language: go
-script: make clean config  cross-build package
+script: make dist-all-platform
 go:
 - 1.6
 deploy:
