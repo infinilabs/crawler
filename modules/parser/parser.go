@@ -18,7 +18,6 @@ package parser
 
 import (
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/config"
 	. "github.com/medcl/gopa/core/env"
 )
 
@@ -30,17 +29,13 @@ func Start(config *Env) {
 		log.Error("parser is already started, please stop it first.")
 	}
 	parseQuitChannels := make([]*chan bool, 2) //shutdownSignal signals for each go routing
-	parseOffsets := make([]*RoutingParameter, config.RuntimeConfig.MaxGoRoutine)
 	c2 := make(chan bool, 1)
 
 	parseQuitChannels[0] = &c2
-	offset2 := new(RoutingParameter)
-	offset2.Shard = 0
-	parseOffsets[0] = offset2
 
 	//start local saved file parser
 	if config.RuntimeConfig.ParseUrlsFromSavedFileLog {
-		go ParseGo(config.Channels.PendingFetchUrl, config.RuntimeConfig, &c2, offset2)
+		go ParseGo(config.Channels.PendingFetchUrl, config.RuntimeConfig, &c2)
 		started = true
 	}
 }

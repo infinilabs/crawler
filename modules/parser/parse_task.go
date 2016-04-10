@@ -261,7 +261,7 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string, fileName []byte,
 	log.Debug("all links within ", siteUrlStr, " is done")
 }
 
-func ParseGo(pendingUrls chan []byte, runtimeConfig *RuntimeConfig, quit *chan bool, offsets *RoutingParameter) {
+func ParseGo(pendingUrls chan []byte, runtimeConfig *RuntimeConfig, quit *chan bool) {
 	log.Info("parsing task started.")
 	path := runtimeConfig.PathConfig.SavedFileLog
 	//touch local's file
