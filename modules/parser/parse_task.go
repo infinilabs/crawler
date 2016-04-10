@@ -28,6 +28,7 @@ import (
 	. "github.com/PuerkitoBio/purell"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
+	"github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/util"
 )
 
@@ -261,9 +262,9 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string, fileName []byte,
 	log.Debug("all links within ", siteUrlStr, " is done")
 }
 
-func ParseGo(pendingUrls chan []byte, runtimeConfig *RuntimeConfig, quit *chan bool) {
+func ParseGo(env *env.Env, quit *chan bool) {
 	log.Info("parsing task started.")
-	path := runtimeConfig.PathConfig.SavedFileLog
+	path := env.RuntimeConfig.PathConfig.SavedFileLog
 	//touch local's file
 	//read all of line
 	//if hit the EOF,will wait 2s,and then reopen the file,and try again,may be check the time of last modified
@@ -275,10 +276,10 @@ waitFile:
 		goto waitFile
 	}
 
-	var storage = runtimeConfig.Storage
-	var offset int64 = storage.LoadOffset(runtimeConfig.PathConfig.SavedFileLog + ".offset")
+	var storage = env.RuntimeConfig.Storage
+	var offset int64 = storage.LoadOffset(env.RuntimeConfig.PathConfig.SavedFileLog + ".offset")
 	log.Info("loaded parse offset:", offset)
-	FetchFileWithOffset(runtimeConfig, path, offset)
+	FetchFileWithOffset(env.RuntimeConfig, path, offset)
 }
 
 func FetchFileWithOffset(runtimeConfig *RuntimeConfig, path string, skipOffset int64) {

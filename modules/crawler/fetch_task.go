@@ -21,12 +21,13 @@ import (
 
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
+	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/util"
 )
 
 //fetch url's content
-func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig, offsets *RoutingParameter) {
+func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig) {
 	t := time.NewTimer(timeout)
 	defer t.Stop()
 
@@ -43,6 +44,7 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig, o
 	if storage.FileHasSaved(savePath) {
 		log.Warn("file already saved,skip fetch.", savePath)
 		storage.AddSavedUrl(url)
+		log.Debug("file add to saved log")
 
 		//re-parse local's previous saved page
 		if runtimeConfig.ParseUrlsFromPreviousSavedPage {
@@ -52,6 +54,7 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig, o
 			}
 		}
 		storage.AddFetchedUrl(url)
+		log.Debug("file add to fetched log")
 		stats.Increment(stats.STATS_FETCH_IGNORE_COUNT)
 		return
 	}
@@ -154,17 +157,14 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig, o
 
 }
 
-func init() {}
-
-func FetchGo(runtimeConfig *RuntimeConfig, taskC *chan []byte, quitC *chan bool, offsets *RoutingParameter) {
-
-	shard := offsets.Shard
+func FetchGo(env *Env, quitC *chan bool, shard int) {
 
 	go func() {
 		for {
-			url := <-*taskC
+			log.Debug("ready to receive url")
+			url := <-env.Channels.PendingFetchUrl
 
-			if !runtimeConfig.Storage.UrlHasFetched(url) {
+			if !env.RuntimeConfig.Storage.UrlHasFetched(url) {
 
 				log.Debug("shard:", shard, ",url received:", string(url))
 
@@ -172,11 +172,11 @@ func FetchGo(runtimeConfig *RuntimeConfig, taskC *chan []byte, quitC *chan bool,
 
 				log.Info("shard:", shard, ",url cool,start fetching:", string(url))
 
-				fetchUrl(url, timeout, runtimeConfig, offsets)
+				fetchUrl(url, timeout, env.RuntimeConfig)
 
-				if runtimeConfig.TaskConfig.FetchDelayThreshold > 0 {
-					log.Debug("sleep ", runtimeConfig.TaskConfig.FetchDelayThreshold, "ms to control crawling speed")
-					time.Sleep(time.Duration(runtimeConfig.TaskConfig.FetchDelayThreshold) * time.Millisecond)
+				if env.RuntimeConfig.TaskConfig.FetchDelayThreshold > 0 {
+					log.Debug("sleep ", env.RuntimeConfig.TaskConfig.FetchDelayThreshold, "ms to control crawling speed")
+					time.Sleep(time.Duration(env.RuntimeConfig.TaskConfig.FetchDelayThreshold) * time.Millisecond)
 					log.Debug("wake up now,continue crawing")
 				}
 			} else {
@@ -192,23 +192,4 @@ func FetchGo(runtimeConfig *RuntimeConfig, taskC *chan []byte, quitC *chan bool,
 
 	log.Trace("fetch task exit.shard:", shard)
 
-}
-
-type FetchTask struct {
-	innerTaskConfig *InnerTaskConfig
-}
-
-func (this *FetchTask) Init(config *InnerTaskConfig) {
-	this.innerTaskConfig = config
-}
-
-func (this *FetchTask) Start() error {
-	log.Info("fetch task is started, shard: ", this.innerTaskConfig.Parameter.Shard)
-	FetchGo(this.innerTaskConfig.RuntimeConfig, this.innerTaskConfig.MessageChan, this.innerTaskConfig.QuitChan, this.innerTaskConfig.Parameter)
-	return nil
-}
-
-func (this *FetchTask) Stop() error {
-	log.Info("fetch task is stoped")
-	return nil
 }

@@ -69,7 +69,6 @@ type RuntimeConfig struct {
 
 	PathConfig *PathConfig
 
-	GoProfEnabled        bool
 	StoreWebPageTogether bool
 
 	MaxGoRoutine int

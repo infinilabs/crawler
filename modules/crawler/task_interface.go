@@ -24,9 +24,3 @@ type InnerTaskConfig struct {
 	QuitChan      *chan bool
 	Parameter     *RoutingParameter
 }
-
-type TaskInterface interface {
-	Init(config *InnerTaskConfig)
-	Start() error
-	Stop() error
-}

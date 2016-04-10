@@ -24,7 +24,7 @@ import (
 var quitChannels []*chan bool
 var started = false
 
-func Start(config *Env) {
+func Start(env *Env) {
 	if started {
 		log.Error("parser is already started, please stop it first.")
 	}
@@ -34,8 +34,8 @@ func Start(config *Env) {
 	parseQuitChannels[0] = &c2
 
 	//start local saved file parser
-	if config.RuntimeConfig.ParseUrlsFromSavedFileLog {
-		go ParseGo(config.Channels.PendingFetchUrl, config.RuntimeConfig, &c2)
+	if env.RuntimeConfig.ParseUrlsFromSavedFileLog {
+		go ParseGo(env, &c2)
 		started = true
 	}
 }

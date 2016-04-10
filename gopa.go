@@ -29,7 +29,7 @@ import (
 	apiModule "github.com/medcl/gopa/modules/api"
 	crawlerModule "github.com/medcl/gopa/modules/crawler"
 	parserModule "github.com/medcl/gopa/modules/parser"
-	profilerModule "github.com/medcl/gopa/modules/profiler"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"runtime"
@@ -97,7 +97,6 @@ func main() {
 
 	//start modules
 	apiModule.Start(env)
-	profilerModule.Start(env)
 	crawlerModule.Start(env)
 	parserModule.Start(env)
 
@@ -120,12 +119,12 @@ func main() {
 		if s == os.Interrupt || s.(os.Signal) == syscall.SIGINT {
 			log.Warn("got signal:os.Interrupt,start shutting down")
 
+			close(env.Channels.PendingFetchUrl)
 			//wait workers to exit
 			shutdownSignal <- true
+			parserModule.Stop()
 			crawlerModule.Stop()
 			apiModule.Stop()
-			profilerModule.Stop()
-			parserModule.Stop()
 			env.RuntimeConfig.Storage.Close()
 			<-shutdownSignal
 			log.Info("all modules stopeed")

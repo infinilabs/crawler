@@ -37,7 +37,7 @@ func Environment(registrar *Registrar, sysConfig *SystemConfig, runtimeConfig *R
 	env.RuntimeConfig = runtimeConfig
 	env.SystemConfig = sysConfig
 	env.Channels = &Channels{}
-	env.Channels.PendingFetchUrl = make(chan []byte)
+	env.Channels.PendingFetchUrl = make(chan []byte, 10) //buffer number is 10
 	env.Registrar = registrar
 	//env.Logger = logger
 

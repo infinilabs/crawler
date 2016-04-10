@@ -131,7 +131,7 @@ Module 通过开关 开启/关闭, 如:动态关闭解析模块,动态关闭抓�
 动态配置日志,动态输出指定代码指定行的日志 [done]
 
 parser过程使用 select fetch goroutine, 如果失败再持久化到本地
-goroutine添加buffer,shutdown的时候关闭chan,并处理关闭事件
+goroutine添加buffer,shutdown的时候关闭chan,并处理关闭事件 [done]
 处理超长URL,可设置最大值,忽略巨长的url(有些可能是异常的URL)
 处理"//www.baidu.com" 造成的域名被当做二级页面路径,URL解析死循环
 
@@ -140,3 +140,5 @@ goroutine添加buffer,shutdown的时候关闭chan,并处理关闭事件
 分离filter和storage接口
 
 提供页面浏览文件内容的接口,storage实现FS接口
+
+不使用文件来存储抓取队列

@@ -79,8 +79,6 @@ func InitOrGetConfig() *RuntimeConfig {
 	runtimeConfig.ParseUrlsFromPreviousSavedPage = GetBoolConfig("Switch", "ParseUrlsFromPreviousSavedPage", false)
 	runtimeConfig.ArrayStringSplitter = GetStringConfig("CrawlerRule", "ArrayStringSplitter", ",")
 
-	runtimeConfig.GoProfEnabled = GetBoolConfig("DEFAULT", "GoProfEnabled", false)
-
 	runtimeConfig.WalkBloomFilterFileName = GetStringConfig("BloomFilter", "WalkBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/walk.bloomfilter")
 	runtimeConfig.FetchBloomFilterFileName = GetStringConfig("BloomFilter", "FetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/fetch.bloomfilter")
 	runtimeConfig.ParseBloomFilterFileName = GetStringConfig("BloomFilter", "ParseBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/parse.bloomfilter")
@@ -90,7 +88,7 @@ func InitOrGetConfig() *RuntimeConfig {
 	runtimeConfig.PathConfig.PendingFetchLog = runtimeConfig.TaskConfig.TaskDataPath + "/tasks/pending_fetch.urls"
 	runtimeConfig.PathConfig.FetchFailedLog = runtimeConfig.TaskConfig.TaskDataPath + "/tasks/failed_fetch.urls"
 
-	runtimeConfig.MaxGoRoutine = GetIntConfig("Global", "MaxGoRoutine", 2)
+	runtimeConfig.MaxGoRoutine = GetIntConfig("Global", "MaxGoRoutine", 10)
 	if runtimeConfig.MaxGoRoutine < 2 {
 		runtimeConfig.MaxGoRoutine = 2
 	}

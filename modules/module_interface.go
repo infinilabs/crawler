@@ -16,7 +16,7 @@ limitations under the License.
 
 package modules
 
-import . "github.com/medcl/gopa/core/config"
+import . "github.com/medcl/gopa/core/env"
 
 type ModuleInterface interface {
 	Start(config *Env)

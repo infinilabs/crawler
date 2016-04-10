@@ -18,74 +18,31 @@ package crawler
 
 import (
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/config"
 	. "github.com/medcl/gopa/core/env"
-	"math/rand"
 )
 
 var fetchQuitChannels []*chan bool
 var started = false
 
-func Start(config *Env) {
+func Start(env *Env) {
 	if started {
 		log.Error("crawler already started, please stop it first.")
 	}
-	numGoRoutine := config.RuntimeConfig.MaxGoRoutine
-	fetchQuitChannels = make([]*chan bool, numGoRoutine)    //shutdownSignal signals for each go routing
-	fetchTaskChannels := make([]*chan []byte, numGoRoutine) //fetchTask channels
-	fetchOffsets := make([]*RoutingParameter, numGoRoutine) //kafka fetchOffsets
-	if config.RuntimeConfig.HttpEnabled {
+	numGoRoutine := env.RuntimeConfig.MaxGoRoutine
+	fetchQuitChannels = make([]*chan bool, numGoRoutine) //shutdownSignal signals for each go routing
+	if env.RuntimeConfig.HttpEnabled {
 		go func() {
 
 			//start fetcher
 			for i := 0; i < numGoRoutine; i++ {
 				quitC := make(chan bool, 1)
-				taskC := make(chan []byte)
-
 				fetchQuitChannels[i] = &quitC
-				fetchTaskChannels[i] = &taskC
-				parameter := new(RoutingParameter)
-				parameter.Shard = i
-				fetchOffsets[i] = parameter
-
-				fetchTask := new(FetchTask)
-				innerTaskConfig := new(InnerTaskConfig)
-				innerTaskConfig.RuntimeConfig = config.RuntimeConfig
-				innerTaskConfig.MessageChan = &taskC
-				innerTaskConfig.QuitChan = &quitC
-				innerTaskConfig.Parameter = parameter
-
-				fetchTask.Init(innerTaskConfig)
-				go fetchTask.Start()
+				go FetchGo(env, &quitC, i)
 
 			}
 		}()
 	}
 
-	//redistribute pendingFetchUrls to sharded workers
-	go func() {
-		for {
-			url := <-config.Channels.PendingFetchUrl
-			if !config.RuntimeConfig.Storage.UrlHasWalked(url) {
-
-				if config.RuntimeConfig.Storage.UrlHasFetched(url) {
-					log.Warn("don't hit walk filter but hit fetch filter, also ignore,", string(url))
-					config.RuntimeConfig.Storage.AddWalkedUrl(url)
-					continue
-				}
-
-				randomShard := 0
-				if numGoRoutine >= 1 {
-					randomShard = rand.Intn(numGoRoutine)
-				}
-				log.Debug("publish:", string(url), ",shard:", randomShard)
-				config.RuntimeConfig.Storage.AddWalkedUrl(url)
-				*fetchTaskChannels[randomShard] <- url
-			} else {
-				log.Trace("hit walk or fetch filter,just ignore,", string(url))
-			}
-		}
-	}()
 	started = true
 	log.Info("crawler success started")
 }
