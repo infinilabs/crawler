@@ -48,12 +48,12 @@ func internalStart(config *Env) {
 
 func Start(config *Env) {
 	//API server
-	if config.RuntimeConfig.HttpEnabled {
+	//if config.RuntimeConfig.HttpEnabled {
 		go func() {
 			internalStart(config)
 		}()
 		log.Debug("api module success started")
-	}
+	//}
 }
 
 func Stop() error {

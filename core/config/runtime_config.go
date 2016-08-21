@@ -23,8 +23,8 @@ import (
 type PathConfig struct {
 	Data     string  `data`
 	Log      string  `log`
-	TaskData string  `task`
-	WebData  string  `web`
+	TaskData string
+	WebData  string
 
 	SavedFileLog    string //path of saved files
 	PendingFetchLog string //path of pending fetch
@@ -50,6 +50,17 @@ type IndexingConfig struct {
 type SaveConfig struct {
 	DefaultExtension string
 }
+type CrawlerConfig struct {
+	Enabled bool `enabled`
+	LoadPendingFetchJobs           bool  `load_pending_fetch_from_file`//fetch url parse and extracted from saved page,load data from:"pending_fetch.urls"
+
+}
+type ParserConfig struct {
+	Enabled bool `enabled`
+	ParseUrlsFromSavedFileLog        bool `parse_file_log`
+	ReParseUrlsFromPreviousSavedPage bool `reparse_file_log` //extract urls from previous saved page
+
+}
 
 type RuledFetchConfig struct {
 	UrlTemplate        string
@@ -73,8 +84,13 @@ type RuntimeConfig struct {
 	PathConfig *PathConfig `path`
 
 
+	//crawler config
+	CrawlerConfig *CrawlerConfig `crawler`
+	ParserConfig *ParserConfig `parser`
+
+
 	//task
-	TaskConfig *TaskConfig
+	TaskConfig *TaskConfig `task.default`
 
 	RuledFetchConfig *RuledFetchConfig
 
@@ -82,15 +98,14 @@ type RuntimeConfig struct {
 	ArrayStringSplitter string
 
 
-	StoreWebPageTogether bool
+	//StoreWebPageTogether bool
 
 	MaxGoRoutine int
 
 	//switch config
-	ParseUrlsFromSavedFileLog      bool
+	//ParseUrlsFromSavedFileLog      bool
 	LoadTemplatedFetchJob          bool
-	LoadPendingFetchJobs           bool //fetch url parse and extracted from saved page,load data from:"pending_fetch.urls"
-	ParseUrlsFromPreviousSavedPage bool //extract urls from previous saved page
+	//ParseUrlsFromPreviousSavedPage bool //extract urls from previous saved page
 	LoadRuledFetchJob              bool //extract urls from previous saved page
 	HttpEnabled                    bool //extract urls from previous saved page
 

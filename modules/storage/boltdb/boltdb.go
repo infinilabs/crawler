@@ -248,13 +248,16 @@ func (filter *BoltdbStore) Persist() error {
 }
 
 func (filter *BoltdbStore) Lookup(key []byte) bool {
+	if(key==nil){
+		panic("the key for lookup can't be null")
+	}
 	value := filter.GetValue(key)
 
 	if value != nil {
 		log.Trace("return true,hit key, ", string(key), " : ", value)
 		return true
 	}
-	log.Trace("return false, hit key", string(key), " : ", value)
+	log.Trace("return false, miss key,", string(key), " : ", value)
 
 	return false
 }

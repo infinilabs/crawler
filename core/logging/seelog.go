@@ -33,6 +33,7 @@ func SetLogging(env *Env) {
 	setLogging(env,logLevel,logFile)
 
 }
+
 func setLogging(env *Env, logLevel string, logFile string) {
 
 	logLevel = strings.ToLower(logLevel)
@@ -49,7 +50,7 @@ func setLogging(env *Env, logLevel string, logFile string) {
 			 <rollingfile formatid="main" type="size" filename="` + logFile + `" maxsize="10000000000" maxrolls="5" />
 		</outputs>
 		<formats>
-			<format id="main" format="[%Date(01-02) %Time] [%LEV] [%File:%Line,%FuncShort] %Msg%n"/>
+			<format id="main" format="[%Date(01-02) %Time] [%LEV] [%File:%Line] %Msg%n"/>
 		</formats>
 	</seelog>`
 	ReplaceConfig(env, testConfig)

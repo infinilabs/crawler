@@ -23,39 +23,43 @@ import (
 type TaskConfig struct {
 
 	//name of this task
-	Name string
+	//Name string
 
 	//store page separately,such as url with paging,ie:http://baidu.com/?pn=10 http://baidu.com/?pn=20 ,here we can set value to "pn"
-	SplitByUrlParameter string
+	SplitByUrlParameter string `split_by_url_parameter`
 
 	//follow page link,and walk around
-	FollowLink bool
+	//FollowLink bool
 
 	//walking around pattern
+	LinkUrlExtractRegexStr           string `link_extract_pattern`
 	LinkUrlExtractRegex           *regexp.Regexp
-	LinkUrlExtractRegexGroupIndex int
+	LinkUrlExtractRegexGroupIndex int `link_extract_group`
 	LinkUrlMustContain            string
 	LinkUrlMustNotContain         string
 
 	//parsing url pattern,when url match this pattern,gopa will not parse urls from response of this url
+	SkipPageParsePatternStr string `skip_page_parse_pattern`
 	SkipPageParsePattern *regexp.Regexp
 
 	//fetch url pattern
+	FetchUrlPatternStr        string `fetch_url_pattern`
 	FetchUrlPattern        *regexp.Regexp
 	FetchUrlMustContain    string
 	FetchUrlMustNotContain string
 
 	//saving pattern
+	SavingUrlPatternStr       string `save_url_pattern`
 	SavingUrlPattern        *regexp.Regexp
 	SavingUrlMustContain    string
 	SavingUrlMustNotContain string
 
 	//Crawling within domain
-	FollowSameDomain bool
-	FollowSubDomain  bool
+	FollowSameDomain bool `follow_same_domain`
+	FollowSubDomain  bool `follow_sub_domain`
 
 	TaskDataPath string
-	WebDataPath  string
+	//WebDataPath  string
 
 	//User Cookie
 	Cookie string

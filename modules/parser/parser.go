@@ -34,7 +34,7 @@ func Start(env *Env) {
 	parseQuitChannels[0] = &c2
 
 	//start local saved file parser
-	if env.RuntimeConfig.ParseUrlsFromSavedFileLog {
+	if env.RuntimeConfig.ParserConfig.ParseUrlsFromSavedFileLog {
 		go ParseGo(env, &c2)
 		started = true
 	}

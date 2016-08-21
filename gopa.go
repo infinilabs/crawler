@@ -156,7 +156,7 @@ func main() {
 	}
 
 	//fetch urls from saved pages
-	if env.RuntimeConfig.LoadPendingFetchJobs {
+	if env.RuntimeConfig.CrawlerConfig.LoadPendingFetchJobs {
 		go task.LoadTaskFromLocalFile(env.Channels.PendingFetchUrl, env.RuntimeConfig)
 	}
 

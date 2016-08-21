@@ -37,7 +37,7 @@ func getSavedPath(runtimeConfig *RuntimeConfig, url []byte) (string,string) {
 	myurl1, _ := Parse(urlStr)
 	log.Trace("url->path:", myurl1.Host, " ", myurl1.Path)
 
-	baseDir := runtimeConfig.TaskConfig.WebDataPath + "/" + myurl1.Host + "/"
+	baseDir := runtimeConfig.PathConfig.WebData + "/" + myurl1.Host + "/"
 	baseDir = strings.Replace(baseDir, `:`, `_`, -1)
 
 	log.Trace("replaced:", baseDir)

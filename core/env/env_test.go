@@ -34,4 +34,7 @@ func TestLoad(t *testing.T) {
 	assert.Equal(t,"data",config.PathConfig.Data)
 	assert.Equal(t,"log",config.PathConfig.Log)
 
+	assert.Equal(t,true,config.ParserConfig.Enabled)
+	assert.Equal(t,true,config.CrawlerConfig.Enabled)
+
 }

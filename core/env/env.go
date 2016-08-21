@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	log "github.com/cihub/seelog"
 	"os"
+	"regexp"
 )
 
 type Env struct {
@@ -91,12 +92,30 @@ func (this *Env) loadRuntimeConfig()(RuntimeConfig,error) {
 	}
 
 	//override built-in config
+	config.PathConfig.SavedFileLog = config.PathConfig.Data + "/tasks/pending_parse.files"
+	config.PathConfig.PendingFetchLog = config.PathConfig.Data + "/tasks/pending_fetch.urls"
+	config.PathConfig.FetchFailedLog = config.PathConfig.Data + "/tasks/failed_fetch.urls"
+
+	config.PathConfig.WebData = config.PathConfig.Data + "/web/"
+	config.PathConfig.TaskData = config.PathConfig.Data + "/tasks/"
+
+	config.TaskConfig.LinkUrlExtractRegex=regexp.MustCompile(config.TaskConfig.LinkUrlExtractRegexStr)
+	config.TaskConfig.FetchUrlPattern=regexp.MustCompile(config.TaskConfig.FetchUrlPatternStr)
+	config.TaskConfig.SavingUrlPattern=regexp.MustCompile(config.TaskConfig.SavingUrlPatternStr)
+	config.TaskConfig.SkipPageParsePattern=regexp.MustCompile(config.TaskConfig.SkipPageParsePatternStr)
+
 	return config,err
 }
 
 func (this *Env) init()(error){
+
+	if this.RuntimeConfig.MaxGoRoutine < 2 {
+		this.RuntimeConfig.MaxGoRoutine = 2
+	}
 	os.MkdirAll(this.RuntimeConfig.PathConfig.Data, 0777)
 	os.MkdirAll(this.RuntimeConfig.PathConfig.Log, 0777)
+	os.MkdirAll(this.RuntimeConfig.PathConfig.WebData, 0777)
+	os.MkdirAll(this.RuntimeConfig.PathConfig.TaskData, 0777)
 	return nil
 }
 

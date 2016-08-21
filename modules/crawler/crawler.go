@@ -29,12 +29,14 @@ func Start(env *Env) {
 		log.Error("crawler already started, please stop it first.")
 	}
 	numGoRoutine := env.RuntimeConfig.MaxGoRoutine
+
 	fetchQuitChannels = make([]*chan bool, numGoRoutine) //shutdownSignal signals for each go routing
-	if env.RuntimeConfig.HttpEnabled {
+	if env.RuntimeConfig.CrawlerConfig.Enabled {
 		go func() {
 
 			//start fetcher
 			for i := 0; i < numGoRoutine; i++ {
+				log.Trace("start crawler:",i)
 				quitC := make(chan bool, 1)
 				fetchQuitChannels[i] = &quitC
 				go FetchGo(env, &quitC, i)

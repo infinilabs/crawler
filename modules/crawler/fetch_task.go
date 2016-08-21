@@ -93,7 +93,7 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig) {
 		log.Debug("file add to saved log")
 
 		//re-parse local's previous saved page
-		if runtimeConfig.ParseUrlsFromPreviousSavedPage {
+		if runtimeConfig.ParserConfig.ReParseUrlsFromPreviousSavedPage {
 			if !storage.FileHasParsed([]byte(savePath)) {
 				log.Debug("previous saved page send to parse-queue:", savePath)
 				storage.LogSavedFile(runtimeConfig.PathConfig.SavedFileLog, requestUrl+"|||"+savePath)
@@ -209,9 +209,10 @@ func FetchGo(env *Env, quitC *chan bool, shard int) {
 			log.Debug("ready to receive url")
 			url := <-env.Channels.PendingFetchUrl
 
+			log.Debug("shard:", shard, ",url received:", string(url))
+
 			if !env.RuntimeConfig.Storage.UrlHasFetched(url) {
 
-				log.Debug("shard:", shard, ",url received:", string(url))
 
 				timeout := 10 * time.Second
 
