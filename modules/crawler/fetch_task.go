@@ -24,14 +24,58 @@ import (
 	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/util"
+	"github.com/medcl/gopa/core/types"
+	"strings"
 )
+
+func checkIfUrlWillBeSave(runtimeConfig *RuntimeConfig,url []byte,)bool  {
+
+	requestUrl:=string(url)
+
+	log.Debug("started check savingUrlPattern,", runtimeConfig.TaskConfig.SavingUrlPattern, ",", string(url))
+	if runtimeConfig.TaskConfig.SavingUrlPattern.Match(url) {
+
+
+		log.Debug("match saving url pattern,", requestUrl)
+		if len(runtimeConfig.TaskConfig.SavingUrlMustNotContain) > 0 {
+			if util.ContainStr(requestUrl, runtimeConfig.TaskConfig.SavingUrlMustNotContain) {
+				log.Debug("hit SavingUrlMustNotContain,ignore,", requestUrl, " , ", runtimeConfig.TaskConfig.SavingUrlMustNotContain)
+				return false
+			}
+		}
+
+		if len(runtimeConfig.TaskConfig.SavingUrlMustContain) > 0 {
+			if !util.ContainStr(requestUrl, runtimeConfig.TaskConfig.SavingUrlMustContain) {
+				log.Debug("not hit SavingUrlMustContain,ignore,", requestUrl, " , ", runtimeConfig.TaskConfig.SavingUrlMustContain)
+				return false
+			}
+		}
+
+		return true
+
+	} else {
+		log.Debug("does not hit SavingUrlPattern ignoring,", requestUrl)
+	}
+	return false
+}
 
 //fetch url's content
 func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig) {
 	t := time.NewTimer(timeout)
 	defer t.Stop()
-
 	requestUrl := string(url)
+
+	if(url==nil||len(requestUrl)==0){
+		log.Error("invalid fetchUrl")
+		return
+	}
+
+	//adding default http protocol
+	if !strings.HasPrefix(requestUrl, "http") {
+		requestUrl = "http://" + requestUrl
+	}
+
+
 
 	var storage = runtimeConfig.Storage
 
@@ -39,7 +83,9 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig) {
 
 	config := runtimeConfig.TaskConfig
 
-	savePath := getSavedPath(runtimeConfig, url)
+	saveDir,saveFile := getSavedPath(runtimeConfig, url)
+
+	savePath:=saveDir+saveFile
 
 	if storage.FileHasSaved(savePath) {
 		log.Warn("file already saved,skip fetch.", savePath)
@@ -91,48 +137,47 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig) {
 	flg := make(chan bool, 1)
 
 	go func() {
+		treasure:=types.Treasure{}
+		treasure.CreateTime=time.Now().UTC()
+		treasure.LastCheckTime=time.Now().UTC()
 
-		body, err := util.HttpGetWithCookie(requestUrl, config.Cookie)
+		body, err := util.HttpGetWithCookie(&treasure,requestUrl, config.Cookie)
 
 		if err == nil {
 			if body != nil {
-				//todo parse urls from this page
-				log.Debug("started check savingUrlPattern,", config.SavingUrlPattern, ",", string(url))
-				if config.SavingUrlPattern.Match(url) {
-					log.Debug("match saving url pattern,", requestUrl)
-					if len(config.SavingUrlMustNotContain) > 0 {
-						if util.ContainStr(requestUrl, config.SavingUrlMustNotContain) {
-							log.Debug("hit SavingUrlMustNotContain,ignore,", requestUrl, " , ", config.SavingUrlMustNotContain)
-							goto exitPage
-						}
-					}
+				if(treasure.StatusCode==404||treasure.StatusCode==302){
+					log.Error("error while 404 or 302:", requestUrl," ",treasure.StatusCode)
+					flg <- false
+					return
+				}
 
-					if len(config.SavingUrlMustContain) > 0 {
-						if !util.ContainStr(requestUrl, config.SavingUrlMustContain) {
-							log.Debug("not hit SavingUrlMustContain,ignore,", requestUrl, " , ", config.SavingUrlMustContain)
-							goto exitPage
-						}
-					}
+				//check save rules
+				if(checkIfUrlWillBeSave(runtimeConfig,url)){
+					_, err := Save(runtimeConfig, saveDir,saveFile, body)
 
-					_, err := Save(runtimeConfig, savePath, body)
+					treasure.Body=string(body)
+					treasure.Size=len(body)
+					treasure.Snapshot=savePath
+
+					//data,_:=json.Marshal(treasure)
+					//log.Error(string(data))
+
 					if err == nil {
 						log.Info("saved:", savePath)
-						//todo saved per shard
-						storage.LogSavedFile(runtimeConfig.PathConfig.SavedFileLog, requestUrl+"|||"+savePath)
-					} else {
-						log.Debug("error while saved:", savePath, ",", err)
-						goto exitPage
-					}
 
-				} else {
-					log.Debug("does not hit SavingUrlPattern ignoring,", requestUrl)
+						runtimeConfig.Storage.LogSavedFile(runtimeConfig.PathConfig.SavedFileLog, requestUrl+"|||"+savePath)
+					} else {
+						log.Error("error while saved:", savePath, ",", err)
+						flg <- false
+						return
+					}
 				}
 			}
+
 			storage.AddFetchedUrl(url)
-		exitPage:
 			log.Debug("exit fetchUrl method:", requestUrl)
-			storage.AddFetchedUrl(url)
 			flg <- true
+
 		} else {
 			storage.LogFetchFailedUrl(runtimeConfig.PathConfig.FetchFailedLog, requestUrl)
 			flg <- false
@@ -149,7 +194,7 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig) {
 			log.Debug("fetching url normal exit,", requestUrl)
 			stats.Increment(stats.STATS_FETCH_SUCCESS_COUNT)
 		} else {
-			log.Debug("fetching url normal exit,", requestUrl)
+			log.Debug("fetching url error exit,", requestUrl)
 			stats.Increment(stats.STATS_FETCH_FAIL_COUNT)
 		}
 		return

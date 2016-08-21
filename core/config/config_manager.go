@@ -17,14 +17,14 @@ limitations under the License.
 package config
 
 import (
-	"fmt"
+
 	"io/ioutil"
 	"path/filepath"
 
 	"gopkg.in/yaml.v2"
 )
 
-func Load() {
+func Load()(RuntimeConfig,error) {
 
 	//load external yaml config
 	filename, _ := filepath.Abs("./gopa.yml")
@@ -40,10 +40,8 @@ func Load() {
 	if err != nil {
 		panic(err)
 	}
-	test, _ := yaml.Marshal(config)
-	fmt.Printf("Value: %#v\n", config)
-	fmt.Printf("Config: %#v\n", string(test))
 
 	//override built-in config
 
+	return config,err
 }

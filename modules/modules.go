@@ -14,15 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package config
+package modules
 
-import (
-	"testing"
-	"github.com/stretchr/testify/assert"
-)
-
-func TestLoad(t *testing.T) {
-	config,_:=Load()
-	assert.Equal(t,"gopa",config.ClusterConfig.Name)
+func Start(config *Env)  {
 
 }

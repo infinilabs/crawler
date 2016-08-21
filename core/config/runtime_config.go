@@ -32,7 +32,7 @@ type PathConfig struct {
 	FetchFailedLog  string //path of failed fetch
 }
 
-type ClusterConfig struct {
+type ClusterConfig  struct {
 	Name string
 }
 
@@ -51,13 +51,13 @@ type RuledFetchConfig struct {
 
 type RuntimeConfig struct {
 	LogLevel string `info`
-	LogPath  string `bin/gopa.log`
+	LogPath  string `./log/gopa.log`
 
 	//config string of seelog
 	LoggingConfig string
 
 	//cluster
-	ClusterConfig *ClusterConfig
+	ClusterConfig *ClusterConfig `cluster`
 
 	//task
 	TaskConfig *TaskConfig

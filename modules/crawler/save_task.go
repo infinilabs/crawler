@@ -28,7 +28,7 @@ import (
 func init() {
 }
 
-func getSavedPath(runtimeConfig *RuntimeConfig, url []byte) string {
+func getSavedPath(runtimeConfig *RuntimeConfig, url []byte) (string,string) {
 
 	siteConfig := runtimeConfig.TaskConfig
 
@@ -44,17 +44,13 @@ func getSavedPath(runtimeConfig *RuntimeConfig, url []byte) string {
 	path := ""
 	filename := ""
 
+	filenamePrefix := ""
+
 	//the url is a folder, making folders
 	if strings.HasSuffix(urlStr, "/") {
-		path = baseDir + myurl1.Path
-		os.MkdirAll(path, 0777)
-		log.Trace("making dir:", path)
 		filename = "default.html"
-		log.Trace("no page name,use default.html:", path)
-
+		log.Trace("no page name,use default.html:", urlStr)
 	}
-
-	filenamePrefix := ""
 
 	// if the url have parameters
 	if len(myurl1.Query()) > 0 {
@@ -96,7 +92,6 @@ func getSavedPath(runtimeConfig *RuntimeConfig, url []byte) string {
 		//http://xx.com/1112/12
 		path = myurl1.Path[0:index]
 		path = baseDir + path
-		os.MkdirAll(path, 0777)
 
 		//if the page extension is missing
 		if !strings.Contains(myurl1.Path, ".") {
@@ -106,22 +101,19 @@ func getSavedPath(runtimeConfig *RuntimeConfig, url []byte) string {
 		}
 	} else {
 		path = baseDir + path + "/"
-		os.MkdirAll(path, 0777)
 		filename = "default.html"
 	}
 
 	filename = strings.Replace(filename, "/", "", -1)
 
-	path = path + "/" + filenamePrefix + filename
-
-	log.Trace(urlStr, " will save to file: ", path)
-
-	return path
+	return path + "/",filenamePrefix + filename
 }
 
-func Save(runtimeConfig *RuntimeConfig, path string, body []byte) (int, error) {
+func Save(runtimeConfig *RuntimeConfig, saveDir string, saveFile string, body []byte) (int, error) {
 
+	path:=saveDir+saveFile
 	log.Trace("saving file,", path)
+	os.MkdirAll(saveDir, 0777)
 	fout, error := os.Create(path)
 	if error != nil {
 		log.Error(path, error)

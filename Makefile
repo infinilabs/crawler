@@ -61,6 +61,7 @@ config:
 	go get gopkg.in/yaml.v2
 	go get github.com/jmoiron/jsonq
 	go get github.com/gorilla/websocket
+	go get github.com/boltdb/bolt/...
 
 
 

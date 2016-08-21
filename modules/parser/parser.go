@@ -38,6 +38,8 @@ func Start(env *Env) {
 		go ParseGo(env, &c2)
 		started = true
 	}
+	log.Info("parser success started")
+
 }
 
 func Stop() error {

@@ -1,4 +1,6 @@
 language: go
+os:
+  - osx
 script: make dist-all-platform
 go:
 - 1.6

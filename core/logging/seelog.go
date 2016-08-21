@@ -24,23 +24,7 @@ import (
 
 func SetInitLogging(env *Env, logLevel string) {
 
-	logLevel = strings.ToLower(logLevel)
-
-	testConfig := `
-	<seelog  type="sync" minlevel="`
-	testConfig = testConfig + logLevel
-	testConfig = testConfig + `">
-		<outputs formatid="main">
-			<filter levels="error">
-				<file path="./log/gopa.log"/>
-			</filter>
-			<console formatid="main" />
-		</outputs>
-		<formats>
-			<format id="main" format="[%Date(01-02) %Time] [%LEV] [%File:%Line,%FuncShort] %Msg%n"/>
-		</formats>
-	</seelog>`
-	ReplaceConfig(env, testConfig)
+	SetLogging(env,logLevel,"./log/gopa.log")
 }
 
 func SetLogging(env *Env, logLevel string, logFile string) {

@@ -14,15 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package config
+package storage
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
+	log "github.com/cihub/seelog"
+	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/modules/storage/boltdb"
+	_ "time"
 )
 
-func TestLoad(t *testing.T) {
-	config,_:=Load()
-	assert.Equal(t,"gopa",config.ClusterConfig.Name)
+var store boltdb.BoltdbStore
 
+func Start(env *Env) {
+
+	store = boltdb.BoltdbStore{}
+	err := store.Open()
+	if err != nil {
+		log.Error(err)
+	}
+	env.RuntimeConfig.Storage = &store
+	log.Info("storage success started")
+
+}
+
+func Stop() error {
+	return store.Close()
 }

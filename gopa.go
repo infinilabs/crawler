@@ -23,12 +23,12 @@ import (
 	. "github.com/medcl/gopa/core/config"
 	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/logging"
-	"github.com/medcl/gopa/core/store/leveldb"
 	task "github.com/medcl/gopa/core/tasks"
 	"github.com/medcl/gopa/core/util"
 	apiModule "github.com/medcl/gopa/modules/api"
 	crawlerModule "github.com/medcl/gopa/modules/crawler"
 	parserModule "github.com/medcl/gopa/modules/parser"
+	storageModule "github.com/medcl/gopa/modules/storage"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
@@ -42,8 +42,6 @@ import (
 var seedUrl string
 var logLevel string
 var env *Env
-var version string
-
 var startTime time.Time
 
 func printStartInfo() {
@@ -54,7 +52,7 @@ func printStartInfo() {
 	fmt.Println(" |___/      |_|          ")
 	fmt.Println(" ")
 
-	fmt.Println("[gopa] " + version + " is on")
+	fmt.Println("[gopa] " + VERSION + " is on")
 	fmt.Println(" ")
 	startTime = time.Now()
 }
@@ -64,18 +62,17 @@ func printShutdownInfo() {
 	fmt.Println("   _` |   _ \\   _ \\   _` |     _ \\  |  |   -_) ")
 	fmt.Println(" \\__, | \\___/ \\___/ \\__,_|   _.__/ \\_, | \\___| ")
 	fmt.Println(" ____/                             ___/        ")
-	fmt.Println("[gopa] "+version+" is down, uptime:", time.Now().Sub(startTime))
+	fmt.Println("[gopa] "+ VERSION +" is down, uptime:", time.Now().Sub(startTime))
 	fmt.Println(" ")
 }
 
-func main() {
 
-	version = "0.7_SNAPSHOT"
+func main() {
 
 	printStartInfo()
 	defer logging.Flush()
 
-	flag.StringVar(&seedUrl, "seed", "http://example.com", "the seed url,where everything starts")
+	flag.StringVar(&seedUrl, "seed", "", "the seed url,where everything starts")
 	flag.StringVar(&logLevel, "log", "info", "setting log level,options:trace,debug,info,warn,error")
 
 	flag.Parse()
@@ -84,28 +81,18 @@ func main() {
 
 	logging.SetInitLogging(NullEnv(), logLevel)
 
-	env = Environment(&Registrar{}, &SystemConfig{Version: version}, InitOrGetConfig())
+	env = Environment(&Registrar{}, &SystemConfig{Version: VERSION}, InitOrGetConfig())
 
 	env.RuntimeConfig.LogLevel = logLevel
 
 	logging.SetLogging(env, env.RuntimeConfig.LogLevel, env.RuntimeConfig.LogPath)
 
-	store := leveldb.LeveldbStore{}
-
-	store.Open()
-	env.RuntimeConfig.Storage = &store
-
 	//start modules
+	storageModule.Start(env)
 	apiModule.Start(env)
 	crawlerModule.Start(env)
 	parserModule.Start(env)
 
-	//adding default http protocol
-	if !strings.HasPrefix(seedUrl, "http") {
-		seedUrl = "http://" + seedUrl
-	}
-
-	shutdownSignal := make(chan bool, 1)
 	finalQuitSignal := make(chan bool, 1)
 
 	//handle exit event
@@ -119,14 +106,12 @@ func main() {
 		if s == os.Interrupt || s.(os.Signal) == syscall.SIGINT {
 			log.Warn("got signal:os.Interrupt,start shutting down")
 
-			close(env.Channels.PendingFetchUrl)
 			//wait workers to exit
-			shutdownSignal <- true
 			parserModule.Stop()
 			crawlerModule.Stop()
 			apiModule.Stop()
+			storageModule.Stop()
 			env.RuntimeConfig.Storage.Close()
-			<-shutdownSignal
 			log.Info("all modules stopeed")
 			finalQuitSignal <- true
 		}
@@ -138,8 +123,10 @@ func main() {
 	//sending feed to task queue
 	go func() {
 		//notice seed will not been persisted
-		log.Debug("sending feed to fetch queue,", seedUrl)
-		env.Channels.PendingFetchUrl <- []byte(seedUrl)
+		if(len(seedUrl)>0){
+			log.Debug("sending feed to fetch queue,", seedUrl)
+			env.Channels.PendingFetchUrl <- []byte(seedUrl)
+		}
 	}()
 
 	//load predefined fetch jobs

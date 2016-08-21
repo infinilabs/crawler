@@ -14,15 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package config
+package util
 
 import (
 	"testing"
-	"github.com/stretchr/testify/assert"
+	"github.com/medcl/gopa/core/types"
+	"fmt"
+	"encoding/json"
 )
 
-func TestLoad(t *testing.T) {
-	config,_:=Load()
-	assert.Equal(t,"gopa",config.ClusterConfig.Name)
+func TestGet(t *testing.T) {
+	t1:=types.Treasure{}
+	data,_:= get(&t1,"http://www.baidu.com/search/resources/images/favicon.ico","")
 
+	data1,_:=json.Marshal(t1)
+	fmt.Println("",string(data))
+	fmt.Println("",string(data1))
 }
+

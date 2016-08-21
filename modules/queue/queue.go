@@ -14,15 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package config
+package queue
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
+	log "github.com/cihub/seelog"
+	"time"
+	. "github.com/medcl/gopa/core/env"
 )
 
-func TestLoad(t *testing.T) {
-	config,_:=Load()
-	assert.Equal(t,"gopa",config.ClusterConfig.Name)
+func Start(env *Env) {
 
+	l:=GopaLogger{}
+	dq := newDiskQueue("task", env.RuntimeConfig.PathConfig.TaskData, 1024, 4, 1<<10, 2500, 2*time.Second, l)
+	defer dq.Close()
+
+
+	//env.RuntimeConfig.Storage = &store
+	log.Info("queue success started")
+
+}
+
+func Stop() error {
+	return nil
 }

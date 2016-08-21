@@ -88,7 +88,7 @@ func InitOrGetConfig() *RuntimeConfig {
 	runtimeConfig.PathConfig.PendingFetchLog = runtimeConfig.TaskConfig.TaskDataPath + "/tasks/pending_fetch.urls"
 	runtimeConfig.PathConfig.FetchFailedLog = runtimeConfig.TaskConfig.TaskDataPath + "/tasks/failed_fetch.urls"
 
-	runtimeConfig.MaxGoRoutine = GetIntConfig("Global", "MaxGoRoutine", 10)
+	runtimeConfig.MaxGoRoutine = GetIntConfig("Global", "MaxGoRoutine", 1)
 	if runtimeConfig.MaxGoRoutine < 2 {
 		runtimeConfig.MaxGoRoutine = 2
 	}

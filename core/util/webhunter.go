@@ -28,6 +28,8 @@ import (
 	"time"
 
 	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/types"
+"errors"
 )
 
 //parse to get url root
@@ -69,14 +71,21 @@ func GetUrlPathFolderWithoutFile(url []byte) []byte {
 	return []byte(src)
 }
 
-func get(url string, cookie string) ([]byte, error) {
+func noRedirect(req *http.Request, via []*http.Request) error {
+	return errors.New("Don't handle redirect!")
+}
+
+func get(treasure *types.Treasure,url string, cookie string) ([]byte, error) {
 
 	log.Debug("let's get :" + url)
 
 	client := &http.Client{
-		CheckRedirect: nil,
+		CheckRedirect: noRedirect,
+		//CheckRedirect: nil,
 	}
 	reqest, _ := http.NewRequest("GET", url, nil)
+
+	//req.SetBasicAuth("user", "password")
 
 	reqest.Header.Set("User-Agent", " Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36")
 	reqest.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
@@ -105,9 +114,25 @@ func get(url string, cookie string) ([]byte, error) {
 
 	resp, err := client.Do(reqest)
 
+	treasure.Domain=reqest.Host
+	treasure.Proto=reqest.Proto
+	treasure.Url=url
+	treasure.Path=reqest.URL.Path
+
 	if err != nil {
-		log.Error(url, err)
+		if resp!=nil && resp.StatusCode == 302 {
+			log.Error("got redirect:",url," => ",resp.Header.Get("Location"))
+
+		} else {
+			log.Error(url, err)
+		}
 		return nil, err
+	}
+
+
+	treasure.StatusCode=resp.StatusCode
+	if(resp.Header!=nil){
+		treasure.Headers=resp.Header
 	}
 
 	defer resp.Body.Close()
@@ -208,9 +233,9 @@ func post(url string, cookie string, postStr string) []byte {
 	return nil
 }
 
-func HttpGetWithCookie(resource string, cookie string) (msg []byte, err error) {
+func HttpGetWithCookie(treasure *types.Treasure,resource string, cookie string) (msg []byte, err error) {
 
-	out, err := get(resource, cookie)
+	out, err := get(treasure,resource, cookie)
 	return out, err
 }
 

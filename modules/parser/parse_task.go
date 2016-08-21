@@ -28,8 +28,8 @@ import (
 	. "github.com/PuerkitoBio/purell"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
-	"github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/util"
+	"github.com/medcl/gopa/core/env"
 )
 
 func init() {
@@ -47,6 +47,7 @@ func loadFileContent(fileName string) []byte {
 	}
 	return nil
 }
+
 
 func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string, fileName []byte, body []byte) {
 
@@ -95,7 +96,15 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string, fileName []byte,
 	log.Debug("parsing external links:", siteUrlStr, ",using:", siteConfig.LinkUrlExtractRegex)
 
 	matches := siteConfig.LinkUrlExtractRegex.FindAllSubmatch(body, -1)
+
 	log.Debug("extract links with pattern,total matchs:", len(matches), " match result,", string(fileName))
+
+	defer func(){
+		if err:=recover();err!=nil{
+			log.Error(err)
+		}
+	}()
+
 	xIndex := 0
 	for _, match := range matches {
 		log.Trace("dealing with match result,", xIndex)
@@ -111,6 +120,11 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string, fileName []byte,
 			continue
 		}
 
+		if(strings.Contains(filteredUrl,"data:image/")){
+			log.Trace("filteredUrl started with: data:image/ ,continue")
+			continue
+		}
+
 		result1 := strings.HasPrefix(filteredUrl, "#")
 		if result1 {
 			log.Trace("filteredUrl started with: # ,continue")
@@ -122,6 +136,7 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string, fileName []byte,
 			log.Trace("filteredUrl started with: javascript: ,continue")
 			continue
 		}
+
 
 		hit := false
 
@@ -174,6 +189,14 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string, fileName []byte,
 					currentUrlStr = "http://" + urlPath + currentUrlStr
 					log.Trace("new relatived url,", currentUrlStr)
 				}
+
+
+				//if url start with //, then add http:
+				if(strings.HasPrefix(currentURI.Path,"//")){
+					currentUrlStr="http:"+currentURI.Path
+					log.Debug("url is start with //, auto add http as prefix")
+				}
+
 			} else {
 				//resolve domain specific filter
 				if siteConfig.FollowSameDomain {
