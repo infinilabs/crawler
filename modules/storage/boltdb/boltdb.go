@@ -68,7 +68,7 @@ func (this *BoltdbStore) Open() error {
 	this.PendingFetchPrefix = "pfetch"
 	this.OffsetPrefix = "offset"
 
-	this.PersistFileName = "boltdb"
+	this.PersistFileName = "data/boltdb"
 
 	//loading or initializing boltdb
 	log.Debug("found boltdb file, start reload,", this.PersistFileName)

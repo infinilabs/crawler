@@ -21,19 +21,30 @@ import (
 )
 
 type PathConfig struct {
-	Home     string
-	Data     string
-	TaskData string
-	WebData  string
-	Log      string
+	Data     string  `data`
+	Log      string  `log`
+	TaskData string  `task`
+	WebData  string  `web`
 
 	SavedFileLog    string //path of saved files
 	PendingFetchLog string //path of pending fetch
 	FetchFailedLog  string //path of failed fetch
 }
 
-type ClusterConfig  struct {
+type ClusterConfig struct {
 	Name string
+}
+
+type LoggingConfig struct {
+	Level     string `level`
+
+	//config string of seelog
+	ConfigStr string
+}
+
+type IndexingConfig struct {
+	Host string `host`
+	Index string `index`
 }
 
 type SaveConfig struct {
@@ -50,14 +61,17 @@ type RuledFetchConfig struct {
 }
 
 type RuntimeConfig struct {
-	LogLevel string `info`
-	LogPath  string `./log/gopa.log`
-
-	//config string of seelog
-	LoggingConfig string
-
 	//cluster
 	ClusterConfig *ClusterConfig `cluster`
+
+	//logging related
+	LoggingConfig *LoggingConfig `logging`
+	IndexingConfig *IndexingConfig `indexing`
+
+
+	//path related
+	PathConfig *PathConfig `path`
+
 
 	//task
 	TaskConfig *TaskConfig
@@ -67,7 +81,6 @@ type RuntimeConfig struct {
 	//splitter of joined array string
 	ArrayStringSplitter string
 
-	PathConfig *PathConfig
 
 	StoreWebPageTogether bool
 

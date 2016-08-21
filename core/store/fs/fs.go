@@ -59,7 +59,7 @@ func (this *FsStore) TaskEnqueue(url []byte) {
 
 func (this *FsStore) Open() error {
 
-	var runtimeConfig = config.InitOrGetConfig()
+	var runtimeConfig = config.GetRuntimeConfig()
 	this.FetchBloomFilterFileName = runtimeConfig.FetchBloomFilterFileName
 	this.WalkBloomFilterFileName = runtimeConfig.WalkBloomFilterFileName
 	this.ParseBloomFilterFileName = runtimeConfig.ParseBloomFilterFileName

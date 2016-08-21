@@ -24,10 +24,16 @@ import (
 
 func SetInitLogging(env *Env, logLevel string) {
 
-	SetLogging(env,logLevel,"./log/gopa.log")
+	setLogging(env,logLevel,"./log/gopa.log")
 }
 
-func SetLogging(env *Env, logLevel string, logFile string) {
+func SetLogging(env *Env) {
+	logLevel := strings.ToLower(env.RuntimeConfig.LoggingConfig.Level)
+	logFile := env.RuntimeConfig.PathConfig.Log+"/gopa.log"
+	setLogging(env,logLevel,logFile)
+
+}
+func setLogging(env *Env, logLevel string, logFile string) {
 
 	logLevel = strings.ToLower(logLevel)
 
@@ -59,13 +65,12 @@ func ReplaceConfig(env *Env, cfg string) {
 		log.Error("replace config error,", err)
 	}
 	if env != nil && env.RuntimeConfig != nil {
-		env.RuntimeConfig.LoggingConfig = cfg
+		env.RuntimeConfig.LoggingConfig.ConfigStr = cfg
 	}
-	log.Info("config success replaced")
 }
 
 func GetLoggingConfig(env *Env) string {
-	return env.RuntimeConfig.LoggingConfig
+	return env.RuntimeConfig.LoggingConfig.ConfigStr
 }
 
 func Flush() {

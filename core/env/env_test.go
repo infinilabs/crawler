@@ -14,34 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package config
+package env
 
 import (
-
-	"io/ioutil"
-	"path/filepath"
-
-	"gopkg.in/yaml.v2"
+	"testing"
+	"github.com/stretchr/testify/assert"
+	"fmt"
 )
 
-func Load()(RuntimeConfig,error) {
+func TestLoad(t *testing.T) {
+	env:=Environment(SystemConfig{ConfigFile:"../../gopa.yml",LogLevel:"debug"})
+	fmt.Sprintln(env)
+	fmt.Sprintln(env.SystemConfig)
+	config:=env.RuntimeConfig
+	assert.Equal(t,"gopa",config.ClusterConfig.Name)
+	assert.Equal(t,"debug",config.LoggingConfig.Level)
+	assert.Equal(t,"http://eshost:9200",config.IndexingConfig.Host)
+	assert.Equal(t,"gopa",config.IndexingConfig.Index)
+	assert.Equal(t,"data",config.PathConfig.Data)
+	assert.Equal(t,"log",config.PathConfig.Log)
 
-	//load external yaml config
-	filename, _ := filepath.Abs("./gopa.yml")
-	yamlFile, err := ioutil.ReadFile(filename)
-
-	if err != nil {
-		panic(err)
-	}
-
-	var config RuntimeConfig
-
-	err = yaml.Unmarshal(yamlFile, &config)
-	if err != nil {
-		panic(err)
-	}
-
-	//override built-in config
-
-	return config,err
 }

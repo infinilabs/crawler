@@ -142,3 +142,6 @@ goroutine添加buffer,shutdown的时候关闭chan,并处理关闭事件 [done]
 提供页面浏览文件内容的接口,storage实现FS接口
 
 不使用文件来存储抓取队列
+
+获取基本信息,建立索引
+

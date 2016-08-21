@@ -27,7 +27,8 @@ import (
 var loadingConfig *cfg.Config
 var runtimeConfig RuntimeConfig
 
-func InitOrGetConfig() *RuntimeConfig {
+
+func OldGetRuntimeConfig() *RuntimeConfig {
 
 	log.Trace("start init config")
 
@@ -39,18 +40,18 @@ func InitOrGetConfig() *RuntimeConfig {
 
 	runtimeConfig.ClusterConfig.Name = GetStringConfig("cluster", "name", "gopa")
 
-	// per cluster:data/gopa/
-	runtimeConfig.PathConfig.Home = GetStringConfig("path", "home", "cluster/"+runtimeConfig.ClusterConfig.Name+"/")
-
-	runtimeConfig.PathConfig.Data = GetStringConfig("path", "data", "")
-	if runtimeConfig.PathConfig.Data == "" {
-		runtimeConfig.PathConfig.Data = runtimeConfig.PathConfig.Home + "/" + "data/"
-	}
-
-	runtimeConfig.PathConfig.Log = GetStringConfig("path", "log", "")
-	if runtimeConfig.PathConfig.Log == "" {
-		runtimeConfig.PathConfig.Log = runtimeConfig.PathConfig.Home + "/" + "log/"
-	}
+	//// per cluster:data/gopa/
+	//runtimeConfig.PathConfig.Home = GetStringConfig("path", "home", "cluster/"+runtimeConfig.ClusterConfig.Name+"/")
+	//
+	//runtimeConfig.PathConfig.Data = GetStringConfig("path", "data", "")
+	//if runtimeConfig.PathConfig.Data == "" {
+	//	runtimeConfig.PathConfig.Data = runtimeConfig.PathConfig.Home + "/" + "data/"
+	//}
+	//
+	//runtimeConfig.PathConfig.Log = GetStringConfig("path", "log", "")
+	//if runtimeConfig.PathConfig.Log == "" {
+	//	runtimeConfig.PathConfig.Log = runtimeConfig.PathConfig.Home + "/" + "log/"
+	//}
 
 	runtimeConfig.PathConfig.WebData = GetStringConfig("path", "webdata", "")
 	if runtimeConfig.PathConfig.WebData == "" {
@@ -67,9 +68,9 @@ func InitOrGetConfig() *RuntimeConfig {
 	runtimeConfig.TaskConfig = parseConfig()
 
 	//set default logging
-	logPath := runtimeConfig.PathConfig.Log + "/" + runtimeConfig.TaskConfig.Name + "/gopa.log"
+	//logPath := runtimeConfig.PathConfig.Log + "/" + runtimeConfig.TaskConfig.Name + "/gopa.log"
 
-	runtimeConfig.LogPath = logPath
+	//runtimeConfig.LoggingConfig.Path = logPath
 
 	runtimeConfig.ParseUrlsFromSavedFileLog = GetBoolConfig("Switch", "ParseUrlsFromSavedFileLog", true)
 	runtimeConfig.LoadTemplatedFetchJob = GetBoolConfig("Switch", "LoadTemplatedFetchJob", true)
@@ -93,10 +94,10 @@ func InitOrGetConfig() *RuntimeConfig {
 		runtimeConfig.MaxGoRoutine = 2
 	}
 
-	log.Debug("maxGoRoutine:", runtimeConfig.MaxGoRoutine)
-	log.Debug("path.home:", runtimeConfig.PathConfig.Home)
+	//log.Debug("maxGoRoutine:", runtimeConfig.MaxGoRoutine)
+	//log.Debug("path.home:", runtimeConfig.PathConfig.Home)
 
-	os.MkdirAll(runtimeConfig.PathConfig.Home, 0777)
+	//os.MkdirAll(runtimeConfig.PathConfig.Home, 0777)
 	os.MkdirAll(runtimeConfig.PathConfig.Data, 0777)
 	os.MkdirAll(runtimeConfig.PathConfig.Log, 0777)
 	os.MkdirAll(runtimeConfig.PathConfig.WebData, 0777)

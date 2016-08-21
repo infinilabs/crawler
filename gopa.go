@@ -20,7 +20,6 @@ import (
 	"flag"
 	"fmt"
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/config"
 	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/logging"
 	task "github.com/medcl/gopa/core/tasks"
@@ -39,18 +38,17 @@ import (
 	"time"
 )
 
-var seedUrl string
-var logLevel string
+//
 var env *Env
 var startTime time.Time
 
 func printStartInfo() {
-	fmt.Println("  __ _  ___  _ __   __ _ ")
-	fmt.Println(" / _` |/ _ \\| '_ \\ / _` |")
-	fmt.Println("| (_| | (_) | |_) | (_| |")
-	fmt.Println(" \\__, |\\___/| .__/ \\__,_|")
-	fmt.Println(" |___/      |_|          ")
-	fmt.Println(" ")
+fmt.Println("  ________ ________ __________  _____   ")
+fmt.Println(" /  _____/ \\_____  \\\\______   \\/  _  \\  ")
+fmt.Println("/   \\  ___  /   |   \\|     ___/  /_\\  \\ ")
+fmt.Println("\\    \\_\\  \\/    |    \\    |  /    |    \\")
+fmt.Println(" \\______  /\\_______  /____|  \\____|__  /")
+fmt.Println("        \\/         \\/                \\/ ")
 
 	fmt.Println("[gopa] " + VERSION + " is on")
 	fmt.Println(" ")
@@ -66,14 +64,17 @@ func printShutdownInfo() {
 	fmt.Println(" ")
 }
 
-
 func main() {
 
+	var seedUrl,logLevel,configFile string
+
 	printStartInfo()
+
 	defer logging.Flush()
 
-	flag.StringVar(&seedUrl, "seed", "", "the seed url,where everything starts")
-	flag.StringVar(&logLevel, "log", "info", "setting log level,options:trace,debug,info,warn,error")
+	flag.StringVar(&seedUrl, "seed", "", "the seed url, where everything starts")
+	flag.StringVar(&logLevel, "log", "info", "the log level,options:trace,debug,info,warn,error, default: info")
+	flag.StringVar(&configFile, "config", "gopa.yml", "the loation of config file, default: gopa.yml")
 
 	flag.Parse()
 
@@ -81,11 +82,11 @@ func main() {
 
 	logging.SetInitLogging(NullEnv(), logLevel)
 
-	env = Environment(&Registrar{}, &SystemConfig{Version: VERSION}, InitOrGetConfig())
+	sysConfig:=SystemConfig{Version: VERSION,ConfigFile:configFile,LogLevel:logLevel}
 
-	env.RuntimeConfig.LogLevel = logLevel
+	env = Environment(sysConfig)
 
-	logging.SetLogging(env, env.RuntimeConfig.LogLevel, env.RuntimeConfig.LogPath)
+	logging.SetLogging(env)
 
 	//start modules
 	storageModule.Start(env)

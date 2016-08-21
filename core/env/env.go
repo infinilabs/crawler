@@ -18,6 +18,11 @@ package env
 
 import (
 	. "github.com/medcl/gopa/core/config"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
+	"path/filepath"
+	log "github.com/cihub/seelog"
+	"os"
 )
 
 type Env struct {
@@ -28,30 +33,85 @@ type Env struct {
 	Channels      *Channels
 }
 
-func Environment(registrar *Registrar, sysConfig *SystemConfig, runtimeConfig *RuntimeConfig) *Env {
+func Environment(sysConfig SystemConfig) *Env {
 	//if logger == nil {
 	//	logger = logging.NullLogger{}
 	//}
 
 	env := Env{}
-	env.RuntimeConfig = runtimeConfig
-	env.SystemConfig = sysConfig
+
+
+	env.SystemConfig = &sysConfig
+	config,err:= env.loadRuntimeConfig()
+	if(err!=nil){
+		panic(err)
+	}
+	env.RuntimeConfig = &config
+
+	//override logging level
+	if(len(sysConfig.LogLevel)>0){
+		env.RuntimeConfig.LoggingConfig.Level = sysConfig.LogLevel
+	}
+
 	env.Channels = &Channels{}
 	env.Channels.PendingFetchUrl = make(chan []byte, 10) //buffer number is 10
-	env.Registrar = registrar
+	env.Registrar = &Registrar{}
 	//env.Logger = logger
+
+
+	env.init()
+
 
 	return &env
 }
 
+func (this *Env) loadRuntimeConfig()(RuntimeConfig,error) {
+
+	var configFile="./gopa.yml"
+	if(this.SystemConfig!=nil&&len(this.SystemConfig.ConfigFile)>0){
+		configFile=this.SystemConfig.ConfigFile
+	}
+
+	//load external yaml config
+	filename, _ := filepath.Abs(configFile)
+
+	log.Debug("configFile:",filename)
+
+	yamlFile, err := ioutil.ReadFile(filename)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var config RuntimeConfig
+
+	err = yaml.Unmarshal(yamlFile, &config)
+	if err != nil {
+		panic(err)
+	}
+
+	//override built-in config
+	return config,err
+}
+
+func (this *Env) init()(error){
+	os.MkdirAll(this.RuntimeConfig.PathConfig.Data, 0777)
+	os.MkdirAll(this.RuntimeConfig.PathConfig.Log, 0777)
+	return nil
+}
+
 func NullEnv() *Env {
-	return Environment(nil, nil, nil)
+	return 	&Env{}
 }
 
 type Channels struct {
 	PendingFetchUrl chan []byte
 }
 
+
+//high priority config, init from the environment or startup, can't be changed
 type SystemConfig struct {
 	Version string `0.0.1`
+	ConfigFile string `gopa.yml`
+	LogLevel string `info`
 }

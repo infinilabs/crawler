@@ -16,6 +16,16 @@ limitations under the License.
 
 package modules
 
-func Start(config *Env)  {
+import . "github.com/medcl/gopa/core/env"
+
+type Modules struct {
+	env *Env
+}
+
+func (this *Modules)Start()  {
+
+}
+
+func (this *Modules)Stop()  {
 
 }

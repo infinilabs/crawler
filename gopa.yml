@@ -1,0 +1,13 @@
+cluster:
+  name: "gopa"
+
+logging:
+  level: "info"
+
+indexing:
+  host: "http://eshost:9200"
+  index: "gopa"
+
+path:
+  data: "data"
+  log:  "log"
