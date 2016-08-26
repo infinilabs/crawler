@@ -29,22 +29,27 @@ import (
 func internalStart(env *Env) {
 	handler := Handler{Env: env}
 
+	mux := http.NewServeMux()
 	websocket.InitWebSocket()
 
-	http.HandleFunc("/stats", handler.StatsAction)
-	http.Handle("/ui/", http.FileServer(ui.FS(false)))
-	http.HandleFunc("/ui/boltdb", handler.BoltDBStatus)
+	//APIs
+	mux.HandleFunc("/stats", handler.StatsAction)
 
-	http.HandleFunc("/task", handler.TaskAction)
-	http.HandleFunc("/task/", handler.TaskAction)
-	http.HandleFunc("/setting/seelog", handler.LoggingSettingAction)
-	http.HandleFunc("/setting/seelog/", handler.LoggingSettingAction)
+	mux.HandleFunc("/task", handler.TaskAction)
+	mux.HandleFunc("/task/", handler.TaskAction)
+	mux.HandleFunc("/setting/seelog", handler.LoggingSettingAction)
+	mux.HandleFunc("/setting/seelog/", handler.LoggingSettingAction)
 
-	http.HandleFunc("/ws", websocket.ServeWs)
-	http.HandleFunc("/", handler.IndexAction)
+	mux.HandleFunc("/ws", websocket.ServeWs)
+	mux.HandleFunc("/", handler.IndexAction)
+
+
+	//UI pages
+	mux.Handle("/ui/", http.FileServer(ui.FS(false)))
+	mux.HandleFunc("/ui/boltdb", handler.BoltDBStatus)
 
 	log.Info("http server listen at: http://localhost:8001/")
-	http.ListenAndServe(":8001", nil)
+	http.ListenAndServe(":8001", mux)
 }
 
 func Start(config *Env) {

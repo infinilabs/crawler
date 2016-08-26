@@ -24,7 +24,7 @@ import (
 
 func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request) {
 
-	if req.Method == "POST" {
+	if req.Method == POST.String() {
 		jsonq, err := this.GetJson(req)
 		if err != nil {
 			logger.Error(err)

@@ -66,7 +66,6 @@ config:
 	go get github.com/jmoiron/jsonq
 	go get github.com/gorilla/websocket
 	go get github.com/boltdb/bolt/...
-	go get github.com/boltdb/boltd/...
 
 
 

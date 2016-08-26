@@ -27,6 +27,33 @@ import (
 	"strings"
 )
 
+type Method string
+
+const (
+	GET    Method = "GET"
+	POST   Method = "POST"
+	PUT    Method = "PUT"
+	DELETE Method = "DELETE"
+	HEAD   Method = "HEAD"
+)
+
+func (this Method) String() string  {
+	switch this {
+	case GET:
+		return "GET"
+	case POST:
+		return "POST"
+	case PUT:
+		return "PUT"
+	case DELETE:
+		return "DELETE"
+	case HEAD:
+		return "HEAD"
+	}
+	return "N/A"
+}
+
+
 type Handler struct {
 	Env         *Env
 	wroteHeader bool

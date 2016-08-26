@@ -560,7 +560,7 @@ func Page(w io.Writer, r *http.Request, tx *bolt.Tx, indexes []int, directID int
 				return err
 			}
 //line page.ego:68
-			if _, err := fmt.Fprintf(w, "%v", trunc(tostr(e.key()), 40)); err != nil {
+			if _, err := fmt.Fprintf(w, "%v", trunc(tostr(e.key()), 150)); err != nil {
 				return err
 			}
 //line page.ego:68
@@ -763,7 +763,7 @@ func Page(w io.Writer, r *http.Request, tx *bolt.Tx, indexes []int, directID int
 					return err
 				}
 //line page.ego:102
-				if _, err := fmt.Fprintf(w, "%v", trunc(tostr(e.key()), 40)); err != nil {
+				if _, err := fmt.Fprintf(w, "%v", trunc(tostr(e.key()), 150)); err != nil {
 					return err
 				}
 //line page.ego:102
@@ -873,7 +873,7 @@ func Page(w io.Writer, r *http.Request, tx *bolt.Tx, indexes []int, directID int
 					return err
 				}
 //line page.ego:111
-				if _, err := fmt.Fprintf(w, "%v", trunc(tostr(e.key()), 40)); err != nil {
+				if _, err := fmt.Fprintf(w, "%v", trunc(tostr(e.key()), 150)); err != nil {
 					return err
 				}
 //line page.ego:111
@@ -885,7 +885,7 @@ func Page(w io.Writer, r *http.Request, tx *bolt.Tx, indexes []int, directID int
 					return err
 				}
 //line page.ego:112
-				if _, err := fmt.Fprintf(w, "%v", trunc(tostr(e.value()), 40)); err != nil {
+				if _, err := fmt.Fprintf(w, "%v", trunc(tostr(e.value()), 150)); err != nil {
 					return err
 				}
 //line page.ego:112

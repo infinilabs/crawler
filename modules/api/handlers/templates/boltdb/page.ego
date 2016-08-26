@@ -64,7 +64,7 @@ if showUsage {
             <% subpage := pageAt(tx, e.pgid) %>
             <% substats := subpage.stats(pageSize) %>
             <tr>
-              <td><%= trunc(tostr(e.key()), 40) %></td>
+              <td><%= trunc(tostr(e.key()), 150) %></td>
               <td><a href="<%= subpagelink(indexes, int(i)) %>"><%= e.pgid %></a></td>
               <td><%= len(e.key()) %></td>
               <td align="right"><%= fmt.Sprintf("%.2f%%", substats.utilization*100) %></td>
@@ -97,7 +97,7 @@ if showUsage {
                 }
               %>
               <tr>
-                <td><strong><%= trunc(tostr(e.key()), 40) %></strong></td>
+                <td><strong><%= trunc(tostr(e.key()), 150) %></strong></td>
                 <td>
                   &lt;bucket(root=<% if b.root != 0 { %><a href="<%= subpagelink(indexes, int(i)) %>"><% } %><%= b.root %><% if b.root != 0 { %></a><% } %>; seq=<%= b.sequence %>)&gt;
                 </td>
@@ -106,8 +106,8 @@ if showUsage {
               </tr>
             <% } else { %>
               <tr>
-                <td><%= trunc(tostr(e.key()), 40) %></td>
-                <td><%= trunc(tostr(e.value()), 40) %></td>
+                <td><%= trunc(tostr(e.key()), 150) %></td>
+                <td><%= trunc(tostr(e.value()), 150) %></td>
                 <td><%= len(e.key()) %> / <%= len(e.value()) %></td>
                 <td>&nbsp;</td>
               </tr>

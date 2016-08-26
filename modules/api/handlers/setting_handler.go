@@ -23,7 +23,7 @@ import (
 )
 
 func (this *Handler) LoggingSettingAction(w http.ResponseWriter, req *http.Request) {
-	if req.Method == "GET" {
+	if req.Method == GET.String() {
 
 		str := logging.GetLoggingConfig(this.Env)
 		if len(str) > 0 {
@@ -32,7 +32,7 @@ func (this *Handler) LoggingSettingAction(w http.ResponseWriter, req *http.Reque
 			this.error500(w, "empty setting")
 		}
 
-	} else if req.Method == "PUT" || req.Method == "POST" {
+	} else if req.Method == PUT.String() || req.Method == POST.String() {
 		body, err := this.GetRawBody(req)
 		if err != nil {
 			log.Error(err)
