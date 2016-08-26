@@ -1,5 +1,5 @@
 # Gopa #
-[狗爬],A High Performance Distributed  Spider Written in GO.
+[狗爬], [aims to be] A High Performance Distributed  Spider Written in GO .
 
 CHANGES
 
