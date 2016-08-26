@@ -1151,7 +1151,7 @@ func Page(w io.Writer, r *http.Request, tx *bolt.Tx, indexes []int, directID int
 		return err
 	}
 //line page.ego:165
-	if _, err := fmt.Fprintf(w, "<form action=\"page\" method=\"GET\">\n      Go to page: "); err != nil {
+	if _, err := fmt.Fprintf(w, "<form action=\"boltdb\" method=\"GET\">\n      Go to page: "); err != nil {
 		return err
 	}
 //line page.ego:166

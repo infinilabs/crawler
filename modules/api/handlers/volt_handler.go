@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/boltdb/bolt"
-	"github.com/medcl/gopa/modules/api/handlers/templates"
+	"github.com/medcl/gopa/modules/api/handlers/templates/boltdb"
 )
 
 func (h *Handler) BoltDBStatus(w http.ResponseWriter, r *http.Request) {

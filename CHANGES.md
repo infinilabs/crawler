@@ -9,7 +9,8 @@ features:
 2.add websocket and simple ui to interact with Gopa, http://localhost:8001/ui/
 3.add task api to accept seed
 4.dynamic change the seelog config via api, [GET/POST] http://localhost:8001/setting/seelog/
-5.follow 302 redirect, and continue fetch 
+5.follow 302 redirect, and continue fetch
+6.add boltdb status page, http://localhost:8001/ui/boltdb
 
 v0.6
 breaking change:

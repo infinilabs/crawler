@@ -33,7 +33,7 @@ func internalStart(env *Env) {
 
 	http.HandleFunc("/stats", handler.StatsAction)
 	http.Handle("/ui/", http.FileServer(ui.FS(false)))
-	http.HandleFunc("/boltdb", handler.BoltDBStatus)
+	http.HandleFunc("/ui/boltdb", handler.BoltDBStatus)
 
 	http.HandleFunc("/task", handler.TaskAction)
 	http.HandleFunc("/task/", handler.TaskAction)

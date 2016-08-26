@@ -158,7 +158,7 @@ if showUsage {
     <% } %>
 
     <br/><br/>
-    <form action="page" method="GET">
+    <form action="boltdb" method="GET">
       Go to page: <input type="text" name="id"/>
       <button type="submit">Go</button>
     </form>
