@@ -80,8 +80,8 @@ func get(treasure *types.Treasure,url string, cookie string) ([]byte, error) {
 	log.Debug("let's get :" + url)
 
 	client := &http.Client{
-		CheckRedirect: noRedirect,
-		//CheckRedirect: nil,
+		//CheckRedirect: noRedirect,
+		CheckRedirect: nil,
 	}
 	reqest, _ := http.NewRequest("GET", url, nil)
 
@@ -121,7 +121,11 @@ func get(treasure *types.Treasure,url string, cookie string) ([]byte, error) {
 
 	if err != nil {
 		if resp!=nil && resp.StatusCode == 302 {
-			log.Error("got redirect:",url," => ",resp.Header.Get("Location"))
+			log.Debug("got redirect:",url," => ",resp.Header.Get("Location"))
+			location:=resp.Header.Get("Location");
+			if(len(location)>0&&location!=url){
+				return get(treasure,location,cookie)
+			}
 
 		} else {
 			log.Error(url, err)
@@ -297,4 +301,34 @@ func HttpGet(resource string) (msg []byte, err error) {
 		return body, nil
 	}
 	return nil, http.ErrNotSupported
+}
+
+
+func sendHTTPRequest(method, url string, body io.Reader) ([]byte, error) {
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, body)
+	if err != nil {
+		return nil, err
+	}
+
+	if method == "POST" || method == "PUT" {
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	}
+
+	newReq, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer newReq.Body.Close()
+	response, err := ioutil.ReadAll(newReq.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if newReq.StatusCode > http.StatusCreated && newReq.StatusCode < http.StatusNotFound {
+		return nil, errors.New(string(response))
+	}
+
+	return response, nil
 }

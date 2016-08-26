@@ -27,9 +27,12 @@ import (
 
 	. "github.com/PuerkitoBio/purell"
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/config"
 	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/core/env"
+	"github.com/PuerkitoBio/goquery"
+	"bytes"
+	"encoding/hex"
+	"crypto/md5"
 )
 
 func init() {
@@ -48,13 +51,12 @@ func loadFileContent(fileName string) []byte {
 	return nil
 }
 
+func extractLinks(env *env.Env, fileUrl string, fileName []byte, body []byte) {
 
-func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string, fileName []byte, body []byte) {
-
-	var storage = runtimeConfig.Storage
+	var storage = env.RuntimeConfig.Storage
 
 	siteUrlStr := fileUrl
-	siteConfig := runtimeConfig.TaskConfig
+	siteConfig := env.RuntimeConfig.TaskConfig
 
 	siteUrlByte := []byte(siteUrlStr)
 	log.Debug("enter links extract,", siteUrlStr)
@@ -261,7 +263,7 @@ func extractLinks(runtimeConfig *RuntimeConfig, fileUrl string, fileName []byte,
 				if !storage.PendingFetchUrlHasAdded(currentUrlByte) {
 					log.Trace("log new pendingFetch url,", currentUrlStr)
 					storage.AddPendingFetchUrl(currentUrlByte)
-					storage.LogPendingFetchUrl(runtimeConfig.PathConfig.PendingFetchLog, currentUrlStr)
+					storage.LogPendingFetchUrl(env.RuntimeConfig.PathConfig.PendingFetchLog, currentUrlStr)
 					log.Debug("check filter result:", currentUrlStr, ":", storage.PendingFetchUrlHasAdded(currentUrlByte))
 
 				} else {
@@ -302,10 +304,10 @@ waitFile:
 	var storage = env.RuntimeConfig.Storage
 	var offset int64 = storage.LoadOffset(env.RuntimeConfig.PathConfig.SavedFileLog + ".offset")
 	log.Info("loaded parse offset:", offset)
-	FetchFileWithOffset(env.RuntimeConfig, path, offset)
+	FetchFileWithOffset(env, path, offset)
 }
 
-func FetchFileWithOffset(runtimeConfig *RuntimeConfig, path string, skipOffset int64) {
+func FetchFileWithOffset(env *env.Env, path string, skipOffset int64) {
 
 	var offset int64 = 0
 
@@ -318,7 +320,7 @@ func FetchFileWithOffset(runtimeConfig *RuntimeConfig, path string, skipOffset i
 		return
 	}
 
-	var storage = runtimeConfig.Storage
+	var storage = env.RuntimeConfig.Storage
 
 	r := bufio.NewReader(f)
 	s, e := util.Readln(r)
@@ -328,8 +330,8 @@ func FetchFileWithOffset(runtimeConfig *RuntimeConfig, path string, skipOffset i
 		offset = offset + 1
 		//TODO use byte offset instead of lines
 		if offset > skipOffset {
-			ParsedSavedFileLog(runtimeConfig, s)
-			storage.PersistOffset(runtimeConfig.PathConfig.SavedFileLog+".offset", offset)
+			ParsedSavedFileLog(env, s)
+			storage.PersistOffset(env.RuntimeConfig.PathConfig.SavedFileLog+".offset", offset)
 		}
 
 		s, e = util.Readln(r)
@@ -344,7 +346,7 @@ waitUpdate:
 
 	if time2 > time1 {
 		log.Debug("file has been changed,restart parse")
-		FetchFileWithOffset(runtimeConfig, path, offset)
+		FetchFileWithOffset(env, path, offset)
 	} else {
 		log.Trace("waiting file update:", path)
 		time.Sleep(5 * time.Second)
@@ -352,9 +354,9 @@ waitUpdate:
 	}
 }
 
-func ParsedSavedFileLog(runtimeConfig *RuntimeConfig, fileLog string) {
+func ParsedSavedFileLog(env *env.Env, fileLog string) {
 	if fileLog != "" {
-		var storage = runtimeConfig.Storage
+		var storage = env.RuntimeConfig.Storage
 		log.Debug("start parse filelog:", fileLog)
 		//load file's content,and extract links
 
@@ -373,7 +375,49 @@ func ParsedSavedFileLog(runtimeConfig *RuntimeConfig, fileLog string) {
 		if fileContent != nil {
 
 			//extract urls to fetch queue.
-			extractLinks(runtimeConfig, fileUrl, fileName, fileContent)
+			extractLinks(env, fileUrl, fileName, fileContent)
+
+			//extractMetadata and persist to DB
+			extractMetadata(env,fileUrl,fileName,fileContent)
 		}
 	}
+}
+
+func extractMetadata(env *env.Env, fileUrl string, fileName []byte, fileContent []byte)(error) {
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(fileContent))
+	if err != nil {
+		panic(err)
+	}
+
+	title:=doc.Find("title").Text()
+
+	data:=map[string]interface{}{}
+	if(len(title)>0){
+		data["title"]=title
+	}
+
+	metadata:=map[string]interface{}{}
+	doc.Find("meta").Each(func(i int, s *goquery.Selection) {
+		// For each item found, get the band and title
+		name,exist := s.Attr("name")
+		name=strings.TrimSpace(name)
+		if(exist&&len(name)>0){
+			content,exist := s.Attr("content")
+			if(exist){
+				metadata[name]=content
+			}
+		}
+
+	})
+
+	m := md5.Sum([]byte(fileUrl))
+	id:=hex.EncodeToString(m[:])
+
+	_,err=env.ESClient.IndexDoc(id,data)
+	if(err!=nil){
+		return err
+	}
+
+	return nil
+
 }

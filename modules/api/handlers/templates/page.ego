@@ -1,0 +1,166 @@
+<%! func Page(w io.Writer, r *http.Request, tx *bolt.Tx, indexes []int, directID int, showUsage bool) error %>
+
+<%% import "net/http" %%>
+<%% import "strings" %%>
+<%% import "unsafe" %%>
+<%% import "github.com/boltdb/bolt" %%>
+
+<%
+p, ids, err := find(tx, directID, indexes)
+if err != nil {
+  return err
+}
+
+// Generate page stats.
+pageSize := tx.DB().Info().PageSize
+stats := p.stats(pageSize)
+
+// Generate histogram of all nested page usage.
+var histogram map[int]int
+if showUsage {
+  histogram = usage(tx, p.id)
+}
+%>
+
+<!DOCTYPE html>
+<html lang="en">
+  <% head(w, tx) %>
+
+  <body>
+    <% nav(w, tx) %>
+
+    <h2>
+      <% for i, id := range ids { %>
+        <% if i > 0 { %>&raquo;<% } %>
+        <a href="<%= pagelink(indexes[:i+1]) %>">#<%= id %></a>
+      <% } %>
+    </h2>
+
+    <h3>Page Information</h3>
+    <p>
+      <strong>ID:</strong> <%= comma(int(p.id)) %><br/>
+      <strong>Type:</strong> <%= fmt.Sprintf("%s (%x)", p.typ(), p.flags) %><br/>
+      <strong>Overflow:</strong> <%= p.overflow %><br/><br/>
+
+      <strong>Alloc:</strong> <%= comma(stats.alloc) %><br/>
+      <strong>In Use:</strong> <%= comma(stats.inuse) %><br/>
+      <strong>Utilization:</strong> <%= fmt.Sprintf("%.2f%%", stats.utilization*100) %><br/>
+    </p>
+
+    <% if (p.flags & branchPageFlag) != 0 { %>
+      <h3>Branch Elements (<%= p.count %>)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th align="left">Key</th>
+            <th align="left">Page ID</th>
+            <th align="left">Size (k)</th>
+            <th align="center">%%Util</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for i := uint16(0); i < p.count; i++ { %>
+            <% e := p.branchPageElement(i) %>
+            <% subpage := pageAt(tx, e.pgid) %>
+            <% substats := subpage.stats(pageSize) %>
+            <tr>
+              <td><%= trunc(tostr(e.key()), 40) %></td>
+              <td><a href="<%= subpagelink(indexes, int(i)) %>"><%= e.pgid %></a></td>
+              <td><%= len(e.key()) %></td>
+              <td align="right"><%= fmt.Sprintf("%.2f%%", substats.utilization*100) %></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    
+    <% } else if (p.flags & leafPageFlag) != 0 { %>
+      <h3>Leaf Elements (<%= p.count %>)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th align="left">Key</th>
+            <th align="left">Value</th>
+            <th align="left">Size (k/v)</th>
+            <th align="center">%%Util</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for i := uint16(0); i < p.count; i++ { %>
+            <% e := p.leafPageElement(i) %>
+            <% if (e.flags & bucketLeafFlag) != 0 { %>
+              <% b := ((*bucket)(unsafe.Pointer(&e.value()[0]))) %>
+              <%
+                util := "-"
+                if b.root != 0 {
+                  substats := pageAt(tx, b.root).stats(pageSize)
+                  util = fmt.Sprintf("%.2f%%", substats.utilization*100)
+                }
+              %>
+              <tr>
+                <td><strong><%= trunc(tostr(e.key()), 40) %></strong></td>
+                <td>
+                  &lt;bucket(root=<% if b.root != 0 { %><a href="<%= subpagelink(indexes, int(i)) %>"><% } %><%= b.root %><% if b.root != 0 { %></a><% } %>; seq=<%= b.sequence %>)&gt;
+                </td>
+                <td><%= len(e.key()) %> / <%= len(e.value()) %></td>
+                <td align="right"><%= util %></td>
+              </tr>
+            <% } else { %>
+              <tr>
+                <td><%= trunc(tostr(e.key()), 40) %></td>
+                <td><%= trunc(tostr(e.value()), 40) %></td>
+                <td><%= len(e.key()) %> / <%= len(e.value()) %></td>
+                <td>&nbsp;</td>
+              </tr>
+            <% } %>
+          <% } %>
+        </tbody>
+      </table>
+    <% } %>
+
+    <% if showUsage { %>
+      <%
+        mins, maxs, values := bucketize(histogram)
+        vmax, maxlen := 0, 20
+        for _, v := range values {
+          if v > vmax {
+            vmax = v
+          }
+        }
+      %>
+
+      <h3>Page Usage Histogram</h3>
+      <table>
+        <thead>
+          <tr>
+            <th align="left">Usage (bytes)</th>
+            <th align="left">Count</th>
+            <th>&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for i := 0; i < len(values); i++ { %>
+            <tr>
+              <td><%= mins[i] %> - <%= maxs[i] %></th>
+              <td><%= values[i] %></th>
+              <td><%= strings.Repeat("█", int((float64(values[i])/float64(vmax))*float64(maxlen))) %></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <%
+      u, q := r.URL, r.URL.Query()
+      q.Set("usage", "true")
+      u.RawQuery = q.Encode()
+      %>
+
+      <p><a href="<%= u.String() %>">Show Page Usage</a></p>
+    <% } %>
+
+    <br/><br/>
+    <form action="page" method="GET">
+      Go to page: <input type="text" name="id"/>
+      <button type="submit">Go</button>
+    </form>
+  </body>
+</html>

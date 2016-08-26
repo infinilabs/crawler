@@ -88,7 +88,7 @@ waitUpdate:
 		log.Debug("file has been changed,restart parse")
 		FetchFileWithOffset2(runtimeConfig, pendingFetchUrls, path, offset)
 	} else {
-		log.Trace("waiting file update", path)
+		log.Trace("waiting file update,", path)
 		time.Sleep(10 * time.Millisecond)
 		goto waitUpdate
 	}

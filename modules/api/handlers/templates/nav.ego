@@ -1,0 +1,6 @@
+<%! func nav(w io.Writer, tx *bolt.Tx) error %>
+
+<%% import "path/filepath" %%>
+<%% import "github.com/boltdb/bolt" %%>
+
+<h1><%= filepath.Base(tx.DB().Path()) %></h1>

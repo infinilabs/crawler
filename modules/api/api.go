@@ -26,14 +26,14 @@ import (
 	ui "github.com/medcl/gopa/ui"
 )
 
-func internalStart(config *Env) {
-	handler := Handler{Env: config}
+func internalStart(env *Env) {
+	handler := Handler{Env: env}
 
 	websocket.InitWebSocket()
 
-	http.HandleFunc("/", handler.IndexAction)
 	http.HandleFunc("/stats", handler.StatsAction)
 	http.Handle("/ui/", http.FileServer(ui.FS(false)))
+	http.HandleFunc("/boltdb", handler.BoltDBStatus)
 
 	http.HandleFunc("/task", handler.TaskAction)
 	http.HandleFunc("/task/", handler.TaskAction)
@@ -41,6 +41,7 @@ func internalStart(config *Env) {
 	http.HandleFunc("/setting/seelog/", handler.LoggingSettingAction)
 
 	http.HandleFunc("/ws", websocket.ServeWs)
+	http.HandleFunc("/", handler.IndexAction)
 
 	log.Info("http server listen at: http://localhost:8001/")
 	http.ListenAndServe(":8001", nil)

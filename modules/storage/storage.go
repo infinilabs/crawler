@@ -35,6 +35,8 @@ func Start(env *Env) {
 	env.RuntimeConfig.Storage = &store
 	log.Info("storage success started")
 
+	env.Register("voltdb_ref",store.DB)
+
 }
 
 func Stop() error {

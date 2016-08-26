@@ -22,7 +22,7 @@ import (
 
 	"github.com/boltdb/bolt"
 	log "github.com/cihub/seelog"
-	util "github.com/medcl/gopa/core/util"
+	"github.com/medcl/gopa/core/util"
 	"time"
 )
 
@@ -75,7 +75,6 @@ func (this *BoltdbStore) Open() error {
 
 	db, err := bolt.Open(this.PersistFileName, 0600, &bolt.Options{Timeout: 5 * time.Second})
 	this.DB = db
-
 	db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte(FilterBucketKey))
 		if err != nil {

@@ -17,6 +17,10 @@ cross-build: clean config
 	GOOS=darwin  GOARCH=amd64 go build -o bin/darwin64/gopa
 	GOOS=linux  GOARCH=amd64 go build -o bin/linux64/gopa
 
+build-linux: clean config
+	go test
+	GOOS=linux  GOARCH=amd64 go build -o bin/linux64/gopa
+
 all: clean config cross-build
 
 all-platform: clean config cross-build-all-platform
@@ -62,6 +66,7 @@ config:
 	go get github.com/jmoiron/jsonq
 	go get github.com/gorilla/websocket
 	go get github.com/boltdb/bolt/...
+	go get github.com/boltdb/boltd/...
 
 
 
@@ -92,23 +97,3 @@ package-all-platform:
 	tar cfz 	 bin/netbsd32.tar.gz     bin/netbsd32/gopa
 	tar cfz 	 bin/openbsd64.tar.gz     bin/openbsd64/gopa
 	tar cfz 	 bin/openbsd32.tar.gz     bin/openbsd32/gopa
-
-
-# only for Go <= 1.4
-cross-compile:
-	@echo "Prepare Cross Compiling"
-	cd $(GOROOT)/src && GOOS=windows GOARCH=amd64 ./make.bash --no-clean
-	cd $(GOROOT)/src && GOOS=windows GOARCH=386 ./make.bash --no-clean
-	cd $(GOROOT)/src && GOOS=darwin  GOARCH=amd64 ./make.bash --no-clean 2> /dev/null 1> /dev/null
-	cd $(GOROOT)/src && GOOS=darwin  GOARCH=386 ./make.bash --no-clean 2> /dev/null 1> /dev/null
-	cd $(GOROOT)/src && GOOS=linux  GOARCH=amd64 ./make.bash --no-clean 2> /dev/null 1> /dev/null
-	cd $(GOROOT)/src && GOOS=linux  GOARCH=386 ./make.bash --no-clean 2> /dev/null 1> /dev/null
-	cd $(GOROOT)/src && GOOS=linux  GOARCH=arm ./make.bash --no-clean 2> /dev/null 1> /dev/null
-	cd $(GOROOT)/src && GOOS=freebsd  GOARCH=amd64 ./make.bash --no-clean 2> /dev/null 1> /dev/null
-	cd $(GOROOT)/src && GOOS=freebsd  GOARCH=386 ./make.bash --no-clean 2> /dev/null 1> /dev/null
-	cd $(GOROOT)/src && GOOS=netbsd  GOARCH=amd64 ./make.bash --no-clean 2> /dev/null 1> /dev/null
-	cd $(GOROOT)/src && GOOS=netbsd  GOARCH=386 ./make.bash --no-clean 2> /dev/null 1> /dev/null
-	cd $(GOROOT)/src && GOOS=openbsd  GOARCH=amd64 ./make.bash --no-clean 2> /dev/null 1> /dev/null
-	cd $(GOROOT)/src && GOOS=openbsd  GOARCH=386 ./make.bash --no-clean 2> /dev/null 1> /dev/null
-
-	cd $(CWD)

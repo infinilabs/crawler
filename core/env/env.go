@@ -24,6 +24,7 @@ import (
 	log "github.com/cihub/seelog"
 	"os"
 	"regexp"
+	"github.com/medcl/gopa/core/util"
 )
 
 type Env struct {
@@ -32,6 +33,9 @@ type Env struct {
 	SystemConfig  *SystemConfig
 	RuntimeConfig *RuntimeConfig
 	Channels      *Channels
+
+	ESClient util.ElasticsearchClient
+
 }
 
 func Environment(sysConfig SystemConfig) *Env {
@@ -56,7 +60,7 @@ func Environment(sysConfig SystemConfig) *Env {
 
 	env.Channels = &Channels{}
 	env.Channels.PendingFetchUrl = make(chan []byte, 10) //buffer number is 10
-	env.Registrar = &Registrar{}
+	env.Registrar = &Registrar{values:map[string]interface{}{}}
 	//env.Logger = logger
 
 
@@ -116,6 +120,9 @@ func (this *Env) init()(error){
 	os.MkdirAll(this.RuntimeConfig.PathConfig.Log, 0777)
 	os.MkdirAll(this.RuntimeConfig.PathConfig.WebData, 0777)
 	os.MkdirAll(this.RuntimeConfig.PathConfig.TaskData, 0777)
+
+	this.ESClient=util.ElasticsearchClient{Host:this.RuntimeConfig.IndexingConfig.Host,Index:this.RuntimeConfig.IndexingConfig.Index}
+
 	return nil
 }
 
