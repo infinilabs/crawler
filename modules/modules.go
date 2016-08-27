@@ -16,16 +16,45 @@ limitations under the License.
 
 package modules
 
-import . "github.com/medcl/gopa/core/env"
+import (
+	. "github.com/medcl/gopa/core/env"
+	apiModule "github.com/medcl/gopa/modules/api"
+	crawlerModule "github.com/medcl/gopa/modules/crawler"
+	parserModule "github.com/medcl/gopa/modules/parser"
+	storageModule "github.com/medcl/gopa/modules/storage"
+	log "github.com/cihub/seelog"
+)
 
 type Modules struct {
 	env *Env
+	modules map[string]ModuleInterface
 }
 
-func (this *Modules)Start()  {
+func New(env *Env)(*Modules)  {
+	modules:=Modules{}
+	modules.env=env
+	return &modules
+}
 
+func (this *Modules) Start()  {
+
+	//for key, value := range this.modules{
+	//
+	//}
+
+	//start modules
+	storageModule.Start(this.env)
+	apiModule.Start(this.env)
+	crawlerModule.Start(this.env)
+	parserModule.Start(this.env)
 }
 
 func (this *Modules)Stop()  {
+	parserModule.Stop()
+	crawlerModule.Stop()
+	apiModule.Stop()
+	storageModule.Stop()
+	this.env.RuntimeConfig.Storage.Close()
+	log.Info("all modules stopeed")
 
 }

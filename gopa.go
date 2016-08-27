@@ -24,10 +24,7 @@ import (
 	"github.com/medcl/gopa/core/logging"
 	task "github.com/medcl/gopa/core/tasks"
 	"github.com/medcl/gopa/core/util"
-	apiModule "github.com/medcl/gopa/modules/api"
-	crawlerModule "github.com/medcl/gopa/modules/crawler"
-	parserModule "github.com/medcl/gopa/modules/parser"
-	storageModule "github.com/medcl/gopa/modules/storage"
+	"github.com/medcl/gopa/modules"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
@@ -43,14 +40,14 @@ var env *Env
 var startTime time.Time
 
 func printStartInfo() {
-fmt.Println("  ________ ________ __________  _____   ")
-fmt.Println(" /  _____/ \\_____  \\\\______   \\/  _  \\  ")
-fmt.Println("/   \\  ___  /   |   \\|     ___/  /_\\  \\ ")
-fmt.Println("\\    \\_\\  \\/    |    \\    |  /    |    \\")
-fmt.Println(" \\______  /\\_______  /____|  \\____|__  /")
-fmt.Println("        \\/         \\/                \\/ ")
+	fmt.Println("  ________ ________ __________  _____   ")
+	fmt.Println(" /  _____/ \\_____  \\\\______   \\/  _  \\  ")
+	fmt.Println("/   \\  ___  /   |   \\|     ___/  /_\\  \\ ")
+	fmt.Println("\\    \\_\\  \\/    |    \\    |  /    |    \\")
+	fmt.Println(" \\______  /\\_______  /____|  \\____|__  /")
+	fmt.Println("        \\/         \\/                \\/ ")
 
-	fmt.Println("[gopa] " + VERSION + " is on")
+	fmt.Println("[gopa] " + VERSION + " is up")
 	fmt.Println(" ")
 	startTime = time.Now()
 }
@@ -60,13 +57,13 @@ func printShutdownInfo() {
 	fmt.Println("   _` |   _ \\   _ \\   _` |     _ \\  |  |   -_) ")
 	fmt.Println(" \\__, | \\___/ \\___/ \\__,_|   _.__/ \\_, | \\___| ")
 	fmt.Println(" ____/                             ___/        ")
-	fmt.Println("[gopa] "+ VERSION +" is down, uptime:", time.Now().Sub(startTime))
+	fmt.Println("[gopa] "+VERSION+" is down, uptime:", time.Now().Sub(startTime))
 	fmt.Println(" ")
 }
 
 func main() {
 
-	var seedUrl,logLevel,configFile string
+	var seedUrl, logLevel, configFile string
 
 	printStartInfo()
 
@@ -82,17 +79,14 @@ func main() {
 
 	logging.SetInitLogging(NullEnv(), logLevel)
 
-	sysConfig:=SystemConfig{Version: VERSION,ConfigFile:configFile,LogLevel:logLevel}
+	sysConfig := SystemConfig{Version: VERSION, ConfigFile: configFile, LogLevel: logLevel}
 
 	env = Environment(sysConfig)
 
 	logging.SetLogging(env)
 
-	//start modules
-	storageModule.Start(env)
-	apiModule.Start(env)
-	crawlerModule.Start(env)
-	parserModule.Start(env)
+	components := modules.New(env)
+	components.Start()
 
 	finalQuitSignal := make(chan bool, 1)
 
@@ -108,12 +102,7 @@ func main() {
 			log.Warn("got signal:os.Interrupt,start shutting down")
 
 			//wait workers to exit
-			parserModule.Stop()
-			crawlerModule.Stop()
-			apiModule.Stop()
-			storageModule.Stop()
-			env.RuntimeConfig.Storage.Close()
-			log.Info("all modules stopeed")
+			components.Stop()
 			finalQuitSignal <- true
 		}
 	}()
@@ -124,7 +113,7 @@ func main() {
 	//sending feed to task queue
 	go func() {
 		//notice seed will not been persisted
-		if(len(seedUrl)>0){
+		if len(seedUrl) > 0 {
 			log.Debug("sending feed to fetch queue,", seedUrl)
 			env.Channels.PendingFetchUrl <- []byte(seedUrl)
 		}
