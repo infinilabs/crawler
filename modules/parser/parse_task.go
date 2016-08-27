@@ -39,7 +39,7 @@ func init() {
 }
 
 func loadFileContent(fileName string) []byte {
-	if util.CheckFileExists(fileName) {
+	if util.FileExists(fileName) {
 		log.Trace("found fileName,start loading:", fileName)
 		n, err := ioutil.ReadFile(fileName)
 		if err != nil {
@@ -295,7 +295,7 @@ func ParseGo(env *env.Env, quit *chan bool) {
 	//if hit the EOF,will wait 2s,and then reopen the file,and try again,may be check the time of last modified
 
 waitFile:
-	if !util.CheckFileExists(path) {
+	if !util.FileExists(path) {
 		log.Trace("waiting file create:", path)
 		time.Sleep(1000 * time.Millisecond)
 		goto waitFile

@@ -27,7 +27,7 @@ import (
 	log "github.com/cihub/seelog"
 )
 
-func CheckFileExists(path string) bool {
+func FileExists(path string) bool {
 	_, err := os.Stat(path)
 	if err == nil {
 		return true

@@ -46,7 +46,7 @@ func internalStart(env *Env) {
 
 	//UI pages
 	mux.Handle("/ui/", http.FileServer(ui.FS(false)))
-	mux.HandleFunc("/ui/boltdb", handler.BoltDBStatus)
+	mux.HandleFunc("/ui/boltdb", handler.BoltDBStatusAction)
 
 	log.Info("http server listen at: http://localhost:8001/")
 	http.ListenAndServe(":8001", mux)

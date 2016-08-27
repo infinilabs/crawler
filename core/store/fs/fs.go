@@ -149,12 +149,12 @@ func (this *FsStore) AddFetchFailedUrl(url []byte) {
 
 func (this *FsStore) CheckSavedFile(file string) bool {
 	log.Debug("start check file:", file)
-	return util.CheckFileExists(file)
+	return util.FileExists(file)
 }
 
 func (this *FsStore) LoadOffset(fileName string) int64 {
 	log.Debug("start init offsets,", fileName)
-	if util.CheckFileExists(fileName) {
+	if util.FileExists(fileName) {
 		log.Debug("found offset file,start loading,", fileName)
 		n, err := ioutil.ReadFile(fileName)
 		if err != nil {

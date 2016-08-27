@@ -57,6 +57,11 @@ func (this Method) String() string  {
 type Handler struct {
 	Env         *Env
 	wroteHeader bool
+	//
+	//w http.ResponseWriter
+	//req *http.Request
+	//
+	//formParsed bool
 }
 
 func (this *Handler) WriteHeader(w http.ResponseWriter, code int) {
@@ -64,8 +69,25 @@ func (this *Handler) WriteHeader(w http.ResponseWriter, code int) {
 	this.wroteHeader = true
 }
 
-func (w *Handler) encodeJson(v interface{}) ([]byte, error) {
-	b, err := json.Marshal(v)
+//func (this *Handler) Get(key string, defaultValue string)(string){
+//	if(!this.formParsed){
+//		this.req.ParseForm()
+//	}
+//	if len(this.req.Form) > 0 {
+//		return this.req.Form.Get(key)
+//	}
+//	return defaultValue
+//}
+
+
+func (w *Handler) encodeJson(v interface{}) (b []byte,err error) {
+
+	//if(w.Get("pretty","false")=="true"){
+		b, err = json.MarshalIndent(v, "", " ")
+	//}else{
+	//	b, err = json.Marshal(v)
+	//}
+
 	if err != nil {
 		return nil, err
 	}

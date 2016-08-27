@@ -28,20 +28,29 @@ func getMapValue(mapData map[string]int, key string, defaultValue int32) int {
 
 func (this *Handler) StatsAction(w http.ResponseWriter, req *http.Request) {
 
-	statsMap := stats.StatsAll()
-	fetch := stats.StatsCount{
-		TotalCount:   getMapValue(statsMap, stats.STATS_FETCH_COUNT, 0),
-		FailCount:    getMapValue(statsMap, stats.STATS_FETCH_FAIL_COUNT, 0),
-		SuccessCount: getMapValue(statsMap, stats.STATS_FETCH_SUCCESS_COUNT, 0),
-		Ignore:       getMapValue(statsMap, stats.STATS_FETCH_IGNORE_COUNT, 0),
-		Timeout:      getMapValue(statsMap, stats.STATS_FETCH_TIMEOUT_COUNT, 0)}
-	parse := stats.StatsCount{
-		TotalCount:   getMapValue(statsMap, stats.STATS_PARSE_COUNT, 0),
-		FailCount:    getMapValue(statsMap, stats.STATS_PARSE_FAIL_COUNT, 0),
-		SuccessCount: getMapValue(statsMap, stats.STATS_PARSE_SUCCESS_COUNT, 0),
-		Ignore:       getMapValue(statsMap, stats.STATS_PARSE_IGNORE_COUNT, 0)}
+	fetchs:=map[string]stats.StatsCount{}
+	parses:=map[string]stats.StatsCount{}
 
-	stats := stats.TaskStatus{Fetch: fetch, Parse: parse}
+	statsMap := stats.StatsAll()
+	for k,v:=range statsMap{
+
+		fetch := stats.StatsCount{
+			TotalCount:   getMapValue(v, stats.STATS_FETCH_COUNT, 0),
+			FailCount:    getMapValue(v, stats.STATS_FETCH_FAIL_COUNT, 0),
+			SuccessCount: getMapValue(v, stats.STATS_FETCH_SUCCESS_COUNT, 0),
+			Ignore:       getMapValue(v, stats.STATS_FETCH_IGNORE_COUNT, 0),
+			Timeout:      getMapValue(v, stats.STATS_FETCH_TIMEOUT_COUNT, 0)}
+		parse := stats.StatsCount{
+			TotalCount:   getMapValue(v, stats.STATS_PARSE_COUNT, 0),
+			FailCount:    getMapValue(v, stats.STATS_PARSE_FAIL_COUNT, 0),
+			SuccessCount: getMapValue(v, stats.STATS_PARSE_SUCCESS_COUNT, 0),
+			Ignore:       getMapValue(v, stats.STATS_PARSE_IGNORE_COUNT, 0)}
+		fetchs[k]=fetch
+		parses[k]=parse
+	}
+
+
+	stats := stats.TaskStatus{Fetch: fetchs, Parse: parses}
 
 	this.WriteJson(w, &stats, http.StatusOK)
 }

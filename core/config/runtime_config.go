@@ -31,9 +31,21 @@ type PathConfig struct {
 	FetchFailedLog  string //path of failed fetch
 }
 
+func (this *PathConfig) Init() (*PathConfig)  {
+	this.Data="data"
+	this.Log="log"
+	return this
+}
+
 type ClusterConfig struct {
 	Name string
 }
+
+func (this *ClusterConfig)Init() (*ClusterConfig)  {
+	this.Name="gopa"
+	return this
+}
+
 
 type LoggingConfig struct {
 	Level     string `level`
@@ -42,14 +54,32 @@ type LoggingConfig struct {
 	ConfigStr string
 }
 
+func (this *LoggingConfig)Init() (*LoggingConfig)  {
+	this.Level="info"
+	return this
+}
+
+
 type IndexingConfig struct {
 	Host string `host`
 	Index string `index`
 }
 
+func (this *IndexingConfig)Init() (*IndexingConfig)  {
+	this.Host="http://127.0.0.1:9200"
+	this.Index="gopa"
+	return this
+}
+
 type SaveConfig struct {
 	DefaultExtension string
 }
+
+func (this *SaveConfig)Init() (*SaveConfig)  {
+	this.DefaultExtension=".html"
+	return this
+}
+
 type CrawlerConfig struct {
 	Enabled bool `enabled`
 	LoadPendingFetchJobs           bool  `load_pending_fetch_from_file`//fetch url parse and extracted from saved page,load data from:"pending_fetch.urls"

@@ -32,7 +32,7 @@ Offset文件放项目文件夹里面[done]
 满足不了Save规则的，但是满足Fetch规则，需要在内存里面解析并记录url，只是不持久化
 
 GOPA集群化，每个gopa只设置一个cluster参数和node参数[可选]，
-通过集群web面板来管理任务，seed参数非必须，通过web来添加
+通过集群web面板来管理任务，seed参数非必须，通过web来添加[done]
 每个gopa可以分别设置角色：fetch、parse、master
 gopa也分shard【考虑一致性hash】
 
@@ -154,3 +154,7 @@ Blotdb: 域名下主键自增,按目录进行prefix遍历
 文件太大,或者下载时间太长,自动标记和取消
 
 持久化任务,记录TASK_ID,方便TRACK进度和状态
+
+Url格式化,大小写,参数合并(参数优先级覆盖),按字母顺序排序
+
+默认情况URL参数允许冗余存储,由后台手工设置规则合并,自动提醒

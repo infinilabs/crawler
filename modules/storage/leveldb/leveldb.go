@@ -190,7 +190,7 @@ func (this *LeveldbStore) AddFetchFailedUrl(url []byte) {
 
 func (this *LeveldbStore) FileHasSaved(file string) bool {
 	log.Debug("start check file:", file)
-	return util.CheckFileExists(file)
+	return util.FileExists(file)
 }
 
 func (this *LeveldbStore) LoadOffset(fileName string) int64 {

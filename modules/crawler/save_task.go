@@ -23,6 +23,8 @@ import (
 
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
+	"github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/types"
 )
 
 func init() {
@@ -109,18 +111,18 @@ func getSavedPath(runtimeConfig *RuntimeConfig, url []byte) (string,string) {
 	return path + "/",filenamePrefix + filename
 }
 
-func Save(runtimeConfig *RuntimeConfig, saveDir string, saveFile string, body []byte) (int, error) {
+func Save(env *env.Env, saveDir string, saveFile string, treasure *types.Treasure) (int, error) {
 
-	path:=saveDir+saveFile
+	path:=env.RuntimeConfig.PathConfig.WebData+treasure.Path
 	log.Trace("saving file,", path)
 	os.MkdirAll(saveDir, 0777)
-	fout, error := os.Create(path)
+	fout, error := os.Create(path) //TODO file is relative to root
 	if error != nil {
 		log.Error(path, error)
 		return 5, error
 	}
 
 	defer fout.Close()
-	rt, err := fout.Write(body)
+	rt, err := fout.Write(treasure.Body)
 	return rt, err
 }

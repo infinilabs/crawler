@@ -77,7 +77,7 @@ func main() {
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	logging.SetInitLogging(NullEnv(), logLevel)
+	logging.SetInitLogging(EmptyEnv(), logLevel)
 
 	sysConfig := SystemConfig{Version: VERSION, ConfigFile: configFile, LogLevel: logLevel}
 
@@ -123,7 +123,7 @@ func main() {
 	if env.RuntimeConfig.LoadTemplatedFetchJob {
 		go func() {
 
-			if util.CheckFileExists(env.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt") {
+			if util.FileExists(env.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt") {
 
 				templates := util.ReadAllLines(env.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt")
 				ids := util.ReadAllLines(env.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/id.txt")

@@ -34,8 +34,8 @@ func LoadTaskFromLocalFile(pendingFetchUrls chan []byte, runtimeConfig *RuntimeC
 	//if hit the EOF,will wait 2s,and then reopen the file,and try again,may be check the time of last modified
 
 waitFile:
-	if !util.CheckFileExists(path) {
-		log.Trace("waiting file create:", path)
+	if !util.FileExists(path) {
+		//log.Trace("waiting file create:", path)
 		time.Sleep(100 * time.Millisecond)
 		goto waitFile
 	}
@@ -82,13 +82,13 @@ func FetchFileWithOffset2(runtimeConfig RuntimeConfig, pendingFetchUrls chan []b
 waitUpdate:
 	time2, _ := util.FileMTime(path)
 
-	log.Trace("2nd touch time:", time2)
+	//log.Trace("2nd touch time:", time2)
 
 	if time2 > time1 {
 		log.Debug("file has been changed,restart parse")
 		FetchFileWithOffset2(runtimeConfig, pendingFetchUrls, path, offset)
 	} else {
-		log.Trace("waiting file update,", path)
+		//log.Trace("waiting file update,", path)
 		time.Sleep(10 * time.Millisecond)
 		goto waitUpdate
 	}

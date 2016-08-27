@@ -60,7 +60,7 @@ func checkIfUrlWillBeSave(runtimeConfig *RuntimeConfig,url []byte,)bool  {
 }
 
 //fetch url's content
-func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig) {
+func fetchUrl(url []byte, timeout time.Duration, env *Env) {
 	t := time.NewTimer(timeout)
 	defer t.Stop()
 	requestUrl := string(url)
@@ -75,9 +75,11 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig) {
 		requestUrl = "http://" + requestUrl
 	}
 
+	domain:="unknown" //TODO getDomain()
 
-
+	runtimeConfig:=env.RuntimeConfig
 	var storage = runtimeConfig.Storage
+
 
 	log.Debug("enter fetchUrl method:", requestUrl)
 
@@ -101,7 +103,7 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig) {
 		}
 		storage.AddFetchedUrl(url)
 		log.Debug("file add to fetched log")
-		stats.Increment(stats.STATS_FETCH_IGNORE_COUNT)
+		stats.Increment(domain,stats.STATS_FETCH_IGNORE_COUNT)
 		return
 	}
 
@@ -113,7 +115,7 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig) {
 			if util.ContainStr(requestUrl, config.FetchUrlMustNotContain) {
 				log.Debug("hit FetchUrlMustNotContain,ignore,", requestUrl, " , ", config.FetchUrlMustNotContain)
 				storage.AddFetchedUrl(url)
-				stats.Increment(stats.STATS_FETCH_IGNORE_COUNT)
+				stats.Increment(domain,stats.STATS_FETCH_IGNORE_COUNT)
 				return
 			}
 		}
@@ -122,14 +124,14 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig) {
 			if !util.ContainStr(requestUrl, config.FetchUrlMustContain) {
 				log.Debug("not hit FetchUrlMustContain,ignore,", requestUrl, " , ", config.FetchUrlMustContain)
 				storage.AddFetchedUrl(url)
-				stats.Increment(stats.STATS_FETCH_IGNORE_COUNT)
+				stats.Increment(domain,stats.STATS_FETCH_IGNORE_COUNT)
 				return
 			}
 		}
 	} else {
 		log.Debug("does not hit FetchUrlPattern ignoring,", requestUrl)
 		storage.AddFetchedUrl(url)
-		stats.Increment(stats.STATS_FETCH_IGNORE_COUNT)
+		stats.Increment(domain,stats.STATS_FETCH_IGNORE_COUNT)
 		return
 	}
 
@@ -141,6 +143,7 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig) {
 		treasure.CreateTime=time.Now().UTC()
 		treasure.LastCheckTime=time.Now().UTC()
 
+		//start to fetch remote content
 		body, err := util.HttpGetWithCookie(&treasure,requestUrl, config.Cookie)
 
 		if err == nil {
@@ -153,11 +156,13 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig) {
 
 				//check save rules
 				if(checkIfUrlWillBeSave(runtimeConfig,url)){
-					_, err := Save(runtimeConfig, saveDir,saveFile, body)
 
-					treasure.Body=string(body)
+
+					treasure.Body=body
 					treasure.Size=len(body)
 					treasure.Snapshot=savePath
+
+					_, err := Save(env, saveDir,saveFile, &treasure)
 
 					//data,_:=json.Marshal(treasure)
 					//log.Error(string(data))
@@ -165,7 +170,8 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig) {
 					if err == nil {
 						log.Info("saved:", savePath)
 
-						runtimeConfig.Storage.LogSavedFile(runtimeConfig.PathConfig.SavedFileLog, requestUrl+"|||"+savePath)
+						runtimeConfig.Storage.LogSavedFile(runtimeConfig.PathConfig.SavedFileLog,
+							requestUrl+"|||"+savePath)
 					} else {
 						log.Error("error while saved:", savePath, ",", err)
 						flg <- false
@@ -188,14 +194,14 @@ func fetchUrl(url []byte, timeout time.Duration, runtimeConfig *RuntimeConfig) {
 	select {
 	case <-t.C:
 		log.Error("fetching url time out,", requestUrl)
-		stats.Increment(stats.STATS_FETCH_TIMEOUT_COUNT)
+		stats.Increment(domain,stats.STATS_FETCH_TIMEOUT_COUNT)
 	case value := <-flg:
 		if value {
 			log.Debug("fetching url normal exit,", requestUrl)
-			stats.Increment(stats.STATS_FETCH_SUCCESS_COUNT)
+			stats.Increment(domain,stats.STATS_FETCH_SUCCESS_COUNT)
 		} else {
 			log.Debug("fetching url error exit,", requestUrl)
-			stats.Increment(stats.STATS_FETCH_FAIL_COUNT)
+			stats.Increment(domain,stats.STATS_FETCH_FAIL_COUNT)
 		}
 		return
 	}
@@ -218,7 +224,7 @@ func FetchGo(env *Env, quitC *chan bool, shard int) {
 
 				log.Info("shard:", shard, ",url cool,start fetching:", string(url))
 
-				fetchUrl(url, timeout, env.RuntimeConfig)
+				fetchUrl(url, timeout, env)
 
 				if env.RuntimeConfig.TaskConfig.FetchDelayThreshold > 0 {
 					log.Debug("sleep ", env.RuntimeConfig.TaskConfig.FetchDelayThreshold, "ms to control crawling speed")

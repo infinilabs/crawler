@@ -50,7 +50,7 @@ func (filter *HyperLogLogFilter) Init(fileName string) error {
 	filter.persistFileName = fileName
 
 	//loading or initializing hyperloglog-filter
-	if util.CheckFileExists(fileName) {
+	if util.FileExists(fileName) {
 		log.Debug("found hyperloglog-filter,start reload,", fileName)
 		n, err := ioutil.ReadFile(fileName)
 		if err != nil {

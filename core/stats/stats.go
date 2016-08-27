@@ -17,21 +17,68 @@ limitations under the License.
 package stats
 
 import (
-	stats "github.com/dmuth/golang-stats"
+	"sync"
+	"runtime"
 )
 
-func Increment(key string) {
-	stats.IncrStat(key)
+
+var data map[string]map[string]int
+var inited bool
+var l sync.Mutex
+
+func initData(domain,key string) {
+	l.Lock()
+	if !inited {
+		data = make(map[string]map[string]int)
+		inited = true
+	}
+
+	_, ok := data[domain]
+	if !ok {
+		data[domain] = make(map[string]int)
+	}
+
+	_, ok1 := data[domain][key]
+	if !ok1 {
+		data[domain][key] = 0
+	}
+	l.Unlock()
+	runtime.Gosched()
 }
 
-func Decrement(key string) {
-	stats.DecrStat(key)
+
+func Increment(domain,key string) {
+	IncrementBy(domain,key, 1)
 }
 
-func Stats(key string) {
-	stats.Stat(key)
+
+func IncrementBy(domain,key string, value int) {
+	initData(domain,key)
+	l.Lock()
+	data[domain][key] += value
+	l.Unlock()
+	runtime.Gosched()
 }
 
-func StatsAll() map[string]int  {
-	return stats.StatAll()
+
+func Decrement(domain,key string) {
+	DecrementBy(domain,key, 1)
+}
+
+
+func DecrementBy(domain,key string, value int) {
+	initData(domain,key)
+	l.Lock()
+	data[domain][key] -= value
+	l.Unlock()
+	runtime.Gosched()
+}
+
+func Stat(domain,key string)int {
+	initData(domain,key)
+	return (data[domain][key])
+}
+
+func StatsAll() map[string]map[string]int {
+	return (data)
 }

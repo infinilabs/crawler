@@ -25,6 +25,7 @@ import (
 	"os"
 	"regexp"
 	"github.com/medcl/gopa/core/util"
+	"github.com/medcl/gopa/core/types"
 )
 
 type Env struct {
@@ -79,21 +80,34 @@ func (this *Env) loadRuntimeConfig()(RuntimeConfig,error) {
 
 	//load external yaml config
 	filename, _ := filepath.Abs(configFile)
-
-	log.Debug("configFile:",filename)
-
-	yamlFile, err := ioutil.ReadFile(filename)
-
-	if err != nil {
-		panic(err)
-	}
-
 	var config RuntimeConfig
 
-	err = yaml.Unmarshal(yamlFile, &config)
-	if err != nil {
-		panic(err)
+	if(util.FileExists(filename)){
+		log.Debug("load configFile:",filename)
+
+		yamlFile, err := ioutil.ReadFile(filename)
+
+		if err != nil {
+			panic(err)
+		}
+		err = yaml.Unmarshal(yamlFile, &config)
+		if err != nil {
+			panic(err)
+		}
+	}else{
+		//init default Config
+		config=RuntimeConfig{}
+		config.PathConfig=(&PathConfig{}).Init()
+		config.ClusterConfig=(&ClusterConfig{}).Init()
+		config.LoggingConfig=(&LoggingConfig{}).Init()
+		config.IndexingConfig=(&IndexingConfig{}).Init()
+		config.CrawlerConfig=(&CrawlerConfig{})//.Init()
+		config.ParserConfig=(&ParserConfig{})//.Init()
+		config.TaskConfig=(&TaskConfig{})//.Init()
+		config.RuledFetchConfig=(&RuledFetchConfig{})//.Init()
 	}
+
+
 
 	//override built-in config
 	config.PathConfig.SavedFileLog = config.PathConfig.Data + "/tasks/pending_parse.files"
@@ -108,7 +122,7 @@ func (this *Env) loadRuntimeConfig()(RuntimeConfig,error) {
 	config.TaskConfig.SavingUrlPattern=regexp.MustCompile(config.TaskConfig.SavingUrlPatternStr)
 	config.TaskConfig.SkipPageParsePattern=regexp.MustCompile(config.TaskConfig.SkipPageParsePatternStr)
 
-	return config,err
+	return config,nil
 }
 
 func (this *Env) init()(error){
@@ -126,14 +140,14 @@ func (this *Env) init()(error){
 	return nil
 }
 
-func NullEnv() *Env {
+func EmptyEnv() *Env {
 	return 	&Env{}
 }
 
 type Channels struct {
 	PendingFetchUrl chan []byte
+	PendingSaveTreasure chan *types.Treasure
 }
-
 
 //high priority config, init from the environment or startup, can't be changed
 type SystemConfig struct {

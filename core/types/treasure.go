@@ -33,7 +33,7 @@ type Treasure struct {
 	Images        []KV //images within this site, img:desc
 	ExtImages     []KV //images outside, img:desc
 	Links         []KV //link:desc
-	Body          string
+	Body          []byte
 	StatusCode    int
 	RefUrl        string //the parent url to enter this url
 	Url           string //full url

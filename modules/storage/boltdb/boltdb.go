@@ -71,7 +71,9 @@ func (this *BoltdbStore) Open() error {
 	this.PersistFileName = "data/boltdb"
 
 	//loading or initializing boltdb
-	log.Debug("found boltdb file, start reload,", this.PersistFileName)
+	if(util.IsExist(this.PersistFileName)){
+		log.Debug("found boltdb file, start reload,", this.PersistFileName)
+	}
 
 	db, err := bolt.Open(this.PersistFileName, 0600, &bolt.Options{Timeout: 5 * time.Second})
 	this.DB = db
@@ -88,7 +90,7 @@ func (this *BoltdbStore) Open() error {
 		return err
 	}
 
-	log.Info("boltdb successfully reloaded:", this.PersistFileName)
+	log.Info("boltdb successfully started:", this.PersistFileName)
 
 	return nil
 }
@@ -198,7 +200,7 @@ func (this *BoltdbStore) AddFetchFailedUrl(url []byte) {
 
 func (this *BoltdbStore) FileHasSaved(file string) bool {
 	log.Debug("start check file:", file)
-	return util.CheckFileExists(file)
+	return util.FileExists(file)
 }
 
 func (this *BoltdbStore) LoadOffset(fileName string) int64 {
