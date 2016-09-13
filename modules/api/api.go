@@ -21,7 +21,7 @@ import (
 
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
-	. "github.com/medcl/gopa/modules/api/handlers"
+	. "github.com/medcl/gopa/modules/api/http"
 	websocket "github.com/medcl/gopa/modules/api/websocket"
 	ui "github.com/medcl/gopa/ui"
 )
@@ -30,7 +30,12 @@ func internalStart(env *Env) {
 	handler := Handler{Env: env}
 
 	mux := http.NewServeMux()
-	websocket.InitWebSocket()
+	websocket.InitWebSocket(env)
+	mux.HandleFunc("/ws", websocket.ServeWs)
+
+	//Index
+	mux.HandleFunc("/", handler.IndexAction)
+
 
 	//APIs
 	mux.HandleFunc("/stats", handler.StatsAction)
@@ -39,10 +44,6 @@ func internalStart(env *Env) {
 	mux.HandleFunc("/task/", handler.TaskAction)
 	mux.HandleFunc("/setting/seelog", handler.LoggingSettingAction)
 	mux.HandleFunc("/setting/seelog/", handler.LoggingSettingAction)
-
-	mux.HandleFunc("/ws", websocket.ServeWs)
-	mux.HandleFunc("/", handler.IndexAction)
-
 
 	//UI pages
 	mux.Handle("/ui/", http.FileServer(ui.FS(false)))

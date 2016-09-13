@@ -26,7 +26,7 @@ type TaskConfig struct {
 	//Name string
 
 	//store page separately,such as url with paging,ie:http://baidu.com/?pn=10 http://baidu.com/?pn=20 ,here we can set value to "pn"
-	SplitByUrlParameter string `split_by_url_parameter`
+	//SplitByUrlParameter string `split_by_url_parameter`
 
 	//follow page link,and walk around
 	//FollowLink bool

@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package http
+package websocket
 
 import (
+	log "github.com/cihub/seelog"
 	"github.com/gorilla/websocket"
-	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -31,16 +32,18 @@ var upgrader = websocket.Upgrader{
 }
 
 // connection is an middleman between the websocket connection and the hub.
-type connection struct {
+type WebsocketConnection struct {
 	// The websocket connection.
 	ws *websocket.Conn
 
 	// Buffered channel of outbound messages.
 	send chan []byte
+
+	handlers map[string]WebsocketHandlerFunc
 }
 
 // readPump pumps messages from the websocket connection to the hub.
-func (c *connection) readPump() {
+func (c *WebsocketConnection) readPump() {
 	defer func() {
 		h.unregister <- c
 		c.ws.Close()
@@ -52,7 +55,7 @@ func (c *connection) readPump() {
 		_, message, err := c.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
-				log.Printf("error: %v", err)
+				log.Errorf("error: %v", err)
 			}
 			break
 		}
@@ -61,13 +64,13 @@ func (c *connection) readPump() {
 }
 
 // write writes a message with the given message type and payload.
-func (c *connection) write(mt int, payload []byte) error {
+func (c *WebsocketConnection) write(mt int, payload []byte) error {
 	c.ws.SetWriteDeadline(time.Now().Add(writeWait))
 	return c.ws.WriteMessage(mt, payload)
 }
 
 // writePump pumps messages from the hub to the websocket connection.
-func (c *connection) writePump() {
+func (c *WebsocketConnection) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
@@ -80,13 +83,9 @@ func (c *connection) writePump() {
 				c.write(websocket.CloseMessage, []byte{})
 				return
 			}
-			if err := c.write(websocket.TextMessage, []byte("Medcl\n")); err != nil {
-				return
-			}
 
-			if err := c.write(websocket.TextMessage, message); err != nil {
-				return
-			}
+			c.parseMessage(message)
+
 		case <-ticker.C:
 			if err := c.write(websocket.PingMessage, []byte{}); err != nil {
 				return
@@ -95,10 +94,29 @@ func (c *connection) writePump() {
 	}
 }
 
-func InitWebSocket() {
-	if !runningHub {
-		go h.RunHub()
+func (c *WebsocketConnection) WriteMessage(msg []byte)error {
+	return c.write(websocket.TextMessage, msg)
+}
+
+func (c *WebsocketConnection) parseMessage(msg []byte) {
+
+	message := string(msg)
+	array := strings.Split(message, " ")
+	if len(array) > 0 {
+		cmd := strings.ToLower(strings.TrimSpace(array[0]))
+		if c.handlers!=nil {
+			handler := c.handlers[cmd]
+			if handler != nil {
+				handler(c,array)
+				return
+			}
+		}
 	}
+
+	if err := c.write(websocket.TextMessage, []byte("\nCommand not found\n")); err != nil {
+		return
+	}
+
 }
 
 // serveWs handles websocket requests from the peer.
@@ -106,10 +124,10 @@ func ServeWs(w http.ResponseWriter, r *http.Request) {
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
-	c := &connection{send: make(chan []byte, 256), ws: ws}
+	c := &WebsocketConnection{send: make(chan []byte, 256), ws: ws, handlers: h.handlers}
 	h.register <- c
 	go c.writePump()
 	c.readPump()

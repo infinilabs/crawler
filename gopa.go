@@ -39,25 +39,17 @@ import (
 var env *Env
 var startTime time.Time
 
-func printStartInfo() {
-	fmt.Println("  ________ ________ __________  _____   ")
-	fmt.Println(" /  _____/ \\_____  \\\\______   \\/  _  \\  ")
-	fmt.Println("/   \\  ___  /   |   \\|     ___/  /_\\  \\ ")
-	fmt.Println("\\    \\_\\  \\/    |    \\    |  /    |    \\")
-	fmt.Println(" \\______  /\\_______  /____|  \\____|__  /")
-	fmt.Println("        \\/         \\/                \\/ ")
-
-	fmt.Println("[gopa] " + VERSION + " is up")
-	fmt.Println(" ")
+func onStart() {
+	fmt.Println(GetWelcomeMessage())
 	startTime = time.Now()
 }
 
-func printShutdownInfo() {
+func onShutdown() {
 	fmt.Println("                         |    |                ")
 	fmt.Println("   _` |   _ \\   _ \\   _` |     _ \\  |  |   -_) ")
 	fmt.Println(" \\__, | \\___/ \\___/ \\__,_|   _.__/ \\_, | \\___| ")
 	fmt.Println(" ____/                             ___/        ")
-	fmt.Println("[gopa] "+VERSION+" is down, uptime:", time.Now().Sub(startTime))
+	fmt.Println("[gopa] "+VERSION+", uptime:", time.Now().Sub(startTime))
 	fmt.Println(" ")
 }
 
@@ -65,7 +57,7 @@ func main() {
 
 	var seedUrl, logLevel, configFile string
 
-	printStartInfo()
+	onStart()
 
 	defer logging.Flush()
 
@@ -172,5 +164,5 @@ func main() {
 
 	log.Debug("finished shutting down")
 
-	printShutdownInfo()
+	onShutdown()
 }

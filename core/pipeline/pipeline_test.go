@@ -27,10 +27,10 @@ type crawlerJoint struct {
 	Url string
 }
 
-func (this crawlerJoint) Process(s *Stream) (*Stream, error) {
-	s.data = map[string]interface{}{}
-	s.data["webpage"] = "hello world gogo "
-	s.data["status"] = true
+func (this crawlerJoint) Process(s *Context) (*Context, error) {
+	s.Data = map[string]interface{}{}
+	s.Data["webpage"] = "hello world gogo "
+	s.Data["status"] = true
 	fmt.Println("start to crawlling url:"+this.Url)
 	return s, nil
 }
@@ -38,9 +38,9 @@ func (this crawlerJoint) Process(s *Stream) (*Stream, error) {
 type parserJoint struct {
 }
 
-func (this parserJoint) Process(s *Stream) (*Stream, error) {
-	s.data["urls"] = "gogo"
-	s.data["domain"] = "http://gogo.com"
+func (this parserJoint) Process(s *Context) (*Context, error) {
+	s.Data["urls"] = "gogo"
+	s.Data["domain"] = "http://gogo.com"
 	//pub urls to channel
 	fmt.Println("start to parse web content")
 	return s, nil
@@ -49,8 +49,8 @@ func (this parserJoint) Process(s *Stream) (*Stream, error) {
 type saveJoint struct {
 }
 
-func (this saveJoint) Process(s *Stream) (*Stream, error) {
-	s.data["saved"] = "true"
+func (this saveJoint) Process(s *Context) (*Context, error) {
+	s.Data["saved"] = "true"
 	//pub urls to channel
 	fmt.Println("start to save web content")
 	return s, nil
@@ -59,9 +59,9 @@ func (this saveJoint) Process(s *Stream) (*Stream, error) {
 type publishJoint struct {
 }
 
-func (this publishJoint) Process(s *Stream) (*Stream, error) {
+func (this publishJoint) Process(s *Context) (*Context, error) {
 	fmt.Println("start to end pipeline")
-	s.data["published"] = "true"
+	s.Data["published"] = "true"
 	return s, nil
 }
 
@@ -69,12 +69,12 @@ func (this publishJoint) Process(s *Stream) (*Stream, error) {
 func TestPipeline(t *testing.T)  {
 
 	pipeline:=Pipeline{}
-	stream:=&Stream{}
-	stream.data=map[string]interface{}{}
-	stream.data["url"]="gogol.com"
-	stream.data["webpage"]="hello world gogo "
+	stream:=&Context{}
+	stream.Data =map[string]interface{}{}
+	stream.Data["url"]="gogol.com"
+	stream.Data["webpage"]="hello world gogo "
 
-	stream= pipeline.Input(stream).
+	stream= pipeline.Context(stream).
 		Start(crawlerJoint{Url:"http://baidu.com"}).
 		Join(parserJoint{}).
 		Join(saveJoint{}).
@@ -82,8 +82,8 @@ func TestPipeline(t *testing.T)  {
 		End().
 		Run()
 
-	fmt.Println(stream.data)
-	assert.Equal(t,stream.data["saved"],"true")
-	assert.Equal(t,stream.data["status"],true)
-	assert.Equal(t,stream.data["domain"],"http://gogo.com")
+	fmt.Println(stream.Data)
+	assert.Equal(t,stream.Data["saved"],"true")
+	assert.Equal(t,stream.Data["status"],true)
+	assert.Equal(t,stream.Data["domain"],"http://gogo.com")
 }

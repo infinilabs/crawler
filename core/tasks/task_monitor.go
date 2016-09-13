@@ -39,10 +39,10 @@ waitFile:
 		time.Sleep(100 * time.Millisecond)
 		goto waitFile
 	}
-	var storage = runtimeConfig.Storage
+	//var storage = runtimeConfig.Storage
 
-	var offset int64 = storage.LoadOffset(runtimeConfig.PathConfig.PendingFetchLog + ".offset")
-	FetchFileWithOffset2(*runtimeConfig, pendingFetchUrls, path, offset)
+	//var offset int64 = storage.LoadOffset(runtimeConfig.PathConfig.PendingFetchLog + ".offset")
+	//FetchFileWithOffset2(*runtimeConfig, pendingFetchUrls, path, offset)
 
 }
 
@@ -58,7 +58,7 @@ func FetchFileWithOffset2(runtimeConfig RuntimeConfig, pendingFetchUrls chan []b
 		log.Trace("error opening file,", path, " ", err)
 		return
 	}
-	var storage = runtimeConfig.Storage
+	//var storage = runtimeConfig.Storage
 
 	r := bufio.NewReader(f)
 	s, e := util.Readln(r)
@@ -72,7 +72,7 @@ func FetchFileWithOffset2(runtimeConfig RuntimeConfig, pendingFetchUrls chan []b
 			ParsedSavedFileLog2(runtimeConfig, pendingFetchUrls, s)
 		}
 
-		storage.PersistOffset(runtimeConfig.PathConfig.PendingFetchLog+".offset", offset)
+		//storage.PersistOffset(runtimeConfig.PathConfig.PendingFetchLog+".offset", offset)
 
 		s, e = util.Readln(r)
 		//todo store offset
@@ -98,12 +98,12 @@ func ParsedSavedFileLog2(runtimeConfig RuntimeConfig, pendingFetchUrls chan []by
 	if url != "" {
 		log.Trace("start parse filelog:", url)
 
-		var storage = runtimeConfig.Storage
+		//var storage = runtimeConfig.Storage
 
-		if storage.UrlHasFetched([]byte(url)) {
-			log.Debug("hit fetch filter ignore,", url)
-			return
-		}
+		//if storage.UrlHasFetched([]byte(url)) {
+		//	log.Debug("hit fetch filter ignore,", url)
+		//	return
+		//}
 		log.Debug("new task extracted from saved page:", url)
 		pendingFetchUrls <- []byte(url)
 	}

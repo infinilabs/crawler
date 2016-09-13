@@ -146,7 +146,7 @@ func EmptyEnv() *Env {
 
 type Channels struct {
 	PendingFetchUrl chan []byte
-	PendingSaveTreasure chan *types.Treasure
+	PendingSaveTreasure chan *types.PageItem
 }
 
 //high priority config, init from the environment or startup, can't be changed

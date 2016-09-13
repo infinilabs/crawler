@@ -18,32 +18,44 @@ package types
 
 
 type Store interface {
-	Store(url string, data []byte)
-	Get(key string) []byte
-	List(from int, size int) [][]byte
-	TaskEnqueue([]byte)
+	//Store(url string, data []byte)
+	//Get(key string) []byte
+	//List(from int, size int) [][]byte
+	//TaskEnqueue([]byte)
+
 	Open() error
 	Close() error
-	UrlHasWalked(url []byte) bool
-	UrlHasFetched(url []byte) bool
-	FileHasParsed(url []byte) bool
-	AddWalkedUrl(url []byte )
-	AddFetchedUrl(url []byte)
-	AddSavedUrl(url []byte )   //the file already saved,but is missing in bloom filter,run this method
-	AddParsedFile(url []byte )
 
-	LogSavedFile(path,content string )
+	//UrlHasWalked(url []byte) bool
+	//UrlHasFetched(url []byte) bool
+	//FileHasParsed(url []byte) bool
+	//AddWalkedUrl(url []byte )
+	//AddFetchedUrl(url []byte)
+	//AddSavedUrl(url []byte )   //the file already saved,but is missing in bloom filter,run this method
+	//AddParsedFile(url []byte )
 
-	LogFetchFailedUrl(path,content string )
+	//LogSavedFile(path,content string )
 
-	FileHasSaved(file string)  bool
+	//LogFetchFailedUrl(path,content string )
 
-	InitPendingFetchBloomFilter(fileName string)
-	PendingFetchUrlHasAdded(url []byte) bool
-	AddPendingFetchUrl(url []byte )
-	LogPendingFetchUrl(path,content string )
+	//FileHasSaved(file string)  bool
 
-	LoadOffset(fileName string) int64
-	PersistOffset(fileName string,offset int64)
+	//InitPendingFetchBloomFilter(fileName string)
+	//PendingFetchUrlHasAdded(url []byte) bool
+	//AddPendingFetchUrl(url []byte )
+	//LogPendingFetchUrl(path,content string )
+
+	//LoadOffset(fileName string) int64
+	//PersistOffset(fileName string,offset int64)
+
+
+	GetValue(bucket string, key []byte) []byte
+
+	AddValue(bucket string, key []byte, value []byte) error
+
+	DeleteValue(bucket string, key []byte, value []byte) error
+
+	DeleteBucket(bucket string, key []byte, value []byte) error
+
 }
 

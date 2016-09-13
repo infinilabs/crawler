@@ -78,7 +78,7 @@ func OldGetRuntimeConfig() *RuntimeConfig {
 	//runtimeConfig.LoadPendingFetchJobs = GetBoolConfig("Switch", "LoadPendingFetchJobs", true)
 	runtimeConfig.HttpEnabled = GetBoolConfig("Switch", "HttpEnabled", true)
 	//runtimeConfig.ParseUrlsFromPreviousSavedPage = GetBoolConfig("Switch", "ParseUrlsFromPreviousSavedPage", false)
-	runtimeConfig.ArrayStringSplitter = GetStringConfig("CrawlerRule", "ArrayStringSplitter", ",")
+	//runtimeConfig.ArrayStringSplitter = GetStringConfig("CrawlerRule", "ArrayStringSplitter", ",")
 
 	runtimeConfig.WalkBloomFilterFileName = GetStringConfig("BloomFilter", "WalkBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/walk.bloomfilter")
 	runtimeConfig.FetchBloomFilterFileName = GetStringConfig("BloomFilter", "FetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/fetch.bloomfilter")
@@ -127,7 +127,7 @@ func parseConfig() *TaskConfig {
 	taskConfig.LinkUrlExtractRegex = regexp.MustCompile(
 		GetStringConfig("CrawlerRule", "LinkUrlExtractRegex", "(\\s+(src2|src|href|HREF|SRC))\\s*=\\s*[\"']?(.*?)[\"']"))
 
-	taskConfig.SplitByUrlParameter = GetStringConfig("CrawlerRule", "SplitByUrlParameter", "p,pn,page,start,index")
+	//taskConfig.SplitByUrlParameter = GetStringConfig("CrawlerRule", "SplitByUrlParameter", "p,pn,page,start,index")
 
 	taskConfig.LinkUrlExtractRegexGroupIndex = GetIntConfig("CrawlerRule", "LinkUrlExtractRegexGroupIndex", 3)
 	//taskConfig.Name = GetStringConfig("CrawlerRule", "Name", "GopaTask")

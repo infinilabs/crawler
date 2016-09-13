@@ -125,7 +125,7 @@ type RuntimeConfig struct {
 	RuledFetchConfig *RuledFetchConfig
 
 	//splitter of joined array string
-	ArrayStringSplitter string
+	//ArrayStringSplitter string
 
 
 	//StoreWebPageTogether bool

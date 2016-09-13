@@ -14,13 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package crawler
+package pipe
 
-import . "github.com/medcl/gopa/core/config"
+import (
+	. "github.com/medcl/gopa/core/pipeline"
+)
 
-type InnerTaskConfig struct {
-	RuntimeConfig *RuntimeConfig
-	MessageChan   *chan []byte
-	QuitChan      *chan bool
-	Parameter     *RoutingParameter
+type ParserJoint struct {
+}
+
+func (this ParserJoint) Process(s *Context) (*Context, error) {
+
+	return s, nil
 }

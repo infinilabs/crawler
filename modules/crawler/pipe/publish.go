@@ -14,31 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package storage
+package pipe
 
 import (
-	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/modules/storage/boltdb"
-	_ "time"
+	. "github.com/medcl/gopa/core/pipeline"
+	"encoding/hex"
+	"crypto/md5"
 )
 
-var store boltdb.BoltdbStore
 
-func Start(env *Env) {
-
-	store = boltdb.BoltdbStore{}
-	err := store.Open()
-	if err != nil {
-		log.Error(err)
-	}
-	env.RuntimeConfig.Storage = &store
-	log.Info("storage success started")
-
-	env.Register("voltdb_ref", store.DB)
-
+type PublishJoint struct {
 }
 
-func Stop() error {
-	return store.Close()
+func (this PublishJoint) Process(c *Context) (*Context, error) {
+
+	m := md5.Sum([]byte(c.MustGetString(CONTEXT_URL.String())))
+	id:=hex.EncodeToString(m[:])
+
+	data:=map[string]interface{}{}
+	meta,b:= c.GetMap(CONTEXT_PAGE_METADATA.String())
+	if(b){
+		data["metadata"]=meta
+	}
+	_,err:= c.Env.ESClient.IndexDoc(id,data)
+	if(err!=nil){
+		return c,err
+	}
+
+	return c, nil
 }

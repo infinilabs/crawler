@@ -25,7 +25,29 @@ import (
 	"sort"
 
 	log "github.com/cihub/seelog"
+	"strings"
 )
+
+func JoinPath(filenames ...string) string {
+
+	hasSlash:=false
+	result:=""
+	for _,str:=range filenames{
+		currentHasSlash:=false
+		if(len(result)>0){
+			currentHasSlash=strings.HasPrefix(str, "/")
+			if(hasSlash&&currentHasSlash){
+				str = strings.TrimLeft(str, "/")
+			}
+			if(!(hasSlash||currentHasSlash)){
+				str="/"+str
+			}
+		}
+		hasSlash=strings.HasSuffix(str, "/")
+		result+=str
+	}
+	return result
+}
 
 func FileExists(path string) bool {
 	_, err := os.Stat(path)
@@ -126,6 +148,7 @@ func FileAppendNewLine(file string, content string) (int, error) {
 	defer f.Close()
 	return f.WriteString(content + "\n")
 }
+
 func FileAppendNewLineWithByte(file string, content []byte) (int, error) {
 	f, err := os.OpenFile(file, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 	if err != nil {

@@ -4,20 +4,24 @@ OLDGOPATH=${GOPATH}
 NEWGOPATH:=${CWD}:${OLDGOPATH}
 export GOPATH=$(NEWGOPATH)
 
-build: clean config
+
+build: clean config update_ui
 	go build  -o bin/gopa
 
+update_ui:
+	go get github.com/mjibson/esc
+	(cd ui&& esc -ignore="static.go|build_static.sh|.DS_Store" -o static.go -pkg server ../ui )
 
 tar: build
 	tar cfz bin/gopa.tar.gz bin/gopa
 
-cross-build: clean config
+cross-build: clean config update_ui
 	go test
 	GOOS=windows GOARCH=amd64 go build -o bin/windows64/gopa.exe
 	GOOS=darwin  GOARCH=amd64 go build -o bin/darwin64/gopa
 	GOOS=linux  GOARCH=amd64 go build -o bin/linux64/gopa
 
-build-linux: clean config
+build-linux: clean config update_ui
 	go test
 	GOOS=linux  GOARCH=amd64 go build -o bin/linux64/gopa
 
@@ -25,7 +29,7 @@ all: clean config cross-build
 
 all-platform: clean config cross-build-all-platform
 
-cross-build-all-platform: clean config
+cross-build-all-platform: clean config update_ui
 	go test
 	GOOS=windows GOARCH=amd64     go build -o bin/windows64/gopa.exe
 	GOOS=windows GOARCH=386       go build -o bin/windows32/gopa.exe

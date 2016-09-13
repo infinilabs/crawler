@@ -11,6 +11,9 @@ features:
 4.dynamic change the seelog config via api, [GET/POST] http://localhost:8001/setting/seelog/
 5.follow 302 redirect, and continue fetch
 6.add boltdb status page, http://localhost:8001/ui/boltdb
+7.add pipeline framework to create crawler
+improve:
+1.add update_ui setup to Makefile in order to build static ui
 
 v0.6
 breaking change:

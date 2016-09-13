@@ -25,14 +25,11 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/PuerkitoBio/purell"
 	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/core/env"
 	"github.com/PuerkitoBio/goquery"
 	"bytes"
-	"encoding/hex"
-	"crypto/md5"
 )
 
 func init() {
@@ -53,7 +50,7 @@ func loadFileContent(fileName string) []byte {
 
 func extractLinks(env *env.Env, fileUrl string, fileName []byte, body []byte) {
 
-	var storage = env.RuntimeConfig.Storage
+	//var storage = env.RuntimeConfig.Storage
 
 	siteUrlStr := fileUrl
 	siteConfig := env.RuntimeConfig.TaskConfig
@@ -140,144 +137,144 @@ func extractLinks(env *env.Env, fileUrl string, fileName []byte, body []byte) {
 		}
 
 
-		hit := false
+		//hit := false
 
-		if storage.UrlHasWalked(filterUrl) || storage.UrlHasFetched(filterUrl) || storage.PendingFetchUrlHasAdded(filterUrl) {
-			log.Trace("hit Filter,continue")
-			hit = true
-			continue
-		}
+		//if storage.UrlHasWalked(filterUrl) || storage.UrlHasFetched(filterUrl) || storage.PendingFetchUrlHasAdded(filterUrl) {
+		//	log.Trace("hit Filter,continue")
+		//	hit = true
+		//	continue
+		//}
 
-		if !hit {
-			currentUrlStr := string(url)
-			currentUrlStr = strings.Trim(currentUrlStr, " ")
-
-			currentURI1, err := ParseRequestURI(currentUrlStr)
-			currentURI := currentURI1
-			if err != nil {
-
-				log.Trace("invalid url,", err)
-
-				if strings.Contains(err.Error(), "invalid URI for request") {
-					log.Debug("invalid URI for request,fix relative url,original:", currentUrlStr)
-
-					//page based relative urls
-					currentUrlStr = parentUrlFullPath + currentUrlStr
-					currentURI1, err = ParseRequestURI(currentUrlStr)
-					currentURI = currentURI1
-					if err != nil {
-						log.Error("ParseCurrentURI internal failed!: ", currentUrlStr, " , ", err)
-						continue
-					}
-
-					log.Debug("new relatived url,", currentUrlStr)
-
-				} else {
-					log.Error("ParseCurrentURI failed!: ", currentUrlStr, " , ", err)
-					continue
-				}
-			}
-
-			//relative links
-			if currentURI == nil || currentURI.Host == "" {
-
-				if strings.HasPrefix(currentURI.Path, "/") {
-					//root based relative urls
-					currentUrlStr = parentUrlFullPath + currentUrlStr
-					log.Trace("new relatived url,", currentUrlStr)
-				} else {
-					//page based relative urls
-					urlPath := util.GetRootUrl(currentURI)
-					currentUrlStr = "http://" + urlPath + currentUrlStr
-					log.Trace("new relatived url,", currentUrlStr)
-				}
-
-
-				//if url start with //, then add http:
-				if(strings.HasPrefix(currentURI.Path,"//")){
-					currentUrlStr="http:"+currentURI.Path
-					log.Debug("url is start with //, auto add http as prefix")
-				}
-
-			} else {
-				//resolve domain specific filter
-				if siteConfig.FollowSameDomain {
-					if siteConfig.FollowSubDomain {
-
-						//TODO handler com.cn and .com,using a TLC-domain list
-
-					}
-
-					if seedURI.Host != currentURI.Host {
-						log.Debug("domain mismatch,", seedURI.Host, " vs ", currentURI.Host)
-						continue
-					}
-					//TODO follow all or list of domain
-				}
-			}
-
-			if len(siteConfig.LinkUrlMustContain) > 0 {
-				if !util.ContainStr(currentUrlStr, siteConfig.LinkUrlMustContain) {
-					log.Trace("link does not hit must-contain,ignore,", currentUrlStr, " , ", siteConfig.LinkUrlMustNotContain)
-					continue
-				}
-			}
-
-			if len(siteConfig.LinkUrlMustNotContain) > 0 {
-				if util.ContainStr(currentUrlStr, siteConfig.LinkUrlMustNotContain) {
-					log.Trace("link hit must-not-contain,ignore,", currentUrlStr, " , ", siteConfig.LinkUrlMustNotContain)
-					continue
-				}
-			}
-
-			//normalize url
-			currentUrlStr = MustNormalizeURLString(currentUrlStr, FlagLowercaseScheme|FlagLowercaseHost|FlagUppercaseEscapes|
-				FlagRemoveUnnecessaryHostDots|FlagRemoveDuplicateSlashes|FlagRemoveFragment)
-			log.Trace("normalized url:", currentUrlStr)
-			currentUrlByte := []byte(currentUrlStr)
-			if !(storage.UrlHasWalked(currentUrlByte) || storage.UrlHasFetched(currentUrlByte) || storage.PendingFetchUrlHasAdded(currentUrlByte)) {
-
-				//copied form fetchTask,TODO refactor
-				//checking fetchUrlPattern
-				log.Trace("started check fetchUrlPattern,", currentUrlStr)
-				if siteConfig.FetchUrlPattern.Match(currentUrlByte) {
-					log.Trace("match fetch url pattern,", currentUrlStr)
-					if len(siteConfig.FetchUrlMustNotContain) > 0 {
-						if util.ContainStr(currentUrlStr, siteConfig.FetchUrlMustNotContain) {
-							log.Trace("hit FetchUrlMustNotContain,ignore,", currentUrlStr)
-							continue
-						}
-					}
-
-					if len(siteConfig.FetchUrlMustContain) > 0 {
-						if !util.ContainStr(currentUrlStr, siteConfig.FetchUrlMustContain) {
-							log.Trace("not hit FetchUrlMustContain,ignore,", currentUrlStr)
-							continue
-						}
-					}
-				} else {
-					log.Trace("does not hit FetchUrlPattern ignoring,", currentUrlStr)
-					continue
-				}
-
-				if !storage.PendingFetchUrlHasAdded(currentUrlByte) {
-					log.Trace("log new pendingFetch url,", currentUrlStr)
-					storage.AddPendingFetchUrl(currentUrlByte)
-					storage.LogPendingFetchUrl(env.RuntimeConfig.PathConfig.PendingFetchLog, currentUrlStr)
-					log.Debug("check filter result:", currentUrlStr, ":", storage.PendingFetchUrlHasAdded(currentUrlByte))
-
-				} else {
-					log.Error("hit new pendingFetch filter,ignore:", currentUrlStr)
-					continue
-				}
-
-				//	TODO pendingFetchFilter			bloomFilter.Add(currentUrlByte)
-			} else {
-				log.Trace("hit filter,ignore:", currentUrlStr)
-			}
-		} else {
-			log.Trace("hit filter,ignore,", string(url))
-		}
+		//if !hit {
+		//	currentUrlStr := string(url)
+		//	currentUrlStr = strings.Trim(currentUrlStr, " ")
+		//
+		//	currentURI1, err := ParseRequestURI(currentUrlStr)
+		//	currentURI := currentURI1
+		//	if err != nil {
+		//
+		//		log.Trace("invalid url,", err)
+		//
+		//		if strings.Contains(err.Error(), "invalid URI for request") {
+		//			log.Debug("invalid URI for request,fix relative url,original:", currentUrlStr)
+		//
+		//			//page based relative urls
+		//			currentUrlStr = parentUrlFullPath + currentUrlStr
+		//			currentURI1, err = ParseRequestURI(currentUrlStr)
+		//			currentURI = currentURI1
+		//			if err != nil {
+		//				log.Error("ParseCurrentURI internal failed!: ", currentUrlStr, " , ", err)
+		//				continue
+		//			}
+		//
+		//			log.Debug("new relatived url,", currentUrlStr)
+		//
+		//		} else {
+		//			log.Error("ParseCurrentURI failed!: ", currentUrlStr, " , ", err)
+		//			continue
+		//		}
+		//	}
+		//
+		//	//relative links
+		//	if currentURI == nil || currentURI.Host == "" {
+		//
+		//		if strings.HasPrefix(currentURI.Path, "/") {
+		//			//root based relative urls
+		//			currentUrlStr = parentUrlFullPath + currentUrlStr
+		//			log.Trace("new relatived url,", currentUrlStr)
+		//		} else {
+		//			//page based relative urls
+		//			urlPath := util.GetRootUrl(currentURI)
+		//			currentUrlStr = "http://" + urlPath + currentUrlStr
+		//			log.Trace("new relatived url,", currentUrlStr)
+		//		}
+		//
+		//
+		//		//if url start with //, then add http:
+		//		if(strings.HasPrefix(currentURI.Path,"//")){
+		//			currentUrlStr="http:"+currentURI.Path
+		//			log.Debug("url is start with //, auto add http as prefix")
+		//		}
+		//
+		//	} else {
+		//		//resolve domain specific filter
+		//		if siteConfig.FollowSameDomain {
+		//			if siteConfig.FollowSubDomain {
+		//
+		//				//TODO handler com.cn and .com,using a TLC-domain list
+		//
+		//			}
+		//
+		//			if seedURI.Host != currentURI.Host {
+		//				log.Debug("domain mismatch,", seedURI.Host, " vs ", currentURI.Host)
+		//				continue
+		//			}
+		//			//TODO follow all or list of domain
+		//		}
+		//	}
+		//
+		//	if len(siteConfig.LinkUrlMustContain) > 0 {
+		//		if !util.ContainStr(currentUrlStr, siteConfig.LinkUrlMustContain) {
+		//			log.Trace("link does not hit must-contain,ignore,", currentUrlStr, " , ", siteConfig.LinkUrlMustNotContain)
+		//			continue
+		//		}
+		//	}
+		//
+		//	if len(siteConfig.LinkUrlMustNotContain) > 0 {
+		//		if util.ContainStr(currentUrlStr, siteConfig.LinkUrlMustNotContain) {
+		//			log.Trace("link hit must-not-contain,ignore,", currentUrlStr, " , ", siteConfig.LinkUrlMustNotContain)
+		//			continue
+		//		}
+		//	}
+		//
+		//	//normalize url
+		//	currentUrlStr = MustNormalizeURLString(currentUrlStr, FlagLowercaseScheme|FlagLowercaseHost|FlagUppercaseEscapes|
+		//		FlagRemoveUnnecessaryHostDots|FlagRemoveDuplicateSlashes|FlagRemoveFragment)
+		//	log.Trace("normalized url:", currentUrlStr)
+		//	currentUrlByte := []byte(currentUrlStr)
+		//	if !(storage.UrlHasWalked(currentUrlByte) || storage.UrlHasFetched(currentUrlByte) || storage.PendingFetchUrlHasAdded(currentUrlByte)) {
+		//
+		//		//copied form fetchTask,TODO refactor
+		//		//checking fetchUrlPattern
+		//		log.Trace("started check fetchUrlPattern,", currentUrlStr)
+		//		if siteConfig.FetchUrlPattern.Match(currentUrlByte) {
+		//			log.Trace("match fetch url pattern,", currentUrlStr)
+		//			if len(siteConfig.FetchUrlMustNotContain) > 0 {
+		//				if util.ContainStr(currentUrlStr, siteConfig.FetchUrlMustNotContain) {
+		//					log.Trace("hit FetchUrlMustNotContain,ignore,", currentUrlStr)
+		//					continue
+		//				}
+		//			}
+		//
+		//			if len(siteConfig.FetchUrlMustContain) > 0 {
+		//				if !util.ContainStr(currentUrlStr, siteConfig.FetchUrlMustContain) {
+		//					log.Trace("not hit FetchUrlMustContain,ignore,", currentUrlStr)
+		//					continue
+		//				}
+		//			}
+		//		} else {
+		//			log.Trace("does not hit FetchUrlPattern ignoring,", currentUrlStr)
+		//			continue
+		//		}
+		//
+		//		if !storage.PendingFetchUrlHasAdded(currentUrlByte) {
+		//			log.Trace("log new pendingFetch url,", currentUrlStr)
+		//			storage.AddPendingFetchUrl(currentUrlByte)
+		//			storage.LogPendingFetchUrl(env.RuntimeConfig.PathConfig.PendingFetchLog, currentUrlStr)
+		//			log.Debug("check filter result:", currentUrlStr, ":", storage.PendingFetchUrlHasAdded(currentUrlByte))
+		//
+		//		} else {
+		//			log.Error("hit new pendingFetch filter,ignore:", currentUrlStr)
+		//			continue
+		//		}
+		//
+		//		//	TODO pendingFetchFilter			bloomFilter.Add(currentUrlByte)
+		//	} else {
+		//		log.Trace("hit filter,ignore:", currentUrlStr)
+		//	}
+		//} else {
+		//	log.Trace("hit filter,ignore,", string(url))
+		//}
 		log.Trace("exit links extract,", siteUrlStr)
 
 	}
@@ -301,10 +298,10 @@ waitFile:
 		goto waitFile
 	}
 
-	var storage = env.RuntimeConfig.Storage
-	var offset int64 = storage.LoadOffset(env.RuntimeConfig.PathConfig.SavedFileLog + ".offset")
-	log.Info("loaded parse offset:", offset)
-	FetchFileWithOffset(env, path, offset)
+	//var storage = env.RuntimeConfig.Storage
+	//var offset int64 = storage.LoadOffset(env.RuntimeConfig.PathConfig.SavedFileLog + ".offset")
+	//log.Info("loaded parse offset:", offset)
+	//FetchFileWithOffset(env, path, offset)
 }
 
 func FetchFileWithOffset(env *env.Env, path string, skipOffset int64) {
@@ -320,7 +317,7 @@ func FetchFileWithOffset(env *env.Env, path string, skipOffset int64) {
 		return
 	}
 
-	var storage = env.RuntimeConfig.Storage
+	//var storage = env.RuntimeConfig.Storage
 
 	r := bufio.NewReader(f)
 	s, e := util.Readln(r)
@@ -331,7 +328,7 @@ func FetchFileWithOffset(env *env.Env, path string, skipOffset int64) {
 		//TODO use byte offset instead of lines
 		if offset > skipOffset {
 			ParsedSavedFileLog(env, s)
-			storage.PersistOffset(env.RuntimeConfig.PathConfig.SavedFileLog+".offset", offset)
+			//storage.PersistOffset(env.RuntimeConfig.PathConfig.SavedFileLog+".offset", offset)
 		}
 
 		s, e = util.Readln(r)
@@ -356,30 +353,30 @@ waitUpdate:
 
 func ParsedSavedFileLog(env *env.Env, fileLog string) {
 	if fileLog != "" {
-		var storage = env.RuntimeConfig.Storage
-		log.Debug("start parse filelog:", fileLog)
-		//load file's content,and extract links
-
-		stringArray := strings.Split(fileLog, "|||")
-		fileUrl := stringArray[0]
-		fileName := []byte(stringArray[1])
-
-		if storage.FileHasParsed(fileName) {
-			log.Debug("hit parse filter ignore,", string(fileName))
-			return
-		}
-
-		fileContent := loadFileContent(string(fileName))
-		storage.AddParsedFile(fileName)
-
-		if fileContent != nil {
-
-			//extract urls to fetch queue.
-			extractLinks(env, fileUrl, fileName, fileContent)
-
-			//extractMetadata and persist to DB
-			extractMetadata(env,fileUrl,fileName,fileContent)
-		}
+		//var storage = env.RuntimeConfig.Storage
+		//log.Debug("start parse filelog:", fileLog)
+		////load file's content,and extract links
+		//
+		//stringArray := strings.Split(fileLog, "|||")
+		//fileUrl := stringArray[0]
+		//fileName := []byte(stringArray[1])
+		//
+		//if storage.FileHasParsed(fileName) {
+		//	log.Debug("hit parse filter ignore,", string(fileName))
+		//	return
+		//}
+		//
+		//fileContent := loadFileContent(string(fileName))
+		//storage.AddParsedFile(fileName)
+		//
+		//if fileContent != nil {
+		//
+		//	//extract urls to fetch queue.
+		//	extractLinks(env, fileUrl, fileName, fileContent)
+		//
+		//	//extractMetadata and persist to DB
+		//	extractMetadata(env,fileUrl,fileName,fileContent)
+		//}
 	}
 }
 
@@ -410,12 +407,8 @@ func extractMetadata(env *env.Env, fileUrl string, fileName []byte, fileContent 
 
 	})
 
-	m := md5.Sum([]byte(fileUrl))
-	id:=hex.EncodeToString(m[:])
+	if(len(metadata)>0){
 
-	_,err=env.ESClient.IndexDoc(id,data)
-	if(err!=nil){
-		return err
 	}
 
 	return nil

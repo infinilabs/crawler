@@ -23,24 +23,24 @@ type KV struct {
 	Value []string
 }
 
-type Treasure struct {
-	Proto        string
-	Domain        string // elastic.co
-	Path          string // /index.html
-	Headers       map[string][]string   // key:value
-	Parameters    []KV   // key:value
-	Meta          map[string]interface{}
-	Images        []KV //images within this site, img:desc
-	ExtImages     []KV //images outside, img:desc
-	Links         []KV //link:desc
-	Body          []byte
-	StatusCode    int
-	RefUrl        string //the parent url to enter this url
-	Url           string //full url
-	Title         string
-	Size          int
-	SimHash       string
-	Snapshot      string //Snapshot storage info
+type PageItem struct {
+	Proto      string
+	Domain     string              // elastic.co
+	UrlPath    string              // /index.html
+	Headers    map[string][]string // key:value
+	Parameters []KV                // key:value
+	Meta       map[string]interface{}
+	Images     []KV                //images within this site, img:desc
+	ExtImages  []KV                //images outside, img:desc
+	Links      []KV                //link:desc
+	Body       []byte
+	StatusCode int
+	RefUrl     string              //the parent url to enter this url
+	Url        string              //full url
+	Title      string
+	Size       int
+	SimHash    string
+	Snapshot   string              //Snapshot storage info
 	CreateTime    Time
 	UpdateTime    Time
 	LastCheckTime Time

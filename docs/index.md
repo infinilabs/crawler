@@ -3,4 +3,6 @@
 * [UI](/ui)
 
 
-Fetch->Parse->Save
+**  Working Process
+
+Fetch Url -> ParseLinks -> Persist Links to Disk Queue -> Save Page

@@ -27,9 +27,9 @@ import (
 	"strings"
 	"time"
 
+	"errors"
 	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/types"
-"errors"
 )
 
 //parse to get url root
@@ -75,7 +75,7 @@ func noRedirect(req *http.Request, via []*http.Request) error {
 	return errors.New("Don't handle redirect!")
 }
 
-func get(treasure *types.Treasure,url string, cookie string) ([]byte, error) {
+func get(treasure *types.PageItem, url string, cookie string) ([]byte, error) {
 
 	log.Debug("let's get :" + url)
 
@@ -114,17 +114,19 @@ func get(treasure *types.Treasure,url string, cookie string) ([]byte, error) {
 
 	resp, err := client.Do(reqest)
 
-	treasure.Domain=reqest.Host
-	treasure.Proto=reqest.Proto
-	treasure.Url=url
-	treasure.Path=reqest.URL.Path
+	treasure.Domain = reqest.Host
+	treasure.Proto = reqest.Proto
+	treasure.Url = url
+	treasure.UrlPath = reqest.URL.Path
+
+	log.Trace("status code,", resp.StatusCode, ",size,", resp.ContentLength)
 
 	if err != nil {
-		if resp!=nil && resp.StatusCode == 302 {
-			log.Debug("got redirect:",url," => ",resp.Header.Get("Location"))
-			location:=resp.Header.Get("Location");
-			if(len(location)>0&&location!=url){
-				return get(treasure,location,cookie)
+		if resp != nil && resp.StatusCode == 302 {
+			log.Debug("got redirect:", url, " => ", resp.Header.Get("Location"))
+			location := resp.Header.Get("Location")
+			if len(location) > 0 && location != url {
+				return get(treasure, location, cookie)
 			}
 
 		} else {
@@ -133,10 +135,9 @@ func get(treasure *types.Treasure,url string, cookie string) ([]byte, error) {
 		return nil, err
 	}
 
-
-	treasure.StatusCode=resp.StatusCode
-	if(resp.Header!=nil){
-		treasure.Headers=resp.Header
+	treasure.StatusCode = resp.StatusCode
+	if resp.Header != nil {
+		treasure.Headers = resp.Header
 	}
 
 	defer resp.Body.Close()
@@ -160,6 +161,8 @@ func get(treasure *types.Treasure,url string, cookie string) ([]byte, error) {
 			log.Error(url, err)
 			return nil, err
 		}
+		treasure.Body = body
+		treasure.Size = len(body)
 		return body, nil
 
 	}
@@ -237,9 +240,9 @@ func post(url string, cookie string, postStr string) []byte {
 	return nil
 }
 
-func HttpGetWithCookie(treasure *types.Treasure,resource string, cookie string) (msg []byte, err error) {
+func HttpGetWithCookie(treasure *types.PageItem, resource string, cookie string) (msg []byte, err error) {
 
-	out, err := get(treasure,resource, cookie)
+	out, err := get(treasure, resource, cookie)
 	return out, err
 }
 
@@ -302,7 +305,6 @@ func HttpGet(resource string) (msg []byte, err error) {
 	}
 	return nil, http.ErrNotSupported
 }
-
 
 func sendHTTPRequest(method, url string, body io.Reader) ([]byte, error) {
 	client := &http.Client{}

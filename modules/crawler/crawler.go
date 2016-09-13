@@ -17,8 +17,11 @@ limitations under the License.
 package crawler
 
 import (
+	"time"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
+	. "github.com/medcl/gopa/core/pipeline"
+	. "github.com/medcl/gopa/modules/crawler/pipe"
 )
 
 var fetchQuitChannels []*chan bool
@@ -29,17 +32,17 @@ func Start(env *Env) {
 		log.Error("crawler already started, please stop it first.")
 	}
 	numGoRoutine := env.RuntimeConfig.MaxGoRoutine
-
-	fetchQuitChannels = make([]*chan bool, numGoRoutine) //shutdownSignal signals for each go routing
+	//shutdownSignal signals for each go routing
+	fetchQuitChannels = make([]*chan bool, numGoRoutine)
 	if env.RuntimeConfig.CrawlerConfig.Enabled {
 		go func() {
 
 			//start fetcher
 			for i := 0; i < numGoRoutine; i++ {
-				log.Trace("start crawler:",i)
+				log.Trace("start crawler:", i)
 				quitC := make(chan bool, 1)
 				fetchQuitChannels[i] = &quitC
-				go FetchGo(env, &quitC, i)
+				go RunPipeline(env, &quitC, i)
 
 			}
 		}()
@@ -52,7 +55,6 @@ func Start(env *Env) {
 func Stop() error {
 	if started {
 		log.Debug("start shutting down crawler")
-
 		for i, item := range fetchQuitChannels {
 			if item != nil {
 				*item <- true
@@ -61,11 +63,52 @@ func Stop() error {
 		}
 
 		log.Info("crawler success stoped")
-
 		started = false
 	} else {
 		log.Error("crawler is not started, please start it first.")
 	}
 
 	return nil
+}
+
+func RunPipeline(env *Env, quitC *chan bool, shard int) {
+
+	go func() {
+		for {
+			log.Debug("ready to receive url")
+			url := string(<-env.Channels.PendingFetchUrl)
+			log.Debug("shard:", shard, ",url received:", url)
+
+			//if !env.RuntimeConfig.Storage.UrlHasFetched([]byte(url)) {
+
+			//log.Info("shard:", shard, ",url cool,start fetching:", url)
+
+			pipeline := Pipeline{}
+			pipeline.Context(&Context{Env: env}).
+				Start(FetchJoint{Url: url}).
+				//Join(ParserJoint{}).
+				//Join(SaveToFileSystemJoint{}).
+				Join(SaveToDBJoint{}).
+				//Join(PublishJoint{}).
+				End().
+				Run()
+
+			if env.RuntimeConfig.TaskConfig.FetchDelayThreshold > 0 {
+				log.Debug("sleep ", env.RuntimeConfig.TaskConfig.FetchDelayThreshold, "ms to control crawling speed")
+				time.Sleep(time.Duration(env.RuntimeConfig.TaskConfig.FetchDelayThreshold) * time.Millisecond)
+				log.Debug("wake up now,continue crawing")
+			}
+			//} else {
+			//	log.Debug("shard:", shard, ",url received,but already fetched,skip: ", url)
+			//}
+
+		}
+	}()
+
+	log.Trace("fetch task started.shard:", shard)
+
+	<-*quitC
+
+	log.Trace("fetch task exit.shard:", shard)
+
 }

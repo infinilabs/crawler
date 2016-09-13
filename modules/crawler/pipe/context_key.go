@@ -14,31 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package storage
+package pipe
+type ContextKey string
 
-import (
-	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/modules/storage/boltdb"
-	_ "time"
+
+const (
+	CONTEXT_URL       ContextKey = "URL"
+	CONTEXT_PAGE_ITEM ContextKey = "PAGE"
+	CONTEXT_HOST ContextKey = "HOST"
+	CONTEXT_URL_PATH ContextKey = "URL_PATH"
+	CONTEXT_PAGE_METADATA ContextKey = "PAGE_METADATA"
+	CONTEXT_SAVE_PATH ContextKey = "CONTEXT_SAVE_PATH"
+	CONTEXT_SAVE_FILENAME ContextKey = "CONTEXT_SAVE_FILENAME"
 )
 
-var store boltdb.BoltdbStore
-
-func Start(env *Env) {
-
-	store = boltdb.BoltdbStore{}
-	err := store.Open()
-	if err != nil {
-		log.Error(err)
-	}
-	env.RuntimeConfig.Storage = &store
-	log.Info("storage success started")
-
-	env.Register("voltdb_ref", store.DB)
-
-}
-
-func Stop() error {
-	return store.Close()
+func (this ContextKey) String() string {
+	return string(this)
 }

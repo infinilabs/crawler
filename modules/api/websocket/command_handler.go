@@ -14,31 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package storage
+package websocket
 
-import (
-	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/modules/storage/boltdb"
-	_ "time"
-)
+import "github.com/medcl/gopa/core/env"
 
-var store boltdb.BoltdbStore
-
-func Start(env *Env) {
-
-	store = boltdb.BoltdbStore{}
-	err := store.Open()
-	if err != nil {
-		log.Error(err)
-	}
-	env.RuntimeConfig.Storage = &store
-	log.Info("storage success started")
-
-	env.Register("voltdb_ref", store.DB)
-
+type Command struct{
+	Env *env.Env
 }
 
-func Stop() error {
-	return store.Close()
+func (this *Command) Help(c *WebsocketConnection,a []string) ()  {
+	c.WriteMessage([]byte("HELP"))
+}
+
+
+func (this *Command) AddSeed(c *WebsocketConnection,a []string) ()  {
+
+	url:=a[1]
+	if(len(url)>0){
+		this.Env.Channels.PendingFetchUrl <- []byte(url)
+		c.WriteMessage([]byte("url "+url+" success added to pending fetch queue"))
+		return
+	}
+	c.WriteMessage([]byte("invalid url"))
 }

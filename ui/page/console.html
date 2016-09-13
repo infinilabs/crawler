@@ -4,11 +4,26 @@
     <title>Chat Example</title>
     <script src="../assets/js/jquery.min.js"></script>
     <script type="text/javascript">
-        $(function() {
+        $(function () {
 
             var conn;
             var msg = $("#msg");
             var log = $("#log");
+
+            function appendRequestLog(msg) {
+                req = $("<div class='request'><pre>" + msg + "</pre></div>");
+                appendLog(req)
+            }
+
+            function appendResponseLog(msg) {
+                req = $("<div class='response'><pre>" + msg + "</pre></div>");
+                appendLog(req)
+            }
+
+            function appendErrorLog(msg) {
+                req = $("<div class='error'><b>" + msg + "</b></div>");
+                appendLog(req)
+            }
 
             function appendLog(msg) {
                 var d = log[0]
@@ -19,7 +34,7 @@
                 }
             }
 
-            $("#form").submit(function() {
+            $("#form").submit(function () {
                 if (!conn) {
                     return false;
                 }
@@ -27,21 +42,25 @@
                     return false;
                 }
                 conn.send(msg.val());
+                appendRequestLog(msg.val())
                 msg.val("");
                 return false
             });
 
             if (window["WebSocket"]) {
-                host= location.hostname+(location.port ? ':'+location.port: '');
-                conn = new WebSocket("ws://"+host+"/ws");
-                conn.onclose = function(evt) {
-                    appendLog($("<div><b>Connection closed.</b></div>"))
+                host = location.hostname + (location.port ? ':' + location.port : '');
+                conn = new WebSocket("ws://" + host + "/ws");
+                conn.onopen = function (evt) {
+                    appendResponseLog("Connection established.")
                 }
-                conn.onmessage = function(evt) {
-                    appendLog($("<div/>").text(evt.data))
+                conn.onclose = function (evt) {
+                    appendResponseLog("Connection closed.")
+                }
+                conn.onmessage = function (evt) {
+                    appendResponseLog(evt.data)
                 }
             } else {
-                appendLog($("<div><b>Your browser does not support WebSockets.</b></div>"))
+                appendErrorLog("Your browser does not support WebSockets.")
             }
         });
     </script>
@@ -60,7 +79,7 @@
         }
 
         #log {
-            background: white;
+            background: gainsboro;
             margin: 0;
             padding: 0.5em 0.5em 0.5em 0.5em;
             position: absolute;
@@ -81,12 +100,33 @@
             overflow: hidden;
         }
 
+        .request {
+            clear: both;
+            padding: 1px 5px;
+            background: lightgray;
+        }
+
+        .response {
+            clear: both;
+            padding: 1px 5px;
+
+            background: grey;
+        }
+
+        .error {
+            clear: both;
+            padding: 1px 5px;
+
+            color: white;
+            background: red;
+        }
+
     </style>
 </head>
 <body>
 <div id="log"></div>
 <form id="form">
-    <input type="submit" value="Send" />
+    <input type="submit" value="Send"/>
     <input type="text" id="msg" size="64"/>
 </form>
 </body>
