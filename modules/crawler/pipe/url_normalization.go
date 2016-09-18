@@ -141,7 +141,7 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 		ref := strings.Split(referenceURI.Host, ".")
 		cur := strings.Split(currentURI.Host, ".")
 
-		log.Trace("%s vs %s , %s vs %s ", ref[len(ref)-1], cur[len(cur)-1], ref[len(ref)-2], cur[len(cur)-2])
+		log.Tracef("%s vs %s , %s vs %s ", ref[len(ref)-1], cur[len(cur)-1], ref[len(ref)-2], cur[len(cur)-2])
 
 		if !(ref[len(ref)-1] == cur[len(cur)-1] && ref[len(ref)-2] == cur[len(cur)-2]) {
 			log.Debug("domain mismatch,", referenceURI.Host, " vs ", currentURI.Host)

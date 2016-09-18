@@ -17,18 +17,19 @@ limitations under the License.
 package env
 
 import (
+	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
+	. "github.com/medcl/gopa/core/queue"
+	"github.com/medcl/gopa/core/stats"
+	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/core/util"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"path/filepath"
-	log "github.com/cihub/seelog"
 	"os"
+	"path/filepath"
 	"regexp"
-	"github.com/medcl/gopa/core/util"
-	"github.com/medcl/gopa/core/types"
-	. "github.com/medcl/gopa/core/queue"
 	"time"
-	"github.com/medcl/gopa/core/stats"
+	"github.com/syndtr/goleveldb/leveldb/errors"
 )
 
 type Env struct {
@@ -39,7 +40,6 @@ type Env struct {
 	Channels      *Channels
 
 	ESClient util.ElasticsearchClient
-
 }
 
 func Environment(sysConfig SystemConfig) *Env {
@@ -49,43 +49,41 @@ func Environment(sysConfig SystemConfig) *Env {
 
 	env := Env{}
 
-
 	env.SystemConfig = &sysConfig
-	config,err:= env.loadRuntimeConfig()
-	if(err!=nil){
+	config, err := env.loadRuntimeConfig()
+	if err != nil {
 		panic(err)
 	}
 	env.RuntimeConfig = &config
 
 	//override logging level
-	if(len(sysConfig.LogLevel)>0){
+	if len(sysConfig.LogLevel) > 0 {
 		env.RuntimeConfig.LoggingConfig.Level = sysConfig.LogLevel
 	}
 
 	env.Channels = &Channels{}
-	env.Channels.pendingFetchUrl = make(chan types.PageTask, 0) //buffer number is 10
-	env.Channels.pendingCheckUrl = make(chan types.PageTask, 0) //buffer number is 10
-	env.Registrar = &Registrar{values:map[string]interface{}{}}
+	env.Channels.pendingFetchUrl = make(chan types.PageTask, 20) //buffer number is 10
+	env.Channels.pendingCheckUrl = make(chan types.PageTask, 20) //buffer number is 10
+	env.Registrar = &Registrar{values: map[string]interface{}{}}
 
 	env.init()
-
 
 	return &env
 }
 
-func (this *Env) loadRuntimeConfig()(RuntimeConfig,error) {
+func (this *Env) loadRuntimeConfig() (RuntimeConfig, error) {
 
-	var configFile="./gopa.yml"
-	if(this.SystemConfig!=nil&&len(this.SystemConfig.ConfigFile)>0){
-		configFile=this.SystemConfig.ConfigFile
+	var configFile = "./gopa.yml"
+	if this.SystemConfig != nil && len(this.SystemConfig.ConfigFile) > 0 {
+		configFile = this.SystemConfig.ConfigFile
 	}
 
 	//load external yaml config
 	filename, _ := filepath.Abs(configFile)
 	var config RuntimeConfig
 
-	if(util.FileExists(filename)){
-		log.Debug("load configFile:",filename)
+	if util.FileExists(filename) {
+		log.Debug("load configFile:", filename)
 
 		yamlFile, err := ioutil.ReadFile(filename)
 
@@ -96,20 +94,18 @@ func (this *Env) loadRuntimeConfig()(RuntimeConfig,error) {
 		if err != nil {
 			panic(err)
 		}
-	}else{
+	} else {
 		//init default Config
-		config=RuntimeConfig{}
-		config.PathConfig=(&PathConfig{}).Init()
-		config.ClusterConfig=(&ClusterConfig{}).Init()
-		config.LoggingConfig=(&LoggingConfig{}).Init()
-		config.IndexingConfig=(&IndexingConfig{}).Init()
-		config.CrawlerConfig=(&CrawlerConfig{})//.Init()
-		config.ParserConfig=(&ParserConfig{})//.Init()
-		config.TaskConfig=(&TaskConfig{})//.Init()
-		config.RuledFetchConfig=(&RuledFetchConfig{})//.Init()
+		config = RuntimeConfig{}
+		config.PathConfig = (&PathConfig{}).Init()
+		config.ClusterConfig = (&ClusterConfig{}).Init()
+		config.LoggingConfig = (&LoggingConfig{}).Init()
+		config.IndexingConfig = (&IndexingConfig{}).Init()
+		config.CrawlerConfig = (&CrawlerConfig{})       //.Init()
+		config.ParserConfig = (&ParserConfig{})         //.Init()
+		config.TaskConfig = (&TaskConfig{})             //.Init()
+		config.RuledFetchConfig = (&RuledFetchConfig{}) //.Init()
 	}
-
-
 
 	//override built-in config
 	config.PathConfig.SavedFileLog = config.PathConfig.Data + "/tasks/pending_parse.files"
@@ -118,17 +114,17 @@ func (this *Env) loadRuntimeConfig()(RuntimeConfig,error) {
 
 	config.PathConfig.WebData = config.PathConfig.Data + "/web/"
 	config.PathConfig.TaskData = config.PathConfig.Data + "/tasks/"
-	config.PathConfig.QueueData= config.PathConfig.Data + "/queue/"
+	config.PathConfig.QueueData = config.PathConfig.Data + "/queue/"
 
-	config.TaskConfig.LinkUrlExtractRegex=regexp.MustCompile(config.TaskConfig.LinkUrlExtractRegexStr)
-	config.TaskConfig.FetchUrlPattern=regexp.MustCompile(config.TaskConfig.FetchUrlPatternStr)
-	config.TaskConfig.SavingUrlPattern=regexp.MustCompile(config.TaskConfig.SavingUrlPatternStr)
-	config.TaskConfig.SkipPageParsePattern=regexp.MustCompile(config.TaskConfig.SkipPageParsePatternStr)
+	config.TaskConfig.LinkUrlExtractRegex = regexp.MustCompile(config.TaskConfig.LinkUrlExtractRegexStr)
+	config.TaskConfig.FetchUrlPattern = regexp.MustCompile(config.TaskConfig.FetchUrlPatternStr)
+	config.TaskConfig.SavingUrlPattern = regexp.MustCompile(config.TaskConfig.SavingUrlPatternStr)
+	config.TaskConfig.SkipPageParsePattern = regexp.MustCompile(config.TaskConfig.SkipPageParsePatternStr)
 
-	return config,nil
+	return config, nil
 }
 
-func (this *Env) init()(error){
+func (this *Env) init() error {
 
 	if this.RuntimeConfig.MaxGoRoutine < 2 {
 		this.RuntimeConfig.MaxGoRoutine = 2
@@ -139,89 +135,98 @@ func (this *Env) init()(error){
 	os.MkdirAll(this.RuntimeConfig.PathConfig.WebData, 0777)
 	os.MkdirAll(this.RuntimeConfig.PathConfig.TaskData, 0777)
 
-	this.ESClient=util.ElasticsearchClient{Host:this.RuntimeConfig.IndexingConfig.Host,Index:this.RuntimeConfig.IndexingConfig.Index}
+	this.ESClient = util.ElasticsearchClient{Host: this.RuntimeConfig.IndexingConfig.Host, Index: this.RuntimeConfig.IndexingConfig.Index}
 	this.Channels.pendingFetchDiskQueue = NewDiskQueue("pending_fetch", this.RuntimeConfig.PathConfig.QueueData, 100*1024*1024, 4, 1<<10, 2500, 2*time.Second)
 	this.Channels.pendingCheckDiskQueue = NewDiskQueue("pending_check", this.RuntimeConfig.PathConfig.QueueData, 100*1024*1024, 4, 1<<10, 2500, 2*time.Second)
 	return nil
 }
 
 func EmptyEnv() *Env {
-	return 	&Env{}
+	return &Env{}
 }
 
 type Channels struct {
-	pendingCheckUrl    chan types.PageTask //check if the url need to fetch or not
-	pendingFetchUrl     chan types.PageTask //the urls pending to fetch
+	pendingCheckUrl chan types.PageTask //check if the url need to fetch or not
+	pendingFetchUrl chan types.PageTask //the urls pending to fetch
 
 	pendingFetchDiskQueue BackendQueue
 	pendingCheckDiskQueue BackendQueue
 }
 
-func (this *Channels)PushUrlToCheck(url types.PageTask) error  {
-	stats.Increment("global",stats.STATS_CHECKER_PUSH_COUNT)
+func (this *Channels) PushUrlToCheck(url types.PageTask) error {
 	//push chan first and then push diskqueue
 	select {
-	case  this.pendingCheckUrl<-url:
-		log.Trace("check url add to chan")
+	case this.pendingCheckUrl <- url:
+		stats.Increment("global", stats.STATS_CHECKER_PUSH_CHAN_COUNT)
 		return nil
 	default:
-		err:=this.pendingCheckDiskQueue.Put(url.MustGetBytes())
-		log.Trace("check url add to disk queue")
+		err := this.pendingCheckDiskQueue.Put(url.MustGetBytes())
+		stats.Increment("global", stats.STATS_CHECKER_PUSH_DISK_COUNT)
 		return err
 	}
 }
-func (this *Channels)PushUrlToFetch(url types.PageTask) error  {
-	stats.Increment("global",stats.STATS_FETCH_PUSH_COUNT)
+func (this *Channels) PushUrlToFetch(url types.PageTask) error {
 
 	//push chan first and then push diskqueue
 	select {
-	case  this.pendingFetchUrl<-url:
-		log.Trace("fetch url add to chan")
+	case this.pendingFetchUrl <- url:
+		stats.Increment("global", stats.STATS_FETCH_PUSH_CHAN_COUNT)
 		return nil
 	default:
-		err:=this.pendingFetchDiskQueue.Put(url.MustGetBytes())
-		log.Trace("fetch url add to disk queue")
+		err := this.pendingFetchDiskQueue.Put(url.MustGetBytes())
+		stats.Increment("global", stats.STATS_FETCH_PUSH_DISK_COUNT)
 		return err
 	}
 
 }
 
-func (this *Channels)PopUrlToCheck() types.PageTask  {
-	stats.Increment("global",stats.STATS_CHECKER_POP_COUNT)
+func (this *Channels) PopUrlToCheck() (types.PageTask,error) {
 
+start:
 	//pop chan first and then pop diskqueue
 	select {
 	case url := <-this.pendingCheckUrl:
-		return url
+		stats.Increment("global", stats.STATS_CHECKER_POP_CHAN_COUNT)
+		return url,nil
+	case b := <-this.pendingCheckDiskQueue.ReadChan():
+		url := types.PageTaskFromBytes(b)
+		stats.Increment("global", stats.STATS_CHECKER_POP_DISK_COUNT)
+		return url,nil
 	default:
-		b := <-this.pendingCheckDiskQueue.ReadChan()
-		url:= types.PageTaskFromBytes(b)
-		return url
+		time.Sleep(3 * time.Second)
+		goto start
 	}
+	return types.PageTask{},errors.New("no url found")
 }
 
-func (this *Channels)PopUrlToFetch()types.PageTask  {
-	stats.Increment("global",stats.STATS_FETCH_POP_COUNT)
+func (this *Channels) PopUrlToFetch() (types.PageTask,error) {
 
+start:
 	//pop chan first and then pop diskqueue
 	select {
 	case url := <-this.pendingFetchUrl:
-		return url
+		stats.Increment("global", stats.STATS_FETCH_POP_CHAN_COUNT)
+		return url,nil
+	case b := <-this.pendingFetchDiskQueue.ReadChan():
+		url := types.PageTaskFromBytes(b)
+		stats.Increment("global", stats.STATS_FETCH_POP_DISK_COUNT)
+		return url,nil
 	default:
-		b := <-this.pendingFetchDiskQueue.ReadChan()
-		url:= types.PageTaskFromBytes(b)
-		return url
+		time.Sleep(3 * time.Second)
+		goto start
 	}
+
+	return types.PageTask{},errors.New("no url found")
 }
 
-func (this *Channels) Close()  {
+func (this *Channels) Close() {
 	this.pendingFetchDiskQueue.Close()
 	this.pendingCheckDiskQueue.Close()
 }
 
 //high priority config, init from the environment or startup, can't be changed
 type SystemConfig struct {
-	Version string `0.0.1`
+	Version    string `0.0.1`
 	ConfigFile string `gopa.yml`
-	LogLevel string `info`
+	LogLevel   string `info`
 }

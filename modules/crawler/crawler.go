@@ -79,7 +79,10 @@ func RunPipeline(env *Env, quitC *chan bool, shard int) {
 		for {
 			log.Trace("waiting url to fetch")
 
-			url := env.Channels.PopUrlToFetch()
+			url, err := env.Channels.PopUrlToFetch()
+			if err != nil {
+				continue
+			}
 			urlStr := string(url.Url)
 			log.Debug("shard:", shard, ",url received:", urlStr)
 
@@ -108,9 +111,9 @@ func execute(task types.PageTask, env *Env) {
 	pipeline := Pipeline{}
 	pipeline.Context(&Context{Env: env}).
 		Start(UrlSource{Url: task.Url, Depth: task.Depth, Reference: task.Reference}).
-		Join(UrlNormalizationJoint{FollowSubDomain:true}).
+		Join(UrlNormalizationJoint{FollowSubDomain: true}).
 		Join(LoadMetadataJoint{}).
-		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount:3}).
+		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 3}).
 		Join(FetchJoint{}).
 		Join(ParserJoint{DispatchLinks: true}).
 		//Join(SaveToFileSystemJoint{}).

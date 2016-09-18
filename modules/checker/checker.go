@@ -44,7 +44,10 @@ func runCheckerGo(env *Env, quitC *chan bool) {
 			}
 			log.Trace("waiting url to check")
 
-			url := env.Channels.PopUrlToCheck()
+			url,err := env.Channels.PopUrlToCheck()
+			if(err!=nil){
+				continue
+			}
 			log.Debug("cheking url:", string(url.Url))
 
 			//checking

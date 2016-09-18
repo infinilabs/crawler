@@ -26,10 +26,14 @@ const STATS_PARSE_SUCCESS_COUNT = "stats.count.parse.success"
 const STATS_PARSE_FAIL_COUNT = "stats.count.parse.fail"
 const STATS_PARSE_IGNORE_COUNT = "stats.count.ignore.fail"
 
-const STATS_CHECKER_PUSH_COUNT = "stats.count.checker.push"
-const STATS_CHECKER_POP_COUNT = "stats.count.checker.pop"
-const STATS_FETCH_PUSH_COUNT = "stats.count.fetch.push"
-const STATS_FETCH_POP_COUNT = "stats.count.fetch.pop"
+const STATS_CHECKER_PUSH_CHAN_COUNT = "stats.count.checker.chan.push"
+const STATS_CHECKER_PUSH_DISK_COUNT = "stats.count.checker.disk.push"
+const STATS_CHECKER_POP_CHAN_COUNT = "stats.count.checker.chan.pop"
+const STATS_CHECKER_POP_DISK_COUNT = "stats.count.checker.disk.pop"
+const STATS_FETCH_PUSH_CHAN_COUNT = "stats.count.fetch.chan.push"
+const STATS_FETCH_PUSH_DISK_COUNT = "stats.count.fetch.disk.push"
+const STATS_FETCH_POP_CHAN_COUNT = "stats.count.fetch.chan.pop"
+const STATS_FETCH_POP_DISK_COUNT = "stats.count.fetch.disk.pop"
 
 
 type StatsCount struct {
