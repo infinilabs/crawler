@@ -33,6 +33,13 @@ func (this PublishJoint) Process(c *Context) (*Context, error) {
 	id:=hex.EncodeToString(m[:])
 
 	data:=map[string]interface{}{}
+
+	data["original_url"]=c.MustGetString(CONTEXT_ORIGINAL_URL)
+	data["url"]=c.MustGetString(CONTEXT_URL)
+	data["host"]=c.MustGetString(CONTEXT_HOST)
+	data["save_path"]=c.MustGetString(CONTEXT_SAVE_PATH)
+	data["save_file"]=c.MustGetString(CONTEXT_SAVE_FILENAME)
+
 	meta,b:= c.GetMap(CONTEXT_PAGE_METADATA)
 	if(b){
 		data["metadata"]=meta

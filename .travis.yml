@@ -1,7 +1,7 @@
 language: go
 os:
   - osx
-script: make dist-all-platform
+script: make clean config cross-build-all-platform package-all-platform
 go:
 - 1.6
 deploy:

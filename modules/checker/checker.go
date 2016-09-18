@@ -48,6 +48,7 @@ func runCheckerGo(env *Env, quitC *chan bool) {
 			log.Debug("cheking url:", string(url.Url))
 
 			//checking
+
 			//send to disk queue
 			env.Channels.PushUrlToFetch(url)
 			log.Debugf("send url: %s ,depth: %d to  fetch queue", string(url.Url), url.Depth)

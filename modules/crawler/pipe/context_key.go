@@ -19,6 +19,7 @@ package pipe
 import . "github.com/medcl/gopa/core/pipeline"
 
 const (
+	CONTEXT_ORIGINAL_URL       ContextKey = "ORIGINAL_URL"
 	CONTEXT_URL       ContextKey = "URL"
 	CONTEXT_REFERENCE_URL       ContextKey = "REFERENCE_URL"
 	CONTEXT_DEPTH       ContextKey = "DEPTH"

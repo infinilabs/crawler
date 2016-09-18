@@ -26,6 +26,7 @@ type UrlSource struct {
 
 func (this UrlSource) Process(context *Context) (*Context, error) {
 
+	context.Set(CONTEXT_ORIGINAL_URL,this.Url)
 	context.Set(CONTEXT_URL,this.Url)
 	context.Set(CONTEXT_DEPTH,this.Depth)
 	context.Set(CONTEXT_REFERENCE_URL,this.Reference)

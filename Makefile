@@ -25,11 +25,11 @@ build-linux: clean config update_ui
 	go test
 	GOOS=linux  GOARCH=amd64 go build -o bin/linux64/gopa
 
-all: clean config cross-build
+all: clean config update_ui cross-build
 
-all-platform: clean config cross-build-all-platform
+all-platform: clean config update_ui cross-build-all-platform
 
-cross-build-all-platform: clean config update_ui
+cross-build-all-platform: clean config
 	go test
 	GOOS=windows GOARCH=amd64     go build -o bin/windows64/gopa.exe
 	GOOS=windows GOARCH=386       go build -o bin/windows32/gopa.exe
