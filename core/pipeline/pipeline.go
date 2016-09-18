@@ -20,13 +20,23 @@ import (
 	"github.com/medcl/gopa/core/env"
 	"fmt"
 )
+type ContextKey string
+
+//func (this ContextKey) String() string {
+//	return string(this)
+//}
 
 type Context struct {
-	Data map[string]interface{}
+	Data map[ContextKey]interface{}
 	Env *env.Env
+	breakFlag bool
 }
 
-func (this *Context) GetString(key string)(string,bool){
+func (this *Context) Break(){
+	this.breakFlag=true
+}
+
+func (this *Context) GetString(key ContextKey)(string,bool){
 	v:=this.Get(key)
 	s,ok:=v.(string)
 	if(ok){
@@ -34,8 +44,16 @@ func (this *Context) GetString(key string)(string,bool){
 	}
 	return s,ok
 }
+func (this *Context) GetInt(key ContextKey)(int,bool){
+	v:=this.Get(key)
+	s,ok:=v.(int)
+	if(ok){
+		return s,ok
+	}
+	return s,ok
+}
 
-func (this *Context) MustGetString(key string)(string){
+func (this *Context) MustGetString(key ContextKey)(string){
 	s,ok:=this.GetString(key)
 	if(!ok){
 		panic(fmt.Errorf("%s not found in context",key))
@@ -43,7 +61,15 @@ func (this *Context) MustGetString(key string)(string){
 	return s
 }
 
-func (this *Context) MustGetMap(key string)(map[string]interface{}){
+func (this *Context) MustGetInt(key ContextKey)(int){
+	s,ok:=this.GetInt(key)
+	if(!ok){
+		panic(fmt.Errorf("%s not found in context",key))
+	}
+	return s
+}
+
+func (this *Context) MustGetMap(key ContextKey)(map[string]interface{}){
 	s,ok:=this.GetMap(key)
 	if(!ok){
 		panic(fmt.Errorf("%s not found in context",key))
@@ -51,7 +77,7 @@ func (this *Context) MustGetMap(key string)(map[string]interface{}){
 	return s
 }
 
-func (this *Context) GetMap(key string)(map[string]interface{},bool){
+func (this *Context) GetMap(key ContextKey)(map[string]interface{},bool){
 	v:=this.Get(key)
 	s,ok:=v.(map[string]interface{})
 	if(ok){
@@ -60,12 +86,12 @@ func (this *Context) GetMap(key string)(map[string]interface{},bool){
 	return s,ok
 }
 
-func (this *Context) Get(key string)interface{}{
+func (this *Context) Get(key ContextKey)interface{}{
 	return this.Data[key]
 }
 
 
-func (this *Context) Set(key string,value interface{}){
+func (this *Context) Set(key ContextKey,value interface{}){
 	this.Data[key]=value
 }
 
@@ -88,7 +114,7 @@ func (this *Pipeline) Start(s JointInterface) *Pipeline {
 		this.context =&Context{}
 	}
 	if(this.context.Data==nil){
-		this.context.Data =map[string]interface{}{}
+		this.context.Data =map[ContextKey]interface{}{}
 	}
 	this.joints = []JointInterface{s}
 	return this
@@ -106,6 +132,9 @@ func (this *Pipeline) End() *Pipeline {
 func (this *Pipeline) Run()(*Context) {
 	var err error
 	for _, v := range this.joints {
+		if(this.context.breakFlag){
+			break
+		}
 		this.context, err = v.Process(this.context)
 		if err != nil {
 			panic(err)

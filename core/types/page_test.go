@@ -14,26 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package queue
+package types
 
 import (
-	log "github.com/cihub/seelog"
-	"time"
-	. "github.com/medcl/gopa/core/env"
+	"testing"
+	"github.com/stretchr/testify/assert"
 )
 
-func Start(env *Env) {
+func TestPageTask_GetBytes(t *testing.T) {
+	task:=PageTask{Url:"baidu.com",Reference:"google.com",Depth:5}
+	bytes,_:=task.GetBytes()
+	task1,_:=fromBytes(bytes)
 
-	l:=GopaLogger{}
-	dq := newDiskQueue("task", env.RuntimeConfig.PathConfig.TaskData, 1024, 4, 1<<10, 2500, 2*time.Second, l)
-	defer dq.Close()
-
-
-	//env.RuntimeConfig.Storage = &store
-	log.Info("queue success started")
+	assert.Equal(t,"baidu.com",task1.Url)
+	assert.Equal(t,"google.com",task1.Reference)
+	assert.Equal(t,5,task1.Depth)
 
 }
 
-func Stop() error {
-	return nil
-}

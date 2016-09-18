@@ -28,9 +28,9 @@ type crawlerJoint struct {
 }
 
 func (this crawlerJoint) Process(s *Context) (*Context, error) {
-	s.Data = map[string]interface{}{}
-	s.Data["webpage"] = "hello world gogo "
-	s.Data["status"] = true
+	s.Data = map[ContextKey]interface{}{}
+	s.Data[("webpage")] = "hello world gogo "
+	s.Data[("status")] = true
 	fmt.Println("start to crawlling url:"+this.Url)
 	return s, nil
 }
@@ -39,8 +39,8 @@ type parserJoint struct {
 }
 
 func (this parserJoint) Process(s *Context) (*Context, error) {
-	s.Data["urls"] = "gogo"
-	s.Data["domain"] = "http://gogo.com"
+	s.Data[("urls")] = "gogo"
+	s.Data[("domain")] = "http://gogo.com"
 	//pub urls to channel
 	fmt.Println("start to parse web content")
 	return s, nil
@@ -70,7 +70,7 @@ func TestPipeline(t *testing.T)  {
 
 	pipeline:=Pipeline{}
 	stream:=&Context{}
-	stream.Data =map[string]interface{}{}
+	stream.Data =map[ContextKey]interface{}{}
 	stream.Data["url"]="gogol.com"
 	stream.Data["webpage"]="hello world gogo "
 

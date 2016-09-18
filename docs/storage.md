@@ -6,12 +6,14 @@
     *  Task metadata
    
    
+    key: [domain][url_path]:original_url: value: [string, original url without normalization]
     key: [domain][url_path]:snapshot: value: [UUID, uuid(url_path), key of webpage snapshot]
     key: [domain][url_path]:size: value: [int, data length]
     key: [domain][url_path]:last_check: value: [unix timestamp, last check time]
     key: [domain][url_path]:created: value: [unix timestamp, create datetime]
     key: [domain][url_path]:updated: value: [unix timestamp, update datetime]
     key: [domain][url_path]:index_summary: value: [extracted JSON metadata from page, ready for indexing]
+    key: [domain][url_path]:depth: value: [int, depth of crawling]
     
 * Stats
    

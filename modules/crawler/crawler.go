@@ -17,11 +17,13 @@ limitations under the License.
 package crawler
 
 import (
-	"time"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
 	. "github.com/medcl/gopa/core/pipeline"
+	"github.com/medcl/gopa/core/types"
 	. "github.com/medcl/gopa/modules/crawler/pipe"
+	"runtime"
+	"time"
 )
 
 var fetchQuitChannels []*chan bool
@@ -75,33 +77,13 @@ func RunPipeline(env *Env, quitC *chan bool, shard int) {
 
 	go func() {
 		for {
-			log.Debug("ready to receive url")
-			url := string(<-env.Channels.PendingFetchUrl)
-			log.Debug("shard:", shard, ",url received:", url)
+			log.Trace("waiting url to fetch")
 
-			//if !env.RuntimeConfig.Storage.UrlHasFetched([]byte(url)) {
+			url := env.Channels.PopUrlToFetch()
+			urlStr := string(url.Url)
+			log.Debug("shard:", shard, ",url received:", urlStr)
 
-			//log.Info("shard:", shard, ",url cool,start fetching:", url)
-
-			pipeline := Pipeline{}
-			pipeline.Context(&Context{Env: env}).
-				Start(FetchJoint{Url: url}).
-				//Join(ParserJoint{}).
-				//Join(SaveToFileSystemJoint{}).
-				Join(SaveToDBJoint{}).
-				//Join(PublishJoint{}).
-				End().
-				Run()
-
-			if env.RuntimeConfig.TaskConfig.FetchDelayThreshold > 0 {
-				log.Debug("sleep ", env.RuntimeConfig.TaskConfig.FetchDelayThreshold, "ms to control crawling speed")
-				time.Sleep(time.Duration(env.RuntimeConfig.TaskConfig.FetchDelayThreshold) * time.Millisecond)
-				log.Debug("wake up now,continue crawing")
-			}
-			//} else {
-			//	log.Debug("shard:", shard, ",url received,but already fetched,skip: ", url)
-			//}
-
+			execute(url, env)
 		}
 	}()
 
@@ -111,4 +93,35 @@ func RunPipeline(env *Env, quitC *chan bool, shard int) {
 
 	log.Trace("fetch task exit.shard:", shard)
 
+}
+
+func execute(task types.PageTask, env *Env) {
+	defer func() {
+		if r := recover(); r != nil {
+			if _, ok := r.(runtime.Error); ok {
+				err := r.(error)
+				log.Error(task.Url, " , ", err)
+			}
+		}
+	}()
+
+	pipeline := Pipeline{}
+	pipeline.Context(&Context{Env: env}).
+		Start(UrlSource{Url: task.Url, Depth: task.Depth, Reference: task.Reference}).
+		Join(UrlNormalizationJoint{FollowSubDomain:true}).
+		Join(LoadMetadataJoint{}).
+		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount:3}).
+		Join(FetchJoint{}).
+		Join(ParserJoint{DispatchLinks: true}).
+		//Join(SaveToFileSystemJoint{}).
+		Join(SaveToDBJoint{}).
+		Join(PublishJoint{}).
+		End().
+		Run()
+
+	if env.RuntimeConfig.TaskConfig.FetchDelayThreshold > 0 {
+		log.Debug("sleep ", env.RuntimeConfig.TaskConfig.FetchDelayThreshold, "ms to control crawling speed")
+		time.Sleep(time.Duration(env.RuntimeConfig.TaskConfig.FetchDelayThreshold) * time.Millisecond)
+		log.Debug("wake up now,continue crawing")
+	}
 }

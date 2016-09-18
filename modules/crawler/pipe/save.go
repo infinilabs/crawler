@@ -41,11 +41,11 @@ func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 		this.baseDir =this.context.Env.RuntimeConfig.PathConfig.WebData
 	}
 
-	url, ok := c.GetString(CONTEXT_URL.String())
+	url, ok := c.GetString(CONTEXT_URL)
 	if !ok {
 		return nil, errors.New("invalid url")
 	}
-	pageItem := c.Get(CONTEXT_PAGE_ITEM.String()).(*types.PageItem)
+	pageItem := c.Get(CONTEXT_PAGE_ITEM).(*types.PageItem)
 
 	log.Debug("save url,", url, ",domain,", pageItem.Domain)
 
@@ -53,14 +53,14 @@ func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 	fullPath:=path.Join(dir,file)
 	log.Trace("saving file,", fullPath)
 	os.MkdirAll(dir, 0777)
-	fout, error := os.Create(fullPath)
-	if error != nil {
-		log.Error(dir, error)
-		return nil, error
+	fout, err := os.Create(fullPath)
+	if err != nil {
+		log.Error(dir, err)
+		return nil, err
 	}
 
 	defer fout.Close()
-	_, err := fout.Write(pageItem.Body)
+	_, err = fout.Write(pageItem.Body)
 	if err != nil {
 		return nil, err
 	}

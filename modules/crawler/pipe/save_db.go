@@ -20,7 +20,6 @@ import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/types"
-	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/medcl/gopa/modules/storage/boltdb"
 	"strings"
 	"path"
@@ -33,14 +32,11 @@ type SaveToDBJoint struct {
 func (this SaveToDBJoint) Process(c *Context) (*Context, error) {
 	this.context = c
 
-	url, ok := c.GetString(CONTEXT_URL.String())
+	url := c.MustGetString(CONTEXT_URL)
 
-	if !ok {
-		return nil, errors.New("invalid url")
-	}
-	pageItem := c.Get(CONTEXT_PAGE_ITEM.String()).(*types.PageItem)
-	savePath := c.MustGetString(CONTEXT_SAVE_PATH.String())
-	saveFile := c.MustGetString(CONTEXT_SAVE_FILENAME.String())
+	pageItem := c.Get(CONTEXT_PAGE_ITEM).(*types.PageItem)
+	savePath := c.MustGetString(CONTEXT_SAVE_PATH)
+	saveFile := c.MustGetString(CONTEXT_SAVE_FILENAME)
 
 	log.Debug("save url to db,", url, ",domain,", pageItem.Domain)
 

@@ -22,17 +22,16 @@ import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/logging"
-	task "github.com/medcl/gopa/core/tasks"
-	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules"
-	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"runtime"
-	"strconv"
-	"strings"
 	"syscall"
 	"time"
+	"runtime/pprof"
+	"github.com/medcl/gopa/core/types"
+	 _ "net/http/pprof"
+	"net/http"
 )
 
 //
@@ -56,7 +55,6 @@ func onShutdown() {
 func main() {
 
 	var seedUrl, logLevel, configFile string
-
 	onStart()
 
 	defer logging.Flush()
@@ -64,8 +62,39 @@ func main() {
 	flag.StringVar(&seedUrl, "seed", "", "the seed url, where everything starts")
 	flag.StringVar(&logLevel, "log", "info", "the log level,options:trace,debug,info,warn,error, default: info")
 	flag.StringVar(&configFile, "config", "gopa.yml", "the loation of config file, default: gopa.yml")
+	var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+	var memprofile = flag.String("memprofile", "", "write memory profile to this file")
+	var pp = flag.String("pprof", "", "start pprof service, endpoint: http://localhost:6060/debug/pprof/")
 
 	flag.Parse()
+
+	if(*pp!=""){
+		go func() {
+			http.ListenAndServe("localhost:6060", nil)
+		}()
+	}
+
+
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Error(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
+
+	if *memprofile !=""{
+		if *memprofile != "" {
+			f, err := os.Create(*memprofile)
+			if err != nil {
+				log.Error(err)
+			}
+			pprof.WriteHeapProfile(f)
+			defer f.Close()
+		}
+	}
+
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
@@ -95,6 +124,7 @@ func main() {
 
 			//wait workers to exit
 			components.Stop()
+			env.Channels.Close()
 			finalQuitSignal <- true
 		}
 	}()
@@ -103,62 +133,62 @@ func main() {
 	//parse rule:url saved to store -> local path persisted to store -> fetched to pendingParseFiles -> redistributed to sharded goroutines -> parse -> clean urls -> enqueue to url store ->done
 
 	//sending feed to task queue
-	go func() {
+	//go func() {
 		//notice seed will not been persisted
 		if len(seedUrl) > 0 {
 			log.Debug("sending feed to fetch queue,", seedUrl)
-			env.Channels.PendingFetchUrl <- []byte(seedUrl)
+			env.Channels.PushUrlToCheck(types.NewPageTask(seedUrl,"",0))
 		}
-	}()
+	//}()
 
-	//load predefined fetch jobs
-	if env.RuntimeConfig.LoadTemplatedFetchJob {
-		go func() {
-
-			if util.FileExists(env.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt") {
-
-				templates := util.ReadAllLines(env.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt")
-				ids := util.ReadAllLines(env.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/id.txt")
-
-				for _, id := range ids {
-					for _, template := range templates {
-						log.Trace("id:", id)
-						log.Trace("template:", template)
-						url := strings.Replace(template, "{id}", id, -1)
-						log.Debug("new task from template:", url)
-						env.Channels.PendingFetchUrl <- []byte(url)
-					}
-				}
-				log.Info("templated download is done.")
-
-			}
-
-		}()
-	}
+	////load predefined fetch jobs
+	//if env.RuntimeConfig.LoadTemplatedFetchJob {
+	//	go func() {
+	//
+	//		if util.FileExists(env.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt") {
+	//
+	//			templates := util.ReadAllLines(env.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt")
+	//			ids := util.ReadAllLines(env.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/id.txt")
+	//
+	//			for _, id := range ids {
+	//				for _, template := range templates {
+	//					log.Trace("id:", id)
+	//					log.Trace("template:", template)
+	//					url := strings.Replace(template, "{id}", id, -1)
+	//					log.Debug("new task from template:", url)
+	//					env.Channels.PendingCheckUrl <- types.NewPageTask(url,"",0)
+	//				}
+	//			}
+	//			log.Info("templated download is done.")
+	//
+	//		}
+	//
+	//	}()
+	//}
 
 	//fetch urls from saved pages
-	if env.RuntimeConfig.CrawlerConfig.LoadPendingFetchJobs {
-		go task.LoadTaskFromLocalFile(env.Channels.PendingFetchUrl, env.RuntimeConfig)
-	}
+	//if env.RuntimeConfig.CrawlerConfig.LoadPendingFetchJobs {
+		//go task.LoadTaskFromLocalFile(env.Channels.PendingCheckUrl, env.RuntimeConfig)
+	//}
 
 	//parse fetch failed jobs,and will ignore the walk-filter
 	//TODO
 
-	if env.RuntimeConfig.LoadRuledFetchJob {
-		log.Debug("start ruled fetch")
-		go func() {
-			if env.RuntimeConfig.RuledFetchConfig.UrlTemplate != "" {
-				for i := env.RuntimeConfig.RuledFetchConfig.From; i <= env.RuntimeConfig.RuledFetchConfig.To; i += env.RuntimeConfig.RuledFetchConfig.Step {
-					url := strings.Replace(env.RuntimeConfig.RuledFetchConfig.UrlTemplate, "{id}", strconv.FormatInt(int64(i), 10), -1)
-					log.Debug("add ruled url:", url)
-					env.Channels.PendingFetchUrl <- []byte(url)
-				}
-			} else {
-				log.Error("ruled template is empty,ignore")
-			}
-		}()
-
-	}
+	//if env.RuntimeConfig.LoadRuledFetchJob {
+	//	log.Debug("start ruled fetch")
+	//	go func() {
+	//		if env.RuntimeConfig.RuledFetchConfig.UrlTemplate != "" {
+	//			for i := env.RuntimeConfig.RuledFetchConfig.From; i <= env.RuntimeConfig.RuledFetchConfig.To; i += env.RuntimeConfig.RuledFetchConfig.Step {
+	//				url := strings.Replace(env.RuntimeConfig.RuledFetchConfig.UrlTemplate, "{id}", strconv.FormatInt(int64(i), 10), -1)
+	//				log.Debug("add ruled url:", url)
+	//				env.Channels.PendingCheckUrl <- types.NewPageTask(url,"",0)
+	//			}
+	//		} else {
+	//			log.Error("ruled template is empty,ignore")
+	//		}
+	//	}()
+	//
+	//}
 
 	<-finalQuitSignal
 

@@ -20,6 +20,7 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 	"encoding/hex"
 	"crypto/md5"
+	"github.com/medcl/gopa/core/types"
 )
 
 
@@ -28,13 +29,24 @@ type PublishJoint struct {
 
 func (this PublishJoint) Process(c *Context) (*Context, error) {
 
-	m := md5.Sum([]byte(c.MustGetString(CONTEXT_URL.String())))
+	m := md5.Sum([]byte(c.MustGetString(CONTEXT_URL)))
 	id:=hex.EncodeToString(m[:])
 
 	data:=map[string]interface{}{}
-	meta,b:= c.GetMap(CONTEXT_PAGE_METADATA.String())
+	meta,b:= c.GetMap(CONTEXT_PAGE_METADATA)
 	if(b){
 		data["metadata"]=meta
+	}
+
+	links,b:= c.GetMap(CONTEXT_PAGE_LINKS)
+	if(b){
+		maps:=[]types.PageLink{}
+		for k,v:= range links{
+			item:=types.PageLink{Url:k,Label:v.(string)}
+			maps=append(maps,item)
+		}
+		data["links"]=maps
+
 	}
 	_,err:= c.Env.ESClient.IndexDoc(id,data)
 	if(err!=nil){

@@ -24,6 +24,7 @@ type PathConfig struct {
 	Data     string  `data`
 	Log      string  `log`
 	TaskData string
+	QueueData string
 	WebData  string
 
 	SavedFileLog    string //path of saved files

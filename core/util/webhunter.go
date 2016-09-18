@@ -113,19 +113,18 @@ func get(treasure *types.PageItem, url string, cookie string) ([]byte, error) {
 	}
 
 	resp, err := client.Do(reqest)
-
 	treasure.Domain = reqest.Host
 	treasure.Proto = reqest.Proto
 	treasure.Url = url
 	treasure.UrlPath = reqest.URL.Path
 
-	log.Trace("status code,", resp.StatusCode, ",size,", resp.ContentLength)
 
 	if err != nil {
-		if resp != nil && resp.StatusCode == 302 {
+		if resp != nil && resp.StatusCode == 301&& resp.StatusCode == 302 {
 			log.Debug("got redirect:", url, " => ", resp.Header.Get("Location"))
 			location := resp.Header.Get("Location")
 			if len(location) > 0 && location != url {
+				treasure.Url = location
 				return get(treasure, location, cookie)
 			}
 
@@ -134,6 +133,8 @@ func get(treasure *types.PageItem, url string, cookie string) ([]byte, error) {
 		}
 		return nil, err
 	}
+
+	log.Trace("status code,", resp.StatusCode, ",size,", resp.ContentLength)
 
 	treasure.StatusCode = resp.StatusCode
 	if resp.Header != nil {

@@ -24,6 +24,8 @@ import (
 	. "github.com/medcl/gopa/modules/api/http"
 	websocket "github.com/medcl/gopa/modules/api/websocket"
 	ui "github.com/medcl/gopa/ui"
+	 _ "net/http/pprof"
+
 )
 
 func internalStart(env *Env) {

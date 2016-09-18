@@ -30,21 +30,21 @@ import (
 
 func JoinPath(filenames ...string) string {
 
-	hasSlash:=false
-	result:=""
-	for _,str:=range filenames{
-		currentHasSlash:=false
-		if(len(result)>0){
-			currentHasSlash=strings.HasPrefix(str, "/")
-			if(hasSlash&&currentHasSlash){
+	hasSlash := false
+	result := ""
+	for _, str := range filenames {
+		currentHasSlash := false
+		if len(result) > 0 {
+			currentHasSlash = strings.HasPrefix(str, "/")
+			if hasSlash && currentHasSlash {
 				str = strings.TrimLeft(str, "/")
 			}
-			if(!(hasSlash||currentHasSlash)){
-				str="/"+str
+			if !(hasSlash || currentHasSlash) {
+				str = "/" + str
 			}
 		}
-		hasSlash=strings.HasSuffix(str, "/")
-		result+=str
+		hasSlash = strings.HasSuffix(str, "/")
+		result += str
 	}
 	return result
 }

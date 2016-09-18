@@ -16,7 +16,13 @@ limitations under the License.
 
 package types
 
-import ."time"
+import (
+	. "time"
+	"bytes"
+	"strings"
+	"fmt"
+	"strconv"
+)
 
 type KV struct {
 	Key   string
@@ -47,4 +53,74 @@ type PageItem struct {
 	H1            []string
 	H2            []string
 	H3            []string
+}
+
+type PageLink struct {
+	Url string `json:"url"`
+	Label string `json:"label"`
+}
+
+type PageTask struct {
+	Url string
+	Reference string
+	Depth int
+}
+
+func (this PageTask)Get(url string)PageTask  {
+	task:=PageTask{}
+	task.Url=url
+	task.Reference=""
+	task.Depth=0
+	return task
+}
+
+func (this PageTask)MustGetBytes()([]byte)  {
+
+	bytes,err:=this.GetBytes()
+	if(err!=nil){
+		panic(err)
+	}
+	return bytes
+}
+
+var delimiter="|#|"
+
+func (this PageTask)GetBytes()([]byte,error)  {
+	var buf bytes.Buffer
+
+	buf.WriteString(fmt.Sprint(this.Depth))
+	buf.WriteString(delimiter)
+	buf.WriteString(this.Reference)
+	buf.WriteString(delimiter)
+	buf.WriteString(this.Url)
+
+	return buf.Bytes(), nil
+}
+func PageTaskFromBytes(b []byte)PageTask  {
+	task,err:=fromBytes(b)
+	if(err!=nil){
+		panic(err)
+	}
+	return task
+}
+
+func fromBytes(b []byte,)(PageTask,error)  {
+
+	str:=string(b)
+	array:=strings.Split(str,delimiter)
+	task:=PageTask{}
+	i, _ := strconv.Atoi(array[0])
+	task.Depth=i
+	task.Reference=array[1]
+	task.Url=array[2]
+
+	return task,nil
+}
+
+func NewPageTask(url,ref string,depth int)PageTask  {
+	task:=PageTask{}
+	task.Url=url
+	task.Reference=ref
+	task.Depth=depth
+	return task
 }

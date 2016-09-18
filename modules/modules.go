@@ -21,8 +21,8 @@ import (
 	. "github.com/medcl/gopa/core/env"
 	apiModule "github.com/medcl/gopa/modules/api"
 	crawlerModule "github.com/medcl/gopa/modules/crawler"
-	parserModule "github.com/medcl/gopa/modules/parser"
 	storageModule "github.com/medcl/gopa/modules/storage"
+	"github.com/medcl/gopa/modules/checker"
 )
 
 type Modules struct {
@@ -42,11 +42,13 @@ func (this *Modules) Start() {
 	storageModule.Start(this.env)
 	apiModule.Start(this.env)
 	crawlerModule.Start(this.env)
-	parserModule.Start(this.env)
+	//parserModule.Start(this.env)
+	url_checker.Start(this.env)
 }
 
 func (this *Modules) Stop() {
-	parserModule.Stop()
+	//parserModule.Stop()
+	url_checker.Stop()
 	crawlerModule.Stop()
 	apiModule.Stop()
 	storageModule.Stop()

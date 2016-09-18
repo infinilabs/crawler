@@ -26,6 +26,11 @@ const STATS_PARSE_SUCCESS_COUNT = "stats.count.parse.success"
 const STATS_PARSE_FAIL_COUNT = "stats.count.parse.fail"
 const STATS_PARSE_IGNORE_COUNT = "stats.count.ignore.fail"
 
+const STATS_CHECKER_PUSH_COUNT = "stats.count.checker.push"
+const STATS_CHECKER_POP_COUNT = "stats.count.checker.pop"
+const STATS_FETCH_PUSH_COUNT = "stats.count.fetch.push"
+const STATS_FETCH_POP_COUNT = "stats.count.fetch.pop"
+
 
 type StatsCount struct {
 	TotalCount   int `json:"total,omitempty"`
@@ -36,6 +41,7 @@ type StatsCount struct {
 }
 
 type TaskStatus struct {
-	Fetch map[string]StatsCount `json:"fetch"`
-	Parse map[string]StatsCount `json:"parse"`
+	//Fetch map[string]StatsCount `json:"fetch"`
+	//Parse map[string]StatsCount `json:"parse"`
+	Stats map[string]map[string]int `json:"stats"`
 }

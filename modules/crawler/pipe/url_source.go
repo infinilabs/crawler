@@ -14,11 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package util
+package pipe
 
-type DeduplicatePlugin interface {
-	Init(fileName string) error
-	Persist() error
-	Lookup(key []byte) bool
-	Add(key []byte) error
+import . "github.com/medcl/gopa/core/pipeline"
+
+type UrlSource struct {
+	Url string
+	Reference string
+	Depth int
 }
+
+func (this UrlSource) Process(context *Context) (*Context, error) {
+
+	context.Set(CONTEXT_URL,this.Url)
+	context.Set(CONTEXT_DEPTH,this.Depth)
+	context.Set(CONTEXT_REFERENCE_URL,this.Reference)
+	return context, nil
+}
+

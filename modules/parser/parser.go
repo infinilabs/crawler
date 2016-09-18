@@ -57,7 +57,7 @@ func Stop() error {
 
 		started = false
 	} else {
-		log.Error("parser is not started, please start it first.")
+		log.Error("parser is not started")
 	}
 
 	return nil

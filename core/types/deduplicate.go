@@ -16,19 +16,9 @@ limitations under the License.
 
 package types
 
-
-type Store interface {
-
-	Open() error
-	Close() error
-
-	GetValue(bucket string, key []byte) []byte
-
-	AddValue(bucket string, key []byte, value []byte) error
-
-	DeleteValue(bucket string, key []byte, value []byte) error
-
-	DeleteBucket(bucket string, key []byte, value []byte) error
-
+type DeduplicatePlugin interface {
+	Init(fileName string) error
+	Persist() error
+	Lookup(key []byte) bool
+	Add(key []byte) error
 }
-

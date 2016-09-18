@@ -14,21 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package types
+package pipe
+
+import (
+	"testing"
+	"github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/pipeline"
+)
+
+func TestNormailzeLinks(t *testing.T) {
+
+	context:= pipeline.Context{Env:env.EmptyEnv()}
+	context.Data=map[string]interface{}{}
+	context.Set(CONTEXT_URL.String(),[]byte("http://elasticsearch.cn/"))
+	context.Set(CONTEXT_DEPTH.String(),1)
+	parse:=UrlNormalizationJoint{}
+	parse.Process(&context)
 
 
-type Store interface {
-
-	Open() error
-	Close() error
-
-	GetValue(bucket string, key []byte) []byte
-
-	AddValue(bucket string, key []byte, value []byte) error
-
-	DeleteValue(bucket string, key []byte, value []byte) error
-
-	DeleteBucket(bucket string, key []byte, value []byte) error
+	//assert.Equal(t,"baidu",links["baidu.com"])
+	//assert.Equal(t,"/wiki/Marking/Users",links["http://elasticsearch.cn/wiki/Marking/Users"])
 
 }
-

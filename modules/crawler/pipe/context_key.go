@@ -15,19 +15,24 @@ limitations under the License.
 */
 
 package pipe
-type ContextKey string
 
+import . "github.com/medcl/gopa/core/pipeline"
 
 const (
 	CONTEXT_URL       ContextKey = "URL"
+	CONTEXT_REFERENCE_URL       ContextKey = "REFERENCE_URL"
+	CONTEXT_DEPTH       ContextKey = "DEPTH"
+	CONTEXT_PAGE_BODY_BYTES ContextKey = "PAGE_BODY_BYTES"
 	CONTEXT_PAGE_ITEM ContextKey = "PAGE"
 	CONTEXT_HOST ContextKey = "HOST"
 	CONTEXT_URL_PATH ContextKey = "URL_PATH"
 	CONTEXT_PAGE_METADATA ContextKey = "PAGE_METADATA"
-	CONTEXT_SAVE_PATH ContextKey = "CONTEXT_SAVE_PATH"
-	CONTEXT_SAVE_FILENAME ContextKey = "CONTEXT_SAVE_FILENAME"
+	CONTEXT_PAGE_LINKS ContextKey = "PAGE_LINKS"
+	CONTEXT_SAVE_PATH ContextKey = "SAVE_PATH"
+	CONTEXT_SAVE_FILENAME ContextKey = "SAVE_FILENAME"
+
+
+	CACHE_TTL_TIMEOUT_HOST ContextKey = "CACHE_TTL_TIMEOUT_HOST"
+
 )
 
-func (this ContextKey) String() string {
-	return string(this)
-}

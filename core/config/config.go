@@ -40,37 +40,7 @@ func OldGetRuntimeConfig() *RuntimeConfig {
 
 	runtimeConfig.ClusterConfig.Name = GetStringConfig("cluster", "name", "gopa")
 
-	//// per cluster:data/gopa/
-	//runtimeConfig.PathConfig.Home = GetStringConfig("path", "home", "cluster/"+runtimeConfig.ClusterConfig.Name+"/")
-	//
-	//runtimeConfig.PathConfig.Data = GetStringConfig("path", "data", "")
-	//if runtimeConfig.PathConfig.Data == "" {
-	//	runtimeConfig.PathConfig.Data = runtimeConfig.PathConfig.Home + "/" + "data/"
-	//}
-	//
-	//runtimeConfig.PathConfig.Log = GetStringConfig("path", "log", "")
-	//if runtimeConfig.PathConfig.Log == "" {
-	//	runtimeConfig.PathConfig.Log = runtimeConfig.PathConfig.Home + "/" + "log/"
-	//}
-
-	//runtimeConfig.PathConfig.WebData = GetStringConfig("path", "webdata", "")
-	//if runtimeConfig.PathConfig.WebData == "" {
-	//	runtimeConfig.PathConfig.WebData = runtimeConfig.PathConfig.Data + "/" + "webdata/"
-	//}
-	//
-	//runtimeConfig.PathConfig.TaskData = GetStringConfig("path", "taskdata", "")
-	//if runtimeConfig.PathConfig.TaskData == "" {
-	//	runtimeConfig.PathConfig.TaskData = runtimeConfig.PathConfig.Data + "/" + "taskdata/"
-	//}
-
-	//runtimeConfig.StoreWebPageTogether = GetBoolConfig("Global", "StoreWebPageTogether", true)
-
 	runtimeConfig.TaskConfig = parseConfig()
-
-	//set default logging
-	//logPath := runtimeConfig.PathConfig.Log + "/" + runtimeConfig.TaskConfig.Name + "/gopa.log"
-
-	//runtimeConfig.LoggingConfig.Path = logPath
 
 	//runtimeConfig.ParseUrlsFromSavedFileLog = GetBoolConfig("Switch", "ParseUrlsFromSavedFileLog", true)
 	runtimeConfig.LoadTemplatedFetchJob = GetBoolConfig("Switch", "LoadTemplatedFetchJob", true)
@@ -85,17 +55,10 @@ func OldGetRuntimeConfig() *RuntimeConfig {
 	runtimeConfig.ParseBloomFilterFileName = GetStringConfig("BloomFilter", "ParseBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/parse.bloomfilter")
 	runtimeConfig.PendingFetchBloomFilterFileName = GetStringConfig("BloomFilter", "PendingFetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/pending_fetch.bloomfilter")
 
-	//runtimeConfig.PathConfig.SavedFileLog = runtimeConfig.TaskConfig.TaskDataPath + "/tasks/pending_parse.files"
-	//runtimeConfig.PathConfig.PendingFetchLog = runtimeConfig.TaskConfig.TaskDataPath + "/tasks/pending_fetch.urls"
-	//runtimeConfig.PathConfig.FetchFailedLog = runtimeConfig.TaskConfig.TaskDataPath + "/tasks/failed_fetch.urls"
-
 	runtimeConfig.MaxGoRoutine = GetIntConfig("Global", "MaxGoRoutine", 1)
 	if runtimeConfig.MaxGoRoutine < 2 {
 		runtimeConfig.MaxGoRoutine = 2
 	}
-
-	//log.Debug("maxGoRoutine:", runtimeConfig.MaxGoRoutine)
-	//log.Debug("path.home:", runtimeConfig.PathConfig.Home)
 
 	//os.MkdirAll(runtimeConfig.PathConfig.Home, 0777)
 	os.MkdirAll(runtimeConfig.PathConfig.Data, 0777)
@@ -149,15 +112,6 @@ func parseConfig() *TaskConfig {
 
 	taskConfig.Cookie = GetStringConfig("CrawlerRule", "Cookie", "")
 	taskConfig.FetchDelayThreshold = GetIntConfig("CrawlerRule", "FetchDelayThreshold", 0)
-
-	//taskConfig.TaskDataPath = GetStringConfig("CrawlerRule", "TaskData", runtimeConfig.PathConfig.TaskData+"/"+taskConfig.Name+"/")
-
-	//defaultWebDataPath := runtimeConfig.PathConfig.WebData + "/" + taskConfig.Name + "/"
-	//if runtimeConfig.StoreWebPageTogether {
-	//	defaultWebDataPath = runtimeConfig.PathConfig.WebData
-	//}
-
-	//taskConfig.WebDataPath = GetStringConfig("CrawlerRule", "WebData", defaultWebDataPath)
 
 	log.Debug("finished parsing taskConfig")
 	return taskConfig

@@ -23,17 +23,12 @@ import (
 	"github.com/medcl/gopa/core/types"
 	"github.com/medcl/gopa/core/util"
 	"github.com/syndtr/goleveldb/leveldb/errors"
-	. "net/url"
-	"strings"
 	"time"
 )
 
 type FetchJoint struct {
 	context             *Context
-	Url                 string
-	domain              string
 	timeout             time.Duration
-	splitByUrlParameter []string
 }
 
 func (this FetchJoint) Process(context *Context) (*Context, error) {
@@ -42,16 +37,11 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 	this.context = context
 	t := time.NewTimer(this.timeout)
 	defer t.Stop()
-	requestUrl := this.Url
+	requestUrl := context.MustGetString(CONTEXT_URL)
 
 	if len(requestUrl) == 0 {
 		log.Error("invalid fetchUrl")
 		return context, errors.New("invalid fetchUrl")
-	}
-
-	//adding default http protocol
-	if !strings.HasPrefix(requestUrl, "http") {
-		requestUrl = "http://" + requestUrl
 	}
 
 	runtimeConfig := context.Env.RuntimeConfig
@@ -123,11 +113,13 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 		//start to fetch remote content
 		body, err := util.HttpGetWithCookie(&pageItem, requestUrl, config.Cookie)
 
+
 		if err == nil {
 			if body != nil {
 				if pageItem.StatusCode == 404 || pageItem.StatusCode == 302 {
 					log.Error("error while 404 or 302:", requestUrl, " ", pageItem.StatusCode)
 					flg <- false
+					context.Break()
 					return
 				}
 
@@ -157,9 +149,10 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 				//}
 			}
 
-			this.parse(requestUrl)
-			context.Set(CONTEXT_PAGE_ITEM.String(), &pageItem)
-			context.Set(CONTEXT_URL.String(), requestUrl)
+			//update url, in case catch redirects
+			context.Set(CONTEXT_URL,pageItem.Url)
+			context.Set(CONTEXT_PAGE_BODY_BYTES,body)
+			context.Set(CONTEXT_PAGE_ITEM, &pageItem)
 			//storage.AddFetchedUrl(url)
 			log.Debug("exit fetchUrl method:", requestUrl)
 			flg <- true
@@ -170,104 +163,26 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 		}
 	}()
 
+	domain:=context.MustGetString(CONTEXT_HOST)
+
 	//监听通道，由于设有超时，不可能泄露
 	select {
 	case <-t.C:
 		log.Error("fetching url time out,", requestUrl)
-		stats.Increment(this.domain, stats.STATS_FETCH_TIMEOUT_COUNT)
+		stats.Increment(domain, stats.STATS_FETCH_TIMEOUT_COUNT)
+		context.Break()
 		return nil, errors.New("fetch url time out")
 	case value := <-flg:
 		if value {
 			log.Debug("fetching url normal exit,", requestUrl)
-			stats.Increment(this.domain, stats.STATS_FETCH_SUCCESS_COUNT)
+			stats.Increment(domain, stats.STATS_FETCH_SUCCESS_COUNT)
 		} else {
 			log.Debug("fetching url error exit,", requestUrl)
-			stats.Increment(this.domain, stats.STATS_FETCH_FAIL_COUNT)
+			context.Break()
+			stats.Increment(domain, stats.STATS_FETCH_FAIL_COUNT)
 		}
 		return context, nil
 	}
 
 	return context, nil
-}
-
-func (this FetchJoint) parse(urlStr string) (string, string) {
-
-	log.Trace("start parse url,", urlStr)
-	myurl1, _ := Parse(urlStr)
-
-	this.context.Set(CONTEXT_HOST.String(), myurl1.Host)
-	this.context.Set(CONTEXT_URL_PATH.String(), myurl1.RawPath)
-
-	this.domain = myurl1.Host
-	//baseDir := myurl1.Host
-	//baseDir = strings.Replace(baseDir, `:`, `_`, -1)
-
-	filePath := ""
-	filename := ""
-
-	filenamePrefix := ""
-
-	//the url is a folder, making folders
-	if strings.HasSuffix(urlStr, "/") {
-		filename = "default.html"
-		log.Trace("no page name found,use default.html:", urlStr)
-	}
-
-	// if the url have parameters
-	if len(myurl1.Query()) > 0 {
-
-		//TODO 不处理非网页内容，去除js 图片 css 压缩包等
-
-		if len(this.splitByUrlParameter) > 0 {
-
-			for i := 0; i < len(this.splitByUrlParameter); i++ {
-				breakTagTemp := myurl1.Query().Get(this.splitByUrlParameter[i])
-				if breakTagTemp != "" {
-					filenamePrefix = filenamePrefix + this.splitByUrlParameter[i] + "_" + breakTagTemp + "_"
-				}
-			}
-		} else {
-			queryMap := myurl1.Query()
-			//			queryMap = sort.Sort(queryMap) //TODO sort the parameters by parameter key
-			for key, value := range queryMap {
-				if value != nil && len(value) > 0 {
-					if len(value) > 0 {
-						filenamePrefix = filenamePrefix + key + "_"
-						for i := 0; i < len(value); i++ {
-							v := value[i]
-							if v != "" && len(v) > 0 {
-								filenamePrefix = filenamePrefix + v + "_"
-							}
-						}
-					}
-
-				}
-			}
-		}
-	}
-
-	//split folder and filename and also insert the prefix filename
-	index := strings.LastIndex(myurl1.Path, "/")
-	if index > 0 {
-		//http://xx.com/1112/12
-		filePath = myurl1.Path[0:index]
-		//filePath = path.Join(baseDir, filePath)
-
-		//if the page extension is missing
-		if !strings.Contains(myurl1.Path, ".") {
-			filename = myurl1.Path[index:len(myurl1.Path)] + ".html"
-		} else {
-			filename = myurl1.Path[index:len(myurl1.Path)]
-		}
-	} else {
-		//filePath = path.Join(baseDir, filePath)
-		filename = "default.html" // this.defaultSavedFileName
-	}
-
-	filename = strings.Replace(filename, "/", "", -1)
-	filename = filenamePrefix + filename
-	this.context.Set(CONTEXT_SAVE_PATH.String(), filePath)
-	this.context.Set(CONTEXT_SAVE_FILENAME.String(), filename)
-
-	return filePath, filename
 }

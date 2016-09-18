@@ -34,6 +34,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	log "github.com/cihub/seelog"
 )
 
 // diskQueue implements the BackendQueue interface
@@ -81,16 +82,15 @@ type diskQueue struct {
 	emptyResponseChan chan error
 	exitChan          chan int
 	exitSyncChan      chan int
-
-	logger logger
 }
+
+
 
 // newDiskQueue instantiates a new instance of diskQueue, retrieving metadata
 // from the filesystem and starting the read ahead goroutine
-func newDiskQueue(name string, dataPath string, maxBytesPerFile int64,
+func NewDiskQueue(name string, dataPath string, maxBytesPerFile int64,
 	minMsgSize int32, maxMsgSize int32,
-	syncEvery int64, syncTimeout time.Duration,
-	logger logger) BackendQueue {
+	syncEvery int64, syncTimeout time.Duration) BackendQueue {
 	d := diskQueue{
 		name:              name,
 		dataPath:          dataPath,
@@ -106,7 +106,6 @@ func newDiskQueue(name string, dataPath string, maxBytesPerFile int64,
 		exitSyncChan:      make(chan int),
 		syncEvery:         syncEvery,
 		syncTimeout:       syncTimeout,
-		logger:            logger,
 	}
 
 	// no need to lock here, nothing else could possibly be touching this instance
@@ -121,10 +120,7 @@ func newDiskQueue(name string, dataPath string, maxBytesPerFile int64,
 }
 
 func (d *diskQueue) logf(f string, args ...interface{}) {
-	if d.logger == nil {
-		return
-	}
-	d.logger.Output(2, fmt.Sprintf(f, args...))
+	log.Tracef(f,args)
 }
 
 // Depth returns the depth of the queue

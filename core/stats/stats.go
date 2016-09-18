@@ -17,16 +17,16 @@ limitations under the License.
 package stats
 
 import (
-	"sync"
+	"encoding/json"
 	"runtime"
+	"sync"
 )
-
 
 var data map[string]map[string]int
 var inited bool
-var l sync.Mutex
+var l sync.RWMutex
 
-func initData(domain,key string) {
+func initData(domain, key string) {
 	l.Lock()
 	if !inited {
 		data = make(map[string]map[string]int)
@@ -46,39 +46,41 @@ func initData(domain,key string) {
 	runtime.Gosched()
 }
 
-
-func Increment(domain,key string) {
-	IncrementBy(domain,key, 1)
+func Increment(domain, key string) {
+	IncrementBy(domain, key, 1)
 }
 
-
-func IncrementBy(domain,key string, value int) {
-	initData(domain,key)
+func IncrementBy(domain, key string, value int) {
+	initData(domain, key)
 	l.Lock()
 	data[domain][key] += value
 	l.Unlock()
 	runtime.Gosched()
 }
 
-
-func Decrement(domain,key string) {
-	DecrementBy(domain,key, 1)
+func Decrement(domain, key string) {
+	DecrementBy(domain, key, 1)
 }
 
-
-func DecrementBy(domain,key string, value int) {
-	initData(domain,key)
+func DecrementBy(domain, key string, value int) {
+	initData(domain, key)
 	l.Lock()
 	data[domain][key] -= value
 	l.Unlock()
 	runtime.Gosched()
 }
 
-func Stat(domain,key string)int {
-	initData(domain,key)
-	return (data[domain][key])
+func Stat(domain, key string) int {
+	initData(domain, key)
+	l.RLock()
+	v := (data[domain][key])
+	l.RUnlock()
+	return v
 }
 
-func StatsAll() map[string]map[string]int {
-	return (data)
+func StatsAll() []byte {
+	l.RLock()
+	defer l.RUnlock()
+	b, _ := json.MarshalIndent(data, "", " ")
+	return b
 }

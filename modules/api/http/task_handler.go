@@ -20,6 +20,7 @@ import (
 	logger "github.com/cihub/seelog"
 	_ "github.com/jmoiron/jsonq"
 	"net/http"
+	"github.com/medcl/gopa/core/types"
 )
 
 func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request) {
@@ -37,7 +38,9 @@ func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request) {
 
 		logger.Info("receive new seed:", seed)
 
-		this.Env.Channels.PendingFetchUrl <- []byte(seed)
+		task:=types.NewPageTask(seed,"",0)
+
+		this.Env.Channels.PushUrlToCheck(task)
 
 		this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
 	} else {

@@ -26,6 +26,9 @@ import (
 	"regexp"
 	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/core/types"
+	. "github.com/medcl/gopa/core/queue"
+	"time"
+	"github.com/medcl/gopa/core/stats"
 )
 
 type Env struct {
@@ -60,10 +63,9 @@ func Environment(sysConfig SystemConfig) *Env {
 	}
 
 	env.Channels = &Channels{}
-	env.Channels.PendingFetchUrl = make(chan []byte, 10) //buffer number is 10
+	env.Channels.pendingFetchUrl = make(chan types.PageTask, 0) //buffer number is 10
+	env.Channels.pendingCheckUrl = make(chan types.PageTask, 0) //buffer number is 10
 	env.Registrar = &Registrar{values:map[string]interface{}{}}
-	//env.Logger = logger
-
 
 	env.init()
 
@@ -116,6 +118,7 @@ func (this *Env) loadRuntimeConfig()(RuntimeConfig,error) {
 
 	config.PathConfig.WebData = config.PathConfig.Data + "/web/"
 	config.PathConfig.TaskData = config.PathConfig.Data + "/tasks/"
+	config.PathConfig.QueueData= config.PathConfig.Data + "/queue/"
 
 	config.TaskConfig.LinkUrlExtractRegex=regexp.MustCompile(config.TaskConfig.LinkUrlExtractRegexStr)
 	config.TaskConfig.FetchUrlPattern=regexp.MustCompile(config.TaskConfig.FetchUrlPatternStr)
@@ -132,11 +135,13 @@ func (this *Env) init()(error){
 	}
 	os.MkdirAll(this.RuntimeConfig.PathConfig.Data, 0777)
 	os.MkdirAll(this.RuntimeConfig.PathConfig.Log, 0777)
+	os.MkdirAll(this.RuntimeConfig.PathConfig.QueueData, 0777)
 	os.MkdirAll(this.RuntimeConfig.PathConfig.WebData, 0777)
 	os.MkdirAll(this.RuntimeConfig.PathConfig.TaskData, 0777)
 
 	this.ESClient=util.ElasticsearchClient{Host:this.RuntimeConfig.IndexingConfig.Host,Index:this.RuntimeConfig.IndexingConfig.Index}
-
+	this.Channels.pendingFetchDiskQueue = NewDiskQueue("pending_fetch", this.RuntimeConfig.PathConfig.QueueData, 100*1024*1024, 4, 1<<10, 2500, 2*time.Second)
+	this.Channels.pendingCheckDiskQueue = NewDiskQueue("pending_check", this.RuntimeConfig.PathConfig.QueueData, 100*1024*1024, 4, 1<<10, 2500, 2*time.Second)
 	return nil
 }
 
@@ -145,8 +150,73 @@ func EmptyEnv() *Env {
 }
 
 type Channels struct {
-	PendingFetchUrl chan []byte
-	PendingSaveTreasure chan *types.PageItem
+	pendingCheckUrl    chan types.PageTask //check if the url need to fetch or not
+	pendingFetchUrl     chan types.PageTask //the urls pending to fetch
+
+	pendingFetchDiskQueue BackendQueue
+	pendingCheckDiskQueue BackendQueue
+}
+
+func (this *Channels)PushUrlToCheck(url types.PageTask) error  {
+	stats.Increment("global",stats.STATS_CHECKER_PUSH_COUNT)
+	//push chan first and then push diskqueue
+	select {
+	case  this.pendingCheckUrl<-url:
+		log.Trace("check url add to chan")
+		return nil
+	default:
+		err:=this.pendingCheckDiskQueue.Put(url.MustGetBytes())
+		log.Trace("check url add to disk queue")
+		return err
+	}
+}
+func (this *Channels)PushUrlToFetch(url types.PageTask) error  {
+	stats.Increment("global",stats.STATS_FETCH_PUSH_COUNT)
+
+	//push chan first and then push diskqueue
+	select {
+	case  this.pendingFetchUrl<-url:
+		log.Trace("fetch url add to chan")
+		return nil
+	default:
+		err:=this.pendingFetchDiskQueue.Put(url.MustGetBytes())
+		log.Trace("fetch url add to disk queue")
+		return err
+	}
+
+}
+
+func (this *Channels)PopUrlToCheck() types.PageTask  {
+	stats.Increment("global",stats.STATS_CHECKER_POP_COUNT)
+
+	//pop chan first and then pop diskqueue
+	select {
+	case url := <-this.pendingCheckUrl:
+		return url
+	default:
+		b := <-this.pendingCheckDiskQueue.ReadChan()
+		url:= types.PageTaskFromBytes(b)
+		return url
+	}
+}
+
+func (this *Channels)PopUrlToFetch()types.PageTask  {
+	stats.Increment("global",stats.STATS_FETCH_POP_COUNT)
+
+	//pop chan first and then pop diskqueue
+	select {
+	case url := <-this.pendingFetchUrl:
+		return url
+	default:
+		b := <-this.pendingFetchDiskQueue.ReadChan()
+		url:= types.PageTaskFromBytes(b)
+		return url
+	}
+}
+
+func (this *Channels) Close()  {
+	this.pendingFetchDiskQueue.Close()
+	this.pendingCheckDiskQueue.Close()
 }
 
 //high priority config, init from the environment or startup, can't be changed

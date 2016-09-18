@@ -20,6 +20,7 @@ import (
 	"testing"
 	"fmt"
 	"path"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestJoinPath(t *testing.T) {
@@ -27,7 +28,7 @@ func TestJoinPath(t *testing.T) {
 	path2:="/blog/"
 	path3:="/comments/1.html"
 	str:=path.Join(path1,path2,path3)
-	//str:=JoinPath(path1,path2,path3)
 	fmt.Println(str)
+	assert.Equal(t,"wwww.baidu.com/blog/comments/1.html",str)
 }
 
