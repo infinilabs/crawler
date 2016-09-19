@@ -47,7 +47,7 @@ func hash64(s []byte) hash.Hash64 {
 	return h
 }
 
-func (filter *HyperLogLogFilter) Init(fileName string) error {
+func (filter *HyperLogLogFilter) Open(fileName string) error {
 	filter.l.Lock()
 	defer filter.l.Unlock()
 
@@ -82,7 +82,7 @@ func (filter *HyperLogLogFilter) Init(fileName string) error {
 	return nil
 }
 
-func (filter *HyperLogLogFilter) Persist() error {
+func (filter *HyperLogLogFilter) Close() error {
 	filter.l.Lock()
 	defer filter.l.Unlock()
 

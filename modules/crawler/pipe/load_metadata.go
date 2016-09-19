@@ -18,12 +18,14 @@ package pipe
 
 import (
 	. "github.com/medcl/gopa/core/pipeline"
-	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/stats"
 )
 
 //load metadata from db
 type LoadMetadataJoint struct {
+}
+
+func (this LoadMetadataJoint) Name() string {
+	return "load_metadata"
 }
 
 func (this LoadMetadataJoint) Process(context *Context) (*Context, error) {
@@ -33,22 +35,5 @@ func (this LoadMetadataJoint) Process(context *Context) (*Context, error) {
 	return context, nil
 }
 
-
-
-type IgnoreTimeoutJoint struct {
-	IgnoreTimeoutAfterCount int
-}
-
-func (this IgnoreTimeoutJoint) Process(context *Context) (*Context, error) {
-
-
-	host:=context.MustGetString(CONTEXT_HOST)
-	timeoutCount:=stats.Stat(host,stats.STATS_FETCH_TIMEOUT_COUNT)
-	if(timeoutCount>this.IgnoreTimeoutAfterCount){
-		context.Break()
-		log.Warnf("hit timeout host, %s , ignore after,%d ",host,timeoutCount)
-	}
-	return context, nil
-}
 
 

@@ -12,6 +12,7 @@ go get github.com/syndtr/goleveldb/leveldb
 go get gopkg.in/yaml.v2
 go get github.com/gorilla/websocket
 go get github.com/boltdb/bolt/...
+go get github.com/quipo/statsd
 
 go get github.com/mjibson/esc
 (cd ui&& esc -ignore="static.go|build_static.sh|.DS_Store" -o static.go -pkg server ../ui )

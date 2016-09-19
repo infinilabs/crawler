@@ -24,6 +24,11 @@ import (
 type LogJoint struct {
 }
 
+
+func (this LogJoint) Name() string {
+	return "log"
+}
+
 func (this LogJoint) Process(s *Context) (*Context, error) {
 
 	return s, nil

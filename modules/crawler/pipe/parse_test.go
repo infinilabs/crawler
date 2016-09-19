@@ -30,8 +30,8 @@ func TestProcessLinks(t *testing.T) {
 		" </div> </body> </html>"
 
 	context:= pipeline.Context{Env:env.EmptyEnv()}
-	context.Data=map[string]interface{}{}
-	context.Set(CONTEXT_URL,[]byte("http://elasticsearch.cn/"))
+	context.Data=map[pipeline.ContextKey]interface{}{}
+	context.Set(CONTEXT_URL,"http://elasticsearch.cn/")
 	context.Set(CONTEXT_DEPTH,1)
 	context.Set(CONTEXT_PAGE_BODY_BYTES,[]byte(body))
 	parse:=ParserJoint{}
@@ -40,8 +40,8 @@ func TestProcessLinks(t *testing.T) {
 	links:=context.MustGetMap(CONTEXT_PAGE_LINKS)
 	println(links["google.com"])
 
-	//assert.Equal(t,"baidu",links["baidu.com"])
-	//assert.Equal(t,"/wiki/Marking/Users",links["http://elasticsearch.cn/wiki/Marking/Users"])
+	assert.Equal(t,"baidu",links["//baidu.com"])
+	assert.Equal(t,"/wiki/Marking/Users",links["/wiki/Marking/Users"])
 	assert.Equal(t,"myLink",links["google.com"])
 
 }

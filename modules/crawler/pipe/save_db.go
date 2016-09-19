@@ -29,6 +29,12 @@ type SaveToDBJoint struct {
 	context *Context
 }
 
+
+func (this SaveToDBJoint) Name() string {
+	return "save2db"
+}
+
+
 func (this SaveToDBJoint) Process(c *Context) (*Context, error) {
 	this.context = c
 

@@ -20,60 +20,111 @@ import (
 	"encoding/json"
 	"runtime"
 	"sync"
+	"github.com/quipo/statsd"
+	"time"
+	log "github.com/cihub/seelog"
 )
 
-var data map[string]map[string]int
+var data map[string]map[string]int64
 var inited bool
+var statsdInited bool
+var statsdbuffer  *statsd.StatsdBuffer
 var l sync.RWMutex
 
-func initData(domain, key string) {
+func initStatsd()  {
+
+	prefix := "gopa."
+	statsdclient := statsd.NewStatsdClient("statsdhost:8125", prefix) //TODO configable
+	err := statsdclient.CreateSocket()
+	if nil != err {
+		log.Error(err)
+		return
+	}
+
+	interval := time.Second * 1 // aggregate stats and flush every 1 seconds
+	statsdbuffer = statsd.NewStatsdBuffer(interval, statsdclient)
+	//defer statsdbuffer.Close()
+
+	statsdInited=true
+
+}
+
+func initData(category, key string) {
 	l.Lock()
+
 	if !inited {
-		data = make(map[string]map[string]int)
+		data = make(map[string]map[string]int64)
 		inited = true
 	}
 
-	_, ok := data[domain]
+	if !statsdInited{
+		initStatsd()
+	}
+
+
+	_, ok := data[category]
 	if !ok {
-		data[domain] = make(map[string]int)
+		data[category] = make(map[string]int64)
 	}
 
-	_, ok1 := data[domain][key]
+	_, ok1 := data[category][key]
 	if !ok1 {
-		data[domain][key] = 0
+		data[category][key] = 0
 	}
 	l.Unlock()
 	runtime.Gosched()
 }
 
-func Increment(domain, key string) {
-	IncrementBy(domain, key, 1)
+func Increment(category, key string) {
+	IncrementBy(category, key, 1)
 }
 
-func IncrementBy(domain, key string, value int) {
-	initData(domain, key)
+func IncrementBy(category, key string, value int64) {
+	initData(category, key)
+
+	if(statsdInited){
+		statsdbuffer.Incr(category+"."+key, value)
+	}
+
 	l.Lock()
-	data[domain][key] += value
+	data[category][key] += value
 	l.Unlock()
 	runtime.Gosched()
 }
 
-func Decrement(domain, key string) {
-	DecrementBy(domain, key, 1)
+func Decrement(category, key string) {
+	DecrementBy(category, key, 1)
 }
 
-func DecrementBy(domain, key string, value int) {
-	initData(domain, key)
+func DecrementBy(category, key string, value int64) {
+	initData(category, key)
+
+	if(statsdInited){
+		statsdbuffer.Decr(category+"."+key, value)
+	}
+
 	l.Lock()
-	data[domain][key] -= value
+	data[category][key] -= value
 	l.Unlock()
 	runtime.Gosched()
 }
 
-func Stat(domain, key string) int {
-	initData(domain, key)
+func Timing(category,key string,v int64)  {
+	if(statsdInited){
+		statsdbuffer.Timing(category+"."+key,v)
+	}
+}
+
+func Gauge(category,key string,v int64)  {
+	if(statsdInited){
+		statsdbuffer.Gauge(category+"."+key,v)
+	}
+}
+
+func Stat(category, key string) int64 {
+	initData(category, key)
 	l.RLock()
-	v := (data[domain][key])
+	v := (data[category][key])
 	l.RUnlock()
 	return v
 }

@@ -29,7 +29,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"time"
-	"github.com/syndtr/goleveldb/leveldb/errors"
+	"errors"
 )
 
 type Env struct {
@@ -62,8 +62,8 @@ func Environment(sysConfig SystemConfig) *Env {
 	}
 
 	env.Channels = &Channels{}
-	env.Channels.pendingFetchUrl = make(chan types.PageTask, 20) //buffer number is 10
-	env.Channels.pendingCheckUrl = make(chan types.PageTask, 20) //buffer number is 10
+	env.Channels.pendingFetchUrl = make(chan types.PageTask, 100) //buffer number is 10
+	env.Channels.pendingCheckUrl = make(chan types.PageTask, 100) //buffer number is 10
 	env.Registrar = &Registrar{values: map[string]interface{}{}}
 
 	env.init()
@@ -138,6 +138,7 @@ func (this *Env) init() error {
 	this.ESClient = util.ElasticsearchClient{Host: this.RuntimeConfig.IndexingConfig.Host, Index: this.RuntimeConfig.IndexingConfig.Index}
 	this.Channels.pendingFetchDiskQueue = NewDiskQueue("pending_fetch", this.RuntimeConfig.PathConfig.QueueData, 100*1024*1024, 4, 1<<10, 2500, 2*time.Second)
 	this.Channels.pendingCheckDiskQueue = NewDiskQueue("pending_check", this.RuntimeConfig.PathConfig.QueueData, 100*1024*1024, 4, 1<<10, 2500, 2*time.Second)
+
 	return nil
 }
 
@@ -193,7 +194,8 @@ start:
 		stats.Increment("global", stats.STATS_CHECKER_POP_DISK_COUNT)
 		return url,nil
 	default:
-		time.Sleep(3 * time.Second)
+		//log.Info("no check url to pop, wait 3s")
+		//time.Sleep(3 * time.Second)
 		goto start
 	}
 	return types.PageTask{},errors.New("no url found")
@@ -212,7 +214,8 @@ start:
 		stats.Increment("global", stats.STATS_FETCH_POP_DISK_COUNT)
 		return url,nil
 	default:
-		time.Sleep(3 * time.Second)
+		//log.Info("no fetch url to pop, wait 3s")
+		//time.Sleep(3 * time.Second)
 		goto start
 	}
 

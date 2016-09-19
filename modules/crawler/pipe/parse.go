@@ -21,13 +21,17 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/pipeline"
-	"strings"
 	"github.com/medcl/gopa/core/types"
+	"strings"
 )
 
 type ParserJoint struct {
-	links map[string]interface{}
+	links         map[string]interface{}
 	DispatchLinks bool
+}
+
+func (this ParserJoint) Name() string {
+	return "parse"
 }
 
 func (this ParserJoint) Process(s *Context) (*Context, error) {
@@ -40,41 +44,38 @@ func (this ParserJoint) Process(s *Context) (*Context, error) {
 		panic(err)
 	}
 
+	title := doc.Find("title").Text()
 
-
-	title:=doc.Find("title").Text()
-
-	metadata:=map[string]interface{}{}
-	if(len(title)>0){
-		metadata["title"]=title
+	metadata := map[string]interface{}{}
+	if len(title) > 0 {
+		metadata["title"] = title
 	}
 
 	doc.Find("meta").Each(func(i int, s *goquery.Selection) {
 		// For each item found, get the band and title
-		name,exist := s.Attr("name")
-		name=strings.TrimSpace(name)
-		if(exist&&len(name)>0){
-			content,exist := s.Attr("content")
-			if(exist){
-				metadata[name]=content
+		name, exist := s.Attr("name")
+		name = strings.TrimSpace(name)
+		if exist && len(name) > 0 {
+			content, exist := s.Attr("content")
+			if exist {
+				metadata[name] = content
 			}
 		}
 
 	})
 
-	if(len(metadata)>0){
-		s.Set(CONTEXT_PAGE_METADATA,metadata)
+	if len(metadata) > 0 {
+		s.Set(CONTEXT_PAGE_METADATA, metadata)
 	}
-
 
 	this.links = map[string]interface{}{}
 	doc.Find("a").Each(func(i int, s *goquery.Selection) {
 		href, exist := s.Attr("href")
 		href = strings.TrimSpace(href)
-		if exist && len(href) > 0 && !(strings.HasPrefix(href,"javascript"))&& !(strings.HasPrefix(href,"#")) && href!="/" {
-			if(strings.Contains(href,"#")){
-				hrefs:=strings.Split(href,"#")
-				href=hrefs[0]
+		if exist && len(href) > 0 && !(strings.HasPrefix(href, "javascript")) && !(strings.HasPrefix(href, "#")) && href != "/" {
+			if strings.Contains(href, "#") {
+				hrefs := strings.Split(href, "#")
+				href = hrefs[0]
 			}
 			text := strings.TrimSpace(s.Text())
 			strings.Replace(text, "\t", "", -1)
@@ -90,14 +91,11 @@ func (this ParserJoint) Process(s *Context) (*Context, error) {
 	s.Set(CONTEXT_PAGE_LINKS, this.links)
 
 	//dispatch links
-	for url,_ := range this.links{
-		if(this.DispatchLinks){
-			s.Env.Channels.PushUrlToCheck(types.NewPageTask(url,refUrl,depth+1))
+	for url, _ := range this.links {
+		if this.DispatchLinks {
+			s.Env.Channels.PushUrlToCheck(types.NewPageTask(url, refUrl, depth+1))
 		}
 	}
-
-
-
 
 	return s, nil
 }

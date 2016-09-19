@@ -1,9 +1,10 @@
+max_go_routine: 5
 cluster:
   name: "gopa"
 
 path:
-  data: "data"
-  log:  "log"
+  data: "/tmp/gopa/data"
+  log:  "/tmp/gopa/log"
 
 logging:
   level: "info"

@@ -31,7 +31,7 @@ type BloomFilter struct{
 }
 
 
-func (filter *BloomFilter) Init(fileName string) error{
+func (filter *BloomFilter) Open(fileName string) error{
 
 	filter.persistFileName=fileName
 
@@ -57,7 +57,7 @@ func (filter *BloomFilter) Init(fileName string) error{
 	return nil
 }
 
-func (filter *BloomFilter) Persist() error{
+func (filter *BloomFilter) Close() error{
 
 	log.Debug("bloomFilter start persist,file:",filter.persistFileName)
 

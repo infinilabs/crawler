@@ -14,31 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package storage
+package pipe
 
 import (
+	. "github.com/medcl/gopa/core/pipeline"
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/modules/storage/boltdb"
-	_ "time"
+	"github.com/medcl/gopa/core/stats"
 )
 
-var store boltdb.BoltdbStore
-
-func Start(env *Env) {
-
-	store = boltdb.BoltdbStore{Env:env}
-	err := store.Open()
-	if err != nil {
-		log.Error(err)
-	}
-	env.RuntimeConfig.Storage = &store
-	log.Info("storage success started")
-
-	env.Register("voltdb_ref", store.DB)
-
+func (this IgnoreTimeoutJoint) Name() string {
+	return "ignore_timeout"
 }
 
-func Stop() error {
-	return store.Close()
+type IgnoreTimeoutJoint struct {
+	IgnoreTimeoutAfterCount int64
+}
+
+func (this IgnoreTimeoutJoint) Process(context *Context) (*Context, error) {
+
+
+	host:=context.MustGetString(CONTEXT_HOST)
+	timeoutCount:=stats.Stat(host,stats.STATS_FETCH_TIMEOUT_COUNT)
+	if(timeoutCount>this.IgnoreTimeoutAfterCount){
+		context.Break()
+		log.Warnf("hit timeout host, %s , ignore after,%d ",host,timeoutCount)
+	}
+	return context, nil
 }

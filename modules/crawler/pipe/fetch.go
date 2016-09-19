@@ -22,13 +22,17 @@ import (
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/types"
 	"github.com/medcl/gopa/core/util"
-	"github.com/syndtr/goleveldb/leveldb/errors"
 	"time"
+	"errors"
 )
 
 type FetchJoint struct {
 	context             *Context
 	timeout             time.Duration
+}
+
+func (this FetchJoint) Name() string {
+	return "fetch"
 }
 
 func (this FetchJoint) Process(context *Context) (*Context, error) {
@@ -51,57 +55,6 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 
 	config := runtimeConfig.TaskConfig
 
-	//
-	//saveDir,saveFile := getSavedPath(runtimeConfig, url)
-	//
-	//savePath:=saveDir+saveFile
-	//
-	//if storage.FileHasSaved(savePath) {
-	//	log.Warn("file already saved,skip fetch.", savePath)
-	//	storage.AddSavedUrl(url)
-	//	log.Debug("file add to saved log")
-	//
-	//	//re-parse local's previous saved page
-	//	if runtimeConfig.ParserConfig.ReParseUrlsFromPreviousSavedPage {
-	//		if !storage.FileHasParsed([]byte(savePath)) {
-	//			log.Debug("previous saved page send to parse-queue:", savePath)
-	//			storage.LogSavedFile(runtimeConfig.PathConfig.SavedFileLog, requestUrl+"|||"+savePath)
-	//		}
-	//	}
-	//	storage.AddFetchedUrl(url)
-	//	log.Debug("file add to fetched log")
-	//	stats.Increment(domain,stats.STATS_FETCH_IGNORE_COUNT)
-	//	return
-	//}
-	//
-	////checking fetchUrlPattern
-	//log.Debug("started check fetchUrlPattern,", config.FetchUrlPattern, ",", requestUrl)
-	//if config.FetchUrlPattern.Match(url) {
-	//	log.Debug("match fetch url pattern,", requestUrl)
-	//	if len(config.FetchUrlMustNotContain) > 0 {
-	//		if util.ContainStr(requestUrl, config.FetchUrlMustNotContain) {
-	//			log.Debug("hit FetchUrlMustNotContain,ignore,", requestUrl, " , ", config.FetchUrlMustNotContain)
-	//			storage.AddFetchedUrl(url)
-	//			stats.Increment(domain,stats.STATS_FETCH_IGNORE_COUNT)
-	//			return
-	//		}
-	//	}
-	//
-	//	if len(config.FetchUrlMustContain) > 0 {
-	//		if !util.ContainStr(requestUrl, config.FetchUrlMustContain) {
-	//			log.Debug("not hit FetchUrlMustContain,ignore,", requestUrl, " , ", config.FetchUrlMustContain)
-	//			storage.AddFetchedUrl(url)
-	//			stats.Increment(domain,stats.STATS_FETCH_IGNORE_COUNT)
-	//			return
-	//		}
-	//	}
-	//} else {
-	//	log.Debug("does not hit FetchUrlPattern ignoring,", requestUrl)
-	//	storage.AddFetchedUrl(url)
-	//	stats.Increment(domain,stats.STATS_FETCH_IGNORE_COUNT)
-	//	return
-	//}
-
 	log.Debug("start fetch url,", requestUrl)
 	flg := make(chan bool, 1)
 
@@ -118,42 +71,16 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 			if body != nil {
 				if pageItem.StatusCode == 404 || pageItem.StatusCode == 302 {
 					log.Error("error while 404 or 302:", requestUrl, " ", pageItem.StatusCode)
-					flg <- false
 					context.Break()
+					flg <- false
 					return
 				}
-
-				////check save rules
-				//if(checkIfUrlWillBeSave(runtimeConfig,url)){
-				//
-				//
-				//	treasure.Body=body
-				//	treasure.Size=len(body)
-				//	treasure.Snapshot=savePath
-				//
-				//	//TODO _, err := Save(env, saveDir,saveFile, &treasure)
-				//
-				//	//data,_:=json.Marshal(treasure)
-				//	//log.Error(string(data))
-				//
-				//	if err == nil {
-				//		log.Info("saved:", savePath)
-				//
-				//		runtimeConfig.Storage.LogSavedFile(runtimeConfig.PathConfig.SavedFileLog,
-				//			requestUrl+"|||"+savePath)
-				//	} else {
-				//		log.Error("error while saved:", savePath, ",", err)
-				//		flg <- false
-				//		return
-				//	}
-				//}
 			}
 
 			//update url, in case catch redirects
 			context.Set(CONTEXT_URL,pageItem.Url)
 			context.Set(CONTEXT_PAGE_BODY_BYTES,body)
 			context.Set(CONTEXT_PAGE_ITEM, &pageItem)
-			//storage.AddFetchedUrl(url)
 			log.Debug("exit fetchUrl method:", requestUrl)
 			flg <- true
 

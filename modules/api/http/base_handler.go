@@ -21,7 +21,7 @@ import (
 	logger "github.com/cihub/seelog"
 	"github.com/jmoiron/jsonq"
 	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/core/types"
+	. "github.com/medcl/gopa/core/errors"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -127,7 +127,7 @@ func (this *Handler) GetJson(r *http.Request) (*jsonq.JsonQuery, error) {
 		return nil, err
 	}
 	if len(content) == 0 {
-		return nil, types.JSONIsEmpty
+		return nil, JSONIsEmpty
 	}
 	logger.Trace("receive json:", string(content))
 
@@ -147,7 +147,7 @@ func (this *Handler) GetRawBody(r *http.Request) ([]byte, error) {
 		return nil, err
 	}
 	if len(content) == 0 {
-		return nil, types.BodyEmpty
+		return nil, BodyEmpty
 	}
 	return content, nil
 }

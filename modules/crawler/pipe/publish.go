@@ -27,6 +27,11 @@ import (
 type PublishJoint struct {
 }
 
+
+func (this PublishJoint) Name() string {
+	return "publish"
+}
+
 func (this PublishJoint) Process(c *Context) (*Context, error) {
 
 	m := md5.Sum([]byte(c.MustGetString(CONTEXT_URL)))

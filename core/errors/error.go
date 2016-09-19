@@ -22,3 +22,16 @@ var (
 	JSONIsEmpty = errors.New("Json is empty")
 	BodyEmpty   = errors.New("Body is empty")
 )
+
+func New(text string) error {
+	return &errorString{text}
+}
+
+// errorString is a trivial implementation of error.
+type errorString struct {
+	s string
+}
+
+func (e *errorString) Error() string {
+	return e.s
+}

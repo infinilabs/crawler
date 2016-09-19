@@ -22,7 +22,7 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/types"
 	"github.com/medcl/gopa/core/util"
-	"github.com/syndtr/goleveldb/leveldb/errors"
+	"errors"
 	. "net/url"
 	"os"
 	"path"
@@ -33,6 +33,12 @@ type SaveToFileSystemJoint struct {
 	context *Context
 	baseDir string
 }
+
+
+func (this SaveToFileSystemJoint) Name() string {
+	return "save2fs"
+}
+
 
 func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 	this.context = c
@@ -55,6 +61,12 @@ func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 	os.MkdirAll(folder, 0777)
 
 	fullPath := path.Join(folder, file)
+
+	if(util.FileExists(fullPath)){
+		log.Warnf("file: %s already exists, ignore,url: %s",fullPath,url)
+		return c,nil
+	}
+
 	log.Trace("save url,", url, ",domain,", pageItem.Domain, ",fullpath,", fullPath)
 
 	fout, err := os.Create(fullPath)

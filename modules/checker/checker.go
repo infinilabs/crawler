@@ -21,11 +21,13 @@ import (
 	. "github.com/medcl/gopa/core/env"
 	. "github.com/medcl/gopa/core/filter"
 	"path"
+	"time"
+	"github.com/medcl/gopa/core/stats"
 )
 
 var quitChannel chan bool
 var started = false
-var filter= BloomFilter{}
+var filter= LeveldbFilter{}
 
 func Start(env *Env) {
 	if started {
@@ -34,7 +36,7 @@ func Start(env *Env) {
 	}
 	quitChannel = make(chan bool)
 
-	filter.Init(path.Join(env.RuntimeConfig.PathConfig.Data,"url_fetched.hyperloglog"))
+	filter.Open(path.Join(env.RuntimeConfig.PathConfig.Data,"url_fetched.filter"))
 
 	go runCheckerGo(env, &quitChannel)
 	started = true
@@ -44,12 +46,14 @@ func runCheckerGo(env *Env, quitC *chan bool) {
 
 	go func() {
 		for {
+			startTime:=time.Now()
 			if !started {
 				return
 			}
 			log.Trace("waiting url to check")
 
 			url,err := env.Channels.PopUrlToCheck()
+			stats.Increment("checker.url","walk")
 			if(err!=nil){
 				continue
 			}
@@ -57,12 +61,21 @@ func runCheckerGo(env *Env, quitC *chan bool) {
 
 			//checking
 			if(filter.Exists([]byte(url.Url))){
-				log.Info("url already pushed to fetch queue, ignore :", string(url.Url))
+				log.Debug("url already pushed to fetch queue, ignore :", string(url.Url))
 				continue
 			}
+
+			//add to filter
+			filter.Add([]byte(url.Url))
+
 			//send to disk queue
 			env.Channels.PushUrlToFetch(url)
+
+			stats.Increment("checker.url","get_valid_seed")
+
 			log.Debugf("send url: %s ,depth: %d to  fetch queue", string(url.Url), url.Depth)
+			elapsedTime:=time.Now().Sub(startTime)
+			stats.Timing("checker.url","time",elapsedTime.Nanoseconds())
 		}
 	}()
 
@@ -77,7 +90,7 @@ func Stop() error {
 	if started {
 		log.Debug("start shutting down url checker")
 
-		filter.Persist()
+		filter.Close()
 
 		quitChannel <- true
 

@@ -75,7 +75,7 @@ func noRedirect(req *http.Request, via []*http.Request) error {
 	return errors.New("Don't handle redirect!")
 }
 
-func get(treasure *types.PageItem, url string, cookie string) ([]byte, error) {
+func get(page *types.PageItem, url string, cookie string) ([]byte, error) {
 
 	log.Debug("let's get :" + url)
 
@@ -113,19 +113,18 @@ func get(treasure *types.PageItem, url string, cookie string) ([]byte, error) {
 	}
 
 	resp, err := client.Do(reqest)
-	treasure.Domain = reqest.Host
-	treasure.Proto = reqest.Proto
-	treasure.Url = url
-	treasure.UrlPath = reqest.URL.Path
-
+	page.Domain = reqest.Host
+	page.Proto = reqest.Proto
+	page.Url = url
+	page.UrlPath = reqest.URL.Path
 
 	if err != nil {
-		if resp != nil && resp.StatusCode == 301&& resp.StatusCode == 302 {
+		if resp != nil && resp.StatusCode == 301 && resp.StatusCode == 302 {
 			log.Debug("got redirect:", url, " => ", resp.Header.Get("Location"))
 			location := resp.Header.Get("Location")
 			if len(location) > 0 && location != url {
-				treasure.Url = location
-				return get(treasure, location, cookie)
+				page.Url = location
+				return get(page, location, cookie)
 			}
 
 		} else {
@@ -136,9 +135,9 @@ func get(treasure *types.PageItem, url string, cookie string) ([]byte, error) {
 
 	log.Trace("status code,", resp.StatusCode, ",size,", resp.ContentLength)
 
-	treasure.StatusCode = resp.StatusCode
+	page.StatusCode = resp.StatusCode
 	if resp.Header != nil {
-		treasure.Headers = resp.Header
+		page.Headers = resp.Header
 	}
 
 	defer resp.Body.Close()
@@ -162,8 +161,8 @@ func get(treasure *types.PageItem, url string, cookie string) ([]byte, error) {
 			log.Error(url, err)
 			return nil, err
 		}
-		treasure.Body = body
-		treasure.Size = len(body)
+		page.Body = body
+		page.Size = len(body)
 		return body, nil
 
 	}
@@ -241,9 +240,9 @@ func post(url string, cookie string, postStr string) []byte {
 	return nil
 }
 
-func HttpGetWithCookie(treasure *types.PageItem, resource string, cookie string) (msg []byte, err error) {
+func HttpGetWithCookie(page *types.PageItem, resource string, cookie string) (msg []byte, err error) {
 
-	out, err := get(treasure, resource, cookie)
+	out, err := get(page, resource, cookie)
 	return out, err
 }
 

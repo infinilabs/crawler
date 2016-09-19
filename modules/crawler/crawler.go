@@ -22,8 +22,8 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/types"
 	. "github.com/medcl/gopa/modules/crawler/pipe"
-	"runtime"
 	"time"
+	"runtime"
 )
 
 var fetchQuitChannels []*chan bool
@@ -99,6 +99,7 @@ func RunPipeline(env *Env, quitC *chan bool, shard int) {
 }
 
 func execute(task types.PageTask, env *Env) {
+
 	defer func() {
 		if r := recover(); r != nil {
 			if _, ok := r.(runtime.Error); ok {
@@ -113,7 +114,7 @@ func execute(task types.PageTask, env *Env) {
 		Start(UrlSource{Url: task.Url, Depth: task.Depth, Reference: task.Reference}).
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
 		Join(LoadMetadataJoint{}).
-		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 3}).
+		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 100}).
 		Join(FetchJoint{}).
 		Join(ParserJoint{DispatchLinks: true}).
 		Join(SaveToFileSystemJoint{}).

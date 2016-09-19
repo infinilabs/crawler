@@ -20,19 +20,51 @@ import (
 	"testing"
 	"github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/pipeline"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNormailzeLinks(t *testing.T) {
 
-	context:= pipeline.Context{Env:env.EmptyEnv()}
-	context.Data=map[string]interface{}{}
-	context.Set(CONTEXT_URL.String(),[]byte("http://elasticsearch.cn/"))
-	context.Set(CONTEXT_DEPTH.String(),1)
+	context:= &pipeline.Context{Env:env.EmptyEnv()}
+	context.Data=map[pipeline.ContextKey]interface{}{}
+	context.Set(CONTEXT_URL,"http://elasticsearch.cn/")
+	context.Set(CONTEXT_REFERENCE_URL,"http://elasticsearch.cn/")
+	context.Set(CONTEXT_DEPTH,1)
 	parse:=UrlNormalizationJoint{}
-	parse.Process(&context)
+	parse.Process(context)
+	assert.Equal(t,"http://elasticsearch.cn/",context.MustGetString(CONTEXT_URL))
+
+	context.Set(CONTEXT_URL,"index.html")
+	parse.Process(context)
+	assert.Equal(t,"http://elasticsearch.cn/index.html",context.MustGetString(CONTEXT_URL))
 
 
-	//assert.Equal(t,"baidu",links["baidu.com"])
-	//assert.Equal(t,"/wiki/Marking/Users",links["http://elasticsearch.cn/wiki/Marking/Users"])
+	context.Set(CONTEXT_URL,"/index.html")
+	parse.Process(context)
+	assert.Equal(t,"http://elasticsearch.cn/index.html",context.MustGetString(CONTEXT_URL))
+}
+
+func TestNormailzeLinks1(t *testing.T) {
+
+	context:= &pipeline.Context{Env:env.EmptyEnv()}
+	context.Data=map[pipeline.ContextKey]interface{}{}
+	context.Set(CONTEXT_URL,"http://localhost/")
+	context.Set(CONTEXT_DEPTH,1)
+	parse:=UrlNormalizationJoint{}
+	parse.Process(context)
+	assert.Equal(t,"http://localhost/",context.MustGetString(CONTEXT_URL))
+
+	context.Set(CONTEXT_URL,"http://localhost/index.html")
+	parse.Process(context)
+	assert.Equal(t,"http://localhost/index.html",context.MustGetString(CONTEXT_URL))
+
+	context.Set(CONTEXT_URL,"http://localhost:8080/index.html")
+	parse.Process(context)
+	assert.Equal(t,"http://localhost:8080/index.html",context.MustGetString(CONTEXT_URL))
+
+	context.Set(CONTEXT_URL,"phpliteadmin.php?table=groupes&action=row_editordelete&pk=3&type=edit")
+	context.Set(CONTEXT_REFERENCE_URL,"http://localhost:8080/index.html")
+	parse.Process(context)
+	assert.Equal(t,"http://localhost:8080/phpliteadmin.php?table=groupes&action=row_editordelete&pk=3&type=edit",context.MustGetString(CONTEXT_URL))
 
 }

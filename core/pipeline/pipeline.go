@@ -19,6 +19,8 @@ package pipeline
 import (
 	"github.com/medcl/gopa/core/env"
 	"fmt"
+	"time"
+	"github.com/medcl/gopa/core/stats"
 )
 type ContextKey string
 
@@ -95,12 +97,13 @@ func (this *Context) Set(key ContextKey,value interface{}){
 	this.Data[key]=value
 }
 
-type JointInterface interface {
+type Joint interface {
+	Name()string
 	Process(s *Context) (*Context, error)
 }
 
 type Pipeline struct {
-	joints  []JointInterface
+	joints  []Joint
 	context *Context
 }
 
@@ -109,18 +112,18 @@ func (this *Pipeline) Context(s *Context) *Pipeline {
 	return this
 }
 
-func (this *Pipeline) Start(s JointInterface) *Pipeline {
+func (this *Pipeline) Start(s Joint) *Pipeline {
 	if(this.context ==nil){
 		this.context =&Context{}
 	}
 	if(this.context.Data==nil){
 		this.context.Data =map[ContextKey]interface{}{}
 	}
-	this.joints = []JointInterface{s}
+	this.joints = []Joint{s}
 	return this
 }
 
-func (this *Pipeline) Join(s JointInterface) *Pipeline {
+func (this *Pipeline) Join(s Joint) *Pipeline {
 	this.joints = append(this.joints, s)
 	return this
 }
@@ -130,13 +133,19 @@ func (this *Pipeline) End() *Pipeline {
 }
 
 func (this *Pipeline) Run()(*Context) {
+	stats.Increment("crawler.pipeline","total")
+
 	var err error
 	for _, v := range this.joints {
 		if(this.context.breakFlag){
 			break
 		}
+		startTime := time.Now()
 		this.context, err = v.Process(this.context)
+		elapsedTime:=time.Now().Sub(startTime)
+		stats.Timing("crawler.pipeline",v.Name(),elapsedTime.Nanoseconds())
 		if err != nil {
+			stats.Increment("crawler.pipeline","error")
 			panic(err)
 		}
 	}

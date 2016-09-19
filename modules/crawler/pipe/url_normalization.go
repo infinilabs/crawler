@@ -17,13 +17,14 @@ limitations under the License.
 package pipe
 
 import (
+	"errors"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/util"
-	"github.com/syndtr/goleveldb/leveldb/errors"
 	. "net/url"
 	"strings"
 	"time"
+	"sort"
 )
 
 type UrlNormalizationJoint struct {
@@ -34,10 +35,12 @@ type UrlNormalizationJoint struct {
 
 var defaultFileName = "default.html"
 
+func (this UrlNormalizationJoint) Name() string {
+	return "url_normalization"
+}
+
 func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
-
 	url := context.MustGetString(CONTEXT_URL)
-
 	var currentURI, referenceURI *URL
 	var err error
 
@@ -47,15 +50,12 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 	//adding default http protocol
 	if strings.HasPrefix(url, "//") {
 		tempUrl = strings.TrimLeft(url, "//")
-	}
-
-	if !strings.HasPrefix(url, "http") {
-		tempUrl = "http://" + url
+		tempUrl = "http:" + url
 	}
 
 	currentURI, _ = Parse(tempUrl)
 
-	log.Trace("start to check ref url")
+	log.Tracef("currentURI,schema:%s, host:%s", currentURI.Scheme, currentURI.Host)
 	refUrlStr, refExists := context.GetString(CONTEXT_REFERENCE_URL)
 	if refExists && refUrlStr != "" {
 		log.Trace("ref url exists, ", refUrlStr)
@@ -68,9 +68,12 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 	//try to fix relative links
 	if currentURI == nil || currentURI.Host == "" {
 
-		log.Trace("host is nil, try to fix relative link: ", url)
+		log.Trace("host is nil, ", url)
 
 		if refExists && referenceURI != nil {
+
+			log.Trace("ref is not nil, try to fix relative link: ", url)
+
 			var parentPath = "/"
 
 			if strings.HasPrefix(url, "/") {
@@ -130,24 +133,27 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 
 	////resolve domain specific filter
 	if this.FollowSubDomain && currentURI != nil && referenceURI != nil {
-		log.Trace("try to check domain rule")
-		//	if siteConfig.FollowSubDomain {
-		//
-		//		//TODO handler com.cn and .com,using a TLC-domain list
-		//
-		//	}
-		//
+		log.Tracef("try to check domain rule, %s vs %s", referenceURI.Host, currentURI.Host)
+		//TODO handler com.cn and .com,using a TLC-domain list
 
-		ref := strings.Split(referenceURI.Host, ".")
-		cur := strings.Split(currentURI.Host, ".")
+		if strings.Contains(currentURI.Host, ".") && strings.Contains(referenceURI.Host, ".") {
+			ref := strings.Split(referenceURI.Host, ".")
+			cur := strings.Split(currentURI.Host, ".")
 
-		log.Tracef("%s vs %s , %s vs %s ", ref[len(ref)-1], cur[len(cur)-1], ref[len(ref)-2], cur[len(cur)-2])
+			log.Tracef("%s vs %s , %s vs %s ", ref[len(ref)-1], cur[len(cur)-1], ref[len(ref)-2], cur[len(cur)-2])
 
-		if !(ref[len(ref)-1] == cur[len(cur)-1] && ref[len(ref)-2] == cur[len(cur)-2]) {
-			log.Debug("domain mismatch,", referenceURI.Host, " vs ", currentURI.Host)
-			context.Break()
-			return context, errors.New("domain mismatch")
+			if !(ref[len(ref)-1] == cur[len(cur)-1] && ref[len(ref)-2] == cur[len(cur)-2]) {
+				log.Debug("domain mismatch,", referenceURI.Host, " vs ", currentURI.Host)
+				context.Break()
+				return context, errors.New("domain mismatch")
+			}
+		} else {
+			if referenceURI.Host != currentURI.Host {
+				context.Break()
+				return context, errors.New("domain mismatch")
+			}
 		}
+
 	}
 
 	url = tempUrl
@@ -181,8 +187,16 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 			}
 		} else {
 			queryMap := currentURI.Query()
-			//			queryMap = sort.Sort(queryMap) //TODO sort the parameters by parameter key
-			for key, value := range queryMap {
+
+			//sort the parameters by parameter key
+			keys := make([]string, 0, len(queryMap))
+			for key := range queryMap {
+				keys = append(keys, key)
+			}
+			sort.Strings(keys)
+
+			for _,key := range keys {
+				value:=queryMap[key]
 				if value != nil && len(value) > 0 {
 					if len(value) > 0 {
 						filenamePrefix = filenamePrefix + key + "_"
@@ -216,10 +230,11 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 			filename = currentURI.Path[index:len(currentURI.Path)]
 		}
 	} else {
+		log.Tracef("no / in path, %s",currentURI.Path)
+		filePath = currentURI.Path
 		filename = defaultFileName
 	}
 
-	filename = strings.Replace(filename, "/", "", -1)
 	filename = filenamePrefix + filename
 	context.Set(CONTEXT_SAVE_PATH, filePath)
 	context.Set(CONTEXT_SAVE_FILENAME, filename)

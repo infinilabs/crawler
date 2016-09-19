@@ -21,28 +21,19 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/util"
 	"time"
+	"github.com/medcl/gopa/core/env"
 )
 
 type BoltdbStore struct {
-	WalkPrefix         string
-	FetchPrefix        string
-	ParsePrefix        string
-	PendingFetchPrefix string
-	OffsetPrefix       string
-
+	Env *env.Env
 	PersistFileName string
 	DB              *bolt.DB
 }
 
 func (this *BoltdbStore) Open() error {
 
-	this.WalkPrefix = "walk"
-	this.FetchPrefix = "fetch"
-	this.ParsePrefix = "parse"
-	this.PendingFetchPrefix = "pfetch"
-	this.OffsetPrefix = "offset"
 
-	this.PersistFileName = "data/boltdb"
+	this.PersistFileName = this.Env.RuntimeConfig.PathConfig.Data+"/boltdb"
 
 	//loading or initializing boltdb
 	if util.IsExist(this.PersistFileName) {

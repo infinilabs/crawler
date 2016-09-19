@@ -17,8 +17,8 @@ limitations under the License.
 package types
 
 type Filter interface {
-	Init(fileName string) error
-	Persist() error
+	Open(fileName string) error
+	Close() error
 	Exists(key []byte) bool
 	Add(key []byte) error
 }

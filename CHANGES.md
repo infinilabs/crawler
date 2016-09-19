@@ -13,6 +13,7 @@ features:
 6.add boltdb status page, http://localhost:8001/ui/boltdb
 7.add pipeline framework to create crawler
 8.add command to dynamic change logging level and add seed
+8.export metrics to statsD
 improve:
 1.add update_ui setup to Makefile in order to build static ui
 

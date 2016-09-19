@@ -66,6 +66,11 @@ type IndexingConfig struct {
 	Index string `index`
 }
 
+type IndexingConfig struct {
+	Host string `host`
+	Index string `index`
+}
+
 func (this *IndexingConfig)Init() (*IndexingConfig)  {
 	this.Host="http://127.0.0.1:9200"
 	this.Index="gopa"
@@ -131,7 +136,7 @@ type RuntimeConfig struct {
 
 	//StoreWebPageTogether bool
 
-	MaxGoRoutine int
+	MaxGoRoutine int `max_go_routine`
 
 	//switch config
 	//ParseUrlsFromSavedFileLog      bool

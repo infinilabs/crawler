@@ -24,6 +24,10 @@ type UrlSource struct {
 	Depth int
 }
 
+func (this UrlSource) Name() string {
+	return "url_source"
+}
+
 func (this UrlSource) Process(context *Context) (*Context, error) {
 
 	context.Set(CONTEXT_ORIGINAL_URL,this.Url)
