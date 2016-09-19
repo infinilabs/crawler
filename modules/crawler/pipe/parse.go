@@ -80,7 +80,7 @@ func (this ParserJoint) Process(s *Context) (*Context, error) {
 			strings.Replace(text, "\t", "", -1)
 
 			if len(text) > 0 {
-				log.Debug("get link: ", text, " , ", href)
+				log.Trace("get link: ", text, " , ", href)
 				this.links[href] = text
 			}
 		}

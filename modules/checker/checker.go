@@ -19,10 +19,13 @@ package url_checker
 import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
+	. "github.com/medcl/gopa/core/filter"
+	"path"
 )
 
 var quitChannel chan bool
 var started = false
+var filter= BloomFilter{}
 
 func Start(env *Env) {
 	if started {
@@ -30,6 +33,8 @@ func Start(env *Env) {
 		return
 	}
 	quitChannel = make(chan bool)
+
+	filter.Init(path.Join(env.RuntimeConfig.PathConfig.Data,"url_fetched.hyperloglog"))
 
 	go runCheckerGo(env, &quitChannel)
 	started = true
@@ -48,10 +53,13 @@ func runCheckerGo(env *Env, quitC *chan bool) {
 			if(err!=nil){
 				continue
 			}
-			log.Debug("cheking url:", string(url.Url))
+			log.Trace("cheking url:", string(url.Url))
 
 			//checking
-
+			if(filter.Exists([]byte(url.Url))){
+				log.Info("url already pushed to fetch queue, ignore :", string(url.Url))
+				continue
+			}
 			//send to disk queue
 			env.Channels.PushUrlToFetch(url)
 			log.Debugf("send url: %s ,depth: %d to  fetch queue", string(url.Url), url.Depth)
@@ -68,6 +76,8 @@ func runCheckerGo(env *Env, quitC *chan bool) {
 func Stop() error {
 	if started {
 		log.Debug("start shutting down url checker")
+
+		filter.Persist()
 
 		quitChannel <- true
 

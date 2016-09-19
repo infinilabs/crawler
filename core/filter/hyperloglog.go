@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package fs
+package filter
 
 import (
 	"hash"
@@ -24,13 +24,15 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/clarkduvall/hyperloglog"
 	. "github.com/clarkduvall/hyperloglog"
-	"github.com/medcl/gopa/core/config"
 	"github.com/medcl/gopa/core/util"
+	"sync"
 )
 
 type HyperLogLogFilter struct {
+	hyperLogLogPrecision uint8
 	persistFileName string
 	filter          *HyperLogLogPlus
+	l sync.Mutex
 }
 
 func hash32(s []byte) hash.Hash32 {
@@ -46,8 +48,11 @@ func hash64(s []byte) hash.Hash64 {
 }
 
 func (filter *HyperLogLogFilter) Init(fileName string) error {
+	filter.l.Lock()
+	defer filter.l.Unlock()
 
 	filter.persistFileName = fileName
+	filter.hyperLogLogPrecision = 18
 
 	//loading or initializing hyperloglog-filter
 	if util.FileExists(fileName) {
@@ -64,10 +69,9 @@ func (filter *HyperLogLogFilter) Init(fileName string) error {
 
 		log.Info("hyperloglog-filter successfully reloaded:", fileName)
 	} else {
-		probItems := config.GetIntConfig(config.HyperLogLogSection, config.HyperLogLogPrecision, 16)
-		log.Debug("initializing hyperloglog-filter", fileName, ",virual size is,", probItems)
+		log.Debug("initializing hyperloglog-filter", fileName, ",precision,", filter.hyperLogLogPrecision)
 		var er error
-		filter.filter, er = hyperloglog.NewPlus(uint8(probItems))
+		filter.filter, er = hyperloglog.NewPlus(filter.hyperLogLogPrecision)
 		if er != nil {
 			log.Info("hyperloglog-filter successfully initialized:", fileName)
 		} else {
@@ -79,6 +83,8 @@ func (filter *HyperLogLogFilter) Init(fileName string) error {
 }
 
 func (filter *HyperLogLogFilter) Persist() error {
+	filter.l.Lock()
+	defer filter.l.Unlock()
 
 	log.Debug("hyperloglog-filter start persist,file:", filter.persistFileName)
 
@@ -98,17 +104,27 @@ func (filter *HyperLogLogFilter) Persist() error {
 	return nil
 }
 
-func (filter *HyperLogLogFilter) Lookup(key []byte) bool {
+func (filter *HyperLogLogFilter) Exists(key []byte) bool {
+	filter.l.Lock()
+	defer filter.l.Unlock()
+
 	var count1 = filter.filter.Count()
 	filter.filter.Add(hash64(key))
 	var count2 = filter.filter.Count()
 	if count2 == count1 {
+		return false
+	}
+	if(count2==count1+1){
 		return true
 	}
-	return false
+	log.Errorf("error hyperloglog behavior, %d vs %d",count1,count2)
+	return true
 }
 
 func (filter *HyperLogLogFilter) Add(key []byte) error {
+	filter.l.Lock()
+	defer filter.l.Unlock()
+
 	filter.filter.Add(hash64(key))
 	return nil
 }

@@ -18,15 +18,15 @@ package pipe
 
 import (
 	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/config"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/core/util"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	. "net/url"
 	"os"
-	"strings"
 	"path"
-	"github.com/medcl/gopa/core/config"
-	"github.com/medcl/gopa/core/util"
+	"strings"
 )
 
 type SaveToFileSystemJoint struct {
@@ -37,8 +37,8 @@ type SaveToFileSystemJoint struct {
 func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 	this.context = c
 
-	if(len(this.baseDir)==0){
-		this.baseDir =this.context.Env.RuntimeConfig.PathConfig.WebData
+	if len(this.baseDir) == 0 {
+		this.baseDir = this.context.Env.RuntimeConfig.PathConfig.WebData
 	}
 
 	url, ok := c.GetString(CONTEXT_URL)
@@ -47,15 +47,19 @@ func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 	}
 	pageItem := c.Get(CONTEXT_PAGE_ITEM).(*types.PageItem)
 
-	log.Debug("save url,", url, ",domain,", pageItem.Domain)
+	domain := c.MustGetString(CONTEXT_HOST)
+	dir := c.MustGetString(CONTEXT_SAVE_PATH)
+	file := c.MustGetString(CONTEXT_SAVE_FILENAME)
+	folder := path.Join(this.context.Env.RuntimeConfig.PathConfig.WebData, domain, dir)
 
-	dir, file := this.getSavedPath(url)
-	fullPath:=path.Join(dir,file)
-	log.Trace("saving file,", fullPath)
-	os.MkdirAll(dir, 0777)
+	os.MkdirAll(folder, 0777)
+
+	fullPath := path.Join(folder, file)
+	log.Trace("save url,", url, ",domain,", pageItem.Domain, ",fullpath,", fullPath)
+
 	fout, err := os.Create(fullPath)
 	if err != nil {
-		log.Error(dir, err)
+		log.Error(fullPath, err)
 		return nil, err
 	}
 
@@ -73,7 +77,7 @@ func (this SaveToFileSystemJoint) getSavedPath(urlStr string) (string, string) {
 	log.Debug("start saving url,", urlStr)
 	myurl1, _ := Parse(urlStr)
 
-	baseDir := path.Join(this.baseDir,myurl1.Host)
+	baseDir := path.Join(this.baseDir, myurl1.Host)
 	baseDir = strings.Replace(baseDir, `:`, `_`, -1)
 
 	log.Trace("replaced:", baseDir)
@@ -127,7 +131,7 @@ func (this SaveToFileSystemJoint) getSavedPath(urlStr string) (string, string) {
 	if index > 0 {
 		//http://xx.com/1112/12
 		filePath = myurl1.Path[0:index]
-		filePath = path.Join(baseDir ,filePath)
+		filePath = path.Join(baseDir, filePath)
 
 		//if the page extension is missing
 		if !strings.Contains(myurl1.Path, ".") {
@@ -136,22 +140,21 @@ func (this SaveToFileSystemJoint) getSavedPath(urlStr string) (string, string) {
 			filename = myurl1.Path[index:len(myurl1.Path)]
 		}
 	} else {
-		filePath = path.Join(baseDir , filePath)
+		filePath = path.Join(baseDir, filePath)
 		filename = "default.html"
 	}
 
 	filename = strings.Replace(filename, "/", "", -1)
 
-	return filePath , filenamePrefix + filename
+	return filePath, filenamePrefix + filename
 }
 
-func checkIfUrlWillBeSave(taskConfig *config.TaskConfig,url []byte,)bool  {
+func checkIfUrlWillBeSave(taskConfig *config.TaskConfig, url []byte) bool {
 
-	requestUrl:=string(url)
+	requestUrl := string(url)
 
 	log.Debug("started check savingUrlPattern,", taskConfig.SavingUrlPattern, ",", string(url))
 	if taskConfig.SavingUrlPattern.Match(url) {
-
 
 		log.Debug("match saving url pattern,", requestUrl)
 		if len(taskConfig.SavingUrlMustNotContain) > 0 {

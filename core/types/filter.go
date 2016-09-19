@@ -16,9 +16,9 @@ limitations under the License.
 
 package types
 
-type DeduplicatePlugin interface {
+type Filter interface {
 	Init(fileName string) error
 	Persist() error
-	Lookup(key []byte) bool
+	Exists(key []byte) bool
 	Add(key []byte) error
 }
