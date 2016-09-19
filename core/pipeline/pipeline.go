@@ -38,6 +38,10 @@ func (this *Context) Break(){
 	this.breakFlag=true
 }
 
+func (this *Context) IsBreak()(bool){
+	return this.breakFlag
+}
+
 func (this *Context) GetString(key ContextKey)(string,bool){
 	v:=this.Get(key)
 	s,ok:=v.(string)

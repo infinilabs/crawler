@@ -62,8 +62,8 @@ func Environment(sysConfig SystemConfig) *Env {
 	}
 
 	env.Channels = &Channels{}
-	env.Channels.pendingFetchUrl = make(chan types.PageTask, 100) //buffer number is 10
-	env.Channels.pendingCheckUrl = make(chan types.PageTask, 100) //buffer number is 10
+	env.Channels.pendingFetchUrl = make(chan types.PageTask, 1) //buffer number is 10
+	env.Channels.pendingCheckUrl = make(chan types.PageTask, 1) //buffer number is 10
 	env.Registrar = &Registrar{values: map[string]interface{}{}}
 
 	env.init()
@@ -101,6 +101,7 @@ func (this *Env) loadRuntimeConfig() (RuntimeConfig, error) {
 		config.ClusterConfig = (&ClusterConfig{}).Init()
 		config.LoggingConfig = (&LoggingConfig{}).Init()
 		config.IndexingConfig = (&IndexingConfig{}).Init()
+		config.ChannelConfig = (&ChannelConfig{}).Init()
 		config.CrawlerConfig = (&CrawlerConfig{})       //.Init()
 		config.ParserConfig = (&ParserConfig{})         //.Init()
 		config.TaskConfig = (&TaskConfig{})             //.Init()

@@ -69,8 +69,8 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 
 		if err == nil {
 			if body != nil {
-				if pageItem.StatusCode == 404 || pageItem.StatusCode == 302 {
-					log.Error("error while 404 or 302:", requestUrl, " ", pageItem.StatusCode)
+				if pageItem.StatusCode == 404{
+					log.Info("skip while 404, ", requestUrl, " , ", pageItem.StatusCode)
 					context.Break()
 					flg <- false
 					return
@@ -95,16 +95,16 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 	//监听通道，由于设有超时，不可能泄露
 	select {
 	case <-t.C:
-		log.Error("fetching url time out,", requestUrl)
+		log.Error("fetching url time out, ", requestUrl)
 		stats.Increment(domain, stats.STATS_FETCH_TIMEOUT_COUNT)
 		context.Break()
 		return nil, errors.New("fetch url time out")
 	case value := <-flg:
 		if value {
-			log.Debug("fetching url normal exit,", requestUrl)
+			log.Debug("fetching url normal exit, ", requestUrl)
 			stats.Increment(domain, stats.STATS_FETCH_SUCCESS_COUNT)
 		} else {
-			log.Debug("fetching url error exit,", requestUrl)
+			log.Debug("fetching url error exit, ", requestUrl)
 			context.Break()
 			stats.Increment(domain, stats.STATS_FETCH_FAIL_COUNT)
 		}

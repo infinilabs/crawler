@@ -45,6 +45,14 @@ cross-build-all-platform: clean config
 	GOOS=openbsd  GOARCH=amd64    go build -o bin/openbsd64/gopa
 	GOOS=openbsd  GOARCH=386      go build -o bin/openbsd32/gopa
 
+build-bsd: clean config update_ui
+	go test
+	GOOS=freebsd  GOARCH=amd64    go build -o bin/freebsd64/gopa
+	GOOS=freebsd  GOARCH=386      go build -o bin/freebsd32/gopa
+	GOOS=netbsd  GOARCH=amd64     go build -o bin/netbsd64/gopa
+	GOOS=netbsd  GOARCH=386       go build -o bin/netbsd32/gopa
+	GOOS=openbsd  GOARCH=amd64    go build -o bin/openbsd64/gopa
+	GOOS=openbsd  GOARCH=386      go build -o bin/openbsd32/gopa
 
 format:
 	gofmt -s -w -tabs=false -tabwidth=4 gopa.go
@@ -70,8 +78,6 @@ config:
 	go get github.com/gorilla/websocket
 	go get github.com/boltdb/bolt/...
 	go get github.com/quipo/statsd
-
-
 
 dist: cross-build package
 

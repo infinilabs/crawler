@@ -48,6 +48,17 @@ func (this *ClusterConfig)Init() (*ClusterConfig)  {
 }
 
 
+type ChannelConfig struct {
+	CheckerChanBuffSize     int `checker_chan_buff_size`
+	FetchChanBuffSize     int `fetch_chan_buff_size`
+}
+
+func (this *ChannelConfig)Init() (*ChannelConfig)  {
+	this.CheckerChanBuffSize=0
+	this.FetchChanBuffSize=0
+	return this
+}
+
 type LoggingConfig struct {
 	Level     string `level`
 
@@ -61,9 +72,8 @@ func (this *LoggingConfig)Init() (*LoggingConfig)  {
 }
 
 
-type IndexingConfig struct {
+type StatsdConfig struct {
 	Host string `host`
-	Index string `index`
 }
 
 type IndexingConfig struct {
@@ -113,7 +123,11 @@ type RuntimeConfig struct {
 
 	//logging related
 	LoggingConfig *LoggingConfig `logging`
+
 	IndexingConfig *IndexingConfig `indexing`
+
+
+	ChannelConfig *ChannelConfig `channel`
 
 
 	//path related

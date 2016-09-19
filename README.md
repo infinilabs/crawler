@@ -24,6 +24,10 @@ After building the project run `./gopa -h` for a list of commandline options
 
 * -seed option : start a crawling, giving a seed url to Gopa. ie: `./gopa -seed=http://www.baidu.com`
 * -log option : logging level,can be set to `trace`,`debug`,`info`,`warn`,`error` ,default is `info`
+* -daemon option : run in background as daemon
+* -pprof option : start pprof service, endpoint: http://localhost:6060/debug/pprof/
+* -cpuprofile option : write cpu profile to this file
+* -memprofile option : write memory profile to this file
 
 
 ## Stopping Gopa ##
@@ -31,24 +35,16 @@ After building the project run `./gopa -h` for a list of commandline options
 It's safety to press `ctrl+c` stop the current running Gopa, Gopa will handle the rest,saving the checkpoint,
 you may restore the job later,the world is still in your hand.
 
-## APIs
+If you are running `Gopa` as daemon, you can stop it like this:
 
-* Send seed to Gopa
+```
+ ps -ax|grep gopa
+ kill -QUIT {PID}
+```
 
-    ```
-    curl -X POST "http://localhost:8001/task/" -d '{
-    "seed":"http://elasticsearch.cn"
-    }' 
-    ```
-    
-* Update logging config on the fly (visit https://github.com/cihub/seelog/wiki for more details)
-    ```
-    curl -X POST "http://localhost:8001/setting/seelog/" -d '
-    <seelog type="asynctimer" asyncinterval="5000000" minlevel="debug" maxlevel="error">
-        ... ...
-    </seelog>
-    ' 
-    ```
+## UI
+
+Visit `http://127.0.0.1:8001/ui/` for more details.
 
 
 License

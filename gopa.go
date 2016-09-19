@@ -22,22 +22,26 @@ import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/logging"
-	"github.com/medcl/gopa/modules"
+	"github.com/medcl/gopa/core/stats"
+	"github.com/medcl/gopa/core/types"
+	modules "github.com/medcl/gopa/modules"
+	"github.com/medcl/gopa/core/daemon"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"runtime"
+	"runtime/pprof"
 	"syscall"
 	"time"
-	"runtime/pprof"
-	"github.com/medcl/gopa/core/types"
-	 _ "net/http/pprof"
-	"net/http"
-	"github.com/medcl/gopa/core/stats"
 )
 
-//
-var env *Env
-var startTime time.Time
+var (
+	env             *Env
+	startTime       time.Time
+	components      *modules.Modules
+	finalQuitSignal chan bool
+)
 
 func onStart() {
 	fmt.Println(GetWelcomeMessage())
@@ -56,26 +60,27 @@ func onShutdown() {
 
 func main() {
 
-	var seedUrl, logLevel, configFile string
 	onStart()
 
 	defer logging.Flush()
 
-	flag.StringVar(&seedUrl, "seed", "", "the seed url, where everything starts")
-	flag.StringVar(&logLevel, "log", "info", "the log level,options:trace,debug,info,warn,error, default: info")
-	flag.StringVar(&configFile, "config", "gopa.yml", "the loation of config file, default: gopa.yml")
-	var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+	var seedUrl = flag.String("seed", "", "the seed url, where everything starts")
+	var logLevel = flag.String("log", "info", "the log level,options:trace,debug,info,warn,error, default: info")
+	var configFile = flag.String("config", "gopa.yml", "the loation of config file, default: gopa.yml")
+	var isDaemon = flag.Bool("daemon", false, "run in background as daemon")
+	var pidfile = flag.String("pidfile", "", "pidfile path (only for daemon)")
+
+	var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to this file")
 	var memprofile = flag.String("memprofile", "", "write memory profile to this file")
-	var pp = flag.String("pprof", "", "start pprof service, endpoint: http://localhost:6060/debug/pprof/")
+	var startPprof = flag.Bool("pprof", false, "start pprof service, endpoint: http://localhost:6060/debug/pprof/")
 
 	flag.Parse()
 
-	if(*pp!=""){
+	if *startPprof {
 		go func() {
 			http.ListenAndServe("localhost:6060", nil)
 		}()
 	}
-
 
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
@@ -86,7 +91,7 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	if *memprofile !=""{
+	if *memprofile != "" {
 		if *memprofile != "" {
 			f, err := os.Create(*memprofile)
 			if err != nil {
@@ -97,33 +102,60 @@ func main() {
 		}
 	}
 
+	//daemon
+	if *isDaemon {
+
+		if(runtime.GOOS=="darwin"||runtime.GOOS=="linux"){
+			runtime.LockOSThread()
+			context := new(daemon.Context)
+			if *pidfile != "" {
+				context.PidFileName = *pidfile
+				context.PidFilePerm = 0644
+			}
+
+			child, _ := context.Reborn()
+
+			if child != nil {
+				return
+			}
+			defer context.Release()
+
+			runtime.UnlockOSThread()
+		}else{
+			fmt.Println("daemon only available in linux and darwin")
+		}
+
+	}
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	logging.SetInitLogging(EmptyEnv(), logLevel)
+	logging.SetInitLogging(EmptyEnv(), *logLevel)
 
-	sysConfig := SystemConfig{Version: VERSION, ConfigFile: configFile, LogLevel: logLevel}
+	sysConfig := SystemConfig{Version: VERSION, ConfigFile: *configFile, LogLevel: *logLevel}
 
 	env = Environment(sysConfig)
 
 	logging.SetLogging(env)
 
-	components := modules.New(env)
+	components = modules.New(env)
 	components.Start()
 
-	finalQuitSignal := make(chan bool, 1)
+	finalQuitSignal = make(chan bool)
 
 	//handle exit event
-	exitEventChannel := make(chan os.Signal, 1)
-	signal.Notify(exitEventChannel, syscall.SIGINT)
-	signal.Notify(exitEventChannel, os.Interrupt)
+	sigc := make(chan os.Signal, 1)
+	signal.Notify(sigc,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT,
+		os.Interrupt)
 
 	go func() {
-		s := <-exitEventChannel
-		log.Debug("got signal:", s)
-		if s == os.Interrupt || s.(os.Signal) == syscall.SIGINT {
-			log.Warn("got signal:os.Interrupt,start shutting down")
-
+		s := <-sigc
+		log.Info("got signal:", s)
+		if s == os.Interrupt || s.(os.Signal) == syscall.SIGINT || s.(os.Signal) == syscall.SIGTERM ||
+			s.(os.Signal) == syscall.SIGKILL || s.(os.Signal) == syscall.SIGQUIT {
+			log.Infof("got signal:%s ,start shutting down", s.String())
 			//wait workers to exit
 			components.Stop()
 			env.Channels.Close()
@@ -131,66 +163,11 @@ func main() {
 		}
 	}()
 
-	//fetch rule:all urls -> persisted to sotre -> fetched from store -> pushed to pendingFetchUrls -> redistributed to sharded goroutines -> fetch -> save webpage to store -> done
-	//parse rule:url saved to store -> local path persisted to store -> fetched to pendingParseFiles -> redistributed to sharded goroutines -> parse -> clean urls -> enqueue to url store ->done
-
 	//sending feed to task queue
-	//go func() {
-		//notice seed will not been persisted
-		if len(seedUrl) > 0 {
-			log.Debug("sending feed to fetch queue,", seedUrl)
-			env.Channels.PushUrlToCheck(types.NewPageTask(seedUrl,"",0))
-		}
-	//}()
-
-	////load predefined fetch jobs
-	//if env.RuntimeConfig.LoadTemplatedFetchJob {
-	//	go func() {
-	//
-	//		if util.FileExists(env.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt") {
-	//
-	//			templates := util.ReadAllLines(env.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/template.txt")
-	//			ids := util.ReadAllLines(env.RuntimeConfig.TaskConfig.TaskDataPath + "/urls/id.txt")
-	//
-	//			for _, id := range ids {
-	//				for _, template := range templates {
-	//					log.Trace("id:", id)
-	//					log.Trace("template:", template)
-	//					url := strings.Replace(template, "{id}", id, -1)
-	//					log.Debug("new task from template:", url)
-	//					env.Channels.PendingCheckUrl <- types.NewPageTask(url,"",0)
-	//				}
-	//			}
-	//			log.Info("templated download is done.")
-	//
-	//		}
-	//
-	//	}()
-	//}
-
-	//fetch urls from saved pages
-	//if env.RuntimeConfig.CrawlerConfig.LoadPendingFetchJobs {
-		//go task.LoadTaskFromLocalFile(env.Channels.PendingCheckUrl, env.RuntimeConfig)
-	//}
-
-	//parse fetch failed jobs,and will ignore the walk-filter
-	//TODO
-
-	//if env.RuntimeConfig.LoadRuledFetchJob {
-	//	log.Debug("start ruled fetch")
-	//	go func() {
-	//		if env.RuntimeConfig.RuledFetchConfig.UrlTemplate != "" {
-	//			for i := env.RuntimeConfig.RuledFetchConfig.From; i <= env.RuntimeConfig.RuledFetchConfig.To; i += env.RuntimeConfig.RuledFetchConfig.Step {
-	//				url := strings.Replace(env.RuntimeConfig.RuledFetchConfig.UrlTemplate, "{id}", strconv.FormatInt(int64(i), 10), -1)
-	//				log.Debug("add ruled url:", url)
-	//				env.Channels.PendingCheckUrl <- types.NewPageTask(url,"",0)
-	//			}
-	//		} else {
-	//			log.Error("ruled template is empty,ignore")
-	//		}
-	//	}()
-	//
-	//}
+	if len(*seedUrl) > 0 {
+		log.Debug("sending feed to fetch queue,", *seedUrl)
+		env.Channels.PushUrlToCheck(types.NewPageTask(*seedUrl, "", 0))
+	}
 
 	<-finalQuitSignal
 

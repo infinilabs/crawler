@@ -9,6 +9,10 @@ path:
 logging:
   level: "info"
 
+channel:
+  checker_chan_buff_size: 0
+  fetch_chan_buff_size: 0
+
 crawler:
   enabled: true
   load_pending_fetch_from_file: true
