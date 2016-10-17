@@ -16,12 +16,12 @@ limitations under the License.
 
 package pipe
 
-import . "github.com/medcl/gopa/core/pipeline"
+import (. "github.com/medcl/gopa/core/pipeline"
+. "github.com/medcl/gopa/core/types"
+)
 
 type UrlSource struct {
-	Url string
-	Reference string
-	Depth int
+	Task PageTask
 }
 
 func (this UrlSource) Name() string {
@@ -30,10 +30,10 @@ func (this UrlSource) Name() string {
 
 func (this UrlSource) Process(context *Context) (*Context, error) {
 
-	context.Set(CONTEXT_ORIGINAL_URL,this.Url)
-	context.Set(CONTEXT_URL,this.Url)
-	context.Set(CONTEXT_DEPTH,this.Depth)
-	context.Set(CONTEXT_REFERENCE_URL,this.Reference)
+	context.Set(CONTEXT_ORIGINAL_URL,this.Task.Url)
+	context.Set(CONTEXT_URL,this.Task.Url)
+	context.Set(CONTEXT_DEPTH,this.Task.Depth)
+	context.Set(CONTEXT_REFERENCE_URL,this.Task.Reference)
 	return context, nil
 }
 

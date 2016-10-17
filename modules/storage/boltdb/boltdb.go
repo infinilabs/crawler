@@ -17,23 +17,23 @@ limitations under the License.
 package boltdb
 
 import (
+	lz4 "github.com/bkaradzic/go-lz4"
 	"github.com/boltdb/bolt"
 	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/util"
 	"time"
-	"github.com/medcl/gopa/core/env"
 )
 
 type BoltdbStore struct {
-	Env *env.Env
+	Env             *env.Env
 	PersistFileName string
 	DB              *bolt.DB
 }
 
 func (this *BoltdbStore) Open() error {
 
-
-	this.PersistFileName = this.Env.RuntimeConfig.PathConfig.Data+"/boltdb"
+	this.PersistFileName = this.Env.RuntimeConfig.PathConfig.Data + "/boltdb"
 
 	//loading or initializing boltdb
 	if util.IsExist(this.PersistFileName) {
@@ -77,6 +77,17 @@ const TaskBucketKey string = "Task"
 const StatsBucketKey string = "Stats"
 const SnapshotBucketKey string = "Snapshot"
 
+func (filter *BoltdbStore) GetCompressedValue(bucket string, key []byte) []byte {
+
+	data := filter.GetValue(bucket, key)
+	data, err := lz4.Decode(nil, data)
+	if err != nil {
+		log.Error("Failed to decode:", err)
+		return nil
+	}
+	return data
+}
+
 func (filter *BoltdbStore) GetValue(bucket string, key []byte) []byte {
 	var ret []byte = nil
 	filter.DB.View(func(tx *bolt.Tx) error {
@@ -88,6 +99,15 @@ func (filter *BoltdbStore) GetValue(bucket string, key []byte) []byte {
 		return nil
 	})
 	return ret
+}
+
+func (filter *BoltdbStore) AddValueCompress(bucket string, key []byte, value []byte) error {
+	value, err := lz4.Encode(nil, value)
+	if err != nil {
+		log.Error("Failed to encode:", err)
+		return err
+	}
+	return filter.AddValue(bucket, key, value)
 }
 
 func (filter *BoltdbStore) AddValue(bucket string, key []byte, value []byte) error {

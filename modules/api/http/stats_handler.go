@@ -52,5 +52,6 @@ func (this *Handler) StatsAction(w http.ResponseWriter, req *http.Request) {
 
 	m:=stats.StatsAll()
 
+	this.WriteJsonHeader(w)
 	this.Write(w, m)
 }

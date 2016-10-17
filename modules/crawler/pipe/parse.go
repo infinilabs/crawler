@@ -52,7 +52,6 @@ func (this ParserJoint) Process(s *Context) (*Context, error) {
 	}
 
 	doc.Find("meta").Each(func(i int, s *goquery.Selection) {
-		// For each item found, get the band and title
 		name, exist := s.Attr("name")
 		name = strings.TrimSpace(name)
 		if exist && len(name) > 0 {

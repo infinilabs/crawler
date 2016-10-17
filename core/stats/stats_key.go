@@ -35,6 +35,9 @@ const STATS_FETCH_PUSH_DISK_COUNT = "stats.count.fetch.disk.push"
 const STATS_FETCH_POP_CHAN_COUNT = "stats.count.fetch.chan.pop"
 const STATS_FETCH_POP_DISK_COUNT = "stats.count.fetch.disk.pop"
 
+const STATS_STORAGE_FILE_SIZE = "stats.sum.file.size"
+const STATS_STORAGE_FILE_COUNT = "stats.sum.file.count"
+
 
 type StatsCount struct {
 	TotalCount   int `json:"total,omitempty"`

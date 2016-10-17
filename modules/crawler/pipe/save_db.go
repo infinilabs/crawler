@@ -23,10 +23,12 @@ import (
 	"github.com/medcl/gopa/modules/storage/boltdb"
 	"strings"
 	"path"
+	"github.com/medcl/gopa/core/stats"
 )
 
 type SaveToDBJoint struct {
-	context *Context
+	context      *Context
+	CompressBody bool
 }
 
 
@@ -43,10 +45,20 @@ func (this SaveToDBJoint) Process(c *Context) (*Context, error) {
 	pageItem := c.Get(CONTEXT_PAGE_ITEM).(*types.PageItem)
 	savePath := c.MustGetString(CONTEXT_SAVE_PATH)
 	saveFile := c.MustGetString(CONTEXT_SAVE_FILENAME)
+	domain := c.MustGetString(CONTEXT_HOST)
 
-	log.Debug("save url to db,", url, ",domain,", pageItem.Domain)
+	saveKey:=GetKey(pageItem.Domain,path.Join(savePath,saveFile))
+	log.Debug("save url to db, ", url, ",domain, ", pageItem.Domain,", ",string(saveKey))
 
-	this.context.Env.RuntimeConfig.Storage.AddValue(boltdb.SnapshotBucketKey,GetKey(pageItem.Domain,path.Join(savePath,saveFile)),pageItem.Body)
+	if(this.CompressBody){
+		this.context.Env.RuntimeConfig.Storage.AddValueCompress(boltdb.SnapshotBucketKey,saveKey,pageItem.Body)
+
+	}else{
+		this.context.Env.RuntimeConfig.Storage.AddValue(boltdb.SnapshotBucketKey,saveKey,pageItem.Body)
+	}
+
+	stats.IncrementBy(domain,stats.STATS_STORAGE_FILE_SIZE,int64(len(pageItem.Body)))
+	stats.Increment(domain,stats.STATS_STORAGE_FILE_COUNT)
 
 	return c, nil
 }

@@ -59,6 +59,7 @@ func runCheckerGo(env *Env, quitC *chan bool) {
 			}
 			log.Trace("cheking url:", string(url.Url))
 
+			//TODO 统一 url 格式 , url 目前可能是相对路径
 			//checking
 			if(filter.Exists([]byte(url.Url))){
 				log.Debug("url already pushed to fetch queue, ignore :", string(url.Url))

@@ -18,7 +18,6 @@ package pipe
 
 import (
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/config"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/types"
 	"github.com/medcl/gopa/core/util"
@@ -104,40 +103,6 @@ func (this SaveToFileSystemJoint) getSavedPath(urlStr string) (string, string) {
 		log.Trace("no page name,use default.html:", urlStr)
 	}
 
-	// if the url have parameters
-	if len(myurl1.Query()) > 0 {
-
-		////TODO 不处理非网页内容，去除js 图片 css 压缩包等
-		//
-		//if siteConfig.SplitByUrlParameter != "" {
-		//
-		//	arrayStr := strings.Split(siteConfig.SplitByUrlParameter, this.context.Env.RuntimeConfig.ArrayStringSplitter)
-		//	for i := 0; i < len(arrayStr); i++ {
-		//		breakTagTemp := myurl1.Query().Get(arrayStr[i])
-		//		if breakTagTemp != "" {
-		//			filenamePrefix = filenamePrefix + arrayStr[i] + "_" + breakTagTemp + "_"
-		//		}
-		//	}
-		//} else {
-		//	queryMap := myurl1.Query()
-		//	//			queryMap = sort.Sort(queryMap) //TODO sort the parameters by parameter key
-		//	for key, value := range queryMap {
-		//		if value != nil && len(value) > 0 {
-		//			if len(value) > 0 {
-		//				filenamePrefix = filenamePrefix + key + "_"
-		//				for i := 0; i < len(value); i++ {
-		//					v := value[i]
-		//					if v != "" && len(v) > 0 {
-		//						filenamePrefix = filenamePrefix + v + "_"
-		//					}
-		//				}
-		//			}
-		//
-		//		}
-		//	}
-		//}
-	}
-
 	//split folder and filename and also insert the prefix filename
 	index := strings.LastIndex(myurl1.Path, "/")
 	if index > 0 {
@@ -161,32 +126,3 @@ func (this SaveToFileSystemJoint) getSavedPath(urlStr string) (string, string) {
 	return filePath, filenamePrefix + filename
 }
 
-func checkIfUrlWillBeSave(taskConfig *config.TaskConfig, url []byte) bool {
-
-	requestUrl := string(url)
-
-	log.Debug("started check savingUrlPattern,", taskConfig.SavingUrlPattern, ",", string(url))
-	if taskConfig.SavingUrlPattern.Match(url) {
-
-		log.Debug("match saving url pattern,", requestUrl)
-		if len(taskConfig.SavingUrlMustNotContain) > 0 {
-			if util.ContainStr(requestUrl, taskConfig.SavingUrlMustNotContain) {
-				log.Debug("hit SavingUrlMustNotContain,ignore,", requestUrl, " , ", taskConfig.SavingUrlMustNotContain)
-				return false
-			}
-		}
-
-		if len(taskConfig.SavingUrlMustContain) > 0 {
-			if !util.ContainStr(requestUrl, taskConfig.SavingUrlMustContain) {
-				log.Debug("not hit SavingUrlMustContain,ignore,", requestUrl, " , ", taskConfig.SavingUrlMustContain)
-				return false
-			}
-		}
-
-		return true
-
-	} else {
-		log.Debug("does not hit SavingUrlPattern ignoring,", requestUrl)
-	}
-	return false
-}

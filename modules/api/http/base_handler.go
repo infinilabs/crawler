@@ -96,6 +96,7 @@ func (w *Handler) encodeJson(v interface{}) (b []byte,err error) {
 
 func (this *Handler) WriteJsonHeader(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Access-Control-Allow-Origin","*")
 }
 
 func (this *Handler) WriteJson(w http.ResponseWriter, v interface{}, statusCode int) error {
@@ -117,6 +118,18 @@ func (this *Handler) WriteJson(w http.ResponseWriter, v interface{}, statusCode 
 }
 
 type ErrEmptyJson struct {
+}
+
+func (this *Handler) GetParameter(r *http.Request,key string) (string) {
+	return r.URL.Query().Get(key)
+}
+
+func (this *Handler) GetParameterOrDefault(r *http.Request,key string,defaultValue string) (string) {
+	v:= r.URL.Query().Get(key)
+	if(len(v)>0){
+		return v
+	}
+	return defaultValue
 }
 
 func (this *Handler) GetJson(r *http.Request) (*jsonq.JsonQuery, error) {

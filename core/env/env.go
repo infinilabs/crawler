@@ -29,7 +29,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"time"
-	"errors"
 )
 
 type Env struct {
@@ -127,8 +126,8 @@ func (this *Env) loadRuntimeConfig() (RuntimeConfig, error) {
 
 func (this *Env) init() error {
 
-	if this.RuntimeConfig.MaxGoRoutine < 2 {
-		this.RuntimeConfig.MaxGoRoutine = 2
+	if this.RuntimeConfig.MaxGoRoutine < 1 {
+		this.RuntimeConfig.MaxGoRoutine = 1
 	}
 	os.MkdirAll(this.RuntimeConfig.PathConfig.Data, 0777)
 	os.MkdirAll(this.RuntimeConfig.PathConfig.Log, 0777)
@@ -137,8 +136,8 @@ func (this *Env) init() error {
 	os.MkdirAll(this.RuntimeConfig.PathConfig.TaskData, 0777)
 
 	this.ESClient = util.ElasticsearchClient{Host: this.RuntimeConfig.IndexingConfig.Host, Index: this.RuntimeConfig.IndexingConfig.Index}
-	this.Channels.pendingFetchDiskQueue = NewDiskQueue("pending_fetch", this.RuntimeConfig.PathConfig.QueueData, 100*1024*1024, 4, 1<<10, 2500, 2*time.Second)
-	this.Channels.pendingCheckDiskQueue = NewDiskQueue("pending_check", this.RuntimeConfig.PathConfig.QueueData, 100*1024*1024, 4, 1<<10, 2500, 2*time.Second)
+	this.Channels.pendingFetchDiskQueue = NewDiskQueue("pending_fetch", this.RuntimeConfig.PathConfig.QueueData, 100*1024*1024, 4, 1<<10, 2500, 10*time.Second)
+	this.Channels.pendingCheckDiskQueue = NewDiskQueue("pending_check", this.RuntimeConfig.PathConfig.QueueData, 100*1024*1024, 4, 1<<10, 2500, 10*time.Second)
 
 	return nil
 }
@@ -167,6 +166,7 @@ func (this *Channels) PushUrlToCheck(url types.PageTask) error {
 		return err
 	}
 }
+
 func (this *Channels) PushUrlToFetch(url types.PageTask) error {
 
 	//push chan first and then push diskqueue
@@ -184,43 +184,45 @@ func (this *Channels) PushUrlToFetch(url types.PageTask) error {
 
 func (this *Channels) PopUrlToCheck() (types.PageTask,error) {
 
-start:
+//start:
 	//pop chan first and then pop diskqueue
-	select {
-	case url := <-this.pendingCheckUrl:
-		stats.Increment("global", stats.STATS_CHECKER_POP_CHAN_COUNT)
-		return url,nil
-	case b := <-this.pendingCheckDiskQueue.ReadChan():
+	//select {
+	//case url := <-this.pendingCheckUrl:
+	//	stats.Increment("global", stats.STATS_CHECKER_POP_CHAN_COUNT)
+	//	return url,nil
+	//case
+		b := <-this.pendingCheckDiskQueue.ReadChan()
 		url := types.PageTaskFromBytes(b)
 		stats.Increment("global", stats.STATS_CHECKER_POP_DISK_COUNT)
 		return url,nil
-	default:
+	//default:
 		//log.Info("no check url to pop, wait 3s")
 		//time.Sleep(3 * time.Second)
-		goto start
-	}
-	return types.PageTask{},errors.New("no url found")
+		//goto start
+	//}
+	//return types.PageTask{},errors.New("no url found")
 }
 
 func (this *Channels) PopUrlToFetch() (types.PageTask,error) {
 
-start:
+//start:
 	//pop chan first and then pop diskqueue
-	select {
-	case url := <-this.pendingFetchUrl:
-		stats.Increment("global", stats.STATS_FETCH_POP_CHAN_COUNT)
-		return url,nil
-	case b := <-this.pendingFetchDiskQueue.ReadChan():
+	//select {
+	//case url := <-this.pendingFetchUrl:
+	//	stats.Increment("global", stats.STATS_FETCH_POP_CHAN_COUNT)
+	//	return url,nil
+	//case
+	b := <-this.pendingFetchDiskQueue.ReadChan() //:
 		url := types.PageTaskFromBytes(b)
 		stats.Increment("global", stats.STATS_FETCH_POP_DISK_COUNT)
 		return url,nil
-	default:
+	//default:
 		//log.Info("no fetch url to pop, wait 3s")
 		//time.Sleep(3 * time.Second)
-		goto start
-	}
+		//goto start
+	//}
 
-	return types.PageTask{},errors.New("no url found")
+	//return types.PageTask{},errors.New("no url found")
 }
 
 func (this *Channels) Close() {

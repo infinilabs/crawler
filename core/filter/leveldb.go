@@ -44,7 +44,7 @@ func (filter *LeveldbFilter) Open(fileName string) error{
 		return err
 	}
 
-	log.Info("leveldb successfully reloaded:", fileName)
+	log.Debug("leveldb successfully reloaded:", fileName)
 	return nil
 }
 

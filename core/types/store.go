@@ -20,9 +20,14 @@ package types
 type Store interface {
 
 	Open() error
+
 	Close() error
 
 	GetValue(bucket string, key []byte) []byte
+
+	GetCompressedValue(bucket string, key []byte) []byte
+
+	AddValueCompress(bucket string, key []byte, value []byte) error
 
 	AddValue(bucket string, key []byte, value []byte) error
 

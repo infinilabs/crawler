@@ -78,6 +78,10 @@ config:
 	go get github.com/gorilla/websocket
 	go get github.com/boltdb/bolt/...
 	go get github.com/quipo/statsd
+	go get github.com/alash3al/goemitter
+	go get github.com/bkaradzic/go-lz4
+	go get github.com/elgs/gojq
+
 
 dist: cross-build package
 

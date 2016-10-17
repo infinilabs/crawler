@@ -22,9 +22,9 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/util"
 	. "net/url"
+	"sort"
 	"strings"
 	"time"
-	"sort"
 )
 
 type UrlNormalizationJoint struct {
@@ -112,23 +112,22 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 			}
 
 			log.Trace("fixed link: ", url)
-
-			tempUrl = url
-			if strings.HasPrefix(url, "//") {
-				tempUrl = strings.TrimLeft(url, "//")
-			}
-
-			if !strings.HasPrefix(url, "http") {
-				tempUrl = "http://" + url
-			}
-			currentURI, err = Parse(tempUrl)
-			if err != nil {
-				log.Error(err)
-				context.Break()
-				return context, err
-			}
 		}
 
+		tempUrl = url
+		if strings.HasPrefix(url, "//") {
+			tempUrl = strings.TrimLeft(url, "//")
+		}
+
+		if !strings.HasPrefix(url, "http") {
+			tempUrl = "http://" + url
+		}
+		currentURI, err = Parse(tempUrl)
+		if err != nil {
+			log.Error(err)
+			context.Break()
+			return context, err
+		}
 	}
 
 	////resolve domain specific filter
@@ -195,8 +194,8 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 			}
 			sort.Strings(keys)
 
-			for _,key := range keys {
-				value:=queryMap[key]
+			for _, key := range keys {
+				value := queryMap[key]
 				if value != nil && len(value) > 0 {
 					if len(value) > 0 {
 						filenamePrefix = filenamePrefix + key + "_"
@@ -230,7 +229,7 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 			filename = currentURI.Path[index:len(currentURI.Path)]
 		}
 	} else {
-		log.Tracef("no / in path, %s",currentURI.Path)
+		log.Tracef("no / in path, %s", currentURI.Path)
 		filePath = currentURI.Path
 		filename = defaultFileName
 	}
@@ -238,7 +237,7 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 	filename = filenamePrefix + filename
 	context.Set(CONTEXT_SAVE_PATH, filePath)
 	context.Set(CONTEXT_SAVE_FILENAME, filename)
-	log.Debug("finished normalization")
+	log.Debugf("finished normalization,%s, %s, %s ",url,filePath,filename)
 
 	return context, nil
 }

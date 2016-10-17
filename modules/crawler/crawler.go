@@ -111,15 +111,15 @@ func execute(task types.PageTask, env *Env) {
 
 	pipeline := Pipeline{}
 	pipeline.Context(&Context{Env: env}).
-		Start(UrlSource{Url: task.Url, Depth: task.Depth, Reference: task.Reference}).
+		Start(UrlSource{Task: task}).
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
 		Join(UrlFilterJoint{}).
 		Join(LoadMetadataJoint{}).
 		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 100}).
 		Join(FetchJoint{}).
-		Join(ParserJoint{DispatchLinks: true}).
+		//Join(ParserJoint{DispatchLinks: true}).
 		//Join(SaveToFileSystemJoint{}).
-		Join(SaveToDBJoint{}).
+		Join(SaveToDBJoint{CompressBody:true}).
 		//Join(PublishJoint{}).
 		End().
 		Run()

@@ -24,10 +24,6 @@ import (
 )
 type ContextKey string
 
-//func (this ContextKey) String() string {
-//	return string(this)
-//}
-
 type Context struct {
 	Data map[ContextKey]interface{}
 	Env *env.Env
@@ -153,5 +149,6 @@ func (this *Pipeline) Run()(*Context) {
 			panic(err)
 		}
 	}
+	stats.Increment("crawler.pipeline","finished")
 	return this.context
 }

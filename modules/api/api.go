@@ -47,6 +47,9 @@ func internalStart(env *Env) {
 	mux.HandleFunc("/setting/seelog", handler.LoggingSettingAction)
 	mux.HandleFunc("/setting/seelog/", handler.LoggingSettingAction)
 
+	//Snapshot
+	mux.HandleFunc("/snapshot/", handler.SnapshotAction)
+
 	//UI pages
 	mux.Handle("/ui/", http.FileServer(ui.FS(false)))
 	mux.HandleFunc("/ui/boltdb", handler.BoltDBStatusAction)

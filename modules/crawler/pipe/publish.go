@@ -58,7 +58,6 @@ func (this PublishJoint) Process(c *Context) (*Context, error) {
 			maps=append(maps,item)
 		}
 		data["links"]=maps
-
 	}
 	_,err:= c.Env.ESClient.IndexDoc(id,data)
 	if(err!=nil){

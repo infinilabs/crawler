@@ -19,37 +19,96 @@ package pipe
 import (
 	. "github.com/medcl/gopa/core/pipeline"
 	"strings"
+	log "github.com/cihub/seelog"
+	"regexp"
 )
 
 type UrlFilterJoint struct {
-
+	//ignore files end with js,css,apk,zip
+	SkipPageParsePattern *regexp.Regexp
 }
 
-
 func (this UrlFilterJoint) Name() string {
-	return "url_filgter"
+	return "url_filter"
 }
 
 func (this UrlFilterJoint) Process(context *Context) (*Context, error) {
-
+	this.SkipPageParsePattern = regexp.MustCompile(".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b")
 	url := context.MustGetString(CONTEXT_URL)
 	orgUrl := context.MustGetString(CONTEXT_ORIGINAL_URL)
 
-	if(orgUrl==""){
-		orgUrl=url
+	if orgUrl == "" {
+		orgUrl = url
 	}
 
-	if((!this.valid(orgUrl))||(url!=orgUrl&&(!this.valid(url)))){
+	if (!this.valid(orgUrl)) || (url != orgUrl && (!this.valid(url))) {
 		context.Break()
 	}
 
 	return context, nil
 }
 
-func (this UrlFilterJoint)valid(url string) bool {
-	if(strings.HasPrefix(url,"mailto:")){
+func (this UrlFilterJoint) valid(url string) bool {
+	if url == "" {
+		return false
+	}
+
+	if strings.HasPrefix(url, "mailto:") {
+		log.Trace("filteredUrl started with: mailto: , invalid")
+		return false
+	}
+
+	if strings.Contains(url, "data:image/") {
+		log.Trace("filteredUrl started with: data:image/ , invalid")
+		return false
+	}
+
+	if strings.HasPrefix(url, "#") {
+		log.Trace("filteredUrl started with: # , invalid")
+		return false
+	}
+
+	if strings.HasPrefix(url, "javascript:") {
+		log.Trace("filteredUrl started with: javascript: , invalid")
+		return false
+	}
+
+
+	if this.SkipPageParsePattern.Match([]byte(url)) {
+		log.Trace("hit SkipPattern pattern,", url)
 		return false
 	}
 
 	return true
 }
+
+
+//func checkIfUrlWillBeSave(taskConfig *config.TaskConfig, url []byte) bool {
+//
+//	requestUrl := string(url)
+//
+//	log.Debug("started check savingUrlPattern,", taskConfig.SavingUrlPattern, ",", string(url))
+//	if taskConfig.SavingUrlPattern.Match(url) {
+//
+//		log.Debug("match saving url pattern,", requestUrl)
+//		if len(taskConfig.SavingUrlMustNotContain) > 0 {
+//			if util.ContainStr(requestUrl, taskConfig.SavingUrlMustNotContain) {
+//				log.Debug("hit SavingUrlMustNotContain,ignore,", requestUrl, " , ", taskConfig.SavingUrlMustNotContain)
+//				return false
+//			}
+//		}
+//
+//		if len(taskConfig.SavingUrlMustContain) > 0 {
+//			if !util.ContainStr(requestUrl, taskConfig.SavingUrlMustContain) {
+//				log.Debug("not hit SavingUrlMustContain,ignore,", requestUrl, " , ", taskConfig.SavingUrlMustContain)
+//				return false
+//			}
+//		}
+//
+//		return true
+//
+//	} else {
+//		log.Debug("does not hit SavingUrlPattern ignoring,", requestUrl)
+//	}
+//	return false
+//}

@@ -27,7 +27,7 @@ import (
 
 type Modules struct {
 	env     *Env
-	modules map[string]ModuleInterface
+	modules *map[int]Module
 }
 
 func New(env *Env) *Modules {

@@ -1,4 +1,4 @@
-max_go_routine: 5
+max_go_routine: 1
 cluster:
   name: "gopa"
 

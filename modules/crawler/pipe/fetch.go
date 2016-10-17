@@ -17,18 +17,19 @@ limitations under the License.
 package pipe
 
 import (
+	"errors"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/types"
 	"github.com/medcl/gopa/core/util"
 	"time"
-	"errors"
 )
 
 type FetchJoint struct {
-	context             *Context
-	timeout             time.Duration
+	context *Context
+	timeout time.Duration
+	cookie  string
 }
 
 func (this FetchJoint) Name() string {
@@ -48,13 +49,6 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 		return context, errors.New("invalid fetchUrl")
 	}
 
-	runtimeConfig := context.Env.RuntimeConfig
-	//var storage = runtimeConfig.Storage
-
-	log.Debug("enter fetchUrl method:", requestUrl)
-
-	config := runtimeConfig.TaskConfig
-
 	log.Debug("start fetch url,", requestUrl)
 	flg := make(chan bool, 1)
 
@@ -64,12 +58,11 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 		pageItem.LastCheckTime = time.Now().UTC()
 
 		//start to fetch remote content
-		body, err := util.HttpGetWithCookie(&pageItem, requestUrl, config.Cookie)
-
+		body, err := util.HttpGetWithCookie(&pageItem, requestUrl, this.cookie)
 
 		if err == nil {
 			if body != nil {
-				if pageItem.StatusCode == 404{
+				if pageItem.StatusCode == 404 {
 					log.Info("skip while 404, ", requestUrl, " , ", pageItem.StatusCode)
 					context.Break()
 					flg <- false
@@ -78,19 +71,18 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 			}
 
 			//update url, in case catch redirects
-			context.Set(CONTEXT_URL,pageItem.Url)
-			context.Set(CONTEXT_PAGE_BODY_BYTES,body)
+			context.Set(CONTEXT_URL, pageItem.Url)
+			context.Set(CONTEXT_PAGE_BODY_BYTES, body)
 			context.Set(CONTEXT_PAGE_ITEM, &pageItem)
 			log.Debug("exit fetchUrl method:", requestUrl)
 			flg <- true
 
 		} else {
-			//storage.LogFetchFailedUrl(runtimeConfig.PathConfig.FetchFailedLog, requestUrl)
 			flg <- false
 		}
 	}()
 
-	domain:=context.MustGetString(CONTEXT_HOST)
+	domain := context.MustGetString(CONTEXT_HOST)
 
 	//监听通道，由于设有超时，不可能泄露
 	select {
