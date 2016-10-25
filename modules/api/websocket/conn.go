@@ -55,7 +55,7 @@ func (c *WebsocketConnection) readPump() {
 		_, message, err := c.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
-				log.Errorf("error: %v", err)
+				log.Trace("error: %v", err)
 			}
 			break
 		}
