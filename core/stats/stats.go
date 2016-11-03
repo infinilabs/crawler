@@ -18,20 +18,20 @@ package stats
 
 import (
 	"encoding/json"
+	log "github.com/cihub/seelog"
 	"runtime"
 	"sync"
-	"github.com/quipo/statsd"
 	"time"
-	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/stats/statsd"
 )
 
 var data map[string]map[string]int64
 var inited bool
 var statsdInited bool
-var statsdbuffer  *statsd.StatsdBuffer
+var statsdbuffer *statsd.StatsdBuffer
 var l sync.RWMutex
 
-func initStatsd()  {
+func initStatsd() {
 
 	prefix := "gopa."
 	statsdclient := statsd.NewStatsdClient("statsdhost:8125", prefix) //TODO configable
@@ -45,7 +45,7 @@ func initStatsd()  {
 	statsdbuffer = statsd.NewStatsdBuffer(interval, statsdclient)
 	//defer statsdbuffer.Close()
 
-	statsdInited=true
+	statsdInited = true
 
 }
 
@@ -57,10 +57,9 @@ func initData(category, key string) {
 		inited = true
 	}
 
-	if !statsdInited{
+	if !statsdInited {
 		initStatsd()
 	}
-
 
 	_, ok := data[category]
 	if !ok {
@@ -82,7 +81,7 @@ func Increment(category, key string) {
 func IncrementBy(category, key string, value int64) {
 	initData(category, key)
 
-	if(statsdInited){
+	if statsdInited {
 		statsdbuffer.Incr(category+"."+key, value)
 	}
 
@@ -99,7 +98,7 @@ func Decrement(category, key string) {
 func DecrementBy(category, key string, value int64) {
 	initData(category, key)
 
-	if(statsdInited){
+	if statsdInited {
 		statsdbuffer.Decr(category+"."+key, value)
 	}
 
@@ -109,15 +108,15 @@ func DecrementBy(category, key string, value int64) {
 	runtime.Gosched()
 }
 
-func Timing(category,key string,v int64)  {
-	if(statsdInited){
-		statsdbuffer.Timing(category+"."+key,v)
+func Timing(category, key string, v int64) {
+	if statsdInited {
+		statsdbuffer.Timing(category+"."+key, v)
 	}
 }
 
-func Gauge(category,key string,v int64)  {
-	if(statsdInited){
-		statsdbuffer.Gauge(category+"."+key,v)
+func Gauge(category, key string, v int64) {
+	if statsdInited {
+		statsdbuffer.Gauge(category+"."+key, v)
 	}
 }
 

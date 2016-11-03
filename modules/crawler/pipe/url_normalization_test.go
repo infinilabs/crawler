@@ -68,3 +68,22 @@ func TestNormailzeLinks1(t *testing.T) {
 	assert.Equal(t,"http://localhost:8080/phpliteadmin.php?table=groupes&action=row_editordelete&pk=3&type=edit",context.MustGetString(CONTEXT_URL))
 
 }
+
+func TestNormailzeLinks2(t *testing.T) {
+
+	context:= &pipeline.Context{Env:env.EmptyEnv()}
+	context.Data=map[pipeline.ContextKey]interface{}{}
+	context.Set(CONTEXT_URL,"http://127.0.0.1:8080/modeling-your-data.html")
+	context.Set(CONTEXT_DEPTH,1)
+	parse:=UrlNormalizationJoint{}
+	parse.Process(context)
+
+	assert.Equal(t,"http://127.0.0.1:8080/modeling-your-data.html",context.MustGetString(CONTEXT_URL))
+	assert.Equal(t,"",context.MustGetString(CONTEXT_SAVE_PATH))
+	assert.Equal(t,"/modeling-your-data.html",context.MustGetString(CONTEXT_SAVE_FILENAME))
+
+	context.Set(CONTEXT_URL,"http://127.0.0.1:8080/video")
+	parse.Process(context)
+	assert.Equal(t,"",context.MustGetString(CONTEXT_SAVE_PATH))
+	assert.Equal(t,"/video",context.MustGetString(CONTEXT_SAVE_FILENAME))
+}

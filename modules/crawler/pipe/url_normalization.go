@@ -214,7 +214,9 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 
 	//split folder and filename and also insert the prefix filename
 	index := strings.LastIndex(currentURI.Path, "/")
+
 	if index > 0 {
+		//the url should has at least one folder
 		//http://xx.com/1112/12
 		filePath = currentURI.Path[0:index]
 
@@ -229,9 +231,10 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 			filename = currentURI.Path[index:len(currentURI.Path)]
 		}
 	} else {
+		//file in the root folder
 		log.Tracef("no / in path, %s", currentURI.Path)
-		filePath = currentURI.Path
-		filename = defaultFileName
+		filePath = ""
+		filename = currentURI.Path
 	}
 
 	filename = filenamePrefix + filename

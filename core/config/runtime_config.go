@@ -101,6 +101,12 @@ type CrawlerConfig struct {
 	LoadPendingFetchJobs           bool  `load_pending_fetch_from_file`//fetch url parse and extracted from saved page,load data from:"pending_fetch.urls"
 
 }
+
+func (this *CrawlerConfig)Init() (*CrawlerConfig)  {
+	this.Enabled=true
+	return this
+}
+
 type ParserConfig struct {
 	Enabled bool `enabled`
 	ParseUrlsFromSavedFileLog        bool `parse_file_log`

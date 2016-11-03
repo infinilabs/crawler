@@ -42,6 +42,7 @@ func (this PublishJoint) Process(c *Context) (*Context, error) {
 	data["original_url"]=c.MustGetString(CONTEXT_ORIGINAL_URL)
 	data["url"]=c.MustGetString(CONTEXT_URL)
 	data["host"]=c.MustGetString(CONTEXT_HOST)
+	data["summary"]=c.MustGetString(CONTEXT_PAGE_BODY_PLAIN_TEXT)
 	data["save_path"]=c.MustGetString(CONTEXT_SAVE_PATH)
 	data["save_file"]=c.MustGetString(CONTEXT_SAVE_FILENAME)
 

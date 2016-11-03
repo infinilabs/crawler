@@ -40,7 +40,7 @@ func (filter *LeveldbFilter) Open(fileName string) error{
 	filter.filter = db
 
 	if err != nil {
-		log.Error("leveldb:", fileName, err)
+		log.Error("leveldb:", fileName,", ", err)
 		return err
 	}
 

@@ -68,7 +68,7 @@ func (this publishJoint) Process(s *Context) (*Context, error) {
 
 func TestPipeline(t *testing.T)  {
 
-	pipeline:=Pipeline{}
+	pipeline:=NewPipeline("crawler_test")
 	stream:=&Context{}
 	stream.Data =map[ContextKey]interface{}{}
 	stream.Data["url"]="gogol.com"

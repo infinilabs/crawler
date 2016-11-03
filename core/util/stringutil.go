@@ -19,6 +19,7 @@ package util
 import (
 	. "strings"
 	"unicode/utf16"
+	"unicode"
 )
 
 func ContainStr(s, substr string) bool {
@@ -48,4 +49,22 @@ func SubString(str string, begin, length int) (substr string) {
 
 	// 返回子串
 	return string(rs[begin:end])
+}
+
+
+// Removes all unnecessary whitespaces
+func MergeSpace(in string) (out string) {
+	white := false
+	for _, c := range in {
+		if unicode.IsSpace(c) {
+			if !white {
+				out = out + " "
+			}
+			white = true
+		} else {
+			out = out + string(c)
+			white = false
+		}
+	}
+	return
 }

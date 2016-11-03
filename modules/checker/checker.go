@@ -20,14 +20,15 @@ import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
 	. "github.com/medcl/gopa/core/filter"
+	"github.com/medcl/gopa/core/stats"
 	"path"
 	"time"
-	"github.com/medcl/gopa/core/stats"
 )
 
 var quitChannel chan bool
 var started = false
-var filter= LeveldbFilter{}
+var filter = LeveldbFilter{}
+var filterFileName = "filters/url_fetched"
 
 func Start(env *Env) {
 	if started {
@@ -36,7 +37,7 @@ func Start(env *Env) {
 	}
 	quitChannel = make(chan bool)
 
-	filter.Open(path.Join(env.RuntimeConfig.PathConfig.Data,"url_fetched.filter"))
+	filter.Open(path.Join(env.RuntimeConfig.PathConfig.Data, filterFileName))
 
 	go runCheckerGo(env, &quitChannel)
 	started = true
@@ -46,22 +47,23 @@ func runCheckerGo(env *Env, quitC *chan bool) {
 
 	go func() {
 		for {
-			startTime:=time.Now()
+			startTime := time.Now()
 			if !started {
 				return
 			}
 			log.Trace("waiting url to check")
 
-			url,err := env.Channels.PopUrlToCheck()
-			stats.Increment("checker.url","walk")
-			if(err!=nil){
+			url, err := env.Channels.PopUrlToCheck()
+
+			stats.Increment("checker.url", "walk")
+			if err != nil {
 				continue
 			}
 			log.Trace("cheking url:", string(url.Url))
 
 			//TODO 统一 url 格式 , url 目前可能是相对路径
 			//checking
-			if(filter.Exists([]byte(url.Url))){
+			if filter.Exists([]byte(url.Url)) {
 				log.Debug("url already pushed to fetch queue, ignore :", string(url.Url))
 				continue
 			}
@@ -72,11 +74,11 @@ func runCheckerGo(env *Env, quitC *chan bool) {
 			//send to disk queue
 			env.Channels.PushUrlToFetch(url)
 
-			stats.Increment("checker.url","get_valid_seed")
+			stats.Increment("checker.url", "get_valid_seed")
 
 			log.Debugf("send url: %s ,depth: %d to  fetch queue", string(url.Url), url.Depth)
-			elapsedTime:=time.Now().Sub(startTime)
-			stats.Timing("checker.url","time",elapsedTime.Nanoseconds())
+			elapsedTime := time.Now().Sub(startTime)
+			stats.Timing("checker.url", "time", elapsedTime.Nanoseconds())
 		}
 	}()
 

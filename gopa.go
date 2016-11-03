@@ -34,6 +34,7 @@ import (
 	"runtime/pprof"
 	"syscall"
 	"time"
+	"github.com/medcl/gopa/core/global"
 )
 
 var (
@@ -66,7 +67,7 @@ func main() {
 
 	var seedUrl = flag.String("seed", "", "the seed url, where everything starts")
 	var logLevel = flag.String("log", "info", "the log level,options:trace,debug,info,warn,error, default: info")
-	var configFile = flag.String("config", "gopa.yml", "the loation of config file, default: gopa.yml")
+	var configFile = flag.String("config", "gopa.yml", "the location of config file, default: gopa.yml")
 	var isDaemon = flag.Bool("daemon", false, "run in background as daemon")
 	var pidfile = flag.String("pidfile", "", "pidfile path (only for daemon)")
 
@@ -134,6 +135,9 @@ func main() {
 	sysConfig := SystemConfig{Version: VERSION, ConfigFile: *configFile, LogLevel: *logLevel}
 
 	env = Environment(sysConfig)
+
+	//put env into global registrar
+	global.Register(global.REGISTER_ENV,&env)
 
 	logging.SetLogging(env)
 

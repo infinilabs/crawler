@@ -7,10 +7,11 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/medcl/gopa/modules/api/http/templates/boltdb"
+	"github.com/medcl/gopa/core/global"
 )
 
 func (h *Handler) BoltDBStatusAction(w http.ResponseWriter, r *http.Request) {
-	db:=h.Env.Lookup("voltdb_ref").(*bolt.DB)
+	db:=global.Lookup(global.REGISTER_BOLTDB).(*bolt.DB)
 	err := db.View(func(tx *bolt.Tx) error {
 		showUsage := (r.FormValue("usage") == "true")
 

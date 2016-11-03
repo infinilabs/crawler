@@ -48,6 +48,9 @@ func Start(env *Env) {
 
 			}
 		}()
+	}else{
+		log.Info("crawler currently not enabled")
+		return
 	}
 
 	started = true
@@ -109,7 +112,7 @@ func execute(task types.PageTask, env *Env) {
 		}
 	}()
 
-	pipeline := Pipeline{}
+	pipeline := NewPipeline("crawler")
 	pipeline.Context(&Context{Env: env}).
 		Start(UrlSource{Task: task}).
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
@@ -117,10 +120,10 @@ func execute(task types.PageTask, env *Env) {
 		Join(LoadMetadataJoint{}).
 		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 100}).
 		Join(FetchJoint{}).
-		//Join(ParserJoint{DispatchLinks: true}).
-		//Join(SaveToFileSystemJoint{}).
+		Join(ParserJoint{DispatchLinks: true, MaxDepth: 3}).
+		Join(SaveToFileSystemJoint{}).
 		Join(SaveToDBJoint{CompressBody:true}).
-		//Join(PublishJoint{}).
+		Join(PublishJoint{}).
 		End().
 		Run()
 

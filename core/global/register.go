@@ -14,31 +14,63 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package env
+package global
 
-import "sync"
+import (
+	"sync"
+	"runtime"
+)
+
+type RegisterKey string
 
 type Registrar struct {
-	values map[string]interface{}
+	values map[RegisterKey]interface{}
 	sync.Mutex
 }
 
-func (r *Registrar) Register(k string, v interface{}) {
-	if r == nil {
+var(
+	r *Registrar
+	l sync.RWMutex
+	inited bool
+)
+
+func GetRegistrar()*Registrar  {
+	if !inited {
+		l.Lock()
+		if(!inited){
+			r = &Registrar{values: map[RegisterKey]interface{}{}}
+			inited = true
+		}
+		l.Unlock()
+		runtime.Gosched()
+	}
+	return r
+}
+
+func Register(k RegisterKey, v interface{}) {
+	reg:=GetRegistrar()
+	if reg == nil {
 		return
 	}
 
-	r.Lock()
-	defer r.Unlock()
-	r.values[k] = v
+	reg.Lock()
+	defer reg.Unlock()
+	reg.values[k] = v
 }
 
-func (r *Registrar) Lookup(k string) interface{} {
-	if r == nil {
+func  Lookup(k RegisterKey) interface{} {
+	reg:=GetRegistrar()
+	if reg == nil {
 		return nil
 	}
 
-	r.Lock()
-	defer r.Unlock()
-	return r.values[k]
+	reg.Lock()
+	defer reg.Unlock()
+	return reg.values[k]
 }
+
+
+
+
+
+

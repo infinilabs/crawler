@@ -24,6 +24,7 @@ const (
 	CONTEXT_REFERENCE_URL       ContextKey = "REFERENCE_URL"
 	CONTEXT_DEPTH       ContextKey = "DEPTH"
 	CONTEXT_PAGE_BODY_BYTES ContextKey = "PAGE_BODY_BYTES"
+	CONTEXT_PAGE_BODY_PLAIN_TEXT ContextKey = "PAGE_BODY_PLAIN_TEXT" //extracted plain text from html
 	CONTEXT_PAGE_ITEM ContextKey = "PAGE"
 	CONTEXT_HOST ContextKey = "HOST"
 	CONTEXT_URL_PATH ContextKey = "URL_PATH"

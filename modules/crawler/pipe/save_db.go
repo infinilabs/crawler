@@ -48,7 +48,7 @@ func (this SaveToDBJoint) Process(c *Context) (*Context, error) {
 	domain := c.MustGetString(CONTEXT_HOST)
 
 	saveKey:=GetKey(pageItem.Domain,path.Join(savePath,saveFile))
-	log.Debug("save url to db, ", url, ",domain, ", pageItem.Domain,", ",string(saveKey))
+	log.Debug("save url to db, url:", url, ",domain:", pageItem.Domain,",path:",savePath,",file:",saveFile,",saveKey:",string(saveKey))
 
 	if(this.CompressBody){
 		this.context.Env.RuntimeConfig.Storage.AddValueCompress(boltdb.SnapshotBucketKey,saveKey,pageItem.Body)

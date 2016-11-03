@@ -14,33 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package storage
+package global
 
-import (
-	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/modules/storage/boltdb"
-	_ "time"
-	"github.com/medcl/gopa/core/global"
+
+const (
+	REGISTER_ENV RegisterKey = "REGISTER_ENV"
+	REGISTER_BOLTDB  RegisterKey = "REGISTER_BOLTDB"
+
 )
-
-var store boltdb.BoltdbStore
-
-
-func Start(env *Env) {
-
-	store = boltdb.BoltdbStore{Env:env}
-	err := store.Open()
-	if err != nil {
-		log.Error(err)
-	}
-	env.RuntimeConfig.Storage = &store
-	log.Info("storage success started")
-
-	global.Register(global.REGISTER_BOLTDB, store.DB)
-
-}
-
-func Stop() error {
-	return store.Close()
-}

@@ -17,94 +17,111 @@ limitations under the License.
 package pipeline
 
 import (
-	"github.com/medcl/gopa/core/env"
 	"fmt"
-	"time"
+	"github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/stats"
+	"time"
+	"strings"
 )
+
 type ContextKey string
 
 type Context struct {
-	Data map[ContextKey]interface{}
-	Env *env.Env
+	Data      map[ContextKey]interface{}
+	Env       *env.Env
 	breakFlag bool
 }
 
-func (this *Context) Break(){
-	this.breakFlag=true
+func (this *Context) Break() {
+	this.breakFlag = true
 }
 
-func (this *Context) IsBreak()(bool){
+func (this *Context) IsBreak() bool {
 	return this.breakFlag
 }
 
-func (this *Context) GetString(key ContextKey)(string,bool){
-	v:=this.Get(key)
-	s,ok:=v.(string)
-	if(ok){
-		return s,ok
+func (this *Context) GetString(key ContextKey) (string, bool) {
+	v := this.Get(key)
+	s, ok := v.(string)
+	if ok {
+		return s, ok
 	}
-	return s,ok
-}
-func (this *Context) GetInt(key ContextKey)(int,bool){
-	v:=this.Get(key)
-	s,ok:=v.(int)
-	if(ok){
-		return s,ok
-	}
-	return s,ok
+	return s, ok
 }
 
-func (this *Context) MustGetString(key ContextKey)(string){
-	s,ok:=this.GetString(key)
-	if(!ok){
-		panic(fmt.Errorf("%s not found in context",key))
+func (this *Context) GetInt(key ContextKey) (int, bool) {
+	v := this.Get(key)
+	s, ok := v.(int)
+	if ok {
+		return s, ok
+	}
+	return s, ok
+}
+
+func (this *Context) MustGetString(key ContextKey) string {
+	s, ok := this.GetString(key)
+	if !ok {
+		panic(fmt.Errorf("%s not found in context", key))
 	}
 	return s
 }
 
-func (this *Context) MustGetInt(key ContextKey)(int){
-	s,ok:=this.GetInt(key)
-	if(!ok){
-		panic(fmt.Errorf("%s not found in context",key))
+func (this *Context) MustGetBytes(key ContextKey) []byte {
+	s, ok := this.Get(key).([]byte)
+	if !ok {
+		panic(fmt.Errorf("%s not found in context", key))
 	}
 	return s
 }
 
-func (this *Context) MustGetMap(key ContextKey)(map[string]interface{}){
-	s,ok:=this.GetMap(key)
-	if(!ok){
-		panic(fmt.Errorf("%s not found in context",key))
+func (this *Context) MustGetInt(key ContextKey) int {
+	s, ok := this.GetInt(key)
+	if !ok {
+		panic(fmt.Errorf("%s not found in context", key))
 	}
 	return s
 }
 
-func (this *Context) GetMap(key ContextKey)(map[string]interface{},bool){
-	v:=this.Get(key)
-	s,ok:=v.(map[string]interface{})
-	if(ok){
-		return s,ok
+func (this *Context) MustGetMap(key ContextKey) map[string]interface{} {
+	s, ok := this.GetMap(key)
+	if !ok {
+		panic(fmt.Errorf("%s not found in context", key))
 	}
-	return s,ok
+	return s
 }
 
-func (this *Context) Get(key ContextKey)interface{}{
+func (this *Context) GetMap(key ContextKey) (map[string]interface{}, bool) {
+	v := this.Get(key)
+	s, ok := v.(map[string]interface{})
+	if ok {
+		return s, ok
+	}
+	return s, ok
+}
+
+func (this *Context) Get(key ContextKey) interface{} {
 	return this.Data[key]
 }
 
-
-func (this *Context) Set(key ContextKey,value interface{}){
-	this.Data[key]=value
+func (this *Context) Set(key ContextKey, value interface{}) {
+	this.Data[key] = value
 }
 
 type Joint interface {
-	Name()string
+	Name() string
 	Process(s *Context) (*Context, error)
 }
 
 type Pipeline struct {
+	name string
 	joints  []Joint
 	context *Context
+}
+
+func NewPipeline(name string) *Pipeline  {
+	pipe:=&Pipeline{}
+	pipe.name=strings.TrimSpace(name)
+	return pipe
 }
 
 func (this *Pipeline) Context(s *Context) *Pipeline {
@@ -113,11 +130,11 @@ func (this *Pipeline) Context(s *Context) *Pipeline {
 }
 
 func (this *Pipeline) Start(s Joint) *Pipeline {
-	if(this.context ==nil){
-		this.context =&Context{}
+	if this.context == nil {
+		this.context = &Context{}
 	}
-	if(this.context.Data==nil){
-		this.context.Data =map[ContextKey]interface{}{}
+	if this.context.Data == nil {
+		this.context.Data = map[ContextKey]interface{}{}
 	}
 	this.joints = []Joint{s}
 	return this
@@ -132,23 +149,23 @@ func (this *Pipeline) End() *Pipeline {
 	return this
 }
 
-func (this *Pipeline) Run()(*Context) {
-	stats.Increment("crawler.pipeline","total")
+func (this *Pipeline) Run() *Context {
+	stats.Increment(this.name+".pipeline", "total")
 
 	var err error
 	for _, v := range this.joints {
-		if(this.context.breakFlag){
+		if this.context.breakFlag {
 			break
 		}
 		startTime := time.Now()
 		this.context, err = v.Process(this.context)
-		elapsedTime:=time.Now().Sub(startTime)
-		stats.Timing("crawler.pipeline",v.Name(),elapsedTime.Nanoseconds())
+		elapsedTime := time.Now().Sub(startTime)
+		stats.Timing(this.name+".pipeline", v.Name(), elapsedTime.Nanoseconds())
 		if err != nil {
-			stats.Increment("crawler.pipeline","error")
+			stats.Increment(this.name+".pipeline", "error")
 			panic(err)
 		}
 	}
-	stats.Increment("crawler.pipeline","finished")
+	stats.Increment(this.name+".pipeline", "finished")
 	return this.context
 }

@@ -128,7 +128,7 @@ func get(page *types.PageItem, url string, cookie string) ([]byte, error) {
 			}
 
 		} else {
-			log.Error(url, err)
+			log.Error(url,", ", err)
 		}
 		return nil, err
 	}
@@ -210,7 +210,7 @@ func post(url string, cookie string, postStr string) []byte {
 	resp, err := client.Do(reqest)
 
 	if err != nil {
-		log.Error(url, err)
+		log.Error(url,", ", err)
 		return nil
 	}
 
