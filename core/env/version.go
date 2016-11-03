@@ -27,6 +27,7 @@ func  GetWelcomeMessage()string  {
 	s+=(" \\______  /\\_______  /____|  \\____|__  /\n")
 	s+=("        \\/         \\/                \\/ \n")
 
-	s+=("[gopa] " + VERSION + "\n")
+	s+=("[gopa] " + VERSION +""+ commitLog +"\n")
 	return (s)
 }
+

@@ -64,7 +64,11 @@ clean:
 	mkdir bin/linux64
 	mkdir bin/darwin64
 
-config:
+
+update_commit_log:
+	echo -e "package env\nconst commitLog  =\"", last commit: `git log -1 --pretty=format:"%h, %ad, %an, %s"` "\"" > core/env/commit_log.go
+
+config: update_commit_log
 	@echo "get Dependencies"
 	go env
 	go get github.com/cihub/seelog

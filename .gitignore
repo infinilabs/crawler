@@ -48,3 +48,4 @@ target/
 .DS_Store
 /bin-run/
 /leveldb
+/.git_commit_log
