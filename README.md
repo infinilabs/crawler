@@ -38,8 +38,7 @@ you may restore the job later,the world is still in your hand.
 If you are running `Gopa` as daemon, you can stop it like this:
 
 ```
- ps -ax|grep gopa
- kill -QUIT {PID}
+ kill -QUIT `pgrep gopa`
 ```
 
 ## UI
