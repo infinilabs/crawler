@@ -16,6 +16,7 @@ limitations under the License.
 
 package env
 
+
 const  VERSION =  "0.7.0_SNAPSHOT"
 
 
@@ -27,6 +28,10 @@ func  GetWelcomeMessage()string  {
 	s+=(" \\______  /\\_______  /____|  \\____|__  /\n")
 	s+=("        \\/         \\/                \\/ \n")
 
+	commitLog:=""
+	if(len(LastCommitLog)>0){
+		commitLog="\n///last commit: "+LastCommitLog+"///"
+	}
 	s+=("[gopa] " + VERSION +""+ commitLog +"\n")
 	return (s)
 }

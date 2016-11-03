@@ -18,6 +18,7 @@ package handler
 
 import (
 	"net/http"
+	"github.com/medcl/gopa/core/env"
 )
 
 func (this *Handler) IndexAction(w http.ResponseWriter, req *http.Request) {
@@ -32,6 +33,7 @@ func (this *Handler) IndexAction(w http.ResponseWriter, req *http.Request) {
 	data["cluster_name"] = this.Env.RuntimeConfig.ClusterConfig.Name
 	data["version"] = this.Env.SystemConfig.Version
 	data["tagline"] = "You Know, for Web"
+	data["last_commit"] = env.LastCommitLog
 
 	this.WriteJson(w, &data, http.StatusOK)
 }
