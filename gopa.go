@@ -132,7 +132,7 @@ func main() {
 
 	logging.SetInitLogging(EmptyEnv(), *logLevel)
 
-	sysConfig := SystemConfig{Version: VERSION, ConfigFile: *configFile, LogLevel: *logLevel}
+	sysConfig := SystemConfig{ConfigFile: *configFile, LogLevel: *logLevel}
 
 	env = Environment(sysConfig)
 

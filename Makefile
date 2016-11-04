@@ -66,7 +66,7 @@ clean:
 
 
 update_commit_log:
-	echo -e "package env\nconst LastCommitLog  =\""`git log -1 --pretty=format:"%h, %ad, %an, %s"` "\"" > core/env/commit_log.go
+	echo -e "package env\nconst LastCommitLog  =\""`git log -1 --pretty=format:"%h, %ad, %an, %s"` "\"\nconst BuildDate  =\"`date`\"" > core/env/commit_log.go
 
 config: update_commit_log
 	@echo "get Dependencies"

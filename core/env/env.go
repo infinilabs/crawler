@@ -143,7 +143,6 @@ func EmptyEnv() *Env {
 
 //high priority config, init from the environment or startup, can't be changed
 type SystemConfig struct {
-	Version    string `0.0.1`
 	ConfigFile string `gopa.yml`
 	LogLevel   string `info`
 }
