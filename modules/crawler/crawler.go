@@ -121,7 +121,7 @@ func execute(task types.PageTask, env *Env) {
 		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 100}).
 		Join(FetchJoint{}).
 		Join(ParserJoint{DispatchLinks: true, MaxDepth: 3}).
-		Join(SaveToFileSystemJoint{}).
+		//Join(SaveToFileSystemJoint{}).
 		Join(SaveToDBJoint{CompressBody:true}).
 		Join(PublishJoint{}).
 		End().

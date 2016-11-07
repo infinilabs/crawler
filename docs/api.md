@@ -24,3 +24,7 @@ curl -XGET http://localhost:8001/stats
     </seelog>
     ' 
     ```
+
+* Get web snapshot
+
+``` http://localhost:8001/snapshot/?url=http://xxx.com ```
