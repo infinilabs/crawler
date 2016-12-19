@@ -18,22 +18,29 @@ package pipe
 
 import (. "github.com/medcl/gopa/core/pipeline"
 . "github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/core/tasks"
 )
 
-type UrlSource struct {
-	Task PageTask
+type StartSeed struct {
+	Seed TaskSeed
 }
 
-func (this UrlSource) Name() string {
-	return "url_source"
+func (this StartSeed) Name() string {
+	return "start_seed"
 }
 
-func (this UrlSource) Process(context *Context) (*Context, error) {
+func (this StartSeed) Process(context *Context) (*Context, error) {
 
-	context.Set(CONTEXT_ORIGINAL_URL,this.Task.Url)
-	context.Set(CONTEXT_URL,this.Task.Url)
-	context.Set(CONTEXT_DEPTH,this.Task.Depth)
-	context.Set(CONTEXT_REFERENCE_URL,this.Task.Reference)
+	//init task record
+	task:=CrawlerTask{}
+	task.Seed=&this.Seed
+	tasks.CreateTask(task)
+
+	context.Set(CONTEXT_ORIGINAL_URL,this.Seed.Url)
+	context.Set(CONTEXT_URL,this.Seed.Url)
+	context.Set(CONTEXT_DEPTH,this.Seed.Depth)
+	context.Set(CONTEXT_REFERENCE_URL,this.Seed.Reference)
+
 	return context, nil
 }
 

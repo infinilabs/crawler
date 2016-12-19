@@ -130,6 +130,7 @@ func (this *Pipeline) Context(s *Context) *Pipeline {
 }
 
 func (this *Pipeline) Start(s Joint) *Pipeline {
+
 	if this.context == nil {
 		this.context = &Context{}
 	}
@@ -146,6 +147,7 @@ func (this *Pipeline) Join(s Joint) *Pipeline {
 }
 
 func (this *Pipeline) End() *Pipeline {
+
 	return this
 }
 

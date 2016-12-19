@@ -37,7 +37,7 @@ func (this *Command) AddSeed(c *WebsocketConnection,a []string) ()  {
 
 	url:=a[1]
 	if(len(url)>0){
-		tasks.CreateTask(types.NewPageTask(url,"",0))
+		tasks.CreateSeed(types.NewPageTask(url,"",0))
 		c.WriteMessage([]byte("url "+url+" success added to pending fetch queue"))
 		return
 	}

@@ -172,7 +172,7 @@ func main() {
 	//sending feed to task queue
 	if len(*seedUrl) > 0 {
 		log.Debug("sending feed to fetch queue,", *seedUrl)
-		tasks.CreateTask(types.NewPageTask(*seedUrl, "", 0))
+		tasks.CreateSeed(types.NewPageTask(*seedUrl, "", 0))
 	}
 
 	<-finalQuitSignal

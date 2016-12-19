@@ -22,7 +22,7 @@ import (
 )
 
 func TestPageTask_GetBytes(t *testing.T) {
-	task:=PageTask{Url:"baidu.com",Reference:"google.com",Depth:5}
+	task:= TaskSeed{Url:"baidu.com",Reference:"google.com",Depth:5}
 	bytes,_:=task.GetBytes()
 	task1,_:=fromBytes(bytes)
 

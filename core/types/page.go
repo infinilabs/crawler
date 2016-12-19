@@ -30,6 +30,7 @@ type KV struct {
 }
 
 type PageItem struct {
+	ID         uint64 `storm:"id,increment"` // primary key with auto increment
 	Proto      string
 	Domain     string              // elastic.co
 	UrlPath    string              // /index.html
@@ -60,23 +61,31 @@ type PageLink struct {
 	Label string `json:"label"`
 }
 
-type PageTask struct {
-	ID  int `storm:"id,increment"` // primary key with auto increment
-	Url string `storm:"index"`
-	Reference string
-	Depth int `storm:"index"`
-	CreateTime    Time `storm:"index"`
+type TaskSeed struct {
+	ID  int `storm:"id,increment" json:"id,omitempty"`
+	Url string `storm:"index" json:"url,omitempty"`
+	Reference string `json:"reference,omitempty"`
+	Depth int `storm:"index" json:"depth,omitempty"`
+	CreateTime    *Time `storm:"index" json:"created,omitempty"`
 }
 
-func (this PageTask)Get(url string)PageTask  {
-	task:=PageTask{}
+type CrawlerTask struct{
+	ID  int `storm:"id,increment" json:"id"`
+	Url string `storm:"unique" json:"url"`
+	Seed *TaskSeed `storm:"inline" json:"seed,omitempty"`
+	Page *PageItem `storm:"inline" json:"page,omitempty"`
+	CreateTime    *Time `storm:"index" json:"created,omitempty"`
+}
+
+func (this TaskSeed)Get(url string) TaskSeed {
+	task:= TaskSeed{}
 	task.Url=url
 	task.Reference=""
 	task.Depth=0
 	return task
 }
 
-func (this PageTask)MustGetBytes()([]byte)  {
+func (this TaskSeed)MustGetBytes()([]byte)  {
 
 	bytes,err:=this.GetBytes()
 	if(err!=nil){
@@ -87,7 +96,7 @@ func (this PageTask)MustGetBytes()([]byte)  {
 
 var delimiter="|#|"
 
-func (this PageTask)GetBytes()([]byte,error)  {
+func (this TaskSeed)GetBytes()([]byte,error)  {
 	var buf bytes.Buffer
 
 	buf.WriteString(fmt.Sprint(this.Depth))
@@ -99,7 +108,7 @@ func (this PageTask)GetBytes()([]byte,error)  {
 	return buf.Bytes(), nil
 }
 
-func PageTaskFromBytes(b []byte)PageTask  {
+func PageTaskFromBytes(b []byte) TaskSeed {
 	task,err:=fromBytes(b)
 	if(err!=nil){
 		panic(err)
@@ -107,11 +116,11 @@ func PageTaskFromBytes(b []byte)PageTask  {
 	return task
 }
 
-func fromBytes(b []byte,)(PageTask,error)  {
+func fromBytes(b []byte,)(TaskSeed,error)  {
 
 	str:=string(b)
 	array:=strings.Split(str,delimiter)
-	task:=PageTask{}
+	task:= TaskSeed{}
 	i, _ := strconv.Atoi(array[0])
 	task.Depth=i
 	task.Reference=array[1]
@@ -120,8 +129,8 @@ func fromBytes(b []byte,)(PageTask,error)  {
 	return task,nil
 }
 
-func NewPageTask(url,ref string,depth int)PageTask  {
-	task:=PageTask{}
+func NewPageTask(url,ref string,depth int) TaskSeed {
+	task:= TaskSeed{}
 	task.Url=url
 	task.Reference=ref
 	task.Depth=depth

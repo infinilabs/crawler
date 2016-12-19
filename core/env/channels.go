@@ -35,26 +35,26 @@ func (this *Channels) Init(path string)  {
 	this.pendingCheckDiskQueue = NewDiskQueue("pending_check", path, 100*1024*1024, 4, 1<<10, 2500, 10*time.Second)
 }
 
-func (this *Channels) PushUrlToCheck(url types.PageTask) error {
+func (this *Channels) PushUrlToCheck(url types.TaskSeed) error {
 	err := this.pendingCheckDiskQueue.Put(url.MustGetBytes())
 	stats.Increment("global", stats.STATS_CHECKER_PUSH_DISK_COUNT)
 	return err
 }
 
-func (this *Channels) PushUrlToFetch(url types.PageTask) error {
+func (this *Channels) PushUrlToFetch(url types.TaskSeed) error {
 	err := this.pendingFetchDiskQueue.Put(url.MustGetBytes())
 	stats.Increment("global", stats.STATS_FETCH_PUSH_DISK_COUNT)
 	return err
 }
 
-func (this *Channels) PopUrlToCheck() (types.PageTask, error) {
+func (this *Channels) PopUrlToCheck() (types.TaskSeed, error) {
 	b := <-this.pendingCheckDiskQueue.ReadChan()
 	url := types.PageTaskFromBytes(b)
 	stats.Increment("global", stats.STATS_CHECKER_POP_DISK_COUNT)
 	return url, nil
 }
 
-func (this *Channels) PopUrlToFetch() (types.PageTask, error) {
+func (this *Channels) PopUrlToFetch() (types.TaskSeed, error) {
 	log.Trace("start pop url from queue")
 	b := <-this.pendingFetchDiskQueue.ReadChan()
 	url := types.PageTaskFromBytes(b)

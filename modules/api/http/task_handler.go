@@ -66,13 +66,24 @@ func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request, ps htt
 
 		task := types.NewPageTask(seed, "", 0)
 
-		tasks.CreateTask(task)
+		tasks.CreateSeed(task)
 
 		this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
 	} else {
 		logger.Trace("get all tasks")
 
-		tasks:=tasks.GetTaskList()
-		this.WriteJson(w,tasks,http.StatusOK)
+		fr := this.GetParameter(req, "from")
+		si := this.GetParameter(req, "size")
+		from,err:=strconv.Atoi(fr)
+		if(err!=nil){from=0}
+		size,err:=strconv.Atoi(si)
+		if(err!=nil){size=10}
+
+		total,tasks,err:=tasks.GetTaskList(from,size)
+		if(err!=nil){
+			this.error(w,err)
+		}else{
+			this.WriteListResultJson(w,total,tasks,http.StatusOK)
+		}
 	}
 }

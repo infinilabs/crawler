@@ -101,20 +101,22 @@ func RunPipeline(env *Env, quitC *chan bool, shard int) {
 
 }
 
-func execute(task types.PageTask, env *Env) {
+func execute(seed types.TaskSeed, env *Env) {
+
+	log.Trace("start crawler")
 
 	defer func() {
 		if r := recover(); r != nil {
 			if _, ok := r.(runtime.Error); ok {
 				err := r.(error)
-				log.Error(task.Url, " , ", err)
+				log.Error(seed.Url, " , ", err)
 			}
 		}
 	}()
 
 	pipeline := NewPipeline("crawler")
 	pipeline.Context(&Context{Env: env}).
-		Start(UrlSource{Task: task}).
+		Start(StartSeed{Seed: seed}).
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
 		Join(UrlFilterJoint{}).
 		Join(LoadMetadataJoint{}).

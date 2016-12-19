@@ -99,6 +99,19 @@ func (this *Handler) WriteJsonHeader(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Origin","*")
 }
 
+type Result struct{
+	Total int `json:"total"`
+	Result interface{} `json:"result"`
+}
+
+
+func (this *Handler) WriteListResultJson(w http.ResponseWriter,total int , v interface{}, statusCode int) error {
+	result:=Result{}
+	result.Total=total
+	result.Result=v
+	return this.WriteJson(w,result,statusCode)
+}
+
 func (this *Handler) WriteJson(w http.ResponseWriter, v interface{}, statusCode int) error {
 	if !this.wroteHeader {
 		this.WriteJsonHeader(w)

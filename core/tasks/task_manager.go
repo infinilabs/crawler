@@ -25,11 +25,54 @@ func Stop()  {
 	db.Close()
 }
 
-
-func CreateTask(task types.PageTask)  {
+func CreateSeed(task types.TaskSeed)  {
 	if(!inited){Start()}
-	log.Trace("start create task")
-	task.CreateTime=time.Now()
+	log.Trace("start create seed")
+	time:=time.Now()
+	task.CreateTime=&time
+	err := db.Save(&task)
+	if(err!=nil){
+		panic(err)
+	}
+	global.Env().Channels.PushUrlToCheck(task)
+}
+
+func DeleteSeed(id int)  {
+	if(!inited){Start()}
+	log.Trace("start delete seed: ",id )
+	task:=types.TaskSeed{ID:id}
+	err := db.DeleteStruct(&task)
+	if(err!=nil){
+		panic(err)
+	}
+}
+
+func GetSeed(id int) (types.TaskSeed,error)  {
+	if(!inited){Start()}
+	log.Trace("start get seed: ",id)
+	task:=types.TaskSeed{}
+	err := db.One("ID", id, &task)
+	return task,err
+}
+
+func GetSeedList()[]types.TaskSeed {
+	if(!inited){Start()}
+	log.Trace("start get all seeds")
+	var tasks []types.TaskSeed
+	err := db.AllByIndex("CreateTime",&tasks)
+	if(err!=nil){
+		panic(err)
+	}
+	return tasks
+}
+
+
+
+func CreateTask(task types.CrawlerTask)  {
+	if(!inited){Start()}
+	log.Trace("start create crawler task")
+	time:=time.Now()
+	task.CreateTime=&time
 	err := db.Save(&task)
 	if(err!=nil){
 		panic(err)
@@ -38,28 +81,30 @@ func CreateTask(task types.PageTask)  {
 
 func DeleteTask(id int)  {
 	if(!inited){Start()}
-	log.Trace("start delete task: ",id )
-	task:=types.PageTask{ID:id}
+	log.Trace("start delete crawler task: ",id )
+	task:=types.CrawlerTask{ID:id}
 	err := db.DeleteStruct(&task)
 	if(err!=nil){
 		panic(err)
 	}
 }
-func GetTask(id int) (types.PageTask,error)  {
+
+func GetTask(id int) (types.CrawlerTask,error)  {
 	if(!inited){Start()}
-	log.Trace("start get task: ",id)
-	task:=types.PageTask{}
+	log.Trace("start get seed: ",id)
+	task:=types.CrawlerTask{}
 	err := db.One("ID", id, &task)
 	return task,err
 }
 
-func GetTaskList()[]types.PageTask  {
+func GetTaskList(from,size int)(int,[]types.CrawlerTask,error) {
 	if(!inited){Start()}
-	log.Trace("start get all tasks")
-	var tasks []types.PageTask
-	err := db.AllByIndex("CreateTime",&tasks)
+	log.Trace("start get all crawler tasks")
+	var tasks []types.CrawlerTask
+	total,err:=db.Count(&types.CrawlerTask{})
 	if(err!=nil){
-		panic(err)
+		log.Error(err)
 	}
-	return tasks
+	err= db.AllByIndex("CreateTime",&tasks,storm.Skip(from),storm.Limit(size))
+	return total,tasks,err
 }
