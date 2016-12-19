@@ -14,40 +14,45 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package storage
+package module
 
 import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/modules/storage/boltdb"
-	_ "time"
-	"github.com/medcl/gopa/core/global"
 )
 
-var store boltdb.BoltdbStore
+type Modules struct {
+	env     *Env
+	modules []Module
+}
+
+var m *Modules
+
+func New(env *Env) {
+	mod := Modules{}
+	mod.env = env
+	m= &mod
+}
+
+func Register(mod Module)  {
+	m.modules = append(m.modules,mod)
+}
 
 
-func (this StorageModule)Start(env *Env) {
+func Start() {
 
-	store = boltdb.BoltdbStore{Env:env}
-	err := store.Open()
-	if err != nil {
-		log.Error(err)
+	log.Trace("start to start modules")
+	for _, v := range m.modules{
+		v.Start(m.env)
+		log.Trace(".")
 	}
-	env.RuntimeConfig.Storage = &store
-	log.Info("storage success started")
-
-	global.Register(global.REGISTER_BOLTDB, store.DB)
-
+	log.Trace("all modules started")
 }
 
-func (this StorageModule)Stop() error {
-	err:= store.Close()
-	log.Info("storage success stoped")
-	return err
-
-}
-
-type StorageModule struct {
-
+func Stop() {
+	log.Trace("start to stop modules")
+	for _, v := range m.modules{
+		v.Stop()
+	}
+	log.Info("all modules stopeed")
 }

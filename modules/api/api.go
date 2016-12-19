@@ -25,7 +25,6 @@ import (
 	websocket "github.com/medcl/gopa/modules/api/websocket"
 	ui "github.com/medcl/gopa/ui"
 	 _ "net/http/pprof"
-
 )
 
 func internalStart(env *Env) {
@@ -58,7 +57,10 @@ func internalStart(env *Env) {
 	http.ListenAndServe(":8001", mux)
 }
 
-func Start(config *Env) {
+func (this APIModule) Start(config *Env) {
+
+	this.env=config
+
 	//API server
 	//if config.RuntimeConfig.HttpEnabled {
 		go func() {
@@ -68,6 +70,10 @@ func Start(config *Env) {
 	//}
 }
 
-func Stop() error {
+func (this APIModule) Stop() error {
 	return nil
+}
+
+type APIModule struct{
+	env *Env
 }

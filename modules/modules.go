@@ -17,41 +17,26 @@ limitations under the License.
 package modules
 
 import (
-	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/env"
-	apiModule "github.com/medcl/gopa/modules/api"
-	crawlerModule "github.com/medcl/gopa/modules/crawler"
-	storageModule "github.com/medcl/gopa/modules/storage"
+	//"github.com/medcl/gopa/modules/checker"
+	//apiModule "github.com/medcl/gopa/modules/api"
+	//crawlerModule "github.com/medcl/gopa/modules/crawler"
+	//storageModule "github.com/medcl/gopa/modules/storage"
+	//. "github.com/medcl/gopa/core/env"
+)
+import (
+	"github.com/medcl/gopa/core/module"
+	"github.com/medcl/gopa/modules/api"
 	"github.com/medcl/gopa/modules/checker"
+	"github.com/medcl/gopa/modules/parser"
+	"github.com/medcl/gopa/modules/crawler"
+	"github.com/medcl/gopa/modules/storage"
 )
 
-type Modules struct {
-	env     *Env
-	modules *map[int]Module
-}
-
-func New(env *Env) *Modules {
-	modules := Modules{}
-	modules.env = env
-	return &modules
-}
-
-func (this *Modules) Start() {
-
+func Register() {
 	//start modules
-	storageModule.Start(this.env)
-	apiModule.Start(this.env)
-	crawlerModule.Start(this.env)
-	//parserModule.Start(this.env)
-	url_checker.Start(this.env)
-}
-
-func (this *Modules) Stop() {
-	//parserModule.Stop()
-	url_checker.Stop()
-	crawlerModule.Stop()
-	apiModule.Stop()
-	storageModule.Stop()
-	this.env.RuntimeConfig.Storage.Close()
-	log.Info("all modules stopeed")
+	module.Register(http.APIModule{})
+	module.Register(storage.StorageModule{})
+	module.Register(crawler.CrawlerModule{})
+	module.Register(parser.ParserModule{})
+	module.Register(url_checker.CheckerModule{})
 }

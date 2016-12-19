@@ -24,7 +24,11 @@ import (
 var quitChannels []*chan bool
 var started = false
 
-func Start(env *Env) {
+type ParserModule  struct {
+
+}
+
+func (this ParserModule)Start(env *Env) {
 	if started {
 		log.Error("parser is already started, please stop it first.")
 	}
@@ -42,7 +46,7 @@ func Start(env *Env) {
 
 }
 
-func Stop() error {
+func (this ParserModule) Stop() error {
 	if started {
 		log.Debug("start shutting down parser")
 

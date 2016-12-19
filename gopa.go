@@ -24,7 +24,6 @@ import (
 	"github.com/medcl/gopa/core/logging"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/types"
-	modules "github.com/medcl/gopa/modules"
 	"github.com/medcl/gopa/core/daemon"
 	"net/http"
 	_ "net/http/pprof"
@@ -35,12 +34,14 @@ import (
 	"syscall"
 	"time"
 	"github.com/medcl/gopa/core/global"
+	"github.com/medcl/gopa/core/module"
+	"github.com/medcl/gopa/modules"
 )
 
 var (
 	env             *Env
 	startTime       time.Time
-	components      *modules.Modules
+	components      *module.Modules
 	finalQuitSignal chan bool
 )
 
@@ -141,8 +142,9 @@ func main() {
 
 	logging.SetLogging(env)
 
-	components = modules.New(env)
-	components.Start()
+	module.New(env)
+	modules.Register()
+	module.Start()
 
 	finalQuitSignal = make(chan bool)
 
@@ -161,7 +163,7 @@ func main() {
 			s.(os.Signal) == syscall.SIGKILL || s.(os.Signal) == syscall.SIGQUIT {
 			log.Infof("got signal:%s ,start shutting down", s.String())
 			//wait workers to exit
-			components.Stop()
+			module.Stop()
 			env.Channels.Close()
 			finalQuitSignal <- true
 		}

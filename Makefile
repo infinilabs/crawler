@@ -1,8 +1,8 @@
 SHELL=/bin/bash
-CWD=$(shell pwd)
-OLDGOPATH=${GOPATH}
-NEWGOPATH:=${CWD}:${OLDGOPATH}
-export GOPATH=$(NEWGOPATH)
+#CWD=$(shell pwd)
+#OLDGOPATH=${GOPATH}
+#NEWGOPATH:=${CWD}:${OLDGOPATH}
+#export GOPATH=$(NEWGOPATH)
 
 
 build: clean config update_ui
@@ -84,6 +84,9 @@ config: update_commit_log
 	go get github.com/alash3al/goemitter
 	go get github.com/bkaradzic/go-lz4
 	go get github.com/elgs/gojq
+	go get github.com/mjibson/esc
+	go get github.com/kardianos/osext
+	go get github.com/zeebo/sbloom
 
 
 dist: cross-build package

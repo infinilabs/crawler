@@ -30,7 +30,7 @@ var started = false
 var filter = LeveldbFilter{}
 var filterFileName = "filters/url_fetched"
 
-func Start(env *Env) {
+func (this CheckerModule) Start(env *Env) {
 	if started {
 		log.Error("url checker is already started, please stop it first.")
 		return
@@ -89,7 +89,7 @@ func runCheckerGo(env *Env, quitC *chan bool) {
 	log.Info("url checker success stoped")
 }
 
-func Stop() error {
+func (this CheckerModule)Stop() error {
 	if started {
 		log.Debug("start shutting down url checker")
 
@@ -103,4 +103,8 @@ func Stop() error {
 	}
 
 	return nil
+}
+
+type CheckerModule struct {
+
 }

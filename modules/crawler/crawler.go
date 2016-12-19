@@ -29,7 +29,7 @@ import (
 var fetchQuitChannels []*chan bool
 var started = false
 
-func Start(env *Env) {
+func (this CrawlerModule)Start(env *Env) {
 	if started {
 		log.Error("crawler already started, please stop it first.")
 	}
@@ -57,7 +57,7 @@ func Start(env *Env) {
 	log.Info("crawler success started")
 }
 
-func Stop() error {
+func (this CrawlerModule)Stop() error {
 	if started {
 		log.Debug("start shutting down crawler")
 		for i, item := range fetchQuitChannels {
@@ -132,4 +132,8 @@ func execute(task types.PageTask, env *Env) {
 		time.Sleep(time.Duration(env.RuntimeConfig.TaskConfig.FetchDelayThreshold) * time.Millisecond)
 		log.Debug("wake up now,continue crawing")
 	}
+}
+
+type CrawlerModule struct {
+
 }

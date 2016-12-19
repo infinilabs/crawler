@@ -96,6 +96,7 @@ func (this PageTask)GetBytes()([]byte,error)  {
 
 	return buf.Bytes(), nil
 }
+
 func PageTaskFromBytes(b []byte)PageTask  {
 	task,err:=fromBytes(b)
 	if(err!=nil){
