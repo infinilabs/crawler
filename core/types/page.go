@@ -61,9 +61,11 @@ type PageLink struct {
 }
 
 type PageTask struct {
-	Url string
+	ID  int `storm:"id,increment"` // primary key with auto increment
+	Url string `storm:"index"`
 	Reference string
-	Depth int
+	Depth int `storm:"index"`
+	CreateTime    Time `storm:"index"`
 }
 
 func (this PageTask)Get(url string)PageTask  {

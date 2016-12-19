@@ -19,9 +19,10 @@ package handler
 import (
 	"net/http"
 	"github.com/medcl/gopa/core/env"
+	"github.com/julienschmidt/httprouter"
 )
 
-func (this *Handler) IndexAction(w http.ResponseWriter, req *http.Request) {
+func (this *Handler) IndexAction(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	if req.URL.Path != "/" {
 		this.WriteJsonHeader(w)
 		http.Error(w, "{\"error\":\"404 Not found\"}", 404)

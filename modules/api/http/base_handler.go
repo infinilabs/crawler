@@ -180,6 +180,10 @@ func (this *Handler) error500(w http.ResponseWriter, msg string) {
 	this.WriteJson(w, map[string]interface{}{"error": msg}, http.StatusInternalServerError)
 }
 
+func (this *Handler) error(w http.ResponseWriter, err error) {
+	this.WriteJson(w, map[string]interface{}{"error": err.Error()}, http.StatusInternalServerError)
+}
+
 func (this *Handler) Flush(w http.ResponseWriter) {
 	if !this.wroteHeader {
 		w.WriteHeader(http.StatusOK)

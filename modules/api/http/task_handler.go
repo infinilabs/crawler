@@ -19,11 +19,38 @@ package handler
 import (
 	logger "github.com/cihub/seelog"
 	_ "github.com/jmoiron/jsonq"
-	"net/http"
+	"github.com/medcl/gopa/core/tasks"
 	"github.com/medcl/gopa/core/types"
+	"net/http"
+	"github.com/julienschmidt/httprouter"
+	"strconv"
 )
 
-func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request) {
+func (this *Handler) TaskDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	 if(req.Method == DELETE.String()) {
+		 id:=ps.ByName("id")
+		 id1,_:=strconv.Atoi(id)
+		 tasks.DeleteTask(id1)
+		 this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
+	 }else{
+		 this.error404(w)
+	 }
+}
+func (this *Handler) TaskGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+		 id:=ps.ByName("id")
+		 id1,_:=strconv.Atoi(id)
+		 task,err:=tasks.GetTask(id1)
+		if(err!=nil){
+			this.error(w,err)
+		}else
+		{
+			this.WriteJson(w, task, http.StatusOK)
+
+		}
+
+}
+
+func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
 	if req.Method == POST.String() {
 		jsonq, err := this.GetJson(req)
@@ -35,15 +62,17 @@ func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			logger.Error(err)
 		}
+		logger.Trace("receive new seed:", seed)
 
-		logger.Info("receive new seed:", seed)
+		task := types.NewPageTask(seed, "", 0)
 
-		task:=types.NewPageTask(seed,"",0)
-
-		this.Env.Channels.PushUrlToCheck(task)
+		tasks.CreateTask(task)
 
 		this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
 	} else {
-		this.error404(w)
+		logger.Trace("get all tasks")
+
+		tasks:=tasks.GetTaskList()
+		this.WriteJson(w,tasks,http.StatusOK)
 	}
 }

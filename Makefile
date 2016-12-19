@@ -87,6 +87,8 @@ config: update_commit_log
 	go get github.com/mjibson/esc
 	go get github.com/kardianos/osext
 	go get github.com/zeebo/sbloom
+	go get github.com/asdine/storm
+	go get github.com/julienschmidt/httprouter
 
 
 dist: cross-build package

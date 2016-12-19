@@ -21,6 +21,7 @@ import (
 	"github.com/medcl/gopa/core/logging"
 	"strings"
 	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/core/tasks"
 )
 
 type Command struct{
@@ -36,7 +37,7 @@ func (this *Command) AddSeed(c *WebsocketConnection,a []string) ()  {
 
 	url:=a[1]
 	if(len(url)>0){
-		this.Env.Channels.PushUrlToCheck(types.NewPageTask(url,"",0))
+		tasks.CreateTask(types.NewPageTask(url,"",0))
 		c.WriteMessage([]byte("url "+url+" success added to pending fetch queue"))
 		return
 	}

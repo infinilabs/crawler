@@ -36,6 +36,7 @@ import (
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/module"
 	"github.com/medcl/gopa/modules"
+	"github.com/medcl/gopa/core/tasks"
 )
 
 var (
@@ -172,7 +173,7 @@ func main() {
 	//sending feed to task queue
 	if len(*seedUrl) > 0 {
 		log.Debug("sending feed to fetch queue,", *seedUrl)
-		env.Channels.PushUrlToCheck(types.NewPageTask(*seedUrl, "", 0))
+		tasks.CreateTask(types.NewPageTask(*seedUrl, "", 0))
 	}
 
 	<-finalQuitSignal

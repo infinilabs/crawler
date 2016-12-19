@@ -25,24 +25,28 @@ import (
 	websocket "github.com/medcl/gopa/modules/api/websocket"
 	ui "github.com/medcl/gopa/ui"
 	 _ "net/http/pprof"
+	"github.com/julienschmidt/httprouter"
 )
 
 func internalStart(env *Env) {
 	handler := Handler{Env: env}
+	router := httprouter.New()
 
 	mux := http.NewServeMux()
 	websocket.InitWebSocket(env)
+
 	mux.HandleFunc("/ws", websocket.ServeWs)
 
 	//Index
-	mux.HandleFunc("/", handler.IndexAction)
-
+	router.GET("/", handler.IndexAction)
 
 	//APIs
 	mux.HandleFunc("/stats", handler.StatsAction)
 
-	mux.HandleFunc("/task", handler.TaskAction)
-	mux.HandleFunc("/task/", handler.TaskAction)
+	router.GET("/tasks", handler.TaskAction)
+	router.GET("/task/:id", handler.TaskGetAction)
+	router.DELETE("/task/:id", handler.TaskDeleteAction)
+
 	mux.HandleFunc("/setting/seelog", handler.LoggingSettingAction)
 	mux.HandleFunc("/setting/seelog/", handler.LoggingSettingAction)
 
@@ -52,6 +56,8 @@ func internalStart(env *Env) {
 	//UI pages
 	mux.Handle("/ui/", http.FileServer(ui.FS(false)))
 	mux.HandleFunc("/ui/boltdb", handler.BoltDBStatusAction)
+
+	mux.Handle("/",router)
 
 	log.Info("http server listen at: http://localhost:8001/")
 	http.ListenAndServe(":8001", mux)
@@ -77,3 +83,4 @@ func (this APIModule) Stop() error {
 type APIModule struct{
 	env *Env
 }
+
