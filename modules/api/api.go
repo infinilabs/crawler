@@ -32,6 +32,9 @@ func internalStart(env *Env) {
 	handler := Handler{Env: env}
 	router := httprouter.New()
 
+	user := "gopa"
+	pass := "gopa"
+
 	mux := http.NewServeMux()
 	websocket.InitWebSocket(env)
 
@@ -45,7 +48,7 @@ func internalStart(env *Env) {
 
 	router.GET("/tasks", handler.TaskAction)
 	router.GET("/task/:id", handler.TaskGetAction)
-	router.DELETE("/task/:id", handler.TaskDeleteAction)
+	router.DELETE("/task/:id", BasicAuth(handler.TaskDeleteAction, user, pass))
 
 	mux.HandleFunc("/setting/seelog", handler.LoggingSettingAction)
 	mux.HandleFunc("/setting/seelog/", handler.LoggingSettingAction)
@@ -61,6 +64,22 @@ func internalStart(env *Env) {
 
 	log.Info("http server listen at: http://localhost:8001/")
 	http.ListenAndServe(":8001", mux)
+}
+
+func BasicAuth(h httprouter.Handle, requiredUser, requiredPassword string) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		// Get the Basic Authentication credentials
+		user, password, hasAuth := r.BasicAuth()
+
+		if hasAuth && user == requiredUser && password == requiredPassword {
+			// Delegate request to the given handle
+			h(w, r, ps)
+		} else {
+			// Request Basic Authentication otherwise
+			w.Header().Set("WWW-Authenticate", "Basic realm=Restricted")
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		}
+	}
 }
 
 func (this APIModule) Start(config *Env) {

@@ -81,14 +81,12 @@ func CreateTask(task types.CrawlerTask)  {
 	}
 }
 
-func DeleteTask(id string)  {
+func DeleteTask(id string)error  {
 	if(!inited){Start()}
 	log.Trace("start delete crawler task: ",id )
 	task:=types.CrawlerTask{ID:id}
 	err := db.DeleteStruct(&task)
-	if(err!=nil){
-		panic(err)
-	}
+	return err
 }
 
 func GetTask(id int) (types.CrawlerTask,error)  {

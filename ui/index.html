@@ -1,94 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Gopa Console</title>
-    <link rel="stylesheet" href="assets/uikit-2.27.1/css/uikit.min.css" />
-    <script src="assets/js/jquery.min.js"></script>
-    <script src="assets/js/echarts.min.js"></script>
-    <script src="assets/uikit-2.27.1/js/uikit.min.js"></script>
+    <title>Gopa</title>
+    <link rel="stylesheet" href="/ui/assets/uikit-2.27.1/css/uikit.min.css" />
+    <script src="/ui/assets/js/jquery.min.js"></script>
+    <script src="/ui/assets/js/echarts.min.js"></script>
+    <script src="/ui/assets/uikit-2.27.1/js/uikit.min.js"></script>
     <meta charset="utf-8">
+    <meta http-equiv="refresh" content="0;url=/ui/page/index.html">
 </head>
 <body>
-<div class="uk-grid">
-
-    <div class="uk-width-1-1">
-
-        <nav class="uk-navbar">
-            <ul class="uk-navbar-nav">
-                <li >
-                    <a href="page/console.html" >console</a>
-                </li>
-                <li>
-                    <a href="boltdb" >boltdb</a>
-                </li>
-            </ul>
-        </nav>
-
-    </div>
-
-    <div class="uk-width-1-1">
-        <div class="uk-grid">
-            <div class="uk-width-1-2">Checker Task: <span id="checker_task_num">N/A</span></div>
-            <div class="uk-width-1-2">Crawler Task: <span id="crawler_task_num">N/A</span></div>
-        </div>
-    </div>
-
-    <div class="uk-width-1-1">
-        <div id="gopa_stats" style="width: 400;height:400px;"></div>
-        <script type="text/javascript">
-            var myChart = echarts.init(document.getElementById('gopa_stats'));
-
-            option = {
-                tooltip : {
-                    formatter: "{a} <br/>{b} : {c}%"
-                },
-                toolbox: {
-                    feature: {
-                        restore: {show: true},
-                        saveAsImage: {show: true}
-                    }
-                },
-                series: [
-                    {
-                        name: 'URL Checker',
-                        center: ['20%', '55%'],
-                        type: 'gauge',
-                        detail: {formatter:'{value}%'},
-                        data: [{value: 0, name: 'URL Checker'}]
-                    },{
-                        name: 'URL Crawler',
-                        center: ['77%', '50%'],
-                        type: 'gauge',
-                        detail: {formatter:'{value}%'},
-                        data: [{value: 0, name: 'URL Crawler'}]
-                    }
-                ]
-            };
-
-            myChart.setOption(option);
-
-            timeTicket = setInterval(function () {
-
-                // 异步加载数据
-                $.get('http://localhost:8001/stats').done(function (data) {
-                    if(data["checker.url"]){
-                        $("#checker_task_num").text(data["checker.url"].get_valid_seed+" / "+data["checker.url"].walk);
-                        option.series[0].data[0].value = ((data["checker.url"].get_valid_seed/data["checker.url"].walk)*100).toFixed(2) - 0;
-                    }
-
-                    if(data["crawler.pipeline"]){
-                        $("#crawler_task_num").text(data["crawler.pipeline"].finished+" + "+data["crawler.pipeline"].error+" / "+data["crawler.pipeline"].total);
-                        option.series[1].data[0].value = (((parseInt(data["crawler.pipeline"].finished)+parseInt(data["crawler.pipeline"].error))/parseInt(data["crawler.pipeline"].total))*100).toFixed(2) - 0;
-                    }
-
-                    myChart.setOption(option, true);
-                });
-
-            },2000);
-
-
-        </script>
-    </div>
-</div>
 </body>
 </html>

@@ -1,9 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <title>Gopa Console</title>
-    <script src="../assets/js/jquery.min.js"></script>
-    <script type="text/javascript">
+    <link rel="stylesheet" href="/ui/assets/uikit-2.27.1/css/uikit.min.css" />
+    <script src="/ui/assets/js/jquery.min.js"></script>
+    <script src="/ui/assets/js/echarts.min.js"></script>
+    <script src="/ui/assets/uikit-2.27.1/js/uikit.min.js"></script>
+    <meta charset="utf-8">
+</head>
+<body>
+<script type="text/javascript">
         $(function () {
 
             var conn;
@@ -64,70 +70,67 @@
             }
         });
     </script>
-    <style type="text/css">
-        html {
-            overflow: hidden;
-        }
+<div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+    <nav class="uk-navbar uk-margin-large-bottom">
+        <a class="uk-navbar-brand uk-hidden-small" href="/ui/">GOPA</a>
+        <ul class="uk-navbar-nav uk-hidden-small">
+            <li >
+                <a href="/ui/page/index.html" >Home</a>
+            </li>
+            <li class="uk-active">
+                <a href="/ui/page/console.html" >Console</a>
+            </li>
+            <li >
+                <a href="/ui/page/tasks.html">Tasks</a>
+            </li>
+            <li>
+                <a href="/ui/boltdb" >Boltdb</a>
+            </li>
+        </ul>
+        <a href="#offcanvas" class="uk-navbar-toggle uk-visible-small" data-uk-offcanvas></a>
+        <div class="uk-navbar-brand uk-navbar-center uk-visible-small">Brand</div>
+    </nav>
 
-        body {
-            overflow: hidden;
-            padding: 0;
-            margin: 0;
-            width: 100%;
-            height: 100%;
-            background: gray;
-        }
+    <div class="uk-grid" data-uk-grid-margin>
+        <div class="uk-width-large-1-1 uk-visible-large">
 
-        #log {
-            background: gainsboro;
-            margin: 0;
-            padding: 0.5em 0.5em 0.5em 0.5em;
-            position: absolute;
-            top: 0.5em;
-            left: 0.5em;
-            right: 0.5em;
-            bottom: 3em;
-            overflow: auto;
-        }
 
-        #form {
-            padding: 0 0.5em 0 0.5em;
-            margin: 0;
-            position: absolute;
-            bottom: 1em;
-            left: 0px;
-            width: 100%;
-            overflow: hidden;
-        }
+            <div id="log"></div>
+            <form id="form">
+                <input type="text" id="msg" size="64"/>
+                <input type="submit" value="Send"/>
+            </form>
 
-        .request {
-            clear: both;
-            padding: 1px 5px;
-            background: lightgray;
-        }
+        </div>
+    </div>
 
-        .response {
-            clear: both;
-            padding: 1px 5px;
+</div>
 
-            background: grey;
-        }
+<script language="javascript">
 
-        .error {
-            clear: both;
-            padding: 1px 5px;
+    $.ajax({
+    url: '/tasks/',
+    type: "post",
+    dataType: "json",
+    success: function(data, textStatus, jqXHR) {
+        drawTable(data);
+    }
+});
 
-            color: white;
-            background: red;
-        }
+function drawTable(data) {
+    for (var i = 0; i < data.length; i++) {
+        drawRow(data[i]);
+    }
+}
 
-    </style>
-</head>
-<body>
-<div id="log"></div>
-<form id="form">
-    <input type="submit" value="Send"/>
-    <input type="text" id="msg" size="64"/>
-</form>
+function drawRow(rowData) {
+    var row = $("<tr />")
+    $("#personDataTable").append(row); //this will append tr element to table... keep its reference for a while since we will add cels into it
+    row.append($("<td>" + rowData.id + "</td>"));
+    row.append($("<td>" + rowData.firstName + "</td>"));
+    row.append($("<td>" + rowData.lastName + "</td>"));
+}
+
+</script>
 </body>
 </html>

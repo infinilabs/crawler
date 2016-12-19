@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gopa Tasks</title>
+    <link rel="stylesheet" href="/ui/assets/uikit-2.27.1/css/uikit.min.css" />
+    <script src="/ui/assets/js/jquery.min.js"></script>
+    <script src="/ui/assets/js/echarts.min.js"></script>
+    <script src="/ui/assets/uikit-2.27.1/js/uikit.min.js"></script>
+    <meta charset="utf-8">
+</head>
+<body>
+
+    <div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+        <nav class="uk-navbar uk-margin-large-bottom">
+            <a class="uk-navbar-brand uk-hidden-small" href="/ui/">GOPA</a>
+            <ul class="uk-navbar-nav uk-hidden-small">
+                <li >
+                    <a href="/ui/page/index.html" >Home</a>
+                </li>
+                <li >
+                    <a href="/ui/page/console.html" >Console</a>
+                </li>
+                <li class="uk-active">
+                    <a href="/ui/page/tasks.html">Tasks</a>
+                </li>
+                <li>
+                    <a href="/ui/boltdb" >Boltdb</a>
+                </li>
+            </ul>
+            <a href="#offcanvas" class="uk-navbar-toggle uk-visible-small" data-uk-offcanvas></a>
+            <div class="uk-navbar-brand uk-navbar-center uk-visible-small">Brand</div>
+        </nav>
+
+        <div class="uk-grid" data-uk-grid-margin>
+            <div class="uk-width-large-1-1 uk-visible-large">
+
+
+                   <table id="example" class="uk-table uk-table-hover uk-table-striped" cellspacing="0" width="100%">
+                       <thead>
+                       <tr>
+                           <th>CreateTime</th>
+                           <th>Domain</th>
+                           <th>Url</th>
+                           <th>Age</th>
+                           <th>Start date</th>
+                           <th>Salary</th>
+                       </tr>
+                       </thead>
+                       <tfoot>
+                       <tr>
+                           <th>Name</th>
+                           <th>Position</th>
+                           <th>Office</th>
+                           <th>Age</th>
+                           <th>Start date</th>
+                           <th>Salary</th>
+                       </tr>
+                       </tfoot>
+                       <tbody>
+                       <tr>
+                           <td>Tiger Nixon</td>
+                           <td>System Architect</td>
+                           <td>Edinburgh</td>
+                           <td>61</td>
+                           <td>2011/04/25</td>
+                           <td>$320,800</td>
+                       </tr>
+                       <tr>
+                           <td>Garrett Winters</td>
+                           <td>Accountant</td>
+                           <td>Tokyo</td>
+                           <td>63</td>
+                           <td>2011/07/25</td>
+                           <td>$170,750</td>
+                       </tr>
+                       <tr>
+                           <td>Ashton Cox</td>
+                           <td>Junior Technical Author</td>
+                           <td>San Francisco</td>
+                           <td>66</td>
+                           <td>2009/01/12</td>
+                           <td>$86,000</td>
+                       </tr>
+                       <tr>
+                           <td>Donna Snider</td>
+                           <td>Customer Support</td>
+                           <td>New York</td>
+                           <td>27</td>
+                           <td>2011/01/25</td>
+                           <td>$112,000</td>
+                       </tr>
+                       </tbody>
+                   </table>
+
+
+                <ul class="uk-pagination">
+                    <li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
+                    <li class="uk-active"><span>1</span></li>
+                    <li><a href="#">2</a></li>
+                    <li><a href="#">3</a></li>
+                    <li><a href="#">4</a></li>
+                    <li><span>...</span></li>
+                    <li><a href="#">20</a></li>
+                    <li><a href="#"><i class="uk-icon-angle-double-right"></i></a></li>
+                </ul>
+
+            </div>
+        </div>
+
+    </div>
+
+<script language="javascript">
+
+    $.ajax({
+    url: '/tasks/',
+    type: "post",
+    dataType: "json",
+    success: function(data, textStatus, jqXHR) {
+        drawTable(data);
+    }
+});
+
+function drawTable(data) {
+    for (var i = 0; i < data.length; i++) {
+        drawRow(data[i]);
+    }
+}
+
+function drawRow(rowData) {
+    var row = $("<tr />")
+    $("#personDataTable").append(row); //this will append tr element to table... keep its reference for a while since we will add cels into it
+    row.append($("<td>" + rowData.id + "</td>"));
+    row.append($("<td>" + rowData.firstName + "</td>"));
+    row.append($("<td>" + rowData.lastName + "</td>"));
+}
+
+</script>
+</body>
+</html>
