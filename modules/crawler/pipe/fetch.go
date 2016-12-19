@@ -54,8 +54,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 
 	go func() {
 		pageItem := types.PageItem{}
-		pageItem.CreateTime = time.Now().UTC()
-		pageItem.LastCheckTime = time.Now().UTC()
+		context.Set(CONTEXT_PAGE_LAST_FETCH, time.Now().UTC())
 
 		//start to fetch remote content
 		body, err := util.HttpGetWithCookie(&pageItem, requestUrl, this.cookie)
@@ -71,7 +70,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 			}
 
 			//update url, in case catch redirects
-			context.Set(CONTEXT_URL, pageItem.Url)
+			//context.Set(CONTEXT_URL, pageItem.Url)//don't update, so what?
 			context.Set(CONTEXT_PAGE_BODY_BYTES, body)
 			context.Set(CONTEXT_PAGE_ITEM, &pageItem)
 			log.Debug("exit fetchUrl method:", requestUrl)

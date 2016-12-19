@@ -22,14 +22,14 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/types"
 	. "github.com/medcl/gopa/modules/crawler/pipe"
-	"time"
 	"runtime"
+	"time"
 )
 
 var fetchQuitChannels []*chan bool
 var started = false
 
-func (this CrawlerModule)Start(env *Env) {
+func (this CrawlerModule) Start(env *Env) {
 	if started {
 		log.Error("crawler already started, please stop it first.")
 	}
@@ -48,7 +48,7 @@ func (this CrawlerModule)Start(env *Env) {
 
 			}
 		}()
-	}else{
+	} else {
 		log.Info("crawler currently not enabled")
 		return
 	}
@@ -57,7 +57,7 @@ func (this CrawlerModule)Start(env *Env) {
 	log.Info("crawler success started")
 }
 
-func (this CrawlerModule)Stop() error {
+func (this CrawlerModule) Stop() error {
 	if started {
 		log.Debug("start shutting down crawler")
 		for i, item := range fetchQuitChannels {
@@ -124,7 +124,7 @@ func execute(seed types.TaskSeed, env *Env) {
 		Join(FetchJoint{}).
 		Join(ParserJoint{DispatchLinks: true, MaxDepth: 3}).
 		//Join(SaveToFileSystemJoint{}).
-		Join(SaveToDBJoint{CompressBody:true}).
+		Join(SaveToDBJoint{CompressBody: true}).
 		Join(PublishJoint{}).
 		End().
 		Run()
@@ -137,5 +137,4 @@ func execute(seed types.TaskSeed, env *Env) {
 }
 
 type CrawlerModule struct {
-
 }

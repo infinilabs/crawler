@@ -17,9 +17,10 @@ limitations under the License.
 package global
 
 import (
-	"sync"
-	"runtime"
+	"errors"
 	"github.com/medcl/gopa/core/env"
+	"runtime"
+	"sync"
 )
 
 type RegisterKey string
@@ -29,17 +30,17 @@ type Registrar struct {
 	sync.Mutex
 }
 
-var(
-	r *Registrar
-	l sync.RWMutex
+var (
+	r      *Registrar
+	l      sync.RWMutex
 	inited bool
-	e *env.Env
-	)
+	e      *env.Env
+)
 
-	func GetRegistrar()*Registrar  {
+func GetRegistrar() *Registrar {
 	if !inited {
 		l.Lock()
-		if(!inited){
+		if !inited {
 			r = &Registrar{values: map[RegisterKey]interface{}{}}
 			inited = true
 		}
@@ -50,7 +51,7 @@ var(
 }
 
 func Register(k RegisterKey, v interface{}) {
-	reg:=GetRegistrar()
+	reg := GetRegistrar()
 	if reg == nil {
 		return
 	}
@@ -60,8 +61,8 @@ func Register(k RegisterKey, v interface{}) {
 	reg.values[k] = v
 }
 
-func  Lookup(k RegisterKey) interface{} {
-	reg:=GetRegistrar()
+func Lookup(k RegisterKey) interface{} {
+	reg := GetRegistrar()
 	if reg == nil {
 		return nil
 	}
@@ -71,14 +72,13 @@ func  Lookup(k RegisterKey) interface{} {
 	return reg.values[k]
 }
 
-func RegisterEnv(e1 *env.Env)   {
-	e=e1
+func RegisterEnv(e1 *env.Env) {
+	e = e1
 }
 
-func Env() *env.Env  {
+func Env() *env.Env {
+	if e == nil {
+		panic(errors.New("env is not inited"))
+	}
 	return e
 }
-
-
-
-

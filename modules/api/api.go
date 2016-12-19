@@ -20,12 +20,12 @@ import (
 	"net/http"
 
 	log "github.com/cihub/seelog"
+	"github.com/julienschmidt/httprouter"
 	. "github.com/medcl/gopa/core/env"
 	. "github.com/medcl/gopa/modules/api/http"
 	websocket "github.com/medcl/gopa/modules/api/websocket"
 	ui "github.com/medcl/gopa/ui"
-	 _ "net/http/pprof"
-	"github.com/julienschmidt/httprouter"
+	_ "net/http/pprof"
 )
 
 func internalStart(env *Env) {
@@ -57,7 +57,7 @@ func internalStart(env *Env) {
 	mux.Handle("/ui/", http.FileServer(ui.FS(false)))
 	mux.HandleFunc("/ui/boltdb", handler.BoltDBStatusAction)
 
-	mux.Handle("/",router)
+	mux.Handle("/", router)
 
 	log.Info("http server listen at: http://localhost:8001/")
 	http.ListenAndServe(":8001", mux)
@@ -65,22 +65,18 @@ func internalStart(env *Env) {
 
 func (this APIModule) Start(config *Env) {
 
-	this.env=config
-
+	this.env = config
 	//API server
-	//if config.RuntimeConfig.HttpEnabled {
-		go func() {
-			internalStart(config)
-		}()
-		log.Debug("api module success started")
-	//}
+	go func() {
+		internalStart(config)
+	}()
+	log.Debug("api module success started")
 }
 
 func (this APIModule) Stop() error {
 	return nil
 }
 
-type APIModule struct{
+type APIModule struct {
 	env *Env
 }
-

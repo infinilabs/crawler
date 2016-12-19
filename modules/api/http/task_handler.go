@@ -29,8 +29,7 @@ import (
 func (this *Handler) TaskDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	 if(req.Method == DELETE.String()) {
 		 id:=ps.ByName("id")
-		 id1,_:=strconv.Atoi(id)
-		 tasks.DeleteTask(id1)
+		 tasks.DeleteTask(id)
 		 this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
 	 }else{
 		 this.error404(w)

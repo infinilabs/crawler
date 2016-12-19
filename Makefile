@@ -89,6 +89,7 @@ config: update_commit_log
 	go get github.com/zeebo/sbloom
 	go get github.com/asdine/storm
 	go get github.com/julienschmidt/httprouter
+	go get github.com/rs/xid
 
 
 dist: cross-build package

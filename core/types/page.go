@@ -17,11 +17,11 @@ limitations under the License.
 package types
 
 import (
-	. "time"
 	"bytes"
-	"strings"
 	"fmt"
 	"strconv"
+	"strings"
+	. "time"
 )
 
 type KV struct {
@@ -30,73 +30,68 @@ type KV struct {
 }
 
 type PageItem struct {
-	ID         uint64 `storm:"id,increment"` // primary key with auto increment
 	Proto      string
 	Domain     string              // elastic.co
 	UrlPath    string              // /index.html
 	Headers    map[string][]string // key:value
 	Parameters []KV                // key:value
 	Meta       map[string]interface{}
-	Images     []KV                //images within this site, img:desc
-	ExtImages  []KV                //images outside, img:desc
-	Links      []KV                //link:desc
+	Images     []KV // images within this site, img:desc
+	ExtImages  []KV // images outside, img:desc
+	Links      []KV // link:desc
 	Body       []byte
 	StatusCode int
-	RefUrl     string              //the parent url to enter this url
-	Url        string              //full url
 	Title      string
 	Size       int
 	SimHash    string
-	Snapshot   string              //Snapshot storage info
-	CreateTime    Time
-	UpdateTime    Time
-	LastCheckTime Time
-	H1            []string
-	H2            []string
-	H3            []string
+	H1         []string
+	H2         []string
+	H3         []string
 }
 
 type PageLink struct {
-	Url string `json:"url"`
+	Url   string `json:"url"`
 	Label string `json:"label"`
 }
 
 type TaskSeed struct {
-	ID  int `storm:"id,increment" json:"id,omitempty"`
-	Url string `storm:"index" json:"url,omitempty"`
-	Reference string `json:"reference,omitempty"`
-	Depth int `storm:"index" json:"depth,omitempty"`
-	CreateTime    *Time `storm:"index" json:"created,omitempty"`
+	ID         int    `storm:"id,increment" json:"id,omitempty"`
+	Url        string `storm:"index" json:"url,omitempty"`
+	Reference  string `json:"reference,omitempty"`
+	Depth      int    `storm:"index" json:"depth,omitempty"`
+	CreateTime *Time  `storm:"index" json:"created,omitempty"`
 }
 
-type CrawlerTask struct{
-	ID  int `storm:"id,increment" json:"id"`
-	Url string `storm:"unique" json:"url"`
-	Seed *TaskSeed `storm:"inline" json:"seed,omitempty"`
-	Page *PageItem `storm:"inline" json:"page,omitempty"`
-	CreateTime    *Time `storm:"index" json:"created,omitempty"`
+type CrawlerTask struct {
+	ID            string    `storm:"id,unique" json:"id"`
+	Seed          *TaskSeed `storm:"inline" json:"seed,omitempty"`
+	Page          *PageItem `storm:"inline" json:"page,omitempty"`
+	CreateTime    *Time     `storm:"index" json:"created,omitempty"`
+	UpdateTime    *Time     `storm:"index" json:"updated,omitempty"`
+	LastCheckTime *Time     `storm:"index" json:"checked,omitempty"`
+	Snapshot      string    `json:"snapshot,omitempty"` //Snapshot storage info
 }
 
-func (this TaskSeed)Get(url string) TaskSeed {
-	task:= TaskSeed{}
-	task.Url=url
-	task.Reference=""
-	task.Depth=0
+func (this TaskSeed) Get(url string) TaskSeed {
+	task := TaskSeed{}
+	task.Url = url
+	task.Reference = ""
+	task.Depth = 0
 	return task
 }
 
-func (this TaskSeed)MustGetBytes()([]byte)  {
+func (this TaskSeed) MustGetBytes() []byte {
 
-	bytes,err:=this.GetBytes()
-	if(err!=nil){
+	bytes, err := this.GetBytes()
+	if err != nil {
 		panic(err)
 	}
 	return bytes
 }
 
-var delimiter="|#|"
+var delimiter = "|#|"
 
-func (this TaskSeed)GetBytes()([]byte,error)  {
+func (this TaskSeed) GetBytes() ([]byte, error) {
 	var buf bytes.Buffer
 
 	buf.WriteString(fmt.Sprint(this.Depth))
@@ -109,30 +104,30 @@ func (this TaskSeed)GetBytes()([]byte,error)  {
 }
 
 func PageTaskFromBytes(b []byte) TaskSeed {
-	task,err:=fromBytes(b)
-	if(err!=nil){
+	task, err := fromBytes(b)
+	if err != nil {
 		panic(err)
 	}
 	return task
 }
 
-func fromBytes(b []byte,)(TaskSeed,error)  {
+func fromBytes(b []byte) (TaskSeed, error) {
 
-	str:=string(b)
-	array:=strings.Split(str,delimiter)
-	task:= TaskSeed{}
+	str := string(b)
+	array := strings.Split(str, delimiter)
+	task := TaskSeed{}
 	i, _ := strconv.Atoi(array[0])
-	task.Depth=i
-	task.Reference=array[1]
-	task.Url=array[2]
+	task.Depth = i
+	task.Reference = array[1]
+	task.Url = array[2]
 
-	return task,nil
+	return task, nil
 }
 
-func NewPageTask(url,ref string,depth int) TaskSeed {
-	task:= TaskSeed{}
-	task.Url=url
-	task.Reference=ref
-	task.Depth=depth
+func NewPageTask(url, ref string, depth int) TaskSeed {
+	task := TaskSeed{}
+	task.Url = url
+	task.Reference = ref
+	task.Depth = depth
 	return task
 }

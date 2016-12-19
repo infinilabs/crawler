@@ -20,11 +20,15 @@ import (
 	"flag"
 	"fmt"
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/core/logging"
-	"github.com/medcl/gopa/core/stats"
-	"github.com/medcl/gopa/core/types"
 	"github.com/medcl/gopa/core/daemon"
+	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/global"
+	"github.com/medcl/gopa/core/logging"
+	"github.com/medcl/gopa/core/module"
+	"github.com/medcl/gopa/core/stats"
+	"github.com/medcl/gopa/core/tasks"
+	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/modules"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -33,10 +37,6 @@ import (
 	"runtime/pprof"
 	"syscall"
 	"time"
-	"github.com/medcl/gopa/core/global"
-	"github.com/medcl/gopa/core/module"
-	"github.com/medcl/gopa/modules"
-	"github.com/medcl/gopa/core/tasks"
 )
 
 var (
@@ -107,7 +107,7 @@ func main() {
 	//daemon
 	if *isDaemon {
 
-		if(runtime.GOOS=="darwin"||runtime.GOOS=="linux"){
+		if runtime.GOOS == "darwin" || runtime.GOOS == "linux" {
 			runtime.LockOSThread()
 			context := new(daemon.Context)
 			if *pidfile != "" {
@@ -123,7 +123,7 @@ func main() {
 			defer context.Release()
 
 			runtime.UnlockOSThread()
-		}else{
+		} else {
 			fmt.Println("daemon only available in linux and darwin")
 		}
 

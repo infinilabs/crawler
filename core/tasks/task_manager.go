@@ -7,6 +7,7 @@ import (
 	"time"
 	"github.com/medcl/gopa/core/global"
 	"path"
+	"github.com/rs/xid"
 )
 
 
@@ -72,6 +73,7 @@ func CreateTask(task types.CrawlerTask)  {
 	if(!inited){Start()}
 	log.Trace("start create crawler task")
 	time:=time.Now()
+	task.ID=xid.New().String()
 	task.CreateTime=&time
 	err := db.Save(&task)
 	if(err!=nil){
@@ -79,7 +81,7 @@ func CreateTask(task types.CrawlerTask)  {
 	}
 }
 
-func DeleteTask(id int)  {
+func DeleteTask(id string)  {
 	if(!inited){Start()}
 	log.Trace("start delete crawler task: ",id )
 	task:=types.CrawlerTask{ID:id}

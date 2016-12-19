@@ -115,7 +115,6 @@ func get(page *types.PageItem, url string, cookie string) ([]byte, error) {
 	resp, err := client.Do(reqest)
 	page.Domain = reqest.Host
 	page.Proto = reqest.Proto
-	page.Url = url
 	page.UrlPath = reqest.URL.Path
 
 	if err != nil {
@@ -123,7 +122,6 @@ func get(page *types.PageItem, url string, cookie string) ([]byte, error) {
 			log.Debug("got redirect:", url, " => ", resp.Header.Get("Location"))
 			location := resp.Header.Get("Location")
 			if len(location) > 0 && location != url {
-				page.Url = location
 				return get(page, location, cookie)
 			}
 

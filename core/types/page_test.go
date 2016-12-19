@@ -17,18 +17,17 @@ limitations under the License.
 package types
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestPageTask_GetBytes(t *testing.T) {
-	task:= TaskSeed{Url:"baidu.com",Reference:"google.com",Depth:5}
-	bytes,_:=task.GetBytes()
-	task1,_:=fromBytes(bytes)
+	task := TaskSeed{Url: "baidu.com", Reference: "google.com", Depth: 5}
+	bytes, _ := task.GetBytes()
+	task1, _ := fromBytes(bytes)
 
-	assert.Equal(t,"baidu.com",task1.Url)
-	assert.Equal(t,"google.com",task1.Reference)
-	assert.Equal(t,5,task1.Depth)
+	assert.Equal(t, "baidu.com", task1.Url)
+	assert.Equal(t, "google.com", task1.Reference)
+	assert.Equal(t, 5, task1.Depth)
 
 }
-
