@@ -12,9 +12,10 @@ features:
 5.follow 301/302 redirect, and continue fetch
 6.add boltdb status page, http://localhost:8001/ui/boltdb
 7.add pipeline framework to create crawler
-8.add command to dynamic change logging level and add seed
+8.add command to dynamic change logging level and add seed url
 8.export metrics to statsD
 9.support daemon mode in linux and darwin
+10.add task management api
 improve:
 1.add update_ui setup to Makefile in order to build static ui
 2.add git commit log and build_date to gopa binary
