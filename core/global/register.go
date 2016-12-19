@@ -19,6 +19,7 @@ package global
 import (
 	"sync"
 	"runtime"
+	"github.com/medcl/gopa/core/env"
 )
 
 type RegisterKey string
@@ -32,9 +33,10 @@ var(
 	r *Registrar
 	l sync.RWMutex
 	inited bool
-)
+	e *env.Env
+	)
 
-func GetRegistrar()*Registrar  {
+	func GetRegistrar()*Registrar  {
 	if !inited {
 		l.Lock()
 		if(!inited){
@@ -69,7 +71,13 @@ func  Lookup(k RegisterKey) interface{} {
 	return reg.values[k]
 }
 
+func RegisterEnv(e1 *env.Env)   {
+	e=e1
+}
 
+func Env() *env.Env  {
+	return e
+}
 
 
 

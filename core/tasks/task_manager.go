@@ -5,6 +5,8 @@ import (
 	"github.com/asdine/storm"
 	log "github.com/cihub/seelog"
 	"time"
+	"github.com/medcl/gopa/core/global"
+	"path"
 )
 
 
@@ -12,7 +14,8 @@ var db *storm.DB
 var inited bool
 func Start() error  {
 	var err error
-	db, err = storm.Open("my.db")
+	file:= path.Join(global.Env().RuntimeConfig.PathConfig.Data,"task_db")
+	db, err = storm.Open(file)
 	inited=true
 	return err
 
@@ -54,7 +57,7 @@ func GetTaskList()[]types.PageTask  {
 	if(!inited){Start()}
 	log.Trace("start get all tasks")
 	var tasks []types.PageTask
-	err := db.All(&tasks)
+	err := db.AllByIndex("CreateTime",&tasks)
 	if(err!=nil){
 		panic(err)
 	}

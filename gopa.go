@@ -42,7 +42,6 @@ import (
 var (
 	env             *Env
 	startTime       time.Time
-	components      *module.Modules
 	finalQuitSignal chan bool
 )
 
@@ -139,7 +138,7 @@ func main() {
 	env = Environment(sysConfig)
 
 	//put env into global registrar
-	global.Register(global.REGISTER_ENV,&env)
+	global.RegisterEnv(env)
 
 	logging.SetLogging(env)
 

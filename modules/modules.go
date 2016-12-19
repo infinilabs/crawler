@@ -33,7 +33,7 @@ import (
 )
 
 func Register() {
-	//start modules
+	//register modules
 	module.Register(http.APIModule{})
 	module.Register(storage.StorageModule{})
 	module.Register(crawler.CrawlerModule{})

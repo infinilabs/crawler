@@ -44,28 +44,34 @@ type TaskConfig struct {
 
 	//fetch url pattern
 	FetchUrlPatternStr        string `fetch_url_pattern`
-	FetchUrlPattern        *regexp.Regexp
-	FetchUrlMustContain    string
-	FetchUrlMustNotContain string
+	FetchUrlPattern         *regexp.Regexp
+	FetchUrlMustContain     string
+	FetchUrlMustNotContain  string
 
 	//saving pattern
-	SavingUrlPatternStr       string `save_url_pattern`
+	SavingUrlPatternStr     string `save_url_pattern`
 	SavingUrlPattern        *regexp.Regexp
 	SavingUrlMustContain    string
 	SavingUrlMustNotContain string
 
 	//Crawling within domain
-	FollowSameDomain bool `follow_same_domain`
-	FollowSubDomain  bool `follow_sub_domain`
+	FollowSameDomain        bool `follow_same_domain`
+	FollowSubDomain         bool `follow_sub_domain`
 
-	TaskDataPath string
+	TaskDataPath            string
 	//WebDataPath  string
 
 	//User Cookie
-	Cookie string
+	Cookie                  string
 
 	//Fetch Speed Control
-	FetchDelayThreshold int
+	FetchDelayThreshold     int
+	TaskDBFilename          string `task_db_filename`
+}
+
+func (this *TaskConfig)Init() *TaskConfig  {
+	this.TaskDBFilename ="taskdb"
+	return this
 }
 
 type Task struct {

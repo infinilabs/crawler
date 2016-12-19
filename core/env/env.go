@@ -99,7 +99,7 @@ func (this *Env) loadRuntimeConfig() (RuntimeConfig, error) {
 		config.ChannelConfig = (&ChannelConfig{}).Init()
 		config.CrawlerConfig = (&CrawlerConfig{}).Init()
 		config.ParserConfig = (&ParserConfig{})         //.Init()
-		config.TaskConfig = (&TaskConfig{})             //.Init()
+		config.TaskConfig = (&TaskConfig{}).Init()
 		config.RuledFetchConfig = (&RuledFetchConfig{}) //.Init()
 	}
 
