@@ -51,7 +51,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 
 	log.Debug("start fetch url,", requestUrl)
 	flg := make(chan bool, 1)
-
+	var err error
 	go func() {
 		pageItem := types.PageItem{}
 		context.Set(CONTEXT_PAGE_LAST_FETCH, time.Now().UTC())
@@ -63,7 +63,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 			if body != nil {
 				if pageItem.StatusCode == 404 {
 					log.Info("skip while 404, ", requestUrl, " , ", pageItem.StatusCode)
-					context.Break()
+					context.Break("fetch 404")
 					flg <- false
 					return
 				}
@@ -88,7 +88,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 	case <-t.C:
 		log.Error("fetching url time out, ", requestUrl)
 		stats.Increment(domain, stats.STATS_FETCH_TIMEOUT_COUNT)
-		context.Break()
+		context.Break("fetch timeout")
 		return nil, errors.New("fetch url time out")
 	case value := <-flg:
 		if value {
@@ -96,7 +96,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 			stats.Increment(domain, stats.STATS_FETCH_SUCCESS_COUNT)
 		} else {
 			log.Debug("fetching url error exit, ", requestUrl)
-			context.Break()
+			context.Break(err)
 			stats.Increment(domain, stats.STATS_FETCH_FAIL_COUNT)
 		}
 		return context, nil

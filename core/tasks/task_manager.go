@@ -36,6 +36,7 @@ func CreateSeed(task types.TaskSeed)  {
 		panic(err)
 	}
 	global.Env().Channels.PushUrlToCheck(task)
+	log.Trace("end create seed")
 }
 
 func DeleteSeed(id int)  {
@@ -46,6 +47,7 @@ func DeleteSeed(id int)  {
 	if(err!=nil){
 		panic(err)
 	}
+	log.Trace("end delete seed")
 }
 
 func GetSeed(id int) (types.TaskSeed,error)  {
@@ -53,6 +55,7 @@ func GetSeed(id int) (types.TaskSeed,error)  {
 	log.Trace("start get seed: ",id)
 	task:=types.TaskSeed{}
 	err := db.One("ID", id, &task)
+	log.Trace("end get seed: ",id)
 	return task,err
 }
 
@@ -64,21 +67,33 @@ func GetSeedList()[]types.TaskSeed {
 	if(err!=nil){
 		panic(err)
 	}
+	log.Trace("end get all seeds")
 	return tasks
 }
 
-
-
-func CreateTask(task types.CrawlerTask)  {
+func CreateTask(task *types.CrawlerTask)  {
 	if(!inited){Start()}
 	log.Trace("start create crawler task")
 	time:=time.Now()
 	task.ID=xid.New().String()
 	task.CreateTime=&time
-	err := db.Save(&task)
+	err := db.Save(task)
 	if(err!=nil){
 		panic(err)
 	}
+	log.Trace("end create crawler task")
+}
+
+func UpdateTask(task *types.CrawlerTask)  {
+	if(!inited){Start()}
+	log.Trace("start update crawler task")
+	time:=time.Now()
+	task.UpdateTime=&time
+	err := db.Update(task)
+	if(err!=nil){
+		panic(err)
+	}
+	log.Trace("end update crawler task")
 }
 
 func DeleteTask(id string)error  {
@@ -86,6 +101,7 @@ func DeleteTask(id string)error  {
 	log.Trace("start delete crawler task: ",id )
 	task:=types.CrawlerTask{ID:id}
 	err := db.DeleteStruct(&task)
+	log.Trace("end delete crawler task: ",id )
 	return err
 }
 
@@ -94,6 +110,7 @@ func GetTask(id int) (types.CrawlerTask,error)  {
 	log.Trace("start get seed: ",id)
 	task:=types.CrawlerTask{}
 	err := db.One("ID", id, &task)
+	log.Trace("end get seed: ",id)
 	return task,err
 }
 
@@ -106,5 +123,6 @@ func GetTaskList(from,size int)(int,[]types.CrawlerTask,error) {
 		log.Error(err)
 	}
 	err= db.AllByIndex("CreateTime",&tasks,storm.Skip(from),storm.Limit(size))
+	log.Trace("end get all crawler tasks")
 	return total,tasks,err
 }

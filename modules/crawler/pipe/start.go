@@ -19,27 +19,33 @@ package pipe
 import (. "github.com/medcl/gopa/core/pipeline"
 . "github.com/medcl/gopa/core/types"
 	"github.com/medcl/gopa/core/tasks"
+	"github.com/cihub/seelog"
 )
 
-type StartSeed struct {
+type Start struct {
 	Seed TaskSeed
 }
 
-func (this StartSeed) Name() string {
-	return "start_seed"
+func (this Start) Name() string {
+	return "start"
 }
 
-func (this StartSeed) Process(context *Context) (*Context, error) {
+func (this Start) Process(context *Context) (*Context, error) {
+
+	seelog.Trace("start 1")
 
 	//init task record
 	task:=CrawlerTask{}
 	task.Seed=&this.Seed
-	tasks.CreateTask(task)
+	tasks.CreateTask(&task)
 
+	context.Set(CONTEXT_CRAWLER_TASK,&task)
 	context.Set(CONTEXT_ORIGINAL_URL,this.Seed.Url)
 	context.Set(CONTEXT_URL,this.Seed.Url)
 	context.Set(CONTEXT_DEPTH,this.Seed.Depth)
 	context.Set(CONTEXT_REFERENCE_URL,this.Seed.Reference)
+
+	seelog.Trace("start 2")
 
 	return context, nil
 }

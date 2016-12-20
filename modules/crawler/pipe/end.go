@@ -16,28 +16,31 @@ limitations under the License.
 
 package pipe
 
-import (
-	. "github.com/medcl/gopa/core/pipeline"
+import (. "github.com/medcl/gopa/core/pipeline"
+. "github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/core/tasks"
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/stats"
 )
 
-func (this IgnoreTimeoutJoint) Name() string {
-	return "ignore_timeout"
+type End struct {
 }
 
-type IgnoreTimeoutJoint struct {
-	IgnoreTimeoutAfterCount int64
+func (this End) Name() string {
+	return "end"
 }
 
-func (this IgnoreTimeoutJoint) Process(context *Context) (*Context, error) {
+func (this End) Process(context *Context) (*Context, error) {
 
+	log.Trace("end process")
 
-	host:=context.MustGetString(CONTEXT_HOST)
-	timeoutCount:=stats.Stat(host,stats.STATS_FETCH_TIMEOUT_COUNT)
-	if(timeoutCount>this.IgnoreTimeoutAfterCount){
-		context.Break("too much timeout on this domain, ignored "+host)
-		log.Warnf("hit timeout host, %s , ignore after,%d ",host,timeoutCount)
+	task:=context.Get(CONTEXT_CRAWLER_TASK).(*CrawlerTask)
+
+	if(context.IsBreak()){
+		task.Message=context.Payload
 	}
+	task.Url=context.MustGetString(CONTEXT_URL)
+	tasks.UpdateTask(task)
+
 	return context, nil
 }
+

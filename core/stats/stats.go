@@ -37,7 +37,7 @@ func initStatsd() {
 	statsdclient := statsd.NewStatsdClient("statsdhost:8125", prefix) //TODO configable
 	err := statsdclient.CreateSocket()
 	if nil != err {
-		log.Error(err)
+		log.Warn(err)
 		return
 	}
 

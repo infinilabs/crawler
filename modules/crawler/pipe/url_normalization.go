@@ -125,7 +125,7 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 		currentURI, err = Parse(tempUrl)
 		if err != nil {
 			log.Error(err)
-			context.Break()
+			context.Break(err)
 			return context, err
 		}
 	}
@@ -143,12 +143,12 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 
 			if !(ref[len(ref)-1] == cur[len(cur)-1] && ref[len(ref)-2] == cur[len(cur)-2]) {
 				log.Debug("domain mismatch,", referenceURI.Host, " vs ", currentURI.Host)
-				context.Break()
+				context.Break("domain missmatch,"+referenceURI.Host+ " vs "+ currentURI.Host)
 				return context, errors.New("domain mismatch")
 			}
 		} else {
 			if referenceURI.Host != currentURI.Host {
-				context.Break()
+				context.Break("domain missmatch,"+referenceURI.Host+ " vs "+ currentURI.Host)
 				return context, errors.New("domain mismatch")
 			}
 		}

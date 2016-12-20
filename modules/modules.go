@@ -27,7 +27,7 @@ import (
 	"github.com/medcl/gopa/core/module"
 	"github.com/medcl/gopa/modules/api"
 	"github.com/medcl/gopa/modules/checker"
-	"github.com/medcl/gopa/modules/parser"
+	//"github.com/medcl/gopa/modules/parser"
 	"github.com/medcl/gopa/modules/crawler"
 	"github.com/medcl/gopa/modules/storage"
 )
@@ -37,6 +37,6 @@ func Register() {
 	module.Register(http.APIModule{})
 	module.Register(storage.StorageModule{})
 	module.Register(crawler.CrawlerModule{})
-	module.Register(parser.ParserModule{})
+	//module.Register(parser.ParserModule{})
 	module.Register(url_checker.CheckerModule{})
 }

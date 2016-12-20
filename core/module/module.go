@@ -44,7 +44,6 @@ func Start() {
 	log.Trace("start to start modules")
 	for _, v := range m.modules{
 		v.Start(m.env)
-		log.Trace(".")
 	}
 	log.Trace("all modules started")
 }

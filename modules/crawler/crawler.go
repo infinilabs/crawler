@@ -105,18 +105,21 @@ func execute(seed types.TaskSeed, env *Env) {
 
 	log.Trace("start crawler")
 
+	var pipeline *Pipeline
 	defer func() {
 		if r := recover(); r != nil {
 			if _, ok := r.(runtime.Error); ok {
 				err := r.(error)
 				log.Error(seed.Url, " , ", err)
 			}
+			log.Error("error in crawler")
 		}
 	}()
 
-	pipeline := NewPipeline("crawler")
+	pipeline = NewPipeline("crawler")
+
 	pipeline.Context(&Context{Env: env}).
-		Start(StartSeed{Seed: seed}).
+		Start(Start{Seed: seed}).
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
 		Join(UrlFilterJoint{}).
 		Join(LoadMetadataJoint{}).
@@ -126,7 +129,7 @@ func execute(seed types.TaskSeed, env *Env) {
 		//Join(SaveToFileSystemJoint{}).
 		Join(SaveToDBJoint{CompressBody: true}).
 		Join(PublishJoint{}).
-		End().
+		End(End{}).
 		Run()
 
 	if env.RuntimeConfig.TaskConfig.FetchDelayThreshold > 0 {
@@ -134,6 +137,8 @@ func execute(seed types.TaskSeed, env *Env) {
 		time.Sleep(time.Duration(env.RuntimeConfig.TaskConfig.FetchDelayThreshold) * time.Millisecond)
 		log.Debug("wake up now,continue crawing")
 	}
+
+	log.Trace("end crawler")
 }
 
 type CrawlerModule struct {

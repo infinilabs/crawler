@@ -64,8 +64,10 @@ type TaskSeed struct {
 
 type CrawlerTask struct {
 	ID            string    `storm:"id,unique" json:"id"`
+	Url           string `storm:"inline" json:"url,omitempty"`
 	Seed          *TaskSeed `storm:"inline" json:"seed,omitempty"`
 	Page          *PageItem `storm:"inline" json:"page,omitempty"`
+	Message       interface{} `storm:"inline" json:"message,omitempty"`
 	CreateTime    *Time     `storm:"index" json:"created,omitempty"`
 	UpdateTime    *Time     `storm:"index" json:"updated,omitempty"`
 	LastCheckTime *Time     `storm:"index" json:"checked,omitempty"`

@@ -21,6 +21,7 @@ import (
 	"encoding/hex"
 	"crypto/md5"
 	"github.com/medcl/gopa/core/types"
+	log "github.com/cihub/seelog"
 )
 
 
@@ -62,6 +63,7 @@ func (this PublishJoint) Process(c *Context) (*Context, error) {
 	}
 	_,err:= c.Env.ESClient.IndexDoc(id,data)
 	if(err!=nil){
+		log.Error(err)
 		return c,err
 	}
 

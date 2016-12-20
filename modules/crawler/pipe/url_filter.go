@@ -42,7 +42,7 @@ func (this UrlFilterJoint) Process(context *Context) (*Context, error) {
 	}
 
 	if (!this.valid(orgUrl)) || (url != orgUrl && (!this.valid(url))) {
-		context.Break()
+		context.Break("invalid url,"+url)
 	}
 
 	return context, nil
