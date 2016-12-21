@@ -28,6 +28,10 @@ type ParserModule  struct {
 
 }
 
+func (this ParserModule) Name() string {
+	return "Parser"
+}
+
 func (this ParserModule)Start(env *Env) {
 	if started {
 		log.Error("parser is already started, please stop it first.")
@@ -42,8 +46,6 @@ func (this ParserModule)Start(env *Env) {
 		go ParseGo(env, &c2)
 		started = true
 	}
-	log.Info("parser success started")
-
 }
 
 func (this ParserModule) Stop() error {
@@ -56,9 +58,6 @@ func (this ParserModule) Stop() error {
 			}
 			log.Error("send exit signal to parser channel: ", i)
 		}
-
-		log.Info("parser success stoped")
-
 		started = false
 	} else {
 		log.Error("parser is not started")

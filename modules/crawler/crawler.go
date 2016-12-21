@@ -29,6 +29,10 @@ import (
 var fetchQuitChannels []*chan bool
 var started = false
 
+func (this CrawlerModule) Name() string{
+	return "Crawler"
+}
+
 func (this CrawlerModule) Start(env *Env) {
 	if started {
 		log.Error("crawler already started, please stop it first.")
@@ -54,7 +58,6 @@ func (this CrawlerModule) Start(env *Env) {
 	}
 
 	started = true
-	log.Info("crawler success started")
 }
 
 func (this CrawlerModule) Stop() error {
@@ -67,7 +70,6 @@ func (this CrawlerModule) Stop() error {
 			log.Debug("send exit signal to fetch channel: ", i)
 		}
 
-		log.Info("crawler success stoped")
 		started = false
 	} else {
 		log.Error("crawler is not started, please start it first.")

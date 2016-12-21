@@ -19,6 +19,7 @@ package module
 import . "github.com/medcl/gopa/core/env"
 
 type Module interface {
+	Name() string
 	Start(config *Env)
 	Stop() error
 }

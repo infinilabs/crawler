@@ -83,6 +83,10 @@ func BasicAuth(h httprouter.Handle, requiredUser, requiredPassword string) httpr
 	}
 }
 
+func (this APIModule) Name() string {
+	return "API"
+}
+
 func (this APIModule) Start(config *Env) {
 
 	this.env = config
@@ -90,7 +94,6 @@ func (this APIModule) Start(config *Env) {
 	go func() {
 		internalStart(config)
 	}()
-	log.Info("api module success started")
 }
 
 func (this APIModule) Stop() error {

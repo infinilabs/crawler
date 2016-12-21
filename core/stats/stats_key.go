@@ -48,7 +48,5 @@ type StatsCount struct {
 }
 
 type TaskStatus struct {
-	//Fetch map[string]StatsCount `json:"fetch"`
-	//Parse map[string]StatsCount `json:"parse"`
 	Stats map[string]map[string]int `json:"stats"`
 }

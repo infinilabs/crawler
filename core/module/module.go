@@ -43,15 +43,20 @@ func Start() {
 
 	log.Trace("start to start modules")
 	for _, v := range m.modules{
+		log.Debug("starting module: ",v.Name())
 		v.Start(m.env)
+		log.Info("started module: ",v.Name())
 	}
-	log.Trace("all modules started")
+	log.Info("all modules started")
 }
 
 func Stop() {
 	log.Trace("start to stop modules")
-	for _, v := range m.modules{
+	for i := len(m.modules) - 1; i >= 0; i-- {
+		v:=m.modules[i]
+		log.Debug("stopping module: ",v.Name())
 		v.Stop()
+		log.Info("started module: ",v.Name())
 	}
 	log.Info("all modules stopeed")
 }

@@ -26,6 +26,9 @@ import (
 
 var store boltdb.BoltdbStore
 
+func (this StorageModule) Name() string {
+	return "Storage"
+}
 
 func (this StorageModule)Start(env *Env) {
 
@@ -35,15 +38,12 @@ func (this StorageModule)Start(env *Env) {
 		log.Error(err)
 	}
 	env.RuntimeConfig.Storage = &store
-	log.Info("storage success started")
-
 	global.Register(global.REGISTER_BOLTDB, store.DB)
 
 }
 
 func (this StorageModule)Stop() error {
 	err:= store.Close()
-	log.Info("storage success stoped")
 	return err
 
 }

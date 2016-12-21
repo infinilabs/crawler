@@ -135,3 +135,26 @@ func GetTaskList(from,size int,skipDate string)(int,[]types.CrawlerTask,error) {
 	log.Trace("end get all crawler tasks")
 	return total,tasks,err
 }
+
+
+func Create(o interface{})  {
+	if(!inited){Start()}
+	err := db.Save(o)
+	if(err!=nil){
+		panic(err)
+	}
+}
+
+func Update(o interface{})  {
+	if(!inited){Start()}
+	err := db.Update(o)
+	if(err!=nil){
+		panic(err)
+	}
+}
+
+func Delete(o interface{})error  {
+	if(!inited){Start()}
+	err := db.DeleteStruct(o)
+	return err
+}

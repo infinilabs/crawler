@@ -46,7 +46,6 @@ func initStatsd() {
 	//defer statsdbuffer.Close()
 
 	statsdInited = true
-
 }
 
 func initData(category, key string) {
