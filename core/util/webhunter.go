@@ -169,7 +169,7 @@ func get(page *types.PageItem, url string, cookie string) ([]byte, error) {
 
 func post(url string, cookie string, postStr string) []byte {
 
-	log.Debug("let's post :" + url)
+	log.Debug("let's post: " + url)
 
 	client := &http.Client{
 		CheckRedirect: nil,

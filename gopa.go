@@ -75,6 +75,7 @@ func main() {
 	var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to this file")
 	var memprofile = flag.String("memprofile", "", "write memory profile to this file")
 	var startPprof = flag.Bool("pprof", false, "start pprof service, endpoint: http://localhost:6060/debug/pprof/")
+	var isDebug = flag.Bool("debug", false, "enable debug")
 
 	flag.Parse()
 
@@ -136,6 +137,7 @@ func main() {
 	sysConfig := SystemConfig{ConfigFile: *configFile, LogLevel: *logLevel}
 
 	env = Environment(sysConfig)
+	env.IsDebug=*isDebug
 
 	//put env into global registrar
 	global.RegisterEnv(env)

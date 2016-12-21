@@ -35,10 +35,22 @@ func (this End) Process(context *Context) (*Context, error) {
 
 	task:=context.Get(CONTEXT_CRAWLER_TASK).(*CrawlerTask)
 
+	task.Success=true
 	if(context.IsBreak()){
+		log.Trace("broken pipeline,",context.Payload)
+		task.Success=false
 		task.Message=context.Payload
 	}
 	task.Url=context.MustGetString(CONTEXT_URL)
+	pageItem:=context.Get(CONTEXT_PAGE_ITEM)
+	if(pageItem!=nil){
+		task.Page=pageItem.(*PageItem)
+		meta,b:= context.GetMap(CONTEXT_PAGE_METADATA)
+		if(b){
+			task.Page.Metadata=&meta
+		}
+	}
+
 	tasks.UpdateTask(task)
 
 	return context, nil

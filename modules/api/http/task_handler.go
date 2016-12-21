@@ -77,12 +77,14 @@ func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request, ps htt
 
 		fr := this.GetParameter(req, "from")
 		si := this.GetParameter(req, "size")
+		skipDate := this.GetParameter(req, "skip_date")
+
 		from,err:=strconv.Atoi(fr)
 		if(err!=nil){from=0}
 		size,err:=strconv.Atoi(si)
 		if(err!=nil){size=10}
 
-		total,tasks,err:=tasks.GetTaskList(from,size)
+		total,tasks,err:=tasks.GetTaskList(from,size,skipDate)
 		if(err!=nil){
 			this.error(w,err)
 		}else{

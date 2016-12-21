@@ -9,6 +9,17 @@
     <meta charset="utf-8">
 </head>
 <body>
+<style type="text/css">
+    pre{
+        margin-top:0px;
+        margin-bottom:0px;
+        padding-top:4px;
+        padding-bottom:4px;
+    }
+    .request pre{
+     color:royalblue;
+    }
+</style>
 <script type="text/javascript">
         $(function () {
 
@@ -97,40 +108,12 @@
 
             <div id="log"></div>
             <form id="form">
-                <input type="text" id="msg" size="64"/>
-                <input type="submit" value="Send"/>
+                <input id="msg" type="text" placeholder="" class="uk-width-1-1">
             </form>
 
         </div>
     </div>
 
 </div>
-
-<script language="javascript">
-
-    $.ajax({
-    url: '/tasks/',
-    type: "post",
-    dataType: "json",
-    success: function(data, textStatus, jqXHR) {
-        drawTable(data);
-    }
-});
-
-function drawTable(data) {
-    for (var i = 0; i < data.length; i++) {
-        drawRow(data[i]);
-    }
-}
-
-function drawRow(rowData) {
-    var row = $("<tr />")
-    $("#personDataTable").append(row); //this will append tr element to table... keep its reference for a while since we will add cels into it
-    row.append($("<td>" + rowData.id + "</td>"));
-    row.append($("<td>" + rowData.firstName + "</td>"));
-    row.append($("<td>" + rowData.lastName + "</td>"));
-}
-
-</script>
 </body>
 </html>

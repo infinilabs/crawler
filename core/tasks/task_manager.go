@@ -8,6 +8,7 @@ import (
 	"github.com/medcl/gopa/core/global"
 	"path"
 	"github.com/rs/xid"
+	"github.com/asdine/storm/q"
 )
 
 
@@ -63,7 +64,7 @@ func GetSeedList()[]types.TaskSeed {
 	if(!inited){Start()}
 	log.Trace("start get all seeds")
 	var tasks []types.TaskSeed
-	err := db.AllByIndex("CreateTime",&tasks)
+	err := db.AllByIndex("CreateTime",&tasks, storm.Reverse())
 	if(err!=nil){
 		panic(err)
 	}
@@ -114,7 +115,7 @@ func GetTask(id int) (types.CrawlerTask,error)  {
 	return task,err
 }
 
-func GetTaskList(from,size int)(int,[]types.CrawlerTask,error) {
+func GetTaskList(from,size int,skipDate string)(int,[]types.CrawlerTask,error) {
 	if(!inited){Start()}
 	log.Trace("start get all crawler tasks")
 	var tasks []types.CrawlerTask
@@ -122,7 +123,15 @@ func GetTaskList(from,size int)(int,[]types.CrawlerTask,error) {
 	if(err!=nil){
 		log.Error(err)
 	}
-	err= db.AllByIndex("CreateTime",&tasks,storm.Skip(from),storm.Limit(size))
+	if(skipDate!=""){
+		log.Error(skipDate)
+		layout := "2016-12-20T22:38:53.456485578+08:00"
+		t, _ := time.Parse(layout, skipDate)
+		query := db.Select(q.Gt("CreateTime", t)).Limit(size).Skip(from).Reverse().OrderBy("CreateTime")
+		err = query.Find(&tasks)
+	}else{
+		err = db.AllByIndex("CreateTime",&tasks,storm.Skip(from),storm.Limit(size), storm.Reverse())
+	}
 	log.Trace("end get all crawler tasks")
 	return total,tasks,err
 }

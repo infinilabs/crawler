@@ -36,7 +36,7 @@ func (this PublishJoint) Name() string {
 func (this PublishJoint) Process(c *Context) (*Context, error) {
 
 	m := md5.Sum([]byte(c.MustGetString(CONTEXT_URL)))
-	id:=hex.EncodeToString(m[:])
+	id:=hex.EncodeToString(m[:]) //TODO make sure page id align with task id
 
 	data:=map[string]interface{}{}
 

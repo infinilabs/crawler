@@ -17,7 +17,6 @@ limitations under the License.
 package pipe
 
 import (
-	"errors"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/util"
@@ -125,7 +124,7 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 		currentURI, err = Parse(tempUrl)
 		if err != nil {
 			log.Error(err)
-			context.Break(err)
+			context.Break(err.Error())
 			return context, err
 		}
 	}
@@ -144,12 +143,12 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 			if !(ref[len(ref)-1] == cur[len(cur)-1] && ref[len(ref)-2] == cur[len(cur)-2]) {
 				log.Debug("domain mismatch,", referenceURI.Host, " vs ", currentURI.Host)
 				context.Break("domain missmatch,"+referenceURI.Host+ " vs "+ currentURI.Host)
-				return context, errors.New("domain mismatch")
+				return context, nil //known exception, not error
 			}
 		} else {
 			if referenceURI.Host != currentURI.Host {
 				context.Break("domain missmatch,"+referenceURI.Host+ " vs "+ currentURI.Host)
-				return context, errors.New("domain mismatch")
+				return context, nil //known exception, not error
 			}
 		}
 

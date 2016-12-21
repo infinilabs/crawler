@@ -42,7 +42,7 @@ func (this ParserJoint) Process(s *Context) (*Context, error) {
 
 	refUrl := s.MustGetString(CONTEXT_URL)
 	depth := s.MustGetInt(CONTEXT_DEPTH)
-	fileContent := s.Get(CONTEXT_PAGE_BODY_BYTES).([]byte)
+	fileContent := s.MustGetBytes(CONTEXT_PAGE_BODY_BYTES)
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(fileContent))
 	if err != nil {
 		panic(err)

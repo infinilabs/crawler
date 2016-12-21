@@ -42,6 +42,7 @@ func internalStart(env *Env) {
 
 	//Index
 	router.GET("/", handler.IndexAction)
+	router.GET("/favicon.ico", handler.IndexAction)
 
 	//APIs
 	mux.HandleFunc("/stats", handler.StatsAction)
@@ -89,7 +90,7 @@ func (this APIModule) Start(config *Env) {
 	go func() {
 		internalStart(config)
 	}()
-	log.Debug("api module success started")
+	log.Info("api module success started")
 }
 
 func (this APIModule) Stop() error {

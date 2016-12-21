@@ -41,6 +41,8 @@ func (this CheckerModule) Start(env *Env) {
 
 	go runCheckerGo(env, &quitChannel)
 	started = true
+
+	log.Info("checker success started")
 }
 
 func runCheckerGo(env *Env, quitC *chan bool) {

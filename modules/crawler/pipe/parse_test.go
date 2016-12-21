@@ -30,7 +30,7 @@ func TestProcessLinks(t *testing.T) {
 		" </div> </body> </html>"
 
 	context:= pipeline.Context{Env:env.EmptyEnv()}
-	context.Data=map[pipeline.ContextKey]interface{}{}
+	context.data =map[pipeline.ContextKey]interface{}{}
 	context.Set(CONTEXT_URL,"http://elasticsearch.cn/")
 	context.Set(CONTEXT_DEPTH,1)
 	context.Set(CONTEXT_PAGE_BODY_BYTES,[]byte(body))

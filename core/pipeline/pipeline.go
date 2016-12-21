@@ -20,17 +20,21 @@ import (
 	"fmt"
 	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/rs/xid"
 	"runtime"
 	"strings"
 	"time"
+	"sync"
 )
+
+var l sync.RWMutex
 
 type ContextKey string
 
 type Context struct {
-	Data      map[ContextKey]interface{}
+	data      map[ContextKey]interface{}
 	Env       *env.Env
 	breakFlag bool
 	Payload   interface{}
@@ -40,6 +44,7 @@ type Context struct {
 break all pipeline
 */
 func (this *Context) Break(msg interface{}) {
+	log.Trace("break,", msg)
 	this.breakFlag = true
 	this.Payload = msg
 }
@@ -108,11 +113,16 @@ func (this *Context) GetMap(key ContextKey) (map[string]interface{}, bool) {
 }
 
 func (this *Context) Get(key ContextKey) interface{} {
-	return this.Data[key]
+	l.RLock()
+	  v:=this.data[key]
+	l.RUnlock()
+	return v
 }
 
 func (this *Context) Set(key ContextKey, value interface{}) {
-	this.Data[key] = value
+	l.Lock()
+	this.data[key] = value
+	l.Unlock()
 }
 
 type Joint interface {
@@ -140,13 +150,19 @@ func (this *Pipeline) Context(s *Context) *Pipeline {
 	return this
 }
 
+func (this *Pipeline) GetID() string {
+	return this.id
+}
+
 func (this *Pipeline) Start(s Joint) *Pipeline {
 
 	if this.context == nil {
 		this.context = &Context{}
 	}
-	if this.context.Data == nil {
-		this.context.Data = map[ContextKey]interface{}{}
+	if this.context.data == nil {
+		l.Lock()
+		this.context.data = map[ContextKey]interface{}{}
+		l.Unlock()
 	}
 	this.joints = []Joint{s}
 	return this
@@ -156,13 +172,6 @@ func (this *Pipeline) Join(s Joint) *Pipeline {
 	this.joints = append(this.joints, s)
 	return this
 }
-
-//func (this *Pipeline) Err(err error) *Pipeline {
-//	//TODO handle error, persist error log
-//	log.Error("error in pipeline: ", this.id)
-//	this.context.Payload =err
-//	return this
-//}
 
 func (this *Pipeline) End(s Joint) *Pipeline {
 	this.endJoint = s
@@ -174,15 +183,19 @@ func (this *Pipeline) Run() *Context {
 	stats.Increment(this.name+".pipeline", "total")
 
 	defer func() {
-		if r := recover(); r != nil {
-			if _, ok := r.(runtime.Error); ok {
-				err := r.(error)
-				stats.Increment(this.name+".pipeline", "error")
-				log.Errorf("%s: %v",this.name, err)
+		if !global.Env().IsDebug {
+			if r := recover(); r != nil {
+				if _, ok := r.(runtime.Error); ok {
+					err := r.(error)
+					stats.Increment(this.name+".pipeline", "error")
+					log.Errorf("%s: %v", this.name, err)
+					this.context.Break(err.Error())
+				}
+				this.endPipeline()
+				log.Trace("error in pipe")
 			}
-			this.endPipeline()
-			log.Trace("error in pipe")
 		}
+
 	}()
 
 	var err error
@@ -199,7 +212,8 @@ func (this *Pipeline) Run() *Context {
 		stats.Timing(this.name+".pipeline", v.Name(), elapsedTime.Nanoseconds())
 		if err != nil {
 			stats.Increment(this.name+".pipeline", "error")
-			log.Errorf("%s-%s: %v",this.name,v.Name(), err)
+			log.Errorf("%s-%s: %v", this.name, v.Name(), err)
+			this.context.Break(err.Error())
 			panic(err)
 		}
 		log.Trace("end joint,", v.Name())

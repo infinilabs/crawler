@@ -35,8 +35,8 @@ type Env struct {
 	SystemConfig  *SystemConfig
 	RuntimeConfig *RuntimeConfig
 	Channels      *Channels
-
 	ESClient util.ElasticsearchClient
+	IsDebug bool
 }
 
 func Environment(sysConfig SystemConfig) *Env {

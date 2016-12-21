@@ -107,12 +107,14 @@ func execute(seed types.TaskSeed, env *Env) {
 
 	var pipeline *Pipeline
 	defer func() {
-		if r := recover(); r != nil {
-			if _, ok := r.(runtime.Error); ok {
-				err := r.(error)
-				log.Error(seed.Url, " , ", err)
+		if !env.IsDebug {
+			if r := recover(); r != nil {
+				if _, ok := r.(runtime.Error); ok {
+					err := r.(error)
+					log.Error(pipeline.GetID(), ", ", seed.Url, ", ", err)
+				}
+				log.Error("error in crawler")
 			}
-			log.Error("error in crawler")
 		}
 	}()
 

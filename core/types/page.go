@@ -25,28 +25,29 @@ import (
 )
 
 type KV struct {
-	Key   string
-	Value []string
+	Key   string `json:"key,omitempty"`
+	Value []string `storm:"inline" json:"value,omitempty"`
 }
 
 type PageItem struct {
-	Proto      string
-	Domain     string              // elastic.co
-	UrlPath    string              // /index.html
-	Headers    map[string][]string // key:value
-	Parameters []KV                // key:value
-	Meta       map[string]interface{}
-	Images     []KV // images within this site, img:desc
-	ExtImages  []KV // images outside, img:desc
-	Links      []KV // link:desc
-	Body       []byte
-	StatusCode int
-	Title      string
-	Size       int
-	SimHash    string
-	H1         []string
-	H2         []string
-	H3         []string
+	Proto      string `storm:"index" json:"proto,omitempty"`
+	Domain     string  `storm:"index" json:"domain,omitempty"`            // elastic.co
+	UrlPath    string  `storm:"index" json:"path,omitempty"`            // /index.html
+	Headers    map[string][]string`storm:"inline" json:"headers,omitempty"` // key:value
+	Parameters []KV   `storm:"inline" json:"parameters,omitempty"`             // key:value
+	Images     []KV `storm:"inline" json:"images,omitempty"`// images within this site, img:desc
+	ExtImages  []KV `storm:"inline" json:"ext_images,omitempty"`// images outside, img:desc
+	Links      []KV `storm:"inline" json:"links,omitempty"`// link:desc
+	Body       []byte`json:"-"`
+	StatusCode int`storm:"index" json:"status_code,omitempty"`
+	Title      string`json:"title,omitempty"`
+	Size       int`json:"size,omitempty"`
+	SimHash    string`storm:"index" json:"sim_hash,omitempty"`
+	H1         []string`json:"h1,omitempty"`
+	H2         []string`json:"h2,omitempty"`
+	H3         []string`json:"h3,omitempty"`
+	Metadata      *map[string]interface{} `storm:"inline" json:"metadata,omitempty"`
+
 }
 
 type PageLink struct {
@@ -64,9 +65,10 @@ type TaskSeed struct {
 
 type CrawlerTask struct {
 	ID            string    `storm:"id,unique" json:"id"`
-	Url           string `storm:"inline" json:"url,omitempty"`
+	Url           string `storm:"index" json:"url,omitempty"`
 	Seed          *TaskSeed `storm:"inline" json:"seed,omitempty"`
 	Page          *PageItem `storm:"inline" json:"page,omitempty"`
+	Success       bool 	`storm:"index" json:"success,omitempty"`
 	Message       interface{} `storm:"inline" json:"message,omitempty"`
 	CreateTime    *Time     `storm:"index" json:"created,omitempty"`
 	UpdateTime    *Time     `storm:"index" json:"updated,omitempty"`

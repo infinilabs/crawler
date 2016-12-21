@@ -36,6 +36,11 @@ func (this FetchJoint) Name() string {
 	return "fetch"
 }
 
+type signal struct {
+	flag bool
+	err error
+}
+
 func (this FetchJoint) Process(context *Context) (*Context, error) {
 
 	this.timeout = 10 * time.Second
@@ -50,8 +55,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 	}
 
 	log.Debug("start fetch url,", requestUrl)
-	flg := make(chan bool, 1)
-	var err error
+	flg := make(chan signal, 1)
 	go func() {
 		pageItem := types.PageItem{}
 		context.Set(CONTEXT_PAGE_LAST_FETCH, time.Now().UTC())
@@ -64,7 +68,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 				if pageItem.StatusCode == 404 {
 					log.Info("skip while 404, ", requestUrl, " , ", pageItem.StatusCode)
 					context.Break("fetch 404")
-					flg <- false
+					flg <-  signal{flag:false,err:errors.New("404 NOT FOUND")}
 					return
 				}
 			}
@@ -74,10 +78,10 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 			context.Set(CONTEXT_PAGE_BODY_BYTES, body)
 			context.Set(CONTEXT_PAGE_ITEM, &pageItem)
 			log.Debug("exit fetchUrl method:", requestUrl)
-			flg <- true
+			flg <- signal{flag:true}
 
 		} else {
-			flg <- false
+			flg <-  signal{flag:false,err:err}
 		}
 	}()
 
@@ -91,12 +95,14 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 		context.Break("fetch timeout")
 		return nil, errors.New("fetch url time out")
 	case value := <-flg:
-		if value {
+		if value.flag {
 			log.Debug("fetching url normal exit, ", requestUrl)
 			stats.Increment(domain, stats.STATS_FETCH_SUCCESS_COUNT)
 		} else {
 			log.Debug("fetching url error exit, ", requestUrl)
-			context.Break(err)
+			if(value.err!=nil){
+				context.Break(value.err.Error())
+			}
 			stats.Increment(domain, stats.STATS_FETCH_FAIL_COUNT)
 		}
 		return context, nil

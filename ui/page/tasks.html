@@ -6,6 +6,8 @@
     <script src="/ui/assets/js/jquery.min.js"></script>
     <script src="/ui/assets/js/echarts.min.js"></script>
     <script src="/ui/assets/uikit-2.27.1/js/uikit.min.js"></script>
+    <script src="/ui/assets/js/jquery.timeago.js"></script>
+    <script src="/ui/assets/js/page/tasks.js"></script>
     <meta charset="utf-8">
 </head>
 <body>
@@ -33,65 +35,21 @@
 
         <div class="uk-grid" data-uk-grid-margin>
             <div class="uk-width-large-1-1 uk-visible-large">
+                <div class="uk-alert" >Total <span id="alert"></span> Records</div>
 
-
-                   <table id="example" class="uk-table uk-table-hover uk-table-striped" cellspacing="0" width="100%">
-                       <thead>
-                       <tr>
-                           <th>CreateTime</th>
-                           <th>Domain</th>
-                           <th>Url</th>
-                           <th>Age</th>
-                           <th>Start date</th>
-                           <th>Salary</th>
-                       </tr>
-                       </thead>
-                       <tfoot>
-                       <tr>
-                           <th>Name</th>
-                           <th>Position</th>
-                           <th>Office</th>
-                           <th>Age</th>
-                           <th>Start date</th>
-                           <th>Salary</th>
-                       </tr>
-                       </tfoot>
-                       <tbody>
-                       <tr>
-                           <td>Tiger Nixon</td>
-                           <td>System Architect</td>
-                           <td>Edinburgh</td>
-                           <td>61</td>
-                           <td>2011/04/25</td>
-                           <td>$320,800</td>
-                       </tr>
-                       <tr>
-                           <td>Garrett Winters</td>
-                           <td>Accountant</td>
-                           <td>Tokyo</td>
-                           <td>63</td>
-                           <td>2011/07/25</td>
-                           <td>$170,750</td>
-                       </tr>
-                       <tr>
-                           <td>Ashton Cox</td>
-                           <td>Junior Technical Author</td>
-                           <td>San Francisco</td>
-                           <td>66</td>
-                           <td>2009/01/12</td>
-                           <td>$86,000</td>
-                       </tr>
-                       <tr>
-                           <td>Donna Snider</td>
-                           <td>Customer Support</td>
-                           <td>New York</td>
-                           <td>27</td>
-                           <td>2011/01/25</td>
-                           <td>$112,000</td>
-                       </tr>
-                       </tbody>
-                   </table>
-
+                <table id="tasks" class="uk-table uk-table-hover uk-table-striped" cellspacing="0" width="100%">
+                    <thead>
+                    <tr>
+                        <th>Domain</th>
+                        <th>Path</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Updated</th>
+                    </tr>
+                    </thead>
+                    <tbody id="records">
+                    </tbody>
+                </table>
 
                 <ul class="uk-pagination">
                     <li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
@@ -111,28 +69,17 @@
 
 <script language="javascript">
 
+    //加载最新任务数据
     $.ajax({
-    url: '/tasks/',
-    type: "post",
-    dataType: "json",
-    success: function(data, textStatus, jqXHR) {
-        drawTable(data);
-    }
-});
+        url: '/tasks?from=0&size=20',
+        type: "get",
+        dataType: "json",
+        success: function(data, textStatus, jqXHR) {
+            $("#alert").text(data.total);
+            drawTable(data.result);
+        }
+    });
 
-function drawTable(data) {
-    for (var i = 0; i < data.length; i++) {
-        drawRow(data[i]);
-    }
-}
-
-function drawRow(rowData) {
-    var row = $("<tr />")
-    $("#personDataTable").append(row); //this will append tr element to table... keep its reference for a while since we will add cels into it
-    row.append($("<td>" + rowData.id + "</td>"));
-    row.append($("<td>" + rowData.firstName + "</td>"));
-    row.append($("<td>" + rowData.lastName + "</td>"));
-}
 
 </script>
 </body>

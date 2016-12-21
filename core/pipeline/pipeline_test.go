@@ -28,9 +28,9 @@ type crawlerJoint struct {
 }
 
 func (this crawlerJoint) Process(s *Context) (*Context, error) {
-	s.Data = map[ContextKey]interface{}{}
-	s.Data[("webpage")] = "hello world gogo "
-	s.Data[("status")] = true
+	s.data = map[ContextKey]interface{}{}
+	s.data[("webpage")] = "hello world gogo "
+	s.data[("status")] = true
 	fmt.Println("start to crawlling url:"+this.Url)
 	return s, nil
 }
@@ -39,8 +39,8 @@ type parserJoint struct {
 }
 
 func (this parserJoint) Process(s *Context) (*Context, error) {
-	s.Data[("urls")] = "gogo"
-	s.Data[("domain")] = "http://gogo.com"
+	s.data[("urls")] = "gogo"
+	s.data[("domain")] = "http://gogo.com"
 	//pub urls to channel
 	fmt.Println("start to parse web content")
 	return s, nil
@@ -50,7 +50,7 @@ type saveJoint struct {
 }
 
 func (this saveJoint) Process(s *Context) (*Context, error) {
-	s.Data["saved"] = "true"
+	s.Set("saved","true")
 	//pub urls to channel
 	fmt.Println("start to save web content")
 	return s, nil
@@ -61,7 +61,7 @@ type publishJoint struct {
 
 func (this publishJoint) Process(s *Context) (*Context, error) {
 	fmt.Println("start to end pipeline")
-	s.Data["published"] = "true"
+	s.Set("published","true")
 	return s, nil
 }
 
@@ -70,9 +70,9 @@ func TestPipeline(t *testing.T)  {
 
 	pipeline:=NewPipeline("crawler_test")
 	stream:=&Context{}
-	stream.Data =map[ContextKey]interface{}{}
-	stream.Data["url"]="gogol.com"
-	stream.Data["webpage"]="hello world gogo "
+	stream.data =map[ContextKey]interface{}{}
+	stream.data["url"]="gogol.com"
+	stream.data["webpage"]="hello world gogo "
 
 	stream= pipeline.Context(stream).
 		Start(crawlerJoint{Url:"http://baidu.com"}).
@@ -82,8 +82,8 @@ func TestPipeline(t *testing.T)  {
 		End().
 		Run()
 
-	fmt.Println(stream.Data)
-	assert.Equal(t,stream.Data["saved"],"true")
-	assert.Equal(t,stream.Data["status"],true)
-	assert.Equal(t,stream.Data["domain"],"http://gogo.com")
+	fmt.Println(stream.data)
+	assert.Equal(t,stream.data["saved"],"true")
+	assert.Equal(t,stream.data["status"],true)
+	assert.Equal(t,stream.data["domain"],"http://gogo.com")
 }

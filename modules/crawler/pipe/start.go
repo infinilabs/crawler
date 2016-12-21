@@ -32,11 +32,12 @@ func (this Start) Name() string {
 
 func (this Start) Process(context *Context) (*Context, error) {
 
-	seelog.Trace("start 1")
+	seelog.Trace("start process")
 
 	//init task record
 	task:=CrawlerTask{}
 	task.Seed=&this.Seed
+	task.Url=this.Seed.Url
 	tasks.CreateTask(&task)
 
 	context.Set(CONTEXT_CRAWLER_TASK,&task)
@@ -44,8 +45,6 @@ func (this Start) Process(context *Context) (*Context, error) {
 	context.Set(CONTEXT_URL,this.Seed.Url)
 	context.Set(CONTEXT_DEPTH,this.Seed.Depth)
 	context.Set(CONTEXT_REFERENCE_URL,this.Seed.Reference)
-
-	seelog.Trace("start 2")
 
 	return context, nil
 }
