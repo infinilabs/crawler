@@ -35,6 +35,7 @@ import (
 	"runtime/pprof"
 	"syscall"
 	"time"
+	"github.com/medcl/gopa/core/util"
 )
 
 var (
@@ -135,11 +136,12 @@ func main() {
 
 	env = Environment(sysConfig)
 	env.IsDebug=*isDebug
-
 	//put env into global registrar
 	global.RegisterEnv(env)
-
 	logging.SetLogging(env)
+
+	//check instance lock
+	util.CheckInstanceLock(env.RuntimeConfig.PathConfig.Data)
 
 	module.New(env)
 	modules.Register()
@@ -163,6 +165,7 @@ func main() {
 			log.Infof("got signal:%s ,start shutting down", s.String())
 			//wait workers to exit
 			module.Stop()
+			util.ClearInstanceLock()
 			finalQuitSignal <- true
 		}
 	}()

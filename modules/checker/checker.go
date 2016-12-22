@@ -44,7 +44,10 @@ func (this CheckerModule) Start(env *Env) {
 	}
 	quitChannel = make(chan bool)
 
-	filter.Open(path.Join(env.RuntimeConfig.PathConfig.Data, filterFileName))
+	err:=filter.Open(path.Join(env.RuntimeConfig.PathConfig.Data, filterFileName))
+	if(err!=nil){
+		panic(err)
+	}
 
 	go runCheckerGo(env, &quitChannel)
 	started = true

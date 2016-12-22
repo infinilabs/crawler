@@ -17,7 +17,6 @@ limitations under the License.
 package storage
 
 import (
-	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/store"
 	"github.com/medcl/gopa/modules/storage/boltdb"
@@ -34,7 +33,7 @@ func (this StorageModule) Start(env *Env) {
 	impl = boltdb.BoltdbStore{FileName: env.RuntimeConfig.PathConfig.Data + "/boltdb"}
 	err := impl.Open()
 	if err != nil {
-		log.Error(err)
+		panic(err)
 	}
 	store.Register(impl)
 }
