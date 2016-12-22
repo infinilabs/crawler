@@ -7,9 +7,9 @@
 
 ## Building Gopa ##
 
-Mac/Linux: Run `chmod a+x build.sh &./build.sh` to build the Gopa
+Mac/Linux: Run `make build` to build the Gopa
 
-Windows: Run `build.bat` to build the Gopa
+Windows: Check out `Makefile` to build the Gopa
 
 
 ## Download ##
