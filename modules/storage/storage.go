@@ -17,37 +17,33 @@ limitations under the License.
 package storage
 
 import (
-log "github.com/cihub/seelog"
-. "github.com/medcl/gopa/core/env"
-"github.com/medcl/gopa/modules/storage/boltdb"
-_ "time"
-"github.com/medcl/gopa/core/global"
+	log "github.com/cihub/seelog"
+	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/store"
+	"github.com/medcl/gopa/modules/storage/boltdb"
 )
 
-var store boltdb.BoltdbStore
+var impl boltdb.BoltdbStore
 
 func (this StorageModule) Name() string {
 	return "Storage"
 }
 
-func (this StorageModule)Start(env *Env) {
+func (this StorageModule) Start(env *Env) {
 
-	store = boltdb.BoltdbStore{Env:env}
-	err := store.Open()
+	impl = boltdb.BoltdbStore{FileName: env.RuntimeConfig.PathConfig.Data + "/boltdb"}
+	err := impl.Open()
 	if err != nil {
 		log.Error(err)
 	}
-	env.RuntimeConfig.Storage = &store
-	global.Register(global.REGISTER_BOLTDB, store.DB)
-
+	store.Register(impl)
 }
 
-func (this StorageModule)Stop() error {
-	err:= store.Close()
+func (this StorageModule) Stop() error {
+	err := impl.Close()
 	return err
 
 }
 
 type StorageModule struct {
-
 }

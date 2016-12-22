@@ -17,13 +17,6 @@ limitations under the License.
 package modules
 
 import (
-	//"github.com/medcl/gopa/modules/checker"
-	//apiModule "github.com/medcl/gopa/modules/api"
-	//crawlerModule "github.com/medcl/gopa/modules/crawler"
-	//storageModule "github.com/medcl/gopa/modules/storage"
-	//. "github.com/medcl/gopa/core/env"
-)
-import (
 	"github.com/medcl/gopa/core/module"
 	"github.com/medcl/gopa/modules/api"
 	"github.com/medcl/gopa/modules/checker"
@@ -35,11 +28,11 @@ import (
 
 func Register() {
 	//register modules
+	module.Register(storage.StorageModule{})
 	module.Register(statsd.StatsStoreModule{})
 	//module.Register(statsd.StatsDModule{})
 	module.Register(queue.DiskQueue{})
 	module.Register(http.APIModule{})
-	module.Register(storage.StorageModule{})
 	module.Register(url_checker.CheckerModule{})
 	module.Register(crawler.CrawlerModule{})
 	//module.Register(parser.ParserModule{})

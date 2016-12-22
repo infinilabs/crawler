@@ -24,6 +24,7 @@ import (
 	"strings"
 	"path"
 	"github.com/medcl/gopa/core/stats"
+	"github.com/medcl/gopa/core/store"
 )
 
 type SaveToDBJoint struct {
@@ -51,10 +52,10 @@ func (this SaveToDBJoint) Process(c *Context) (*Context, error) {
 	log.Debug("save url to db, url:", url, ",domain:", pageItem.Domain,",path:",savePath,",file:",saveFile,",saveKey:",string(saveKey))
 
 	if(this.CompressBody){
-		this.context.Env.RuntimeConfig.Storage.AddValueCompress(boltdb.SnapshotBucketKey,saveKey,pageItem.Body)
+		store.AddValueCompress(boltdb.SnapshotBucketKey,saveKey,pageItem.Body)
 
 	}else{
-		this.context.Env.RuntimeConfig.Storage.AddValue(boltdb.SnapshotBucketKey,saveKey,pageItem.Body)
+		store.AddValue(boltdb.SnapshotBucketKey,saveKey,pageItem.Body)
 	}
 
 	stats.IncrementBy(domain,stats.STATS_STORAGE_FILE_SIZE,int64(len(pageItem.Body)))

@@ -21,6 +21,7 @@ import (
 	_ "github.com/jmoiron/jsonq"
 	"github.com/medcl/gopa/modules/storage/boltdb"
 	"net/http"
+	"github.com/medcl/gopa/core/store"
 )
 
 func (this *Handler) SnapshotAction(w http.ResponseWriter, req *http.Request) {
@@ -33,9 +34,9 @@ func (this *Handler) SnapshotAction(w http.ResponseWriter, req *http.Request) {
 
 		var bytes []byte
 		if compressed == "true" {
-			bytes = this.Env.RuntimeConfig.Storage.GetCompressedValue(boltdb.SnapshotBucketKey, []byte(url))
+			bytes = store.GetCompressedValue(boltdb.SnapshotBucketKey, []byte(url))
 		} else {
-			bytes = this.Env.RuntimeConfig.Storage.GetValue(boltdb.SnapshotBucketKey, []byte(url))
+			bytes = store.GetValue(boltdb.SnapshotBucketKey, []byte(url))
 		}
 
 		if len(bytes) > 0 {

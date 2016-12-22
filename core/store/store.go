@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package types
+package store
 
 
 type Store interface {
@@ -34,6 +34,34 @@ type Store interface {
 	DeleteValue(bucket string, key []byte, value []byte) error
 
 	DeleteBucket(bucket string, key []byte, value []byte) error
-
 }
 
+var handler Store
+
+func GetValue(bucket string, key []byte) []byte{
+	return handler.GetValue(bucket,key)
+}
+
+func GetCompressedValue(bucket string, key []byte) []byte{
+	return handler.GetCompressedValue(bucket,key)
+}
+
+func AddValueCompress(bucket string, key []byte, value []byte) error{
+	return handler.AddValueCompress(bucket,key,value)
+}
+
+func AddValue(bucket string, key []byte, value []byte) error{
+	return handler.AddValue(bucket,key,value)
+}
+
+func DeleteValue(bucket string, key []byte, value []byte) error{
+	return handler.DeleteValue(bucket,key,value)
+}
+
+func DeleteBucket(bucket string, key []byte, value []byte) error{
+	return handler.DeleteBucket(bucket,key,value)
+}
+
+func Register(h Store){
+	handler=h
+}

@@ -26,7 +26,7 @@ function drawRow(rowData) {
         }else{
             col3="N/A";
         }
-        col4= getdata(rowData.page.size);
+        col4= formatBytes(getdata(rowData.page.size),1);
         row.append($("<td>" + col1 + "</td>"));
         row.append($("<td>" + col2 + "</td>"));
         row.append($("<td>" + col3 + "</td>"));
@@ -53,4 +53,14 @@ function timeago(v){
     }catch(e){
         return v
     }
+}
+
+
+function formatBytes(bytes,decimals) {
+    if(bytes == 0) return '0 Byte';
+    var k = 1000;
+    var dm = decimals + 1 || 3;
+    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    var i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }

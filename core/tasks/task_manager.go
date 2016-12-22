@@ -6,10 +6,11 @@ import (
 	log "github.com/cihub/seelog"
 	"time"
 	"github.com/medcl/gopa/core/global"
-	"path"
 	"github.com/rs/xid"
 	"github.com/asdine/storm/q"
 	"sync"
+	bolt "github.com/boltdb/bolt"
+	"path"
 )
 
 
@@ -20,8 +21,16 @@ var l sync.RWMutex
 func Start() error  {
 	l.Lock()
 	var err error
-	file:= path.Join(global.Env().RuntimeConfig.PathConfig.Data,"task_db")
-	db, err = storm.Open(file)
+
+	v:=global.Lookup(global.REGISTER_BOLTDB)
+	if(v!=nil){
+		boltDb:= v.(*bolt.DB)
+		db,err = storm.Open("task_db", storm.UseDB(boltDb))
+	}else{
+		file:= path.Join(global.Env().RuntimeConfig.PathConfig.Data,"task_db")
+		db, err = storm.Open(file)
+	}
+
 	inited=true
 	l.Unlock()
 	return err
@@ -95,7 +104,6 @@ func GetTaskList(from,size int,skipDate string)(int,[]types.CrawlerTask,error) {
 	log.Trace("end get all crawler tasks")
 	return total,tasks,err
 }
-
 
 func Get(key string,value interface{},to interface{}) (error)  {
 	if(!inited){Start()}

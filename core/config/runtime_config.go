@@ -16,10 +16,6 @@ limitations under the License.
 
 package config
 
-import (
-	. "github.com/medcl/gopa/core/types"
-)
-
 type PathConfig struct {
 	Data     string  `data`
 	Log      string  `log`
@@ -164,9 +160,6 @@ type RuntimeConfig struct {
 	//ParseUrlsFromPreviousSavedPage bool //extract urls from previous saved page
 	LoadRuledFetchJob              bool //extract urls from previous saved page
 	HttpEnabled                    bool //extract urls from previous saved page
-
-	//runtime variables
-	Storage Store
 
 	WalkBloomFilterFileName         string
 	FetchBloomFilterFileName        string

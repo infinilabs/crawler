@@ -50,10 +50,10 @@ func OldGetRuntimeConfig() *RuntimeConfig {
 	//runtimeConfig.ParseUrlsFromPreviousSavedPage = GetBoolConfig("Switch", "ParseUrlsFromPreviousSavedPage", false)
 	//runtimeConfig.ArrayStringSplitter = GetStringConfig("CrawlerRule", "ArrayStringSplitter", ",")
 
-	runtimeConfig.WalkBloomFilterFileName = GetStringConfig("BloomFilter", "WalkBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/walk.bloomfilter")
-	runtimeConfig.FetchBloomFilterFileName = GetStringConfig("BloomFilter", "FetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/fetch.bloomfilter")
-	runtimeConfig.ParseBloomFilterFileName = GetStringConfig("BloomFilter", "ParseBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/parse.bloomfilter")
-	runtimeConfig.PendingFetchBloomFilterFileName = GetStringConfig("BloomFilter", "PendingFetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/pending_fetch.bloomfilter")
+	//runtimeConfig.WalkBloomFilterFileName = GetStringConfig("BloomFilter", "WalkBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/walk.bloomfilter")
+	//runtimeConfig.FetchBloomFilterFileName = GetStringConfig("BloomFilter", "FetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/fetch.bloomfilter")
+	//runtimeConfig.ParseBloomFilterFileName = GetStringConfig("BloomFilter", "ParseBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/parse.bloomfilter")
+	//runtimeConfig.PendingFetchBloomFilterFileName = GetStringConfig("BloomFilter", "PendingFetchBloomFilterFileName", runtimeConfig.TaskConfig.TaskDataPath+"/filters/pending_fetch.bloomfilter")
 
 	runtimeConfig.MaxGoRoutine = GetIntConfig("Global", "MaxGoRoutine", 1)
 	if runtimeConfig.MaxGoRoutine < 2 {
