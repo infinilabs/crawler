@@ -6,7 +6,7 @@ go:
 - 1.6
 deploy:
   provider: releases
-  skip_cleanup: true
+  skip_cleanup: false
   api_key:
     secure: Y34W9IfgIPA+/kkVfysNs6s/Zx5Rz2TK1Og1Tr9EGzDofadCs5e0Pjke1sU+VTcKIo8T4JGoDw5oUhC5CTsrq3iBa47hseFdQuERzLUKdEtaWIORTNcrJZJqitw/Fs50A6KPpN7Tvi6rOGD+pUi+lgYXbNvspyuVdHvW6HbcTvk=
   file: bin/*.tar.gz 
