@@ -20,18 +20,18 @@ import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
 	. "github.com/medcl/gopa/core/pipeline"
+	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/modules/config"
 	. "github.com/medcl/gopa/modules/crawler/pipe"
 	"runtime"
 	"time"
-	"github.com/medcl/gopa/core/queue"
-	"github.com/medcl/gopa/modules/config"
 )
 
 var fetchQuitChannels []*chan bool
 var started = false
 
-func (this CrawlerModule) Name() string{
+func (this CrawlerModule) Name() string {
 	return "Crawler"
 }
 
@@ -44,7 +44,6 @@ func (this CrawlerModule) Start(env *Env) {
 	fetchQuitChannels = make([]*chan bool, numGoRoutine)
 	if env.RuntimeConfig.CrawlerConfig.Enabled {
 		go func() {
-
 			//start fetcher
 			for i := 0; i < numGoRoutine; i++ {
 				log.Trace("start crawler:", i)
@@ -64,6 +63,7 @@ func (this CrawlerModule) Start(env *Env) {
 
 func (this CrawlerModule) Stop() error {
 	if started {
+		started = false
 		log.Debug("start shutting down crawler")
 		for i, item := range fetchQuitChannels {
 			if item != nil {
@@ -72,7 +72,6 @@ func (this CrawlerModule) Stop() error {
 			log.Debug("send exit signal to fetch channel: ", i)
 		}
 
-		started = false
 	} else {
 		log.Error("crawler is not started, please start it first.")
 	}
@@ -84,13 +83,16 @@ func RunPipeline(env *Env, quitC *chan bool, shard int) {
 
 	go func() {
 		for {
-			log.Trace("waiting url to fetch")
-			data := queue.Pop(config.FetchChannel)
-			url:=types.PageTaskFromBytes(data)
-			urlStr := string(url.Url)
-			log.Debug("shard:", shard, ",url received:", urlStr)
+			if started {
+				log.Trace("waiting url to fetch")
+				data := queue.Pop(config.FetchChannel)
+				url := types.PageTaskFromBytes(data)
+				urlStr := string(url.Url)
+				log.Debug("shard:", shard, ",url received:", urlStr)
 
-			execute(url, env)
+				execute(url, env)
+			}
+
 		}
 	}()
 
@@ -145,9 +147,4 @@ func execute(seed types.TaskSeed, env *Env) {
 }
 
 type CrawlerModule struct {
-}
-
-func CreateSeed(task types.TaskSeed)  {
-	queue.Push(config.CheckChannel,task.MustGetBytes())
-	log.Trace("end create seed")
 }
