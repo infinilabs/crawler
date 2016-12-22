@@ -30,7 +30,7 @@ type Command struct{
 }
 
 func (this *Command) Help(c *WebsocketConnection,a []string) ()  {
-	c.WriteMessage([]byte("HELP"))
+	c.WriteMessage([]byte("COMMAND LIST\nseed [url] eg: seed http://elastic.co\nlog [level]  eg: log debug"))
 }
 
 

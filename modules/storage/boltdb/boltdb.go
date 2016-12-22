@@ -41,7 +41,7 @@ func (this BoltdbStore) Open() error {
 	var err error
 	db, err = bolt.Open(this.FileName, 0600, &bolt.Options{Timeout: 5 * time.Second})
 	if err != nil {
-		log.Error("error open boltdb:", this.FileName, err)
+		log.Errorf("error open boltdb: %s, %s", this.FileName, err)
 		return err
 	}
 

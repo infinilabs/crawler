@@ -56,7 +56,7 @@ func Stop() {
 		v:=m.modules[i]
 		log.Debug("stopping module: ",v.Name())
 		v.Stop()
-		log.Info("started module: ",v.Name())
+		log.Info("stoped module: ",v.Name())
 	}
 	log.Info("all modules stopeed")
 }

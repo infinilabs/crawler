@@ -19,7 +19,7 @@ features:
 improve:
 1.add update_ui setup to Makefile in order to build static ui
 2.add git commit log and build_date to gopa binary
-3.console ui support auto reconnect
+3.console ui support websocket reconnect
 
 v0.6
 breaking change:

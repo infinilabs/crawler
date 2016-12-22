@@ -95,7 +95,6 @@ func runCheckerGo(env *Env, quitC *chan bool) {
 
 	<-*quitC
 
-	log.Info("url checker success stoped")
 }
 
 func (this CheckerModule)Stop() error {
