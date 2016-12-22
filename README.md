@@ -3,7 +3,6 @@
 [狗爬], A Spider Written in Go.
 
 [![Travis](https://travis-ci.org/medcl/gopa.svg?branch=master)](https://travis-ci.org/medcl/gopa)
-[![Build Status](https://drone.io/github.com/medcl/gopa/status.png)](https://drone.io/github.com/medcl/gopa/latest)
 
 
 ## Building Gopa ##
