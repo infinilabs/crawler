@@ -57,6 +57,9 @@ build-bsd: clean config update_ui
 format:
 	gofmt -s -w -tabs=false -tabwidth=4 gopa.go
 
+update_bolt_ui:
+	cd modules/api/http/templates/boltdb && ego -package templates
+
 clean:
 	rm -rif bin
 	mkdir bin

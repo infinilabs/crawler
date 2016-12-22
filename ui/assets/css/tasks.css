@@ -2,3 +2,7 @@
     background: yellow;
     color: red;
 }
+table {
+    border-collapse:collapse;
+    word-break:break-all; word-wrap:break-word;
+}
