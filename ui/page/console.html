@@ -64,21 +64,42 @@
                 return false
             });
 
-            if (window["WebSocket"]) {
-                host = location.hostname + (location.port ? ':' + location.port : '');
-                conn = new WebSocket("ws://" + host + "/ws");
-                conn.onopen = function (evt) {
-                    appendResponseLog("Connection established.")
+            var refreshFunc = function(){
+                console.log("reconnecting");
+                connect();
+            };
+
+            var tm
+            function connect(){
+
+                clearInterval(tm);
+
+                if (window["WebSocket"]) {
+                    host = location.hostname + (location.port ? ':' + location.port : '');
+                    conn = new WebSocket("ws://" + host + "/ws");
+                    conn.onopen = function (evt) {
+                        var msg="Connection established.";
+                        $("#connect_status").text(msg);
+                        $("#connect_status").removeClass("uk-alert-danger").addClass("uk-alert-success");
+                        clearInterval(tm);
+                        console.log("remove refresh trigger")
+                    }
+                    conn.onclose = function (evt) {
+                        var msg="Connection closed.";
+                        $("#connect_status").text(msg);
+                        $("#connect_status").removeClass("uk-alert-success").addClass("uk-alert-danger");
+                            tm=setInterval(refreshFunc, 5000);
+                            console.log("set refresh trigger")
+                    }
+                    conn.onmessage = function (evt) {
+                        appendResponseLog(evt.data);
+                    }
+                } else {
+                    appendErrorLog("Your browser does not support WebSockets.");
                 }
-                conn.onclose = function (evt) {
-                    appendResponseLog("Connection closed.")
-                }
-                conn.onmessage = function (evt) {
-                    appendResponseLog(evt.data)
-                }
-            } else {
-                appendErrorLog("Your browser does not support WebSockets.")
             }
+
+            connect();
         });
     </script>
 <div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
@@ -105,6 +126,7 @@
     <div class="uk-grid" data-uk-grid-margin>
         <div class="uk-width-large-1-1 uk-visible-large">
 
+            <div id="connect_status" class="uk-alert" ></div>
 
             <div id="log"></div>
             <form id="form">
