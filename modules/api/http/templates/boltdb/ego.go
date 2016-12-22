@@ -55,11 +55,9 @@ func nav(w io.Writer, tx *bolt.Tx) error {
 //line nav.ego:4
 	_, _ = io.WriteString(w, "\n")
 //line nav.ego:5
-	_, _ = io.WriteString(w, "\n\n<h1>")
+	_, _ = io.WriteString(w, "\n\n")
 //line nav.ego:6
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(filepath.Base(tx.DB().Path()))))
-//line nav.ego:6
-	_, _ = io.WriteString(w, "</h1>")
 	return nil
 }
 
