@@ -3,7 +3,7 @@ package statsd
 import (
 	log "github.com/cihub/seelog"
 	"time"
-	"github.com/medcl/gopa/core/stats/statsd/event"
+	"github.com/medcl/gopa/modules/stats/statsd/event"
 )
 
 // request to close the buffered statsd collector
@@ -21,6 +21,7 @@ type StatsdBuffer struct {
 	events        map[string]event.Event
 	closeChannel  chan closeRequest
 	Verbose       bool
+	errorCount    int
 }
 
 // NewStatsdBuffer Factory
@@ -186,11 +187,20 @@ func (sb *StatsdBuffer) flush() (err error) {
 	}
 	err = sb.statsd.CreateSocket()
 	if nil != err {
-		log.Error("Error establishing UDP connection for sending statsd events:", err)
+		sb.errorCount++
+		if(sb.errorCount<5||sb.errorCount>10){
+			log.Error("Error establishing UDP connection for sending statsd events:", err)
+			if(sb.errorCount>50){
+				sb.errorCount=0
+			}
+		}else{
+			log.Warn("Error establishing UDP connection for sending statsd events:", err)
+		}
+
 		return err
 	}
 	if err := sb.statsd.SendEvents(sb.events); err != nil {
-		log.Error(err)
+		log.Warn(err)
 		return err
 	}
 	sb.events = make(map[string]event.Event)

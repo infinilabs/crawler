@@ -25,6 +25,8 @@ import (
 	"strings"
 	"regexp"
 	"github.com/medcl/gopa/core/util"
+	"github.com/medcl/gopa/core/queue"
+	"github.com/medcl/gopa/modules/config"
 )
 
 type ParserJoint struct {
@@ -150,7 +152,7 @@ func (this ParserJoint) Process(s *Context) (*Context, error) {
 	//dispatch links
 	for url, _ := range this.links {
 		if this.DispatchLinks {
-			s.Env.Channels.PushUrlToCheck(types.NewPageTask(url, refUrl, depth+1))
+			queue.Push(config.CheckChannel,types.NewPageTask(url, refUrl, depth+1).MustGetBytes())
 		}
 	}
 

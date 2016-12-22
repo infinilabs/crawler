@@ -19,10 +19,13 @@ package url_checker
 import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/queue"
 	. "github.com/medcl/gopa/core/filter"
 	"github.com/medcl/gopa/core/stats"
 	"path"
 	"time"
+	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/modules/config"
 )
 
 var quitChannel chan bool
@@ -57,12 +60,11 @@ func runCheckerGo(env *Env, quitC *chan bool) {
 			}
 			log.Trace("waiting url to check")
 
-			url, err := env.Channels.PopUrlToCheck()
+			data := queue.Pop(config.CheckChannel)
+			url:=types.PageTaskFromBytes(data)
 
-			stats.Increment("checker.url", "walk")
-			if err != nil {
-				continue
-			}
+			stats.Increment("checker.url", "finished")
+
 			log.Trace("cheking url:", string(url.Url))
 
 			//TODO 统一 url 格式 , url 目前可能是相对路径
@@ -76,7 +78,7 @@ func runCheckerGo(env *Env, quitC *chan bool) {
 			filter.Add([]byte(url.Url))
 
 			//send to disk queue
-			env.Channels.PushUrlToFetch(url)
+			queue.Push(config.FetchChannel,url.MustGetBytes())
 
 			stats.Increment("checker.url", "get_valid_seed")
 

@@ -14,40 +14,44 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package storage
+package queue
 
 import (
-log "github.com/cihub/seelog"
-. "github.com/medcl/gopa/core/env"
-"github.com/medcl/gopa/modules/storage/boltdb"
-_ "time"
-"github.com/medcl/gopa/core/global"
+	"errors"
+	"github.com/medcl/gopa/core/stats"
 )
 
-var store boltdb.BoltdbStore
 
-func (this StorageModule) Name() string {
-	return "Storage"
+type QueueKey string
+
+type Queue interface {
+	Push(QueueKey,[]byte) error
+	Pop(QueueKey)([]byte)
 }
 
-func (this StorageModule)Start(env *Env) {
+var handler Queue
 
-	store = boltdb.BoltdbStore{Env:env}
-	err := store.Open()
-	if err != nil {
-		log.Error(err)
+func Push(k QueueKey,v []byte) error{
+
+	if(handler!=nil){
+		o:= handler.Push(k,v)
+		stats.Increment("queue."+string(k), "push")
+		return o
+
 	}
-	env.RuntimeConfig.Storage = &store
-	global.Register(global.REGISTER_BOLTDB, store.DB)
-
+	panic(errors.New("channel is not registered"))
+	return nil
 }
 
-func (this StorageModule)Stop() error {
-	err:= store.Close()
-	return err
-
+func Pop(k QueueKey)([]byte){
+	if(handler!=nil){
+		o:=handler.Pop(k)
+		stats.Increment("queue."+string(k), "pop")
+		return o
+	}
+	panic(errors.New("channel is not registered"))
 }
 
-type StorageModule struct {
-
+func Register(h Queue)  {
+	handler=h
 }

@@ -24,6 +24,8 @@ import (
 	"net/http"
 	"github.com/julienschmidt/httprouter"
 	"strconv"
+	"github.com/medcl/gopa/core/queue"
+	"github.com/medcl/gopa/modules/config"
 )
 
 func (this *Handler) TaskDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
@@ -69,7 +71,7 @@ func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request, ps htt
 
 		task := types.NewPageTask(seed, "", 0)
 
-		tasks.CreateSeed(task)
+		queue.Push(config.CheckChannel,task.MustGetBytes())
 
 		this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
 	} else {

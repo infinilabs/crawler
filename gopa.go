@@ -26,8 +26,6 @@ import (
 	"github.com/medcl/gopa/core/logging"
 	"github.com/medcl/gopa/core/module"
 	"github.com/medcl/gopa/core/stats"
-	"github.com/medcl/gopa/core/tasks"
-	"github.com/medcl/gopa/core/types"
 	"github.com/medcl/gopa/modules"
 	"net/http"
 	_ "net/http/pprof"
@@ -51,7 +49,7 @@ func onStart() {
 }
 
 func onShutdown() {
-	log.Debug(string(stats.StatsAll()))
+	log.Debug(string(*stats.StatsAll()))
 	fmt.Println("                         |    |                ")
 	fmt.Println("   _` |   _ \\   _ \\   _` |     _ \\  |  |   -_) ")
 	fmt.Println(" \\__, | \\___/ \\___/ \\__,_|   _.__/ \\_, | \\___| ")
@@ -66,7 +64,6 @@ func main() {
 
 	defer logging.Flush()
 
-	var seedUrl = flag.String("seed", "", "the seed url, where everything starts")
 	var logLevel = flag.String("log", "info", "the log level,options:trace,debug,info,warn,error, default: info")
 	var configFile = flag.String("config", "gopa.yml", "the location of config file, default: gopa.yml")
 	var isDaemon = flag.Bool("daemon", false, "run in background as daemon")
@@ -166,16 +163,9 @@ func main() {
 			log.Infof("got signal:%s ,start shutting down", s.String())
 			//wait workers to exit
 			module.Stop()
-			env.Channels.Close()
 			finalQuitSignal <- true
 		}
 	}()
-
-	//sending feed to task queue
-	if len(*seedUrl) > 0 {
-		log.Debug("sending feed to fetch queue,", *seedUrl)
-		tasks.CreateSeed(types.NewPageTask(*seedUrl, "", 0))
-	}
 
 	<-finalQuitSignal
 

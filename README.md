@@ -22,7 +22,6 @@ Windows: Run `build.bat` to build the Gopa
 
 After building the project run `./gopa -h` for a list of commandline options
 
-* -seed option : start a crawling, giving a seed url to Gopa. ie: `./gopa -seed=http://www.baidu.com`
 * -log option : logging level,can be set to `trace`,`debug`,`info`,`warn`,`error` ,default is `info`
 * -daemon option : run in background as daemon
 * -pprof option : start pprof service, endpoint: http://localhost:6060/debug/pprof/

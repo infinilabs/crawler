@@ -16,78 +16,42 @@ limitations under the License.
 
 package stats
 
-import (
-	"encoding/json"
-	log "github.com/cihub/seelog"
-	"runtime"
-	"sync"
-	"time"
-	"github.com/medcl/gopa/core/stats/statsd"
-)
+import "sync"
 
-var data map[string]map[string]int64
-var inited bool
-var statsdInited bool
-var statsdbuffer *statsd.StatsdBuffer
-var l sync.RWMutex
-
-func initStatsd() {
-
-	prefix := "gopa."
-	statsdclient := statsd.NewStatsdClient("statsdhost:8125", prefix) //TODO configable
-	err := statsdclient.CreateSocket()
-	if nil != err {
-		log.Warn(err)
-		return
-	}
-
-	interval := time.Second * 1 // aggregate stats and flush every 1 seconds
-	statsdbuffer = statsd.NewStatsdBuffer(interval, statsdclient)
-	//defer statsdbuffer.Close()
-
-	statsdInited = true
+type Stats struct {
+	ID   string                       `storm:"id,unique" json:"id"`
+	Data *map[string]map[string]int64 `storm:"inline" json:"data,omitempty"`
 }
 
-func initData(category, key string) {
-	l.Lock()
+type StatsInterface interface {
 
-	if !inited {
-		data = make(map[string]map[string]int64)
-		inited = true
-	}
+	Increment(category, key string)
 
-	if !statsdInited {
-		initStatsd()
-	}
+	IncrementBy(category, key string, value int64)
 
-	_, ok := data[category]
-	if !ok {
-		data[category] = make(map[string]int64)
-	}
+	Decrement(category, key string)
 
-	_, ok1 := data[category][key]
-	if !ok1 {
-		data[category][key] = 0
-	}
-	l.Unlock()
-	runtime.Gosched()
+	DecrementBy(category, key string, value int64)
+
+	Timing(category, key string, v int64)
+
+	Gauge(category, key string, v int64)
+
+	Stat(category, key string) int64
+
+	StatsAll() *[]byte
 }
+
+var handlers []StatsInterface
 
 func Increment(category, key string) {
 	IncrementBy(category, key, 1)
 }
 
 func IncrementBy(category, key string, value int64) {
-	initData(category, key)
-
-	if statsdInited {
-		statsdbuffer.Incr(category+"."+key, value)
+	for _, v := range handlers {
+		v.IncrementBy(category,key,value)
 	}
-
-	l.Lock()
-	data[category][key] += value
-	l.Unlock()
-	runtime.Gosched()
 }
 
 func Decrement(category, key string) {
@@ -95,41 +59,57 @@ func Decrement(category, key string) {
 }
 
 func DecrementBy(category, key string, value int64) {
-	initData(category, key)
-
-	if statsdInited {
-		statsdbuffer.Decr(category+"."+key, value)
-	}
-
-	l.Lock()
-	data[category][key] -= value
-	l.Unlock()
-	runtime.Gosched()
-}
-
-func Timing(category, key string, v int64) {
-	if statsdInited {
-		statsdbuffer.Timing(category+"."+key, v)
+	for _, v := range handlers {
+		v.DecrementBy(category,key,value)
 	}
 }
 
-func Gauge(category, key string, v int64) {
-	if statsdInited {
-		statsdbuffer.Gauge(category+"."+key, v)
+func Timing(category, key string, value int64) {
+	for _, v := range handlers {
+		v.Timing(category,key,value)
+	}
+}
+
+func Gauge(category, key string, value int64) {
+	for _, v := range handlers {
+		v.Gauge(category,key,value)
 	}
 }
 
 func Stat(category, key string) int64 {
-	initData(category, key)
-	l.RLock()
-	v := (data[category][key])
-	l.RUnlock()
-	return v
+	for _, v := range handlers {
+		b:=v.Stat(category,key)
+		if(b>0){
+			return b
+		}
+	}
+	return 0
 }
 
-func StatsAll() []byte {
-	l.RLock()
-	defer l.RUnlock()
-	b, _ := json.MarshalIndent(data, "", " ")
-	return b
+func StatsAll() *[]byte {
+	for _, v := range handlers {
+		b:=v.StatsAll()
+		if(b!=nil){
+			return b
+		}
+	}
+	return &[]byte{}
+}
+
+var inited bool
+var l sync.RWMutex
+
+func Init()  {
+	if(inited){
+		return
+	}
+	l.Lock()
+	handlers=[]StatsInterface{}
+	inited=true
+	l.Unlock()
+}
+
+func Register(h StatsInterface)  {
+	Init()
+	handlers=append(handlers,h)
 }

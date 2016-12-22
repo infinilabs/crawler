@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 	"time"
-	"github.com/medcl/gopa/core/stats/statsd/event"
+	"github.com/medcl/gopa/modules/stats/statsd/event"
 )
 
 // Logger interface compatible with log.Logger

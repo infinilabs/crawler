@@ -57,7 +57,7 @@
                            <th>Domain</th>
                            <th>Path</th>
                            <th>Title</th>
-                           <th>Status</th>
+                           <th>Size</th>
                            <th>Updated</th>
                        </tr>
                        </thead>
@@ -115,14 +115,14 @@
 
             // 加载统计数据
             $.get('/stats').done(function (data) {
-                if(data["checker.url"]){
-                    $("#checker_task_num").text(data["checker.url"].get_valid_seed+" / "+data["checker.url"].walk);
-                    option.series[0].data[0].value = ((data["checker.url"].get_valid_seed/data["checker.url"].walk)*100).toFixed(2) - 0;
+                if(data["queue.check"]){
+                    $("#checker_task_num").text(data["queue.check"].pop+" / "+data["queue.check"].push+", valid: "+data["checker.url"].get_valid_seed);
+                    option.series[0].data[0].value = ((data["queue.check"].pop/data["queue.check"].push)*100).toFixed(2) - 0;
                 }
 
-                if(data["crawler.pipeline"]){
-                    $("#crawler_task_num").text(safeGetValue(data["crawler.pipeline"].finished)+" + "+safeGetValue(data["crawler.pipeline"].error)+" / "+data["crawler.pipeline"].total);
-                    option.series[1].data[0].value = (((parseInt(safeGetValue(data["crawler.pipeline"].finished))+parseInt(safeGetValue(data["crawler.pipeline"].error)))/parseInt(safeGetValue(data["crawler.pipeline"].total)))*100).toFixed(2) - 0;
+                if(data["queue.fetch"]){
+                    $("#crawler_task_num").text(safeGetValue(data["queue.fetch"].pop)+" / "+data["queue.fetch"].push+", error: "+safeGetValue(data["crawler.pipeline"].error)+", break: "+safeGetValue(data["crawler.pipeline"].break));
+                    option.series[1].data[0].value = (((parseInt(safeGetValue(data["queue.fetch"].pop)))/parseInt(safeGetValue(data["queue.fetch"].push)))*100).toFixed(2) - 0;
                 }
 
                 myChart.setOption(option, true);

@@ -34,7 +34,6 @@ type Env struct {
 	//*Registrar
 	SystemConfig  *SystemConfig
 	RuntimeConfig *RuntimeConfig
-	Channels      *Channels
 	ESClient util.ElasticsearchClient
 	IsDebug bool
 }
@@ -57,8 +56,6 @@ func Environment(sysConfig SystemConfig) *Env {
 	if len(sysConfig.LogLevel) > 0 {
 		env.RuntimeConfig.LoggingConfig.Level = sysConfig.LogLevel
 	}
-
-	env.Channels = &Channels{}
 	//env.Registrar = &Registrar{values: map[string]interface{}{}}
 
 	env.init()
@@ -132,7 +129,6 @@ func (this *Env) init() error {
 	os.MkdirAll(this.RuntimeConfig.PathConfig.TaskData, 0777)
 
 	this.ESClient = util.ElasticsearchClient{Host: this.RuntimeConfig.IndexingConfig.Host, Index: this.RuntimeConfig.IndexingConfig.Index}
-	this.Channels.Init(this.RuntimeConfig.PathConfig.QueueData)
 	return nil
 }
 

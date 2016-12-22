@@ -182,20 +182,22 @@ func (this *Pipeline) Run() *Context {
 
 	stats.Increment(this.name+".pipeline", "total")
 
+	//final phrase
 	defer func() {
 		if !global.Env().IsDebug {
 			if r := recover(); r != nil {
 				if _, ok := r.(runtime.Error); ok {
 					err := r.(error)
-					stats.Increment(this.name+".pipeline", "error")
 					log.Errorf("%s: %v", this.name, err)
-					this.context.Break(err.Error())
+					//this.context.Break(err.Error())
 				}
-				this.endPipeline()
 				log.Trace("error in pipe")
+				stats.Increment(this.name+".pipeline", "error")
 			}
 		}
 
+		this.endPipeline()
+		stats.Increment(this.name+".pipeline", "finished")
 	}()
 
 	var err error
@@ -219,8 +221,6 @@ func (this *Pipeline) Run() *Context {
 		log.Trace("end joint,", v.Name())
 	}
 
-	this.endPipeline()
-	stats.Increment(this.name+".pipeline", "finished")
 	return this.context
 }
 

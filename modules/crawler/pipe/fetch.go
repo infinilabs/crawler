@@ -24,6 +24,7 @@ import (
 	"github.com/medcl/gopa/core/types"
 	"github.com/medcl/gopa/core/util"
 	"time"
+	"fmt"
 )
 
 type FetchJoint struct {
@@ -90,9 +91,9 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 	//监听通道，由于设有超时，不可能泄露
 	select {
 	case <-t.C:
-		log.Error("fetching url time out, ", requestUrl)
+		log.Error("fetching url time out, ", requestUrl,", ",this.timeout)
 		stats.Increment(domain, stats.STATS_FETCH_TIMEOUT_COUNT)
-		context.Break("fetch timeout")
+		panic(errors.New(fmt.Sprintf("fetching url time out, %s, %s", requestUrl,this.timeout)))
 		return nil, errors.New("fetch url time out")
 	case value := <-flg:
 		if value.flag {
@@ -102,6 +103,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 			log.Debug("fetching url error exit, ", requestUrl)
 			if(value.err!=nil){
 				context.Break(value.err.Error())
+				panic(value.err.Error())
 			}
 			stats.Increment(domain, stats.STATS_FETCH_FAIL_COUNT)
 		}

@@ -24,6 +24,8 @@ import (
 	. "github.com/medcl/gopa/modules/crawler/pipe"
 	"runtime"
 	"time"
+	"github.com/medcl/gopa/core/queue"
+	"github.com/medcl/gopa/modules/config"
 )
 
 var fetchQuitChannels []*chan bool
@@ -83,11 +85,8 @@ func RunPipeline(env *Env, quitC *chan bool, shard int) {
 	go func() {
 		for {
 			log.Trace("waiting url to fetch")
-
-			url, err := env.Channels.PopUrlToFetch()
-			if err != nil {
-				continue
-			}
+			data := queue.Pop(config.FetchChannel)
+			url:=types.PageTaskFromBytes(data)
 			urlStr := string(url.Url)
 			log.Debug("shard:", shard, ",url received:", urlStr)
 
@@ -146,4 +145,9 @@ func execute(seed types.TaskSeed, env *Env) {
 }
 
 type CrawlerModule struct {
+}
+
+func CreateSeed(task types.TaskSeed)  {
+	queue.Push(config.CheckChannel,task.MustGetBytes())
+	log.Trace("end create seed")
 }

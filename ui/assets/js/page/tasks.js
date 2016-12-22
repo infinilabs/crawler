@@ -26,7 +26,7 @@ function drawRow(rowData) {
         }else{
             col3="N/A";
         }
-        col4= getdata(rowData.page.status_code);
+        col4= getdata(rowData.page.size);
         row.append($("<td>" + col1 + "</td>"));
         row.append($("<td>" + col2 + "</td>"));
         row.append($("<td>" + col3 + "</td>"));

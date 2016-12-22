@@ -9,67 +9,27 @@ import (
 	"path"
 	"github.com/rs/xid"
 	"github.com/asdine/storm/q"
+	"sync"
 )
 
 
 var db *storm.DB
 var inited bool
+var l sync.RWMutex
+
 func Start() error  {
+	l.Lock()
 	var err error
 	file:= path.Join(global.Env().RuntimeConfig.PathConfig.Data,"task_db")
 	db, err = storm.Open(file)
 	inited=true
+	l.Unlock()
 	return err
 
 }
 
 func Stop()  {
 	db.Close()
-}
-
-func CreateSeed(task types.TaskSeed)  {
-	if(!inited){Start()}
-	log.Trace("start create seed")
-	time:=time.Now()
-	task.CreateTime=&time
-	err := db.Save(&task)
-	if(err!=nil){
-		panic(err)
-	}
-	global.Env().Channels.PushUrlToCheck(task)
-	log.Trace("end create seed")
-}
-
-func DeleteSeed(id int)  {
-	if(!inited){Start()}
-	log.Trace("start delete seed: ",id )
-	task:=types.TaskSeed{ID:id}
-	err := db.DeleteStruct(&task)
-	if(err!=nil){
-		panic(err)
-	}
-	log.Trace("end delete seed")
-}
-
-func GetSeed(id int) (types.TaskSeed,error)  {
-	if(!inited){Start()}
-	log.Trace("start get seed: ",id)
-	task:=types.TaskSeed{}
-	err := db.One("ID", id, &task)
-	log.Trace("end get seed: ",id)
-	return task,err
-}
-
-func GetSeedList()[]types.TaskSeed {
-	if(!inited){Start()}
-	log.Trace("start get all seeds")
-	var tasks []types.TaskSeed
-	err := db.AllByIndex("CreateTime",&tasks, storm.Reverse())
-	if(err!=nil){
-		panic(err)
-	}
-	log.Trace("end get all seeds")
-	return tasks
 }
 
 func CreateTask(task *types.CrawlerTask)  {
@@ -137,7 +97,13 @@ func GetTaskList(from,size int,skipDate string)(int,[]types.CrawlerTask,error) {
 }
 
 
-func Create(o interface{})  {
+func Get(key string,value interface{},to interface{}) (error)  {
+	if(!inited){Start()}
+	err:= db.One(key,value, to)
+	return err
+}
+
+func Save(o interface{})  {
 	if(!inited){Start()}
 	err := db.Save(o)
 	if(err!=nil){
