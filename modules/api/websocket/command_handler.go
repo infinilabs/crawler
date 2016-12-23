@@ -38,7 +38,7 @@ func (this *Command) AddSeed(c *WebsocketConnection,a []string) ()  {
 
 	url:=a[1]
 	if(len(url)>0){
-		queue.Push(config.CheckChannel,types.NewPageTask(url,"",0).MustGetBytes())
+		queue.Push(config.CheckChannel,types.NewTaskSeed(url,"",0).MustGetBytes())
 		c.WriteMessage([]byte("url "+url+" success added to pending fetch queue"))
 		return
 	}

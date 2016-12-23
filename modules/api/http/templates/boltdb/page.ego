@@ -50,7 +50,7 @@ if showUsage {
 
     <div class="uk-grid" data-uk-grid-margin>
         <div class="uk-width-large-1-1 uk-visible-large">
-            <div class="uk-alert" ><% nav(w, tx) %></div>
+            <div class="uk-alert" >Database: <% nav(w, tx) %></div>
 
 
           <h2>
@@ -131,7 +131,7 @@ if showUsage {
                       <% } else { %>
                         <tr>
                           <td><%= trunc(tostr(e.key()), 150) %></td>
-                          <td><%= trunc(tostr(e.value()), 150) %></td>
+                          <td><%= trunc(tostr(e.value()), 5000) %></td>
                           <td><%= len(e.key()) %> / <%= len(e.value()) %></td>
                           <td>&nbsp;</td>
                         </tr>

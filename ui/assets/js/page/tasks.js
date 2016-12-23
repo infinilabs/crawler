@@ -13,7 +13,7 @@ function drawTable(data) {
 
 function drawRow(rowData) {
     var row = $("<tr />")
-    if(!rowData.success){
+    if(!rowData.status==2){
         row = $("<tr class='failed_task' />")
     }
     $("#records").append(row);
@@ -31,12 +31,18 @@ function drawRow(rowData) {
         row.append($("<td>" + col2 + "</td>"));
         row.append($("<td>" + col3 + "</td>"));
         row.append($("<td>" + col4 + "</td>"));
-    }else{
-        row.append($("<td colspan='2'>" + rowData.url + "</td>"));
+    }else if(rowData.seed!=undefined){
+        row.append($("<td colspan='1'>" + rowData.id + "</td>"));
+        row.append($("<td colspan='2'>" + rowData.seed.url + "</td>"));
+        row.append($("<td colspan='1'>" + rowData.status + "</td>"));
+    }
+    else{
+        row.append($("<td colspan='1'>" + rowData.id + "</td>"));
+        row.append($("<td colspan='1'>" + rowData.url + "</td>"));
         row.append($("<td colspan='2'>" + rowData.message + "</td>"));
     }
 
-    row.append($("<td class='timeago'>" + timeago(rowData.updated) + "</td>"));
+    row.append($("<td class='timeago'>" + timeago(rowData.updated!=undefined?rowData.updated:rowData.created) + "</td>"));
 }
 
 function getdata(v){

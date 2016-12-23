@@ -26,6 +26,7 @@ import (
 	"time"
 	"github.com/medcl/gopa/core/types"
 	"github.com/medcl/gopa/modules/config"
+	"github.com/medcl/gopa/core/tasks"
 )
 
 var quitChannel chan bool
@@ -64,7 +65,7 @@ func runCheckerGo(env *Env, quitC *chan bool) {
 			log.Trace("waiting url to check")
 
 			data := queue.Pop(config.CheckChannel)
-			url:=types.PageTaskFromBytes(data)
+			url:=types.TaskSeedFromBytes(data)
 
 			stats.Increment("checker.url", "finished")
 
@@ -80,8 +81,11 @@ func runCheckerGo(env *Env, quitC *chan bool) {
 			//add to filter
 			filter.Add([]byte(url.Url))
 
+			task:=types.Task{Seed:&url}
+			tasks.CreateTask(&task)
+
 			//send to disk queue
-			queue.Push(config.FetchChannel,url.MustGetBytes())
+			//queue.Push(config.FetchChannel,url.MustGetBytes())
 
 			stats.Increment("checker.url", "get_valid_seed")
 

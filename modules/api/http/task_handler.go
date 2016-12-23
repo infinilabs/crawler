@@ -69,7 +69,7 @@ func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request, ps htt
 		}
 		logger.Trace("receive new seed:", seed)
 
-		task := types.NewPageTask(seed, "", 0)
+		task := types.NewTaskSeed(seed, "", 0)
 
 		queue.Push(config.CheckChannel,task.MustGetBytes())
 

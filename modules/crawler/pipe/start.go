@@ -17,13 +17,12 @@ limitations under the License.
 package pipe
 
 import (. "github.com/medcl/gopa/core/pipeline"
-. "github.com/medcl/gopa/core/types"
 	"github.com/medcl/gopa/core/tasks"
 	"github.com/cihub/seelog"
 )
 
 type Start struct {
-	Seed TaskSeed
+	ID string
 }
 
 func (this Start) Name() string {
@@ -35,16 +34,13 @@ func (this Start) Process(context *Context) (*Context, error) {
 	seelog.Trace("start process")
 
 	//init task record
-	task:=CrawlerTask{}
-	task.Seed=&this.Seed
-	task.Url=this.Seed.Url
-	tasks.CreateTask(&task)
+	task:=tasks.LoadTaskByID(this.ID)
 
 	context.Set(CONTEXT_CRAWLER_TASK,&task)
-	context.Set(CONTEXT_ORIGINAL_URL,this.Seed.Url)
-	context.Set(CONTEXT_URL,this.Seed.Url)
-	context.Set(CONTEXT_DEPTH,this.Seed.Depth)
-	context.Set(CONTEXT_REFERENCE_URL,this.Seed.Reference)
+	context.Set(CONTEXT_ORIGINAL_URL,task.Seed.Url) //TODO remove
+	context.Set(CONTEXT_URL,task.Seed.Url)  //TODO remove
+	context.Set(CONTEXT_DEPTH,task.Seed.Depth)  //TODO remove
+	context.Set(CONTEXT_REFERENCE_URL,task.Seed.Reference)  //TODO remove
 
 	return context, nil
 }

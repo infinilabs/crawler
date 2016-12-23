@@ -5,9 +5,9 @@ import (
 	"sync"
 	"github.com/medcl/gopa/core/stats"
 	"runtime"
-	"github.com/medcl/gopa/core/tasks"
 	"encoding/json"
 	."github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/store"
 )
 
 func (this StatsStoreModule) Name() string {
@@ -20,7 +20,7 @@ func (this StatsStoreModule) Start(env *Env) {
 }
 
 func (this StatsStoreModule) Stop() error {
-	tasks.Save(s)
+	store.Save(s)
 	log.Trace("save stats db,", s.ID)
 	return nil
 }
@@ -105,7 +105,7 @@ func initStats() {
 	if s == nil {
 		s = &stats.Stats{}
 		s.ID = "statsd"
-		err := tasks.Get("ID", "statsd", s)
+		err := store.Get("ID", "statsd", s)
 		if err != nil {
 		}
 	}

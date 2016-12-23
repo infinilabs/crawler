@@ -8,13 +8,34 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/medcl/gopa/modules/api/http/templates/boltdb"
 	"github.com/medcl/gopa/core/global"
+	"github.com/asdine/storm"
 )
 
 func (h *Handler) BoltDBStatusAction(w http.ResponseWriter, r *http.Request) {
-	db:=global.Lookup(global.REGISTER_BOLTDB).(*bolt.DB)
-	err := db.View(func(tx *bolt.Tx) error {
-		showUsage := (r.FormValue("usage") == "true")
+	db:=global.Lookup(global.REGISTER_BOLTDB).(*storm.DB)
 
+	//go func() {
+	//	// Grab the initial stats.
+	//	prev := db.Stats()
+	//
+	//	for {
+	//		// Wait for 10s.
+	//		time.Sleep(10 * time.Second)
+	//
+	//		// Grab the current stats and diff them.
+	//		stats := db.Stats()
+	//		diff := stats.Sub(&prev)
+	//
+	//		// Encode stats to JSON and print to STDERR.
+	//		json.NewEncoder(os.Stderr).Encode(diff)
+	//
+	//		// Save stats for the next loop.
+	//		prev = stats
+	//	}
+	//}()
+
+	err := db.Bolt.View(func(tx *bolt.Tx) error {
+		showUsage := (r.FormValue("usage") == "true")
 		// Use the direct page id, if available.
 		if r.FormValue("id") != "" {
 			id, _ := strconv.Atoi(r.FormValue("id"))

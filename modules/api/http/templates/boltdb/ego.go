@@ -94,7 +94,7 @@ func Page(w io.Writer, r *http.Request, tx *bolt.Tx, indexes []int, directID int
 //line page.ego:28
 	head(w, tx)
 //line page.ego:29
-	_, _ = io.WriteString(w, "\n<body>\n\n<div class=\"uk-container uk-container-center uk-margin-top uk-margin-large-bottom\">\n    <nav class=\"uk-navbar uk-margin-large-bottom\">\n        <a class=\"uk-navbar-brand uk-hidden-small\" href=\"/ui/\">GOPA</a>\n        <ul class=\"uk-navbar-nav uk-hidden-small\">\n            <li >\n                <a href=\"/ui/page/index.html\" >Home</a>\n            </li>\n            <li >\n                <a href=\"/ui/page/console.html\" >Console</a>\n            </li>\n            <li >\n                <a href=\"/ui/page/tasks.html\">Tasks</a>\n            </li>\n            <li class=\"uk-active\">\n                <a href=\"/ui/boltdb\" >Boltdb</a>\n            </li>\n        </ul>\n        <a href=\"#offcanvas\" class=\"uk-navbar-toggle uk-visible-small\" data-uk-offcanvas></a>\n        <div class=\"uk-navbar-brand uk-navbar-center uk-visible-small\">GOPA</div>\n    </nav>\n\n    <div class=\"uk-grid\" data-uk-grid-margin>\n        <div class=\"uk-width-large-1-1 uk-visible-large\">\n            <div class=\"uk-alert\" >")
+	_, _ = io.WriteString(w, "\n<body>\n\n<div class=\"uk-container uk-container-center uk-margin-top uk-margin-large-bottom\">\n    <nav class=\"uk-navbar uk-margin-large-bottom\">\n        <a class=\"uk-navbar-brand uk-hidden-small\" href=\"/ui/\">GOPA</a>\n        <ul class=\"uk-navbar-nav uk-hidden-small\">\n            <li >\n                <a href=\"/ui/page/index.html\" >Home</a>\n            </li>\n            <li >\n                <a href=\"/ui/page/console.html\" >Console</a>\n            </li>\n            <li >\n                <a href=\"/ui/page/tasks.html\">Tasks</a>\n            </li>\n            <li class=\"uk-active\">\n                <a href=\"/ui/boltdb\" >Boltdb</a>\n            </li>\n        </ul>\n        <a href=\"#offcanvas\" class=\"uk-navbar-toggle uk-visible-small\" data-uk-offcanvas></a>\n        <div class=\"uk-navbar-brand uk-navbar-center uk-visible-small\">GOPA</div>\n    </nav>\n\n    <div class=\"uk-grid\" data-uk-grid-margin>\n        <div class=\"uk-width-large-1-1 uk-visible-large\">\n            <div class=\"uk-alert\" >Database: ")
 //line page.ego:54
 	nav(w, tx)
 //line page.ego:54
@@ -277,7 +277,7 @@ func Page(w io.Writer, r *http.Request, tx *bolt.Tx, indexes []int, directID int
 //line page.ego:135
 				_, _ = io.WriteString(w, "</td>\n                          <td>")
 //line page.ego:136
-				_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(trunc(tostr(e.value()), 150))))
+				_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(trunc(tostr(e.value()), 5000))))
 //line page.ego:136
 				_, _ = io.WriteString(w, "</td>\n                          <td>")
 //line page.ego:137

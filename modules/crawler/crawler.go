@@ -21,7 +21,6 @@ import (
 	. "github.com/medcl/gopa/core/env"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/queue"
-	"github.com/medcl/gopa/core/types"
 	"github.com/medcl/gopa/modules/config"
 	. "github.com/medcl/gopa/modules/crawler/pipe"
 	"runtime"
@@ -85,12 +84,10 @@ func RunPipeline(env *Env, quitC *chan bool, shard int) {
 		for {
 			if started {
 				log.Trace("waiting url to fetch")
-				data := queue.Pop(config.FetchChannel)
-				url := types.PageTaskFromBytes(data)
-				urlStr := string(url.Url)
-				log.Debug("shard:", shard, ",url received:", urlStr)
+				taskID := queue.Pop(config.FetchChannel)
+				log.Debug("shard:", shard, ",task received:", string(taskID))
 
-				execute(url, env)
+				execute(string(taskID), env)
 			}
 
 		}
@@ -104,7 +101,7 @@ func RunPipeline(env *Env, quitC *chan bool, shard int) {
 
 }
 
-func execute(seed types.TaskSeed, env *Env) {
+func execute(taskId string, env *Env) {
 
 	log.Trace("start crawler")
 
@@ -114,7 +111,7 @@ func execute(seed types.TaskSeed, env *Env) {
 			if r := recover(); r != nil {
 				if _, ok := r.(runtime.Error); ok {
 					err := r.(error)
-					log.Error(pipeline.GetID(), ", ", seed.Url, ", ", err)
+					log.Error(pipeline.GetID(), ", taskId: ", taskId, ", ", err)
 				}
 				log.Error("error in crawler")
 			}
@@ -124,7 +121,7 @@ func execute(seed types.TaskSeed, env *Env) {
 	pipeline = NewPipeline("crawler")
 
 	pipeline.Context(&Context{Env: env}).
-		Start(Start{Seed: seed}).
+		Start(Start{ID: taskId}).
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
 		Join(UrlFilterJoint{}).
 		Join(LoadMetadataJoint{}).

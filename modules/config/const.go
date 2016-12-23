@@ -6,3 +6,7 @@ const (
 	CheckChannel QueueKey = "check"
 )
 
+const TaskBucketKey string = "Task"
+const StatsBucketKey string = "Stats"
+const SnapshotBucketKey string = "Snapshot"
+const SnapshotMappingBucketKey string = "SnapshotMapping"

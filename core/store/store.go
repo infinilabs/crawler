@@ -16,9 +16,9 @@ limitations under the License.
 
 package store
 
+import "errors"
 
 type Store interface {
-
 	Open() error
 
 	Close() error
@@ -36,32 +36,100 @@ type Store interface {
 	DeleteBucket(bucket string, key []byte, value []byte) error
 }
 
+type ORM interface {
+	Save(o interface{}) error
+
+	Update(o interface{}) error
+
+	Delete(o interface{}) error
+
+	Search(t1,t2 interface{}, q *Query) (error, Result)
+
+	Get(key string, value interface{}, to interface{}) error
+
+	Count(o interface{}) (int, error)
+}
+
+type Query struct {
+	Sort string
+	From int
+	Size int
+}
+
+type Result struct {
+	Total  int
+	Result interface{}
+}
+
 var handler Store
+var theORMHandler ORM
 
-func GetValue(bucket string, key []byte) []byte{
-	return handler.GetValue(bucket,key)
+func GetValue(bucket string, key []byte) []byte {
+	return getHandler().GetValue(bucket, key)
 }
 
-func GetCompressedValue(bucket string, key []byte) []byte{
-	return handler.GetCompressedValue(bucket,key)
+func GetCompressedValue(bucket string, key []byte) []byte {
+	return getHandler().GetCompressedValue(bucket, key)
 }
 
-func AddValueCompress(bucket string, key []byte, value []byte) error{
-	return handler.AddValueCompress(bucket,key,value)
+func AddValueCompress(bucket string, key []byte, value []byte) error {
+	return getHandler().AddValueCompress(bucket, key, value)
 }
 
-func AddValue(bucket string, key []byte, value []byte) error{
-	return handler.AddValue(bucket,key,value)
+func AddValue(bucket string, key []byte, value []byte) error {
+	return getHandler().AddValue(bucket, key, value)
 }
 
-func DeleteValue(bucket string, key []byte, value []byte) error{
-	return handler.DeleteValue(bucket,key,value)
+func DeleteValue(bucket string, key []byte, value []byte) error {
+	return getHandler().DeleteValue(bucket, key, value)
 }
 
-func DeleteBucket(bucket string, key []byte, value []byte) error{
-	return handler.DeleteBucket(bucket,key,value)
+func DeleteBucket(bucket string, key []byte, value []byte) error {
+	return getHandler().DeleteBucket(bucket, key, value)
 }
 
-func Register(h Store){
-	handler=h
+func Get(key string, value interface{}, to interface{}) error {
+	return getORMHandler().Get(key, value, to)
+}
+
+func Save(o interface{}) error {
+	return getORMHandler().Save(o)
+}
+
+func Update(o interface{}) error {
+	return getORMHandler().Update(o)
+}
+
+func Delete(o interface{}) error {
+	return getORMHandler().Delete(o)
+}
+
+func Count(o interface{}) (int, error) {
+	return getORMHandler().Count(o)
+}
+
+func Search(t1,t2 interface{}, q *Query) (error, Result) {
+	return getORMHandler().Search(t1,t2, q)
+}
+
+func getHandler() Store {
+	if handler == nil {
+		panic(errors.New("store handler is not registered"))
+	}
+	return handler
+}
+
+func getORMHandler() ORM {
+	if theORMHandler == nil {
+		panic(errors.New("ORM handler is not registered"))
+	}
+	return theORMHandler
+}
+
+func RegisterStoreHandler(h Store) {
+	handler = h
+}
+
+func RegisterORMHandler(h ORM) {
+	theORMHandler = h
 }

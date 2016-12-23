@@ -20,11 +20,12 @@ import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/types"
-	"github.com/medcl/gopa/modules/storage/boltdb"
 	"strings"
 	"path"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/store"
+	"github.com/rs/xid"
+	"github.com/medcl/gopa/modules/config"
 )
 
 type SaveToDBJoint struct {
@@ -52,10 +53,10 @@ func (this SaveToDBJoint) Process(c *Context) (*Context, error) {
 	log.Debug("save url to db, url:", url, ",domain:", pageItem.Domain,",path:",savePath,",file:",saveFile,",saveKey:",string(saveKey))
 
 	if(this.CompressBody){
-		store.AddValueCompress(boltdb.SnapshotBucketKey,saveKey,pageItem.Body)
+		store.AddValueCompress(config.SnapshotBucketKey,saveKey,pageItem.Body)
 
 	}else{
-		store.AddValue(boltdb.SnapshotBucketKey,saveKey,pageItem.Body)
+		store.AddValue(config.SnapshotBucketKey,saveKey,pageItem.Body)
 	}
 
 	stats.IncrementBy(domain,stats.STATS_STORAGE_FILE_SIZE,int64(len(pageItem.Body)))
@@ -66,5 +67,17 @@ func (this SaveToDBJoint) Process(c *Context) (*Context, error) {
 
 const KeyDelimiter string = "||"
 func GetKey( args ...string) []byte {
-	return []byte(strings.Join(args,KeyDelimiter))
+	key:=config.SnapshotMappingBucketKey
+	url:=[]byte(strings.Join(args,KeyDelimiter))
+	v:=store.GetValue(key,url)
+	if(v!=nil){
+		log.Error("get snapshotId from db, maybe previous already saved")
+		return v
+	}
+	snapshotId,err:=xid.New().MarshalText()
+	if(err!=nil){
+		panic(err)
+	}
+	store.AddValue(key,url,snapshotId)
+	return snapshotId
 }

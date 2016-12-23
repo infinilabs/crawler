@@ -19,9 +19,9 @@ package handler
 import (
 	log "github.com/cihub/seelog"
 	_ "github.com/jmoiron/jsonq"
-	"github.com/medcl/gopa/modules/storage/boltdb"
 	"net/http"
 	"github.com/medcl/gopa/core/store"
+	"github.com/medcl/gopa/modules/config"
 )
 
 func (this *Handler) SnapshotAction(w http.ResponseWriter, req *http.Request) {
@@ -31,12 +31,11 @@ func (this *Handler) SnapshotAction(w http.ResponseWriter, req *http.Request) {
 		log.Trace("get snapsthot by url:", string(url))
 
 		compressed := this.GetParameterOrDefault(req, "compressed", "true")
-
 		var bytes []byte
 		if compressed == "true" {
-			bytes = store.GetCompressedValue(boltdb.SnapshotBucketKey, []byte(url))
+			bytes = store.GetCompressedValue(config.SnapshotBucketKey, []byte(url))
 		} else {
-			bytes = store.GetValue(boltdb.SnapshotBucketKey, []byte(url))
+			bytes = store.GetValue(config.SnapshotBucketKey, []byte(url))
 		}
 
 		if len(bytes) > 0 {

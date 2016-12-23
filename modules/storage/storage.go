@@ -35,7 +35,8 @@ func (this StorageModule) Start(env *Env) {
 	if err != nil {
 		panic(err)
 	}
-	store.Register(impl)
+	store.RegisterStoreHandler(impl)
+	store.RegisterORMHandler(impl)
 }
 
 func (this StorageModule) Stop() error {

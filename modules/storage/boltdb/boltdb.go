@@ -17,19 +17,23 @@ limitations under the License.
 package boltdb
 
 import (
+	"github.com/asdine/storm"
 	lz4 "github.com/bkaradzic/go-lz4"
 	"github.com/boltdb/bolt"
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/util"
-	"time"
 	"github.com/medcl/gopa/core/global"
+	"github.com/medcl/gopa/core/store"
+	"github.com/medcl/gopa/core/util"
+	"github.com/medcl/gopa/modules/config"
+	"path"
+	"time"
 )
 
 type BoltdbStore struct {
 	FileName string
 }
 
-var db       *bolt.DB
+var db *storm.DB
 
 func (this BoltdbStore) Open() error {
 
@@ -39,15 +43,22 @@ func (this BoltdbStore) Open() error {
 	}
 
 	var err error
-	db, err = bolt.Open(this.FileName, 0600, &bolt.Options{Timeout: 5 * time.Second})
+	v := global.Lookup(global.REGISTER_BOLTDB)
+	if v != nil {
+		boltDb := v.(*bolt.DB)
+		db, err = storm.Open("boltdb", storm.UseDB(boltDb))
+	} else {
+		file := path.Join(global.Env().RuntimeConfig.PathConfig.Data, "boltdb")
+		db, err = storm.Open(file, storm.BoltOptions(0600, &bolt.Options{Timeout: 1 * time.Second}))
+	}
 	if err != nil {
 		log.Errorf("error open boltdb: %s, %s", this.FileName, err)
 		return err
 	}
 
-	buckets := []string{TaskBucketKey, StatsBucketKey, SnapshotBucketKey}
+	buckets := []string{config.TaskBucketKey, config.StatsBucketKey, config.SnapshotBucketKey, config.SnapshotMappingBucketKey}
 	for _, bucket := range buckets {
-		db.Update(func(tx *bolt.Tx) error {
+		db.Bolt.Update(func(tx *bolt.Tx) error {
 			_, err := tx.CreateBucketIfNotExists([]byte(bucket))
 			if err != nil {
 				log.Error("create bucket: ", err, ",", bucket)
@@ -72,10 +83,6 @@ func (this BoltdbStore) Close() error {
 	return err
 }
 
-const TaskBucketKey string = "Task"
-const StatsBucketKey string = "Stats"
-const SnapshotBucketKey string = "Snapshot"
-
 func (filter BoltdbStore) GetCompressedValue(bucket string, key []byte) []byte {
 
 	data := filter.GetValue(bucket, key)
@@ -89,7 +96,7 @@ func (filter BoltdbStore) GetCompressedValue(bucket string, key []byte) []byte {
 
 func (filter BoltdbStore) GetValue(bucket string, key []byte) []byte {
 	var ret []byte = nil
-	db.View(func(tx *bolt.Tx) error {
+	db.Bolt.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		v := b.Get(key)
 		if v != nil {
@@ -110,7 +117,7 @@ func (filter BoltdbStore) AddValueCompress(bucket string, key []byte, value []by
 }
 
 func (filter BoltdbStore) AddValue(bucket string, key []byte, value []byte) error {
-	db.Update(func(tx *bolt.Tx) error {
+	db.Bolt.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		err := b.Put(key, value)
 		return err
@@ -119,7 +126,7 @@ func (filter BoltdbStore) AddValue(bucket string, key []byte, value []byte) erro
 }
 
 func (filter BoltdbStore) DeleteValue(bucket string, key []byte, value []byte) error {
-	db.Update(func(tx *bolt.Tx) error {
+	db.Bolt.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		err := b.Delete(key)
 		return err
@@ -128,10 +135,50 @@ func (filter BoltdbStore) DeleteValue(bucket string, key []byte, value []byte) e
 }
 
 func (filter BoltdbStore) DeleteBucket(bucket string, key []byte, value []byte) error {
-	db.Update(func(tx *bolt.Tx) error {
+	db.Bolt.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		err := b.DeleteBucket(key)
 		return err
 	})
 	return nil
+}
+
+func (filter BoltdbStore) Get(key string, value interface{}, to interface{}) error {
+	return db.One(key, value, to)
+}
+
+func (filter BoltdbStore) Save(o interface{}) error {
+	return db.Save(o)
+}
+
+func (filter BoltdbStore) Update(o interface{}) error {
+	return db.Update(o)
+}
+
+func (filter BoltdbStore) Delete(o interface{}) error {
+	return db.DeleteStruct(o)
+}
+
+func (filter BoltdbStore) Count(o interface{}) (int, error) {
+	return db.Count(o)
+}
+
+func (filter BoltdbStore) Search(t1,t2 interface{}, q *store.Query) (error, store.Result) {
+	result := store.Result{}
+	total, err := store.Count(t1)
+	if err != nil {
+		log.Debug(err)
+		total = -1
+	}
+	result.Total = total
+	result.Result = t2
+
+	//t, _ := time.Parse(layout, skipDate)
+	//query := db.Select(q.Gt("CreateTime", t)).Limit(size).Skip(from).Reverse().OrderBy("CreateTime")
+	//err = query.Find(&tasks)
+	err = db.AllByIndex(q.Sort, t2, storm.Skip(q.From), storm.Limit(q.Size), storm.Reverse())
+	if(err!=nil){
+		log.Debug(err)
+	}
+	return err, result
 }

@@ -152,7 +152,7 @@ func (this ParserJoint) Process(s *Context) (*Context, error) {
 	//dispatch links
 	for url, _ := range this.links {
 		if this.DispatchLinks {
-			queue.Push(config.CheckChannel,types.NewPageTask(url, refUrl, depth+1).MustGetBytes())
+			queue.Push(config.CheckChannel,types.NewTaskSeed(url, refUrl, depth+1).MustGetBytes())
 		}
 	}
 
