@@ -1,15 +1,15 @@
 package dispatcher
 
 import (
-	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/core/tasks"
-	"github.com/medcl/gopa/core/queue"
-	"github.com/medcl/gopa/modules/config"
 	log "github.com/cihub/seelog"
+	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/filter"
+	"github.com/medcl/gopa/core/queue"
+	"github.com/medcl/gopa/core/tasks"
+	"github.com/medcl/gopa/modules/config"
 )
 
-type DispatcherModule  struct {
-
+type DispatcherModule struct {
 }
 
 var started bool
@@ -18,30 +18,33 @@ func (this DispatcherModule) Name() string {
 	return "Dispatcher"
 }
 
-func (this DispatcherModule)Start(env *Env) {
+func (this DispatcherModule) Start(env *Env) {
 
 	go func() {
-		started=true
+		started = true
 		for {
 			log.Trace("get task from db")
 			if started {
 				log.Trace("waiting dispatcher signal")
-				v:=queue.Pop(config.DispatcherChannel)
-				log.Trace("got dispatcher signal, ",string(v))
+				v := queue.Pop(config.DispatcherChannel)
+				log.Trace("got dispatcher signal, ", string(v))
 
-				_,tasks,err:=tasks.GetPendingFetchTasks()
-				if(err!=nil){
+				if filter.Exists(config.FetchFilter, v) {
+					log.Debug("url seems already fetched, ignore now")
+					continue
+				}
+
+				_, tasks, err := tasks.GetPendingFetchTasks()
+				if err != nil {
 					log.Error(err)
 				}
 
-				if(tasks!=nil){
-					for _,v:=range tasks{
-						log.Debug("get task from db, ",v.ID)
-						queue.Push(config.FetchChannel,[]byte(v.ID))
+				if tasks != nil {
+					for _, v := range tasks {
+						log.Debug("get task from db, ", v.ID)
+						queue.Push(config.FetchChannel, []byte(v.ID))
 					}
 				}
-
-
 
 			}
 		}
@@ -51,7 +54,6 @@ func (this DispatcherModule)Start(env *Env) {
 
 func (this DispatcherModule) Stop() error {
 
-	started=false
+	started = false
 	return nil
 }
-

@@ -68,7 +68,7 @@ func GetTaskList(from,size int,skipDate string)(int,[]types.Task,error) {
 	queryO:=store.Query{Sort:"CreateTime",From:from,Size:size}
 	err,result:=store.Search(&types.Task{},&tasks,&queryO)
 	if(err!=nil){
-		log.Error(err)
+		log.Debug(err)
 	}
 	return result.Total,tasks,err
 }

@@ -140,6 +140,8 @@ func main() {
 	global.RegisterEnv(env)
 	logging.SetLogging(env)
 
+	log.Error("wait done")
+
 	//check instance lock
 	util.CheckInstanceLock(env.RuntimeConfig.PathConfig.Data)
 

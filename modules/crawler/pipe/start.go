@@ -19,6 +19,8 @@ package pipe
 import (. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/tasks"
 	"github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/filter"
+	"github.com/medcl/gopa/modules/config"
 )
 
 type Start struct {
@@ -41,6 +43,8 @@ func (this Start) Process(context *Context) (*Context, error) {
 	context.Set(CONTEXT_URL,task.Seed.Url)  //TODO remove
 	context.Set(CONTEXT_DEPTH,task.Seed.Depth)  //TODO remove
 	context.Set(CONTEXT_REFERENCE_URL,task.Seed.Reference)  //TODO remove
+
+	filter.Add(config.FetchFilter,[]byte(this.ID))
 
 	return context, nil
 }

@@ -198,7 +198,7 @@ func (filter BoltdbStore) Search(t1, t2 interface{}, q1 *store.Query) (error, st
 	//query := db.Select(q.Gt("CreateTime", t)).Limit(size).Skip(from).Reverse().OrderBy("CreateTime")
 	err = q2.Find(t2)
 	if err != nil {
-		log.Error(err)
+		log.Debug(err)
 	}
 	return err, result
 }

@@ -19,20 +19,19 @@ package url_checker
 import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/filter"
 	"github.com/medcl/gopa/core/queue"
-	. "github.com/medcl/gopa/core/filter"
 	"github.com/medcl/gopa/core/stats"
-	"path"
-	"time"
+	"github.com/medcl/gopa/core/tasks"
 	"github.com/medcl/gopa/core/types"
 	"github.com/medcl/gopa/modules/config"
-	"github.com/medcl/gopa/core/tasks"
+	"sync"
+	"time"
 )
 
+var signalChannel chan bool
 var quitChannel chan bool
 var started = false
-var filter = LeveldbFilter{}
-var filterFileName = "filters/url_fetched"
 
 func (this CheckerModule) Name() string {
 	return "Checker"
@@ -43,69 +42,80 @@ func (this CheckerModule) Start(env *Env) {
 		log.Error("url checker is already started, please stop it first.")
 		return
 	}
+	signalChannel = make(chan bool)
 	quitChannel = make(chan bool)
-
-	err:=filter.Open(path.Join(env.RuntimeConfig.PathConfig.Data, filterFileName))
-	if(err!=nil){
-		panic(err)
-	}
-
-	go runCheckerGo(env, &quitChannel)
+	go runCheckerGo()
 	started = true
 }
 
-func runCheckerGo(env *Env, quitC *chan bool) {
+func runCheckerGo() {
+
+	quit := make(chan bool, 1)
+	var wg sync.WaitGroup
 
 	go func() {
 		for {
-			startTime := time.Now()
-			if !started {
+			select {
+			case <-quit:
+				wg.Wait()
+				log.Trace("url checker success stoped")
 				return
+			default:
+				{
+					startTime := time.Now()
+					if !started {
+						return
+					}
+					log.Trace("waiting url to check")
+
+					wg.Add(1)
+					defer wg.Done()
+					data := queue.Pop(config.CheckChannel)
+					url := types.TaskSeedFromBytes(data)
+
+					stats.Increment("checker.url", "finished")
+
+					log.Trace("cheking url:", string(url.Url))
+
+					//TODO 统一 url 格式 , url 目前可能是相对路径
+					//checking
+					if filter.Exists(config.CheckFilter, []byte(url.Url)) {
+						stats.Increment("checker.url", "duplicated")
+						log.Debug("url already pushed to fetch queue, ignore :", string(url.Url))
+						continue
+					}
+
+					//add to filter
+					filter.Add(config.CheckFilter, []byte(url.Url))
+
+					task := types.Task{Seed: &url}
+					tasks.CreateTask(&task)
+
+					//send to disk queue
+					//queue.Push(config.FetchChannel,url.MustGetBytes())
+
+					stats.Increment("checker.url", "get_valid_seed")
+
+					log.Debugf("send url: %s ,depth: %d to  fetch queue", string(url.Url), url.Depth)
+					elapsedTime := time.Now().Sub(startTime)
+					stats.Timing("checker.url", "time", elapsedTime.Nanoseconds())
+				}
 			}
-			log.Trace("waiting url to check")
-
-			data := queue.Pop(config.CheckChannel)
-			url:=types.TaskSeedFromBytes(data)
-
-			stats.Increment("checker.url", "finished")
-
-			log.Trace("cheking url:", string(url.Url))
-
-			//TODO 统一 url 格式 , url 目前可能是相对路径
-			//checking
-			if filter.Exists([]byte(url.Url)) {
-				stats.Increment("checker.url", "duplicated")
-				log.Debug("url already pushed to fetch queue, ignore :", string(url.Url))
-				continue
-			}
-
-			//add to filter
-			filter.Add([]byte(url.Url))
-
-			task:=types.Task{Seed:&url}
-			tasks.CreateTask(&task)
-
-			//send to disk queue
-			//queue.Push(config.FetchChannel,url.MustGetBytes())
-
-			stats.Increment("checker.url", "get_valid_seed")
-
-			log.Debugf("send url: %s ,depth: %d to  fetch queue", string(url.Url), url.Depth)
-			elapsedTime := time.Now().Sub(startTime)
-			stats.Timing("checker.url", "time", elapsedTime.Nanoseconds())
 		}
 	}()
 
 	log.Trace("url checker success started")
-
-	<-*quitC
-
+	<-signalChannel
+	quit <- true
+	wg.Wait()
+	log.Trace("url checker wait end")
+	quitChannel <- true
+	log.Trace("url checker quit")
 }
 
-func (this CheckerModule)Stop() error {
+func (this CheckerModule) Stop() error {
 	if started {
-		filter.Close()
-		quitChannel <- true
+		signalChannel <- true
 		started = false
 	} else {
 		log.Error("url checker is not started")
@@ -114,5 +124,4 @@ func (this CheckerModule)Stop() error {
 }
 
 type CheckerModule struct {
-
 }

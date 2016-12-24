@@ -28,8 +28,10 @@ import (
 	"time"
 )
 
-var fetchQuitChannels []*chan bool
+var signalChannels []*chan bool
+var quitChannels []*chan bool
 var started = false
+
 func (this CrawlerModule) Name() string {
 	return "Crawler"
 }
@@ -42,14 +44,17 @@ func (this CrawlerModule) Start(env *Env) {
 
 	numGoRoutine := env.RuntimeConfig.MaxGoRoutine
 	//shutdownSignal signals for each go routing
-	fetchQuitChannels = make([]*chan bool, numGoRoutine)
+	signalChannels = make([]*chan bool, numGoRoutine)
+	quitChannels = make([]*chan bool, numGoRoutine)
 	if env.RuntimeConfig.CrawlerConfig.Enabled {
 		//start fetcher
 		for i := 0; i < numGoRoutine; i++ {
 			log.Trace("start crawler:", i)
+			signalC := make(chan bool, 1)
 			quitC := make(chan bool, 1)
-			fetchQuitChannels[i] = &quitC
-			go runPipeline(env, &quitC, i)
+			signalChannels[i] = &signalC
+			quitChannels[i] = &quitC
+			go runPipeline(env, &signalC, &quitC, i)
 
 		}
 	} else {
@@ -64,19 +69,19 @@ func (this CrawlerModule) Stop() error {
 	if started {
 		started = false
 		log.Debug("start shutting down crawler")
-		for i, item := range fetchQuitChannels {
+		for i, item := range signalChannels {
 			if item != nil {
-				*item <- true
 				*item <- true
 			}
 			log.Debug("send exit signal to fetch channel: ", i)
 		}
 
-		for i, item := range fetchQuitChannels {
+		//waiting for quit
+		for i, item := range quitChannels {
+			log.Debug("get final exit signal from fetch channel: ", i)
 			if item != nil {
 				<-*item
 			}
-			log.Debug("get final exit signal from fetch channel: ", i)
 		}
 
 	} else {
@@ -86,31 +91,42 @@ func (this CrawlerModule) Stop() error {
 	return nil
 }
 
-func runPipeline(env *Env, quitC *chan bool, shard int) {
+func runPipeline(env *Env, signalC *chan bool, quitC *chan bool, shard int) {
 
+	quit := make(chan bool, 1)
 	var wg sync.WaitGroup
 	go func() {
 		for {
-			if started {
-				wg.Add(1)
-				log.Trace("waiting url to fetch")
-				taskID := queue.Pop(config.FetchChannel)
-				log.Trace("shard:", shard, ",task received:", string(taskID))
-				execute(string(taskID), env,&wg)
-				log.Trace("shard:", shard, ",task finished:", string(taskID))
+			select {
+			case <- quit:
+				return
+			default:
+				if started {
+					log.Trace("waiting url to fetch, shard:", shard)
+					taskID := queue.Pop(config.FetchChannel)
+					log.Trace("shard:", shard, ",task received:", string(taskID))
+					execute(string(taskID), env, &wg)
+					log.Trace("shard:", shard, ",task finished:", string(taskID))
+
+				}
 			}
 
 		}
 	}()
 	log.Trace("fetch task started, shard:", shard)
-	<-*quitC
-	log.Trace("fetch task gonna exit, shard:", shard)
+	<-*signalC
+	log.Trace("fetch task gonna exit, waiting task to finish, shard:", shard)
+	quit <- true
 	wg.Wait()
-	log.Trace("fetch task exited, shard:", shard)
+	log.Trace("fetch task finished, shard:", shard)
+	*quitC <- true
+	log.Trace("fetch task exit, shard:", shard)
+
 }
 
-func execute(taskId string, env *Env,wg *sync.WaitGroup) {
+func execute(taskId string, env *Env, wg *sync.WaitGroup) {
 	var pipeline *Pipeline
+	wg.Add(1)
 	defer func() {
 		wg.Done()
 		if !env.IsDebug {

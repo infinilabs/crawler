@@ -14,11 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package types
+package filter
+
+type FilterKey string
+
 
 type Filter interface {
-	Open(fileName string) error
-	Close() error
-	Exists(key []byte) bool
-	Add(key []byte) error
+	Exists(bucket FilterKey, key []byte) bool
+	Add(bucket FilterKey, key []byte) error
+}
+
+var handler Filter
+
+func Exists(bucket FilterKey, key []byte) bool {
+	return handler.Exists(bucket, key)
+}
+
+func Add(bucket FilterKey, key []byte) error {
+	return handler.Add(bucket, key)
+}
+
+func Regsiter(h Filter) {
+	handler = h
 }
