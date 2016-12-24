@@ -62,8 +62,8 @@ func (this *LeveldbFilter) Close() error{
 }
 
 func (filter *LeveldbFilter) Exists(key []byte) bool{
-	filter.l.RLock()
-	defer filter.l.RUnlock()
+	filter.l.Lock()
+	defer filter.l.Unlock()
 	value,_  :=  filter.filter.Get(key,nil)
 	if value != nil {
 		return true

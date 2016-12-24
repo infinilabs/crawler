@@ -16,7 +16,9 @@ limitations under the License.
 
 package store
 
-import "errors"
+import (
+	"errors"
+)
 
 type Store interface {
 	Open() error
@@ -54,6 +56,12 @@ type Query struct {
 	Sort string
 	From int
 	Size int
+	Filter *Cond
+}
+
+type Cond struct {
+	Name string
+	Value interface{}
 }
 
 type Result struct {

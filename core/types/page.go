@@ -73,7 +73,7 @@ const TaskFetchSuccess  =3
 type Task struct {
 	ID            string    `storm:"id,unique" json:"id"`
 	Url           string `storm:"index" json:"url,omitempty"`
-	Status        TaskStatus `storm:"index" json:"status,omitempty"`
+	Status        TaskStatus `storm:"index" json:"status"`
 	Seed          *Seed `storm:"inline" json:"seed,omitempty"`
 	Page          *PageItem `storm:"inline" json:"page,omitempty"`
 	Message       interface{} `storm:"inline" json:"message,omitempty"`

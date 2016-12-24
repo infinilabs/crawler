@@ -13,7 +13,7 @@ function drawTable(data) {
 
 function drawRow(rowData) {
     var row = $("<tr />")
-    if(!rowData.status==2){
+    if(rowData.status==2){
         row = $("<tr class='failed_task' />")
     }
     $("#records").append(row);
@@ -31,14 +31,14 @@ function drawRow(rowData) {
         row.append($("<td>" + col2 + "</td>"));
         row.append($("<td>" + col3 + "</td>"));
         row.append($("<td>" + col4 + "</td>"));
-    }else if(rowData.seed!=undefined){
-        row.append($("<td colspan='1'>" + rowData.id + "</td>"));
-        row.append($("<td colspan='2'>" + rowData.seed.url + "</td>"));
-        row.append($("<td colspan='1'>" + rowData.status + "</td>"));
     }
-    else{
-        row.append($("<td colspan='1'>" + rowData.id + "</td>"));
-        row.append($("<td colspan='1'>" + rowData.url + "</td>"));
+    else if(rowData.seed!=undefined){
+        row.append($("<td>" + rowData.id + "</td>"));
+        row.append($("<td colspan='2'>" + rowData.seed.url + "</td>"));
+        row.append($("<td>" + rowData.status + "</td>"));
+    }else{
+        row.append($("<td>" + rowData.id + "</td>"));
+        row.append($("<td>" + rowData.url + "</td>"));
         row.append($("<td colspan='2'>" + rowData.message + "</td>"));
     }
 

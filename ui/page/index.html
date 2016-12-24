@@ -37,8 +37,8 @@
 
         <div class="uk-width-1-1 uk-alert">
             <div class="uk-grid">
-                <div class="uk-width-1-3">Checker Task: <span id="checker_task_num">N/A</span></div>
-                <div class="uk-width-1-3">Crawler Task: <span id="crawler_task_num">N/A</span></div>
+                <div class="uk-width-1-2">Checker: <span id="checker_task_num">N/A</span></div>
+                <div class="uk-width-1-2">Crawler: <span id="crawler_task_num">N/A</span></div>
             </div>
         </div>
 
@@ -111,7 +111,7 @@
 
         myChart.setOption(option);
 
-        timeTicket = setInterval(function () {
+        function loadData(){
 
             // 加载统计数据
             $.get('/stats').done(function (data) {
@@ -120,8 +120,8 @@
                     option.series[0].data[0].value = ((data["queue.check"].pop/data["queue.check"].push)*100).toFixed(2) - 0;
                 }
 
-                if(data["queue.fetch"]){
-                    $("#crawler_task_num").text(safeGetValue(data["queue.fetch"].pop)+" / "+data["queue.fetch"].push+", error: "+safeGetValue(data["crawler.pipeline"].error)+", break: "+safeGetValue(data["crawler.pipeline"].break));
+                if(data["crawler.pipeline"]){
+                    $("#crawler_task_num").text(safeGetValue(data["crawler.pipeline"].finished)+" / "+data["crawler.pipeline"].total+", error: "+safeGetValue(data["crawler.pipeline"].error)+", break: "+safeGetValue(data["crawler.pipeline"].break)+", queue: "+safeGetValue(data["queue.fetch"].pop)+" / "+data["queue.fetch"].push);
                     option.series[1].data[0].value = (((parseInt(safeGetValue(data["queue.fetch"].pop)))/parseInt(safeGetValue(data["queue.fetch"].push)))*100).toFixed(2) - 0;
                 }
 
@@ -139,9 +139,11 @@
                 }
             });
 
-        },2000);
+        }
 
+        timeTicket = setInterval(loadData ,2000);
 
+        loadData();
 </script>
 </body>
 </html>

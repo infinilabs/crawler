@@ -18,6 +18,7 @@ package boltdb
 
 import (
 	"github.com/asdine/storm"
+	"github.com/asdine/storm/q"
 	lz4 "github.com/bkaradzic/go-lz4"
 	"github.com/boltdb/bolt"
 	log "github.com/cihub/seelog"
@@ -49,7 +50,7 @@ func (this BoltdbStore) Open() error {
 		db, err = storm.Open("boltdb", storm.UseDB(boltDb))
 	} else {
 		file := path.Join(global.Env().RuntimeConfig.PathConfig.Data, "boltdb")
-		db, err = storm.Open(file, storm.BoltOptions(0600, &bolt.Options{Timeout: 1 * time.Second}))
+		db, err = storm.Open(file, storm.BoltOptions(0600, &bolt.Options{Timeout: 5 * time.Second}))
 	}
 	if err != nil {
 		log.Errorf("error open boltdb: %s, %s", this.FileName, err)
@@ -163,7 +164,7 @@ func (filter BoltdbStore) Count(o interface{}) (int, error) {
 	return db.Count(o)
 }
 
-func (filter BoltdbStore) Search(t1,t2 interface{}, q *store.Query) (error, store.Result) {
+func (filter BoltdbStore) Search(t1, t2 interface{}, q1 *store.Query) (error, store.Result) {
 	result := store.Result{}
 	total, err := store.Count(t1)
 	if err != nil {
@@ -173,12 +174,31 @@ func (filter BoltdbStore) Search(t1,t2 interface{}, q *store.Query) (error, stor
 	result.Total = total
 	result.Result = t2
 
+	if q1.From < 0 {
+		q1.From = 0
+	}
+	if q1.Size < 0 {
+		q1.Size = 10
+	}
+
+	var q2 storm.Query
+	if q1.Filter != nil {
+		q2 = db.Select(q.Eq(q1.Filter.Name,q1.Filter.Value)) //can't limit here, bug .Limit(q1.Size).Skip(q1.From)
+
+	} else {
+		q2 = db.Select(q.True()).Limit(q1.Size).Skip(q1.From)
+	}
+
+
+	if q1.Sort != "" {
+		q2 = q2.OrderBy(q1.Sort).Reverse()
+	}
+
 	//t, _ := time.Parse(layout, skipDate)
 	//query := db.Select(q.Gt("CreateTime", t)).Limit(size).Skip(from).Reverse().OrderBy("CreateTime")
-	//err = query.Find(&tasks)
-	err = db.AllByIndex(q.Sort, t2, storm.Skip(q.From), storm.Limit(q.Size), storm.Reverse())
-	if(err!=nil){
-		log.Debug(err)
+	err = q2.Find(t2)
+	if err != nil {
+		log.Error(err)
 	}
 	return err, result
 }

@@ -26,6 +26,10 @@ const STATS_PARSE_SUCCESS_COUNT = "stats.count.parse.success"
 const STATS_PARSE_FAIL_COUNT = "stats.count.parse.fail"
 const STATS_PARSE_IGNORE_COUNT = "stats.count.ignore.fail"
 
+
+const STATS_SAVE_DUPLICATED_URL = "stats.count.save.duplicated"
+
+
 const STATS_CHECKER_PUSH_CHAN_COUNT = "stats.count.checker.chan.push"
 const STATS_CHECKER_PUSH_DISK_COUNT = "stats.count.checker.disk.push"
 const STATS_CHECKER_POP_CHAN_COUNT = "stats.count.checker.chan.pop"

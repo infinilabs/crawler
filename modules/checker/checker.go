@@ -74,6 +74,7 @@ func runCheckerGo(env *Env, quitC *chan bool) {
 			//TODO 统一 url 格式 , url 目前可能是相对路径
 			//checking
 			if filter.Exists([]byte(url.Url)) {
+				stats.Increment("checker.url", "duplicated")
 				log.Debug("url already pushed to fetch queue, ignore :", string(url.Url))
 				continue
 			}

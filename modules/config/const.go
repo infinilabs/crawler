@@ -4,6 +4,7 @@ import . "github.com/medcl/gopa/core/queue"
 const (
 	FetchChannel QueueKey = "fetch"
 	CheckChannel QueueKey = "check"
+	DispatcherChannel QueueKey = "dispatcher"
 )
 
 const TaskBucketKey string = "Task"

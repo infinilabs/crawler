@@ -65,13 +65,14 @@ func (this SaveToDBJoint) Process(c *Context) (*Context, error) {
 	return c, nil
 }
 
-const KeyDelimiter string = "||"
+const KeyDelimiter string = ""
 func GetKey( args ...string) []byte {
 	key:=config.SnapshotMappingBucketKey
 	url:=[]byte(strings.Join(args,KeyDelimiter))
 	v:=store.GetValue(key,url)
 	if(v!=nil){
-		log.Error("get snapshotId from db, maybe previous already saved")
+		stats.Increment("save","duplicated_url")
+		log.Errorf("get snapshotId from db, maybe previous already saved, %s, %s",string(v),string(url))
 		return v
 	}
 	snapshotId,err:=xid.New().MarshalText()

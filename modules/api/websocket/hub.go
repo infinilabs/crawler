@@ -48,6 +48,7 @@ func (h *Hub) registerHandlers(env *env.Env) {
 	HandleWebSocketCommand("HELP",handler.Help)
 	HandleWebSocketCommand("SEED",handler.AddSeed)
 	HandleWebSocketCommand("LOG",handler.UpdateLogLevel)
+	HandleWebSocketCommand("DIS",handler.Dispatch)
 }
 
 

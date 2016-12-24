@@ -56,3 +56,12 @@ func (this *Command) UpdateLogLevel(c *WebsocketConnection,a []string) ()  {
 	}
 	c.WriteMessage([]byte("invalid setting"))
 }
+
+func (this *Command) Dispatch(c *WebsocketConnection,a []string) ()  {
+
+	err:=queue.Push(config.DispatcherChannel,[]byte("go"))
+	if(err!=nil){
+		panic(err)
+	}
+	c.WriteMessage([]byte("trigger tasks"))
+}

@@ -58,6 +58,12 @@
                 if (!msg.val()) {
                     return false;
                 }
+
+                if(msg.val()=="CLS"||msg.val()=="cls"||msg.val()=="clear"||msg.val()=="CLEAR"){
+                    log.children().remove();
+                    return
+                }
+
                 conn.send(msg.val());
                 appendRequestLog(msg.val())
                 msg.val("");
@@ -130,7 +136,7 @@
 
             <div id="log"></div>
             <form id="form">
-                <input id="msg" type="text" placeholder="" class="uk-width-1-1">
+                <input id="msg" type="text" placeholder="" autocomplete="off" class="uk-width-1-1">
             </form>
 
         </div>

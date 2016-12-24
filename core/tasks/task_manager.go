@@ -15,6 +15,7 @@ func CreateTask(task *types.Task)  {
 	task.ID=xid.New().String()
 	task.Status=types.TaskCreated
 	task.CreateTime=&time
+	task.UpdateTime=&time
 	err := store.Save(task)
 	if(err!=nil){
 		panic(err)
@@ -23,7 +24,8 @@ func CreateTask(task *types.Task)  {
 
 func LoadTaskByID(id string)(types.Task)   {
 	task:=types.Task{}
-	err := store.Get("ID",id,task)
+	log.Trace("get id,",id)
+	err := store.Get("ID",id,&task)
 	if(err!=nil){
 		panic(err)
 	}
@@ -64,6 +66,17 @@ func GetTaskList(from,size int,skipDate string)(int,[]types.Task,error) {
 	log.Trace("start get all crawler tasks")
 	var tasks []types.Task
 	queryO:=store.Query{Sort:"CreateTime",From:from,Size:size}
+	err,result:=store.Search(&types.Task{},&tasks,&queryO)
+	if(err!=nil){
+		log.Error(err)
+	}
+	return result.Total,tasks,err
+}
+
+func GetPendingFetchTasks()(int,[]types.Task,error) {
+	log.Trace("start get all crawler tasks")
+	var tasks []types.Task
+	queryO:=store.Query{Sort:"CreateTime",Filter:&store.Cond{Name:"Status",Value:0}}
 	err,result:=store.Search(&types.Task{},&tasks,&queryO)
 	if(err!=nil){
 		log.Error(err)
