@@ -29,11 +29,6 @@ func (this DispatcherModule) Start(env *Env) {
 				v := queue.Pop(config.DispatcherChannel)
 				log.Trace("got dispatcher signal, ", string(v))
 
-				if filter.Exists(config.FetchFilter, v) {
-					log.Debug("url seems already fetched, ignore now")
-					continue
-				}
-
 				_, tasks, err := tasks.GetPendingFetchTasks()
 				if err != nil {
 					log.Error(err)
@@ -42,6 +37,19 @@ func (this DispatcherModule) Start(env *Env) {
 				if tasks != nil {
 					for _, v := range tasks {
 						log.Debug("get task from db, ", v.ID)
+
+						b,err:= filter.CheckThenAdd(config.FetchFilter, []byte(v.ID))
+
+						if(err!=nil){
+							log.Error(err)
+							panic(err)
+						}
+
+						if b{
+							log.Debug("url seems already fetched, ignore now, ",v.ID)
+							continue
+						}
+
 						queue.Push(config.FetchChannel, []byte(v.ID))
 					}
 				}

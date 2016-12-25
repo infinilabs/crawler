@@ -78,15 +78,17 @@ func runCheckerGo() {
 					log.Trace("cheking url:", string(url.Url))
 
 					//TODO 统一 url 格式 , url 目前可能是相对路径
+					b,err:=filter.CheckThenAdd(config.CheckFilter,[]byte(url.Url))
 					//checking
-					if filter.Exists(config.CheckFilter, []byte(url.Url)) {
+					if b {
 						stats.Increment("checker.url", "duplicated")
 						log.Debug("url already pushed to fetch queue, ignore :", string(url.Url))
 						continue
 					}
-
-					//add to filter
-					filter.Add(config.CheckFilter, []byte(url.Url))
+					if(err!=nil){
+						log.Error(err)
+						panic(err)
+					}
 
 					task := types.Task{Seed: &url}
 					tasks.CreateTask(&task)

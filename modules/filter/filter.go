@@ -9,6 +9,7 @@ import (
 	"github.com/medcl/gopa/modules/config"
 	"github.com/medcl/gopa/modules/filter/impl"
 	"path"
+	"sync"
 )
 
 type FilterModule struct {
@@ -26,6 +27,18 @@ func (this FilterModule) Exists(bucket FilterKey, key []byte) bool {
 func (this FilterModule) Add(bucket FilterKey, key []byte) error {
 	f:=filters[bucket]
 	return f.Add(key)
+}
+
+var l sync.RWMutex
+func (this FilterModule)CheckThenAdd(bucket FilterKey,key[]byte)(b bool,err error){
+	f:=filters[bucket]
+	l.Lock()
+	defer l.Unlock()
+	b=f.Exists(key)
+	if(!b){
+	 err=f.Add(key)
+	}
+	return b,err
 }
 
 func initFilter(key FilterKey) {
