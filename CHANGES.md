@@ -3,6 +3,12 @@
 
 CHANGES
 
+v0.8
+features
+improve
+bugfix
+1.incorrect stats number, incorrect task filter
+
 v0.7
 features:
 1.add stats api to expose the task info, http://localhost:8001/stats
