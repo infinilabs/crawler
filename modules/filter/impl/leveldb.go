@@ -77,3 +77,10 @@ func (filter *LeveldbFilter) Add(key []byte) error{
 	filter.filter.Put(key,[]byte(""),nil)
 	return nil
 }
+
+func (filter *LeveldbFilter) Delete(key []byte) error{
+	filter.l.Lock()
+	defer filter.l.Unlock()
+	filter.filter.Delete(key,nil)
+	return nil
+}

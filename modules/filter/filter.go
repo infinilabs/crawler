@@ -29,6 +29,11 @@ func (this FilterModule) Add(bucket FilterKey, key []byte) error {
 	return f.Add(key)
 }
 
+func (this FilterModule) Delete(bucket FilterKey, key []byte) error {
+	f:=filters[bucket]
+	return f.Delete(key)
+}
+
 var l sync.RWMutex
 func (this FilterModule)CheckThenAdd(bucket FilterKey,key[]byte)(b bool,err error){
 	f:=filters[bucket]
