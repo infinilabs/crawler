@@ -18,7 +18,7 @@ package handler
 
 import (
 	log "github.com/cihub/seelog"
-	logging "github.com/medcl/gopa/core/logging"
+	logging "github.com/medcl/gopa/core/logger"
 	"net/http"
 )
 

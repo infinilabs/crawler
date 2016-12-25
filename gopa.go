@@ -23,7 +23,7 @@ import (
 	"github.com/medcl/gopa/core/daemon"
 	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/global"
-	"github.com/medcl/gopa/core/logging"
+	"github.com/medcl/gopa/core/logger"
 	"github.com/medcl/gopa/core/module"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/modules"
@@ -63,7 +63,7 @@ func main() {
 
 	onStart()
 
-	defer logging.Flush()
+	defer logger.Flush()
 
 	var logLevel = flag.String("log", "info", "the log level,options:trace,debug,info,warn,error, default: info")
 	var configFile = flag.String("config", "gopa.yml", "the location of config file, default: gopa.yml")
@@ -130,7 +130,7 @@ func main() {
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	logging.SetInitLogging(EmptyEnv(), *logLevel)
+	logger.SetInitLogging(EmptyEnv(), *logLevel)
 
 	sysConfig := SystemConfig{ConfigFile: *configFile, LogLevel: *logLevel}
 
@@ -138,7 +138,7 @@ func main() {
 	env.IsDebug=*isDebug
 	//put env into global registrar
 	global.RegisterEnv(env)
-	logging.SetLogging(env)
+	logger.SetLogging(env)
 
 	log.Error("wait done")
 

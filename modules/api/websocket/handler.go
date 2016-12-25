@@ -18,7 +18,7 @@ package websocket
 
 import (
 	"github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/core/logging"
+	"github.com/medcl/gopa/core/logger"
 	"strings"
 	"github.com/medcl/gopa/core/types"
 	"github.com/medcl/gopa/core/queue"
@@ -50,7 +50,7 @@ func (this *Command) UpdateLogLevel(c *WebsocketConnection,a []string) ()  {
 	level :=a[1]
 	if(len(level)>0){
 		level:=strings.ToLower(level)
-		logging.SetInitLogging(this.Env,level)
+		logger.SetInitLogging(this.Env,level)
 		c.WriteMessage([]byte("setting log level to  "+ level ))
 		return
 	}
