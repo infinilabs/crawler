@@ -50,6 +50,15 @@ func GetTask(id string) (Task, error) {
 	}
 	return task, err
 }
+func GetTaskByField(k,v string) (Task, error) {
+	log.Trace("start get seed: ", k,", ",v)
+	task := Task{}
+	err := store.Get(k, v, &task)
+	if err != nil {
+		log.Debug(k, ", ", err)
+	}
+	return task, err
+}
 
 func GetTaskList(from, size int, domain string) (int, []Task, error) {
 	log.Trace("start get all crawler tasks")

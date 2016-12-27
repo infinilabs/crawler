@@ -68,9 +68,25 @@ func (this *Command) Dispatch(c *WebsocketConnection, a []string) {
 
 func (this *Command) GetTask(c *WebsocketConnection, a []string) {
 
-	taskId := a[1]
-	if len(taskId) > 0 {
-		task, err := model.GetTask(taskId)
+
+	if len(a) == 2 {
+		para1 := a[1]
+		task, err := model.GetTask(para1)
+		if err != nil {
+			c.WriteMessage([]byte(err.Error()))
+		}
+
+		b, err := json.MarshalIndent(task, "", " ")
+
+		c.WriteMessage(b)
+		c.WriteMessage([]byte("get task by taskId," + para1 + "\n"))
+		return
+	}
+
+	if len(a) ==3{
+		para1 := a[1]
+		para2 := a[2]
+		task, err := model.GetTaskByField(para1,para2)
 		if err != nil {
 			c.WriteMessage([]byte(err.Error()))
 		}
@@ -79,8 +95,11 @@ func (this *Command) GetTask(c *WebsocketConnection, a []string) {
 
 		c.WriteMessage(b)
 
-		c.WriteMessage([]byte("get task by taskId," + taskId + "\n"))
+
+		c.WriteMessage([]byte("get task by," + para1 +", "+para2 + "\n"))
+
 		return
 	}
+
 	c.WriteMessage([]byte("invalid taskId"))
 }
