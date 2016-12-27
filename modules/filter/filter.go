@@ -47,10 +47,13 @@ func (this FilterModule)CheckThenAdd(bucket FilterKey,key[]byte)(b bool,err erro
 }
 
 func initFilter(key FilterKey) {
-	//f := impl.BloomFilter{}
+	//f := impl.EmptyFilter{}
 	f:=impl.LeveldbFilter{}
 	file := path.Join(global.Env().RuntimeConfig.PathConfig.Data, string(key))
-	f.Open(file)
+	err:=f.Open(file)
+	if(err!=nil){
+		panic(err)
+	}
 
 	filters[key] = &f
 }
@@ -62,8 +65,9 @@ func (this FilterModule) Start(env *Env) {
 	filters = map[FilterKey]*impl.LeveldbFilter{}
 
 	//TODO dynamic config
-	initFilter(config.CheckFilter)
+	initFilter(config.DispatchFilter)
 	initFilter(config.FetchFilter)
+	initFilter(config.CheckFilter)
 
 	filter.Regsiter(this)
 }

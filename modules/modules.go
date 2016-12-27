@@ -19,7 +19,6 @@ package modules
 import (
 	"github.com/medcl/gopa/core/module"
 	"github.com/medcl/gopa/modules/api"
-	"github.com/medcl/gopa/modules/checker"
 	"github.com/medcl/gopa/modules/queue"
 	"github.com/medcl/gopa/modules/crawler"
 	"github.com/medcl/gopa/modules/storage"
@@ -35,8 +34,8 @@ func Register() {
 	module.Register(statsd.StatsStoreModule{})
 	//module.Register(statsd.StatsDModule{})
 	module.Register(queue.DiskQueue{})
-	module.Register(url_checker.CheckerModule{})
-	module.Register(crawler.CrawlerModule{})
+	module.Register(crawler.CheckerModule{})
+	//module.Register(crawler.CrawlerModule{})
 	module.Register(dispatcher.DispatcherModule{})
 	module.Register(http.APIModule{})
 }

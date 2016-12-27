@@ -9,7 +9,7 @@ import (
 )
 
 
-func CreateTask(task *types.Task)  {
+func CreateTask(task *types.Task) error  {
 	log.Trace("start create crawler task")
 	time:=time.Now()
 	task.ID=xid.New().String()
@@ -18,18 +18,9 @@ func CreateTask(task *types.Task)  {
 	task.UpdateTime=&time
 	err := store.Save(task)
 	if(err!=nil){
-		panic(err)
+		log.Debug(task.ID,", ",err)
 	}
-}
-
-func LoadTaskByID(id string)(types.Task)   {
-	task:=types.Task{}
-	log.Trace("get id,",id)
-	err := store.Get("ID",id,&task)
-	if(err!=nil){
-		panic(err)
-	}
-	return task
+	return err
 }
 
 func UpdateTask(task *types.Task)  {
@@ -47,25 +38,28 @@ func DeleteTask(id string)error  {
 	task:=types.Task{ID:id}
 	err := store.Delete(&task)
 	if(err!=nil){
-		panic(err)
+		log.Debug(id,", ",err)
 	}
 	return err
 }
 
-func GetTask(id int) (types.Task,error)  {
+func GetTask(id string) (types.Task,error)  {
 	log.Trace("start get seed: ",id)
 	task:=types.Task{}
 	err := store.Get("ID", id, &task)
 	if(err!=nil){
-		log.Error(id,", ",err)
+		log.Debug(id,", ",err)
 	}
 	return task,err
 }
 
-func GetTaskList(from,size int,skipDate string)(int,[]types.Task,error) {
+func GetTaskList(from,size int,domain string)(int,[]types.Task,error) {
 	log.Trace("start get all crawler tasks")
 	var tasks []types.Task
 	queryO:=store.Query{Sort:"CreateTime",From:from,Size:size}
+	if(len(domain)>0){
+		queryO.Filter=&store.Cond{Name:"Domain",Value:domain}
+	}
 	err,result:=store.Search(&types.Task{},&tasks,&queryO)
 	if(err!=nil){
 		log.Debug(err)
@@ -76,10 +70,10 @@ func GetTaskList(from,size int,skipDate string)(int,[]types.Task,error) {
 func GetPendingFetchTasks()(int,[]types.Task,error) {
 	log.Trace("start get all crawler tasks")
 	var tasks []types.Task
-	queryO:=store.Query{Sort:"CreateTime",Filter:&store.Cond{Name:"Status",Value:0}}
+	queryO:=store.Query{Sort:"CreateTime",Filter:&store.Cond{Name:"Phrase",Value:1}}
 	err,result:=store.Search(&types.Task{},&tasks,&queryO)
 	if(err!=nil){
-		log.Error(err)
+		log.Debug(err)
 	}
 	return result.Total,tasks,err
 }

@@ -21,35 +21,31 @@ import (
 	"github.com/medcl/gopa/core/stats"
 )
 
-
 type QueueKey string
 
 type Queue interface {
-	Push(QueueKey,[]byte) error
-	Pop(QueueKey)([]byte)
-	Close(QueueKey)(error)
+	Push(QueueKey, []byte) error
+	Pop(QueueKey) []byte
+	Close(QueueKey) error
 }
 
 var handler Queue
 
-func Push(k QueueKey,v []byte) error{
-
-	if(handler!=nil){
-		o:= handler.Push(k,v)
-		if(o==nil){
+func Push(k QueueKey, v []byte) error {
+	if handler != nil {
+		o := handler.Push(k, v)
+		if o == nil {
 			stats.Increment("queue."+string(k), "push")
 		}
 		return o
-
 	}
 	stats.Increment("queue."+string(k), "push_error")
 	panic(errors.New("channel is not registered"))
-	return nil
 }
 
-func Pop(k QueueKey)([]byte){
-	if(handler!=nil){
-		o:=handler.Pop(k)
+func Pop(k QueueKey) []byte {
+	if handler != nil {
+		o := handler.Pop(k)
 		stats.Increment("queue."+string(k), "pop")
 		return o
 	}
@@ -57,9 +53,9 @@ func Pop(k QueueKey)([]byte){
 	panic(errors.New("channel is not registered"))
 }
 
-func Close(k QueueKey)(error){
-	if(handler!=nil){
-		o:=handler.Close(k)
+func Close(k QueueKey) error {
+	if handler != nil {
+		o := handler.Close(k)
 		stats.Increment("queue."+string(k), "close")
 		return o
 	}
@@ -67,6 +63,6 @@ func Close(k QueueKey)(error){
 	panic(errors.New("channel is not closed"))
 }
 
-func Register(h Queue)  {
-	handler=h
+func Register(h Queue) {
+	handler = h
 }

@@ -85,3 +85,9 @@ func (filter *BloomFilter) Add(key []byte) error{
 	filter.filter.Add(key)
 	return nil
 }
+
+
+func (filter *BloomFilter) Delete(key []byte) error{
+
+	return nil
+}

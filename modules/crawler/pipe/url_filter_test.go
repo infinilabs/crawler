@@ -25,7 +25,7 @@ import (
 
 func TestUrlFilter(t *testing.T) {
 
-	context:= &pipeline.Context{Env:env.EmptyEnv()}
+	context:= &pipeline.Context{}
 	context.data =map[pipeline.ContextKey]interface{}{}
 	context.Set(CONTEXT_URL,"http://elasticsearch.cn/")
 	context.Set(CONTEXT_ORIGINAL_URL,"http://elasticsearch.cn/")

@@ -113,9 +113,9 @@ func get(page *types.PageItem, url string, cookie string) ([]byte, error) {
 	}
 
 	resp, err := client.Do(reqest)
-	page.Domain = reqest.Host
-	page.Proto = reqest.Proto
-	page.UrlPath = reqest.URL.Path
+	//page.Domain = reqest.Host
+	//page.Proto = reqest.Proto
+	//page.UrlPath = reqest.URL.Path
 
 	if err != nil {
 		if resp != nil && resp.StatusCode == 301 && resp.StatusCode == 302 {

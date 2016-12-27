@@ -19,39 +19,37 @@ package handler
 import (
 	logger "github.com/cihub/seelog"
 	_ "github.com/jmoiron/jsonq"
+	"github.com/julienschmidt/httprouter"
+	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/tasks"
 	"github.com/medcl/gopa/core/types"
-	"net/http"
-	"github.com/julienschmidt/httprouter"
-	"strconv"
-	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/modules/config"
+	"net/http"
+	"strconv"
 )
 
 func (this *Handler) TaskDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	 if(req.Method == DELETE.String()) {
-		 id:=ps.ByName("id")
-		 err:=tasks.DeleteTask(id)
-		 if(err!=nil){
-			 this.error(w,err)
-		 }else{
-			 this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
-		 }
-	 }else{
-		 this.error404(w)
-	 }
+	if req.Method == DELETE.String() {
+		id := ps.ByName("id")
+		err := tasks.DeleteTask(id)
+		if err != nil {
+			this.error(w, err)
+		} else {
+			this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
+		}
+	} else {
+		this.error404(w)
+	}
 }
 func (this *Handler) TaskGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-		 id:=ps.ByName("id")
-		 id1,_:=strconv.Atoi(id)
-		 task,err:=tasks.GetTask(id1)
-		if(err!=nil){
-			this.error(w,err)
-		}else
-		{
-			this.WriteJson(w, task, http.StatusOK)
+	id := ps.ByName("id")
+	task, err := tasks.GetTask(id)
+	if err != nil {
+		this.error(w, err)
+	} else {
+		this.WriteJson(w, task, http.StatusOK)
 
-		}
+	}
 
 }
 
@@ -71,7 +69,7 @@ func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request, ps htt
 
 		task := types.NewTaskSeed(seed, "", 0)
 
-		queue.Push(config.CheckChannel,task.MustGetBytes())
+		queue.Push(config.CheckChannel, task.MustGetBytes())
 
 		this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
 	} else {
@@ -79,18 +77,22 @@ func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request, ps htt
 
 		fr := this.GetParameter(req, "from")
 		si := this.GetParameter(req, "size")
-		skipDate := this.GetParameter(req, "skip_date")
+		domain := this.GetParameter(req, "domain")
 
-		from,err:=strconv.Atoi(fr)
-		if(err!=nil){from=0}
-		size,err:=strconv.Atoi(si)
-		if(err!=nil){size=10}
+		from, err := strconv.Atoi(fr)
+		if err != nil {
+			from = 0
+		}
+		size, err := strconv.Atoi(si)
+		if err != nil {
+			size = 10
+		}
 
-		total,tasks,err:=tasks.GetTaskList(from,size,skipDate)
-		if(err!=nil){
-			this.error(w,err)
-		}else{
-			this.WriteListResultJson(w,total,tasks,http.StatusOK)
+		total, tasks, err := tasks.GetTaskList(from, size, domain)
+		if err != nil {
+			this.error(w, err)
+		} else {
+			this.WriteListResultJson(w, total, tasks, http.StatusOK)
 		}
 	}
 }

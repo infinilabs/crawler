@@ -22,6 +22,7 @@ import (
 	"crypto/md5"
 	"github.com/medcl/gopa/core/types"
 	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/global"
 )
 
 
@@ -61,7 +62,7 @@ func (this PublishJoint) Process(c *Context) (*Context, error) {
 		}
 		data["links"]=maps
 	}
-	_,err:= c.Env.ESClient.IndexDoc(id,data)
+	_,err:= global.Env().ESClient.IndexDoc(id,data)
 	if(err!=nil){
 		log.Error(err)
 		return c,err

@@ -35,6 +35,7 @@ func (this End) Process(context *Context) (*Context, error) {
 
 	task:=context.Get(CONTEXT_CRAWLER_TASK).(*Task)
 	task.Status=TaskFetchSuccess
+	task.Phrase=context.Phrase
 
 	if(context.IsBreak()){
 		log.Trace("broken pipeline,",context.Payload)

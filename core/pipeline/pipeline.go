@@ -19,7 +19,6 @@ package pipeline
 import (
 	"fmt"
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/rs/xid"
@@ -27,6 +26,7 @@ import (
 	"strings"
 	"time"
 	"sync"
+	"github.com/medcl/gopa/core/types"
 )
 
 var l sync.RWMutex
@@ -34,8 +34,8 @@ var l sync.RWMutex
 type ContextKey string
 
 type Context struct {
+	Phrase types.TaskPhrase
 	data      map[ContextKey]interface{}
-	Env       *env.Env
 	breakFlag bool
 	Payload   interface{}
 }

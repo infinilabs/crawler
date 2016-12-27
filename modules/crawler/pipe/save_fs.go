@@ -26,6 +26,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"github.com/medcl/gopa/core/global"
 )
 
 type SaveToFileSystemJoint struct {
@@ -43,19 +44,20 @@ func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 	this.context = c
 
 	if len(this.baseDir) == 0 {
-		this.baseDir = this.context.Env.RuntimeConfig.PathConfig.WebData
+		this.baseDir = global.Env().RuntimeConfig.PathConfig.WebData
 	}
 
 	url, ok := c.GetString(CONTEXT_URL)
 	if !ok {
 		return nil, errors.New("invalid url")
 	}
+	task := c.Get(CONTEXT_PAGE_ITEM).(*types.Task)
 	pageItem := c.Get(CONTEXT_PAGE_ITEM).(*types.PageItem)
 
 	domain := c.MustGetString(CONTEXT_HOST)
 	dir := c.MustGetString(CONTEXT_SAVE_PATH)
 	file := c.MustGetString(CONTEXT_SAVE_FILENAME)
-	folder := path.Join(this.context.Env.RuntimeConfig.PathConfig.WebData, domain, dir)
+	folder := path.Join(global.Env().RuntimeConfig.PathConfig.WebData, domain, dir)
 
 	os.MkdirAll(folder, 0777)
 
@@ -66,7 +68,7 @@ func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 		return c,nil
 	}
 
-	log.Trace("save url,", url, ",domain,", pageItem.Domain, ",fullpath,", fullPath)
+	log.Trace("save url,", url, ",domain,", task.Domain, ",fullpath,", fullPath)
 
 	fout, err := os.Create(fullPath)
 	if err != nil {

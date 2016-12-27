@@ -7,6 +7,8 @@ import (
 	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/tasks"
 	"github.com/medcl/gopa/modules/config"
+	"github.com/medcl/gopa/core/stats"
+	"time"
 )
 
 type DispatcherModule struct {
@@ -31,7 +33,8 @@ func (this DispatcherModule) Start(env *Env) {
 
 				_, tasks, err := tasks.GetPendingFetchTasks()
 				if err != nil {
-					log.Error(err)
+					log.Debug(err)
+					return
 				}
 
 				if tasks != nil {
@@ -58,6 +61,31 @@ func (this DispatcherModule) Start(env *Env) {
 		}
 	}()
 
+	go func() {
+		started = true
+		for {
+			if started {
+
+				pop:=stats.Stat("queue.fetch","pop")
+				push:=stats.Stat("queue.fetch","push")
+
+				time.Sleep(10*time.Second)
+
+				pop2:=stats.Stat("queue.fetch","pop")
+				push2:=stats.Stat("queue.fetch","push")
+				if(push==push2&&pop==pop2){
+					log.Debug("fetch tasks stalled after 5 seconds, try to dispatch some tasks from db")
+					err:=queue.Push(config.DispatcherChannel,[]byte("10s auto"))
+					if(err!=nil){
+						panic(err)
+					}
+				}else{
+					time.Sleep(30*time.Second)
+					continue
+				}
+			}
+		}
+	}()
 }
 
 func (this DispatcherModule) Stop() error {

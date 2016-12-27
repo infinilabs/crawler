@@ -44,13 +44,14 @@ func (this SaveToDBJoint) Process(c *Context) (*Context, error) {
 
 	url := c.MustGetString(CONTEXT_URL)
 
+	task := c.Get(CONTEXT_CRAWLER_TASK).(*types.Task)
 	pageItem := c.Get(CONTEXT_PAGE_ITEM).(*types.PageItem)
 	savePath := c.MustGetString(CONTEXT_SAVE_PATH)
 	saveFile := c.MustGetString(CONTEXT_SAVE_FILENAME)
 	domain := c.MustGetString(CONTEXT_HOST)
 
-	saveKey:=GetKey(pageItem.Domain,path.Join(savePath,saveFile))
-	log.Debug("save url to db, url:", url, ",domain:", pageItem.Domain,",path:",savePath,",file:",saveFile,",saveKey:",string(saveKey))
+	saveKey:=GetKey(task.Domain,path.Join(savePath,saveFile))
+	log.Debug("save url to db, url:", url, ",domain:", task.Domain,",path:",savePath,",file:",saveFile,",saveKey:",string(saveKey))
 
 	if(this.CompressBody){
 		store.AddValueCompress(config.SnapshotBucketKey,saveKey,pageItem.Body)

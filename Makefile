@@ -93,6 +93,7 @@ config: update_commit_log
 	go get github.com/asdine/storm
 	go get github.com/julienschmidt/httprouter
 	go get github.com/rs/xid
+	go get github.com/seiflotfy/cuckoofilter
 
 
 dist: cross-build package

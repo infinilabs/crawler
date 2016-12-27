@@ -18,9 +18,12 @@ function drawRow(rowData) {
     }
     $("#records").append(row);
 
+
+
     if(rowData.page != undefined ){
-        col1= getdata(rowData.page.domain);
-        col2= getdata(rowData.page.path);
+        col1= getdata(rowData.domain);
+        col2= getdata(rowData.path);
+
         if(rowData.page.metadata!=undefined){
             col3=getdata(rowData.page.metadata.title);
         }else{

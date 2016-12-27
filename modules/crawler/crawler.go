@@ -30,15 +30,14 @@ import (
 
 var signalChannels []*chan bool
 var quitChannels []*chan bool
-var started = false
-
+var crawlerStarted bool
 func (this CrawlerModule) Name() string {
 	return "Crawler"
 }
 
 func (this CrawlerModule) Start(env *Env) {
-	if started {
-		log.Error("crawler already started, please stop it first.")
+	if crawlerStarted {
+		log.Error("crawler already crawlerStarted, please stop it first.")
 		return
 	}
 
@@ -54,7 +53,7 @@ func (this CrawlerModule) Start(env *Env) {
 			quitC := make(chan bool, 1)
 			signalChannels[i] = &signalC
 			quitChannels[i] = &quitC
-			go runPipeline(env, &signalC, &quitC, i)
+			go this.runPipeline(env, &signalC, &quitC, i)
 
 		}
 	} else {
@@ -62,12 +61,12 @@ func (this CrawlerModule) Start(env *Env) {
 		return
 	}
 
-	started = true
+	crawlerStarted = true
 }
 
 func (this CrawlerModule) Stop() error {
-	if started {
-		started = false
+	if crawlerStarted {
+		crawlerStarted = false
 		log.Debug("start shutting down crawler")
 		for i, item := range signalChannels {
 			if item != nil {
@@ -85,35 +84,35 @@ func (this CrawlerModule) Stop() error {
 		}
 
 	} else {
-		log.Error("crawler is not started, please start it first.")
+		log.Error("crawler is not crawlerStarted, please start it first.")
 	}
 
 	return nil
 }
 
-func runPipeline(env *Env, signalC *chan bool, quitC *chan bool, shard int) {
+func (this CrawlerModule) runPipeline(env *Env, signalC *chan bool, quitC *chan bool, shard int) {
 
 	quit := make(chan bool, 1)
 	var wg sync.WaitGroup
 	go func() {
 		for {
 			select {
-			case <- quit:
+			case <-quit:
+				crawlerStarted = false
 				return
 			default:
-				if started {
+				if crawlerStarted {
 					log.Trace("waiting url to fetch, shard:", shard)
 					taskID := queue.Pop(config.FetchChannel)
+					wg.Add(1)
 					log.Trace("shard:", shard, ",task received:", string(taskID))
-					execute(string(taskID), env, &wg)
+					this.execute(string(taskID), env, &wg)
 					log.Trace("shard:", shard, ",task finished:", string(taskID))
-
 				}
 			}
-
 		}
 	}()
-	log.Trace("fetch task started, shard:", shard)
+	log.Trace("fetch task crawlerStarted, shard:", shard)
 	<-*signalC
 	log.Trace("fetch task gonna exit, waiting task to finish, shard:", shard)
 	quit <- true
@@ -121,12 +120,10 @@ func runPipeline(env *Env, signalC *chan bool, quitC *chan bool, shard int) {
 	log.Trace("fetch task finished, shard:", shard)
 	*quitC <- true
 	log.Trace("fetch task exit, shard:", shard)
-
 }
 
-func execute(taskId string, env *Env, wg *sync.WaitGroup) {
+func (this CrawlerModule) execute(taskId string, env *Env, wg *sync.WaitGroup) {
 	var pipeline *Pipeline
-	wg.Add(1)
 	defer func() {
 		wg.Done()
 		if !env.IsDebug {
@@ -142,8 +139,8 @@ func execute(taskId string, env *Env, wg *sync.WaitGroup) {
 
 	pipeline = NewPipeline("crawler")
 
-	pipeline.Context(&Context{Env: env}).
-		Start(Start{ID: taskId}).
+	pipeline.Context(&Context{Phrase:config.PhraseCrawler}).
+		Start(Start{ID: &taskId}).
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
 		Join(UrlFilterJoint{}).
 		Join(LoadMetadataJoint{}).

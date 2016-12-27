@@ -19,10 +19,13 @@ package pipe
 import (. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/tasks"
 	"github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/types"
+	"errors"
 )
 
 type Start struct {
-	ID string
+	ID *string
+	Task *types.Task
 }
 
 func (this Start) Name() string {
@@ -33,10 +36,23 @@ func (this Start) Process(context *Context) (*Context, error) {
 
 	seelog.Trace("start process")
 
-	//init task record
-	task:=tasks.LoadTaskByID(this.ID)
+	var task *types.Task
+	if(this.Task!=nil){
+		task=this.Task
+	}else if(this.ID !=nil){
+		//init task record
+		t,err:=tasks.GetTask(*this.ID)
+		if(err!=nil){
+			panic(err)
+		}
+		task=&t
+	}else{
+		panic(errors.New("task not set"))
+	}
 
-	context.Set(CONTEXT_CRAWLER_TASK,&task)
+
+
+	context.Set(CONTEXT_CRAWLER_TASK,task)
 	context.Set(CONTEXT_ORIGINAL_URL,task.Seed.Url) //TODO remove
 	context.Set(CONTEXT_URL,task.Seed.Url)  //TODO remove
 	context.Set(CONTEXT_DEPTH,task.Seed.Depth)  //TODO remove

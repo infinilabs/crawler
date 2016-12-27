@@ -29,8 +29,7 @@ type Hub struct {
 	handlers map[string]WebsocketHandlerFunc
 }
 
-type WebsocketHandlerFunc func(c *WebsocketConnection,array []string)
-
+type WebsocketHandlerFunc func(c *WebsocketConnection, array []string)
 
 var h = Hub{
 	broadcast:   make(chan []byte),
@@ -45,12 +44,12 @@ var runningHub = false
 // Register command handlers
 func (h *Hub) registerHandlers(env *env.Env) {
 	handler := Command{Env: env}
-	HandleWebSocketCommand("HELP",handler.Help)
-	HandleWebSocketCommand("SEED",handler.AddSeed)
-	HandleWebSocketCommand("LOG",handler.UpdateLogLevel)
-	HandleWebSocketCommand("DIS",handler.Dispatch)
+	HandleWebSocketCommand("HELP", handler.Help)
+	HandleWebSocketCommand("SEED", handler.AddSeed)
+	HandleWebSocketCommand("LOG", handler.UpdateLogLevel)
+	HandleWebSocketCommand("DIS", handler.Dispatch)
+	HandleWebSocketCommand("GET_TASK", handler.GetTask)
 }
-
 
 func InitWebSocket(env *env.Env) {
 	if !runningHub {
@@ -59,11 +58,10 @@ func InitWebSocket(env *env.Env) {
 	}
 }
 
-func HandleWebSocketCommand(cmd string,handler func(c *WebsocketConnection,array []string))  {
-	cmd=strings.ToLower(strings.TrimSpace(cmd))
-	h.handlers[cmd]=WebsocketHandlerFunc(handler)
+func HandleWebSocketCommand(cmd string, handler func(c *WebsocketConnection, array []string)) {
+	cmd = strings.ToLower(strings.TrimSpace(cmd))
+	h.handlers[cmd] = WebsocketHandlerFunc(handler)
 }
-
 
 func (h *Hub) RunHub() {
 	for {

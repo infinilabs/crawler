@@ -25,7 +25,7 @@ import (
 
 func TestNormailzeLinks(t *testing.T) {
 
-	context:= &pipeline.Context{Env:env.EmptyEnv()}
+	context:= &pipeline.Context{}
 	context.data =map[pipeline.ContextKey]interface{}{}
 	context.Set(CONTEXT_URL,"http://elasticsearch.cn/")
 	context.Set(CONTEXT_REFERENCE_URL,"http://elasticsearch.cn/")
@@ -46,7 +46,7 @@ func TestNormailzeLinks(t *testing.T) {
 
 func TestNormailzeLinks1(t *testing.T) {
 
-	context:= &pipeline.Context{Env:env.EmptyEnv()}
+	context:= &pipeline.Context{}
 	context.data =map[pipeline.ContextKey]interface{}{}
 	context.Set(CONTEXT_URL,"http://localhost/")
 	context.Set(CONTEXT_DEPTH,1)
@@ -71,7 +71,7 @@ func TestNormailzeLinks1(t *testing.T) {
 
 func TestNormailzeLinks2(t *testing.T) {
 
-	context:= &pipeline.Context{Env:env.EmptyEnv()}
+	context:= &pipeline.Context{}
 	context.data =map[pipeline.ContextKey]interface{}{}
 	context.Set(CONTEXT_URL,"http://127.0.0.1:8080/modeling-your-data.html")
 	context.Set(CONTEXT_DEPTH,1)

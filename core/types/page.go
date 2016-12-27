@@ -30,9 +30,6 @@ type KV struct {
 }
 
 type PageItem struct {
-	Proto      string `storm:"index" json:"proto,omitempty"`
-	Domain     string  `storm:"index" json:"domain,omitempty"`            // elastic.co
-	UrlPath    string  `storm:"index" json:"path,omitempty"`            // /index.html
 	Headers    map[string][]string`storm:"inline" json:"headers,omitempty"` // key:value
 	Parameters []KV   `storm:"inline" json:"parameters,omitempty"`             // key:value
 	Images     []KV `storm:"inline" json:"images,omitempty"`// images within this site, img:desc
@@ -66,13 +63,18 @@ type Seed struct {
 type TaskStatus int
 
 const TaskCreated  =0
-const TaskFetchStarted  =1
 const TaskFetchFailed  =2
 const TaskFetchSuccess  =3
 
+type TaskPhrase int
+
 type Task struct {
-	ID            string    `storm:"id,unique" json:"id"`
-	Url           string `storm:"index" json:"url,omitempty"`
+	ID            string     `storm:"id,unique" json:"id"`
+	Url           string     `storm:"index" json:"url,omitempty"`
+	Proto      string `storm:"index" json:"proto,omitempty"`
+	Domain     string  `storm:"index" json:"domain,omitempty"`            // elastic.co
+	UrlPath    string  `storm:"index" json:"path,omitempty"`            // /index.html
+	Phrase        TaskPhrase `storm:"index" json:"phrase"`
 	Status        TaskStatus `storm:"index" json:"status"`
 	Seed          *Seed `storm:"inline" json:"seed,omitempty"`
 	Page          *PageItem `storm:"inline" json:"page,omitempty"`
