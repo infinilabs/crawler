@@ -17,15 +17,14 @@ limitations under the License.
 package pipe
 
 import (. "github.com/medcl/gopa/core/pipeline"
-. "github.com/medcl/gopa/core/types"
-	"github.com/medcl/gopa/core/tasks"
+ "github.com/medcl/gopa/core/model"
 	log "github.com/cihub/seelog"
-)
+	)
 
-type End struct {
-}
+	type End struct {
+	}
 
-func (this End) Name() string {
+	func (this End) Name() string {
 	return "end"
 }
 
@@ -33,13 +32,13 @@ func (this End) Process(context *Context) (*Context, error) {
 
 	log.Trace("end process")
 
-	task:=context.Get(CONTEXT_CRAWLER_TASK).(*Task)
-	task.Status=TaskFetchSuccess
+	task:=context.Get(CONTEXT_CRAWLER_TASK).(*model.Task)
+	task.Status=model.TaskFetchSuccess
 	task.Phrase=context.Phrase
 
 	if(context.IsBreak()){
 		log.Trace("broken pipeline,",context.Payload)
-		task.Status=TaskFetchFailed
+		task.Status=model.TaskFetchFailed
 		task.Message=context.Payload
 	}
 
@@ -48,14 +47,14 @@ func (this End) Process(context *Context) (*Context, error) {
 	pageItem:=context.Get(CONTEXT_PAGE_ITEM)
 
 	if(pageItem!=nil){
-		task.Page=pageItem.(*PageItem)
+		task.Page=pageItem.(*model.PageItem)
 		meta,b:= context.GetMap(CONTEXT_PAGE_METADATA)
 		if(b){
 			task.Page.Metadata=&meta
 		}
 	}
 
-	tasks.UpdateTask(task)
+	model.UpdateTask(task)
 
 	return context, nil
 }

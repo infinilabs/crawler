@@ -29,7 +29,7 @@ import (
 
 	"errors"
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/types"
+	."github.com/medcl/gopa/core/model"
 )
 
 //parse to get url root
@@ -75,7 +75,7 @@ func noRedirect(req *http.Request, via []*http.Request) error {
 	return errors.New("Don't handle redirect!")
 }
 
-func get(page *types.PageItem, url string, cookie string) ([]byte, error) {
+func get(page *PageItem, url string, cookie string) ([]byte, error) {
 
 	log.Debug("let's get :" + url)
 
@@ -113,9 +113,6 @@ func get(page *types.PageItem, url string, cookie string) ([]byte, error) {
 	}
 
 	resp, err := client.Do(reqest)
-	//page.Domain = reqest.Host
-	//page.Proto = reqest.Proto
-	//page.UrlPath = reqest.URL.Path
 
 	if err != nil {
 		if resp != nil && resp.StatusCode == 301 && resp.StatusCode == 302 {
@@ -238,7 +235,7 @@ func post(url string, cookie string, postStr string) []byte {
 	return nil
 }
 
-func HttpGetWithCookie(page *types.PageItem, resource string, cookie string) (msg []byte, err error) {
+func HttpGetWithCookie(page *PageItem, resource string, cookie string) (msg []byte, err error) {
 
 	out, err := get(page, resource, cookie)
 	return out, err

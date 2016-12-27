@@ -19,24 +19,21 @@ package pipe
 import . "github.com/medcl/gopa/core/pipeline"
 
 const (
-	CONTEXT_CRAWLER_TASK       ContextKey = "CRAWLER_TASK"
-	CONTEXT_ORIGINAL_URL       ContextKey = "ORIGINAL_URL"
-	CONTEXT_URL       ContextKey = "URL"
-	CONTEXT_REFERENCE_URL       ContextKey = "REFERENCE_URL"
-	CONTEXT_DEPTH       ContextKey = "DEPTH"
-	CONTEXT_PAGE_BODY_BYTES ContextKey = "PAGE_BODY_BYTES"
+	CONTEXT_CRAWLER_TASK         ContextKey = "CRAWLER_TASK"
+	CONTEXT_ORIGINAL_URL         ContextKey = "ORIGINAL_URL"
+	CONTEXT_URL                  ContextKey = "URL"
+	CONTEXT_REFERENCE_URL        ContextKey = "REFERENCE_URL"
+	CONTEXT_DEPTH                ContextKey = "DEPTH"
+	CONTEXT_PAGE_BODY_BYTES      ContextKey = "PAGE_BODY_BYTES"
 	CONTEXT_PAGE_BODY_PLAIN_TEXT ContextKey = "PAGE_BODY_PLAIN_TEXT" //extracted plain text from html
-	CONTEXT_PAGE_ITEM ContextKey = "PAGE"
-	CONTEXT_HOST ContextKey = "HOST"
-	CONTEXT_URL_PATH ContextKey = "URL_PATH"
-	CONTEXT_PAGE_METADATA ContextKey = "PAGE_METADATA"
-	CONTEXT_PAGE_LINKS ContextKey = "PAGE_LINKS"
-	CONTEXT_SAVE_PATH ContextKey = "SAVE_PATH"
-	CONTEXT_SAVE_FILENAME ContextKey = "SAVE_FILENAME"
-	CONTEXT_PAGE_LAST_FETCH ContextKey = "PAGE_LAST_FETCH"
-
+	CONTEXT_PAGE_ITEM            ContextKey = "PAGE"
+	CONTEXT_HOST                 ContextKey = "HOST"
+	CONTEXT_URL_PATH             ContextKey = "URL_PATH"
+	CONTEXT_PAGE_METADATA        ContextKey = "PAGE_METADATA"
+	CONTEXT_PAGE_LINKS           ContextKey = "PAGE_LINKS"
+	CONTEXT_SAVE_PATH            ContextKey = "SAVE_PATH"
+	CONTEXT_SAVE_FILENAME        ContextKey = "SAVE_FILENAME"
+	CONTEXT_PAGE_LAST_FETCH      ContextKey = "PAGE_LAST_FETCH"
 
 	CACHE_TTL_TIMEOUT_HOST ContextKey = "CACHE_TTL_TIMEOUT_HOST"
-
 )
-

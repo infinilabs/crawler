@@ -3,7 +3,7 @@ package config
 import (
 	. "github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/filter"
-	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/core/model"
 )
 const (
 	FetchChannel QueueKey = "fetch"
@@ -21,5 +21,5 @@ const StatsBucketKey string = "Stats"
 const SnapshotBucketKey string = "Snapshot"
 const SnapshotMappingBucketKey string = "SnapshotMapping"
 
-const PhraseChecker  types.TaskPhrase =1
-const PhraseCrawler  types.TaskPhrase =2
+const PhraseChecker  model.TaskPhrase =1
+const PhraseCrawler  model.TaskPhrase =2

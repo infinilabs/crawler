@@ -21,7 +21,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/pipeline"
-	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/core/model"
 	"strings"
 	"regexp"
 	"github.com/medcl/gopa/core/util"
@@ -152,7 +152,7 @@ func (this ParserJoint) Process(s *Context) (*Context, error) {
 	//dispatch links
 	for url, _ := range this.links {
 		if this.DispatchLinks {
-			queue.Push(config.CheckChannel,types.NewTaskSeed(url, refUrl, depth+1).MustGetBytes())
+			queue.Push(config.CheckChannel,model.NewTaskSeed(url, refUrl, depth+1).MustGetBytes())
 		}
 	}
 

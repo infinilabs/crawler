@@ -19,7 +19,7 @@ package pipe
 import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/pipeline"
-	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/core/model"
 	"strings"
 	"path"
 	"github.com/medcl/gopa/core/stats"
@@ -44,8 +44,8 @@ func (this SaveToDBJoint) Process(c *Context) (*Context, error) {
 
 	url := c.MustGetString(CONTEXT_URL)
 
-	task := c.Get(CONTEXT_CRAWLER_TASK).(*types.Task)
-	pageItem := c.Get(CONTEXT_PAGE_ITEM).(*types.PageItem)
+	task := c.Get(CONTEXT_CRAWLER_TASK).(*model.Task)
+	pageItem := c.Get(CONTEXT_PAGE_ITEM).(*model.PageItem)
 	savePath := c.MustGetString(CONTEXT_SAVE_PATH)
 	saveFile := c.MustGetString(CONTEXT_SAVE_FILENAME)
 	domain := c.MustGetString(CONTEXT_HOST)

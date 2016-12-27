@@ -21,8 +21,7 @@ import (
 	"github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/logger"
 	"github.com/medcl/gopa/core/queue"
-	"github.com/medcl/gopa/core/tasks"
-	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/modules/config"
 	"strings"
 )
@@ -39,7 +38,7 @@ func (this *Command) AddSeed(c *WebsocketConnection, a []string) {
 
 	url := a[1]
 	if len(url) > 0 {
-		queue.Push(config.CheckChannel, types.NewTaskSeed(url, "", 0).MustGetBytes())
+		queue.Push(config.CheckChannel, model.NewTaskSeed(url, "", 0).MustGetBytes())
 		c.WriteMessage([]byte("url " + url + " success added to pending fetch queue"))
 		return
 	}
@@ -71,7 +70,7 @@ func (this *Command) GetTask(c *WebsocketConnection, a []string) {
 
 	taskId := a[1]
 	if len(taskId) > 0 {
-		task, err := tasks.GetTask(taskId)
+		task, err := model.GetTask(taskId)
 		if err != nil {
 			c.WriteMessage([]byte(err.Error()))
 		}

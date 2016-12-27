@@ -52,16 +52,7 @@
                     </tbody>
                 </table>
 
-                <ul class="uk-pagination">
-                    <li class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
-                    <li class="uk-active"><span>1</span></li>
-                    <li><a href="#">2</a></li>
-                    <li><a href="#">3</a></li>
-                    <li><a href="#">4</a></li>
-                    <li><span>...</span></li>
-                    <li><a href="#">20</a></li>
-                    <li><a href="#"><i class="uk-icon-angle-double-right"></i></a></li>
-                </ul>
+                <ul class="uk-pagination" data-uk-pagination="{items:100, itemsOnPage:10}"></ul>
 
             </div>
         </div>
@@ -79,6 +70,10 @@
             $("#alert").text(data.total);
             drawTable(data.result);
         }
+    });
+
+    $('[data-uk-pagination]').on('select.uk.pagination', function(e, pageIndex){
+        alert('You have selected page: ' + (pageIndex+1));
     });
 
 

@@ -26,7 +26,7 @@ import (
 	"strings"
 	"time"
 	"sync"
-	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/core/model"
 )
 
 var l sync.RWMutex
@@ -34,7 +34,7 @@ var l sync.RWMutex
 type ContextKey string
 
 type Context struct {
-	Phrase types.TaskPhrase
+	Phrase model.TaskPhrase
 	data      map[ContextKey]interface{}
 	breakFlag bool
 	Payload   interface{}

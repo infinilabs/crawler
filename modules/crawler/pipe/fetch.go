@@ -18,13 +18,13 @@ package pipe
 
 import (
 	"errors"
+	"fmt"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/stats"
-	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/util"
 	"time"
-	"fmt"
 )
 
 type FetchJoint struct {
@@ -39,7 +39,7 @@ func (this FetchJoint) Name() string {
 
 type signal struct {
 	flag bool
-	err error
+	err  error
 }
 
 func (this FetchJoint) Process(context *Context) (*Context, error) {
@@ -58,7 +58,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 	log.Debug("start fetch url,", requestUrl)
 	flg := make(chan signal, 1)
 	go func() {
-		pageItem := types.PageItem{}
+		pageItem := model.PageItem{}
 		context.Set(CONTEXT_PAGE_LAST_FETCH, time.Now().UTC())
 
 		//start to fetch remote content
@@ -69,7 +69,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 				if pageItem.StatusCode == 404 {
 					log.Info("skip while 404, ", requestUrl, " , ", pageItem.StatusCode)
 					context.Break("fetch 404")
-					flg <-  signal{flag:false,err:errors.New("404 NOT FOUND")}
+					flg <- signal{flag: false, err: errors.New("404 NOT FOUND")}
 					return
 				}
 			}
@@ -79,10 +79,10 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 			context.Set(CONTEXT_PAGE_BODY_BYTES, body)
 			context.Set(CONTEXT_PAGE_ITEM, &pageItem)
 			log.Debug("exit fetchUrl method:", requestUrl)
-			flg <- signal{flag:true}
+			flg <- signal{flag: true}
 
 		} else {
-			flg <-  signal{flag:false,err:err}
+			flg <- signal{flag: false, err: err}
 		}
 	}()
 
@@ -91,21 +91,21 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 	//监听通道，由于设有超时，不可能泄露
 	select {
 	case <-t.C:
-		log.Error("fetching url time out, ", requestUrl,", ",this.timeout)
-		stats.Increment(domain, stats.STATS_FETCH_TIMEOUT_COUNT)
-		panic(errors.New(fmt.Sprintf("fetching url time out, %s, %s", requestUrl,this.timeout)))
+		log.Error("fetching url time out, ", requestUrl, ", ", this.timeout)
+		stats.Increment("domain.stats", domain+"."+stats.STATS_FETCH_TIMEOUT_COUNT)
+		panic(errors.New(fmt.Sprintf("fetching url time out, %s, %s", requestUrl, this.timeout)))
 		return nil, errors.New("fetch url time out")
 	case value := <-flg:
 		if value.flag {
 			log.Debug("fetching url normal exit, ", requestUrl)
-			stats.Increment(domain, stats.STATS_FETCH_SUCCESS_COUNT)
+			stats.Increment("domain.stats", domain+"."+stats.STATS_FETCH_SUCCESS_COUNT)
 		} else {
 			log.Debug("fetching url error exit, ", requestUrl)
-			if(value.err!=nil){
+			if value.err != nil {
 				context.Break(value.err.Error())
 				panic(value.err.Error())
 			}
-			stats.Increment(domain, stats.STATS_FETCH_FAIL_COUNT)
+			stats.Increment("domain.stats", domain+"."+stats.STATS_FETCH_FAIL_COUNT)
 		}
 		return context, nil
 	}

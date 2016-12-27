@@ -35,7 +35,7 @@ func Register() {
 	//module.Register(statsd.StatsDModule{})
 	module.Register(queue.DiskQueue{})
 	module.Register(crawler.CheckerModule{})
-	//module.Register(crawler.CrawlerModule{})
+	module.Register(crawler.CrawlerModule{})
 	module.Register(dispatcher.DispatcherModule{})
 	module.Register(http.APIModule{})
 }

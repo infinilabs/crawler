@@ -116,7 +116,7 @@
             // 加载统计数据
             $.get('/stats').done(function (data) {
                 if(data["queue.check"]){
-                    $("#checker_task_num").text(data["queue.check"].pop+" / "+data["queue.check"].push+", valid: "+data["checker.url"].get_valid_seed);
+                    $("#checker_task_num").text(data["queue.check"].pop+" / "+data["queue.check"].push+", valid: "+data["checker.url"].valid_seed);
                     option.series[0].data[0].value = ((data["queue.check"].pop/data["queue.check"].push)*100).toFixed(2) - 0;
                 }
 

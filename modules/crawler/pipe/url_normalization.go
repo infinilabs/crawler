@@ -24,7 +24,7 @@ import (
 	"sort"
 	"strings"
 	"time"
-	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/core/model"
 )
 
 type UrlNormalizationJoint struct {
@@ -160,8 +160,9 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 	context.Set(CONTEXT_HOST, currentURI.Host)
 	context.Set(CONTEXT_URL_PATH, currentURI.Path)
 
-	task:=context.Get(CONTEXT_CRAWLER_TASK).(*types.Task)
+	task:=context.Get(CONTEXT_CRAWLER_TASK).(*model.Task)
 	task.Domain=currentURI.Host
+	task.Scheme=currentURI.Scheme
 	task.UrlPath=currentURI.Path
 
 	filePath := ""

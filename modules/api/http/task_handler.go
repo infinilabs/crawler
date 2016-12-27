@@ -21,8 +21,7 @@ import (
 	_ "github.com/jmoiron/jsonq"
 	"github.com/julienschmidt/httprouter"
 	"github.com/medcl/gopa/core/queue"
-	"github.com/medcl/gopa/core/tasks"
-	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/modules/config"
 	"net/http"
 	"strconv"
@@ -31,7 +30,7 @@ import (
 func (this *Handler) TaskDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	if req.Method == DELETE.String() {
 		id := ps.ByName("id")
-		err := tasks.DeleteTask(id)
+		err := model.DeleteTask(id)
 		if err != nil {
 			this.error(w, err)
 		} else {
@@ -43,7 +42,7 @@ func (this *Handler) TaskDeleteAction(w http.ResponseWriter, req *http.Request, 
 }
 func (this *Handler) TaskGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
-	task, err := tasks.GetTask(id)
+	task, err := model.GetTask(id)
 	if err != nil {
 		this.error(w, err)
 	} else {
@@ -67,7 +66,7 @@ func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request, ps htt
 		}
 		logger.Trace("receive new seed:", seed)
 
-		task := types.NewTaskSeed(seed, "", 0)
+		task := model.NewTaskSeed(seed, "", 0)
 
 		queue.Push(config.CheckChannel, task.MustGetBytes())
 
@@ -88,7 +87,7 @@ func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request, ps htt
 			size = 10
 		}
 
-		total, tasks, err := tasks.GetTaskList(from, size, domain)
+		total, tasks, err := model.GetTaskList(from, size, domain)
 		if err != nil {
 			this.error(w, err)
 		} else {

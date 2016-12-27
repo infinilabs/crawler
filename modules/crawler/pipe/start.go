@@ -16,16 +16,16 @@ limitations under the License.
 
 package pipe
 
-import (. "github.com/medcl/gopa/core/pipeline"
-	"github.com/medcl/gopa/core/tasks"
-	"github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/types"
+import (
 	"errors"
+	"github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/model"
+	. "github.com/medcl/gopa/core/pipeline"
 )
 
 type Start struct {
-	ID *string
-	Task *types.Task
+	ID   *string
+	Task *model.Task
 }
 
 func (this Start) Name() string {
@@ -36,28 +36,25 @@ func (this Start) Process(context *Context) (*Context, error) {
 
 	seelog.Trace("start process")
 
-	var task *types.Task
-	if(this.Task!=nil){
-		task=this.Task
-	}else if(this.ID !=nil){
+	var task *model.Task
+	if this.Task != nil {
+		task = this.Task
+	} else if this.ID != nil {
 		//init task record
-		t,err:=tasks.GetTask(*this.ID)
-		if(err!=nil){
+		t, err := model.GetTask(*this.ID)
+		if err != nil {
 			panic(err)
 		}
-		task=&t
-	}else{
+		task = &t
+	} else {
 		panic(errors.New("task not set"))
 	}
 
-
-
-	context.Set(CONTEXT_CRAWLER_TASK,task)
-	context.Set(CONTEXT_ORIGINAL_URL,task.Seed.Url) //TODO remove
-	context.Set(CONTEXT_URL,task.Seed.Url)  //TODO remove
-	context.Set(CONTEXT_DEPTH,task.Seed.Depth)  //TODO remove
-	context.Set(CONTEXT_REFERENCE_URL,task.Seed.Reference)  //TODO remove
+	context.Set(CONTEXT_CRAWLER_TASK, task)
+	context.Set(CONTEXT_ORIGINAL_URL, task.Seed.Url)        //TODO remove
+	context.Set(CONTEXT_URL, task.Seed.Url)                 //TODO remove
+	context.Set(CONTEXT_DEPTH, task.Seed.Depth)             //TODO remove
+	context.Set(CONTEXT_REFERENCE_URL, task.Seed.Reference) //TODO remove
 
 	return context, nil
 }
-

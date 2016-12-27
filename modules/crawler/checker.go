@@ -24,8 +24,7 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/stats"
-	"github.com/medcl/gopa/core/tasks"
-	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/modules/config"
 	. "github.com/medcl/gopa/modules/crawler/pipe"
 	"runtime"
@@ -88,7 +87,7 @@ func  (this CheckerModule)execute(wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	data := queue.Pop(config.CheckChannel)
-	url := types.TaskSeedFromBytes(data)
+	url := model.TaskSeedFromBytes(data)
 
 	stats.Increment("checker.url", "finished")
 
@@ -107,8 +106,8 @@ func  (this CheckerModule)execute(wg *sync.WaitGroup) {
 		panic(err)
 	}
 
-	task := types.Task{Seed: &url}
-	err = tasks.CreateTask(&task)
+	task := model.Task{Seed: &url}
+	err = model.CreateTask(&task)
 	if err != nil {
 		panic(err)
 	}
@@ -136,7 +135,12 @@ func  (this CheckerModule)execute(wg *sync.WaitGroup) {
 		Run()
 
 	//send to disk queue
-	queue.Push(config.FetchChannel,[]byte(task.ID))
+	if(len(task.Domain)>0){
+		stats.Increment("domain.stats", task.Domain+"."+stats.STATS_FETCH_TOTAL_COUNT)
+		queue.Push(config.FetchChannel,[]byte(task.ID))
+	}else{
+		log.Debug("invalid domain, ",url.Url)
+	}
 
 	stats.Increment("checker.url", "valid_seed")
 

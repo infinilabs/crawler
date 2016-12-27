@@ -19,7 +19,7 @@ package pipe
 import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/pipeline"
-	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/util"
 	"errors"
 	. "net/url"
@@ -51,8 +51,8 @@ func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 	if !ok {
 		return nil, errors.New("invalid url")
 	}
-	task := c.Get(CONTEXT_PAGE_ITEM).(*types.Task)
-	pageItem := c.Get(CONTEXT_PAGE_ITEM).(*types.PageItem)
+	task := c.Get(CONTEXT_PAGE_ITEM).(*model.Task)
+	pageItem := c.Get(CONTEXT_PAGE_ITEM).(*model.PageItem)
 
 	domain := c.MustGetString(CONTEXT_HOST)
 	dir := c.MustGetString(CONTEXT_SAVE_PATH)

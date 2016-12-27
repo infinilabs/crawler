@@ -20,7 +20,7 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 	"encoding/hex"
 	"crypto/md5"
-	"github.com/medcl/gopa/core/types"
+	"github.com/medcl/gopa/core/model"
 	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/global"
 )
@@ -55,9 +55,9 @@ func (this PublishJoint) Process(c *Context) (*Context, error) {
 
 	links,b:= c.GetMap(CONTEXT_PAGE_LINKS)
 	if(b){
-		maps:=[]types.PageLink{}
+		maps:=[]model.PageLink{}
 		for k,v:= range links{
-			item:=types.PageLink{Url:k,Label:v.(string)}
+			item:=model.PageLink{Url:k,Label:v.(string)}
 			maps=append(maps,item)
 		}
 		data["links"]=maps

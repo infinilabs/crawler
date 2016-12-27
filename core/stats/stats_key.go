@@ -16,28 +16,11 @@ limitations under the License.
 
 package stats
 
-const STATS_FETCH_COUNT = "stats.count.fetch.total"
-const STATS_FETCH_SUCCESS_COUNT = "stats.count.fetch.success"
-const STATS_FETCH_FAIL_COUNT = "stats.count.fetch.fail"
-const STATS_FETCH_TIMEOUT_COUNT = "stats.count.fetch.timeout"
-const STATS_FETCH_IGNORE_COUNT = "stats.count.fetch.ignore"
-const STATS_PARSE_COUNT = "stats.count.parse.total"
-const STATS_PARSE_SUCCESS_COUNT = "stats.count.parse.success"
-const STATS_PARSE_FAIL_COUNT = "stats.count.parse.fail"
-const STATS_PARSE_IGNORE_COUNT = "stats.count.ignore.fail"
-
-
-const STATS_SAVE_DUPLICATED_URL = "stats.count.save.duplicated"
-
-
-const STATS_CHECKER_PUSH_CHAN_COUNT = "stats.count.checker.chan.push"
-const STATS_CHECKER_PUSH_DISK_COUNT = "stats.count.checker.disk.push"
-const STATS_CHECKER_POP_CHAN_COUNT = "stats.count.checker.chan.pop"
-const STATS_CHECKER_POP_DISK_COUNT = "stats.count.checker.disk.pop"
-const STATS_FETCH_PUSH_CHAN_COUNT = "stats.count.fetch.chan.push"
-const STATS_FETCH_PUSH_DISK_COUNT = "stats.count.fetch.disk.push"
-const STATS_FETCH_POP_CHAN_COUNT = "stats.count.fetch.chan.pop"
-const STATS_FETCH_POP_DISK_COUNT = "stats.count.fetch.disk.pop"
+const STATS_FETCH_TOTAL_COUNT = "fetch.total"
+const STATS_FETCH_SUCCESS_COUNT = "fetch.success"
+const STATS_FETCH_FAIL_COUNT = "fetch.fail"
+const STATS_FETCH_TIMEOUT_COUNT = "fetch.timeout"
+const STATS_FETCH_IGNORE_COUNT = "fetch.ignore"
 
 const STATS_STORAGE_FILE_SIZE = "stats.sum.file.size"
 const STATS_STORAGE_FILE_COUNT = "stats.sum.file.count"
