@@ -18,7 +18,6 @@ package pipe
 
 import (
 	"testing"
-	"github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/pipeline"
 	"github.com/stretchr/testify/assert"
 )
@@ -26,21 +25,21 @@ import (
 func TestUrlFilter(t *testing.T) {
 
 	context:= &pipeline.Context{}
-	context.data =map[pipeline.ContextKey]interface{}{}
+	context.Init()
 	context.Set(CONTEXT_URL,"http://elasticsearch.cn/")
 	context.Set(CONTEXT_ORIGINAL_URL,"http://elasticsearch.cn/")
-	parse:=UrlFilterJoint{}
+	parse:= UrlExtFilterJoint{}
 	parse.Process(context)
 	assert.Equal(t,false,context.IsBreak())
 
 	context.Set(CONTEXT_URL,"mailto:gg@gg.com")
 	parse.Process(context)
-	assert.Equal(t,true,context.IsBreak())
+	assert.Equal(t,true,context.IsExit())
 
 
 	context.Set(CONTEXT_URL,"asfasdf.gif")
 	parse.Process(context)
-	assert.Equal(t,true,context.IsBreak())
+	assert.Equal(t,true,context.IsExit())
 
 
 }

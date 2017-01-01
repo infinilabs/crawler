@@ -19,7 +19,6 @@ package crawler
 import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/core/filter"
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
@@ -89,26 +88,7 @@ func (this CheckerModule) execute() {
 
 	stats.Increment("checker.url", "finished")
 
-	log.Trace("cheking url:", string(url.Url))
-
-	//TODO 统一 url 格式 , url 目前可能是相对路径
-	b, err := filter.CheckThenAdd(config.CheckFilter, []byte(url.Url))
-	//checking
-	if b {
-		stats.Increment("checker.url", "duplicated")
-		log.Debug("url already pushed to fetch queue, ignore :", string(url.Url))
-		return
-	}
-	if err != nil {
-		log.Error(err)
-		panic(err)
-	}
-
 	task := model.Task{Seed: &url}
-	err = model.CreateTask(&task)
-	if err != nil {
-		panic(err)
-	}
 
 	var pipeline *Pipeline
 	defer func() {
@@ -126,10 +106,11 @@ func (this CheckerModule) execute() {
 	pipeline = NewPipeline("checker")
 
 	pipeline.Context(&Context{Phrase: config.PhraseChecker}).
-		Start(Start{Task: &task}).
+		Start(InitTask{Task: &task}).
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
-		Join(UrlFilterJoint{}).
-		End(End{}).
+		Join(UrlExtFilterJoint{}).
+		Join(UrlCheckedFilterJoint{}).
+		End(SaveTask{IsCreate:true}).
 		Run()
 
 	//send to disk queue

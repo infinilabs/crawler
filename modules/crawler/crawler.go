@@ -138,9 +138,9 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 	pipeline = NewPipeline("crawler")
 
 	pipeline.Context(&Context{Phrase: config.PhraseCrawler}).
-		Start(Start{ID: &taskId}).
+		Start(InitTask{ID: &taskId}).
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
-		Join(UrlFilterJoint{}).
+		Join(UrlExtFilterJoint{}).
 		Join(LoadMetadataJoint{}).
 		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 100}).
 		Join(FetchJoint{}).
@@ -148,7 +148,7 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 		//Join(SaveToFileSystemJoint{}).
 		Join(SaveToDBJoint{CompressBody: true}).
 		Join(PublishJoint{}).
-		End(End{}).
+		End(SaveTask{}).
 		Run()
 
 	if env.RuntimeConfig.TaskConfig.FetchDelayThreshold > 0 {

@@ -23,16 +23,16 @@ import (
 	"regexp"
 )
 
-type UrlFilterJoint struct {
+type UrlExtFilterJoint struct {
 	//ignore files end with js,css,apk,zip
 	SkipPageParsePattern *regexp.Regexp
 }
 
-func (this UrlFilterJoint) Name() string {
-	return "url_filter"
+func (this UrlExtFilterJoint) Name() string {
+	return "url_ext_filter"
 }
 
-func (this UrlFilterJoint) Process(context *Context) (*Context, error) {
+func (this UrlExtFilterJoint) Process(context *Context) (*Context, error) {
 	this.SkipPageParsePattern = regexp.MustCompile(".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b")
 	url := context.MustGetString(CONTEXT_URL)
 	orgUrl := context.MustGetString(CONTEXT_ORIGINAL_URL)
@@ -42,13 +42,13 @@ func (this UrlFilterJoint) Process(context *Context) (*Context, error) {
 	}
 
 	if (!this.valid(orgUrl)) || (url != orgUrl && (!this.valid(url))) {
-		context.Break("invalid url,"+url)
+		context.Exit("invalid url ext, "+url)
 	}
 
 	return context, nil
 }
 
-func (this UrlFilterJoint) valid(url string) bool {
+func (this UrlExtFilterJoint) valid(url string) bool {
 	if url == "" {
 		return false
 	}
@@ -72,7 +72,6 @@ func (this UrlFilterJoint) valid(url string) bool {
 		log.Trace("filteredUrl started with: javascript: , invalid")
 		return false
 	}
-
 
 	if this.SkipPageParsePattern.Match([]byte(url)) {
 		log.Trace("hit SkipPattern pattern,", url)

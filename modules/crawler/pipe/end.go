@@ -21,14 +21,15 @@ import (. "github.com/medcl/gopa/core/pipeline"
 	log "github.com/cihub/seelog"
 	)
 
-	type End struct {
+	type SaveTask struct {
+		IsCreate bool
 	}
 
-	func (this End) Name() string {
+	func (this SaveTask) Name() string {
 	return "end"
 }
 
-func (this End) Process(context *Context) (*Context, error) {
+func (this SaveTask) Process(context *Context) (*Context, error) {
 
 	log.Trace("end process")
 
@@ -54,7 +55,11 @@ func (this End) Process(context *Context) (*Context, error) {
 		}
 	}
 
-	model.UpdateTask(task)
+	if(this.IsCreate){
+		model.CreateTask(task)
+	}else{
+		model.UpdateTask(task)
+	}
 
 	return context, nil
 }

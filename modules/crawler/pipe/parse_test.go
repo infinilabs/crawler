@@ -18,7 +18,6 @@ package pipe
 
 import (
 	"testing"
-	"github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/pipeline"
 	"github.com/stretchr/testify/assert"
 )
@@ -29,8 +28,8 @@ func TestProcessLinks(t *testing.T) {
 		"<a href=\"/wiki/Marking/Users\">/wiki/Marking/Users</a>" +
 		" </div> </body> </html>"
 
-	context:= pipeline.Context{Env:env.EmptyEnv()}
-	context.data =map[pipeline.ContextKey]interface{}{}
+	context:= pipeline.Context{}
+	context.Init()
 	context.Set(CONTEXT_URL,"http://elasticsearch.cn/")
 	context.Set(CONTEXT_DEPTH,1)
 	context.Set(CONTEXT_PAGE_BODY_BYTES,[]byte(body))

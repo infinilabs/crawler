@@ -23,16 +23,16 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 )
 
-type Start struct {
+type InitTask struct {
 	ID   *string
 	Task *model.Task
 }
 
-func (this Start) Name() string {
+func (this InitTask) Name() string {
 	return "start"
 }
 
-func (this Start) Process(context *Context) (*Context, error) {
+func (this InitTask) Process(context *Context) (*Context, error) {
 
 	seelog.Trace("start process")
 

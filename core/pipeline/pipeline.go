@@ -20,13 +20,13 @@ import (
 	"fmt"
 	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/global"
+	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/rs/xid"
 	"runtime"
 	"strings"
-	"time"
 	"sync"
-	"github.com/medcl/gopa/core/model"
+	"time"
 )
 
 var l sync.RWMutex
@@ -34,14 +34,15 @@ var l sync.RWMutex
 type ContextKey string
 
 type Context struct {
-	Phrase model.TaskPhrase
+	Phrase    model.TaskPhrase
 	data      map[ContextKey]interface{}
 	breakFlag bool
+	exitFlag  bool
 	Payload   interface{}
 }
 
 /**
-break all pipeline
+break all pipelines, but the end phrase not included
 */
 func (this *Context) Break(msg interface{}) {
 	log.Trace("break,", msg)
@@ -49,8 +50,31 @@ func (this *Context) Break(msg interface{}) {
 	this.Payload = msg
 }
 
+func (this *Context) Init() {
+	l.Lock()
+	if this.data == nil {
+		this.data = map[ContextKey]interface{}{}
+	}
+	l.Unlock()
+}
+
 func (this *Context) IsBreak() bool {
 	return this.breakFlag
+}
+
+/**
+break all pipelines, without execute the end phrase
+*/
+func (this *Context) IsExit() bool {
+	return this.exitFlag
+}
+
+/**
+tell pipeline to exit all
+*/
+func (this *Context) Exit(msg interface{}) {
+	this.exitFlag = true
+	this.Payload = msg
 }
 
 func (this *Context) GetString(key ContextKey) (string, bool) {
@@ -114,7 +138,7 @@ func (this *Context) GetMap(key ContextKey) (map[string]interface{}, bool) {
 
 func (this *Context) Get(key ContextKey) interface{} {
 	l.RLock()
-	  v:=this.data[key]
+	v := this.data[key]
 	l.RUnlock()
 	return v
 }
@@ -142,11 +166,14 @@ func NewPipeline(name string) *Pipeline {
 	pipe := &Pipeline{}
 	pipe.id = xid.New().String()
 	pipe.name = strings.TrimSpace(name)
+	pipe.context = &Context{}
+	pipe.context.Init()
 	return pipe
 }
 
 func (this *Pipeline) Context(s *Context) *Pipeline {
 	this.context = s
+	this.context.Init()
 	return this
 }
 
@@ -155,15 +182,6 @@ func (this *Pipeline) GetID() string {
 }
 
 func (this *Pipeline) Start(s Joint) *Pipeline {
-
-	if this.context == nil {
-		this.context = &Context{}
-	}
-	if this.context.data == nil {
-		l.Lock()
-		this.context.data = map[ContextKey]interface{}{}
-		l.Unlock()
-	}
 	this.joints = []Joint{s}
 	return this
 }
@@ -191,7 +209,7 @@ func (this *Pipeline) Run() *Context {
 					log.Errorf("%s: %v", this.name, err)
 					//this.context.Break(err.Error())
 				}
-				log.Trace("error in pipe, ",this.name)
+				log.Trace("error in pipeline, ", this.name)
 				stats.Increment(this.name+".pipeline", "error")
 			}
 		}
@@ -202,10 +220,15 @@ func (this *Pipeline) Run() *Context {
 
 	var err error
 	for _, v := range this.joints {
-		log.Trace("pipe, ",this.name,", start joint,", v.Name())
+		log.Trace("pipe, ", this.name, ", start joint,", v.Name())
 		if this.context.IsBreak() {
 			log.Trace("break joint,", v.Name())
 			stats.Increment(this.name+".pipeline", "break")
+			break
+		}
+		if this.context.IsExit() {
+			log.Trace("exit joint,", v.Name())
+			stats.Increment(this.name+".pipeline", "exit")
 			break
 		}
 		startTime := time.Now()
@@ -218,16 +241,21 @@ func (this *Pipeline) Run() *Context {
 			this.context.Break(err.Error())
 			panic(err)
 		}
-		log.Trace(this.name,", end joint,", v.Name())
+		log.Trace(this.name, ", end joint,", v.Name())
 	}
 
 	return this.context
 }
 
 func (this *Pipeline) endPipeline() {
-	log.Trace("start finish piplne, ",this.name)
+	if(this.context.IsExit()){
+		log.Info("exit pipeline, ", this.name,", ",this.context.Payload)
+		return
+	}
+
+	log.Trace("start finish pipeline, ", this.name)
 	if this.endJoint != nil {
 		this.endJoint.Process(this.context)
 	}
-	log.Trace("end finish piplne, ",this.name)
+	log.Trace("end finish pipeline, ", this.name)
 }

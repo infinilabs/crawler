@@ -57,7 +57,7 @@ type PageLink struct {
 
 type Seed struct {
 	ID         int    `storm:"id,increment" json:"id,omitempty"`
-	Url        string `storm:"index" json:"url,omitempty"`
+	Url        string `storm:"index" json:"url,omitempty"` // the seed url may not cleaned, may miss the domain part, need reference to provide the complete url information
 	Reference  string `json:"reference,omitempty"`
 	Depth      int    `storm:"index" json:"depth,omitempty"`
 	CreateTime *Time  `storm:"index" json:"created,omitempty"`
