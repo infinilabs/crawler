@@ -249,7 +249,7 @@ func (this *Pipeline) Run() *Context {
 
 func (this *Pipeline) endPipeline() {
 	if(this.context.IsExit()){
-		log.Info("exit pipeline, ", this.name,", ",this.context.Payload)
+		log.Debug("exit pipeline, ", this.name,", ",this.context.Payload)
 		return
 	}
 
