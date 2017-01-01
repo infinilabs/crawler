@@ -11,3 +11,7 @@
     LOG [log_level]
     eg: LOG ERROR
    
+    
+    * GET_TASK
+    GET_TASK [filed_name] [value]
+    eg: GET_TASK Domain elasticsearch.cn 

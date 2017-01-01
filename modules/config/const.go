@@ -21,5 +21,6 @@ const StatsBucketKey string = "Stats"
 const SnapshotBucketKey string = "Snapshot"
 const SnapshotMappingBucketKey string = "SnapshotMapping"
 
-const PhraseChecker  model.TaskPhrase =1
-const PhraseCrawler  model.TaskPhrase =2
+const PhraseChecker  model.TaskPhrase =1 //check url validation
+const PhraseCrawler  model.TaskPhrase =2 //going to fetch
+const PhraseUpdate  model.TaskPhrase =3 //scheduled update
