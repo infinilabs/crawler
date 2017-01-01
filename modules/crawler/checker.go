@@ -21,20 +21,20 @@ import (
 	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/filter"
 	"github.com/medcl/gopa/core/global"
+	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/stats"
-	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/modules/config"
 	. "github.com/medcl/gopa/modules/crawler/pipe"
 	"runtime"
-	"sync"
 	"time"
 )
 
 var signalChannel chan bool
 var quitChannel chan bool
 var checkerStarted bool
+
 func (this CheckerModule) Name() string {
 	return "Checker"
 }
@@ -53,40 +53,38 @@ func (this CheckerModule) Start(env *Env) {
 func (this CheckerModule) runCheckerGo() {
 
 	quit := make(chan bool, 1)
-	var wg sync.WaitGroup
 
 	go func() {
 		for {
 			select {
 			case <-quit:
-				wg.Wait()
 				log.Trace("url checker success stoped")
 				return
 			default:
-
-				this.execute(&wg)
-
+				this.execute()
 			}
 		}
 	}()
 
 	log.Trace("url checker success checkerStarted")
 	<-signalChannel
+	log.Trace("get checker exit signal")
 	quit <- true
-	wg.Wait()
 	log.Trace("url checker wait end")
 	quitChannel <- true
 	log.Trace("url checker quit")
 }
 
-func  (this CheckerModule)execute(wg *sync.WaitGroup) {
+func (this CheckerModule) execute() {
 	startTime := time.Now()
 	log.Trace("waiting url to check")
-	wg.Add(1)
 
-	defer wg.Done()
+	err,data := queue.Pop(config.CheckChannel)
+	if(err!=nil){
+		log.Trace(err)
+		return
+	}
 
-	data := queue.Pop(config.CheckChannel)
 	url := model.TaskSeedFromBytes(data)
 
 	stats.Increment("checker.url", "finished")
@@ -127,7 +125,7 @@ func  (this CheckerModule)execute(wg *sync.WaitGroup) {
 	}()
 	pipeline = NewPipeline("checker")
 
-	pipeline.Context(&Context{Phrase:config.PhraseChecker}).
+	pipeline.Context(&Context{Phrase: config.PhraseChecker}).
 		Start(Start{Task: &task}).
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
 		Join(UrlFilterJoint{}).
@@ -135,11 +133,18 @@ func  (this CheckerModule)execute(wg *sync.WaitGroup) {
 		Run()
 
 	//send to disk queue
-	if(len(task.Domain)>0){
+	if len(task.Domain) > 0 {
 		stats.Increment("domain.stats", task.Domain+"."+stats.STATS_FETCH_TOTAL_COUNT)
-		queue.Push(config.FetchChannel,[]byte(task.ID))
-	}else{
-		log.Debug("invalid domain, ",url.Url)
+
+		err,d:=model.GetDomain(task.Domain)
+		if(err!=nil){
+			log.Error(err)
+		}
+		log.Trace("load host settings, ",d.Host)
+
+		queue.Push(config.FetchChannel, []byte(task.ID))
+	} else {
+		log.Debug("invalid domain, ", url.Url)
 	}
 
 	stats.Increment("checker.url", "valid_seed")

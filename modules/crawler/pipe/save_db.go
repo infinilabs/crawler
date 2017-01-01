@@ -60,8 +60,8 @@ func (this SaveToDBJoint) Process(c *Context) (*Context, error) {
 		store.AddValue(config.SnapshotBucketKey,saveKey,pageItem.Body)
 	}
 
-	stats.IncrementBy(domain,stats.STATS_STORAGE_FILE_SIZE,int64(len(pageItem.Body)))
-	stats.Increment(domain,stats.STATS_STORAGE_FILE_COUNT)
+	stats.IncrementBy("domain.stats", domain+"."+stats.STATS_STORAGE_FILE_SIZE,int64(len(pageItem.Body)))
+	stats.Increment("domain.stats", domain+"."+stats.STATS_STORAGE_FILE_COUNT)
 
 	return c, nil
 }

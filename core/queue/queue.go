@@ -19,13 +19,14 @@ package queue
 import (
 	"errors"
 	"github.com/medcl/gopa/core/stats"
+	"time"
 )
 
 type QueueKey string
 
 type Queue interface {
 	Push(QueueKey, []byte) error
-	Pop(QueueKey) []byte
+	Pop(QueueKey, time.Duration) (error,[]byte)
 	Close(QueueKey) error
 }
 
@@ -43,11 +44,13 @@ func Push(k QueueKey, v []byte) error {
 	panic(errors.New("channel is not registered"))
 }
 
-func Pop(k QueueKey) []byte {
+func Pop(k QueueKey) (error,[]byte) {
 	if handler != nil {
-		o := handler.Pop(k)
-		stats.Increment("queue."+string(k), "pop")
-		return o
+		er,o := handler.Pop(k,5*time.Second)
+		if(er==nil){
+			stats.Increment("queue."+string(k), "pop")
+		}
+		return er,o
 	}
 	stats.Increment("queue."+string(k), "pop_error")
 	panic(errors.New("channel is not registered"))

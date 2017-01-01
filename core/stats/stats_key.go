@@ -20,7 +20,7 @@ const STATS_FETCH_TOTAL_COUNT = "fetch.total"
 const STATS_FETCH_SUCCESS_COUNT = "fetch.success"
 const STATS_FETCH_FAIL_COUNT = "fetch.fail"
 const STATS_FETCH_TIMEOUT_COUNT = "fetch.timeout"
-const STATS_FETCH_IGNORE_COUNT = "fetch.ignore"
+const STATS_FETCH_TIMEOUT_IGNORE_COUNT = "fetch.timeout_ignore"
 
 const STATS_STORAGE_FILE_SIZE = "stats.sum.file.size"
 const STATS_STORAGE_FILE_COUNT = "stats.sum.file.count"

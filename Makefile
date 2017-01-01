@@ -6,7 +6,10 @@ SHELL=/bin/bash
 
 
 build: clean config update_ui
-	go build  -o bin/gopa
+	go build -o bin/gopa
+
+build-with-flags: clean config update_ui
+	go build -gcflags "-N -l" -race -o bin/gopa
 
 update_ui:
 	go get github.com/mjibson/esc
@@ -94,6 +97,7 @@ config: update_commit_log
 	go get github.com/julienschmidt/httprouter
 	go get github.com/rs/xid
 	go get github.com/seiflotfy/cuckoofilter
+
 
 
 dist: cross-build package

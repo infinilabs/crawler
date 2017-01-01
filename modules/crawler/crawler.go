@@ -24,12 +24,12 @@ import (
 	"github.com/medcl/gopa/modules/config"
 	. "github.com/medcl/gopa/modules/crawler/pipe"
 	"runtime"
-	"sync"
 	"time"
 )
 
 var signalChannels []*chan bool
 var quitChannels []*chan bool
+
 var crawlerStarted bool
 func (this CrawlerModule) Name() string {
 	return "Crawler"
@@ -42,7 +42,6 @@ func (this CrawlerModule) Start(env *Env) {
 	}
 
 	numGoRoutine := env.RuntimeConfig.MaxGoRoutine
-	//shutdownSignal signals for each go routing
 	signalChannels = make([]*chan bool, numGoRoutine)
 	quitChannels = make([]*chan bool, numGoRoutine)
 	if env.RuntimeConfig.CrawlerConfig.Enabled {
@@ -93,39 +92,38 @@ func (this CrawlerModule) Stop() error {
 func (this CrawlerModule) runPipeline(env *Env, signalC *chan bool, quitC *chan bool, shard int) {
 
 	quit := make(chan bool, 1)
-	var wg sync.WaitGroup
+
 	go func() {
 		for {
 			select {
 			case <-quit:
-				crawlerStarted = false
 				return
 			default:
-				if crawlerStarted {
-					log.Trace("waiting url to fetch, shard:", shard)
-					taskID := queue.Pop(config.FetchChannel)
-					wg.Add(1)
-					log.Trace("shard:", shard, ",task received:", string(taskID))
-					this.execute(string(taskID), env, &wg)
-					log.Trace("shard:", shard, ",task finished:", string(taskID))
+				log.Trace("waiting url to fetch, shard:", shard)
+				err,taskID := queue.Pop(config.FetchChannel)
+				if(err!=nil){
+					log.Trace(err)
+					continue
 				}
+				log.Trace("shard:", shard, ",task received:", string(taskID))
+				this.execute(string(taskID), env)
+				log.Trace("shard:", shard, ",task finished:", string(taskID))
+
 			}
 		}
 	}()
-	log.Trace("fetch task crawlerStarted, shard:", shard)
+	log.Trace("crawler Started, shard:", shard)
 	<-*signalC
-	log.Trace("fetch task gonna exit, waiting task to finish, shard:", shard)
+	log.Trace("crawler gonna exit, waiting task to finish, shard:", shard)
 	quit <- true
-	wg.Wait()
-	log.Trace("fetch task finished, shard:", shard)
+	log.Trace("crawler finished, shard:", shard)
 	*quitC <- true
-	log.Trace("fetch task exit, shard:", shard)
+	log.Trace("crawler exit, shard:", shard)
 }
 
-func (this CrawlerModule) execute(taskId string, env *Env, wg *sync.WaitGroup) {
+func (this CrawlerModule) execute(taskId string, env *Env) {
 	var pipeline *Pipeline
 	defer func() {
-		wg.Done()
 		if !env.IsDebug {
 			if r := recover(); r != nil {
 				if _, ok := r.(runtime.Error); ok {
@@ -139,7 +137,7 @@ func (this CrawlerModule) execute(taskId string, env *Env, wg *sync.WaitGroup) {
 
 	pipeline = NewPipeline("crawler")
 
-	pipeline.Context(&Context{Phrase:config.PhraseCrawler}).
+	pipeline.Context(&Context{Phrase: config.PhraseCrawler}).
 		Start(Start{ID: &taskId}).
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
 		Join(UrlFilterJoint{}).

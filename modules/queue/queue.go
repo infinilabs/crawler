@@ -8,6 +8,7 @@ import (
 	. "github.com/medcl/gopa/modules/queue/disk_queue"
 	"time"
 	log "github.com/cihub/seelog"
+	"errors"
 )
 
 var queues map[QueueKey]*BackendQueue
@@ -36,9 +37,23 @@ func (this DiskQueue) Push(k QueueKey, v []byte) error {
 	return (*queues[k]).Put(v)
 }
 
-func (this DiskQueue) Pop(k QueueKey) []byte {
-	b := <-(*queues[k]).ReadChan()
-	return b
+func (this DiskQueue) Pop(k QueueKey, timeoutInSeconds time.Duration) (error,[]byte) {
+
+	if(timeoutInSeconds<1){
+		timeoutInSeconds=5
+	}
+
+	timeout := make(chan bool, 1)
+	go func() {
+		time.Sleep(timeoutInSeconds) // sleep 3 second
+		timeout <- true
+	}()
+	select {
+	case b:=<-(*queues[k]).ReadChan():
+		return nil,b
+	case <-timeout:
+		return errors.New("time out"),nil
+	}
 }
 
 func  (this DiskQueue) Close(k QueueKey)(error) {

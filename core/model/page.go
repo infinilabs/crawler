@@ -29,11 +29,6 @@ type KV struct {
 	Value []string `storm:"inline" json:"value,omitempty"`
 }
 
-type Host struct {
-	Domain     string `storm:"id,unique" json:"domain,omitempty"`
-	LinksCount int    `json:"links_count,omitempty"`
-}
-
 type PageItem struct {
 	Headers    map[string][]string     `storm:"inline" json:"headers,omitempty"`    // key:value
 	Parameters []KV                    `storm:"inline" json:"parameters,omitempty"` // key:value

@@ -17,12 +17,12 @@ limitations under the License.
 package handler
 
 import (
-	log "github.com/cihub/seelog"
-	logging "github.com/medcl/gopa/core/logger"
-	"net/http"
+log "github.com/cihub/seelog"
+logging "github.com/medcl/gopa/core/logger"
+"net/http"
 )
 
-func (this *Handler) LoggingSettingAction(w http.ResponseWriter, req *http.Request) {
+func (this Handler) LoggingSettingAction(w http.ResponseWriter, req *http.Request) {
 	if req.Method == GET.String() {
 
 		str := logging.GetLoggingConfig(this.Env)

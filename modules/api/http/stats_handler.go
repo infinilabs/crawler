@@ -26,7 +26,7 @@ func getMapValue(mapData map[string]int, key string, defaultValue int32) int {
 	return data
 }
 
-func (this *Handler) StatsAction(w http.ResponseWriter, req *http.Request) {
+func (this Handler) StatsAction(w http.ResponseWriter, req *http.Request) {
 
 	//fetchs:=map[string]stats.StatsCount{}
 	//parses:=map[string]stats.StatsCount{}

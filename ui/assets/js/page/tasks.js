@@ -3,6 +3,23 @@
  */
 
 var totalRow=20
+function drawDomainTable(data) {
+    $("#domain-records").children().remove();
+    for (var i = 0; i < data.length; i++) {
+        drawDomainRow(data[i]);
+    }
+}
+
+
+function drawDomainRow(rowData) {
+    var row = $("<li />")
+    $("#domain-records").append(row);
+
+    row.append($("<span class='uk-column-1-1' ><a class=uk-button href=\"javascript:loadData('" + rowData.host + "')\" >" + rowData.host + " ("+rowData.links_count+")</a></span>"));
+
+}
+
+
 function drawTable(data) {
     //.eq(-1).remove();
     $("#records").children().remove();
@@ -73,3 +90,48 @@ function formatBytes(bytes,decimals) {
     var i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
+
+function loadDomain(){
+    $("#domain-alert").text("Loading");
+    //load domain data
+    $.ajax({
+        url: '/domains?from=0&size=40',
+        type: "get",
+        dataType: "json",
+        success: function(data, textStatus, jqXHR) {
+            $("#domain-alert").text("Total: "+data.total);
+            drawDomainTable(data.result);
+        }
+    });
+}
+
+
+
+function loadData(domain){
+
+    $("#alert").text("Loading");
+
+    para='/tasks?from=0&size=20';
+    if(domain!=undefined){
+        para=para+"&domain="+domain;
+    }
+
+    //load task data
+    $.ajax({
+        url: para,
+        type: "get",
+        dataType: "json",
+        success: function(data, textStatus, jqXHR) {
+            $("#alert").text("Total: "+data.total);
+            drawTable(data.result);
+        }
+    });
+}
+
+loadDomain();
+
+loadData();
+
+$('[data-uk-pagination]').on('select.uk.pagination', function(e, pageIndex){
+    alert('You have selected page: ' + (pageIndex+1));
+});

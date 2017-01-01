@@ -11,7 +11,7 @@ import (
 	"github.com/asdine/storm"
 )
 
-func (h *Handler) BoltDBStatusAction(w http.ResponseWriter, r *http.Request) {
+func (h Handler) BoltDBStatusAction(w http.ResponseWriter, r *http.Request) {
 	db:=global.Lookup(global.REGISTER_BOLTDB).(*storm.DB)
 
 	//go func() {

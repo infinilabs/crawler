@@ -24,7 +24,7 @@ import (
 	"github.com/medcl/gopa/modules/config"
 )
 
-func (this *Handler) SnapshotAction(w http.ResponseWriter, req *http.Request) {
+func (this Handler) SnapshotAction(w http.ResponseWriter, req *http.Request) {
 
 	if req.Method == GET.String() {
 		url := this.GetParameter(req, "url")

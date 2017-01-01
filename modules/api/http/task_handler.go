@@ -25,9 +25,10 @@ import (
 	"github.com/medcl/gopa/modules/config"
 	"net/http"
 	"strconv"
+	"github.com/medcl/gopa/core/stats"
 )
 
-func (this *Handler) TaskDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (this Handler) TaskDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	if req.Method == DELETE.String() {
 		id := ps.ByName("id")
 		err := model.DeleteTask(id)
@@ -40,7 +41,7 @@ func (this *Handler) TaskDeleteAction(w http.ResponseWriter, req *http.Request, 
 		this.error404(w)
 	}
 }
-func (this *Handler) TaskGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (this Handler) TaskGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
 	task, err := model.GetTask(id)
 	if err != nil {
@@ -52,7 +53,7 @@ func (this *Handler) TaskGetAction(w http.ResponseWriter, req *http.Request, ps 
 
 }
 
-func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (this Handler) TaskAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
 	if req.Method == POST.String() {
 		jsonq, err := this.GetJson(req)
@@ -92,6 +93,85 @@ func (this *Handler) TaskAction(w http.ResponseWriter, req *http.Request, ps htt
 			this.error(w, err)
 		} else {
 			this.WriteListResultJson(w, total, tasks, http.StatusOK)
+		}
+	}
+}
+
+func (this Handler) DomainDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	if req.Method == DELETE.String() {
+		id := ps.ByName("id")
+		err := model.DeleteTask(id)
+		if err != nil {
+			this.error(w, err)
+		} else {
+			this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
+		}
+	} else {
+		this.error404(w)
+	}
+}
+
+func (this Handler) DomainGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	id := ps.ByName("id")
+	task, err := model.GetTask(id)
+	if err != nil {
+		this.error(w, err)
+	} else {
+		this.WriteJson(w, task, http.StatusOK)
+
+	}
+
+}
+
+func (this Handler) DomainAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+
+	if req.Method == POST.String() {
+		//jsonq, err := this.GetJson(req)
+		//if err != nil {
+		//	logger.Error(err)
+		//}
+		//
+		//seed, err := jsonq.String("seed")
+		//if err != nil {
+		//	logger.Error(err)
+		//}
+		//logger.Trace("receive new seed:", seed)
+		//
+		//task := model.NewTaskSeed(seed, "", 0)
+		//
+		//queue.Push(config.CheckChannel, task.MustGetBytes())
+
+		this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
+	} else {
+		logger.Trace("get all domain settings")
+
+		fr := this.GetParameter(req, "from")
+		si := this.GetParameter(req, "size")
+		domain := this.GetParameter(req, "domain")
+
+		from, err := strconv.Atoi(fr)
+		if err != nil {
+			from = 0
+		}
+		size, err := strconv.Atoi(si)
+		if err != nil {
+			size = 10
+		}
+
+		total, domains, err := model.GetDomainList(from, size, domain)
+
+		newDomains:=[]model.Domain{}
+		for _,v:=range domains{
+
+			total:=stats.Stat("domain.stats", v.Host+"."+stats.STATS_FETCH_TOTAL_COUNT)
+			v.LinksCount=total
+			newDomains=append(newDomains,v)
+		}
+
+		if err != nil {
+			this.error(w, err)
+		} else {
+			this.WriteListResultJson(w, total, newDomains, http.StatusOK)
 		}
 	}
 }

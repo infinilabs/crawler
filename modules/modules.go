@@ -22,16 +22,16 @@ import (
 	"github.com/medcl/gopa/modules/queue"
 	"github.com/medcl/gopa/modules/crawler"
 	"github.com/medcl/gopa/modules/storage"
-	"github.com/medcl/gopa/modules/stats"
 	"github.com/medcl/gopa/modules/dispatcher"
 	"github.com/medcl/gopa/modules/filter"
+	"github.com/medcl/gopa/modules/stats"
 )
 
 func Register() {
 	//register modules
 	module.Register(filter.FilterModule{})
 	module.Register(storage.StorageModule{})
-	module.Register(statsd.StatsStoreModule{})
+	module.Register(stats.StatsStoreModule{})
 	//module.Register(statsd.StatsDModule{})
 	module.Register(queue.DiskQueue{})
 	module.Register(crawler.CheckerModule{})

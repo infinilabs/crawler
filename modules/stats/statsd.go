@@ -1,4 +1,4 @@
-package statsd
+package stats
 
 import (
 	log "github.com/cihub/seelog"

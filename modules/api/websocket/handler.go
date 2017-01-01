@@ -18,23 +18,22 @@ package websocket
 
 import (
 	"encoding/json"
-	"github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/core/logger"
+	logging "github.com/medcl/gopa/core/logger"
 	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/modules/config"
 	"strings"
+	"github.com/medcl/gopa/core/global"
 )
 
 type Command struct {
-	Env *env.Env
 }
 
-func (this *Command) Help(c *WebsocketConnection, a []string) {
+func (this Command) Help(c *WebsocketConnection, a []string) {
 	c.WriteMessage([]byte("COMMAND LIST\nseed [url] eg: seed http://elastic.co\nlog [level]  eg: log debug"))
 }
 
-func (this *Command) AddSeed(c *WebsocketConnection, a []string) {
+func (this Command) AddSeed(c *WebsocketConnection, a []string) {
 
 	url := a[1]
 	if len(url) > 0 {
@@ -45,19 +44,19 @@ func (this *Command) AddSeed(c *WebsocketConnection, a []string) {
 	c.WriteMessage([]byte("invalid url"))
 }
 
-func (this *Command) UpdateLogLevel(c *WebsocketConnection, a []string) {
+func (this Command) UpdateLogLevel(c *WebsocketConnection, a []string) {
 
 	level := a[1]
 	if len(level) > 0 {
 		level := strings.ToLower(level)
-		logger.SetInitLogging(this.Env, level)
+		logging.SetInitLogging(global.Env(), level)
 		c.WriteMessage([]byte("setting log level to  " + level))
 		return
 	}
 	c.WriteMessage([]byte("invalid setting"))
 }
 
-func (this *Command) Dispatch(c *WebsocketConnection, a []string) {
+func (this Command) Dispatch(c *WebsocketConnection, a []string) {
 
 	err := queue.Push(config.DispatcherChannel, []byte("go"))
 	if err != nil {
@@ -66,7 +65,7 @@ func (this *Command) Dispatch(c *WebsocketConnection, a []string) {
 	c.WriteMessage([]byte("trigger tasks"))
 }
 
-func (this *Command) GetTask(c *WebsocketConnection, a []string) {
+func (this Command) GetTask(c *WebsocketConnection, a []string) {
 
 
 	if len(a) == 2 {

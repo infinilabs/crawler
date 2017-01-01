@@ -43,7 +43,7 @@ var runningHub = false
 
 // Register command handlers
 func (h *Hub) registerHandlers(env *env.Env) {
-	handler := Command{Env: env}
+	handler := Command{}
 	HandleWebSocketCommand("HELP", handler.Help)
 	HandleWebSocketCommand("SEED", handler.AddSeed)
 	HandleWebSocketCommand("LOG", handler.UpdateLogLevel)

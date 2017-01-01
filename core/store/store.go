@@ -96,8 +96,8 @@ func DeleteBucket(bucket string, key []byte, value []byte) error {
 	return getHandler().DeleteBucket(bucket, key, value)
 }
 
-func Get(key string, value interface{}, to interface{}) error {
-	return getORMHandler().Get(key, value, to)
+func Get(field string, value interface{}, to interface{}) error {
+	return getORMHandler().Get(field, value, to)
 }
 
 func Save(o interface{}) error {

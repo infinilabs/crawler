@@ -191,7 +191,7 @@ func (this *Pipeline) Run() *Context {
 					log.Errorf("%s: %v", this.name, err)
 					//this.context.Break(err.Error())
 				}
-				log.Trace("error in pipe")
+				log.Trace("error in pipe, ",this.name)
 				stats.Increment(this.name+".pipeline", "error")
 			}
 		}
@@ -202,7 +202,7 @@ func (this *Pipeline) Run() *Context {
 
 	var err error
 	for _, v := range this.joints {
-		log.Trace("start joint,", v.Name())
+		log.Trace("pipe, ",this.name,", start joint,", v.Name())
 		if this.context.IsBreak() {
 			log.Trace("break joint,", v.Name())
 			stats.Increment(this.name+".pipeline", "break")
@@ -218,16 +218,16 @@ func (this *Pipeline) Run() *Context {
 			this.context.Break(err.Error())
 			panic(err)
 		}
-		log.Trace("end joint,", v.Name())
+		log.Trace(this.name,", end joint,", v.Name())
 	}
 
 	return this.context
 }
 
 func (this *Pipeline) endPipeline() {
-	log.Trace("start finish piplne")
+	log.Trace("start finish piplne, ",this.name)
 	if this.endJoint != nil {
 		this.endJoint.Process(this.context)
 	}
-	log.Trace("end finish piplne")
+	log.Trace("end finish piplne, ",this.name)
 }

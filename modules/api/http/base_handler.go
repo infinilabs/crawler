@@ -37,7 +37,7 @@ const (
 	HEAD   Method = "HEAD"
 )
 
-func (this Method) String() string  {
+func (this Method) String() string {
 	switch this {
 	case GET:
 		return "GET"
@@ -53,7 +53,6 @@ func (this Method) String() string  {
 	return "N/A"
 }
 
-
 type Handler struct {
 	Env         *Env
 	wroteHeader bool
@@ -64,12 +63,12 @@ type Handler struct {
 	//formParsed bool
 }
 
-func (this *Handler) WriteHeader(w http.ResponseWriter, code int) {
+func (this Handler) WriteHeader(w http.ResponseWriter, code int) {
 	w.WriteHeader(code)
 	this.wroteHeader = true
 }
 
-//func (this *Handler) Get(key string, defaultValue string)(string){
+//func (this Handler) Get(key string, defaultValue string)(string){
 //	if(!this.formParsed){
 //		this.req.ParseForm()
 //	}
@@ -79,11 +78,10 @@ func (this *Handler) WriteHeader(w http.ResponseWriter, code int) {
 //	return defaultValue
 //}
 
-
-func (w *Handler) encodeJson(v interface{}) (b []byte,err error) {
+func (w Handler) encodeJson(v interface{}) (b []byte, err error) {
 
 	//if(w.Get("pretty","false")=="true"){
-		b, err = json.MarshalIndent(v, "", " ")
+	b, err = json.MarshalIndent(v, "", " ")
 	//}else{
 	//	b, err = json.Marshal(v)
 	//}
@@ -94,25 +92,24 @@ func (w *Handler) encodeJson(v interface{}) (b []byte,err error) {
 	return b, nil
 }
 
-func (this *Handler) WriteJsonHeader(w http.ResponseWriter) {
+func (this Handler) WriteJsonHeader(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Header().Set("Access-Control-Allow-Origin","*")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 }
 
-type Result struct{
-	Total int `json:"total"`
+type Result struct {
+	Total  int         `json:"total"`
 	Result interface{} `json:"result"`
 }
 
-
-func (this *Handler) WriteListResultJson(w http.ResponseWriter,total int , v interface{}, statusCode int) error {
-	result:=Result{}
-	result.Total=total
-	result.Result=v
-	return this.WriteJson(w,result,statusCode)
+func (this Handler) WriteListResultJson(w http.ResponseWriter, total int, v interface{}, statusCode int) error {
+	result := Result{}
+	result.Total = total
+	result.Result = v
+	return this.WriteJson(w, result, statusCode)
 }
 
-func (this *Handler) WriteJson(w http.ResponseWriter, v interface{}, statusCode int) error {
+func (this Handler) WriteJson(w http.ResponseWriter, v interface{}, statusCode int) error {
 	if !this.wroteHeader {
 		this.WriteJsonHeader(w)
 		w.WriteHeader(statusCode)
@@ -133,19 +130,19 @@ func (this *Handler) WriteJson(w http.ResponseWriter, v interface{}, statusCode 
 type ErrEmptyJson struct {
 }
 
-func (this *Handler) GetParameter(r *http.Request,key string) (string) {
+func (this Handler) GetParameter(r *http.Request, key string) string {
 	return r.URL.Query().Get(key)
 }
 
-func (this *Handler) GetParameterOrDefault(r *http.Request,key string,defaultValue string) (string) {
-	v:= r.URL.Query().Get(key)
-	if(len(v)>0){
+func (this Handler) GetParameterOrDefault(r *http.Request, key string, defaultValue string) string {
+	v := r.URL.Query().Get(key)
+	if len(v) > 0 {
 		return v
 	}
 	return defaultValue
 }
 
-func (this *Handler) GetJson(r *http.Request) (*jsonq.JsonQuery, error) {
+func (this Handler) GetJson(r *http.Request) (*jsonq.JsonQuery, error) {
 
 	content, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
@@ -165,7 +162,7 @@ func (this *Handler) GetJson(r *http.Request) (*jsonq.JsonQuery, error) {
 	return jq, nil
 }
 
-func (this *Handler) GetRawBody(r *http.Request) ([]byte, error) {
+func (this Handler) GetRawBody(r *http.Request) ([]byte, error) {
 
 	content, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
@@ -178,26 +175,26 @@ func (this *Handler) GetRawBody(r *http.Request) ([]byte, error) {
 	return content, nil
 }
 
-func (this *Handler) Write(w http.ResponseWriter, b []byte) (int, error) {
+func (this Handler) Write(w http.ResponseWriter, b []byte) (int, error) {
 	if !this.wroteHeader {
 		this.WriteHeader(w, http.StatusOK)
 	}
 	return w.Write(b)
 }
 
-func (this *Handler) error404(w http.ResponseWriter) {
+func (this Handler) error404(w http.ResponseWriter) {
 	this.WriteJson(w, map[string]interface{}{"error": 404}, http.StatusNotFound)
 }
 
-func (this *Handler) error500(w http.ResponseWriter, msg string) {
+func (this Handler) error500(w http.ResponseWriter, msg string) {
 	this.WriteJson(w, map[string]interface{}{"error": msg}, http.StatusInternalServerError)
 }
 
-func (this *Handler) error(w http.ResponseWriter, err error) {
+func (this Handler) error(w http.ResponseWriter, err error) {
 	this.WriteJson(w, map[string]interface{}{"error": err.Error()}, http.StatusInternalServerError)
 }
 
-func (this *Handler) Flush(w http.ResponseWriter) {
+func (this Handler) Flush(w http.ResponseWriter) {
 	if !this.wroteHeader {
 		w.WriteHeader(http.StatusOK)
 	}

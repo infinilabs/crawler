@@ -51,6 +51,10 @@ func internalStart(env *Env) {
 	router.GET("/task/:id", handler.TaskGetAction)
 	router.DELETE("/task/:id", BasicAuth(handler.TaskDeleteAction, user, pass))
 
+	router.GET("/domains", handler.DomainAction)
+	router.GET("/domain/:id", handler.DomainGetAction)
+	router.DELETE("/domain/:id", BasicAuth(handler.DomainDeleteAction, user, pass))
+
 	mux.HandleFunc("/setting/seelog", handler.LoggingSettingAction)
 	mux.HandleFunc("/setting/seelog/", handler.LoggingSettingAction)
 
