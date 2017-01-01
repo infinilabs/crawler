@@ -30,18 +30,12 @@ import (
 
 
 type Env struct {
-	//Logger logging.Logger
-	//*Registrar
 	SystemConfig  *SystemConfig
 	RuntimeConfig *RuntimeConfig
-	ESClient util.ElasticsearchClient
 	IsDebug bool
 }
 
 func Environment(sysConfig SystemConfig) *Env {
-	//if logger == nil {
-	//	logger = logging.NullLogger{}
-	//}
 
 	env := Env{}
 
@@ -56,7 +50,6 @@ func Environment(sysConfig SystemConfig) *Env {
 	if len(sysConfig.LogLevel) > 0 {
 		env.RuntimeConfig.LoggingConfig.Level = sysConfig.LogLevel
 	}
-	//env.Registrar = &Registrar{values: map[string]interface{}{}}
 
 	env.init()
 
@@ -128,7 +121,6 @@ func (this *Env) init() error {
 	os.MkdirAll(this.RuntimeConfig.PathConfig.WebData, 0777)
 	os.MkdirAll(this.RuntimeConfig.PathConfig.TaskData, 0777)
 
-	this.ESClient = util.ElasticsearchClient{Host: this.RuntimeConfig.IndexingConfig.Host, Index: this.RuntimeConfig.IndexingConfig.Index}
 	return nil
 }
 

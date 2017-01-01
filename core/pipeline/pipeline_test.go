@@ -17,27 +17,35 @@ limitations under the License.
 package pipeline
 
 import (
-	"testing"
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"testing"
+	"github.com/medcl/gopa/core/global"
+	"github.com/medcl/gopa/core/env"
 )
-
 
 type crawlerJoint struct {
 	Url string
+}
+
+func (this crawlerJoint) Name() string {
+	return "crawlerJoint"
 }
 
 func (this crawlerJoint) Process(s *Context) (*Context, error) {
 	s.data = map[ContextKey]interface{}{}
 	s.data[("webpage")] = "hello world gogo "
 	s.data[("status")] = true
-	fmt.Println("start to crawlling url:"+this.Url)
+	fmt.Println("start to crawlling url:" + this.Url)
 	return s, nil
 }
 
 type parserJoint struct {
 }
 
+func (this parserJoint) Name() string {
+	return "parserJoint"
+}
 func (this parserJoint) Process(s *Context) (*Context, error) {
 	s.data[("urls")] = "gogo"
 	s.data[("domain")] = "http://gogo.com"
@@ -49,8 +57,11 @@ func (this parserJoint) Process(s *Context) (*Context, error) {
 type saveJoint struct {
 }
 
+func (this saveJoint) Name() string {
+	return "saveJoint"
+}
 func (this saveJoint) Process(s *Context) (*Context, error) {
-	s.Set("saved","true")
+	s.Set("saved", "true")
 	//pub urls to channel
 	fmt.Println("start to save web content")
 	return s, nil
@@ -59,31 +70,35 @@ func (this saveJoint) Process(s *Context) (*Context, error) {
 type publishJoint struct {
 }
 
+func (this publishJoint) Name() string {
+	return "publishJoint"
+}
+
 func (this publishJoint) Process(s *Context) (*Context, error) {
 	fmt.Println("start to end pipeline")
-	s.Set("published","true")
+	s.Set("published", "true")
 	return s, nil
 }
 
+func TestPipeline(t *testing.T) {
 
-func TestPipeline(t *testing.T)  {
+	global.RegisterEnv(env.EmptyEnv())
 
-	pipeline:=NewPipeline("crawler_test")
-	stream:=&Context{}
-	stream.data =map[ContextKey]interface{}{}
-	stream.data["url"]="gogol.com"
-	stream.data["webpage"]="hello world gogo "
+	pipeline := NewPipeline("crawler_test")
+	stream := &Context{}
+	stream.data = map[ContextKey]interface{}{}
+	stream.data["url"] = "gogol.com"
+	stream.data["webpage"] = "hello world gogo "
 
-	stream= pipeline.Context(stream).
-		Start(crawlerJoint{Url:"http://baidu.com"}).
+	stream = pipeline.Context(stream).
+		Start(crawlerJoint{Url: "http://baidu.com"}).
 		Join(parserJoint{}).
 		Join(saveJoint{}).
 		Join(publishJoint{}).
-		End().
 		Run()
 
 	fmt.Println(stream.data)
-	assert.Equal(t,stream.data["saved"],"true")
-	assert.Equal(t,stream.data["status"],true)
-	assert.Equal(t,stream.data["domain"],"http://gogo.com")
+	assert.Equal(t, stream.data["saved"], "true")
+	assert.Equal(t, stream.data["status"], true)
+	assert.Equal(t, stream.data["domain"], "http://gogo.com")
 }

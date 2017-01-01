@@ -44,7 +44,7 @@ func (this BoltdbStore) Open() error {
 	}
 
 	var err error
-	v := global.Lookup(global.REGISTER_BOLTDB)
+	v := global.Lookup(config.REGISTER_BOLTDB)
 	if v != nil {
 		boltDb := v.(*bolt.DB)
 		db, err = storm.Open("boltdb", storm.UseDB(boltDb))
@@ -69,7 +69,7 @@ func (this BoltdbStore) Open() error {
 		})
 	}
 
-	global.Register(global.REGISTER_BOLTDB, db)
+	global.Register(config.REGISTER_BOLTDB, db)
 
 	log.Debug("boltdb successfully started:", this.FileName)
 

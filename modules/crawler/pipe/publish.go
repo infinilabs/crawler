@@ -23,6 +23,7 @@ import (
 	"github.com/medcl/gopa/core/model"
 	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/global"
+	"github.com/medcl/gopa/core/util"
 )
 
 
@@ -62,7 +63,8 @@ func (this PublishJoint) Process(c *Context) (*Context, error) {
 		}
 		data["links"]=maps
 	}
-	_,err:= global.Env().ESClient.IndexDoc(id,data)
+	esClient := util.ElasticsearchClient{Host: global.Env().RuntimeConfig.IndexingConfig.Host, Index: global.Env().RuntimeConfig.IndexingConfig.Index}
+	_,err:= esClient.IndexDoc(id,data)
 	if(err!=nil){
 		log.Error(err)
 		return c,err

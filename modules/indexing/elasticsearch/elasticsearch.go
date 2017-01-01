@@ -14,11 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package global
+package elasticsearch
 
-
-const (
-	REGISTER_ENV RegisterKey = "REGISTER_ENV"
-	REGISTER_BOLTDB  RegisterKey = "REGISTER_BOLTDB"
-
-)

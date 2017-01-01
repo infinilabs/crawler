@@ -38,7 +38,6 @@ func Register(mod Module)  {
 	m.modules = append(m.modules,mod)
 }
 
-
 func Start() {
 
 	log.Trace("start to start modules")

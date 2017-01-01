@@ -20,6 +20,7 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/syndtr/goleveldb/leveldb"
 	"sync"
+	"github.com/syndtr/goleveldb/leveldb/opt"
 )
 
 
@@ -36,7 +37,7 @@ func (filter *LeveldbFilter) Open(fileName string) error{
 	defer filter.l.Unlock()
 
 	filter.persistFileName=fileName
-	db, err := leveldb.OpenFile(fileName, nil)
+	db, err := leveldb.OpenFile(fileName, &opt.Options{DisableBlockCache:true,DisableBufferPool:true,BlockCacher:opt.NoCacher})
 	filter.filter = db
 
 	if err != nil {
