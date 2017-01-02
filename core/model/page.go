@@ -38,6 +38,7 @@ type PageItem struct {
 	Body       []byte                  `json:"-"`
 	StatusCode int                     `storm:"index" json:"status_code,omitempty"`
 	Title      string                  `json:"title,omitempty"`
+	Text       string                  `json:"text,omitempty"`
 	Size       int                     `json:"size,omitempty"`
 	SimHash    string                  `storm:"index" json:"sim_hash,omitempty"`
 	H1         []string                `json:"h1,omitempty"`

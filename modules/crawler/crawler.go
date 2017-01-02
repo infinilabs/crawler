@@ -145,6 +145,7 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 100}).
 		Join(FetchJoint{}).
 		Join(ParserJoint{DispatchLinks: true, MaxDepth: 3}).
+		Join(HtmlToTextJoint{MergeWhitespace:true}).
 		//Join(SaveToFileSystemJoint{}).
 		Join(SaveToDBJoint{CompressBody: true}).
 		Join(PublishJoint{}).

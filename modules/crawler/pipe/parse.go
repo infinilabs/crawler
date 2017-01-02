@@ -23,8 +23,6 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/model"
 	"strings"
-	"regexp"
-	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/modules/config"
 )
@@ -39,7 +37,6 @@ func (this ParserJoint) Name() string {
 	return "parse"
 }
 
-
 func (this ParserJoint) Process(s *Context) (*Context, error) {
 
 	refUrl := s.MustGetString(CONTEXT_URL)
@@ -53,53 +50,13 @@ func (this ParserJoint) Process(s *Context) (*Context, error) {
 	title := doc.Find("title").Text()
 
 	selected:=doc.Find("body")
-	selected.RemoveFiltered("script")
-	selected.RemoveFiltered("noscript")
-	selected.RemoveFiltered("div[style*='display: none']")
-
-
 	body,err:=selected.Html()
 	if(err!=nil){
 		panic(err)
+	}else{
+		s.Set(CONTEXT_PAGE_BODY_BYTES,[]byte(body))
 	}
-	src := body
 
-	//将HTML标签全转换成小写
-	re, _ := regexp.Compile("\\<[\\S\\s]+?\\>")
-	src = re.ReplaceAllStringFunc(src, strings.ToLower)
-
-	//去除STYLE
-	re, _ = regexp.Compile("\\<style[\\S\\s]+?\\</style\\>")
-	src = re.ReplaceAllString(src, "")
-
-	//去除META
-	re, _ = regexp.Compile("\\<meta[\\S\\s]+?\\</meta\\>")
-	src = re.ReplaceAllString(src, "")
-
-	//去除注释
-	re, _ = regexp.Compile("\\<!--[\\S\\s]+? --\\>")
-	src = re.ReplaceAllString(src, "")
-
-	//去除SCRIPT
-	re, _ = regexp.Compile("\\<script[\\S\\s]+?\\</script\\>")
-	src = re.ReplaceAllString(src, "")
-
-	//去除NOSCRIPT
-	re, _ = regexp.Compile("\\<noscript[\\S\\s]+?\\</noscript\\>")
-	src = re.ReplaceAllString(src, "")
-
-	//去除所有尖括号内的HTML代码，并换成换行符
-	re, _ = regexp.Compile("\\<[\\S\\s]+?\\>")
-	src = re.ReplaceAllString(src, "\n")
-
-	//去除连续的换行符
-	re, _ = regexp.Compile("\\s{2,}")
-	src = re.ReplaceAllString(src, "\n")
-
-	src = strings.TrimSpace(util.MergeSpace(src))
-
-
-	s.Set(CONTEXT_PAGE_BODY_PLAIN_TEXT,src)
 
 	metadata := map[string]interface{}{}
 	if len(title) > 0 {
