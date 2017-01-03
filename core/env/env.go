@@ -27,12 +27,10 @@ import (
 	"regexp"
 )
 
-
-
 type Env struct {
 	SystemConfig  *SystemConfig
 	RuntimeConfig *RuntimeConfig
-	IsDebug bool
+	IsDebug       bool
 }
 
 func Environment(sysConfig SystemConfig) *Env {
@@ -88,7 +86,7 @@ func (this *Env) loadRuntimeConfig() (RuntimeConfig, error) {
 		config.IndexingConfig = (&IndexingConfig{}).Init()
 		config.ChannelConfig = (&ChannelConfig{}).Init()
 		config.CrawlerConfig = (&CrawlerConfig{}).Init()
-		config.ParserConfig = (&ParserConfig{})         //.Init()
+		config.ParserConfig = (&ParserConfig{}) //.Init()
 		config.TaskConfig = (&TaskConfig{}).Init()
 		config.RuledFetchConfig = (&RuledFetchConfig{}) //.Init()
 	}
@@ -128,9 +126,26 @@ func EmptyEnv() *Env {
 	return &Env{}
 }
 
-
 //high priority config, init from the environment or startup, can't be changed
 type SystemConfig struct {
-	ConfigFile string `gopa.yml`
-	LogLevel   string `info`
+	ConfigFile       string `gopa.yml`
+	LogLevel         string `info`
+	HttpBinding      string `http_bind`
+	ClusterBinding   string `cluster_bind`
+	ClusterSeed      string `cluster_seed`
+	WebsocketBinding string `websocket_bind`
+	AllowMultiInstance bool `multi_instance`
+}
+
+func (this *SystemConfig)Init()  {
+	if(len(this.HttpBinding)==0){
+		this.HttpBinding=":8001"
+	}
+	if(len(this.HttpBinding)==0){
+		this.ClusterBinding=":13000"
+	}
+	if(len(this.WebsocketBinding)==0){
+		this.WebsocketBinding=":8001"
+	}
+	this.AllowMultiInstance=true
 }

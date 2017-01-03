@@ -26,6 +26,7 @@ import (
 	"github.com/medcl/gopa/core/logger"
 	"github.com/medcl/gopa/core/module"
 	"github.com/medcl/gopa/core/stats"
+	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules"
 	"net/http"
 	_ "net/http/pprof"
@@ -35,7 +36,6 @@ import (
 	"runtime/pprof"
 	"syscall"
 	"time"
-	"github.com/medcl/gopa/core/util"
 )
 
 var (
@@ -74,6 +74,11 @@ func main() {
 	var memprofile = flag.String("memprofile", "", "write memory profile to this file")
 	var startPprof = flag.Bool("pprof", false, "start pprof service, endpoint: http://localhost:6060/debug/pprof/")
 	var isDebug = flag.Bool("debug", false, "enable debug")
+
+	var httpBinding = flag.String("http_bind", "", "the http binding address, eg: 127.0.0.1:11000")
+	var websocketBinding = flag.String("websocket_bind", "", "the websocket binding address, eg: 127.0.0.1:12000")
+	var clusterBinding = flag.String("cluster_bind", "", "the cluster binding address, eg: 127.0.0.1:13000")
+	var clusterSeed = flag.String("cluster_seed", "", "the cluster address to start join in, seprated by comma, eg: 127.0.0.1:13000,127.0.0.1:13001,127.0.0.1:13002")
 
 	flag.Parse()
 
@@ -132,10 +137,11 @@ func main() {
 
 	logger.SetInitLogging(EmptyEnv(), *logLevel)
 
-	sysConfig := SystemConfig{ConfigFile: *configFile, LogLevel: *logLevel}
+	sysConfig := SystemConfig{ConfigFile: *configFile, LogLevel: *logLevel, HttpBinding: *httpBinding, WebsocketBinding: *websocketBinding, ClusterBinding: *clusterBinding, ClusterSeed: *clusterSeed}
+	sysConfig.Init()
 
 	env = Environment(sysConfig)
-	env.IsDebug=*isDebug
+	env.IsDebug = *isDebug
 	//put env into global registrar
 	global.RegisterEnv(env)
 	logger.SetLogging(env)

@@ -20,16 +20,29 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"net"
+	"strconv"
 )
 
 func TestTestPort(t *testing.T) {
-	port:="42122"
+	port:=42122
 	res:=TestPort(port)
 	assert.Equal(t,true,res)
 
-	ln, _ := net.Listen("tcp", ":" + port)
+	ln, _ := net.Listen("tcp", ":" + strconv.Itoa(port))
 
 	res=TestPort(port)
 	assert.Equal(t,false,res)
+	ln.Close()
+}
+
+func TestGetAvailablePort(t *testing.T) {
+	port:=42123
+	res:=TestPort(port)
+	assert.Equal(t,true,res)
+
+	ln, _ := net.Listen("tcp", ":" + strconv.Itoa(port))
+
+	p1:=GetAvailablePort("",port)
+	assert.Equal(t,42124,p1)
 	ln.Close()
 }
