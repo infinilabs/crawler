@@ -1,13 +1,4 @@
-max_go_routine: 100
-cluster:
-  name: "gopa"
-
-path:
-  data: "/tmp/gopa/data"
-  log:  "/tmp/gopa/log"
-
-logging:
-  level: "info"
+max_go_routine: 1
 
 channel:
   checker_chan_buff_size: 0

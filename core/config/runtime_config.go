@@ -16,34 +16,6 @@ limitations under the License.
 
 package config
 
-type PathConfig struct {
-	Data     string  `data`
-	Log      string  `log`
-	TaskData string
-	QueueData string
-	WebData  string
-
-	SavedFileLog    string //path of saved files
-	PendingFetchLog string //path of pending fetch
-	FetchFailedLog  string //path of failed fetch
-}
-
-func (this *PathConfig) Init() (*PathConfig)  {
-	this.Data="data"
-	this.Log="log"
-	return this
-}
-
-type ClusterConfig struct {
-	Name string
-}
-
-func (this *ClusterConfig)Init() (*ClusterConfig)  {
-	this.Name="gopa"
-	return this
-}
-
-
 type ChannelConfig struct {
 	CheckerChanBuffSize     int `checker_chan_buff_size`
 	FetchChanBuffSize     int `fetch_chan_buff_size`
@@ -52,18 +24,6 @@ type ChannelConfig struct {
 func (this *ChannelConfig)Init() (*ChannelConfig)  {
 	this.CheckerChanBuffSize=0
 	this.FetchChanBuffSize=0
-	return this
-}
-
-type LoggingConfig struct {
-	Level     string `level`
-
-	//config string of seelog
-	ConfigStr string
-}
-
-func (this *LoggingConfig)Init() (*LoggingConfig)  {
-	this.Level="info"
 	return this
 }
 
@@ -120,20 +80,11 @@ type RuledFetchConfig struct {
 }
 
 type RuntimeConfig struct {
-	//cluster
-	ClusterConfig *ClusterConfig `cluster`
-
-	//logging related
-	LoggingConfig *LoggingConfig `logging`
 
 	IndexingConfig *IndexingConfig `indexing`
 
 
 	ChannelConfig *ChannelConfig `channel`
-
-
-	//path related
-	PathConfig *PathConfig `path`
 
 
 	//crawler config

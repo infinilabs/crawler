@@ -75,10 +75,12 @@ func main() {
 	var startPprof = flag.Bool("pprof", false, "start pprof service, endpoint: http://localhost:6060/debug/pprof/")
 	var isDebug = flag.Bool("debug", false, "enable debug")
 
-	var httpBinding = flag.String("http_bind", "", "the http binding address, eg: 127.0.0.1:11000")
-	var websocketBinding = flag.String("websocket_bind", "", "the websocket binding address, eg: 127.0.0.1:12000")
-	var clusterBinding = flag.String("cluster_bind", "", "the cluster binding address, eg: 127.0.0.1:13000")
-	var clusterSeed = flag.String("cluster_seed", "", "the cluster address to start join in, seprated by comma, eg: 127.0.0.1:13000,127.0.0.1:13001,127.0.0.1:13002")
+	var httpBinding = flag.String("http_bind", "", "the http binding address, eg: 127.0.0.1:8001")
+	var clusterBinding = flag.String("cluster_bind", "", "the cluster binding address, eg: 127.0.0.1:13001")
+	var clusterSeed = flag.String("cluster_seeds", "", "the cluster address to start join in, seprated by comma, eg: 127.0.0.1:8001,127.0.0.1:8002,127.0.0.1:8003")
+	var clusterName = flag.String("cluster_name", "gopa", "the cluster name, default: gopa")
+	var dataDir = flag.String("data_path", "data", "the data path, default: data")
+	var logDir = flag.String("log_path", "log", "the log path, default: log")
 
 	flag.Parse()
 
@@ -137,7 +139,7 @@ func main() {
 
 	logger.SetInitLogging(EmptyEnv(), *logLevel)
 
-	sysConfig := SystemConfig{ConfigFile: *configFile, LogLevel: *logLevel, HttpBinding: *httpBinding, WebsocketBinding: *websocketBinding, ClusterBinding: *clusterBinding, ClusterSeed: *clusterSeed}
+	sysConfig := SystemConfig{ConfigFile: *configFile, LogLevel: *logLevel, HttpBinding: *httpBinding, ClusterBinding: *clusterBinding, ClusterSeeds: *clusterSeed,ClusterName:*clusterName,Data:*dataDir,Log:*logDir}
 	sysConfig.Init()
 
 	env = Environment(sysConfig)
@@ -147,7 +149,7 @@ func main() {
 	logger.SetLogging(env)
 
 	//check instance lock
-	util.CheckInstanceLock(env.RuntimeConfig.PathConfig.Data)
+	util.CheckInstanceLock(env.SystemConfig.Data)
 
 	module.New(env)
 	modules.Register()
@@ -171,13 +173,12 @@ func main() {
 			log.Infof("got signal:%s ,start shutting down", s.String())
 			//wait workers to exit
 			module.Stop()
-			util.ClearInstanceLock()
 			finalQuitSignal <- true
 		}
 	}()
 
 	<-finalQuitSignal
-
+	util.ClearInstanceLock()
 	log.Debug("finished shutting down")
 
 	onShutdown()

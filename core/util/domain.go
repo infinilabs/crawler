@@ -1530,7 +1530,7 @@ var (
 // returns true if url is a valid url.
 func IsValidTLD(host string) bool {
 
-	//parts := strings.Split(url, "/")
+	//parts := strings.Split(host, "/")
 	//
 	//if !validTLD[path.Ext(parts[0])] {
 	//	return false

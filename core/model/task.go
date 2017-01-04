@@ -69,7 +69,7 @@ func GetTaskList(from, size int, domain string) (int, []Task, error) {
 	}
 	err, result := store.Search(&Task{}, &tasks, &queryO)
 	if err != nil {
-		log.Debug(err)
+		log.Trace(err)
 	}
 	return result.Total, tasks, err
 }
@@ -80,7 +80,7 @@ func GetPendingFetchTasks() (int, []Task, error) {
 	queryO := store.Query{Sort: "CreateTime", Filter: &store.Cond{Name: "Phrase", Value: 1}}
 	err, result := store.Search(&Task{}, &tasks, &queryO)
 	if err != nil {
-		log.Debug(err)
+		log.Trace(err)
 	}
 	return result.Total, tasks, err
 }

@@ -18,13 +18,13 @@ package util
 
 import (
 	"testing"
-	"github.com/medcl/gopa/core/types"
 	"fmt"
 	"encoding/json"
+	"github.com/medcl/gopa/core/model"
 )
 
 func TestGet(t *testing.T) {
-	t1:=types.PageItem{}
+	t1:=model.PageItem{}
 	data,_:= get(&t1,"http://www.baidu.com/search/resources/images/favicon.ico","")
 
 	data1,_:=json.Marshal(t1)

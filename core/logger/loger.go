@@ -59,6 +59,10 @@ func Critical(v ...interface{}) error {
 	return logger.Critical(v)
 }
 
+func Fatal(v ...interface{}) error {
+	return logger.Critical(v)
+}
+
 func Register(l Logger) {
 	logger = l
 }

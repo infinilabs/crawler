@@ -26,16 +26,20 @@ import (
 	websocket "github.com/medcl/gopa/modules/api/websocket"
 	ui "github.com/medcl/gopa/ui"
 	_ "net/http/pprof"
+	apis "github.com/medcl/gopa/core/api"
+	"github.com/medcl/gopa/core/util"
 )
 
+var router *httprouter.Router
+var mux *http.ServeMux
 func internalStart(env *Env) {
-	handler := Handler{Env: env}
-	router := httprouter.New()
+	handler:= Handler{Env: env}
+	router = httprouter.New()
 
 	user := "gopa"
 	pass := "gopa"
 
-	mux := http.NewServeMux()
+	mux = http.NewServeMux()
 	websocket.InitWebSocket(env)
 
 	mux.HandleFunc("/ws", websocket.ServeWs)
@@ -65,10 +69,25 @@ func internalStart(env *Env) {
 	mux.Handle("/ui/", http.FileServer(ui.FS(false)))
 	mux.HandleFunc("/ui/boltdb", handler.BoltDBStatusAction)
 
+	//registered handlers
+	if(apis.RegisteredHandler!=nil){
+		for k,v:=range apis.RegisteredHandler{
+			log.Debug("register custom http handler: ",k)
+			mux.Handle(k,v)
+		}
+	}
+	if(apis.RegisteredFuncHandler!=nil){
+		for k,v:=range apis.RegisteredFuncHandler{
+			log.Debug("register custom http handler: ",k)
+			mux.HandleFunc(k,v)
+		}
+	}
+
 	mux.Handle("/", router)
 
-	log.Info("http server listen at: http://localhost:8001/")
-	http.ListenAndServe(":8001", mux)
+	address:=util.AutoGetAddress(env.SystemConfig.HttpBinding)
+	log.Info("http server listen at: ",address)
+	http.ListenAndServe(address, mux)
 }
 
 func BasicAuth(h httprouter.Handle, requiredUser, requiredPassword string) httprouter.Handle {

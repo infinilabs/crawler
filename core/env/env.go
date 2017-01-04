@@ -31,6 +31,8 @@ type Env struct {
 	SystemConfig  *SystemConfig
 	RuntimeConfig *RuntimeConfig
 	IsDebug       bool
+	LoggingLevel    string
+
 }
 
 func Environment(sysConfig SystemConfig) *Env {
@@ -43,12 +45,6 @@ func Environment(sysConfig SystemConfig) *Env {
 		panic(err)
 	}
 	env.RuntimeConfig = &config
-
-	//override logging level
-	if len(sysConfig.LogLevel) > 0 {
-		env.RuntimeConfig.LoggingConfig.Level = sysConfig.LogLevel
-	}
-
 	env.init()
 
 	return &env
@@ -80,9 +76,6 @@ func (this *Env) loadRuntimeConfig() (RuntimeConfig, error) {
 	} else {
 		//init default Config
 		config = RuntimeConfig{}
-		config.PathConfig = (&PathConfig{}).Init()
-		config.ClusterConfig = (&ClusterConfig{}).Init()
-		config.LoggingConfig = (&LoggingConfig{}).Init()
 		config.IndexingConfig = (&IndexingConfig{}).Init()
 		config.ChannelConfig = (&ChannelConfig{}).Init()
 		config.CrawlerConfig = (&CrawlerConfig{}).Init()
@@ -90,15 +83,6 @@ func (this *Env) loadRuntimeConfig() (RuntimeConfig, error) {
 		config.TaskConfig = (&TaskConfig{}).Init()
 		config.RuledFetchConfig = (&RuledFetchConfig{}) //.Init()
 	}
-
-	//override built-in config
-	config.PathConfig.SavedFileLog = config.PathConfig.Data + "/tasks/pending_parse.files"
-	config.PathConfig.PendingFetchLog = config.PathConfig.Data + "/tasks/pending_fetch.urls"
-	config.PathConfig.FetchFailedLog = config.PathConfig.Data + "/tasks/failed_fetch.urls"
-
-	config.PathConfig.WebData = config.PathConfig.Data + "/web/"
-	config.PathConfig.TaskData = config.PathConfig.Data + "/tasks/"
-	config.PathConfig.QueueData = config.PathConfig.Data + "/queue/"
 
 	config.TaskConfig.LinkUrlExtractRegex = regexp.MustCompile(config.TaskConfig.LinkUrlExtractRegexStr)
 	config.TaskConfig.FetchUrlPattern = regexp.MustCompile(config.TaskConfig.FetchUrlPatternStr)
@@ -113,11 +97,6 @@ func (this *Env) init() error {
 	if this.RuntimeConfig.MaxGoRoutine < 1 {
 		this.RuntimeConfig.MaxGoRoutine = 1
 	}
-	os.MkdirAll(this.RuntimeConfig.PathConfig.Data, 0777)
-	os.MkdirAll(this.RuntimeConfig.PathConfig.Log, 0777)
-	os.MkdirAll(this.RuntimeConfig.PathConfig.QueueData, 0777)
-	os.MkdirAll(this.RuntimeConfig.PathConfig.WebData, 0777)
-	os.MkdirAll(this.RuntimeConfig.PathConfig.TaskData, 0777)
 
 	return nil
 }
@@ -128,24 +107,40 @@ func EmptyEnv() *Env {
 
 //high priority config, init from the environment or startup, can't be changed
 type SystemConfig struct {
-	ConfigFile       string `gopa.yml`
-	LogLevel         string `info`
-	HttpBinding      string `http_bind`
-	ClusterBinding   string `cluster_bind`
-	ClusterSeed      string `cluster_seed`
-	WebsocketBinding string `websocket_bind`
+	ClusterName        string `cluster_name`
+	NodeName           string `node_name`
+	ConfigFile         string `gopa.yml`
+	LogLevel           string `info`
+	HttpBinding        string `http_bind`
+	ClusterBinding     string `cluster_bind`
+	ClusterSeeds       string `cluster_seeds`
 	AllowMultiInstance bool `multi_instance`
+	Data               string  `data`
+	Log                string  `log`
 }
 
 func (this *SystemConfig)Init()  {
+	if(len(this.Data)==0){
+		this.Data="data"
+	}
+	if(len(this.Log)==0){
+		this.Log="log"
+	}
+	if(len(this.ClusterName)==0){
+		this.ClusterName="gopa"
+	}
+	if(len(this.NodeName)==0){
+		this.NodeName=util.RandomPickName()
+	}
 	if(len(this.HttpBinding)==0){
 		this.HttpBinding=":8001"
 	}
-	if(len(this.HttpBinding)==0){
-		this.ClusterBinding=":13000"
+
+	if(len(this.ClusterBinding)==0){
+		this.ClusterBinding=":13001"
 	}
-	if(len(this.WebsocketBinding)==0){
-		this.WebsocketBinding=":8001"
-	}
+
 	this.AllowMultiInstance=true
+	os.MkdirAll(this.Data, 0777)
+	os.MkdirAll(this.Log, 0777)
 }

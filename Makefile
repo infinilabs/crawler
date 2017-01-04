@@ -4,12 +4,18 @@ SHELL=/bin/bash
 #NEWGOPATH:=${CWD}:${OLDGOPATH}
 #export GOPATH=$(NEWGOPATH)
 
-
 build: clean config update_ui
 	go build -o bin/gopa
 
+build-cluster-test: build
+	cd bin && mkdir node1 node2 node3 && cp gopa node1 && cp gopa node2 && cp gopa node3
+
 build-with-flags: clean config update_ui
 	go build -gcflags "-N -l" -race -o bin/gopa
+
+test-all:
+	go test -timeout 60s -v ./...
+	GORACE="halt_on_error=1" go test -race -timeout 120s -v ./...
 
 update_ui:
 	go get github.com/mjibson/esc
@@ -58,7 +64,7 @@ build-bsd: clean config update_ui
 	GOOS=openbsd  GOARCH=386      go build -o bin/openbsd32/gopa
 
 format:
-	gofmt -s -w -tabs=false -tabwidth=4 gopa.go
+	gofmt -s -w -tabs=false -tabwidth=4 main.go
 
 update_bolt_ui:
 	cd modules/api/http/templates/boltdb && ego -package templates
@@ -97,6 +103,8 @@ config: update_commit_log
 	go get github.com/julienschmidt/httprouter
 	go get github.com/rs/xid
 	go get github.com/seiflotfy/cuckoofilter
+	go get github.com/hashicorp/raft
+	go get github.com/hashicorp/raft-boltdb
 
 
 

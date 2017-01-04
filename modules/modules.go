@@ -25,6 +25,7 @@ import (
 	"github.com/medcl/gopa/modules/dispatcher"
 	"github.com/medcl/gopa/modules/filter"
 	"github.com/medcl/gopa/modules/stats"
+	"github.com/medcl/gopa/modules/cluster"
 )
 
 func Register() {
@@ -37,5 +38,6 @@ func Register() {
 	module.Register(crawler.CheckerModule{})
 	module.Register(crawler.CrawlerModule{})
 	module.Register(dispatcher.DispatcherModule{})
+	module.Register(cluster.ClusterModule{})
 	module.Register(http.APIModule{})
 }

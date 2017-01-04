@@ -49,7 +49,7 @@ func (this FilterModule)CheckThenAdd(bucket FilterKey,key[]byte)(b bool,err erro
 func initFilter(key FilterKey) {
 	//f := impl.EmptyFilter{}
 	f:=impl.LeveldbFilter{}
-	file := path.Join(global.Env().RuntimeConfig.PathConfig.Data, string(key))
+	file := path.Join(global.Env().SystemConfig.Data, string(key))
 	err:=f.Open(file)
 	if(err!=nil){
 		panic(err)

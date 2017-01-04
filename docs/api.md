@@ -28,3 +28,27 @@ curl -XGET http://localhost:8001/stats
 * Get web snapshot
 
 ``` http://localhost:8001/snapshot/?url=http://xxx.com ```
+
+
+* Get Cluster
+``` http://127.0.0.1:8001/cluster/info ```
+
+```
+{
+	"addr": "Node at :13003 [Follower]",
+	"leader": ":13000",
+	"stats": {
+		"applied_index": "21",
+		"commit_index": "21",
+		"fsm_pending": "0",
+		"last_contact": "55.516082ms",
+		"last_log_index": "21",
+		"last_log_term": "408",
+		"last_snapshot_index": "0",
+		"last_snapshot_term": "0",
+		"num_peers": "4",
+		"state": "Follower",
+		"term": "408"
+	}
+}
+```

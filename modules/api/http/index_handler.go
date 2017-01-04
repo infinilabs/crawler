@@ -30,8 +30,8 @@ func (this Handler) IndexAction(w http.ResponseWriter, req *http.Request, _ http
 	}
 
 	data := map[string]interface{}{}
-	data["name"] = "007"
-	data["cluster_name"] = this.Env.RuntimeConfig.ClusterConfig.Name
+	data["cluster_name"] = this.Env.SystemConfig.ClusterName
+	data["name"] = this.Env.SystemConfig.NodeName
 	version:=map[string]interface{}{}
 	version["number"]=env.VERSION
 	version["build_commit"]=env.LastCommitLog

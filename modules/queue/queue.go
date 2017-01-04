@@ -9,6 +9,7 @@ import (
 	"time"
 	log "github.com/cihub/seelog"
 	"errors"
+	"os"
 )
 
 var queues map[QueueKey]*BackendQueue
@@ -22,7 +23,8 @@ func (this DiskQueue) Name() string {
 
 func (this DiskQueue) Start(env *Env) {
 	queues = make(map[QueueKey]*BackendQueue)
-	path := global.Env().RuntimeConfig.PathConfig.QueueData
+	path := global.Env().SystemConfig.Data+"/queue"
+	os.Mkdir(path,0777)
 	pendingFetchDiskQueue := NewDiskQueue("pending_fetch", path, 100*1024*1024, 1, 1<<10, 2500, 5*time.Second)
 	pendingCheckDiskQueue := NewDiskQueue("pending_check", path, 100*1024*1024, 1, 1<<10, 2500, 5*time.Second)
 	pendingDispatchDiskQueue := NewDiskQueue("pending_dispatch", path, 100*1024*1024, 1, 1<<10, 2500, 5*time.Second)

@@ -46,3 +46,30 @@ func TestGetAvailablePort(t *testing.T) {
 	assert.Equal(t,42124,p1)
 	ln.Close()
 }
+
+func TestAutoGetAddress(t *testing.T) {
+	port:=42123
+	res:=TestPort(port)
+	assert.Equal(t,true,res)
+
+	ln, _ := net.Listen("tcp", ":" + strconv.Itoa(port))
+
+	var p1 string
+
+	p1=AutoGetAddress(":42123")
+	assert.Equal(t,":42124",p1)
+	ln.Close()
+
+	ln, _ = net.Listen("tcp", "127.0.0.1:" + strconv.Itoa(port))
+
+	p1=AutoGetAddress("127.0.0.1:42123")
+	assert.Equal(t,"127.0.0.1:42124",p1)
+	ln.Close()
+
+}
+
+func TestGetValidAddress(t *testing.T) {
+	addr:=":8001"
+	addr=GetValidAddress(addr)
+	assert.Equal(t,"127.0.0.1:8001",addr)
+}

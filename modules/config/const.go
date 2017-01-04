@@ -24,7 +24,8 @@ const SnapshotMappingBucketKey string = "SnapshotMapping"
 
 const PhraseChecker  model.TaskPhrase =1 //check url validation
 const PhraseCrawler  model.TaskPhrase =2 //going to fetch
-const PhraseUpdate  model.TaskPhrase =3 //scheduled update
+const PhraseParse  model.TaskPhrase =3  //parse content
+const PhraseUpdate  model.TaskPhrase =4 //scheduled update
 
 
 const REGISTER_BOLTDB  global.RegisterKey = "REGISTER_BOLTDB"

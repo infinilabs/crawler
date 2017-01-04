@@ -49,7 +49,7 @@ func (this BoltdbStore) Open() error {
 		boltDb := v.(*bolt.DB)
 		db, err = storm.Open("boltdb", storm.UseDB(boltDb))
 	} else {
-		file := path.Join(global.Env().RuntimeConfig.PathConfig.Data, "boltdb")
+		file := path.Join(global.Env().SystemConfig.Data, "boltdb")
 		db, err = storm.Open(file, storm.BoltOptions(0600, &bolt.Options{Timeout: 5 * time.Second}))
 	}
 	if err != nil {
@@ -198,7 +198,7 @@ func (filter BoltdbStore) Search(t1, t2 interface{}, q1 *store.Query) (error, st
 	//query := db.Select(q.Gt("CreateTime", t)).Limit(size).Skip(from).Reverse().OrderBy("CreateTime")
 	err = q2.Find(t2)
 	if err != nil {
-		log.Debug(err)
+		log.Trace(err)
 	}
 	return err, result
 }

@@ -31,8 +31,8 @@ func TestLoad(t *testing.T) {
 	assert.Equal(t,"debug",config.LoggingConfig.Level)
 	assert.Equal(t,"http://eshost:9200",config.IndexingConfig.Host)
 	assert.Equal(t,"gopa",config.IndexingConfig.Index)
-	assert.Equal(t,"data",config.PathConfig.Data)
-	assert.Equal(t,"log",config.PathConfig.Log)
+	//assert.Equal(t,"data",config.PathConfig.Data)
+	//assert.Equal(t,"log",config.PathConfig.Log)
 
 	assert.Equal(t,true,config.ParserConfig.Enabled)
 	assert.Equal(t,true,config.CrawlerConfig.Enabled)

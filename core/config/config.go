@@ -34,11 +34,8 @@ func OldGetRuntimeConfig() *RuntimeConfig {
 
 	//parse main config
 	loadingConfig, _ = cfg.ReadDefault("config.ini")
-	runtimeConfig.PathConfig = new(PathConfig)
-	runtimeConfig.ClusterConfig = new(ClusterConfig)
+	//runtimeConfig.PathConfig = new(PathConfig)
 	parseConfig()
-
-	runtimeConfig.ClusterConfig.Name = GetStringConfig("cluster", "name", "gopa")
 
 	runtimeConfig.TaskConfig = parseConfig()
 
@@ -61,10 +58,10 @@ func OldGetRuntimeConfig() *RuntimeConfig {
 	}
 
 	//os.MkdirAll(runtimeConfig.PathConfig.Home, 0777)
-	os.MkdirAll(runtimeConfig.PathConfig.Data, 0777)
-	os.MkdirAll(runtimeConfig.PathConfig.Log, 0777)
-	os.MkdirAll(runtimeConfig.PathConfig.WebData, 0777)
-	os.MkdirAll(runtimeConfig.PathConfig.TaskData, 0777)
+	//os.MkdirAll(runtimeConfig.PathConfig.Data, 0777)
+	//os.MkdirAll(runtimeConfig.PathConfig.Log, 0777)
+	//os.MkdirAll(runtimeConfig.PathConfig.WebData, 0777)
+	//os.MkdirAll(runtimeConfig.PathConfig.TaskData, 0777)
 
 	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath, 0777)
 	os.MkdirAll(runtimeConfig.TaskConfig.TaskDataPath+"/tasks/", 0777)

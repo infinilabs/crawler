@@ -44,7 +44,7 @@ func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 	this.context = c
 
 	if len(this.baseDir) == 0 {
-		this.baseDir = global.Env().RuntimeConfig.PathConfig.WebData
+		this.baseDir = global.Env().SystemConfig.Data+"/web"
 	}
 
 	url, ok := c.GetString(CONTEXT_URL)
@@ -57,7 +57,7 @@ func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 	domain := c.MustGetString(CONTEXT_HOST)
 	dir := c.MustGetString(CONTEXT_SAVE_PATH)
 	file := c.MustGetString(CONTEXT_SAVE_FILENAME)
-	folder := path.Join(global.Env().RuntimeConfig.PathConfig.WebData, domain, dir)
+	folder := path.Join(this.baseDir, domain, dir)
 
 	os.MkdirAll(folder, 0777)
 
