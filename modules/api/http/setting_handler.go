@@ -44,7 +44,8 @@ func (this Handler) LoggingSettingAction(w http.ResponseWriter, req *http.Reques
 
 		log.Info("receive new settings:", configStr)
 
-		logging.ReplaceConfig(this.Env, configStr)
+		//TODO json config
+		//logging.SetLogging(this.Env, configStr)
 
 		this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
 	}

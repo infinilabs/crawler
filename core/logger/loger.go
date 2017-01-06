@@ -16,6 +16,12 @@ limitations under the License.
 
 package logger
 
+import "fmt"
+
+func reportInternalError(err error) {
+	fmt.Sprintln(err)
+}
+
 type Logger interface {
 	Trace(v ...interface{})
 

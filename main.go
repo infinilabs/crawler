@@ -137,7 +137,7 @@ func main() {
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	logger.SetInitLogging(EmptyEnv(), *logLevel)
+	logger.SetLogging(EmptyEnv(), *logLevel,*logDir)
 
 	sysConfig := SystemConfig{ConfigFile: *configFile, LogLevel: *logLevel, HttpBinding: *httpBinding, ClusterBinding: *clusterBinding, ClusterSeeds: *clusterSeed, ClusterName: *clusterName, Data: *dataDir, Log: *logDir}
 	sysConfig.Init()
@@ -146,7 +146,7 @@ func main() {
 	env.IsDebug = *isDebug
 	//put env into global registrar
 	global.RegisterEnv(env)
-	logger.SetLogging(env)
+	logger.SetLogging(env,*logLevel,*logDir)
 
 	//check instance lock
 	util.CheckInstanceLock(env.SystemConfig.GetDataDir())
@@ -173,12 +173,13 @@ func main() {
 			log.Infof("got signal:%s ,start shutting down", s.String())
 			//wait workers to exit
 			module.Stop()
+			util.ClearInstanceLock()
+			log.Flush()
 			finalQuitSignal <- true
 		}
 	}()
 
 	<-finalQuitSignal
-	util.ClearInstanceLock()
 	log.Debug("finished shutting down")
 
 	onShutdown()

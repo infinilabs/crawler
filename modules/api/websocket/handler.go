@@ -48,7 +48,7 @@ func (this Command) UpdateLogLevel(c *WebsocketConnection, a []string) {
 	level := a[1]
 	if len(level) > 0 {
 		level := strings.ToLower(level)
-		logging.SetInitLogging(global.Env(), level)
+		logging.SetLogging(global.Env(), level,"")
 		c.WriteMessage([]byte("setting log level to  " + level))
 		return
 	}

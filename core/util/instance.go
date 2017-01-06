@@ -23,7 +23,6 @@ func CheckInstanceLock(p string) {
 
 func ClearInstanceLock() {
 	if locked {
-		log.Trace("lock removed,", file)
 		os.Remove(path.Join(file))
 	}
 }

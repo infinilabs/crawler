@@ -113,7 +113,7 @@ func (c *WebsocketConnection) parseMessage(msg []byte) {
 		}
 	}
 
-	if err := c.write(websocket.TextMessage, []byte(message+"\nCommand not found\n")); err != nil {
+	if err := c.write(websocket.TextMessage, []byte(message)); err != nil {
 		return
 	}
 

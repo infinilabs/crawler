@@ -17,66 +17,62 @@ limitations under the License.
 package logger
 
 import (
-	"fmt"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
 	"strings"
 )
 
-func SetInitLogging(env *Env, logLevel string) {
-
-	setLogging(env, logLevel, "./log/gopa.log")
-}
-
-func SetLogging(env *Env) {
-	logLevel := strings.ToLower(env.LoggingLevel)
-	logFile := env.SystemConfig.Log + "/gopa.log"
-	setLogging(env, logLevel, logFile)
-
-}
-
 var config string
-var env *Env
+var level string
+var file string
 
-func setLogging(env *Env, logLevel string, logFile string) {
 
-	logLevel = strings.ToLower(logLevel)
-
-	testConfig := `
-	<seelog  type="sync" minlevel="`
-	testConfig = testConfig + logLevel
-	testConfig = testConfig + `">
-		<outputs formatid="main">
-			<console formatid="main"/>
-			<filter levels="` + logLevel + `">
-				<file path="` + logFile + `"/>
-			</filter>
-			 <rollingfile formatid="main" type="size" filename="` + logFile + `" maxsize="10000000000" maxrolls="5" />
-			<custom name="websocket" formatid="main"/>
-		</outputs>
-		<formats>
-			<format id="main" format="[%Date(01-02) %Time] [%LEV] [%File:%Line] %Msg%n"/>
-		</formats>
-	</seelog>`
-	ReplaceConfig(env, testConfig)
-}
-
-func ReplaceConfig(e *Env, cfg string) {
-
-	log.RegisterReceiver("websocket", &WebsocketReceiver{})
-
-	logger, err := log.LoggerFromConfigAsBytes([]byte(cfg))
-	if err != nil {
-		log.Error("replace config error,", err)
-		return
+func SetLogging(env *Env, logLevel string, logFile string) {
+	if(env!=nil){
+		envLevel := strings.ToLower(env.LoggingLevel)
+		if(env.SystemConfig!=nil){
+			envLogFile := env.SystemConfig.Log + "/gopa.log"
+			if(len(envLogFile)>0){
+				file=envLogFile
+			}
+		}
+		if(len(envLevel)>0){
+			level=envLevel
+		}
 	}
-	err = log.ReplaceLogger(logger)
-	if err != nil {
-		log.Error("replace config error,", err)
-		return
+
+	if len(logLevel) > 0 {
+		level = strings.ToLower(logLevel)
 	}
-	config = cfg
-	env = e
+	if len(level) <= 0 {
+		level = "info"
+	}
+
+	if len(file) <= 0 {
+		logFile = "./log/gopa.log"
+	}
+
+	consoleWriter, _ := NewConsoleWriter()
+	websocketWriter, _ := NewWebsocketWriter()
+
+	formatter, _ := log.NewFormatter("[%Date(01-02) %Time] [%LEV] [%File:%Line] %Msg%n")
+
+	NewRollingFileWriterSize(logFile, rollingArchiveNone, "", 10000000000, 5, rollingNameModePostfix)
+
+	root, _ := log.NewSplitDispatcher(formatter, []interface{}{websocketWriter,consoleWriter})
+
+	l,_:=log.LogLevelFromString(level)
+	constraints, _ := log.NewMinMaxConstraints(l, log.CriticalLvl)
+
+	specificConstraints, _ := log.NewListConstraints([]log.LogLevel{log.TraceLvl, log.ErrorLvl})
+
+	ex, _ := log.NewLogLevelException("*", "*crawler.go", specificConstraints)
+
+	exceptions := []*log.LogLevelException{ex}
+
+	logger := log.NewAsyncLoopLogger(log.NewLoggerConfig(constraints, exceptions, root))
+
+	log.ReplaceLogger(logger)
 }
 
 func GetLoggingConfig(env *Env) string {
@@ -92,27 +88,26 @@ var websocketHandler func(message string, level log.LogLevel, context log.LogCon
 func RegisterWebsocketHandler(func1 func(message string, level log.LogLevel, context log.LogContextInterface)) {
 	websocketHandler = func1
 	if func1 != nil {
-		log.Error("logging func registed")
+		log.Debug("websocket logging ready")
 	}
 }
 
 type WebsocketReceiver struct {
 }
 
-func (ar *WebsocketReceiver) ReceiveMessage(message string, level log.LogLevel, context log.LogContextInterface) error {
-	fmt.Sprintln("custom logging func calling")
-	//if websocketHandler != nil {
-	//	websocketHandler(message, level, context)
-	//	log.Error("logging func called")
-	//}
-	return nil
-}
-func (ar *WebsocketReceiver) AfterParse(initArgs log.CustomReceiverInitArgs) error {
-	return nil
-}
-func (ar *WebsocketReceiver) Flush() {
+func NewWebsocketWriter() (writer *WebsocketReceiver, err error) {
+	newWriter := new(WebsocketReceiver)
 
+	return newWriter, nil
 }
-func (ar *WebsocketReceiver) Close() error {
-	return nil
+
+func (console *WebsocketReceiver) Write(bytes []byte) (int, error) {
+	if websocketHandler != nil {
+		websocketHandler(string(bytes), log.DebugLvl, nil)
+	}
+	return 0,nil
+}
+
+func (console *WebsocketReceiver) String() string {
+	return "Websocket writer"
 }
