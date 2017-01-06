@@ -23,6 +23,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	apis "github.com/medcl/gopa/core/api"
 	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/logger"
 	"github.com/medcl/gopa/core/util"
 	. "github.com/medcl/gopa/modules/api/http"
 	websocket "github.com/medcl/gopa/modules/api/websocket"
@@ -110,6 +111,11 @@ func (this APIModule) Name() string {
 	return "API"
 }
 
+func LoggerReceiver(message string, level log.LogLevel, context log.LogContextInterface) {
+
+	websocket.BroadcastMessage(message)
+}
+
 func (this APIModule) Start(config *Env) {
 
 	this.env = config
@@ -117,6 +123,9 @@ func (this APIModule) Start(config *Env) {
 	go func() {
 		internalStart(config)
 	}()
+
+	go logger.RegisterWebsocketHandler(LoggerReceiver)
+
 }
 
 func (this APIModule) Stop() error {

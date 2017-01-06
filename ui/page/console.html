@@ -20,6 +20,14 @@
     .request pre{
      color:royalblue;
     }
+    #log {
+        max-height: 500px;
+    }
+    #logging {
+        max-height: 500px;
+        background: black;
+        color: white;
+    }
 </style>
 <div class="uk-container uk-container-center uk-margin-top uk-margin-bottom">
     <nav class="uk-navbar uk-margin-bottom">
@@ -52,6 +60,12 @@
                 <input id="msg" data-uk-tooltip="{pos:'top'}" type="text" title="Type HELP for more details." placeholder="Type HELP for more details." autocomplete="off" class="uk-width-1-1">
             </form>
 
+        </div>
+        <div class="uk-width-1-1">
+            <i class="uk-icon-play"></i>
+            <i class="uk-icon-stop"></i>
+
+            <div id="logging"></div>
         </div>
     </div>
 

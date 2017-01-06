@@ -17,6 +17,7 @@ limitations under the License.
 package logger
 
 import (
+	"fmt"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
 	"strings"
@@ -35,6 +36,7 @@ func SetLogging(env *Env) {
 }
 
 var config string
+var env *Env
 
 func setLogging(env *Env, logLevel string, logFile string) {
 
@@ -50,6 +52,7 @@ func setLogging(env *Env, logLevel string, logFile string) {
 				<file path="` + logFile + `"/>
 			</filter>
 			 <rollingfile formatid="main" type="size" filename="` + logFile + `" maxsize="10000000000" maxrolls="5" />
+			<custom name="websocket" formatid="main"/>
 		</outputs>
 		<formats>
 			<format id="main" format="[%Date(01-02) %Time] [%LEV] [%File:%Line] %Msg%n"/>
@@ -58,8 +61,11 @@ func setLogging(env *Env, logLevel string, logFile string) {
 	ReplaceConfig(env, testConfig)
 }
 
-func ReplaceConfig(env *Env, cfg string) {
-	logger, err := log.LoggerFromConfigAsString(cfg)
+func ReplaceConfig(e *Env, cfg string) {
+
+	log.RegisterReceiver("websocket", &WebsocketReceiver{})
+
+	logger, err := log.LoggerFromConfigAsBytes([]byte(cfg))
 	if err != nil {
 		log.Error("replace config error,", err)
 		return
@@ -70,6 +76,7 @@ func ReplaceConfig(env *Env, cfg string) {
 		return
 	}
 	config = cfg
+	env = e
 }
 
 func GetLoggingConfig(env *Env) string {
@@ -78,4 +85,34 @@ func GetLoggingConfig(env *Env) string {
 
 func Flush() {
 	log.Flush()
+}
+
+var websocketHandler func(message string, level log.LogLevel, context log.LogContextInterface)
+
+func RegisterWebsocketHandler(func1 func(message string, level log.LogLevel, context log.LogContextInterface)) {
+	websocketHandler = func1
+	if func1 != nil {
+		log.Error("logging func registed")
+	}
+}
+
+type WebsocketReceiver struct {
+}
+
+func (ar *WebsocketReceiver) ReceiveMessage(message string, level log.LogLevel, context log.LogContextInterface) error {
+	fmt.Sprintln("custom logging func calling")
+	//if websocketHandler != nil {
+	//	websocketHandler(message, level, context)
+	//	log.Error("logging func called")
+	//}
+	return nil
+}
+func (ar *WebsocketReceiver) AfterParse(initArgs log.CustomReceiverInitArgs) error {
+	return nil
+}
+func (ar *WebsocketReceiver) Flush() {
+
+}
+func (ar *WebsocketReceiver) Close() error {
+	return nil
 }

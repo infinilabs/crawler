@@ -5,9 +5,12 @@
 package websocket
 
 import (
+	log "github.com/cihub/seelog"
 	ws "github.com/gorilla/websocket"
 	"github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/global"
 	"strings"
+	"time"
 )
 
 // hub maintains the set of active connections and broadcasts messages to the
@@ -27,12 +30,15 @@ type Hub struct {
 
 	// Command handlers
 	handlers map[string]WebsocketHandlerFunc
+
+	//Broadcast content
+	content []byte
 }
 
 type WebsocketHandlerFunc func(c *WebsocketConnection, array []string)
 
 var h = Hub{
-	broadcast:   make(chan []byte),
+	broadcast:   make(chan []byte, 1000),
 	register:    make(chan *WebsocketConnection),
 	unregister:  make(chan *WebsocketConnection),
 	connections: make(map[*WebsocketConnection]bool),
@@ -64,7 +70,19 @@ func HandleWebSocketCommand(cmd string, handler func(c *WebsocketConnection, arr
 }
 
 func (h *Hub) RunHub() {
-	//TOD error　handler,　parameter　assertion
+	//TODO error　handler,　parameter　assertion
+
+	if global.Env().IsDebug {
+		go func() {
+			t := time.NewTicker(time.Duration(5) * time.Second)
+			for {
+				select {
+				case <-t.C:
+					h.broadcast <- []byte("testing websocket broadcast")
+				}
+			}
+		}()
+	}
 
 	for {
 		select {
@@ -77,14 +95,30 @@ func (h *Hub) RunHub() {
 				close(c.send)
 			}
 		case m := <-h.broadcast:
-			for c := range h.connections {
-				select {
-				case c.send <- m:
-				default:
-					close(c.send)
-					delete(h.connections, c)
-				}
-			}
+			h.content = m
+			h.broadcastMessage()
 		}
 	}
+
+}
+
+func (h *Hub) broadcastMessage() {
+	for c := range h.connections {
+		select {
+		case c.send <- []byte(h.content):
+			break
+		default:
+			close(c.send)
+			delete(h.connections, c)
+		}
+	}
+}
+
+func BroadcastMessage(msg string) {
+	select {
+	case h.broadcast <- []byte(msg):
+	default:
+		log.Warn("websocket broadcast too busy, msg droped")
+	}
+
 }

@@ -90,9 +90,11 @@ format:
 update_bolt_ui:
 	cd modules/api/http/templates/boltdb && ego -package templates
 
-clean:
+clean_data:
 	rm -rif data
 	rm -rif log
+
+clean: clean_data
 	rm -rif bin
 	mkdir bin
 	mkdir bin/windows64
@@ -190,7 +192,7 @@ update_vendor:
 	which glide-vc || go get -v -u github.com/sgotti/glide-vc
 	rm -r vendor && mv _vendor/src vendor || true
 	rm -rf _vendor
-	glide update -s -v -u --quick
+	glide update -s -v -u
 	glide vc --only-code --no-tests
 	mkdir -p _vendor
 	mv vendor _vendor/src

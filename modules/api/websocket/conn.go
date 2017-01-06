@@ -113,7 +113,7 @@ func (c *WebsocketConnection) parseMessage(msg []byte) {
 		}
 	}
 
-	if err := c.write(websocket.TextMessage, []byte("\nCommand not found\n")); err != nil {
+	if err := c.write(websocket.TextMessage, []byte(message+"\nCommand not found\n")); err != nil {
 		return
 	}
 
@@ -131,4 +131,12 @@ func ServeWs(w http.ResponseWriter, r *http.Request) {
 	h.register <- c
 	go c.writePump()
 	c.readPump()
+}
+
+func (c *WebsocketConnection) Broadcast(msg string) {
+	defer func() {
+		h.unregister <- c
+		c.ws.Close()
+	}()
+	h.broadcast <- []byte(msg)
 }
