@@ -34,7 +34,6 @@ func (this Command) Help(c *WebsocketConnection, a []string) {
 }
 
 func (this Command) AddSeed(c *WebsocketConnection, a []string) {
-
 	url := a[1]
 	if len(url) > 0 {
 		queue.Push(config.CheckChannel, model.NewTaskSeed(url, "", 0).MustGetBytes())

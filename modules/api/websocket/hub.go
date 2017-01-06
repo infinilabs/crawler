@@ -64,6 +64,8 @@ func HandleWebSocketCommand(cmd string, handler func(c *WebsocketConnection, arr
 }
 
 func (h *Hub) RunHub() {
+	//TOD error　handler,　parameter　assertion
+
 	for {
 		select {
 		case c := <-h.register:
