@@ -45,7 +45,7 @@ type ORM interface {
 
 	Delete(o interface{}) error
 
-	Search(t1,t2 interface{}, q *Query) (error, Result)
+	Search(t1, t2 interface{}, q *Query) (error, Result)
 
 	Get(key string, value interface{}, to interface{}) error
 
@@ -53,14 +53,14 @@ type ORM interface {
 }
 
 type Query struct {
-	Sort string
-	From int
-	Size int
+	Sort   string
+	From   int
+	Size   int
 	Filter *Cond
 }
 
 type Cond struct {
-	Name string
+	Name  string
 	Value interface{}
 }
 
@@ -116,8 +116,8 @@ func Count(o interface{}) (int, error) {
 	return getORMHandler().Count(o)
 }
 
-func Search(t1,t2 interface{}, q *Query) (error, Result) {
-	return getORMHandler().Search(t1,t2, q)
+func Search(t1, t2 interface{}, q *Query) (error, Result) {
+	return getORMHandler().Search(t1, t2, q)
 }
 
 func getHandler() Store {

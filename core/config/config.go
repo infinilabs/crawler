@@ -27,7 +27,6 @@ import (
 var loadingConfig *cfg.Config
 var runtimeConfig RuntimeConfig
 
-
 func OldGetRuntimeConfig() *RuntimeConfig {
 
 	log.Trace("start init config")

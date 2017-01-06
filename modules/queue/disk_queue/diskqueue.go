@@ -18,7 +18,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
  [nsq]: https://github.com/nsqio/nsq
- */
+*/
 package queue
 
 import (
@@ -27,6 +27,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	log "github.com/cihub/seelog"
 	"io"
 	"math/rand"
 	"os"
@@ -34,7 +35,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-	log "github.com/cihub/seelog"
 )
 
 // diskQueue implements the BackendQueue interface
@@ -84,8 +84,6 @@ type diskQueue struct {
 	exitSyncChan      chan int
 }
 
-
-
 // newDiskQueue instantiates a new instance of diskQueue, retrieving metadata
 // from the filesystem and starting the read ahead goroutine
 func NewDiskQueue(name string, dataPath string, maxBytesPerFile int64,
@@ -97,7 +95,7 @@ func NewDiskQueue(name string, dataPath string, maxBytesPerFile int64,
 		maxBytesPerFile:   maxBytesPerFile,
 		minMsgSize:        minMsgSize,
 		maxMsgSize:        maxMsgSize,
-		readChan:          make(chan []byte,10),
+		readChan:          make(chan []byte, 10),
 		writeChan:         make(chan []byte),
 		writeResponseChan: make(chan error),
 		emptyChan:         make(chan int),
@@ -120,7 +118,7 @@ func NewDiskQueue(name string, dataPath string, maxBytesPerFile int64,
 }
 
 func (d *diskQueue) logf(f string, args ...interface{}) {
-	log.Tracef(f,args)
+	log.Tracef(f, args)
 }
 
 // Depth returns the depth of the queue

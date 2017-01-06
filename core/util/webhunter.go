@@ -29,7 +29,7 @@ import (
 
 	"errors"
 	log "github.com/cihub/seelog"
-	."github.com/medcl/gopa/core/model"
+	. "github.com/medcl/gopa/core/model"
 )
 
 //parse to get url root
@@ -123,7 +123,7 @@ func get(page *PageItem, url string, cookie string) ([]byte, error) {
 			}
 
 		} else {
-			log.Error(url,", ", err)
+			log.Error(url, ", ", err)
 		}
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func post(url string, cookie string, postStr string) []byte {
 	resp, err := client.Do(reqest)
 
 	if err != nil {
-		log.Error(url,", ", err)
+		log.Error(url, ", ", err)
 		return nil
 	}
 

@@ -17,12 +17,14 @@ limitations under the License.
 package env
 
 import (
+	"errors"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
 	"github.com/medcl/gopa/core/util"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 )
@@ -31,8 +33,7 @@ type Env struct {
 	SystemConfig  *SystemConfig
 	RuntimeConfig *RuntimeConfig
 	IsDebug       bool
-	LoggingLevel    string
-
+	LoggingLevel  string
 }
 
 func Environment(sysConfig SystemConfig) *Env {
@@ -114,33 +115,41 @@ type SystemConfig struct {
 	HttpBinding        string `http_bind`
 	ClusterBinding     string `cluster_bind`
 	ClusterSeeds       string `cluster_seeds`
-	AllowMultiInstance bool `multi_instance`
-	Data               string  `data`
-	Log                string  `log`
+	AllowMultiInstance bool   `multi_instance`
+	Data               string `data`
+	Log                string `log`
 }
 
-func (this *SystemConfig)Init()  {
-	if(len(this.Data)==0){
-		this.Data="data"
+func (this *SystemConfig) Init() {
+	if len(this.Data) == 0 {
+		this.Data = "data"
 	}
-	if(len(this.Log)==0){
-		this.Log="log"
+	if len(this.Log) == 0 {
+		this.Log = "log"
 	}
-	if(len(this.ClusterName)==0){
-		this.ClusterName="gopa"
+	if len(this.ClusterName) == 0 {
+		this.ClusterName = "gopa"
 	}
-	if(len(this.NodeName)==0){
-		this.NodeName=util.RandomPickName()
+	if len(this.NodeName) == 0 {
+		this.NodeName = util.RandomPickName()
 	}
-	if(len(this.HttpBinding)==0){
-		this.HttpBinding=":8001"
-	}
-
-	if(len(this.ClusterBinding)==0){
-		this.ClusterBinding=":13001"
+	if len(this.HttpBinding) == 0 {
+		this.HttpBinding = ":8001"
 	}
 
-	this.AllowMultiInstance=true
-	os.MkdirAll(this.Data, 0777)
+	if len(this.ClusterBinding) == 0 {
+		this.ClusterBinding = ":13001"
+	}
+
+	this.AllowMultiInstance = false
+	os.MkdirAll(this.GetDataDir(), 0777)
 	os.MkdirAll(this.Log, 0777)
+}
+
+func (this *SystemConfig) GetDataDir() string {
+	if this.AllowMultiInstance == false {
+		return path.Join(this.Data, this.ClusterName, "nodes", "0")
+	}
+	//TODO auto select next nodes folder, eg: nodes/1 nodes/2
+	panic(errors.New("not supported yet"))
 }

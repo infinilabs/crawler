@@ -1,17 +1,17 @@
 package model
 
 import (
-	"github.com/medcl/gopa/core/store"
 	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/store"
 	"time"
 )
 
 type Domain struct {
 	Host       string         `storm:"id,unique" json:"host,omitempty"`
-	LinksCount int64            `json:"links_count,omitempty"`
+	LinksCount int64          `json:"links_count,omitempty"`
 	Settings   *DomainSetting `storm:"inline" json:"settings,omitempty"`
-	CreateTime    *time.Time       `storm:"index" json:"created,omitempty"`
-	UpdateTime    *time.Time       `storm:"index" json:"updated,omitempty"`
+	CreateTime *time.Time     `storm:"index" json:"created,omitempty"`
+	UpdateTime *time.Time     `storm:"index" json:"updated,omitempty"`
 }
 
 type DomainSetting struct {
@@ -25,12 +25,12 @@ func GetDomain(host string) (error, Domain) {
 
 	err := store.Get("Host", host, &domain)
 	if err != nil {
-		if(err.Error()=="not found"){
-			log.Trace("create domain setting, ",host)
+		if err.Error() == "not found" {
+			log.Trace("create domain setting, ", host)
 			domain.CreateTime = &time
 			domain.UpdateTime = &time
 			store.Save(&domain)
-			return nil,domain
+			return nil, domain
 		}
 	}
 	//
@@ -42,9 +42,6 @@ func GetDomain(host string) (error, Domain) {
 
 	return err, domain
 }
-
-
-
 
 func GetDomainList(from, size int, domain string) (int, []Domain, error) {
 	log.Trace("start get all domain settings")

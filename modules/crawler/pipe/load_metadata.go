@@ -34,6 +34,3 @@ func (this LoadMetadataJoint) Process(context *Context) (*Context, error) {
 
 	return context, nil
 }
-
-
-

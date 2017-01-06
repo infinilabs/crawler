@@ -45,7 +45,6 @@ func Uint32toBytes(b []byte, v uint32) {
 	}
 }
 
-
 func DeepCopy(value interface{}) interface{} {
 	if valueMap, ok := value.(map[string]interface{}); ok {
 		newMap := make(map[string]interface{})

@@ -33,9 +33,9 @@ func (this DispatcherModule) Start(env *Env) {
 				return
 			default:
 				log.Trace("waiting dispatcher signal")
-				er,v := queue.Pop(config.DispatcherChannel)
+				er, v := queue.Pop(config.DispatcherChannel)
 				log.Trace("got dispatcher signal, ", string(v))
-				if(er!=nil){
+				if er != nil {
 					log.Trace(er)
 					continue
 				}

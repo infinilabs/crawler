@@ -18,13 +18,13 @@ package pipe
 
 import (
 	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/util"
 	. "net/url"
 	"sort"
 	"strings"
 	"time"
-	"github.com/medcl/gopa/core/model"
 )
 
 type UrlNormalizationJoint struct {
@@ -143,12 +143,12 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 
 			if !(ref[len(ref)-1] == cur[len(cur)-1] && ref[len(ref)-2] == cur[len(cur)-2]) {
 				log.Debug("domain mismatch,", referenceURI.Host, " vs ", currentURI.Host)
-				context.Break("domain missmatch,"+referenceURI.Host+ " vs "+ currentURI.Host)
+				context.Break("domain missmatch," + referenceURI.Host + " vs " + currentURI.Host)
 				return context, nil //known exception, not error
 			}
 		} else {
 			if referenceURI.Host != currentURI.Host {
-				context.Break("domain missmatch,"+referenceURI.Host+ " vs "+ currentURI.Host)
+				context.Break("domain missmatch," + referenceURI.Host + " vs " + currentURI.Host)
 				return context, nil //known exception, not error
 			}
 		}
@@ -160,10 +160,10 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 	context.Set(CONTEXT_HOST, currentURI.Host)
 	context.Set(CONTEXT_URL_PATH, currentURI.Path)
 
-	task:=context.Get(CONTEXT_CRAWLER_TASK).(*model.Task)
-	task.Domain=currentURI.Host
-	task.Scheme=currentURI.Scheme
-	task.UrlPath=currentURI.Path
+	task := context.Get(CONTEXT_CRAWLER_TASK).(*model.Task)
+	task.Domain = currentURI.Host
+	task.Scheme = currentURI.Scheme
+	task.UrlPath = currentURI.Path
 
 	filePath := ""
 	filename := ""
@@ -245,7 +245,7 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 	filename = filenamePrefix + filename
 	context.Set(CONTEXT_SAVE_PATH, filePath)
 	context.Set(CONTEXT_SAVE_FILENAME, filename)
-	log.Debugf("finished normalization,%s, %s, %s ",url,filePath,filename)
+	log.Debugf("finished normalization,%s, %s, %s ", url, filePath, filename)
 
 	return context, nil
 }

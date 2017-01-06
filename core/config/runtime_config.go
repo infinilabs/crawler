@@ -17,29 +17,28 @@ limitations under the License.
 package config
 
 type ChannelConfig struct {
-	CheckerChanBuffSize     int `checker_chan_buff_size`
-	FetchChanBuffSize     int `fetch_chan_buff_size`
+	CheckerChanBuffSize int `checker_chan_buff_size`
+	FetchChanBuffSize   int `fetch_chan_buff_size`
 }
 
-func (this *ChannelConfig)Init() (*ChannelConfig)  {
-	this.CheckerChanBuffSize=0
-	this.FetchChanBuffSize=0
+func (this *ChannelConfig) Init() *ChannelConfig {
+	this.CheckerChanBuffSize = 0
+	this.FetchChanBuffSize = 0
 	return this
 }
-
 
 type StatsdConfig struct {
 	Host string `host`
 }
 
 type IndexingConfig struct {
-	Host string `host`
+	Host  string `host`
 	Index string `index`
 }
 
-func (this *IndexingConfig)Init() (*IndexingConfig)  {
-	this.Host="http://127.0.0.1:9200"
-	this.Index="gopa"
+func (this *IndexingConfig) Init() *IndexingConfig {
+	this.Host = "http://127.0.0.1:9200"
+	this.Index = "gopa"
 	return this
 }
 
@@ -47,24 +46,24 @@ type SaveConfig struct {
 	DefaultExtension string
 }
 
-func (this *SaveConfig)Init() (*SaveConfig)  {
-	this.DefaultExtension=".html"
+func (this *SaveConfig) Init() *SaveConfig {
+	this.DefaultExtension = ".html"
 	return this
 }
 
 type CrawlerConfig struct {
-	Enabled bool `enabled`
-	LoadPendingFetchJobs           bool  `load_pending_fetch_from_file`//fetch url parse and extracted from saved page,load data from:"pending_fetch.urls"
+	Enabled              bool `enabled`
+	LoadPendingFetchJobs bool `load_pending_fetch_from_file` //fetch url parse and extracted from saved page,load data from:"pending_fetch.urls"
 
 }
 
-func (this *CrawlerConfig)Init() (*CrawlerConfig)  {
-	this.Enabled=true
+func (this *CrawlerConfig) Init() *CrawlerConfig {
+	this.Enabled = true
 	return this
 }
 
 type ParserConfig struct {
-	Enabled bool `enabled`
+	Enabled                          bool `enabled`
 	ParseUrlsFromSavedFileLog        bool `parse_file_log`
 	ReParseUrlsFromPreviousSavedPage bool `reparse_file_log` //extract urls from previous saved page
 
@@ -80,17 +79,13 @@ type RuledFetchConfig struct {
 }
 
 type RuntimeConfig struct {
-
 	IndexingConfig *IndexingConfig `indexing`
-
 
 	ChannelConfig *ChannelConfig `channel`
 
-
 	//crawler config
 	CrawlerConfig *CrawlerConfig `crawler`
-	ParserConfig *ParserConfig `parser`
-
+	ParserConfig  *ParserConfig  `parser`
 
 	//task
 	TaskConfig *TaskConfig `task.default`
@@ -100,17 +95,16 @@ type RuntimeConfig struct {
 	//splitter of joined array string
 	//ArrayStringSplitter string
 
-
 	//StoreWebPageTogether bool
 
 	MaxGoRoutine int `max_go_routine`
 
 	//switch config
 	//ParseUrlsFromSavedFileLog      bool
-	LoadTemplatedFetchJob          bool
+	LoadTemplatedFetchJob bool
 	//ParseUrlsFromPreviousSavedPage bool //extract urls from previous saved page
-	LoadRuledFetchJob              bool //extract urls from previous saved page
-	HttpEnabled                    bool //extract urls from previous saved page
+	LoadRuledFetchJob bool //extract urls from previous saved page
+	HttpEnabled       bool //extract urls from previous saved page
 
 	WalkBloomFilterFileName         string
 	FetchBloomFilterFileName        string

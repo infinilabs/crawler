@@ -20,38 +20,39 @@ func (this FilterModule) Name() string {
 }
 
 func (this FilterModule) Exists(bucket FilterKey, key []byte) bool {
-	f:=filters[bucket]
+	f := filters[bucket]
 	return f.Exists(key)
 }
 
 func (this FilterModule) Add(bucket FilterKey, key []byte) error {
-	f:=filters[bucket]
+	f := filters[bucket]
 	return f.Add(key)
 }
 
 func (this FilterModule) Delete(bucket FilterKey, key []byte) error {
-	f:=filters[bucket]
+	f := filters[bucket]
 	return f.Delete(key)
 }
 
 var l sync.RWMutex
-func (this FilterModule)CheckThenAdd(bucket FilterKey,key[]byte)(b bool,err error){
-	f:=filters[bucket]
+
+func (this FilterModule) CheckThenAdd(bucket FilterKey, key []byte) (b bool, err error) {
+	f := filters[bucket]
 	l.Lock()
 	defer l.Unlock()
-	b=f.Exists(key)
-	if(!b){
-	 err=f.Add(key)
+	b = f.Exists(key)
+	if !b {
+		err = f.Add(key)
 	}
-	return b,err
+	return b, err
 }
 
 func initFilter(key FilterKey) {
 	//f := impl.EmptyFilter{}
-	f:=impl.LeveldbFilter{}
-	file := path.Join(global.Env().SystemConfig.Data, string(key))
-	err:=f.Open(file)
-	if(err!=nil){
+	f := impl.LeveldbFilter{}
+	file := path.Join(global.Env().SystemConfig.GetDataDir(), string(key))
+	err := f.Open(file)
+	if err != nil {
 		panic(err)
 	}
 

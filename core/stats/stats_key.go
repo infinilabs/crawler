@@ -25,7 +25,6 @@ const STATS_FETCH_TIMEOUT_IGNORE_COUNT = "fetch.timeout_ignore"
 const STATS_STORAGE_FILE_SIZE = "stats.sum.file.size"
 const STATS_STORAGE_FILE_COUNT = "stats.sum.file.count"
 
-
 type StatsCount struct {
 	TotalCount   int `json:"total,omitempty"`
 	SuccessCount int `json:"success,omitempty"`

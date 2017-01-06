@@ -24,15 +24,14 @@ import (
 var quitChannels []*chan bool
 var started = false
 
-type ParserModule  struct {
-
+type ParserModule struct {
 }
 
 func (this ParserModule) Name() string {
 	return "Parser"
 }
 
-func (this ParserModule)Start(env *Env) {
+func (this ParserModule) Start(env *Env) {
 	if started {
 		log.Error("parser is already started, please stop it first.")
 	}

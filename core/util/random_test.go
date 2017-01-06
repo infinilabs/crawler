@@ -17,17 +17,17 @@ limitations under the License.
 package util
 
 import (
-	"testing"
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestGetRandomName(t *testing.T) {
 
-	for i:=0;i<100 ;i++  {
-		name:=RandomPickName()
+	for i := 0; i < 100; i++ {
+		name := RandomPickName()
 		fmt.Scanln(name)
-		assert.NotEmpty(t,name)
+		assert.NotEmpty(t, name)
 	}
 
 }

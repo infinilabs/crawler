@@ -17,9 +17,9 @@ limitations under the License.
 package handler
 
 import (
-log "github.com/cihub/seelog"
-logging "github.com/medcl/gopa/core/logger"
-"net/http"
+	log "github.com/cihub/seelog"
+	logging "github.com/medcl/gopa/core/logger"
+	"net/http"
 )
 
 func (this Handler) LoggingSettingAction(w http.ResponseWriter, req *http.Request) {

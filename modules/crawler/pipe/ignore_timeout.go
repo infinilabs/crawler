@@ -17,8 +17,8 @@ limitations under the License.
 package pipe
 
 import (
-	. "github.com/medcl/gopa/core/pipeline"
 	log "github.com/cihub/seelog"
+	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/stats"
 )
 
@@ -32,13 +32,12 @@ type IgnoreTimeoutJoint struct {
 
 func (this IgnoreTimeoutJoint) Process(context *Context) (*Context, error) {
 
-
-	host:=context.MustGetString(CONTEXT_HOST)
-	timeoutCount:=stats.Stat("domain.stats", host+"."+stats.STATS_FETCH_TIMEOUT_COUNT)
-	if(timeoutCount>this.IgnoreTimeoutAfterCount){
+	host := context.MustGetString(CONTEXT_HOST)
+	timeoutCount := stats.Stat("domain.stats", host+"."+stats.STATS_FETCH_TIMEOUT_COUNT)
+	if timeoutCount > this.IgnoreTimeoutAfterCount {
 		stats.Increment("domain.stats", host+"."+stats.STATS_FETCH_TIMEOUT_IGNORE_COUNT)
-		context.Break("too much timeout on this domain, ignored "+host)
-		log.Warnf("hit timeout host, %s , ignore after,%d ",host,timeoutCount)
+		context.Break("too much timeout on this domain, ignored " + host)
+		log.Warnf("hit timeout host, %s , ignore after,%d ", host, timeoutCount)
 	}
 	return context, nil
 }

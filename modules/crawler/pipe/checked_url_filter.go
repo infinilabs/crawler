@@ -17,12 +17,12 @@ limitations under the License.
 package pipe
 
 import (
-	. "github.com/medcl/gopa/core/pipeline"
 	log "github.com/cihub/seelog"
-	"regexp"
 	"github.com/medcl/gopa/core/filter"
-	"github.com/medcl/gopa/modules/config"
+	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/stats"
+	"github.com/medcl/gopa/modules/config"
+	"regexp"
 )
 
 type UrlCheckedFilterJoint struct {
@@ -45,13 +45,13 @@ func (this UrlCheckedFilterJoint) Process(context *Context) (*Context, error) {
 	if b {
 		stats.Increment("checker.url", "duplicated")
 		log.Debug("duplicated url,already checked,  url:", url)
-		context.Exit("duplicated url,already checked,  url:"+url)
+		context.Exit("duplicated url,already checked,  url:" + url)
 		return context, nil
 	}
 	if err != nil {
 		log.Error(err)
 		panic(err)
-		context.Break("check url error, url: "+url+", "+err.Error())
+		context.Break("check url error, url: " + url + ", " + err.Error())
 	}
 
 	return context, nil

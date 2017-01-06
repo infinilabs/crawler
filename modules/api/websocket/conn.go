@@ -94,7 +94,7 @@ func (c *WebsocketConnection) writePump() {
 	}
 }
 
-func (c *WebsocketConnection) WriteMessage(msg []byte)error {
+func (c *WebsocketConnection) WriteMessage(msg []byte) error {
 	return c.write(websocket.TextMessage, msg)
 }
 
@@ -104,10 +104,10 @@ func (c *WebsocketConnection) parseMessage(msg []byte) {
 	array := strings.Split(message, " ")
 	if len(array) > 0 {
 		cmd := strings.ToLower(strings.TrimSpace(array[0]))
-		if c.handlers!=nil {
+		if c.handlers != nil {
 			handler := c.handlers[cmd]
 			if handler != nil {
-				handler(c,array)
+				handler(c, array)
 				return
 			}
 		}

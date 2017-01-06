@@ -20,17 +20,17 @@ import (
 	"bytes"
 	"github.com/PuerkitoBio/goquery"
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/model"
-	"strings"
+	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/modules/config"
+	"strings"
 )
 
 type ParserJoint struct {
 	links         map[string]interface{}
 	DispatchLinks bool
-	MaxDepth int
+	MaxDepth      int
 }
 
 func (this ParserJoint) Name() string {
@@ -49,14 +49,13 @@ func (this ParserJoint) Process(s *Context) (*Context, error) {
 
 	title := doc.Find("title").Text()
 
-	selected:=doc.Find("body")
-	body,err:=selected.Html()
-	if(err!=nil){
+	selected := doc.Find("body")
+	body, err := selected.Html()
+	if err != nil {
 		panic(err)
-	}else{
-		s.Set(CONTEXT_PAGE_BODY_BYTES,[]byte(body))
+	} else {
+		s.Set(CONTEXT_PAGE_BODY_BYTES, []byte(body))
 	}
-
 
 	metadata := map[string]interface{}{}
 	if len(title) > 0 {
@@ -102,14 +101,14 @@ func (this ParserJoint) Process(s *Context) (*Context, error) {
 	s.Set(CONTEXT_PAGE_LINKS, this.links)
 
 	//if reach max depth, skip for future fetch
-	if(depth>=this.MaxDepth){
-		return s,nil
+	if depth >= this.MaxDepth {
+		return s, nil
 	}
 
 	//dispatch links
-	for url, _ := range this.links {
+	for url := range this.links {
 		if this.DispatchLinks {
-			queue.Push(config.CheckChannel,model.NewTaskSeed(url, refUrl, depth+1).MustGetBytes())
+			queue.Push(config.CheckChannel, model.NewTaskSeed(url, refUrl, depth+1).MustGetBytes())
 		}
 	}
 

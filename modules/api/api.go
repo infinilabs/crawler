@@ -21,19 +21,20 @@ import (
 
 	log "github.com/cihub/seelog"
 	"github.com/julienschmidt/httprouter"
+	apis "github.com/medcl/gopa/core/api"
 	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/util"
 	. "github.com/medcl/gopa/modules/api/http"
 	websocket "github.com/medcl/gopa/modules/api/websocket"
 	ui "github.com/medcl/gopa/ui"
 	_ "net/http/pprof"
-	apis "github.com/medcl/gopa/core/api"
-	"github.com/medcl/gopa/core/util"
 )
 
 var router *httprouter.Router
 var mux *http.ServeMux
+
 func internalStart(env *Env) {
-	handler:= Handler{Env: env}
+	handler := Handler{Env: env}
 	router = httprouter.New()
 
 	user := "gopa"
@@ -43,6 +44,7 @@ func internalStart(env *Env) {
 	websocket.InitWebSocket(env)
 
 	mux.HandleFunc("/ws", websocket.ServeWs)
+	mux.Handle("/", router)
 
 	//Index
 	router.GET("/", handler.IndexAction)
@@ -70,23 +72,21 @@ func internalStart(env *Env) {
 	mux.HandleFunc("/ui/boltdb", handler.BoltDBStatusAction)
 
 	//registered handlers
-	if(apis.RegisteredHandler!=nil){
-		for k,v:=range apis.RegisteredHandler{
-			log.Debug("register custom http handler: ",k)
-			mux.Handle(k,v)
+	if apis.RegisteredHandler != nil {
+		for k, v := range apis.RegisteredHandler {
+			log.Debug("register custom http handler: ", k)
+			mux.Handle(k, v)
 		}
 	}
-	if(apis.RegisteredFuncHandler!=nil){
-		for k,v:=range apis.RegisteredFuncHandler{
-			log.Debug("register custom http handler: ",k)
-			mux.HandleFunc(k,v)
+	if apis.RegisteredFuncHandler != nil {
+		for k, v := range apis.RegisteredFuncHandler {
+			log.Debug("register custom http handler: ", k)
+			mux.HandleFunc(k, v)
 		}
 	}
 
-	mux.Handle("/", router)
-
-	address:=util.AutoGetAddress(env.SystemConfig.HttpBinding)
-	log.Info("http server listen at: ",address)
+	address := util.AutoGetAddress(env.SystemConfig.HttpBinding)
+	log.Info("http server listen at: ", address)
 	http.ListenAndServe(address, mux)
 }
 

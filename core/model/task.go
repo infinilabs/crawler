@@ -50,8 +50,8 @@ func GetTask(id string) (Task, error) {
 	}
 	return task, err
 }
-func GetTaskByField(k,v string) (Task, error) {
-	log.Trace("start get seed: ", k,", ",v)
+func GetTaskByField(k, v string) (Task, error) {
+	log.Trace("start get seed: ", k, ", ", v)
 	task := Task{}
 	err := store.Get(k, v, &task)
 	if err != nil {

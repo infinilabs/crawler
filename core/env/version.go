@@ -16,23 +16,20 @@ limitations under the License.
 
 package env
 
+const VERSION = "0.8.0_SNAPSHOT"
 
-const  VERSION =  "0.8.0_SNAPSHOT"
+func GetWelcomeMessage() string {
+	s := ("  ________ ________ __________  _____   \n")
+	s += (" /  _____/ \\_____  \\\\______   \\/  _  \\  \n")
+	s += ("/   \\  ___  /   |   \\|     ___/  /_\\  \\ \n")
+	s += ("\\    \\_\\  \\/    |    \\    |  /    |    \\\n")
+	s += (" \\______  /\\_______  /____|  \\____|__  /\n")
+	s += ("        \\/         \\/                \\/ \n")
 
-
-func  GetWelcomeMessage()string  {
-	s:=("  ________ ________ __________  _____   \n")
-	s+=(" /  _____/ \\_____  \\\\______   \\/  _  \\  \n")
-	s+=("/   \\  ___  /   |   \\|     ___/  /_\\  \\ \n")
-	s+=("\\    \\_\\  \\/    |    \\    |  /    |    \\\n")
-	s+=(" \\______  /\\_______  /____|  \\____|__  /\n")
-	s+=("        \\/         \\/                \\/ \n")
-
-	commitLog:=""
-	if(len(LastCommitLog)>0){
-		commitLog="\n///last commit: "+LastCommitLog+"///"
+	commitLog := ""
+	if len(LastCommitLog) > 0 {
+		commitLog = "\n///last commit: " + LastCommitLog + "///"
 	}
-	s+=("[gopa] " + VERSION +""+ commitLog +"\n")
+	s += ("[gopa] " + VERSION + "" + commitLog + "\n")
 	return (s)
 }
-

@@ -18,12 +18,12 @@ package websocket
 
 import (
 	"encoding/json"
+	"github.com/medcl/gopa/core/global"
 	logging "github.com/medcl/gopa/core/logger"
-	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/model"
+	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/modules/config"
 	"strings"
-	"github.com/medcl/gopa/core/global"
 )
 
 type Command struct {
@@ -67,7 +67,6 @@ func (this Command) Dispatch(c *WebsocketConnection, a []string) {
 
 func (this Command) GetTask(c *WebsocketConnection, a []string) {
 
-
 	if len(a) == 2 {
 		para1 := a[1]
 		task, err := model.GetTask(para1)
@@ -82,10 +81,10 @@ func (this Command) GetTask(c *WebsocketConnection, a []string) {
 		return
 	}
 
-	if len(a) ==3{
+	if len(a) == 3 {
 		para1 := a[1]
 		para2 := a[2]
-		task, err := model.GetTaskByField(para1,para2)
+		task, err := model.GetTaskByField(para1, para2)
 		if err != nil {
 			c.WriteMessage([]byte(err.Error()))
 		}
@@ -94,8 +93,7 @@ func (this Command) GetTask(c *WebsocketConnection, a []string) {
 
 		c.WriteMessage(b)
 
-
-		c.WriteMessage([]byte("get task by," + para1 +", "+para2 + "\n"))
+		c.WriteMessage([]byte("get task by," + para1 + ", " + para2 + "\n"))
 
 		return
 	}

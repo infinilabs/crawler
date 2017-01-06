@@ -25,11 +25,11 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/util"
-	"github.com/medcl/gopa/core/env"
-	"github.com/PuerkitoBio/goquery"
 	"bytes"
+	"github.com/PuerkitoBio/goquery"
+	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/util"
 )
 
 func init() {
@@ -98,8 +98,8 @@ func extractLinks(env *env.Env, fileUrl string, fileName []byte, body []byte) {
 
 	log.Debug("extract links with pattern,total matchs:", len(matches), " match result,", string(fileName))
 
-	defer func(){
-		if err:=recover();err!=nil{
+	defer func() {
+		if err := recover(); err != nil {
 			log.Error(err)
 		}
 	}()
@@ -119,7 +119,7 @@ func extractLinks(env *env.Env, fileUrl string, fileName []byte, body []byte) {
 			continue
 		}
 
-		if(strings.Contains(filteredUrl,"data:image/")){
+		if strings.Contains(filteredUrl, "data:image/") {
 			log.Trace("filteredUrl started with: data:image/ ,continue")
 			continue
 		}
@@ -135,7 +135,6 @@ func extractLinks(env *env.Env, fileUrl string, fileName []byte, body []byte) {
 			log.Trace("filteredUrl started with: javascript: ,continue")
 			continue
 		}
-
 
 		//hit := false
 
@@ -380,34 +379,34 @@ func ParsedSavedFileLog(env *env.Env, fileLog string) {
 	}
 }
 
-func extractMetadata(env *env.Env, fileUrl string, fileName []byte, fileContent []byte)(error) {
+func extractMetadata(env *env.Env, fileUrl string, fileName []byte, fileContent []byte) error {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(fileContent))
 	if err != nil {
 		panic(err)
 	}
 
-	title:=doc.Find("title").Text()
+	title := doc.Find("title").Text()
 
-	data:=map[string]interface{}{}
-	if(len(title)>0){
-		data["title"]=title
+	data := map[string]interface{}{}
+	if len(title) > 0 {
+		data["title"] = title
 	}
 
-	metadata:=map[string]interface{}{}
+	metadata := map[string]interface{}{}
 	doc.Find("meta").Each(func(i int, s *goquery.Selection) {
 		// For each item found, get the band and title
-		name,exist := s.Attr("name")
-		name=strings.TrimSpace(name)
-		if(exist&&len(name)>0){
-			content,exist := s.Attr("content")
-			if(exist){
-				metadata[name]=content
+		name, exist := s.Attr("name")
+		name = strings.TrimSpace(name)
+		if exist && len(name) > 0 {
+			content, exist := s.Attr("content")
+			if exist {
+				metadata[name] = content
 			}
 		}
 
 	})
 
-	if(len(metadata)>0){
+	if len(metadata) > 0 {
 
 	}
 

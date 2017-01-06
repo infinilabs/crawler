@@ -62,6 +62,7 @@ $(function () {
             conn = new WebSocket("ws://" + host + "/ws");
             conn.onopen = function (evt) {
                 var msg="Connection established.";
+                log.children().remove();
                 $("#connect_status").text(msg);
                 $("#connect_status").removeClass("uk-alert-danger").addClass("uk-alert-success");
                 clearInterval(tm);

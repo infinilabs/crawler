@@ -22,11 +22,9 @@ import (
 )
 
 type ElasticsearchClient struct {
-	Host string
+	Host  string
 	Index string
 }
-
-
 
 type InsertResponse struct {
 	Created bool   `json:"created"`
@@ -38,25 +36,22 @@ type InsertResponse struct {
 
 func (c *ElasticsearchClient) IndexDoc(id string, data map[string]interface{}) (*InsertResponse, error) {
 
-	typeName:="webpage"
+	typeName := "webpage"
 	url := c.Host + "/" + c.Index + "/" + typeName + "/" + id
 
+	js, err := json.Marshal(data)
 
-	js,err:=json.Marshal(data)
-
-	log.Debug("indexing doc: ",url,",",string(js))
-
+	log.Debug("indexing doc: ", url, ",", string(js))
 
 	if err != nil {
 		return nil, err
 	}
-	response := post(url, "",string(js))
+	response := post(url, "", string(js))
 	if err != nil {
 		return nil, err
 	}
 
-	log.Debug("indexing response: ",string(response))
-
+	log.Debug("indexing response: ", string(response))
 
 	esResp := &InsertResponse{}
 	err = json.Unmarshal(response, esResp)
@@ -66,4 +61,3 @@ func (c *ElasticsearchClient) IndexDoc(id string, data map[string]interface{}) (
 
 	return esResp, nil
 }
-

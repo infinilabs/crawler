@@ -50,4 +50,3 @@ func TestDomainMatch(t *testing.T) {
 	//assert.Equal(t,true,IsValidTLD(path11))
 	//assert.Equal(t,true,IsValidTLD(path12))
 }
-

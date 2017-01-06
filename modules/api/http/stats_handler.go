@@ -49,8 +49,7 @@ func (this Handler) StatsAction(w http.ResponseWriter, req *http.Request) {
 	//	parses[k]=parse
 	//}
 
-
-	m:=stats.StatsAll()
+	m := stats.StatsAll()
 
 	this.WriteJsonHeader(w)
 	this.Write(w, *m)

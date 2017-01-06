@@ -5,15 +5,15 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/boltdb/bolt"
-	"github.com/medcl/gopa/modules/api/http/templates/boltdb"
-	"github.com/medcl/gopa/core/global"
 	"github.com/asdine/storm"
+	"github.com/boltdb/bolt"
+	"github.com/medcl/gopa/core/global"
+	"github.com/medcl/gopa/modules/api/http/templates/boltdb"
 	"github.com/medcl/gopa/modules/config"
 )
 
 func (h Handler) BoltDBStatusAction(w http.ResponseWriter, r *http.Request) {
-	db:=global.Lookup(config.REGISTER_BOLTDB).(*storm.DB)
+	db := global.Lookup(config.REGISTER_BOLTDB).(*storm.DB)
 
 	//go func() {
 	//	// Grab the initial stats.

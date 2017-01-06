@@ -17,18 +17,17 @@ limitations under the License.
 package util
 
 import (
-	"testing"
 	"fmt"
-	"path"
 	"github.com/stretchr/testify/assert"
+	"path"
+	"testing"
 )
 
 func TestJoinPath(t *testing.T) {
-	path1:="wwww.baidu.com"
-	path2:="/blog/"
-	path3:="/comments/1.html"
-	str:=path.Join(path1,path2,path3)
+	path1 := "wwww.baidu.com"
+	path2 := "/blog/"
+	path3 := "/comments/1.html"
+	str := path.Join(path1, path2, path3)
 	fmt.Println(str)
-	assert.Equal(t,"wwww.baidu.com/blog/comments/1.html",str)
+	assert.Equal(t, "wwww.baidu.com/blog/comments/1.html", str)
 }
-

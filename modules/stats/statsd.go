@@ -2,11 +2,11 @@ package stats
 
 import (
 	log "github.com/cihub/seelog"
+	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/modules/stats/statsd"
 	"sync"
 	"time"
-	"github.com/medcl/gopa/core/stats"
-	."github.com/medcl/gopa/core/env"
 )
 
 func (this StatsDModule) Name() string {
@@ -19,7 +19,7 @@ func (this StatsDModule) Start(env *Env) {
 }
 
 func (this StatsDModule) Stop() error {
-	if(statsdbuffer!=nil){
+	if statsdbuffer != nil {
 		statsdbuffer.Close()
 	}
 	return nil
@@ -85,5 +85,6 @@ func (this StatsDModule) Stat(category, key string) int64 {
 	return 0
 }
 
-func (this StatsDModule) StatsAll() *[]byte {	return nil
+func (this StatsDModule) StatsAll() *[]byte {
+	return nil
 }

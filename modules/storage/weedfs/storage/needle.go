@@ -2,9 +2,9 @@ package storage
 
 import (
 	"encoding/hex"
-	log "logging"
 	"io"
 	"io/ioutil"
+	log "logging"
 	"net/http"
 	"os"
 	"strconv"

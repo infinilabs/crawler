@@ -20,25 +20,25 @@ import "testing"
 
 func TestStats(t *testing.T) {
 
-	domain:="www.google.com"
+	domain := "www.google.com"
 	key := "key1"
 	key2 := "key2"
-	Increment(domain,key)
+	Increment(domain, key)
 
-	result := Stat(domain,key)
+	result := Stat(domain, key)
 	expected := 1
 	if result != expected {
 		t.Errorf("Value '%d' doesn't match expected '%d'!", result, expected)
 	}
 
-	Decrement(domain,key)
-	result = Stat(domain,key)
+	Decrement(domain, key)
+	result = Stat(domain, key)
 	expected = 0
 	if result != expected {
 		t.Errorf("Value '%d' doesn't match expected '%d'!", result, expected)
 	}
 
-	Increment(domain,key2)
+	Increment(domain, key2)
 	data := StatsAll()
 
 	expected = 0
@@ -51,8 +51,8 @@ func TestStats(t *testing.T) {
 		t.Errorf("Value '%d' doesn't match expected '%d'!", data[key2], expected)
 	}
 
-	IncrementBy(domain,key, 1)
-	DecrementBy(domain,key2, 3)
+	IncrementBy(domain, key, 1)
+	DecrementBy(domain, key2, 3)
 
 	data = StatsAll()
 

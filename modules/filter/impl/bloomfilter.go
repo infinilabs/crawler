@@ -17,49 +17,48 @@ limitations under the License.
 package impl
 
 import (
-log "github.com/cihub/seelog"
-. "github.com/zeebo/sbloom"
-"io/ioutil"
-"github.com/medcl/gopa/core/util"
-"github.com/medcl/gopa/core/config"
-"hash/fnv"
+	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/config"
+	"github.com/medcl/gopa/core/util"
+	. "github.com/zeebo/sbloom"
+	"hash/fnv"
+	"io/ioutil"
 )
 
-type BloomFilter struct{
+type BloomFilter struct {
 	persistFileName string
-	filter *Filter
+	filter          *Filter
 }
 
+func (filter *BloomFilter) Open(fileName string) error {
 
-func (filter *BloomFilter) Open(fileName string) error{
-
-	filter.persistFileName=fileName
+	filter.persistFileName = fileName
 
 	//loading or initializing bloom filter
 	if util.FileExists(fileName) {
 		log.Debug("found bloomFilter,start reload,", fileName)
 		n, err := ioutil.ReadFile(fileName)
 		if err != nil {
-			log.Error("bloomFilter:",fileName, err)
+			log.Error("bloomFilter:", fileName, err)
 		}
-		filter.filter=new (Filter)
+		filter.filter = new(Filter)
 		if err := filter.filter.GobDecode(n); err != nil {
-			log.Error("bloomFilter:",fileName, err)
+			log.Error("bloomFilter:", fileName, err)
 		}
-		log.Info("bloomFilter successfully reloaded:",fileName)
+		log.Info("bloomFilter successfully reloaded:", fileName)
 	} else {
 		probItems := config.GetIntConfig("BloomFilter", "ItemSize", 100000)
-		log.Debug("initializing bloom-filter",fileName,",virual size is,", probItems)
+		log.Debug("initializing bloom-filter", fileName, ",virual size is,", probItems)
 		filter.filter = NewFilter(fnv.New64(), probItems)
-		log.Info("bloomFilter successfully initialized:",fileName)
+		log.Info("bloomFilter successfully initialized:", fileName)
 	}
 
 	return nil
 }
 
-func (filter *BloomFilter) Close() error{
+func (filter *BloomFilter) Close() error {
 
-	log.Debug("bloomFilter start persist,file:",filter.persistFileName)
+	log.Debug("bloomFilter start persist,file:", filter.persistFileName)
 
 	//save bloom-filter
 	m, err := filter.filter.GobEncode()
@@ -77,17 +76,16 @@ func (filter *BloomFilter) Close() error{
 	return nil
 }
 
-func (filter *BloomFilter) Exists(key []byte) bool{
+func (filter *BloomFilter) Exists(key []byte) bool {
 	return filter.filter.Lookup(key)
 }
 
-func (filter *BloomFilter) Add(key []byte) error{
+func (filter *BloomFilter) Add(key []byte) error {
 	filter.filter.Add(key)
 	return nil
 }
 
-
-func (filter *BloomFilter) Delete(key []byte) error{
+func (filter *BloomFilter) Delete(key []byte) error {
 
 	return nil
 }

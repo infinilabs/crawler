@@ -1,13 +1,13 @@
 package stats
 
 import (
-	log "github.com/cihub/seelog"
-	"sync"
-	"github.com/medcl/gopa/core/stats"
-	"runtime"
 	"encoding/json"
-	."github.com/medcl/gopa/core/env"
+	log "github.com/cihub/seelog"
+	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/store"
+	"runtime"
+	"sync"
 )
 
 func (this StatsStoreModule) Name() string {
@@ -52,7 +52,7 @@ func (this StatsStoreModule) Increment(category, key string) {
 	this.IncrementBy(category, key, 1)
 }
 
-func  (this StatsStoreModule)IncrementBy(category, key string, value int64) {
+func (this StatsStoreModule) IncrementBy(category, key string, value int64) {
 	initData(category, key)
 	l.Lock()
 	(*s.Data)[category][key] += value
@@ -60,11 +60,11 @@ func  (this StatsStoreModule)IncrementBy(category, key string, value int64) {
 	runtime.Gosched()
 }
 
-func  (this StatsStoreModule)Decrement(category, key string) {
+func (this StatsStoreModule) Decrement(category, key string) {
 	this.DecrementBy(category, key, 1)
 }
 
-func  (this StatsStoreModule)DecrementBy(category, key string, value int64) {
+func (this StatsStoreModule) DecrementBy(category, key string, value int64) {
 	initData(category, key)
 	l.Lock()
 	(*s.Data)[category][key] -= value
@@ -72,15 +72,15 @@ func  (this StatsStoreModule)DecrementBy(category, key string, value int64) {
 	runtime.Gosched()
 }
 
-func  (this StatsStoreModule)Timing(category, key string, v int64) {
+func (this StatsStoreModule) Timing(category, key string, v int64) {
 
 }
 
-func  (this StatsStoreModule)Gauge(category, key string, v int64) {
+func (this StatsStoreModule) Gauge(category, key string, v int64) {
 
 }
 
-func  (this StatsStoreModule)Stat(category, key string) int64 {
+func (this StatsStoreModule) Stat(category, key string) int64 {
 	initData(category, key)
 	l.RLock()
 	v := ((*s.Data)[category][key])
@@ -88,7 +88,7 @@ func  (this StatsStoreModule)Stat(category, key string) int64 {
 	return v
 }
 
-func  (this StatsStoreModule)StatsAll() *[]byte {
+func (this StatsStoreModule) StatsAll() *[]byte {
 	initStats()
 	l.RLock()
 	defer l.RUnlock()

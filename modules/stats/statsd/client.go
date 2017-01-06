@@ -2,12 +2,12 @@ package statsd
 
 import (
 	"fmt"
+	"github.com/medcl/gopa/modules/stats/statsd/event"
 	"log"
 	"net"
 	"os"
 	"strings"
 	"time"
-	"github.com/medcl/gopa/modules/stats/statsd/event"
 )
 
 // Logger interface compatible with log.Logger

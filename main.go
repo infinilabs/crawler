@@ -139,7 +139,7 @@ func main() {
 
 	logger.SetInitLogging(EmptyEnv(), *logLevel)
 
-	sysConfig := SystemConfig{ConfigFile: *configFile, LogLevel: *logLevel, HttpBinding: *httpBinding, ClusterBinding: *clusterBinding, ClusterSeeds: *clusterSeed,ClusterName:*clusterName,Data:*dataDir,Log:*logDir}
+	sysConfig := SystemConfig{ConfigFile: *configFile, LogLevel: *logLevel, HttpBinding: *httpBinding, ClusterBinding: *clusterBinding, ClusterSeeds: *clusterSeed, ClusterName: *clusterName, Data: *dataDir, Log: *logDir}
 	sysConfig.Init()
 
 	env = Environment(sysConfig)
@@ -149,7 +149,7 @@ func main() {
 	logger.SetLogging(env)
 
 	//check instance lock
-	util.CheckInstanceLock(env.SystemConfig.Data)
+	util.CheckInstanceLock(env.SystemConfig.GetDataDir())
 
 	module.New(env)
 	modules.Register()

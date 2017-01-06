@@ -19,9 +19,9 @@ package handler
 import (
 	log "github.com/cihub/seelog"
 	_ "github.com/jmoiron/jsonq"
-	"net/http"
 	"github.com/medcl/gopa/core/store"
 	"github.com/medcl/gopa/modules/config"
+	"net/http"
 )
 
 func (this Handler) SnapshotAction(w http.ResponseWriter, req *http.Request) {
@@ -40,7 +40,7 @@ func (this Handler) SnapshotAction(w http.ResponseWriter, req *http.Request) {
 
 		if len(bytes) > 0 {
 			this.Write(w, bytes)
-			this.Write(w,[]byte("<script src=\"/ui/assets/js/snapshot_footprint.js?v=1\"></script> "))
+			this.Write(w, []byte("<script src=\"/ui/assets/js/snapshot_footprint.js?v=1\"></script> "))
 			return
 		}
 

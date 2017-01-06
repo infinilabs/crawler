@@ -17,16 +17,16 @@ limitations under the License.
 package pipe
 
 import (
-	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/pipeline"
-	"github.com/medcl/gopa/core/model"
-	"github.com/medcl/gopa/core/util"
 	"errors"
+	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/global"
+	"github.com/medcl/gopa/core/model"
+	. "github.com/medcl/gopa/core/pipeline"
+	"github.com/medcl/gopa/core/util"
 	. "net/url"
 	"os"
 	"path"
 	"strings"
-	"github.com/medcl/gopa/core/global"
 )
 
 type SaveToFileSystemJoint struct {
@@ -34,17 +34,15 @@ type SaveToFileSystemJoint struct {
 	baseDir string
 }
 
-
 func (this SaveToFileSystemJoint) Name() string {
 	return "save2fs"
 }
-
 
 func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 	this.context = c
 
 	if len(this.baseDir) == 0 {
-		this.baseDir = global.Env().SystemConfig.Data+"/web"
+		this.baseDir = global.Env().SystemConfig.Data + "/web"
 	}
 
 	url, ok := c.GetString(CONTEXT_URL)
@@ -63,9 +61,9 @@ func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 
 	fullPath := path.Join(folder, file)
 
-	if(util.FileExists(fullPath)){
-		log.Warnf("file: %s already exists, ignore,url: %s",fullPath,url)
-		return c,nil
+	if util.FileExists(fullPath) {
+		log.Warnf("file: %s already exists, ignore,url: %s", fullPath, url)
+		return c, nil
 	}
 
 	log.Trace("save url,", url, ",domain,", task.Domain, ",fullpath,", fullPath)
@@ -127,4 +125,3 @@ func (this SaveToFileSystemJoint) getSavedPath(urlStr string) (string, string) {
 
 	return filePath, filenamePrefix + filename
 }
-

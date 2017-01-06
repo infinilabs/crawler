@@ -20,10 +20,8 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 )
 
-
 type LogJoint struct {
 }
-
 
 func (this LogJoint) Name() string {
 	return "log"

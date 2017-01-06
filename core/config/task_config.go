@@ -32,7 +32,7 @@ type TaskConfig struct {
 	//FollowLink bool
 
 	//walking around pattern
-	LinkUrlExtractRegexStr           string `link_extract_pattern`
+	LinkUrlExtractRegexStr        string `link_extract_pattern`
 	LinkUrlExtractRegex           *regexp.Regexp
 	LinkUrlExtractRegexGroupIndex int `link_extract_group`
 	LinkUrlMustContain            string
@@ -40,13 +40,13 @@ type TaskConfig struct {
 
 	//parsing url pattern,when url match this pattern,gopa will not parse urls from response of this url
 	SkipPageParsePatternStr string `skip_page_parse_pattern`
-	SkipPageParsePattern *regexp.Regexp
+	SkipPageParsePattern    *regexp.Regexp
 
 	//fetch url pattern
-	FetchUrlPatternStr        string `fetch_url_pattern`
-	FetchUrlPattern         *regexp.Regexp
-	FetchUrlMustContain     string
-	FetchUrlMustNotContain  string
+	FetchUrlPatternStr     string `fetch_url_pattern`
+	FetchUrlPattern        *regexp.Regexp
+	FetchUrlMustContain    string
+	FetchUrlMustNotContain string
 
 	//saving pattern
 	SavingUrlPatternStr     string `save_url_pattern`
@@ -55,22 +55,22 @@ type TaskConfig struct {
 	SavingUrlMustNotContain string
 
 	//Crawling within domain
-	FollowSameDomain        bool `follow_same_domain`
-	FollowSubDomain         bool `follow_sub_domain`
+	FollowSameDomain bool `follow_same_domain`
+	FollowSubDomain  bool `follow_sub_domain`
 
-	TaskDataPath            string
+	TaskDataPath string
 	//WebDataPath  string
 
 	//User Cookie
-	Cookie                  string
+	Cookie string
 
 	//Fetch Speed Control
-	FetchDelayThreshold     int
-	TaskDBFilename          string `task_db_filename`
+	FetchDelayThreshold int
+	TaskDBFilename      string `task_db_filename`
 }
 
-func (this *TaskConfig)Init() *TaskConfig  {
-	this.TaskDBFilename ="taskdb"
+func (this *TaskConfig) Init() *TaskConfig {
+	this.TaskDBFilename = "taskdb"
 	return this
 }
 

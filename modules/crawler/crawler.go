@@ -31,6 +31,7 @@ var signalChannels []*chan bool
 var quitChannels []*chan bool
 
 var crawlerStarted bool
+
 func (this CrawlerModule) Name() string {
 	return "Crawler"
 }
@@ -100,8 +101,8 @@ func (this CrawlerModule) runPipeline(env *Env, signalC *chan bool, quitC *chan 
 				return
 			default:
 				log.Trace("waiting url to fetch, shard:", shard)
-				err,taskID := queue.Pop(config.FetchChannel)
-				if(err!=nil){
+				err, taskID := queue.Pop(config.FetchChannel)
+				if err != nil {
 					log.Trace(err)
 					continue
 				}
@@ -145,7 +146,7 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 100}).
 		Join(FetchJoint{}).
 		Join(ParserJoint{DispatchLinks: true, MaxDepth: 3}).
-		Join(HtmlToTextJoint{MergeWhitespace:true}).
+		Join(HtmlToTextJoint{MergeWhitespace: true}).
 		//Join(SaveToFileSystemJoint{}).
 		Join(SaveToDBJoint{CompressBody: true}).
 		Join(PublishJoint{}).

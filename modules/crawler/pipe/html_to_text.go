@@ -17,11 +17,11 @@ limitations under the License.
 package pipe
 
 import (
-	."github.com/medcl/gopa/core/pipeline"
-	"strings"
-	"regexp"
-	"github.com/medcl/gopa/core/util"
 	log "github.com/cihub/seelog"
+	. "github.com/medcl/gopa/core/pipeline"
+	"github.com/medcl/gopa/core/util"
+	"regexp"
+	"strings"
 )
 
 type HtmlToTextJoint struct {
@@ -35,7 +35,7 @@ func (this HtmlToTextJoint) Name() string {
 func (this HtmlToTextJoint) Process(context *Context) (*Context, error) {
 
 	//TODO all configable
-	body:=context.MustGetBytes(CONTEXT_PAGE_BODY_BYTES)
+	body := context.MustGetBytes(CONTEXT_PAGE_BODY_BYTES)
 	src := string(body)
 	//将HTML标签全转换成小写
 	re, _ := regexp.Compile("\\<[\\S\\s]+?\\>")
@@ -95,7 +95,7 @@ func (this HtmlToTextJoint) Process(context *Context) (*Context, error) {
 	re, _ = regexp.Compile("\\s{2,}")
 	src = re.ReplaceAllString(src, "\n")
 
-	if(this.MergeWhitespace){
+	if this.MergeWhitespace {
 		src = strings.TrimSpace(util.MergeSpace(src))
 	}
 
@@ -111,8 +111,8 @@ func (this HtmlToTextJoint) Process(context *Context) (*Context, error) {
 	src = strings.Replace(src, "&amp; ", "& ", -1)
 	src = strings.Replace(src, "&amp;amp; ", "& ", -1)
 
-	log.Trace("get text: ",src)
+	log.Trace("get text: ", src)
 
-	context.Set(CONTEXT_PAGE_BODY_PLAIN_TEXT,src)
+	context.Set(CONTEXT_PAGE_BODY_PLAIN_TEXT, src)
 	return context, nil
 }

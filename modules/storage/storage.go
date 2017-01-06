@@ -17,9 +17,9 @@ limitations under the License.
 package storage
 
 import (
-. "github.com/medcl/gopa/core/env"
-"github.com/medcl/gopa/core/store"
-"github.com/medcl/gopa/modules/storage/boltdb"
+	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/store"
+	"github.com/medcl/gopa/modules/storage/boltdb"
 )
 
 var impl boltdb.BoltdbStore
@@ -30,7 +30,7 @@ func (this StorageModule) Name() string {
 
 func (this StorageModule) Start(env *Env) {
 
-	impl = boltdb.BoltdbStore{FileName: env.SystemConfig.Data + "/boltdb"}
+	impl = boltdb.BoltdbStore{FileName: env.SystemConfig.GetDataDir() + "/boltdb"}
 	err := impl.Open()
 	if err != nil {
 		panic(err)

@@ -17,29 +17,27 @@ limitations under the License.
 package pipe
 
 import (
-	"testing"
 	"github.com/medcl/gopa/core/pipeline"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestUrlFilter(t *testing.T) {
 
-	context:= &pipeline.Context{}
+	context := &pipeline.Context{}
 	context.Init()
-	context.Set(CONTEXT_URL,"http://elasticsearch.cn/")
-	context.Set(CONTEXT_ORIGINAL_URL,"http://elasticsearch.cn/")
-	parse:= UrlExtFilterJoint{}
+	context.Set(CONTEXT_URL, "http://elasticsearch.cn/")
+	context.Set(CONTEXT_ORIGINAL_URL, "http://elasticsearch.cn/")
+	parse := UrlExtFilterJoint{}
 	parse.Process(context)
-	assert.Equal(t,false,context.IsBreak())
+	assert.Equal(t, false, context.IsBreak())
 
-	context.Set(CONTEXT_URL,"mailto:gg@gg.com")
+	context.Set(CONTEXT_URL, "mailto:gg@gg.com")
 	parse.Process(context)
-	assert.Equal(t,true,context.IsExit())
+	assert.Equal(t, true, context.IsExit())
 
-
-	context.Set(CONTEXT_URL,"asfasdf.gif")
+	context.Set(CONTEXT_URL, "asfasdf.gif")
 	parse.Process(context)
-	assert.Equal(t,true,context.IsExit())
-
+	assert.Equal(t, true, context.IsExit())
 
 }

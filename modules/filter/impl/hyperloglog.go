@@ -30,9 +30,9 @@ import (
 
 type HyperLogLogFilter struct {
 	hyperLogLogPrecision uint8
-	persistFileName string
-	filter          *HyperLogLogPlus
-	l sync.Mutex
+	persistFileName      string
+	filter               *HyperLogLogPlus
+	l                    sync.Mutex
 }
 
 func hash32(s []byte) hash.Hash32 {
@@ -114,10 +114,10 @@ func (filter *HyperLogLogFilter) Exists(key []byte) bool {
 	if count2 == count1 {
 		return false
 	}
-	if(count2==count1+1){
+	if count2 == count1+1 {
 		return true
 	}
-	log.Errorf("error hyperloglog behavior, %d vs %d",count1,count2)
+	log.Errorf("error hyperloglog behavior, %d vs %d", count1, count2)
 	return true
 }
 

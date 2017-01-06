@@ -18,10 +18,10 @@ package pipeline
 
 import (
 	"fmt"
+	"github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/global"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"github.com/medcl/gopa/core/global"
-	"github.com/medcl/gopa/core/env"
 )
 
 type crawlerJoint struct {

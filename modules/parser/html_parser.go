@@ -1,7 +1,8 @@
 package parser
+
 import (
-	"log"
 	"github.com/PuerkitoBio/goquery"
+	"log"
 )
 
 func ExampleScrape() {

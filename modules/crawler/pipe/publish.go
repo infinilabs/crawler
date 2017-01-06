@@ -17,19 +17,17 @@ limitations under the License.
 package pipe
 
 import (
-	. "github.com/medcl/gopa/core/pipeline"
-	"encoding/hex"
 	"crypto/md5"
-	"github.com/medcl/gopa/core/model"
+	"encoding/hex"
 	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/global"
+	"github.com/medcl/gopa/core/model"
+	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/util"
 )
 
-
 type PublishJoint struct {
 }
-
 
 func (this PublishJoint) Name() string {
 	return "publish"
@@ -38,36 +36,36 @@ func (this PublishJoint) Name() string {
 func (this PublishJoint) Process(c *Context) (*Context, error) {
 
 	m := md5.Sum([]byte(c.MustGetString(CONTEXT_URL)))
-	id:=hex.EncodeToString(m[:]) //TODO make sure page id align with task id
+	id := hex.EncodeToString(m[:]) //TODO make sure page id align with task id
 
-	data:=map[string]interface{}{}
+	data := map[string]interface{}{}
 
-	data["original_url"]=c.MustGetString(CONTEXT_ORIGINAL_URL)
-	data["url"]=c.MustGetString(CONTEXT_URL)
-	data["host"]=c.MustGetString(CONTEXT_HOST)
-	data["summary"]=c.MustGetString(CONTEXT_PAGE_BODY_PLAIN_TEXT)
-	data["save_path"]=c.MustGetString(CONTEXT_SAVE_PATH)
-	data["save_file"]=c.MustGetString(CONTEXT_SAVE_FILENAME)
+	data["original_url"] = c.MustGetString(CONTEXT_ORIGINAL_URL)
+	data["url"] = c.MustGetString(CONTEXT_URL)
+	data["host"] = c.MustGetString(CONTEXT_HOST)
+	data["summary"] = c.MustGetString(CONTEXT_PAGE_BODY_PLAIN_TEXT)
+	data["save_path"] = c.MustGetString(CONTEXT_SAVE_PATH)
+	data["save_file"] = c.MustGetString(CONTEXT_SAVE_FILENAME)
 
-	meta,b:= c.GetMap(CONTEXT_PAGE_METADATA)
-	if(b){
-		data["metadata"]=meta
+	meta, b := c.GetMap(CONTEXT_PAGE_METADATA)
+	if b {
+		data["metadata"] = meta
 	}
 
-	links,b:= c.GetMap(CONTEXT_PAGE_LINKS)
-	if(b){
-		maps:=[]model.PageLink{}
-		for k,v:= range links{
-			item:=model.PageLink{Url:k,Label:v.(string)}
-			maps=append(maps,item)
+	links, b := c.GetMap(CONTEXT_PAGE_LINKS)
+	if b {
+		maps := []model.PageLink{}
+		for k, v := range links {
+			item := model.PageLink{Url: k, Label: v.(string)}
+			maps = append(maps, item)
 		}
-		data["links"]=maps
+		data["links"] = maps
 	}
 	esClient := util.ElasticsearchClient{Host: global.Env().RuntimeConfig.IndexingConfig.Host, Index: global.Env().RuntimeConfig.IndexingConfig.Index}
-	_,err:= esClient.IndexDoc(id,data)
-	if(err!=nil){
+	_, err := esClient.IndexDoc(id, data)
+	if err != nil {
 		log.Error(err)
-		return c,err
+		return c, err
 	}
 
 	return c, nil

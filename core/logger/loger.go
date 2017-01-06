@@ -16,9 +16,6 @@ limitations under the License.
 
 package logger
 
-import (
-)
-
 type Logger interface {
 	Trace(v ...interface{})
 

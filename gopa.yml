@@ -1,4 +1,4 @@
-max_go_routine: 1
+max_go_routine: 10
 
 channel:
   checker_chan_buff_size: 0

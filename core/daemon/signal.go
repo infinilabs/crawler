@@ -27,7 +27,7 @@ func SetSigHandler(handler SignalHandlerFunc, signals ...os.Signal) {
 // func ServeSignals calls handlers for system signals.
 func ServeSignals() (err error) {
 	signals := make([]os.Signal, 0, len(handlers))
-	for sig, _ := range handlers {
+	for sig := range handlers {
 		signals = append(signals, sig)
 	}
 

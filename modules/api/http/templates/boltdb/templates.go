@@ -115,7 +115,7 @@ func comma(v int) string {
 		j--
 	}
 	parts[j] = strconv.Itoa(int(v))
-	return sign + strings.Join(parts[j:len(parts)], ",")
+	return sign + strings.Join(parts[j:], ",")
 }
 
 // maxHistogramN is the maximum number of buckets that can be used for the histogram.

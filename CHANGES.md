@@ -5,9 +5,10 @@ CHANGES
 
 v0.8
 features
+1.raft clustering
 improve
 bugfix
-1.incorrect stats number, incorrect task filter
+1.fix incorrect stats number, incorrect task filter
 
 v0.7
 features:

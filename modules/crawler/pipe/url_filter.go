@@ -17,10 +17,10 @@ limitations under the License.
 package pipe
 
 import (
-	. "github.com/medcl/gopa/core/pipeline"
-	"strings"
 	log "github.com/cihub/seelog"
+	. "github.com/medcl/gopa/core/pipeline"
 	"regexp"
+	"strings"
 )
 
 type UrlExtFilterJoint struct {
@@ -42,7 +42,7 @@ func (this UrlExtFilterJoint) Process(context *Context) (*Context, error) {
 	}
 
 	if (!this.valid(orgUrl)) || (url != orgUrl && (!this.valid(url))) {
-		context.Exit("invalid url ext, "+url)
+		context.Exit("invalid url ext, " + url)
 	}
 
 	return context, nil
@@ -80,7 +80,6 @@ func (this UrlExtFilterJoint) valid(url string) bool {
 
 	return true
 }
-
 
 //func checkIfUrlWillBeSave(taskConfig *config.TaskConfig, url []byte) bool {
 //

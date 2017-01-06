@@ -17,18 +17,17 @@ limitations under the License.
 package util
 
 import (
-	"testing"
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"github.com/medcl/gopa/core/model"
+	"testing"
 )
 
 func TestGet(t *testing.T) {
-	t1:=model.PageItem{}
-	data,_:= get(&t1,"http://www.baidu.com/search/resources/images/favicon.ico","")
+	t1 := model.PageItem{}
+	data, _ := get(&t1, "http://www.baidu.com/search/resources/images/favicon.ico", "")
 
-	data1,_:=json.Marshal(t1)
-	fmt.Println("",string(data))
-	fmt.Println("",string(data1))
+	data1, _ := json.Marshal(t1)
+	fmt.Println("", string(data))
+	fmt.Println("", string(data1))
 }
-

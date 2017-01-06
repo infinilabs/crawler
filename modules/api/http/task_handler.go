@@ -20,12 +20,12 @@ import (
 	logger "github.com/cihub/seelog"
 	_ "github.com/jmoiron/jsonq"
 	"github.com/julienschmidt/httprouter"
-	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/model"
+	"github.com/medcl/gopa/core/queue"
+	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/modules/config"
 	"net/http"
 	"strconv"
-	"github.com/medcl/gopa/core/stats"
 )
 
 func (this Handler) TaskDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
@@ -160,12 +160,12 @@ func (this Handler) DomainAction(w http.ResponseWriter, req *http.Request, ps ht
 
 		total, domains, err := model.GetDomainList(from, size, domain)
 
-		newDomains:=[]model.Domain{}
-		for _,v:=range domains{
+		newDomains := []model.Domain{}
+		for _, v := range domains {
 
-			total:=stats.Stat("domain.stats", v.Host+"."+stats.STATS_FETCH_TOTAL_COUNT)
-			v.LinksCount=total
-			newDomains=append(newDomains,v)
+			total := stats.Stat("domain.stats", v.Host+"."+stats.STATS_FETCH_TOTAL_COUNT)
+			v.LinksCount = total
+			newDomains = append(newDomains, v)
 		}
 
 		if err != nil {

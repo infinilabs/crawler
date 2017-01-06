@@ -17,25 +17,24 @@ limitations under the License.
 package handler
 
 import (
-	"net/http"
-	"github.com/medcl/gopa/core/env"
 	"github.com/julienschmidt/httprouter"
+	"github.com/medcl/gopa/core/env"
+	"net/http"
 )
 
 func (this Handler) IndexAction(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	if req.URL.Path != "/" {
-		this.WriteJsonHeader(w)
-		http.Error(w, "{\"error\":\"404 Not found\"}", 404)
+		this.error404(w)
 		return
 	}
 
 	data := map[string]interface{}{}
 	data["cluster_name"] = this.Env.SystemConfig.ClusterName
 	data["name"] = this.Env.SystemConfig.NodeName
-	version:=map[string]interface{}{}
-	version["number"]=env.VERSION
-	version["build_commit"]=env.LastCommitLog
-	version["build_date"]=env.BuildDate
+	version := map[string]interface{}{}
+	version["number"] = env.VERSION
+	version["build_commit"] = env.LastCommitLog
+	version["build_date"] = env.BuildDate
 	data["version"] = version
 	data["tagline"] = "You Know, for Web"
 

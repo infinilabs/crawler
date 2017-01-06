@@ -2,8 +2,8 @@ package statsd
 
 import (
 	log "github.com/cihub/seelog"
-	"time"
 	"github.com/medcl/gopa/modules/stats/statsd/event"
+	"time"
 )
 
 // request to close the buffered statsd collector
@@ -188,12 +188,12 @@ func (sb *StatsdBuffer) flush() (err error) {
 	err = sb.statsd.CreateSocket()
 	if nil != err {
 		sb.errorCount++
-		if(sb.errorCount<5||sb.errorCount>10){
+		if sb.errorCount < 5 || sb.errorCount > 10 {
 			log.Error("Error establishing UDP connection for sending statsd events:", err)
-			if(sb.errorCount>50){
-				sb.errorCount=0
+			if sb.errorCount > 50 {
+				sb.errorCount = 0
 			}
-		}else{
+		} else {
 			log.Warn("Error establishing UDP connection for sending statsd events:", err)
 		}
 

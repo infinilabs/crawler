@@ -78,8 +78,8 @@ func (this CheckerModule) execute() {
 	startTime := time.Now()
 	log.Trace("waiting url to check")
 
-	err,data := queue.Pop(config.CheckChannel)
-	if(err!=nil){
+	err, data := queue.Pop(config.CheckChannel)
+	if err != nil {
 		log.Trace(err)
 		return
 	}
@@ -110,18 +110,18 @@ func (this CheckerModule) execute() {
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
 		Join(UrlExtFilterJoint{}).
 		Join(UrlCheckedFilterJoint{}).
-		End(SaveTask{IsCreate:true}).
+		End(SaveTask{IsCreate: true}).
 		Run()
 
 	//send to disk queue
 	if len(task.Domain) > 0 {
 		stats.Increment("domain.stats", task.Domain+"."+stats.STATS_FETCH_TOTAL_COUNT)
 
-		err,d:=model.GetDomain(task.Domain)
-		if(err!=nil){
+		err, d := model.GetDomain(task.Domain)
+		if err != nil {
 			log.Error(err)
 		}
-		log.Trace("load host settings, ",d.Host)
+		log.Trace("load host settings, ", d.Host)
 
 		queue.Push(config.FetchChannel, []byte(task.ID))
 	} else {

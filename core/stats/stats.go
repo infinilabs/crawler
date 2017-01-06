@@ -24,7 +24,6 @@ type Stats struct {
 }
 
 type StatsInterface interface {
-
 	Increment(category, key string)
 
 	IncrementBy(category, key string, value int64)
@@ -50,7 +49,7 @@ func Increment(category, key string) {
 
 func IncrementBy(category, key string, value int64) {
 	for _, v := range handlers {
-		v.IncrementBy(category,key,value)
+		v.IncrementBy(category, key, value)
 	}
 }
 
@@ -60,26 +59,26 @@ func Decrement(category, key string) {
 
 func DecrementBy(category, key string, value int64) {
 	for _, v := range handlers {
-		v.DecrementBy(category,key,value)
+		v.DecrementBy(category, key, value)
 	}
 }
 
 func Timing(category, key string, value int64) {
 	for _, v := range handlers {
-		v.Timing(category,key,value)
+		v.Timing(category, key, value)
 	}
 }
 
 func Gauge(category, key string, value int64) {
 	for _, v := range handlers {
-		v.Gauge(category,key,value)
+		v.Gauge(category, key, value)
 	}
 }
 
 func Stat(category, key string) int64 {
 	for _, v := range handlers {
-		b:=v.Stat(category,key)
-		if(b>0){
+		b := v.Stat(category, key)
+		if b > 0 {
 			return b
 		}
 	}
@@ -88,8 +87,8 @@ func Stat(category, key string) int64 {
 
 func StatsAll() *[]byte {
 	for _, v := range handlers {
-		b:=v.StatsAll()
-		if(b!=nil){
+		b := v.StatsAll()
+		if b != nil {
 			return b
 		}
 	}
@@ -99,17 +98,17 @@ func StatsAll() *[]byte {
 var inited bool
 var l sync.RWMutex
 
-func Init()  {
-	if(inited){
+func Init() {
+	if inited {
 		return
 	}
 	l.Lock()
-	handlers=[]StatsInterface{}
-	inited=true
+	handlers = []StatsInterface{}
+	inited = true
 	l.Unlock()
 }
 
-func Register(h StatsInterface)  {
+func Register(h StatsInterface) {
 	Init()
-	handlers=append(handlers,h)
+	handlers = append(handlers, h)
 }

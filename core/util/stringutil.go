@@ -18,8 +18,8 @@ package util
 
 import (
 	. "strings"
-	"unicode/utf16"
 	"unicode"
+	"unicode/utf16"
 )
 
 func ContainStr(s, substr string) bool {
@@ -50,7 +50,6 @@ func SubString(str string, begin, length int) (substr string) {
 	// 返回子串
 	return string(rs[begin:end])
 }
-
 
 // Removes all unnecessary whitespaces
 func MergeSpace(in string) (out string) {

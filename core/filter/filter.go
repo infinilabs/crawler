@@ -18,12 +18,11 @@ package filter
 
 type FilterKey string
 
-
 type Filter interface {
 	Exists(bucket FilterKey, key []byte) bool
 	Add(bucket FilterKey, key []byte) error
 	Delete(bucket FilterKey, key []byte) error
-	CheckThenAdd(bucket FilterKey,key[]byte)(bool,error)
+	CheckThenAdd(bucket FilterKey, key []byte) (bool, error)
 }
 
 var handler Filter
@@ -40,8 +39,8 @@ func Remove(bucket FilterKey, key []byte) error {
 	return handler.Delete(bucket, key)
 }
 
-func CheckThenAdd(bucket FilterKey,key[]byte)(bool,error){
-	return handler.CheckThenAdd(bucket,key)
+func CheckThenAdd(bucket FilterKey, key []byte) (bool, error) {
+	return handler.CheckThenAdd(bucket, key)
 }
 
 func Regsiter(h Filter) {

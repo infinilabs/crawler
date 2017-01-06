@@ -155,7 +155,9 @@ func FSByte(useLocal bool, name string) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		return ioutil.ReadAll(f)
+		b, err := ioutil.ReadAll(f)
+		f.Close()
+		return b, err
 	}
 	f, err := _escStatic.prepare(name)
 	if err != nil {
@@ -3784,23 +3786,23 @@ oGGq+kPyoPPz+7cXIKr0M9qohFUno5RjJLFNRWGAVitu7nYIwzW9j0rMfwMAAP//TOzJcsMcAAA=
 
 	"/ui/assets/js/page/console.js": {
 		local:   "../ui/assets/js/page/console.js",
-		size:    2552,
-		modtime: 1482989883,
+		size:    2593,
+		modtime: 1483538698,
 		compressed: `
-H4sIAAAJbogA/7xW32/bNhB+919x4wKYghs6L3tJrQxD0GED8rKmwDAUxUCTZ1kLRSo8yl7Q+n8fKFsy
-JbuYkWHVk3W80/fddz/oK75qrAqls8Az+DyZAABspAflrH3bv1VUQA5XnH1fUcGy44Fx3YFx7UF70n9T
-1jVa/R6fG6Tw4ApeURFh4PB4fN6HL3S5AWUkUT71e/fp3aL2eMdg1sLPgC3m0bCY63Jz15GIzx4lft7j
-c9aad18hQrWzhJcz2fv/D1Teee/8pTwwOk/vFsshheV/IXAGOxZUQx6L+vHm09DsHpV3xkAOWlD784Or
-IT++/oJlsQ5wDVooU6INe8ORWUWF2EN/cNy4IutPyhXwDiDlE58B2uVguzTz2J4r5yuWCWqWVRlGTZ/y
-+C42/piEx9B4CytpCMcYfWDMbyMNzy6NTsJ5H5zn7P7hkX35klqUoRMLSj+y3T+8++k9y4bgxhVCrUuj
-PVqeCY+V2yBPGubI8By1qIYgtPrI8KTZhuN9cBqUPZpY2qWpJPtKdasjNpvHlUda/9xYBXnftzzJTDlL
-zqAwruDMY2SJKpS2SEEO1i7ZXYIQquFI9K6fk9SjxL/agD7SD1XHsCv4trTabT+y33H56NQTBvZpXPm1
-o9DOk5IRRsR3KyuEGfDeWDsf4EeY3k5hBkPrLUyno1JFppCDxS30wJxt6XY+j7uhRZwBm2+JnYkUzroa
-baIqcNyEMW84rv2c3R/EdRaQglyaktaoBXt7EhLn7KDknxRkaIhlIuDfoV00F/rvO/Q+Lj7OmqdradCH
-ay1tgZ5lQmo9PqNGKaSTfL9SwxOXYStF8K4BIfiyaGEHUbtzsirjCF+raxv8rSXtZTunaaf3KUKocsLQ
-a5rM6hv44ebm5t8kJgyv0bdCIllcpPDpXY+bILQMcsTtCLQDNISjb40uavaHazwsvdsSxgsRCawLQE3d
-zmo/jSRS2QYXUbKRJu3G++u3Bv0L1041FdoQSyX1Cx+vvKvEY1lazadP+NLUgqZvEjmS/dj/UxMrpxri
-Wb9kW9jJ5J8AAAD//6XjBfj4CQAA
+H4sIAAAJbogA/7RWXW/bNhR996+44wKYghs6L3tJrQxD0GED8rKmwDAUxUCT17IWilR4KXtB6/8+ULZk
+SnYxo0X0ZN0PnsNzP+QrvmqsCqWzwDP4PJkAAGykB+Wsfdu/VVRADlec/VhRwbKjw7jOYVzraD39mbKu
+0er3+NwghQdX8IqKCAOHx+PzPn2hyw0oI4nyqd+HT+8Wtcc7BrMWfgZsMY+GxVyXm7uORHz2KPF4j89Z
+a959hQjVzhJezmQf/wpU3nnv/KU8MAZP7xbLIYXl9xA4gx0LqiGPRf1482lodo/KO2MgBy2o/fnB1ZAf
+X3/DslgHuAYtlCnRhr3hyKyiQuyhPzhuXJH1nnIFvANI+cRngHY52C69eWzPlfMVywQ1y6oMo6ZPefwQ
+G39MwmNovIWVNIRjjD4x3m8jDc8uzU7SeZ+c5+z+4ZF9+ZJalKETC0o/st0/vPvlPcuG4MYVQq1Loz1a
+ngmPldsgTxrmyPActaiGILT6yPCk2YbjfQgalD2aWNqlqST7SnWrIzabx5VHWv/aWAV537c8uZlylpxB
+YVzBmcfIElUobZGCHKzdZXcJQqiGI9GHfk6uHiX+3Qb0kX6oOoZdwbel1W77kf2Jy0ennjCwT+PKrx2F
+dp6UjDAivltZIcyA98ba+QA/w/R2CjMYWm9hOh2VKjKFHCxuoQfmbEu383ncDS3iDNh8S+xMpnDW1WgT
+VYHjJox5w3Ht5+z+IK6zgBTk0pS0Ri3Y25OUi3oNDgN5kPxvCjI0xDIR8N/QbqQL4/fH38cNyVnzdC0N
++nCtpS3Qs0xIrcc+apRCOhHmK8U+CRn2XATvOhWCL4sWdpC1O6e/Mo7wWwvQJp/V/hUl7WU7p2mn9ylC
+qHLC0GuaDPUb+Onm5ub/JCYM36JvhUSyuEjh0z8FuAlCyyBH3I5AO0BDODpr9EVnf7nGw9K7LWH8ciKB
+dQGoqduh7seWRCrb4IuVrK5Juxr/+aNB/8K1U02FNsRSSf3Cx7vxKolYllbz6RO+NLWg6ZtEjmSR9n/p
+xMqphnjWb+MWdjL5LwAA//9KAeyTIQoAAA==
 `,
 	},
 

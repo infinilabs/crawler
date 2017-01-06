@@ -19,29 +19,26 @@ package impl
 import (
 	log "github.com/cihub/seelog"
 	"github.com/syndtr/goleveldb/leveldb"
-	"sync"
 	"github.com/syndtr/goleveldb/leveldb/opt"
+	"sync"
 )
 
-
-
-type LeveldbFilter struct{
+type LeveldbFilter struct {
 	persistFileName string
-	filter *leveldb.DB
-	l sync.RWMutex
+	filter          *leveldb.DB
+	l               sync.RWMutex
 }
 
-
-func (filter *LeveldbFilter) Open(fileName string) error{
+func (filter *LeveldbFilter) Open(fileName string) error {
 	filter.l.Lock()
 	defer filter.l.Unlock()
 
-	filter.persistFileName=fileName
-	db, err := leveldb.OpenFile(fileName, &opt.Options{DisableBlockCache:true,DisableBufferPool:true,BlockCacher:opt.NoCacher})
+	filter.persistFileName = fileName
+	db, err := leveldb.OpenFile(fileName, &opt.Options{DisableBlockCache: true, DisableBufferPool: true, BlockCacher: opt.NoCacher})
 	filter.filter = db
 
 	if err != nil {
-		log.Error("leveldb:", fileName,", ", err)
+		log.Error("leveldb:", fileName, ", ", err)
 		return err
 	}
 
@@ -49,10 +46,10 @@ func (filter *LeveldbFilter) Open(fileName string) error{
 	return nil
 }
 
-func (this *LeveldbFilter) Close() error{
+func (this *LeveldbFilter) Close() error {
 	this.l.Lock()
 	defer this.l.Unlock()
-	log.Debug("start persist leveldb, file:",this.persistFileName)
+	log.Debug("start persist leveldb, file:", this.persistFileName)
 
 	err := this.filter.Close()
 	if err != nil {
@@ -62,26 +59,26 @@ func (this *LeveldbFilter) Close() error{
 
 }
 
-func (filter *LeveldbFilter) Exists(key []byte) bool{
+func (filter *LeveldbFilter) Exists(key []byte) bool {
 	filter.l.Lock()
 	defer filter.l.Unlock()
-	value,_  :=  filter.filter.Get(key,nil)
+	value, _ := filter.filter.Get(key, nil)
 	if value != nil {
 		return true
 	}
 	return false
 }
 
-func (filter *LeveldbFilter) Add(key []byte) error{
+func (filter *LeveldbFilter) Add(key []byte) error {
 	filter.l.Lock()
 	defer filter.l.Unlock()
-	filter.filter.Put(key,[]byte(""),nil)
+	filter.filter.Put(key, []byte(""), nil)
 	return nil
 }
 
-func (filter *LeveldbFilter) Delete(key []byte) error{
+func (filter *LeveldbFilter) Delete(key []byte) error {
 	filter.l.Lock()
 	defer filter.l.Unlock()
-	filter.filter.Delete(key,nil)
+	filter.filter.Delete(key, nil)
 	return nil
 }

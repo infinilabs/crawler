@@ -18,14 +18,14 @@ package pipe
 
 import (
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/model"
-	"strings"
-	"path"
+	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/store"
-	"github.com/rs/xid"
 	"github.com/medcl/gopa/modules/config"
+	"github.com/rs/xid"
+	"path"
+	"strings"
 )
 
 type SaveToDBJoint struct {
@@ -33,11 +33,9 @@ type SaveToDBJoint struct {
 	CompressBody bool
 }
 
-
 func (this SaveToDBJoint) Name() string {
 	return "save2db"
 }
-
 
 func (this SaveToDBJoint) Process(c *Context) (*Context, error) {
 	this.context = c
@@ -50,36 +48,37 @@ func (this SaveToDBJoint) Process(c *Context) (*Context, error) {
 	saveFile := c.MustGetString(CONTEXT_SAVE_FILENAME)
 	domain := c.MustGetString(CONTEXT_HOST)
 
-	saveKey:=GetKey(task.Domain,path.Join(savePath,saveFile))
-	log.Debug("save url to db, url:", url, ",domain:", task.Domain,",path:",savePath,",file:",saveFile,",saveKey:",string(saveKey))
+	saveKey := GetKey(task.Domain, path.Join(savePath, saveFile))
+	log.Debug("save url to db, url:", url, ",domain:", task.Domain, ",path:", savePath, ",file:", saveFile, ",saveKey:", string(saveKey))
 
-	if(this.CompressBody){
-		store.AddValueCompress(config.SnapshotBucketKey,saveKey,pageItem.Body)
+	if this.CompressBody {
+		store.AddValueCompress(config.SnapshotBucketKey, saveKey, pageItem.Body)
 
-	}else{
-		store.AddValue(config.SnapshotBucketKey,saveKey,pageItem.Body)
+	} else {
+		store.AddValue(config.SnapshotBucketKey, saveKey, pageItem.Body)
 	}
 
-	stats.IncrementBy("domain.stats", domain+"."+stats.STATS_STORAGE_FILE_SIZE,int64(len(pageItem.Body)))
+	stats.IncrementBy("domain.stats", domain+"."+stats.STATS_STORAGE_FILE_SIZE, int64(len(pageItem.Body)))
 	stats.Increment("domain.stats", domain+"."+stats.STATS_STORAGE_FILE_COUNT)
 
 	return c, nil
 }
 
 const KeyDelimiter string = ""
-func GetKey( args ...string) []byte {
-	key:=config.SnapshotMappingBucketKey
-	url:=[]byte(strings.Join(args,KeyDelimiter))
-	v:=store.GetValue(key,url)
-	if(v!=nil){
-		stats.Increment("save","duplicated_url")
-		log.Errorf("get snapshotId from db, maybe previous already saved, %s, %s",string(v),string(url))
+
+func GetKey(args ...string) []byte {
+	key := config.SnapshotMappingBucketKey
+	url := []byte(strings.Join(args, KeyDelimiter))
+	v := store.GetValue(key, url)
+	if v != nil {
+		stats.Increment("save", "duplicated_url")
+		log.Errorf("get snapshotId from db, maybe previous already saved, %s, %s", string(v), string(url))
 		return v
 	}
-	snapshotId,err:=xid.New().MarshalText()
-	if(err!=nil){
+	snapshotId, err := xid.New().MarshalText()
+	if err != nil {
 		panic(err)
 	}
-	store.AddValue(key,url,snapshotId)
+	store.AddValue(key, url, snapshotId)
 	return snapshotId
 }

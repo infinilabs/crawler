@@ -31,20 +31,20 @@ var m *Modules
 func New(env *Env) {
 	mod := Modules{}
 	mod.env = env
-	m= &mod
+	m = &mod
 }
 
-func Register(mod Module)  {
-	m.modules = append(m.modules,mod)
+func Register(mod Module) {
+	m.modules = append(m.modules, mod)
 }
 
 func Start() {
 
 	log.Trace("start to start modules")
-	for _, v := range m.modules{
-		log.Debug("starting module: ",v.Name())
+	for _, v := range m.modules {
+		log.Debug("starting module: ", v.Name())
 		v.Start(m.env)
-		log.Info("started module: ",v.Name())
+		log.Info("started module: ", v.Name())
 	}
 	log.Info("all modules started")
 }
@@ -52,10 +52,10 @@ func Start() {
 func Stop() {
 	log.Trace("start to stop modules")
 	for i := len(m.modules) - 1; i >= 0; i-- {
-		v:=m.modules[i]
-		log.Debug("stopping module: ",v.Name())
+		v := m.modules[i]
+		log.Info("stopping module: ", v.Name())
 		v.Stop()
-		log.Info("stoped module: ",v.Name())
+		log.Info("stoped module: ", v.Name())
 	}
 	log.Info("all modules stopeed")
 }

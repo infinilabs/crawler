@@ -17,24 +17,24 @@ limitations under the License.
 package env
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
 	"fmt"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestLoad(t *testing.T) {
-	env:=Environment(SystemConfig{ConfigFile:"../../gopa.yml",LogLevel:"debug"})
+	env := Environment(SystemConfig{ConfigFile: "../../gopa.yml", LogLevel: "debug"})
 	fmt.Sprintln(env)
 	fmt.Sprintln(env.SystemConfig)
-	config:=env.RuntimeConfig
-	assert.Equal(t,"gopa",config.ClusterConfig.Name)
-	assert.Equal(t,"debug",config.LoggingConfig.Level)
-	assert.Equal(t,"http://eshost:9200",config.IndexingConfig.Host)
-	assert.Equal(t,"gopa",config.IndexingConfig.Index)
+	config := env.RuntimeConfig
+	assert.Equal(t, "gopa", config.ClusterConfig.Name)
+	assert.Equal(t, "debug", config.LoggingConfig.Level)
+	assert.Equal(t, "http://eshost:9200", config.IndexingConfig.Host)
+	assert.Equal(t, "gopa", config.IndexingConfig.Index)
 	//assert.Equal(t,"data",config.PathConfig.Data)
 	//assert.Equal(t,"log",config.PathConfig.Log)
 
-	assert.Equal(t,true,config.ParserConfig.Enabled)
-	assert.Equal(t,true,config.CrawlerConfig.Enabled)
+	assert.Equal(t, true, config.ParserConfig.Enabled)
+	assert.Equal(t, true, config.CrawlerConfig.Enabled)
 
 }

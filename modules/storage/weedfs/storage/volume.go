@@ -1,8 +1,8 @@
 package storage
 
 import (
-	log "logging"
 	"io"
+	log "logging"
 	"os"
 	"path"
 	"strconv"

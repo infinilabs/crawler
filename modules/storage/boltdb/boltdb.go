@@ -18,6 +18,7 @@ package boltdb
 
 import (
 	"github.com/asdine/storm"
+	"github.com/asdine/storm/codec/protobuf"
 	"github.com/asdine/storm/q"
 	lz4 "github.com/bkaradzic/go-lz4"
 	"github.com/boltdb/bolt"
@@ -47,10 +48,10 @@ func (this BoltdbStore) Open() error {
 	v := global.Lookup(config.REGISTER_BOLTDB)
 	if v != nil {
 		boltDb := v.(*bolt.DB)
-		db, err = storm.Open("boltdb", storm.UseDB(boltDb))
+		db, err = storm.Open("boltdb", storm.UseDB(boltDb), storm.Codec(protobuf.Codec))
 	} else {
 		file := path.Join(global.Env().SystemConfig.Data, "boltdb")
-		db, err = storm.Open(file, storm.BoltOptions(0600, &bolt.Options{Timeout: 5 * time.Second}))
+		db, err = storm.Open(file, storm.BoltOptions(0600, &bolt.Options{Timeout: 5 * time.Second}), storm.Codec(protobuf.Codec))
 	}
 	if err != nil {
 		log.Errorf("error open boltdb: %s, %s", this.FileName, err)
@@ -183,12 +184,11 @@ func (filter BoltdbStore) Search(t1, t2 interface{}, q1 *store.Query) (error, st
 
 	var q2 storm.Query
 	if q1.Filter != nil {
-		q2 = db.Select(q.Eq(q1.Filter.Name,q1.Filter.Value)) //can't limit here, bug .Limit(q1.Size).Skip(q1.From)
+		q2 = db.Select(q.Eq(q1.Filter.Name, q1.Filter.Value)) //can't limit here, bug .Limit(q1.Size).Skip(q1.From)
 
 	} else {
 		q2 = db.Select(q.True()).Limit(q1.Size).Skip(q1.From)
 	}
-
 
 	if q1.Sort != "" {
 		q2 = q2.OrderBy(q1.Sort).Reverse()
