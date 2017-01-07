@@ -19,6 +19,7 @@ package config
 type LoggingConfig struct {
 	RealtimePushEnabled bool  `json:"realtime"`
 	LogLevel string  `json:"log_level"`
+	PushLogLevel string  `json:"push_log_level"`
 	FuncFilterPattern string `json:"func_pattern"`
 	FileFilterPattern string  `json:"file_pattern"`
 }

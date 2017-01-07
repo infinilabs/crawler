@@ -135,6 +135,7 @@ fetch-depends:
 	$(GO) get github.com/hashicorp/raft-boltdb
 	$(GO) get github.com/jaytaylor/html2text
 	$(GO) get github.com/asdine/storm/codec/protobuf
+	$(GO) get github.com/ryanuber/go-glob
 
 
 dist: cross-build package

@@ -3,10 +3,11 @@
 <head>
     <title>Gopa Console</title>
     <link rel="stylesheet" href="/ui/assets/uikit-2.27.1/css/uikit.min.css" />
+    <link rel="stylesheet" href="/ui/assets/uikit-2.27.1/css/components/notify.min.css" />
     <script src="/ui/assets/js/jquery.min.js"></script>
     <script src="/ui/assets/js/jquery.hotkeys-0.7.9.min.js"></script>
     <script src="/ui/assets/uikit-2.27.1/js/uikit.min.js"></script>
-    <script src="/ui/assets/js/page/console.js"></script>
+    <script src="/ui/assets/uikit-2.27.1/js/components/notify.min.js"></script>
     <meta charset="utf-8">
 </head>
 <body>
@@ -61,23 +62,23 @@
         </div>
         <div class="uk-width-1-1 ">
 
-            <form class="uk-form">
+            <form class="uk-form" onsubmit="return false;">
 
                 <fieldset data-uk-margin>
                     <legend class="uk-text-primary">Realtime logging</legend>
-                    <input type="text" class="uk-form-width-medium" placeholder="FuncPattern, eg: runPipeline*">
-                    <input type="text" class="uk-form-width-medium" placeholder="FilePattern, eg: crawler*.go">
-                    <select>
+                    <select id="log_level">
                         <option>ERROR</option>
                         <option>WARN</option>
                         <option>INFO</option>
                         <option>DEBUG</option>
                         <option>TRACE</option>
                     </select>
-                    <button class="uk-button uk-icon-play uk-button-success"> START</button>
-                    <button class="uk-button uk-icon-stop uk-button-danger"> STOP</button>
+                    <input id="file_pattern" type="text" class="uk-form-width-medium" placeholder="FilePattern, eg: crawler*.go">
+                    <input id="func_pattern" type="text" class="uk-form-width-medium" placeholder="FuncPattern, eg: runPipeline*">
+                    <button class="uk-button uk-icon-play uk-button-success" onclick="updateLogging(true)"> START</button>
+                    <button class="uk-button uk-icon-stop uk-button-danger"  onclick="updateLogging(false)"> STOP</button>
+                    <div id="update_config_response"></div>
                 </fieldset>
-
             </form>
 
 
@@ -87,4 +88,5 @@
 
 </div>
 </body>
+<script src="/ui/assets/js/page/console.js"></script>
 </html>

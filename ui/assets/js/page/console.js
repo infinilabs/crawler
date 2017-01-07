@@ -20,7 +20,7 @@ $(function () {
                 return appendLog(req)
             }else if(op=="PUBLIC"){
                 req = $("<div class='response'><pre>" + msg + "</pre></div>");
-                appendLoggingLog(req)
+               return appendLoggingLog(req)
             }
         }
         console.log("invalid format: ",msg)
@@ -117,4 +117,49 @@ jQuery(document).ready(function(){
 });
 
 
+function updateLogging(enabled){
 
+    $("#update_config_response").text("");
+
+    txt=$("input").val();
+
+    var data={};
+    data.realtime=enabled;
+    data.push_log_level=$("#log_level").val();
+    data.func_pattern=$("#func_pattern").val();
+    data.file_pattern=$("#file_pattern").val();
+
+        //load domain data
+        $.ajax({
+            url: '/setting/logger',
+            type: "post",
+            data: JSON.stringify(data),
+            cache : false,
+            dataType: "json",
+            success: function(data, textStatus, jqXHR) {
+                UIkit.notify("Success");
+
+                $(".uk-icon-play").attr("disabled",enabled)
+                $(".uk-icon-stop").attr("disabled",!enabled)
+
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                UIkit.notify("Error: " + errorThrown);
+            }
+
+        });
+
+
+}
+
+
+
+window.onload = function(){
+    var s = setInterval("scrollDiv()", 10000);
+}
+function scrollDiv(){
+    var logging = document.getElementById("logging");
+    logging.scrollTop = logging.scrollHeight;
+    var log = document.getElementById("log");
+    log.scrollTop = log.scrollHeight;
+}

@@ -6,6 +6,7 @@ CHANGES
 v0.8
 features
 1.raft clustering
+2.dynamic change logging setting from the console, filter log level, specify file and func
 improve
 bugfix
 1.fix incorrect stats number, incorrect task filter

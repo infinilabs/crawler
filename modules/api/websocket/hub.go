@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 	"fmt"
-	"github.com/medcl/gopa/core/util"
 )
 
 // hub maintains the set of active connections and broadcasts messages to the
@@ -105,10 +104,6 @@ func (h *Hub) broadcastMessage(msg string) {
 
 	if(len(msg)<=0){
 		return
-	}
-
-	if(len(msg)>300){
-		msg=util.SubString(msg,0,300)
 	}
 
 	for c := range h.connections {

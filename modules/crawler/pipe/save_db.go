@@ -72,7 +72,7 @@ func GetKey(args ...string) []byte {
 	v := store.GetValue(key, url)
 	if v != nil {
 		stats.Increment("save", "duplicated_url")
-		log.Errorf("get snapshotId from db, maybe previous already saved, %s, %s", string(v), string(url))
+		log.Warnf("get snapshotId from db, maybe previous already saved, %s, %s", string(v), string(url))
 		return v
 	}
 	snapshotId, err := xid.New().MarshalText()

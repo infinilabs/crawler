@@ -23,6 +23,8 @@ import (
 	"strings"
 	"fmt"
 	"sync"
+	"github.com/medcl/gopa/core/util"
+	"github.com/ryanuber/go-glob"
 )
 
 var file string
@@ -37,6 +39,7 @@ func SetLogging(env *Env, logLevel string, logFile string) {
 	  if(loggingConfig==nil){
 		  loggingConfig=&config.LoggingConfig{}
 		  loggingConfig.LogLevel="info"
+		  loggingConfig.PushLogLevel="info"
 		  loggingConfig.FileFilterPattern="*"
 		  loggingConfig.FuncFilterPattern="*"
 	  }
@@ -69,38 +72,70 @@ func SetLogging(env *Env, logLevel string, logFile string) {
 		file = "./log/gopa.log"
 	}
 
-	consoleWriter, _ := NewConsoleWriter()
-	websocketWriter, _ := NewWebsocketWriter()
+	if len(loggingConfig.FuncFilterPattern) <= 0 {
+		loggingConfig.FuncFilterPattern="*"
+	}
+	if len(loggingConfig.FileFilterPattern) <= 0 {
+		loggingConfig.FileFilterPattern="*"
+	}
+	if(len(loggingConfig.LogLevel)<=0){
+		loggingConfig.LogLevel="info"
+	}
+	if(len(loggingConfig.PushLogLevel)<=0){
+		loggingConfig.PushLogLevel="info"
+	}
 
-	formatter, _ := log.NewFormatter("[%Date(01-02) %Time] [%LEV] [%File:%Line] %Msg%n")
+	consoleWriter, _ := NewConsoleWriter()
+
+	format:="[%Date(01-02) %Time] [%LEV] [%File:%Line] [%FuncShort] %Msg%n"
+	formatter, err := log.NewFormatter(format)
+	if(err!=nil){
+		fmt.Println(err)
+	}
 
 	rollingFileWriter,_:=NewRollingFileWriterSize(file, rollingArchiveNone, "", 10000000000, 5, rollingNameModePostfix)
 	bufferedWriter,_:=NewBufferedWriter(rollingFileWriter,10000,1000)
 
-	l,_:=log.LogLevelFromString(loggingConfig.LogLevel)
+	l,_:=log.LogLevelFromString(strings.ToLower(loggingConfig.LogLevel))
+	pushl,_:=log.LogLevelFromString(strings.ToLower(loggingConfig.PushLogLevel))
+
 
 	//logging receivers
 	receivers:=[]interface{}{consoleWriter,bufferedWriter}
 	if(loggingConfig.RealtimePushEnabled){
-		receivers=append(receivers,websocketWriter)
+		receivers=append(receivers)
 	}
 
-	root, _ := log.NewFilterDispatcher(formatter,receivers ,l)
-
-	constraints, _ := log.NewMinMaxConstraints(l, log.CriticalLvl)
-
-	specificConstraints, _ := log.NewListConstraints([]log.LogLevel{l, log.CriticalLvl})
-
-	ex, _ := log.NewLogLevelException(loggingConfig.FuncFilterPattern, loggingConfig.FileFilterPattern, specificConstraints)
-
-	exceptions := []*log.LogLevelException{ex}
-
-	logger := log.NewAsyncLoopLogger(log.NewLoggerConfig(constraints, exceptions, root))
-
-	err:=log.ReplaceLogger(logger)
+	root, err := log.NewSplitDispatcher(formatter,receivers)
 	if(err!=nil){
 		fmt.Println(err)
 	}
+
+	golbalConstraints, err := log.NewMinMaxConstraints(l, log.CriticalLvl)
+	if(err!=nil){
+		fmt.Println(err)
+	}
+
+	exceptions := []*log.LogLevelException{}
+
+
+	if(loggingConfig.RealtimePushEnabled) {
+
+		logger,err :=log.LoggerFromCustomReceiver(&CustomReceiver{config:loggingConfig,minLogLevel:l,pushminLogLevel:pushl})
+		err=log.ReplaceLogger(logger)
+		if(err!=nil){
+			fmt.Println(err)
+		}
+	}else{
+		logger := log.NewAsyncLoopLogger(log.NewLoggerConfig(golbalConstraints, exceptions, root))
+		err=log.ReplaceLogger(logger)
+		if(err!=nil){
+			fmt.Println(err)
+		}
+	}
+
+
+
 }
 
 func GetLoggingConfig() *config.LoggingConfig {
@@ -145,4 +180,73 @@ func (console *WebsocketReceiver) Write(bytes []byte) (int, error) {
 
 func (console *WebsocketReceiver) String() string {
 	return "Websocket writer"
+}
+
+
+
+type CustomReceiver struct { // implements seelog.CustomReceiver
+
+	config *config.LoggingConfig
+	minLogLevel log.LogLevel
+	pushminLogLevel log.LogLevel
+}
+
+func (ar *CustomReceiver) ReceiveMessage(message string, level log.LogLevel, context log.LogContextInterface) error {
+
+	//truncate huge message
+	if(len(message)>300){
+		message=util.SubString(message,0,300)+"..."
+	}
+
+	f := context.Func()
+	spl := strings.Split(f, ".")
+	funcName:= spl[len(spl)-1]
+
+	preparedMessage:=fmt.Sprintf("[%s] [%s] [%s:%d] [%s] %s\n",
+		context.CallTime().Format("15:04:05"),
+		strings.ToUpper(level.String()),
+		context.FileName(),
+		context.Line(),
+		funcName,
+		message,
+	)
+
+	//console output
+	if(level>=ar.minLogLevel){
+		fmt.Printf(preparedMessage)
+	}
+
+	if(ar.config!=nil){
+		if(level< ar.pushminLogLevel){
+			return nil
+		}
+
+		if(len(ar.config.FileFilterPattern)>0){
+			if(!glob.Glob(ar.config.FileFilterPattern,context.FileName())){
+			return nil
+			}
+		}
+		if(len(ar.config.FuncFilterPattern)>0){
+			if(!glob.Glob(ar.config.FuncFilterPattern,funcName)){
+			return nil
+			}
+		}
+	}
+
+	//push message to websocket
+	if websocketHandler != nil {
+
+		websocketHandler(preparedMessage, log.DebugLvl, nil)
+	}
+
+	return nil
+}
+func (ar *CustomReceiver) AfterParse(initArgs log.CustomReceiverInitArgs) error {
+	return nil
+}
+func (ar *CustomReceiver) Flush() {
+
+}
+func (ar *CustomReceiver) Close() error {
+	return nil
 }
