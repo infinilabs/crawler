@@ -5,16 +5,17 @@
 package websocket
 
 import (
-	log "github.com/cihub/seelog"
 	"github.com/gorilla/websocket"
 	"net/http"
 	"strings"
 	"time"
+	"fmt"
+	"sync"
 )
 
 const (
 	// Time allowed to write a message to the peer.
-	writeWait = 10 * time.Second
+	writeWait = 2 * time.Second
 
 	// Time allowed to read the next pong message from the peer.
 	pongWait = 60 * time.Second
@@ -34,12 +35,12 @@ var upgrader = websocket.Upgrader{
 // connection is an middleman between the websocket connection and the hub.
 type WebsocketConnection struct {
 	// The websocket connection.
-	ws *websocket.Conn
+	ws            *websocket.Conn
 
 	// Buffered channel of outbound messages.
-	send chan []byte
+	signalChannel chan []byte
 
-	handlers map[string]WebsocketHandlerFunc
+	handlers      map[string]WebsocketHandlerFunc
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -55,16 +56,19 @@ func (c *WebsocketConnection) readPump() {
 		_, message, err := c.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
-				log.Trace("error: %v", err)
+				fmt.Sprintln("error: %v", err)
 			}
 			break
 		}
-		h.broadcast <- message
+		c.parseMessage(message)
 	}
 }
 
+var l sync.Mutex
 // write writes a message with the given message type and payload.
-func (c *WebsocketConnection) write(mt int, payload []byte) error {
+func (c *WebsocketConnection) internalWrite(mt int, payload []byte) error {
+	l.Lock()
+	defer l.Unlock()
 	c.ws.SetWriteDeadline(time.Now().Add(writeWait))
 	return c.ws.WriteMessage(mt, payload)
 }
@@ -78,28 +82,44 @@ func (c *WebsocketConnection) writePump() {
 	}()
 	for {
 		select {
-		case message, ok := <-c.send:
+		case message, ok := <-c.signalChannel:
 			if !ok {
-				c.write(websocket.CloseMessage, []byte{})
+				c.internalWrite(websocket.CloseMessage, []byte{})
 				return
 			}
 
 			c.parseMessage(message)
 
 		case <-ticker.C:
-			if err := c.write(websocket.PingMessage, []byte{}); err != nil {
+			if err := c.internalWrite(websocket.PingMessage, []byte{}); err != nil {
 				return
 			}
 		}
 	}
 }
 
-func (c *WebsocketConnection) WriteMessage(msg []byte) error {
-	return c.write(websocket.TextMessage, msg)
+type MsgType string
+
+const (
+	PrivateMessage MsgType = "PRIVATE"
+	PublicMessage MsgType =  "PUBLIC"
+)
+
+func (c *WebsocketConnection) WritePrivateMessage(msg string) error {
+
+	return c.WriteMessage(PrivateMessage,msg)
 }
 
-func (c *WebsocketConnection) parseMessage(msg []byte) {
+// the right way to write message, don't call c.write directly
+func (c *WebsocketConnection) WriteMessage(t MsgType,msg string) error {
 
+	msg=string(t)+" "+msg
+
+	return c.internalWrite(websocket.TextMessage, []byte(msg))
+}
+
+//parse received message, pass to specify handler
+func (c *WebsocketConnection) parseMessage(msg []byte) {
 	message := string(msg)
 	array := strings.Split(message, " ")
 	if len(array) > 0 {
@@ -113,7 +133,7 @@ func (c *WebsocketConnection) parseMessage(msg []byte) {
 		}
 	}
 
-	if err := c.write(websocket.TextMessage, []byte(message)); err != nil {
+	if err := c.WritePrivateMessage(getHelpMessage()); err != nil {
 		return
 	}
 
@@ -124,19 +144,17 @@ func ServeWs(w http.ResponseWriter, r *http.Request) {
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Error(err)
+		fmt.Println(err)
 		return
 	}
-	c := &WebsocketConnection{send: make(chan []byte, 256), ws: ws, handlers: h.handlers}
+	c := &WebsocketConnection{signalChannel: make(chan []byte, 256), ws: ws, handlers: h.handlers}
 	h.register <- c
 	go c.writePump()
 	c.readPump()
 }
 
+
 func (c *WebsocketConnection) Broadcast(msg string) {
-	defer func() {
-		h.unregister <- c
-		c.ws.Close()
-	}()
-	h.broadcast <- []byte(msg)
+	c.WriteMessage(PublicMessage,msg)
+
 }

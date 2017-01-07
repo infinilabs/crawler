@@ -24,12 +24,11 @@
         max-height: 500px;
     }
     #logging {
-        max-height: 500px;
-        background: black;
-        color: white;
+        height: 600px;
+        max-height: 1000px;
     }
 </style>
-<div class="uk-container uk-container-center uk-margin-top uk-margin-bottom">
+<div class="uk-container uk-container-center uk-margin-top uk-margin-bottom ">
     <nav class="uk-navbar uk-margin-bottom">
         <a class="uk-navbar-brand uk-hidden-small" href="/ui/">GOPA</a>
         <ul class="uk-navbar-nav uk-hidden-small">
@@ -50,22 +49,39 @@
         <div class="uk-navbar-brand uk-navbar-center uk-visible-small">GOPA</div>
     </nav>
 
-    <div class="uk-grid" data-uk-grid-margin>
-        <div class="uk-width-1-1">
+    <div class="uk-grid " data-uk-grid-margin>
+        <div class="uk-width-1-1 ">
 
             <div id="connect_status" class="uk-alert" ></div>
 
-            <div id="log"></div>
-            <form id="form">
-                <input id="msg" data-uk-tooltip="{pos:'top'}" type="text" title="Type HELP for more details." placeholder="Type HELP for more details." autocomplete="off" class="uk-width-1-1">
+            <div id="log" class="uk-scrollable-text"></div>
+            <form id="form" class="uk-form">
+                <input id="msg" type="text"  style="ime-mode: disabled" title="Press <s> to quick input; Type HELP for more details." placeholder="Press <s> to quick input; Type HELP for more details." autocomplete="off" class="uk-width-1-1">
+            </form>
+        </div>
+        <div class="uk-width-1-1 ">
+
+            <form class="uk-form">
+
+                <fieldset data-uk-margin>
+                    <legend class="uk-text-primary">Realtime logging</legend>
+                    <input type="text" class="uk-form-width-medium" placeholder="FuncPattern, eg: runPipeline*">
+                    <input type="text" class="uk-form-width-medium" placeholder="FilePattern, eg: crawler*.go">
+                    <select>
+                        <option>ERROR</option>
+                        <option>WARN</option>
+                        <option>INFO</option>
+                        <option>DEBUG</option>
+                        <option>TRACE</option>
+                    </select>
+                    <button class="uk-button uk-icon-play uk-button-success"> START</button>
+                    <button class="uk-button uk-icon-stop uk-button-danger"> STOP</button>
+                </fieldset>
+
             </form>
 
-        </div>
-        <div class="uk-width-1-1">
-            <i class="uk-icon-play"></i>
-            <i class="uk-icon-stop"></i>
 
-            <div id="logging"></div>
+            <div id="logging" class="uk-scrollable-text "></div>
         </div>
     </div>
 

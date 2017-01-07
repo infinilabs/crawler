@@ -29,18 +29,25 @@ import (
 type Command struct {
 }
 
+func getHelpMessage() string{
+	help:="COMMAND LIST\n" +
+		"seed [url] eg: seed http://elastic.co\n" +
+		"log [level]  eg: log debug"
+	return help
+}
+
 func (this Command) Help(c *WebsocketConnection, a []string) {
-	c.WriteMessage([]byte("COMMAND LIST\nseed [url] eg: seed http://elastic.co\nlog [level]  eg: log debug"))
+	c.WritePrivateMessage(getHelpMessage())
 }
 
 func (this Command) AddSeed(c *WebsocketConnection, a []string) {
 	url := a[1]
 	if len(url) > 0 {
 		queue.Push(config.CheckChannel, model.NewTaskSeed(url, "", 0).MustGetBytes())
-		c.WriteMessage([]byte("url " + url + " success added to pending fetch queue"))
+		c.WritePrivateMessage("url " + url + " success added to pending fetch queue")
 		return
 	}
-	c.WriteMessage([]byte("invalid url"))
+	c.WritePrivateMessage("invalid url")
 }
 
 func (this Command) UpdateLogLevel(c *WebsocketConnection, a []string) {
@@ -49,10 +56,10 @@ func (this Command) UpdateLogLevel(c *WebsocketConnection, a []string) {
 	if len(level) > 0 {
 		level := strings.ToLower(level)
 		logging.SetLogging(global.Env(), level,"")
-		c.WriteMessage([]byte("setting log level to  " + level))
+		c.WritePrivateMessage("setting log level to  " + level)
 		return
 	}
-	c.WriteMessage([]byte("invalid setting"))
+	c.WritePrivateMessage("invalid setting")
 }
 
 func (this Command) Dispatch(c *WebsocketConnection, a []string) {
@@ -61,7 +68,7 @@ func (this Command) Dispatch(c *WebsocketConnection, a []string) {
 	if err != nil {
 		panic(err)
 	}
-	c.WriteMessage([]byte("trigger tasks"))
+	c.WritePrivateMessage("trigger tasks")
 }
 
 func (this Command) GetTask(c *WebsocketConnection, a []string) {
@@ -70,13 +77,13 @@ func (this Command) GetTask(c *WebsocketConnection, a []string) {
 		para1 := a[1]
 		task, err := model.GetTask(para1)
 		if err != nil {
-			c.WriteMessage([]byte(err.Error()))
+			c.WritePrivateMessage(err.Error())
 		}
 
 		b, err := json.MarshalIndent(task, "", " ")
 
-		c.WriteMessage(b)
-		c.WriteMessage([]byte("get task by taskId," + para1 + "\n"))
+		c.WritePrivateMessage(string(b))
+		c.WritePrivateMessage("get task by taskId," + para1 + "\n")
 		return
 	}
 
@@ -85,17 +92,17 @@ func (this Command) GetTask(c *WebsocketConnection, a []string) {
 		para2 := a[2]
 		task, err := model.GetTaskByField(para1, para2)
 		if err != nil {
-			c.WriteMessage([]byte(err.Error()))
+			c.WritePrivateMessage(err.Error())
 		}
 
 		b, err := json.MarshalIndent(task, "", " ")
 
-		c.WriteMessage(b)
+		c.WritePrivateMessage(string(b))
 
-		c.WriteMessage([]byte("get task by," + para1 + ", " + para2 + "\n"))
+		c.WritePrivateMessage("get task by," + para1 + ", " + para2 + "\n")
 
 		return
 	}
 
-	c.WriteMessage([]byte("invalid taskId"))
+	c.WritePrivateMessage("invalid taskId")
 }

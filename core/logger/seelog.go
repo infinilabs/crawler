@@ -20,6 +20,7 @@ import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
 	"strings"
+	"fmt"
 )
 
 var config string
@@ -64,15 +65,18 @@ func SetLogging(env *Env, logLevel string, logFile string) {
 	l,_:=log.LogLevelFromString(level)
 	constraints, _ := log.NewMinMaxConstraints(l, log.CriticalLvl)
 
-	specificConstraints, _ := log.NewListConstraints([]log.LogLevel{log.TraceLvl, log.ErrorLvl})
+	specificConstraints, _ := log.NewListConstraints([]log.LogLevel{l, log.CriticalLvl})
 
-	ex, _ := log.NewLogLevelException("*", "*crawler.go", specificConstraints)
+	ex, _ := log.NewLogLevelException("*", "*main.go", specificConstraints)
 
 	exceptions := []*log.LogLevelException{ex}
 
 	logger := log.NewAsyncLoopLogger(log.NewLoggerConfig(constraints, exceptions, root))
 
-	log.ReplaceLogger(logger)
+	err:=log.ReplaceLogger(logger)
+	if(err!=nil){
+		fmt.Println(err)
+	}
 }
 
 func GetLoggingConfig(env *Env) string {
@@ -86,6 +90,7 @@ func Flush() {
 var websocketHandler func(message string, level log.LogLevel, context log.LogContextInterface)
 
 func RegisterWebsocketHandler(func1 func(message string, level log.LogLevel, context log.LogContextInterface)) {
+
 	websocketHandler = func1
 	if func1 != nil {
 		log.Debug("websocket logging ready")
@@ -97,7 +102,6 @@ type WebsocketReceiver struct {
 
 func NewWebsocketWriter() (writer *WebsocketReceiver, err error) {
 	newWriter := new(WebsocketReceiver)
-
 	return newWriter, nil
 }
 

@@ -5,12 +5,12 @@
 package websocket
 
 import (
-	log "github.com/cihub/seelog"
-	ws "github.com/gorilla/websocket"
 	"github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/global"
 	"strings"
 	"time"
+	"fmt"
+	"github.com/medcl/gopa/core/util"
 )
 
 // hub maintains the set of active connections and broadcasts messages to the
@@ -20,7 +20,7 @@ type Hub struct {
 	connections map[*WebsocketConnection]bool
 
 	// Inbound messages from the connections.
-	broadcast chan []byte
+	broadcast chan string
 
 	// Register requests from the connections.
 	register chan *WebsocketConnection
@@ -30,15 +30,12 @@ type Hub struct {
 
 	// Command handlers
 	handlers map[string]WebsocketHandlerFunc
-
-	//Broadcast content
-	content []byte
 }
 
 type WebsocketHandlerFunc func(c *WebsocketConnection, array []string)
 
 var h = Hub{
-	broadcast:   make(chan []byte, 1000),
+	broadcast:   make(chan string, 5),
 	register:    make(chan *WebsocketConnection),
 	unregister:  make(chan *WebsocketConnection),
 	connections: make(map[*WebsocketConnection]bool),
@@ -73,52 +70,56 @@ func (h *Hub) RunHub() {
 	//TODO error　handler,　parameter　assertion
 
 	if global.Env().IsDebug {
+
 		go func() {
 			t := time.NewTicker(time.Duration(5) * time.Second)
 			for {
 				select {
 				case <-t.C:
-					h.broadcast <- []byte("testing websocket broadcast")
+					fmt.Println("sending test msg to broadcast")
+					h.broadcast <- "testing websocket broadcast"
 				}
 			}
 		}()
 	}
 
+	//handle connect, disconnect, broadcast
 	for {
 		select {
 		case c := <-h.register:
 			h.connections[c] = true
-			c.write(ws.TextMessage, []byte(env.GetWelcomeMessage()))
+			c.WritePrivateMessage(env.GetWelcomeMessage())
 		case c := <-h.unregister:
 			if _, ok := h.connections[c]; ok {
 				delete(h.connections, c)
-				close(c.send)
+				close(c.signalChannel)
 			}
 		case m := <-h.broadcast:
-			h.content = m
-			h.broadcastMessage()
+			h.broadcastMessage(m)
 		}
 	}
 
 }
 
-func (h *Hub) broadcastMessage() {
+func (h *Hub) broadcastMessage(msg string) {
+
+	if(len(msg)<=0){
+		return
+	}
+
+	if(len(msg)>300){
+		msg=util.SubString(msg,0,300)
+	}
+
 	for c := range h.connections {
-		select {
-		case c.send <- []byte(h.content):
-			break
-		default:
-			close(c.send)
-			delete(h.connections, c)
-		}
+		c.Broadcast(msg)
 	}
 }
 
 func BroadcastMessage(msg string) {
 	select {
-	case h.broadcast <- []byte(msg):
-	default:
-		log.Warn("websocket broadcast too busy, msg droped")
+		case h.broadcast <- msg:
+		default:
+			fmt.Println("websocket broadcast too busy, msg droped")
 	}
-
 }

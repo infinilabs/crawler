@@ -124,7 +124,7 @@ func (this APIModule) Start(config *Env) {
 		internalStart(config)
 	}()
 
-	go logger.RegisterWebsocketHandler(LoggerReceiver)
+	logger.RegisterWebsocketHandler(LoggerReceiver)
 
 }
 

@@ -19,7 +19,9 @@ package logger
 import "fmt"
 
 func reportInternalError(err error) {
-	fmt.Sprintln(err)
+	if(err!=nil){
+		fmt.Println(err)
+	}
 }
 
 type Logger interface {

@@ -50,7 +50,7 @@ func onStart() {
 }
 
 func onShutdown() {
-	log.Debug(string(*stats.StatsAll()))
+	fmt.Println(string(*stats.StatsAll()))
 	fmt.Println("                         |    |                ")
 	fmt.Println("   _` |   _ \\   _ \\   _` |     _ \\  |  |   -_) ")
 	fmt.Println(" \\__, | \\___/ \\___/ \\__,_|   _.__/ \\_, | \\___| ")
@@ -136,7 +136,6 @@ func main() {
 	}
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
-
 	logger.SetLogging(EmptyEnv(), *logLevel,*logDir)
 
 	sysConfig := SystemConfig{ConfigFile: *configFile, LogLevel: *logLevel, HttpBinding: *httpBinding, ClusterBinding: *clusterBinding, ClusterSeeds: *clusterSeed, ClusterName: *clusterName, Data: *dataDir, Log: *logDir}
