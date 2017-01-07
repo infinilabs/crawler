@@ -27,3 +27,4 @@ import:
 - package: gopkg.in/yaml.v2
 - package: github.com/golang/protobuf/proto
 - package: github.com/armon/go-metrics
+- package: get github.com/ryanuber/go-glob
