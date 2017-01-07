@@ -119,7 +119,7 @@ func (s *RaftModule) Open() error {
 	// Allow the node to entry single-mode, potentially electing itself, if
 	// explicitly enabled and there is only 1 node in the cluster already.
 	if enableSingle && len(peers) <= 1 {
-		log.Info("enabling single-node mode")
+		log.Debug("raft enabling single-node mode")
 		config.EnableSingleNode = true
 		config.DisableBootstrapAfterElect = false
 	}

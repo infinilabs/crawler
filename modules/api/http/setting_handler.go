@@ -20,33 +20,44 @@ import (
 	log "github.com/cihub/seelog"
 	logging "github.com/medcl/gopa/core/logger"
 	"net/http"
+	"encoding/json"
+	"github.com/medcl/gopa/core/config"
 )
 
 func (this Handler) LoggingSettingAction(w http.ResponseWriter, req *http.Request) {
 	if req.Method == GET.String() {
 
-		str := logging.GetLoggingConfig(this.Env)
-		if len(str) > 0 {
-			this.Write(w, []byte(str))
+		cfg := logging.GetLoggingConfig()
+		if cfg!=nil {
+			this.WriteJson(w,cfg,200)
 		} else {
-			this.error500(w, "empty setting")
+			this.error500(w, "config not available")
 		}
 
 	} else if req.Method == PUT.String() || req.Method == POST.String() {
 		body, err := this.GetRawBody(req)
 		if err != nil {
 			log.Error(err)
-			this.error500(w, "config replace failed")
+			this.error500(w, "config update failed")
 			return
 		}
 
 		configStr := string(body)
 
+		cfg:=config.LoggingConfig{}
+
+		err=json.Unmarshal([]byte(configStr),&cfg)
+
+		if(err!=nil){
+			this.error(w, err)
+
+		}
+
 		log.Info("receive new settings:", configStr)
 
-		//TODO json config
-		//logging.SetLogging(this.Env, configStr)
+		logging.UpdateLoggingConfig(&cfg)
 
 		this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
+
 	}
 }

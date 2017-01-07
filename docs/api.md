@@ -15,13 +15,32 @@ curl -XGET http://localhost:8001/stats
     "seed":"http://elasticsearch.cn"
     }' 
     ```
+* Get logging config
+
+```
+curl -XGET http://127.0.0.1:8001/setting/logger
+```
+
+```
+{
+ "realtime": false,
+ "log_level": "info",
+ "func_pattern": "*",
+ "file_pattern": "*"
+}
+```
+
     
-* Update logging config on the fly (visit https://github.com/cihub/seelog/wiki for more details)
+* Update logging config on the fly
+
     ```
-    curl -X POST "http://localhost:8001/setting/seelog/" -d '
-    <seelog type="asynctimer" asyncinterval="5000000" minlevel="debug" maxlevel="error">
-        ... ...
-    </seelog>
+    curl -X POST "http://localhost:8001/setting/logger/" -d '
+   {
+    "realtime": true,
+    "log_level": "info",
+    "func_pattern": "*",
+    "file_pattern": "*"
+   }
     ' 
     ```
 

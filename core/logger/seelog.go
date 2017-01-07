@@ -19,16 +19,29 @@ package logger
 import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/config"
 	"strings"
 	"fmt"
+	"sync"
 )
 
-var config string
-var level string
 var file string
-
-
+var loggingConfig *config.LoggingConfig
+var l sync.Mutex
+var e *Env
 func SetLogging(env *Env, logLevel string, logFile string) {
+
+	e=env
+
+	l.Lock()
+	  if(loggingConfig==nil){
+		  loggingConfig=&config.LoggingConfig{}
+		  loggingConfig.LogLevel="info"
+		  loggingConfig.FileFilterPattern="*"
+		  loggingConfig.FuncFilterPattern="*"
+	  }
+	l.Unlock()
+
 	if(env!=nil){
 		envLevel := strings.ToLower(env.LoggingLevel)
 		if(env.SystemConfig!=nil){
@@ -38,19 +51,22 @@ func SetLogging(env *Env, logLevel string, logFile string) {
 			}
 		}
 		if(len(envLevel)>0){
-			level=envLevel
+			loggingConfig.LogLevel=envLevel
 		}
 	}
 
+	//overwrite env config
 	if len(logLevel) > 0 {
-		level = strings.ToLower(logLevel)
-	}
-	if len(level) <= 0 {
-		level = "info"
+		loggingConfig.LogLevel = strings.ToLower(logLevel)
 	}
 
+	if len(logFile) > 0 {
+		file = logFile
+	}
+
+	//finally check filename
 	if len(file) <= 0 {
-		logFile = "./log/gopa.log"
+		file = "./log/gopa.log"
 	}
 
 	consoleWriter, _ := NewConsoleWriter()
@@ -58,16 +74,24 @@ func SetLogging(env *Env, logLevel string, logFile string) {
 
 	formatter, _ := log.NewFormatter("[%Date(01-02) %Time] [%LEV] [%File:%Line] %Msg%n")
 
-	NewRollingFileWriterSize(logFile, rollingArchiveNone, "", 10000000000, 5, rollingNameModePostfix)
+	rollingFileWriter,_:=NewRollingFileWriterSize(file, rollingArchiveNone, "", 10000000000, 5, rollingNameModePostfix)
+	bufferedWriter,_:=NewBufferedWriter(rollingFileWriter,10000,1000)
 
-	root, _ := log.NewSplitDispatcher(formatter, []interface{}{websocketWriter,consoleWriter})
+	l,_:=log.LogLevelFromString(loggingConfig.LogLevel)
 
-	l,_:=log.LogLevelFromString(level)
+	//logging receivers
+	receivers:=[]interface{}{consoleWriter,bufferedWriter}
+	if(loggingConfig.RealtimePushEnabled){
+		receivers=append(receivers,websocketWriter)
+	}
+
+	root, _ := log.NewFilterDispatcher(formatter,receivers ,l)
+
 	constraints, _ := log.NewMinMaxConstraints(l, log.CriticalLvl)
 
 	specificConstraints, _ := log.NewListConstraints([]log.LogLevel{l, log.CriticalLvl})
 
-	ex, _ := log.NewLogLevelException("*", "*main.go", specificConstraints)
+	ex, _ := log.NewLogLevelException(loggingConfig.FuncFilterPattern, loggingConfig.FileFilterPattern, specificConstraints)
 
 	exceptions := []*log.LogLevelException{ex}
 
@@ -79,8 +103,15 @@ func SetLogging(env *Env, logLevel string, logFile string) {
 	}
 }
 
-func GetLoggingConfig(env *Env) string {
-	return config
+func GetLoggingConfig() *config.LoggingConfig {
+	return loggingConfig
+}
+
+func UpdateLoggingConfig(config *config.LoggingConfig)  {
+	l.Lock()
+	loggingConfig=config
+	l.Unlock()
+	SetLogging(e,"","")
 }
 
 func Flush() {
