@@ -25,6 +25,7 @@ curl -XGET http://127.0.0.1:8001/setting/logger
 {
  "realtime": false,
  "log_level": "info",
+ "push_log_level": "info",
  "func_pattern": "*",
  "file_pattern": "*"
 }
@@ -38,6 +39,7 @@ curl -XGET http://127.0.0.1:8001/setting/logger
    {
     "realtime": true,
     "log_level": "info",
+    "push_log_level": "info",
     "func_pattern": "*",
     "file_pattern": "*"
    }
