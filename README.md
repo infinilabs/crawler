@@ -19,7 +19,9 @@ Windows: Check out `Makefile` to build the Gopa
 
 ## Running Gopa ##
 
-After building the project run `./gopa -h` for a list of commandline options
+After download/build the binary file, run `./gopa` to start the Gopa 
+
+Run `./gopa -h` to get the full list of commandline options
 
 * -log option : logging level,can be set to `trace`,`debug`,`info`,`warn`,`error` ,default is `info`
 * -daemon option : run in background as daemon
