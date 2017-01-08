@@ -221,17 +221,17 @@ func (ar *CustomReceiver) ReceiveMessage(message string, level log.LogLevel, con
 			return nil
 		}
 
-		if(len(ar.config.FileFilterPattern)>0){
+		if(len(ar.config.FileFilterPattern)>0&&ar.config.FileFilterPattern!="*"){
 			if(!glob.Glob(ar.config.FileFilterPattern,context.FileName())){
 			return nil
 			}
 		}
-		if(len(ar.config.FuncFilterPattern)>0){
+		if(len(ar.config.FuncFilterPattern)>0&&ar.config.FuncFilterPattern!="*"){
 			if(!glob.Glob(ar.config.FuncFilterPattern,funcName)){
 			return nil
 			}
 		}
-		if(len(ar.config.MessageFilterPattern)>0){
+		if(len(ar.config.MessageFilterPattern)>0&&ar.config.MessageFilterPattern!="*"){
 			if(!glob.Glob(ar.config.MessageFilterPattern,message)){
 			return nil
 			}
