@@ -50,7 +50,10 @@ func onStart() {
 }
 
 func onShutdown() {
-	fmt.Println(string(*stats.StatsAll()))
+	if(env.IsDebug){
+		fmt.Println(string(*stats.StatsAll()))
+	}
+
 	fmt.Println("                         |    |                ")
 	fmt.Println("   _` |   _ \\   _ \\   _` |     _ \\  |  |   -_) ")
 	fmt.Println(" \\__, | \\___/ \\___/ \\__,_|   _.__/ \\_, | \\___| ")
