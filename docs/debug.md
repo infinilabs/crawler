@@ -1,3 +1,6 @@
+
+** Start gopa with pprof
+
 ./bin/gopa -pprof
 
 ** HEAP **
@@ -25,3 +28,9 @@ go tool pprof --web --lines  http://localhost:6060:/debug/pprof/profile
 ** Reference
 
 https://software.intel.com/en-us/blogs/2014/05/10/debugging-performance-issues-in-go-programs
+
+
+** Debug static ui
+
+python -m SimpleHTTPServer 8080
+open http://127.0.0.1:8080/ui/page/console.html
