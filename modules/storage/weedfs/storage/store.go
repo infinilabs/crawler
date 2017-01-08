@@ -3,11 +3,11 @@ package storage
 import (
 	"encoding/json"
 	"errors"
-	log "logging"
+	log "github.com/cihub/seelog"
 	"net/url"
 	"strconv"
 	"strings"
-	"util"
+	"github.com/medcl/gopa/core/util"
 )
 
 type Store struct {

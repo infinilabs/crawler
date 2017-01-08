@@ -4,12 +4,12 @@ import (
 	"encoding/hex"
 	"io"
 	"io/ioutil"
-	log "logging"
+	log "github.com/cihub/seelog"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
-	"util"
+	"github.com/medcl/gopa/core/util"
 )
 
 type Needle struct {

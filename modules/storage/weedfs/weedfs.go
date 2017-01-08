@@ -8,11 +8,11 @@ import (
 	"math/rand"
 	"mime"
 	"net/http"
-	"store/weedfs/directory"
-	"store/weedfs/storage"
 	"strconv"
 	"strings"
 	"time"
+	"github.com/medcl/gopa/modules/storage/weedfs/directory"
+	"github.com/medcl/gopa/modules/storage/weedfs/storage"
 )
 
 var (

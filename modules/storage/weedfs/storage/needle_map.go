@@ -1,9 +1,9 @@
 package storage
 
 import (
-	log "logging"
+	log "github.com/cihub/seelog"
 	"os"
-	"util"
+	"github.com/medcl/gopa/core/util"
 )
 
 type NeedleValue struct {
