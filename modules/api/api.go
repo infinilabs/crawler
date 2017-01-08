@@ -54,6 +54,7 @@ func internalStart(env *Env) {
 	//APIs
 	mux.HandleFunc("/stats", handler.StatsAction)
 
+	router.POST("/task/", handler.TaskAction)
 	router.GET("/tasks", handler.TaskAction)
 	router.GET("/task/:id", handler.TaskGetAction)
 	router.DELETE("/task/:id", BasicAuth(handler.TaskDeleteAction, user, pass))

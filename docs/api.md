@@ -11,7 +11,7 @@ curl -XGET http://localhost:8001/stats
 * Send seed to Gopa
 
     ```
-    curl -X POST "http://localhost:8001/task/" -d '{
+    curl -XPOST "http://localhost:8001/task/" -d '{
     "seed":"http://elasticsearch.cn"
     }' 
     ```
@@ -51,15 +51,14 @@ curl -XGET http://127.0.0.1:8001/setting/logger
 * Update logging config on the fly
 
     ```
-    curl -X POST "http://localhost:8001/setting/logger/" -d '
+    curl -XPOST "http://localhost:8001/setting/logger/" -d '
    {
     "realtime": true,
     "log_level": "info",
     "push_log_level": "info",
     "func_pattern": "*",
     "file_pattern": "*"
-   }
-    ' 
+   }' 
     ```
 
 * Get web snapshot
