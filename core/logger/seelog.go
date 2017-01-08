@@ -87,7 +87,7 @@ func SetLogging(env *Env, logLevel string, logFile string) {
 
 	consoleWriter, _ := NewConsoleWriter()
 
-	format:="[%Date(01-02) %Time] [%LEV] [%File:%Line] [%FuncShort] %Msg%n"
+	format:="[%Date(01-02) %Time] [%LEV] [%File:%Line] %Msg%n"
 	formatter, err := log.NewFormatter(format)
 	if(err!=nil){
 		fmt.Println(err)
