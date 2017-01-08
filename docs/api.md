@@ -15,6 +15,22 @@ curl -XGET http://localhost:8001/stats
     "seed":"http://elasticsearch.cn"
     }' 
     ```
+
+* Get domains
+
+```
+curl -XGET http://127.0.0.1:8001/domains
+```
+
+
+* Get tasks
+
+```
+curl -XGET http://127.0.0.1:8001/tasks?from=100&size=10&domain=elasticsearch.cn
+
+```
+
+
 * Get logging config
 
 ```
@@ -51,7 +67,7 @@ curl -XGET http://127.0.0.1:8001/setting/logger
 ``` http://localhost:8001/snapshot/?url=http://xxx.com ```
 
 
-* Get Cluster
+* Get cluster
 ``` http://127.0.0.1:8001/cluster/info ```
 
 ```
