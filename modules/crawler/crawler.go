@@ -149,7 +149,7 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 		Join(HtmlToTextJoint{MergeWhitespace: true}).
 		//Join(SaveToFileSystemJoint{}).
 		Join(SaveToDBJoint{CompressBody: true}).
-		Join(PublishJoint{}).
+		//Join(PublishJoint{}).
 		End(SaveTask{}).
 		Run()
 
