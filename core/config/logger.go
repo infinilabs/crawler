@@ -22,4 +22,5 @@ type LoggingConfig struct {
 	PushLogLevel string  `json:"push_log_level"`
 	FuncFilterPattern string `json:"func_pattern"`
 	FileFilterPattern string  `json:"file_pattern"`
+	MessageFilterPattern string  `json:"message_pattern"`
 }

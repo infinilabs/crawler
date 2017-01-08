@@ -128,6 +128,7 @@ function updateLogging(enabled){
     data.push_log_level=$("#log_level").val();
     data.func_pattern=$("#func_pattern").val();
     data.file_pattern=$("#file_pattern").val();
+    data.message_pattern=$("#message_pattern").val();
 
         //load domain data
         $.ajax({

@@ -231,6 +231,11 @@ func (ar *CustomReceiver) ReceiveMessage(message string, level log.LogLevel, con
 			return nil
 			}
 		}
+		if(len(ar.config.MessageFilterPattern)>0){
+			if(!glob.Glob(ar.config.MessageFilterPattern,message)){
+			return nil
+			}
+		}
 	}
 
 	//push message to websocket
