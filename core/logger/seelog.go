@@ -163,27 +163,6 @@ func RegisterWebsocketHandler(func1 func(message string, level log.LogLevel, con
 	}
 }
 
-type WebsocketReceiver struct {
-}
-
-func NewWebsocketWriter() (writer *WebsocketReceiver, err error) {
-	newWriter := new(WebsocketReceiver)
-	return newWriter, nil
-}
-
-func (console *WebsocketReceiver) Write(bytes []byte) (int, error) {
-	if websocketHandler != nil {
-		websocketHandler(string(bytes), log.DebugLvl, nil)
-	}
-	return 0,nil
-}
-
-func (console *WebsocketReceiver) String() string {
-	return "Websocket writer"
-}
-
-
-
 type CustomReceiver struct { // implements seelog.CustomReceiver
 
 	config *config.LoggingConfig
