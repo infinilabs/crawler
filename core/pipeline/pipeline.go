@@ -19,23 +19,24 @@ package pipeline
 import (
 	"fmt"
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/rs/xid"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
+	"github.com/medcl/gopa/core/global"
+	"runtime"
+	"reflect"
+	"errors"
 )
 
-var l sync.RWMutex
 
-type ContextKey string
+type ParaKey string
 
 type Context struct {
+	Parameters
 	Phrase    model.TaskPhrase
-	data      map[ContextKey]interface{}
 	breakFlag bool
 	exitFlag  bool
 	Payload   interface{}
@@ -50,13 +51,6 @@ func (this *Context) Break(msg interface{}) {
 	this.Payload = msg
 }
 
-func (this *Context) Init() {
-	l.Lock()
-	if this.data == nil {
-		this.data = map[ContextKey]interface{}{}
-	}
-	l.Unlock()
-}
 
 func (this *Context) IsBreak() bool {
 	return this.breakFlag
@@ -77,7 +71,22 @@ func (this *Context) Exit(msg interface{}) {
 	this.Payload = msg
 }
 
-func (this *Context) GetString(key ContextKey) (string, bool) {
+
+type Parameters struct {
+	Data map[string]interface{}
+	l    sync.RWMutex
+}
+
+
+func (this *Parameters) Init() {
+	this.l.Lock()
+	if this.Data == nil {
+		this.Data = map[string]interface{}{}
+	}
+	this.l.Unlock()
+}
+
+func (this *Parameters) GetString(key ParaKey) (string, bool) {
 	v := this.Get(key)
 	s, ok := v.(string)
 	if ok {
@@ -86,7 +95,7 @@ func (this *Context) GetString(key ContextKey) (string, bool) {
 	return s, ok
 }
 
-func (this *Context) GetInt(key ContextKey) (int, bool) {
+func (this *Parameters) GetInt(key ParaKey) (int, bool) {
 	v := this.Get(key)
 	s, ok := v.(int)
 	if ok {
@@ -95,39 +104,7 @@ func (this *Context) GetInt(key ContextKey) (int, bool) {
 	return s, ok
 }
 
-func (this *Context) MustGetString(key ContextKey) string {
-	s, ok := this.GetString(key)
-	if !ok {
-		panic(fmt.Errorf("%s not found in context", key))
-	}
-	return s
-}
-
-func (this *Context) MustGetBytes(key ContextKey) []byte {
-	s, ok := this.Get(key).([]byte)
-	if !ok {
-		panic(fmt.Errorf("%s not found in context", key))
-	}
-	return s
-}
-
-func (this *Context) MustGetInt(key ContextKey) int {
-	s, ok := this.GetInt(key)
-	if !ok {
-		panic(fmt.Errorf("%s not found in context", key))
-	}
-	return s
-}
-
-func (this *Context) MustGetMap(key ContextKey) map[string]interface{} {
-	s, ok := this.GetMap(key)
-	if !ok {
-		panic(fmt.Errorf("%s not found in context", key))
-	}
-	return s
-}
-
-func (this *Context) GetMap(key ContextKey) (map[string]interface{}, bool) {
+func (this *Parameters) GetMap(key ParaKey) (map[string]interface{}, bool) {
 	v := this.Get(key)
 	s, ok := v.(map[string]interface{})
 	if ok {
@@ -136,18 +113,53 @@ func (this *Context) GetMap(key ContextKey) (map[string]interface{}, bool) {
 	return s, ok
 }
 
-func (this *Context) Get(key ContextKey) interface{} {
-	l.RLock()
-	v := this.data[key]
-	l.RUnlock()
+func (this *Parameters) Get(key ParaKey) interface{} {
+	this.l.RLock()
+	s:=string(key)
+	v := this.Data[s]
+	this.l.RUnlock()
 	return v
 }
 
-func (this *Context) Set(key ContextKey, value interface{}) {
-	l.Lock()
-	this.data[key] = value
-	l.Unlock()
+func (this *Parameters) Set(key ParaKey, value interface{}) {
+	this.l.Lock()
+	s:=string(key)
+	this.Data[s] = value
+	this.l.Unlock()
 }
+
+func (this *Parameters) MustGetString(key ParaKey) string {
+	s, ok := this.GetString(key)
+	if !ok {
+		panic(fmt.Errorf("%s not found in context", key))
+	}
+	return s
+}
+
+func (this *Parameters) MustGetBytes(key ParaKey) []byte {
+	s, ok := this.Get(key).([]byte)
+	if !ok {
+		panic(fmt.Errorf("%s not found in context", key))
+	}
+	return s
+}
+
+func (this *Parameters) MustGetInt(key ParaKey) int {
+	s, ok := this.GetInt(key)
+	if !ok {
+		panic(fmt.Errorf("%s not found in context", key))
+	}
+	return s
+}
+
+func (this *Parameters) MustGetMap(key ParaKey) map[string]interface{} {
+	s, ok := this.GetMap(key)
+	if !ok {
+		panic(fmt.Errorf("%s not found in context", key))
+	}
+	return s
+}
+
 
 type Joint interface {
 	Name() string
@@ -167,13 +179,13 @@ func NewPipeline(name string) *Pipeline {
 	pipe.id = xid.New().String()
 	pipe.name = strings.TrimSpace(name)
 	pipe.context = &Context{}
-	pipe.context.Init()
+	pipe.context.Parameters.Init()
 	return pipe
 }
 
 func (this *Pipeline) Context(s *Context) *Pipeline {
 	this.context = s
-	this.context.Init()
+	this.context.Parameters.Init()
 	return this
 }
 
@@ -258,4 +270,50 @@ func (this *Pipeline) endPipeline() {
 		this.endJoint.Process(this.context)
 	}
 	log.Trace("end finish pipeline, ", this.name)
+}
+
+func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
+	pipe := &Pipeline{}
+	pipe.id = xid.New().String()
+	pipe.name = strings.TrimSpace(config.Name)
+
+	pipe.Context(config.Context)
+
+	if config.InputJoint!=nil {
+		input := GetJointInstance(config.InputJoint)
+		pipe.Start(input)
+	}
+
+	for _, cfg := range config.ProcessJoints {
+		j := GetJointInstance(cfg)
+		pipe.Join(j)
+	}
+
+	if config.OutputJoint!=nil {
+		output := GetJointInstance(config.OutputJoint)
+		pipe.End(output)
+	}
+
+	return pipe
+}
+
+var typeRegistry = make(map[string]interface{})
+
+func GetJointInstance(cfg *JointConfig) Joint {
+	if typeRegistry[cfg.JointName] != nil {
+		t := reflect.ValueOf(typeRegistry[cfg.JointName]).Type()
+		v := reflect.New(t).Elem()
+
+		f := v.FieldByName("Data")
+		if f.IsValid() && f.CanSet() && f.Kind() == reflect.Map {
+			f.Set(reflect.ValueOf(cfg.Parameters))
+		}
+		v1:=v.Interface().(Joint)
+		return v1
+	}
+	panic(errors.New(cfg.JointName+" not found"))
+}
+
+func Register(jointName string,joint Joint){
+	typeRegistry[jointName]=joint
 }

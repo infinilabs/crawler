@@ -19282,6 +19282,16 @@ uGf+jy7AdzQjv8+uprOURdQTU/v2XatNLbkpwNFt/zwloekXUcPN5BEJm1MiMtwKa3JV3DrwlTUejp4O
 `,
 	},
 
+	"/ui/page/create_task.html": {
+		local:   "../ui/page/create_task.html",
+		size:    99,
+		modtime: 1483864453,
+		compressed: `
+H4sIAAAJbogA/7JRdPF3DokMcFXIKMnNseOyAVEKOYl56bZKqXlKIIHUxBQ7LgUFBQWb3NSSRIXkjMSi
+4tQSW6XQEDddC5AKfYgSm6T8lEo7Li4bfQjDRh9iJCAAAP//eCLnd2MAAAA=
+`,
+	},
+
 	"/ui/page/index.html": {
 		local:   "../ui/page/index.html",
 		size:    2634,

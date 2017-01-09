@@ -1,36 +1,48 @@
 
-** Start gopa with pprof
+## Debugging Gopa
 
-./bin/gopa -pprof
+* Start gopa with pprof
 
-** HEAP **
+`./bin/gopa -pprof`
 
-http://localhost:6060/debug/pprof/heap?debug=1
-go tool pprof --inuse_space http://localhost:6060/debug/pprof/heap
-go tool pprof --alloc_space http://localhost:6060/debug/pprof/heap
-go tool pprof --text http://localhost:6060/debug/pprof/heap
-go tool pprof --web http://localhost:6060/debug/pprof/heap
+* HEAP
 
-** GC **
+`http://localhost:6060/debug/pprof/heap?debug=1`
 
-go get -u -v github.com/davecheney/gcvis
-gcvis godoc -index -http=:6060
+`go tool pprof --inuse_space http://localhost:6060/debug/pprof/heap`
 
-env GODEBUG=gctrace=1 godoc -http=:6060
+`go tool pprof --alloc_space http://localhost:6060/debug/pprof/heap`
 
-** CPU **
+`go tool pprof --text http://localhost:6060/debug/pprof/heap`
 
-go tool pprof --text http://localhost:6060:/debug/pprof/profile
-go tool pprof --web  http://localhost:6060:/debug/pprof/profile
-go tool pprof --web --lines  http://localhost:6060:/debug/pprof/profile
+`go tool pprof --web http://localhost:6060/debug/pprof/heap`
+
+* GC
+
+`go get -u -v github.com/davecheney/gcvis`
+
+`gcvis godoc -index -http=:6060`
+
+`env GODEBUG=gctrace=1 godoc -http=:6060`
+
+* CPU
+
+`go tool pprof --text http://localhost:6060:/debug/pprof/profile`
+
+`go tool pprof --web  http://localhost:6060:/debug/pprof/profile`
+
+`go tool pprof --web --lines  http://localhost:6060:/debug/pprof/profile`
 
 
-** Reference
+* Reference
 
 https://software.intel.com/en-us/blogs/2014/05/10/debugging-performance-issues-in-go-programs
 
 
-** Debug static ui
+* Debug static ui
 
+`
 python -m SimpleHTTPServer 8080
+`
+
 open http://127.0.0.1:8080/ui/page/console.html

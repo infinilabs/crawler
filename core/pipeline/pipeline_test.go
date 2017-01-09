@@ -24,8 +24,9 @@ import (
 	"testing"
 )
 
+
 type crawlerJoint struct {
-	Url string
+	Parameters
 }
 
 func (this crawlerJoint) Name() string {
@@ -33,22 +34,24 @@ func (this crawlerJoint) Name() string {
 }
 
 func (this crawlerJoint) Process(s *Context) (*Context, error) {
-	s.data = map[ContextKey]interface{}{}
-	s.data[("webpage")] = "hello world gogo "
-	s.data[("status")] = true
-	fmt.Println("start to crawlling url:" + this.Url)
+	s.Data[("webpage")] = "hello world gogo "
+	s.Data["received_url"] = this.Data["url"]
+	s.Data[("status")] = true
+	fmt.Println("start to crawlling url: ",this.Get("url"))// + this.GetParameter("url").(string))
 	return s, nil
 }
 
 type parserJoint struct {
+
 }
 
 func (this parserJoint) Name() string {
 	return "parserJoint"
 }
+
 func (this parserJoint) Process(s *Context) (*Context, error) {
-	s.data[("urls")] = "gogo"
-	s.data[("domain")] = "http://gogo.com"
+	s.Parameters.Data[("urls")] = "gogo"
+	s.Parameters.Data[("domain")] = "http://gogo.com"
 	//pub urls to channel
 	fmt.Println("start to parse web content")
 	return s, nil
@@ -60,14 +63,16 @@ type saveJoint struct {
 func (this saveJoint) Name() string {
 	return "saveJoint"
 }
+
 func (this saveJoint) Process(s *Context) (*Context, error) {
-	s.Set("saved", "true")
+	s.Parameters.Set("saved", "true")
 	//pub urls to channel
 	fmt.Println("start to save web content")
 	return s, nil
 }
 
 type publishJoint struct {
+
 }
 
 func (this publishJoint) Name() string {
@@ -76,7 +81,7 @@ func (this publishJoint) Name() string {
 
 func (this publishJoint) Process(s *Context) (*Context, error) {
 	fmt.Println("start to end pipeline")
-	s.Set("published", "true")
+	s.Parameters.Set("published", "true")
 	return s, nil
 }
 
@@ -85,20 +90,24 @@ func TestPipeline(t *testing.T) {
 	global.RegisterEnv(env.EmptyEnv())
 
 	pipeline := NewPipeline("crawler_test")
-	stream := &Context{}
-	stream.data = map[ContextKey]interface{}{}
-	stream.data["url"] = "gogol.com"
-	stream.data["webpage"] = "hello world gogo "
+	context := &Context{}
+	context.Parameters.Init()
+	context.Parameters.Data["url"] = "gogol.com"
+	context.Parameters.Data["webpage"] = "hello world gogo "
 
-	stream = pipeline.Context(stream).
-		Start(crawlerJoint{Url: "http://baidu.com"}).
+	crawler:=crawlerJoint{}
+	//crawler.SetParameter("url","http://baidu.com")
+
+	context = pipeline.Context(context).
+		Start(crawler).
 		Join(parserJoint{}).
 		Join(saveJoint{}).
 		Join(publishJoint{}).
 		Run()
 
-	fmt.Println(stream.data)
-	assert.Equal(t, stream.data["saved"], "true")
-	assert.Equal(t, stream.data["status"], true)
-	assert.Equal(t, stream.data["domain"], "http://gogo.com")
+	fmt.Println(context.Data)
+	assert.Equal(t, context.Parameters.Data["published"], "true")
+	assert.Equal(t, context.Parameters.Data["saved"], "true")
+	assert.Equal(t, context.Parameters.Data["status"], true)
+	assert.Equal(t, context.Parameters.Data["domain"], "http://gogo.com")
 }

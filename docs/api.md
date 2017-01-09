@@ -2,6 +2,12 @@
 ## Gopa API
 
 
+* Get basic info
+
+```
+curl -XGET http://127.0.0.1:8001/
+```
+
 * Get task status
 
 ```
@@ -63,11 +69,15 @@ curl -XPOST "http://localhost:8001/setting/logger/" -d '
 
 * Get web snapshot
 
-``` http://localhost:8001/snapshot/?url=http://xxx.com ```
+``` 
+curl -XGET http://localhost:8001/snapshot/?url=http://xxx.com 
+```
 
 
 * Get cluster
-``` http://127.0.0.1:8001/cluster/info ```
+``` 
+curl -XGET http://127.0.0.1:8001/cluster/info 
+```
 
 ```
 {
