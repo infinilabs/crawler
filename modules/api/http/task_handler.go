@@ -26,26 +26,27 @@ import (
 	"github.com/medcl/gopa/modules/config"
 	"net/http"
 	"strconv"
+	. "github.com/medcl/gopa/core/api"
 )
 
-func (this Handler) TaskDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (this API) TaskDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	if req.Method == DELETE.String() {
 		id := ps.ByName("id")
 		err := model.DeleteTask(id)
 		if err != nil {
-			this.error(w, err)
+			this.Error(w, err)
 		} else {
 			this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
 		}
 	} else {
-		this.error404(w)
+		this.Error404(w)
 	}
 }
-func (this Handler) TaskGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (this API) TaskGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
 	task, err := model.GetTask(id)
 	if err != nil {
-		this.error(w, err)
+		this.Error(w, err)
 	} else {
 		this.WriteJson(w, task, http.StatusOK)
 
@@ -53,7 +54,7 @@ func (this Handler) TaskGetAction(w http.ResponseWriter, req *http.Request, ps h
 
 }
 
-func (this Handler) TaskAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (this API) TaskAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
 	if req.Method == POST.String() {
 		jsonq, err := this.GetJson(req)
@@ -90,32 +91,32 @@ func (this Handler) TaskAction(w http.ResponseWriter, req *http.Request, ps http
 
 		total, tasks, err := model.GetTaskList(from, size, domain)
 		if err != nil {
-			this.error(w, err)
+			this.Error(w, err)
 		} else {
 			this.WriteListResultJson(w, total, tasks, http.StatusOK)
 		}
 	}
 }
 
-func (this Handler) DomainDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (this API) DomainDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	if req.Method == DELETE.String() {
 		id := ps.ByName("id")
 		err := model.DeleteTask(id)
 		if err != nil {
-			this.error(w, err)
+			this.Error(w, err)
 		} else {
 			this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
 		}
 	} else {
-		this.error404(w)
+		this.Error404(w)
 	}
 }
 
-func (this Handler) DomainGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (this API) DomainGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
 	task, err := model.GetTask(id)
 	if err != nil {
-		this.error(w, err)
+		this.Error(w, err)
 	} else {
 		this.WriteJson(w, task, http.StatusOK)
 
@@ -123,7 +124,7 @@ func (this Handler) DomainGetAction(w http.ResponseWriter, req *http.Request, ps
 
 }
 
-func (this Handler) DomainAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (this API) DomainAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
 	if req.Method == POST.String() {
 		//jsonq, err := this.GetJson(req)
@@ -169,7 +170,7 @@ func (this Handler) DomainAction(w http.ResponseWriter, req *http.Request, ps ht
 		}
 
 		if err != nil {
-			this.error(w, err)
+			this.Error(w, err)
 		} else {
 			this.WriteListResultJson(w, total, newDomains, http.StatusOK)
 		}

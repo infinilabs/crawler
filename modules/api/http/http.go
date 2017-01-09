@@ -16,20 +16,8 @@ limitations under the License.
 
 package handler
 
-import (
-	"github.com/medcl/gopa/core/stats"
-	"net/http"
-)
+import "github.com/medcl/gopa/core/api"
 
-func getMapValue(mapData map[string]int, key string, defaultValue int32) int {
-	data := mapData[key]
-	return data
-}
-
-func (this API) StatsAction(w http.ResponseWriter, req *http.Request) {
-
-	m := stats.StatsAll()
-
-	this.WriteJsonHeader(w)
-	this.Write(w, *m)
+type API struct {
+	api.Handler
 }

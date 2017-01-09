@@ -20,17 +20,18 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/medcl/gopa/core/env"
 	"net/http"
+	"github.com/medcl/gopa/core/global"
 )
 
-func (this Handler) IndexAction(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+func (this API) IndexAction(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	if req.URL.Path != "/" {
-		this.error404(w)
+		this.Error404(w)
 		return
 	}
 
 	data := map[string]interface{}{}
-	data["cluster_name"] = this.Env.SystemConfig.ClusterName
-	data["name"] = this.Env.SystemConfig.NodeName
+	data["cluster_name"] = global.Env().SystemConfig.ClusterName
+	data["name"] = global.Env().SystemConfig.NodeName
 	version := map[string]interface{}{}
 	version["number"] = env.VERSION
 	version["build_commit"] = env.LastCommitLog

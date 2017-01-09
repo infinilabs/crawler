@@ -35,7 +35,7 @@ var router *httprouter.Router
 var mux *http.ServeMux
 
 func internalStart(env *Env) {
-	handler := Handler{Env: env}
+	handler := API{}
 	router = httprouter.New()
 
 	user := "gopa"
@@ -63,6 +63,7 @@ func internalStart(env *Env) {
 	router.GET("/domain/:id", handler.DomainGetAction)
 	router.DELETE("/domain/:id", BasicAuth(handler.DomainDeleteAction, user, pass))
 
+
 	mux.HandleFunc("/setting/logger", handler.LoggingSettingAction)
 	mux.HandleFunc("/setting/logger/", handler.LoggingSettingAction)
 
@@ -84,6 +85,14 @@ func internalStart(env *Env) {
 		for k, v := range apis.RegisteredFuncHandler {
 			log.Debug("register custom http handler: ", k)
 			mux.HandleFunc(k, v)
+		}
+	}
+	if apis.RegisteredMethodHandler != nil {
+		for k, v := range apis.RegisteredMethodHandler {
+			for m, n := range v {
+				log.Debug("register custom http handler: ", k," ",m)
+				router.Handle(k,m,n)
+			}
 		}
 	}
 

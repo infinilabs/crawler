@@ -14,22 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package handler
+package crawler
 
 import (
-	"github.com/medcl/gopa/core/stats"
-	"net/http"
+	"github.com/medcl/gopa/core/pipeline"
+	"github.com/medcl/gopa/modules/crawler/pipe"
+	log "github.com/cihub/seelog"
 )
 
-func getMapValue(mapData map[string]int, key string, defaultValue int32) int {
-	data := mapData[key]
-	return data
-}
+func InitJoints() {
+	log.Debug("start register joints")
+	pipeline.Register(pipe.UrlCheckedFilter,pipe.UrlCheckedFilterJoint{})
+	log.Debug("end register joints")
 
-func (this API) StatsAction(w http.ResponseWriter, req *http.Request) {
-
-	m := stats.StatsAll()
-
-	this.WriteJsonHeader(w)
-	this.Write(w, *m)
 }

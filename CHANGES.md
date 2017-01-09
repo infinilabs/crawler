@@ -4,10 +4,14 @@
 ## CHANGES
 
 #### v0.8
+
 ##### features
 1. raft clustering
 2. dynamic change logging setting from the console, can be filter log by level, message, file and function name
+3. dynamic create pipeline
+
 ##### improve
+
 ##### bugfix
 1. fix incorrect stats number, incorrect task filter
 
@@ -24,6 +28,7 @@
 8. export metrics to statsD
 9. support daemon mode in linux and darwin
 10. add task management api
+
 ##### improve:
 1. add update_ui setup to Makefile in order to build static ui
 2. add git commit log and build_date to gopa binary
@@ -32,6 +37,7 @@
 #### v0.6
 ##### breaking change:
 1. remove bloom, use leveldb to store urls
+
 ##### feature:
 1. crawling speed control
 2. cookie supported
@@ -60,10 +66,10 @@
 2. list page download
 
 #### v0.3
-1. adding golang pprof,http://localhost:6060/debug/pprof/
-    go tool pprof http://localhost:6060/debug/pprof/heap
-    go tool pprof http://localhost:6060/debug/pprof/profile
-    go tool pprof http://localhost:6060/debug/pprof/block
+1. adding golang pprof, http://localhost:6060/debug/pprof/
+  - go tool pprof http://localhost:6060/debug/pprof/heap
+  - go tool pprof http://localhost:6060/debug/pprof/profile
+  - go tool pprof http://localhost:6060/debug/pprof/block
 
 2. integrate with kafka to make task controllable and recoverable
 3. parameters configable

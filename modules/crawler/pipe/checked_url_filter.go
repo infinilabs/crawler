@@ -25,13 +25,16 @@ import (
 	"regexp"
 )
 
+const UrlCheckedFilter JointKey = "url_checked_filter"
+
+
 type UrlCheckedFilterJoint struct {
 	//ignore files end with js,css,apk,zip
 	SkipPageParsePattern *regexp.Regexp
 }
 
 func (this UrlCheckedFilterJoint) Name() string {
-	return "url_checked_filter"
+	return string(UrlCheckedFilter)
 }
 
 func (this UrlCheckedFilterJoint) Process(context *Context) (*Context, error) {

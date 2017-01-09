@@ -26,10 +26,12 @@ import (
 	"github.com/medcl/gopa/modules/queue"
 	"github.com/medcl/gopa/modules/stats"
 	"github.com/medcl/gopa/modules/storage"
+	"github.com/medcl/gopa/modules/core"
 )
 
 func Register() {
 	//register modules
+	module.Register(core.CoreModule{})
 	module.Register(filter.FilterModule{})
 	module.Register(storage.StorageModule{})
 	module.Register(stats.StatsStoreModule{})

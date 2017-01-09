@@ -22,23 +22,24 @@ import (
 	"net/http"
 	"encoding/json"
 	"github.com/medcl/gopa/core/config"
+	. "github.com/medcl/gopa/core/api"
 )
 
-func (this Handler) LoggingSettingAction(w http.ResponseWriter, req *http.Request) {
+func (this API) LoggingSettingAction(w http.ResponseWriter, req *http.Request) {
 	if req.Method == GET.String() {
 
 		cfg := logging.GetLoggingConfig()
 		if cfg!=nil {
 			this.WriteJson(w,cfg,200)
 		} else {
-			this.error500(w, "config not available")
+			this.Error500(w, "config not available")
 		}
 
 	} else if req.Method == PUT.String() || req.Method == POST.String() {
 		body, err := this.GetRawBody(req)
 		if err != nil {
 			log.Error(err)
-			this.error500(w, "config update failed")
+			this.Error500(w, "config update failed")
 			return
 		}
 
@@ -49,7 +50,7 @@ func (this Handler) LoggingSettingAction(w http.ResponseWriter, req *http.Reques
 		err=json.Unmarshal([]byte(configStr),&cfg)
 
 		if(err!=nil){
-			this.error(w, err)
+			this.Error(w, err)
 
 		}
 

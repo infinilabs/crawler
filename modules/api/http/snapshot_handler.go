@@ -22,9 +22,10 @@ import (
 	"github.com/medcl/gopa/core/store"
 	"github.com/medcl/gopa/modules/config"
 	"net/http"
+	. "github.com/medcl/gopa/core/api"
 )
 
-func (this Handler) SnapshotAction(w http.ResponseWriter, req *http.Request) {
+func (this API) SnapshotAction(w http.ResponseWriter, req *http.Request) {
 
 	if req.Method == GET.String() {
 		url := this.GetParameter(req, "url")
@@ -46,6 +47,6 @@ func (this Handler) SnapshotAction(w http.ResponseWriter, req *http.Request) {
 
 	}
 
-	this.error404(w)
+	this.Error404(w)
 
 }

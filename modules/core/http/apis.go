@@ -14,22 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package handler
+package http
 
-import (
-	"github.com/medcl/gopa/core/stats"
-	"net/http"
-)
+import "github.com/medcl/gopa/core/api"
 
-func getMapValue(mapData map[string]int, key string, defaultValue int32) int {
-	data := mapData[key]
-	return data
+type API struct {
+	api.Handler
 }
 
-func (this API) StatsAction(w http.ResponseWriter, req *http.Request) {
+func InitAPI()  {
+	apis:=API{}
+	api.HandleMethod(api.GET,"/pipelines/",apis.handleGetPipelinesRequest)
+	api.HandleMethod(api.POST,"/pipeline/:id",apis.handlePostPipelinesRequest)
 
-	m := stats.StatsAll()
-
-	this.WriteJsonHeader(w)
-	this.Write(w, *m)
 }

@@ -14,22 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package handler
+package http
 
 import (
-	"github.com/medcl/gopa/core/stats"
 	"net/http"
+	"github.com/julienschmidt/httprouter"
 )
 
-func getMapValue(mapData map[string]int, key string, defaultValue int32) int {
-	data := mapData[key]
-	return data
+
+
+func   (this API)handleGetPipelinesRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+
+	return
 }
 
-func (this API) StatsAction(w http.ResponseWriter, req *http.Request) {
 
-	m := stats.StatsAll()
+func   (this API)handlePostPipelinesRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
-	this.WriteJsonHeader(w)
-	this.Write(w, *m)
+	return
 }
+

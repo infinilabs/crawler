@@ -14,13 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package handler
+package api
 
 import (
 	"encoding/json"
-	logger "github.com/cihub/seelog"
 	"github.com/jmoiron/jsonq"
-	. "github.com/medcl/gopa/core/env"
 	. "github.com/medcl/gopa/core/errors"
 	"io/ioutil"
 	"net/http"
@@ -54,13 +52,12 @@ func (this Method) String() string {
 }
 
 type Handler struct {
-	Env         *Env
 	wroteHeader bool
-	//
+
 	//w http.ResponseWriter
 	//req *http.Request
 	//
-	//formParsed bool
+	formParsed bool
 }
 
 func (this Handler) WriteHeader(w http.ResponseWriter, code int) {
@@ -68,17 +65,17 @@ func (this Handler) WriteHeader(w http.ResponseWriter, code int) {
 	this.wroteHeader = true
 }
 
-//func (this Handler) Get(key string, defaultValue string)(string){
-//	if(!this.formParsed){
-//		this.req.ParseForm()
-//	}
-//	if len(this.req.Form) > 0 {
-//		return this.req.Form.Get(key)
-//	}
-//	return defaultValue
-//}
+func (this Handler) Get(req *http.Request,key string, defaultValue string)(string){
+	if(!this.formParsed){
+		req.ParseForm()
+	}
+	if len(req.Form) > 0 {
+		return req.Form.Get(key)
+	}
+	return defaultValue
+}
 
-func (w Handler) encodeJson(v interface{}) (b []byte, err error) {
+func (w Handler) EncodeJson(v interface{}) (b []byte, err error) {
 
 	//if(w.Get("pretty","false")=="true"){
 	b, err = json.MarshalIndent(v, "", " ")
@@ -115,7 +112,7 @@ func (this Handler) WriteJson(w http.ResponseWriter, v interface{}, statusCode i
 		w.WriteHeader(statusCode)
 	}
 
-	b, err := this.encodeJson(v)
+	b, err := this.EncodeJson(v)
 	if err != nil {
 		return err
 	}
@@ -152,7 +149,6 @@ func (this Handler) GetJson(r *http.Request) (*jsonq.JsonQuery, error) {
 	if len(content) == 0 {
 		return nil, JSONIsEmpty
 	}
-	logger.Trace("receive json:", string(content))
 
 	data := map[string]interface{}{}
 	dec := json.NewDecoder(strings.NewReader(string(content)))
@@ -182,15 +178,15 @@ func (this Handler) Write(w http.ResponseWriter, b []byte) (int, error) {
 	return w.Write(b)
 }
 
-func (this Handler) error404(w http.ResponseWriter) {
+func (this Handler) Error404(w http.ResponseWriter) {
 	this.WriteJson(w, map[string]interface{}{"error": 404}, http.StatusNotFound)
 }
 
-func (this Handler) error500(w http.ResponseWriter, msg string) {
+func (this Handler) Error500(w http.ResponseWriter, msg string) {
 	this.WriteJson(w, map[string]interface{}{"error": msg}, http.StatusInternalServerError)
 }
 
-func (this Handler) error(w http.ResponseWriter, err error) {
+func (this Handler) Error(w http.ResponseWriter, err error) {
 	this.WriteJson(w, map[string]interface{}{"error": err.Error()}, http.StatusInternalServerError)
 }
 

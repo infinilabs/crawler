@@ -37,6 +37,10 @@ func (this CrawlerModule) Name() string {
 }
 
 func (this CrawlerModule) Start(env *Env) {
+
+	//TODO
+	InitJoints()
+
 	if crawlerStarted {
 		log.Error("crawler already crawlerStarted, please stop it first.")
 		return

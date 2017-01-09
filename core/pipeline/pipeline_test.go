@@ -96,7 +96,6 @@ func TestPipeline(t *testing.T) {
 	context.Parameters.Data["webpage"] = "hello world gogo "
 
 	crawler:=crawlerJoint{}
-	//crawler.SetParameter("url","http://baidu.com")
 
 	context = pipeline.Context(context).
 		Start(crawler).

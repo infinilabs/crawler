@@ -54,6 +54,9 @@ func onShutdown() {
 		fmt.Println(string(*stats.StatsAll()))
 	}
 
+	//force flush all logs
+	log.Flush()
+
 	fmt.Println("                         |    |                ")
 	fmt.Println("   _` |   _ \\   _ \\   _` |     _ \\  |  |   -_) ")
 	fmt.Println(" \\__, | \\___/ \\___/ \\__,_|   _.__/ \\_, | \\___| ")

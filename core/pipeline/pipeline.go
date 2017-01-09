@@ -314,6 +314,14 @@ func GetJointInstance(cfg *JointConfig) Joint {
 	panic(errors.New(cfg.JointName+" not found"))
 }
 
-func Register(jointName string,joint Joint){
+
+type JointKey string
+
+func Register(jointName JointKey,joint Joint){
+	k:=string(jointName)
+	RegisterByName(k,joint)
+}
+
+func RegisterByName(jointName string,joint Joint){
 	typeRegistry[jointName]=joint
 }

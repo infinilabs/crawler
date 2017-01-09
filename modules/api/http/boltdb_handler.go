@@ -12,7 +12,9 @@ import (
 	"github.com/medcl/gopa/modules/config"
 )
 
-func (h Handler) BoltDBStatusAction(w http.ResponseWriter, r *http.Request) {
+
+
+func (h API) BoltDBStatusAction(w http.ResponseWriter, r *http.Request) {
 	db := global.Lookup(config.REGISTER_BOLTDB).(*storm.DB)
 
 	//go func() {
