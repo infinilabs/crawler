@@ -269,7 +269,7 @@ func ReadAllLines(file string) []string {
 	f, err := os.Open(file)
 	if err != nil {
 		log.Error("error opening file,", file, " ", err)
-		os.Exit(1)
+		panic(err)
 	}
 
 	r := bufio.NewReader(f)
