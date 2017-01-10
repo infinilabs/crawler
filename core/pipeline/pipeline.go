@@ -36,10 +36,10 @@ type ParaKey string
 
 type Context struct {
 	Parameters
-	Phrase    model.TaskPhrase
-	breakFlag bool
-	exitFlag  bool
-	Payload   interface{}
+	Phrase    model.TaskPhrase `json:"phrase"`
+	breakFlag bool `json:"-"`
+	exitFlag  bool `json:"-"`
+	Payload   interface{} `json:"-"`
 }
 
 /**
@@ -73,7 +73,7 @@ func (this *Context) Exit(msg interface{}) {
 
 
 type Parameters struct {
-	Data map[string]interface{}
+	Data map[string]interface{} `json:"data"`
 	l    sync.RWMutex
 }
 
@@ -93,6 +93,11 @@ func (this *Parameters) GetString(key ParaKey) (string, bool) {
 		return s, ok
 	}
 	return s, ok
+}
+
+func (this *Parameters) Has(key ParaKey) (bool) {
+	_,ok := this.Data[string(key)]
+	return ok
 }
 
 func (this *Parameters) GetInt(key ParaKey) (int, bool) {
@@ -163,6 +168,8 @@ func (this *Parameters) MustGetMap(key ParaKey) map[string]interface{} {
 
 type Joint interface {
 	Name() string
+	//Input()map[string]bool
+	//Output()map[string]bool
 	Process(s *Context) (*Context, error)
 }
 
@@ -185,7 +192,7 @@ func NewPipeline(name string) *Pipeline {
 
 func (this *Pipeline) Context(s *Context) *Pipeline {
 	this.context = s
-	this.context.Parameters.Init()
+	this.context.Init()
 	return this
 }
 
@@ -299,6 +306,10 @@ func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
 
 var typeRegistry = make(map[string]interface{})
 
+func GetAllRegisteredJoints()map[string]interface{}  {
+	return typeRegistry
+}
+
 func GetJointInstance(cfg *JointConfig) Joint {
 	if typeRegistry[cfg.JointName] != nil {
 		t := reflect.ValueOf(typeRegistry[cfg.JointName]).Type()
@@ -313,7 +324,6 @@ func GetJointInstance(cfg *JointConfig) Joint {
 	}
 	panic(errors.New(cfg.JointName+" not found"))
 }
-
 
 type JointKey string
 

@@ -25,14 +25,14 @@ curl -XPOST "http://localhost:8001/task/" -d '{
 * Get domains
 
 ```
-curl -XGET http://127.0.0.1:8001/domains
+curl -XGET http://127.0.0.1:8001/domain
 ```
 
 
 * Get tasks
 
 ```
-curl -XGET http://127.0.0.1:8001/tasks?from=100&size=10&domain=elasticsearch.cn
+curl -XGET http://127.0.0.1:8001/task?from=100&size=10&domain=elasticsearch.cn
 
 ```
 
@@ -78,7 +78,6 @@ curl -XGET http://localhost:8001/snapshot/?url=http://xxx.com
 ``` 
 curl -XGET http://127.0.0.1:8001/cluster/info 
 ```
-
 ```
 {
 	"addr": "Node at :13003 [Follower]",
@@ -97,4 +96,74 @@ curl -XGET http://127.0.0.1:8001/cluster/info
 		"term": "408"
 	}
 }
+```
+
+* Get joints
+```
+curl -XGET http://127.0.0.1:8001/joint/
+```
+```
+{
+ "fetch": {},
+ "html2text": {
+  "MergeWhitespace": false
+ },
+ "ignore_timeout": {
+  "IgnoreTimeoutAfterCount": 0
+ },
+ "init_task": {
+  "data": null,
+  "Task": null
+ },
+ "load_metadata": {},
+ "parse": {
+  "DispatchLinks": false,
+  "MaxDepth": 0
+ },
+ "save2db": {
+  "CompressBody": false
+ },
+ "save2fs": {},
+ "save_task": {
+  "IsCreate": false
+ },
+ "url_checked_filter": {
+  "data": null,
+  "SkipPageParsePattern": null
+ },
+ "url_ext_filter": {
+  "SkipPageParsePattern": null
+ },
+ "url_normalization": {
+  "FollowSubDomain": false
+ }
+}
+```
+
+* Create pipeline
+```
+curl -XPOST http://127.0.0.1:8001/joint/ -d'
+{
+ "name": "test_pipe_line",
+ "context": {
+  "data": {
+   "URL": "http://baidu.com",
+   "HOST": "baidu.com"
+  },
+  "phrase": 0
+ },
+ "input_joint": {
+  "joint_name": "empty",
+  "parameters": {
+   "key": "value"
+  }
+ },
+ "process_joints": [
+ {
+   "joint_name": "fetch",
+   "parameters": {}
+  }
+ ],
+ "output_joint": null
+}'
 ```

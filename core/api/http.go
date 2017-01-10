@@ -33,7 +33,7 @@ func Handle(pattern string, handler http.Handler) {
 
 func HandleMethod(method Method,pattern string, handler func (w http.ResponseWriter, req *http.Request, ps httprouter.Params)) {
 	l.Lock()
-	if RegisteredHandler == nil {
+	if RegisteredMethodHandler == nil {
 		RegisteredMethodHandler = map[string]map[string]func (w http.ResponseWriter, req *http.Request, ps httprouter.Params){}
 	}
 

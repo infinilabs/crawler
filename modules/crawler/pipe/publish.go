@@ -26,11 +26,13 @@ import (
 	"github.com/medcl/gopa/core/util"
 )
 
+const Publish JointKey = "publish"
+
 type PublishJoint struct {
 }
 
 func (this PublishJoint) Name() string {
-	return "publish"
+	return string(Publish)
 }
 
 func (this PublishJoint) Process(c *Context) (*Context, error) {

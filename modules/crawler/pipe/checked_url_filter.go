@@ -29,6 +29,7 @@ const UrlCheckedFilter JointKey = "url_checked_filter"
 
 
 type UrlCheckedFilterJoint struct {
+	Parameters
 	//ignore files end with js,css,apk,zip
 	SkipPageParsePattern *regexp.Regexp
 }

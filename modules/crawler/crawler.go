@@ -142,19 +142,22 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 
 	pipeline = NewPipeline("crawler")
 
+	init:=InitTaskJoint{}
+	init.Set(TaskID,taskId)
+
 	pipeline.Context(&Context{Phrase: config.PhraseCrawler}).
-		Start(InitTask{ID: &taskId}).
+		Start(init).
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
 		Join(UrlExtFilterJoint{}).
 		Join(LoadMetadataJoint{}).
 		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 100}).
 		Join(FetchJoint{}).
-		Join(ParserJoint{DispatchLinks: true, MaxDepth: 3}).
+		Join(ParsePageJoint{DispatchLinks: true, MaxDepth: 3}).
 		Join(HtmlToTextJoint{MergeWhitespace: true}).
 		//Join(SaveToFileSystemJoint{}).
 		Join(SaveToDBJoint{CompressBody: true}).
 		//Join(PublishJoint{}).
-		End(SaveTask{}).
+		End(SaveTaskJoint{}).
 		Run()
 
 	if env.RuntimeConfig.TaskConfig.FetchDelayThreshold > 0 {

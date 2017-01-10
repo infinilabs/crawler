@@ -27,6 +27,9 @@ import (
 	"time"
 )
 
+const Fetch JointKey = "fetch"
+
+
 type FetchJoint struct {
 	context *Context
 	timeout time.Duration
@@ -34,7 +37,7 @@ type FetchJoint struct {
 }
 
 func (this FetchJoint) Name() string {
-	return "fetch"
+	return string(Fetch)
 }
 
 type signal struct {

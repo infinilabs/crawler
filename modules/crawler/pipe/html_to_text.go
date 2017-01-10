@@ -23,13 +23,14 @@ import (
 	"regexp"
 	"strings"
 )
+const HtmlToText JointKey = "html2text"
 
 type HtmlToTextJoint struct {
 	MergeWhitespace bool
 }
 
 func (this HtmlToTextJoint) Name() string {
-	return "html2text"
+	return string(HtmlToText)
 }
 
 func (this HtmlToTextJoint) Process(context *Context) (*Context, error) {

@@ -33,7 +33,7 @@ func TestProcessLinks(t *testing.T) {
 	context.Set(CONTEXT_URL, "http://elasticsearch.cn/")
 	context.Set(CONTEXT_DEPTH, 1)
 	context.Set(CONTEXT_PAGE_BODY_BYTES, []byte(body))
-	parse := ParserJoint{}
+	parse := ParsePageJoint{}
 	parse.Process(&context)
 
 	links := context.MustGetMap(CONTEXT_PAGE_LINKS)

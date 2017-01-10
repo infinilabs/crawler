@@ -28,13 +28,15 @@ import (
 	"strings"
 )
 
+const SaveToDB JointKey = "save2db"
+
 type SaveToDBJoint struct {
 	context      *Context
 	CompressBody bool
 }
 
 func (this SaveToDBJoint) Name() string {
-	return "save2db"
+	return string(SaveToDB)
 }
 
 func (this SaveToDBJoint) Process(c *Context) (*Context, error) {

@@ -23,25 +23,29 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 )
 
-type InitTask struct {
-	ID   *string
+const InitTask JointKey = "init_task"
+
+const TaskID ParaKey = "TASK_ID"
+
+type InitTaskJoint struct {
+	Parameters
 	Task *model.Task
 }
 
-func (this InitTask) Name() string {
-	return "start"
+func (this InitTaskJoint) Name() string {
+	return string(InitTask)
 }
 
-func (this InitTask) Process(context *Context) (*Context, error) {
+func (this InitTaskJoint) Process(context *Context) (*Context, error) {
 
 	seelog.Trace("start process")
 
 	var task *model.Task
 	if this.Task != nil {
 		task = this.Task
-	} else if this.ID != nil {
+	} else if this.Has(TaskID) {
 		//init task record
-		t, err := model.GetTask(*this.ID)
+		t, err := model.GetTask(this.MustGetString(TaskID))
 		if err != nil {
 			panic(err)
 		}

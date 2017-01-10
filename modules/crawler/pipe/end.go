@@ -22,15 +22,18 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 )
 
-type SaveTask struct {
+const SaveTask JointKey = "save_task"
+
+
+type SaveTaskJoint struct {
 	IsCreate bool
 }
 
-func (this SaveTask) Name() string {
-	return "end"
+func (this SaveTaskJoint) Name() string {
+	return string(SaveTask)
 }
 
-func (this SaveTask) Process(context *Context) (*Context, error) {
+func (this SaveTaskJoint) Process(context *Context) (*Context, error) {
 
 	log.Trace("end process")
 

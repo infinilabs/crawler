@@ -27,17 +27,20 @@ import (
 	"strings"
 )
 
-type ParserJoint struct {
+const ParsePage JointKey = "parse"
+
+
+type ParsePageJoint struct {
 	links         map[string]interface{}
 	DispatchLinks bool
 	MaxDepth      int
 }
 
-func (this ParserJoint) Name() string {
-	return "parse"
+func (this ParsePageJoint) Name() string {
+	return string(ParsePage)
 }
 
-func (this ParserJoint) Process(s *Context) (*Context, error) {
+func (this ParsePageJoint) Process(s *Context) (*Context, error) {
 
 	refUrl := s.MustGetString(CONTEXT_URL)
 	depth := s.MustGetInt(CONTEXT_DEPTH)

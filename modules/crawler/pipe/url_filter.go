@@ -23,13 +23,15 @@ import (
 	"strings"
 )
 
+const UrlExtFilter JointKey = "url_ext_filter"
+
 type UrlExtFilterJoint struct {
 	//ignore files end with js,css,apk,zip
 	SkipPageParsePattern *regexp.Regexp
 }
 
 func (this UrlExtFilterJoint) Name() string {
-	return "url_ext_filter"
+	return string(UrlExtFilter)
 }
 
 func (this UrlExtFilterJoint) Process(context *Context) (*Context, error) {

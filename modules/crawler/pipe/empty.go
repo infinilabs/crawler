@@ -19,15 +19,16 @@ package pipe
 import (
 	. "github.com/medcl/gopa/core/pipeline"
 )
+const Empty JointKey = "empty"
 
-type LogJoint struct {
+type EmptyJoint struct {
 }
 
-func (this LogJoint) Name() string {
-	return "log"
+func (this EmptyJoint) Name() string {
+	return string(Empty)
 }
 
-func (this LogJoint) Process(s *Context) (*Context, error) {
+func (this EmptyJoint) Process(s *Context) (*Context, error) {
 
 	return s, nil
 }

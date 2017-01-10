@@ -106,11 +106,11 @@ func (this CheckerModule) execute() {
 	pipeline = NewPipeline("checker")
 
 	pipeline.Context(&Context{Phrase: config.PhraseChecker}).
-		Start(InitTask{Task: &task}).
+		Start(InitTaskJoint{Task: &task}).
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
 		Join(UrlExtFilterJoint{}).
 		Join(UrlCheckedFilterJoint{}).
-		End(SaveTask{IsCreate: true}).
+		End(SaveTaskJoint{IsCreate: true}).
 		Run()
 
 	//send to disk queue

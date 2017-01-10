@@ -55,11 +55,11 @@ func internalStart(env *Env) {
 	mux.HandleFunc("/stats", handler.StatsAction)
 
 	router.POST("/task/", handler.TaskAction)
-	router.GET("/tasks", handler.TaskAction)
+	router.GET("/task", handler.TaskAction)
 	router.GET("/task/:id", handler.TaskGetAction)
 	router.DELETE("/task/:id", BasicAuth(handler.TaskDeleteAction, user, pass))
 
-	router.GET("/domains", handler.DomainAction)
+	router.GET("/domain", handler.DomainAction)
 	router.GET("/domain/:id", handler.DomainGetAction)
 	router.DELETE("/domain/:id", BasicAuth(handler.DomainDeleteAction, user, pass))
 

@@ -21,11 +21,13 @@ import (
 	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/util"
-	. "net/url"
+	u "net/url"
 	"sort"
 	"strings"
 	"time"
 )
+
+const UrlNormalization JointKey = "url_normalization"
 
 type UrlNormalizationJoint struct {
 	timeout             time.Duration
@@ -36,12 +38,12 @@ type UrlNormalizationJoint struct {
 var defaultFileName = "default.html"
 
 func (this UrlNormalizationJoint) Name() string {
-	return "url_normalization"
+	return string(UrlNormalization)
 }
 
 func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 	url := context.MustGetString(CONTEXT_URL)
-	var currentURI, referenceURI *URL
+	var currentURI, referenceURI *u.URL
 	var err error
 
 	log.Trace("start parse url,", url)
@@ -53,13 +55,13 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 		tempUrl = "http:" + url
 	}
 
-	currentURI, _ = Parse(tempUrl)
+	currentURI, _ = u.Parse(tempUrl)
 
 	log.Tracef("currentURI,schema:%s, host:%s", currentURI.Scheme, currentURI.Host)
 	refUrlStr, refExists := context.GetString(CONTEXT_REFERENCE_URL)
 	if refExists && refUrlStr != "" {
 		log.Trace("ref url exists, ", refUrlStr)
-		referenceURI, err = ParseRequestURI(refUrlStr)
+		referenceURI, err = u.ParseRequestURI(refUrlStr)
 		if err != nil {
 			log.Trace("ref url parsed failed, ", err)
 		}
@@ -122,7 +124,7 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 		if !strings.HasPrefix(url, "http") {
 			tempUrl = "http://" + url
 		}
-		currentURI, err = Parse(tempUrl)
+		currentURI, err = u.Parse(tempUrl)
 		if err != nil {
 			log.Error(err)
 			context.Break(err.Error())

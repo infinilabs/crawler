@@ -23,8 +23,11 @@ type API struct {
 }
 
 func InitAPI()  {
+
 	apis:=API{}
-	api.HandleMethod(api.GET,"/pipelines/",apis.handleGetPipelinesRequest)
+	api.HandleMethod(api.GET,"/joint/",apis.handleGetPipelineJointsRequest)
+	api.HandleMethod(api.POST,"/joint/",apis.handlePostPipelineJointsRequest)
 	api.HandleMethod(api.POST,"/pipeline/:id",apis.handlePostPipelinesRequest)
+	api.HandleMethod(api.GET,"/pipeline/",apis.handleGetPipelinesRequest)
 
 }

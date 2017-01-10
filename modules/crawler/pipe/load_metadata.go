@@ -20,12 +20,14 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 )
 
+const LoadMetadata JointKey = "load_metadata"
+
 //load metadata from db
 type LoadMetadataJoint struct {
 }
 
 func (this LoadMetadataJoint) Name() string {
-	return "load_metadata"
+	return string(LoadMetadata)
 }
 
 func (this LoadMetadataJoint) Process(context *Context) (*Context, error) {

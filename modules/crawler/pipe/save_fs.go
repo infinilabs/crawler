@@ -23,11 +23,13 @@ import (
 	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/util"
-	. "net/url"
+	 "net/url"
 	"os"
 	"path"
 	"strings"
 )
+
+const SaveToFileSystem JointKey = "save2fs"
 
 type SaveToFileSystemJoint struct {
 	context *Context
@@ -35,7 +37,7 @@ type SaveToFileSystemJoint struct {
 }
 
 func (this SaveToFileSystemJoint) Name() string {
-	return "save2fs"
+	return string(SaveToFileSystem)
 }
 
 func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
@@ -86,7 +88,7 @@ func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 func (this SaveToFileSystemJoint) getSavedPath(urlStr string) (string, string) {
 
 	log.Debug("start saving url,", urlStr)
-	myurl1, _ := Parse(urlStr)
+	myurl1, _ := url.Parse(urlStr)
 
 	baseDir := path.Join(this.baseDir, myurl1.Host)
 	baseDir = strings.Replace(baseDir, `:`, `_`, -1)
