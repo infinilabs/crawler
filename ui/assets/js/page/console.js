@@ -21,6 +21,11 @@ $(function () {
             }else if(op=="PUBLIC"){
                 req = $("<div class='response'><pre>" + msg + "</pre></div>");
                return appendLoggingLog(req)
+            }else if(op=="CONFIG"){
+                console.log("init config")
+                obj=JSON.parse(msg);
+                initLogging(obj);
+               return
             }
         }
         console.log("invalid format: ",msg)
@@ -116,6 +121,23 @@ jQuery(document).ready(function(){
     });
 });
 
+function initLogging(data){
+    $("#log_level").val(data.push_log_level.toUpperCase());
+    if(data.func_pattern!="*"){
+        $("#func_pattern").val(data.func_pattern);
+    }
+
+    if(data.file_pattern!="*"){
+        $("#file_pattern").val(data.file_pattern);
+    }
+
+    if(data.message_pattern!="*"){
+        $("#message_pattern").val(data.message_pattern);
+    }
+
+    $(".uk-icon-play").attr("disabled",data.realtime)
+    $(".uk-icon-stop").attr("disabled",!data.realtime)
+}
 
 function updateLogging(enabled){
 

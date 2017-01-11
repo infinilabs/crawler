@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 	"fmt"
+	"github.com/medcl/gopa/core/logger"
+	"encoding/json"
 )
 
 // hub maintains the set of active connections and broadcasts messages to the
@@ -88,6 +90,8 @@ func (h *Hub) RunHub() {
 		case c := <-h.register:
 			h.connections[c] = true
 			c.WritePrivateMessage(env.GetWelcomeMessage())
+			js,_:=json.Marshal(logger.GetLoggingConfig())
+			c.WriteMessage(ConfigMessage,string(js))
 		case c := <-h.unregister:
 			if _, ok := h.connections[c]; ok {
 				delete(h.connections, c)

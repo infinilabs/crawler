@@ -103,6 +103,7 @@ type MsgType string
 const (
 	PrivateMessage MsgType = "PRIVATE"
 	PublicMessage MsgType =  "PUBLIC"
+	ConfigMessage MsgType =  "CONFIG"
 )
 
 func (c *WebsocketConnection) WritePrivateMessage(msg string) error {
