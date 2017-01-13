@@ -95,7 +95,7 @@ function loadDomain(){
     $("#domain-alert").text("Loading");
     //load domain data
     $.ajax({
-        url: '/domains?from=0&size=40',
+        url: '/domain?from=0&size=40',
         type: "get",
         dataType: "json",
         success: function(data, textStatus, jqXHR) {
@@ -111,7 +111,7 @@ function loadData(domain){
 
     $("#alert").text("Loading");
 
-    para='/tasks?from=0&size=20';
+    para='/task?from=0&size=20';
     if(domain!=undefined){
         para=para+"&domain="+domain;
     }

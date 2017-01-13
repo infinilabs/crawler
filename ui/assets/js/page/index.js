@@ -59,7 +59,7 @@ function loadData(){
 
     //加载最新任务数据
     $.ajax({
-        url: '/tasks?size=20',
+        url: '/task?size=20',
         type: "get",
         dataType: "json",
         success: function(data, textStatus, jqXHR) {
