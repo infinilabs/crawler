@@ -72,7 +72,7 @@ func GetUrlPathFolderWithoutFile(url []byte) []byte {
 }
 
 func noRedirect(req *http.Request, via []*http.Request) error {
-	return errors.New("Don't handle redirect!")
+	return errors.New("catch http redirect!")
 }
 
 func get(page *PageItem, url string, cookie string) ([]byte, error) {
@@ -80,8 +80,8 @@ func get(page *PageItem, url string, cookie string) ([]byte, error) {
 	log.Debug("let's get :" + url)
 
 	client := &http.Client{
-		//CheckRedirect: noRedirect,
-		CheckRedirect: nil,
+		CheckRedirect: noRedirect,
+		//CheckRedirect: nil,
 	}
 	reqest, _ := http.NewRequest("GET", url, nil)
 
@@ -114,21 +114,29 @@ func get(page *PageItem, url string, cookie string) ([]byte, error) {
 
 	resp, err := client.Do(reqest)
 
-	if err != nil {
-		if resp != nil && resp.StatusCode == 301 && resp.StatusCode == 302 {
-			log.Debug("got redirect:", url, " => ", resp.Header.Get("Location"))
-			location := resp.Header.Get("Location")
-			if len(location) > 0 && location != url {
-				return get(page, location, cookie)
-			}
+	log.Trace("response: ", err,", ",resp)
 
-		} else {
-			log.Error(url, ", ", err)
+	if resp != nil && (resp.StatusCode == 301 || resp.StatusCode == 302) {
+		log.Debug("got redirect: ", url, " => ", resp.Header.Get("Location"))
+		location := resp.Header.Get("Location")
+		if len(location) > 0 && location != url {
+			return get(page, location, cookie)
 		}
+	}
+
+	if err != nil {
+		log.Error(url, ", ", err)
 		return nil, err
 	}
 
+
 	log.Trace("status code,", resp.StatusCode, ",size,", resp.ContentLength)
+
+	log.Trace("host: ",resp.Request.Host," url: ",resp.Request.URL.String())
+
+	//update host, redirects may change the host
+	page.Host=resp.Request.Host
+	page.Url=resp.Request.URL.String()
 
 	page.StatusCode = resp.StatusCode
 	if resp.Header != nil {

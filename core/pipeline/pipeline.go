@@ -75,14 +75,19 @@ func (this *Context) Exit(msg interface{}) {
 type Parameters struct {
 	Data map[string]interface{} `json:"data"`
 	l    sync.RWMutex
+	inited bool
 }
 
 
 func (this *Parameters) Init() {
+	if(this.inited){
+		return
+	}
 	this.l.Lock()
 	if this.Data == nil {
 		this.Data = map[string]interface{}{}
 	}
+	this.inited=true
 	this.l.Unlock()
 }
 
@@ -96,6 +101,7 @@ func (this *Parameters) GetString(key ParaKey) (string, bool) {
 }
 
 func (this *Parameters) Has(key ParaKey) (bool) {
+	this.Init()
 	_,ok := this.Data[string(key)]
 	return ok
 }
@@ -119,6 +125,7 @@ func (this *Parameters) GetMap(key ParaKey) (map[string]interface{}, bool) {
 }
 
 func (this *Parameters) Get(key ParaKey) interface{} {
+	this.Init()
 	this.l.RLock()
 	s:=string(key)
 	v := this.Data[s]
@@ -127,6 +134,7 @@ func (this *Parameters) Get(key ParaKey) interface{} {
 }
 
 func (this *Parameters) Set(key ParaKey, value interface{}) {
+	this.Init()
 	this.l.Lock()
 	s:=string(key)
 	this.Data[s] = value

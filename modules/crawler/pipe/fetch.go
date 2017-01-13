@@ -78,7 +78,8 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 			}
 
 			//update url, in case catch redirects
-			//context.Set(CONTEXT_URL, pageItem.Url)//don't update, so what?
+			context.Set(CONTEXT_URL, pageItem.Url)//don't update, so what? will be bad, if url got redirected, you will got wrong url
+			context.Set(CONTEXT_HOST, pageItem.Host)
 			context.Set(CONTEXT_PAGE_BODY_BYTES, body)
 			context.Set(CONTEXT_PAGE_ITEM, &pageItem)
 			log.Debug("exit fetchUrl method:", requestUrl)

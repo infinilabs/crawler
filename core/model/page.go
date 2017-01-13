@@ -30,6 +30,8 @@ type KV struct {
 }
 
 type PageItem struct {
+	Host       string     		   `storm:"index" json:"host,omitempty"`
+	Url       string     		   `storm:"index" json:"url,omitempty"`
 	Headers    map[string][]string     `storm:"inline" json:"headers,omitempty"`    // key:value
 	Parameters []KV                    `storm:"inline" json:"parameters,omitempty"` // key:value
 	Images     []KV                    `storm:"inline" json:"images,omitempty"`     // images within this site, img:desc
