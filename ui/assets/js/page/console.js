@@ -87,7 +87,14 @@ $(function () {
 
         if (window["WebSocket"]) {
             host = location.hostname + (location.port ? ':' + location.port : '');
-            conn = new WebSocket("ws://" + host + "/ws");
+            //wss
+
+            if(location.protocol=="https:"){
+                conn = new WebSocket("wss://" + host + "/ws");
+            }else{
+                conn = new WebSocket("ws://" + host + "/ws");
+            }
+
             conn.onopen = function (evt) {
                 var msg="Connection established.";
                 log.children().remove();

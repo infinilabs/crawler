@@ -9,6 +9,7 @@
 1. raft clustering
 2. dynamic change logging setting from the console, can be filter log by level, message, file and function name
 3. dynamic create pipeline
+4. add tls to security api and websocket
 
 ##### improve
 

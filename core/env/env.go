@@ -118,6 +118,7 @@ type SystemConfig struct {
 	AllowMultiInstance bool   `multi_instance`
 	Data               string `data`
 	Log                string `log`
+	CertPath           string `cert_path`
 }
 
 func (this *SystemConfig) Init() {

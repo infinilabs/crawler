@@ -26,6 +26,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"crypto/tls"
 )
 
 const (
@@ -195,6 +196,7 @@ func (s *RaftModule) Open() error {
 // sent join requests to seed host
 func join(joinAddr, raftAddr string) error {
 
+	log.Debug("start join address, ",joinAddr,",",raftAddr)
 	raftAddr = util.GetValidAddress(raftAddr)
 
 	b, err := json.Marshal(map[string]string{"addr": raftAddr})
@@ -204,6 +206,31 @@ func join(joinAddr, raftAddr string) error {
 	}
 
 	joinAddr = util.GetValidAddress(joinAddr)
+
+
+	if(len(global.Env().SystemConfig.CertPath)>0){
+		url := fmt.Sprintf("https://%s/cluster/node/_join", joinAddr)
+
+		log.Info("try to join the cluster, ", url, ", ", string(b))
+
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		client := &http.Client{Transport: tr}
+		resp, err := client.Post(url, "application-type/json", bytes.NewReader(b))
+		if err != nil {
+			log.Error("Get error:", err)
+			return err
+		}
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Error(url, err)
+			return err
+		}
+		log.Debug(string(body))
+		return nil
+	}
 
 	url := fmt.Sprintf("http://%s/cluster/node/_join", joinAddr)
 
@@ -223,7 +250,6 @@ func join(joinAddr, raftAddr string) error {
 
 	log.Debug(string(body))
 	defer resp.Body.Close()
-
 	return nil
 }
 

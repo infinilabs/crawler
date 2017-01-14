@@ -29,12 +29,16 @@ import (
 	"github.com/medcl/gopa/modules/api/websocket"
 	ui "github.com/medcl/gopa/ui"
 	_ "net/http/pprof"
+	"path"
+	"path/filepath"
+	"errors"
+	"crypto/tls"
 )
 
 var router *httprouter.Router
 var mux *http.ServeMux
 
-func internalStart(env *Env) {
+func (this APIModule) internalStart(env *Env) {
 	handler := API{}
 	router = httprouter.New()
 
@@ -97,8 +101,67 @@ func internalStart(env *Env) {
 	}
 
 	address := util.AutoGetAddress(env.SystemConfig.HttpBinding)
-	log.Info("http server listen at: ", address)
-	http.ListenAndServe(address, mux)
+
+	if(len(this.env.SystemConfig.CertPath)>0){
+		log.Debug("start ssl endpoint")
+
+		certFile:=path.Join(this.env.SystemConfig.CertPath,"*c*rt*")
+		match,err:=filepath.Glob(certFile)
+		if(err!=nil){
+			panic(err)
+		}
+		if(len(match)<=0){
+			panic(errors.New("no cert file found, the file name must end with .crt"))
+		}
+		certFile=match[0]
+
+
+		keyFile:=path.Join(this.env.SystemConfig.CertPath,"*key*")
+		match,err=filepath.Glob(keyFile)
+		if(err!=nil){
+			panic(err)
+		}
+		if(len(match)<=0){
+			panic(errors.New("no key file found, the file name must end with .key"))
+		}
+		keyFile=match[0]
+
+
+		cfg := &tls.Config{
+			MinVersion:               tls.VersionTLS12,
+			CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+			PreferServerCipherSuites: true,
+			CipherSuites: []uint16{
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+				tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+			},
+		}
+
+		srv := &http.Server{
+			Addr:         address,
+			Handler:      mux,
+			TLSConfig:    cfg,
+			TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+		}
+
+		log.Info("https server listen at: https://", address)
+		err=srv.ListenAndServeTLS(certFile, keyFile)
+		if(err!=nil){
+			log.Error(err)
+			panic(err)
+		}
+
+	}else{
+		log.Info("http server listen at: http://", address)
+		err:=http.ListenAndServe(address, mux)
+		if(err!=nil){
+			log.Error(err)
+			panic(err)
+		}
+	}
+
 }
 
 func BasicAuth(h httprouter.Handle, requiredUser, requiredPassword string) httprouter.Handle {
@@ -131,7 +194,7 @@ func (this APIModule) Start(config *Env) {
 	this.env = config
 	//API server
 	go func() {
-		internalStart(config)
+		this.internalStart(config)
 	}()
 
 	logger.RegisterWebsocketHandler(LoggerReceiver)

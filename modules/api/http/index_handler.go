@@ -24,6 +24,7 @@ import (
 )
 
 func (this API) IndexAction(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+
 	if req.URL.Path != "/" {
 		this.Error404(w)
 		return
@@ -38,6 +39,9 @@ func (this API) IndexAction(w http.ResponseWriter, req *http.Request, _ httprout
 	version["build_date"] = env.BuildDate
 	data["version"] = version
 	data["tagline"] = "You Know, for Web"
+
+
+	//w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 
 	this.WriteJson(w, &data, http.StatusOK)
 }

@@ -50,7 +50,7 @@ func onStart() {
 }
 
 func onShutdown() {
-	if(env.IsDebug){
+	if env.IsDebug {
 		fmt.Println(string(*stats.StatsAll()))
 	}
 
@@ -87,6 +87,7 @@ func main() {
 	var clusterName = flag.String("cluster_name", "gopa", "the cluster name, default: gopa")
 	var dataDir = flag.String("data_path", "data", "the data path, default: data")
 	var logDir = flag.String("log_path", "log", "the log path, default: log")
+	var serverCertPath = flag.String("cert_path", "", "the cert files for http server, if you want enable https instead of http, the folder should contain 2 files: server.cert, server.key")
 
 	flag.Parse()
 
@@ -142,16 +143,16 @@ func main() {
 	}
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	logger.SetLogging(EmptyEnv(), *logLevel,*logDir)
+	logger.SetLogging(EmptyEnv(), *logLevel, *logDir)
 
-	sysConfig := SystemConfig{ConfigFile: *configFile, LogLevel: *logLevel, HttpBinding: *httpBinding, ClusterBinding: *clusterBinding, ClusterSeeds: *clusterSeed, ClusterName: *clusterName, Data: *dataDir, Log: *logDir}
+	sysConfig := SystemConfig{ConfigFile: *configFile, LogLevel: *logLevel, HttpBinding: *httpBinding, ClusterBinding: *clusterBinding, ClusterSeeds: *clusterSeed, ClusterName: *clusterName, Data: *dataDir, Log: *logDir, CertPath: *serverCertPath}
 	sysConfig.Init()
 
 	env = Environment(sysConfig)
 	env.IsDebug = *isDebug
 	//put env into global registrar
 	global.RegisterEnv(env)
-	logger.SetLogging(env,*logLevel,*logDir)
+	logger.SetLogging(env, *logLevel, *logDir)
 
 	//check instance lock
 	util.CheckInstanceLock(env.SystemConfig.GetDataDir())

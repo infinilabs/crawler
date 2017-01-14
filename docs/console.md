@@ -2,7 +2,7 @@
 ## Gopa Console
 
     
-* Command
+### Command
     *  Seed
     SEED url
     eg: SEED http://elastic.co
@@ -14,4 +14,4 @@
     
     * GET_TASK
     GET_TASK [filed_name] [value]
-    eg: GET_TASK Domain elasticsearch.cn 
+    eg: GET_TASK Domain elasticsearch.cn
