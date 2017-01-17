@@ -49,7 +49,7 @@ func SetSession(w http.ResponseWriter, r *http.Request, key string, value interf
 }
 
 func GetFlash(w http.ResponseWriter, r *http.Request) (bool, []interface{}) {
-	log.Error("get flash")
+	log.Trace("get flash")
 	session, err := store.Get(r, sessionName)
 	if err != nil {
 		log.Error(err)
