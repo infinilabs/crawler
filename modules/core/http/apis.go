@@ -29,5 +29,6 @@ func InitAPI()  {
 	api.HandleMethod(api.POST,"/joint/",apis.handlePostPipelineJointsRequest)
 	api.HandleMethod(api.POST,"/pipeline/:id",apis.handlePostPipelinesRequest)
 	api.HandleMethod(api.GET,"/pipeline/",apis.handleGetPipelinesRequest)
+	api.HandleMethod(api.GET,"/user/",apis.handleUserLoginRequest)
 
 }

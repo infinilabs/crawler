@@ -14,21 +14,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package handler
+package http
 
 import (
-	"github.com/medcl/gopa/core/stats"
 	"net/http"
+	"github.com/julienschmidt/httprouter"
+	"github.com/medcl/gopa/core/api"
+	"time"
 )
 
-func getMapValue(mapData map[string]int, key string, defaultValue int32) int {
-	data := mapData[key]
-	return data
+
+func   (this API)handleUserLoginRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+
+	b,v:=api.GetSession(w,req,"key")
+	if(!b){
+		api.SetSession(w,req,"key","hello "+time.Now().String())
+		api.SetFlash(w,req,"user logged in")
+	}
+
+	b,v=api.GetFlash(w,req)
+	if(b){
+		 this.WriteJson(w,v,200)
+		return
+	}
+
+	this.WriteJson(w,v,200)
+
+
+
+
+	return
 }
 
-func (this API) StatsAction(w http.ResponseWriter, req *http.Request) {
-
-	m := stats.StatsAll()
-
-	this.WriteJson(w,*m,200)
-}

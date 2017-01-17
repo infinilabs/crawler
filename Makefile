@@ -11,10 +11,11 @@ ifeq "$(GOPATH)" ""
 endif
 
 CURDIR := $(shell pwd)
+OLDGOPATH:= $(GOPATH)
 NEWGOPATH:= $(GOPATH):$(CURDIR)/_vendor
 
 GO        := GO15VENDOREXPERIMENT="1" go
-GOBUILD   := GOPATH=$(NEWGOPATH) $(GO) build
+GOBUILD  := GOPATH=$(NEWGOPATH) $(GO) build
 GOTEST   := GOPATH=$(NEWGOPATH) $(GO) test
 
 ARCH      := "`uname -s`"
@@ -31,6 +32,7 @@ build: clean config update_ui
 	@echo $(GOPATH)
 	@echo $(NEWGOPATH)
 	$(GOBUILD) -o bin/gopa
+
 
 build-cluster-test: build
 	cd bin && mkdir node1 node2 node3 && cp gopa node1 && cp gopa node2 && cp gopa node3
@@ -107,10 +109,10 @@ update_commit_log:
 
 config: update_commit_log
 	@echo "init config"
+	$(GO) env
 
 fetch-depends:
 	@echo "get Dependencies"
-	$(GO) env
 	$(GO) get github.com/cihub/seelog
 	$(GO) get github.com/robfig/config
 	$(GO) get github.com/PuerkitoBio/purell
@@ -136,7 +138,7 @@ fetch-depends:
 	$(GO) get github.com/jaytaylor/html2text
 	$(GO) get github.com/asdine/storm/codec/protobuf
 	$(GO) get github.com/ryanuber/go-glob
-
+	$(GO) get github.com/gorilla/sessions
 
 dist: cross-build package
 

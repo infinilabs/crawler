@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"github.com/medcl/gopa/core/global"
 )
 
 type Method string
@@ -62,6 +63,9 @@ type Handler struct {
 
 func (this Handler) WriteHeader(w http.ResponseWriter, code int) {
 	w.WriteHeader(code)
+	if(len(global.Env().SystemConfig.CertPath)>0){
+		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
+	}
 	this.wroteHeader = true
 }
 

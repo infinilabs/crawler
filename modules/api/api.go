@@ -33,12 +33,25 @@ import (
 	"path/filepath"
 	"errors"
 	"crypto/tls"
+	"github.com/gorilla/sessions"
+	"github.com/gorilla/context"
 )
 
 var router *httprouter.Router
 var mux *http.ServeMux
 
+var store = sessions.NewCookieStore([]byte("1c6f2afbccef959ac5c8b81f690c1be7"))
+
 func (this APIModule) internalStart(env *Env) {
+
+	store.Options = &sessions.Options{
+		Domain:     "localhost", //TODO config　http　domain
+		Path:       "/",
+		MaxAge:     60 * 15,
+		Secure:     true,
+		HttpOnly:   true,
+	}
+
 	handler := API{}
 	router = httprouter.New()
 
@@ -141,7 +154,7 @@ func (this APIModule) internalStart(env *Env) {
 
 		srv := &http.Server{
 			Addr:         address,
-			Handler:      mux,
+			Handler:      context.ClearHandler(mux),
 			TLSConfig:    cfg,
 			TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
 		}
@@ -155,7 +168,7 @@ func (this APIModule) internalStart(env *Env) {
 
 	}else{
 		log.Info("http server listen at: http://", address)
-		err:=http.ListenAndServe(address, mux)
+		err:=http.ListenAndServe(address, context.ClearHandler(mux))
 		if(err!=nil){
 			log.Error(err)
 			panic(err)

@@ -202,3 +202,4 @@ func (filter BoltdbStore) Search(t1, t2 interface{}, q1 *store.Query) (error, st
 	}
 	return err, result
 }
+

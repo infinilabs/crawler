@@ -40,8 +40,5 @@ func (this API) IndexAction(w http.ResponseWriter, req *http.Request, _ httprout
 	data["version"] = version
 	data["tagline"] = "You Know, for Web"
 
-
-	//w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
-
 	this.WriteJson(w, &data, http.StatusOK)
 }
