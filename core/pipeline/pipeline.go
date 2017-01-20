@@ -35,6 +35,7 @@ import (
 type ParaKey string
 
 type Context struct {
+	DryRun bool
 	Parameters
 	Phrase    model.TaskPhrase `json:"phrase"`
 	breakFlag bool `json:"-"`

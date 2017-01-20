@@ -11,7 +11,9 @@
 3. dynamic create pipeline
 4. add tls to security api and websocket
 
-##### improve
+##### improvement
+1. use template engine, UI refactoring
+2. add a logo
 
 ##### bugfix
 1. fix incorrect stats number, incorrect task filter
@@ -30,7 +32,7 @@
 9. support daemon mode in linux and darwin
 10. add task management api
 
-##### improve:
+##### improvement:
 1. add update_ui setup to Makefile in order to build static ui
 2. add git commit log and build_date to gopa binary
 3. console ui support websocket reconnect
@@ -55,7 +57,7 @@
 3. http console
 
 #### v0.4
-##### improve:
+##### improvement:
 1. refactor storage interface,data path are now configable
 2. disable pprof by default
 3. use local storage instead of kafka,kafka will be removed later

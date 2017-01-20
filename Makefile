@@ -1,9 +1,4 @@
 SHELL=/bin/bash
-#CWD=$(shell pwd)
-#OLDGOPATH=${GOPATH}
-#NEWGOPATH:=${CWD}:${OLDGOPATH}
-#export GOPATH=$(NEWGOPATH)
-
 
 # Ensure GOPATH is set before running build process.
 ifeq "$(GOPATH)" ""
@@ -28,7 +23,7 @@ FILES     := $$(find . -name '*.go' | grep -vE 'vendor')
 .PHONY: all build update test clean
 
 
-build: clean config update_ui
+build: clean config update_ui update_template_ui
 	@echo $(GOPATH)
 	@echo $(NEWGOPATH)
 	$(GOBUILD) -o bin/gopa
@@ -41,8 +36,12 @@ build-grace: clean config update_ui
 	$(GOBUILD) -gcflags "-N -l" -race -o bin/gopa
 
 update_ui:
-	$(GO) get github.com/mjibson/esc
-	(cd ui&& esc -ignore="static.go|build_static.sh|.DS_Store" -o static.go -pkg server ../ui )
+	$(GO) get github.com/infinitbyte/esc
+	(cd static&& esc -ignore="static.go|build_static.sh|.DS_Store" -o static.go -pkg static ../static )
+
+update_template_ui:
+	$(GO) get github.com/infinitbyte/ego/cmd/ego
+	cd modules/ui/templates/ && ego -package templates
 
 tar: build
 	cd bin && tar cfz ../bin/gopa.tar.gz gopa
@@ -89,9 +88,6 @@ build-bsd: clean config update_ui
 format:
 	gofmt -l -s -w .
 
-update_bolt_ui:
-	cd modules/api/http/templates/boltdb && ego -package templates
-
 clean_data:
 	rm -rif data
 	rm -rif log
@@ -126,7 +122,6 @@ fetch-depends:
 	$(GO) get github.com/alash3al/goemitter
 	$(GO) get github.com/bkaradzic/go-lz4
 	$(GO) get github.com/elgs/gojq
-	$(GO) get github.com/mjibson/esc
 	$(GO) get github.com/kardianos/osext
 	$(GO) get github.com/zeebo/sbloom
 	$(GO) get github.com/asdine/storm

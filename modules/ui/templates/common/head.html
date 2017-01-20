@@ -1,0 +1,15 @@
+<%! func Head(w io.Writer, title string, customHeaderBlock string) error %>
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %> - GOPA</title>
+  <link rel="stylesheet" href="/static/assets/uikit-2.27.1/css/uikit.min.css" />
+  <link rel="icon" href="/static/assets/img/favicon.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="/static/assets/img/favicon.ico" type="image/x-icon" />
+  <script src="/static/assets/js/jquery.min.js"></script>
+  <script src="/static/assets/uikit-2.27.1/js/uikit.min.js"></script>
+
+  <meta charset="utf-8">
+  <% if len(customHeaderBlock)>0 { %>
+  <%= customHeaderBlock %>
+  <%}%>

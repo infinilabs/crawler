@@ -27,6 +27,7 @@ import (
 	"github.com/medcl/gopa/modules/stats"
 	"github.com/medcl/gopa/modules/storage"
 	"github.com/medcl/gopa/modules/core"
+	"github.com/medcl/gopa/modules/ui"
 )
 
 func Register() {
@@ -41,5 +42,6 @@ func Register() {
 	module.Register(crawler.CrawlerModule{})
 	module.Register(dispatcher.DispatcherModule{})
 	module.Register(cluster.ClusterModule{})
+	module.Register(ui.UIModule{})
 	module.Register(http.APIModule{})
 }

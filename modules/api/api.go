@@ -27,7 +27,6 @@ import (
 	"github.com/medcl/gopa/core/util"
 	. "github.com/medcl/gopa/modules/api/http"
 	"github.com/medcl/gopa/modules/api/websocket"
-	ui "github.com/medcl/gopa/ui"
 	_ "net/http/pprof"
 	"path"
 	"path/filepath"
@@ -86,10 +85,6 @@ func (this APIModule) internalStart(env *Env) {
 
 	//Snapshot
 	mux.HandleFunc("/snapshot/", handler.SnapshotAction)
-
-	//UI pages
-	mux.Handle("/ui/", http.FileServer(ui.FS(false)))
-	mux.HandleFunc("/ui/boltdb", handler.BoltDBStatusAction)
 
 	//registered handlers
 	if apis.RegisteredHandler != nil {
