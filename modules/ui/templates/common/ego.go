@@ -40,8 +40,8 @@ func Nav(w io.Writer, current string) error {
 	_, _ = io.WriteString(w, "  ><a href=\"/ui/explore/\">Explore</a></li>\n      <li ")
 	_, _ = fmt.Fprint(w, NavCurrent(current, "Console"))
 	_, _ = io.WriteString(w, " ><a href=\"/ui/console/\">Console</a></li>\n      <li ")
-	_, _ = fmt.Fprint(w, NavCurrent(current, "BoldDB"))
-	_, _ = io.WriteString(w, " ><a href=\"/ui/boltdb/\">BoldDB</a></li>\n    </ul>\n\n    <a href=\"#tm-offcanvas\" class=\"uk-navbar-toggle uk-visible-small\" data-uk-offcanvas=\"\"></a>\n\n    <div class=\"uk-navbar-brand uk-navbar-center uk-visible-small\"><img src=\"/static/assets/img/logo.svg\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></div>\n\n  </div>\n</nav>\n\n<div style=\"height: 15px;clear: both\"></div>\n")
+	_, _ = fmt.Fprint(w, NavCurrent(current, "BoltDB"))
+	_, _ = io.WriteString(w, " ><a href=\"/ui/boltdb/\">BoltDB</a></li>\n    </ul>\n\n    <a href=\"#tm-offcanvas\" class=\"uk-navbar-toggle uk-visible-small\" data-uk-offcanvas=\"\"></a>\n\n    <div class=\"uk-navbar-brand uk-navbar-center uk-visible-small\"><img src=\"/static/assets/img/logo.svg\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></div>\n\n  </div>\n</nav>\n\n<div style=\"height: 15px;clear: both\"></div>\n")
 	return nil
 }
 func OffCanvas(w io.Writer) error {
