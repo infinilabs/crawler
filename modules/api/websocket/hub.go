@@ -5,13 +5,13 @@
 package websocket
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/global"
+	"github.com/medcl/gopa/core/logger"
 	"strings"
 	"time"
-	"fmt"
-	"github.com/medcl/gopa/core/logger"
-	"encoding/json"
 )
 
 // hub maintains the set of active connections and broadcasts messages to the
@@ -90,8 +90,8 @@ func (h *Hub) RunHub() {
 		case c := <-h.register:
 			h.connections[c] = true
 			c.WritePrivateMessage(env.GetWelcomeMessage())
-			js,_:=json.Marshal(logger.GetLoggingConfig())
-			c.WriteMessage(ConfigMessage,string(js))
+			js, _ := json.Marshal(logger.GetLoggingConfig())
+			c.WriteMessage(ConfigMessage, string(js))
 		case c := <-h.unregister:
 			if _, ok := h.connections[c]; ok {
 				delete(h.connections, c)
@@ -106,7 +106,7 @@ func (h *Hub) RunHub() {
 
 func (h *Hub) broadcastMessage(msg string) {
 
-	if(len(msg)<=0){
+	if len(msg) <= 0 {
 		return
 	}
 
@@ -117,8 +117,8 @@ func (h *Hub) broadcastMessage(msg string) {
 
 func BroadcastMessage(msg string) {
 	select {
-		case h.broadcast <- msg:
-		default:
-			fmt.Println("websocket broadcast too busy, msg droped")
+	case h.broadcast <- msg:
+	default:
+		fmt.Println("websocket broadcast too busy, msg droped")
 	}
 }

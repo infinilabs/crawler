@@ -23,6 +23,7 @@ import (
 	"regexp"
 	"strings"
 )
+
 const HtmlToText JointKey = "html2text"
 
 type HtmlToTextJoint struct {

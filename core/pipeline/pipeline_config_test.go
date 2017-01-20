@@ -25,7 +25,6 @@ import (
 	"testing"
 )
 
-
 func TestPipelineConfig(t *testing.T) {
 	global.RegisterEnv(env.EmptyEnv())
 	global.Env().IsDebug = true
@@ -38,10 +37,10 @@ func TestPipelineConfig(t *testing.T) {
 	config.Context.Data["url"] = "gogol.com"
 	config.Context.Data["webpage"] = "hello world gogo "
 
-	Register("crawler",crawlerJoint{})
-	Register("parser",parserJoint{})
-	Register("save",saveJoint{})
-	Register("publish",publishJoint{})
+	Register("crawler", crawlerJoint{})
+	Register("parser", parserJoint{})
+	Register("save", saveJoint{})
+	Register("publish", publishJoint{})
 
 	config.InputJoint = &JointConfig{JointName: "crawler", Parameters: map[string]interface{}{"url": "http://baidu12.com"}}
 	joints := []*JointConfig{}
@@ -55,11 +54,11 @@ func TestPipelineConfig(t *testing.T) {
 	context := pipe.Run()
 
 	fmt.Println(context.Data)
-	assert.Equal(t, "http://baidu12.com",context.Data["received_url"])
-	assert.Equal(t, "true",context.Data["published"])
-	assert.Equal(t, "true",context.Data["saved"])
-	assert.Equal(t, true,context.Data["status"] )
-	assert.Equal(t,"http://gogo.com", context.Data["domain"])
+	assert.Equal(t, "http://baidu12.com", context.Data["received_url"])
+	assert.Equal(t, "true", context.Data["published"])
+	assert.Equal(t, "true", context.Data["saved"])
+	assert.Equal(t, true, context.Data["status"])
+	assert.Equal(t, "http://gogo.com", context.Data["domain"])
 
 }
 
@@ -77,12 +76,12 @@ type foo struct {
 	Name string
 }
 
-func (this foo)Do()string  {
-	fmt.Println("foo do,",this.Id,",",this.Name,",",this.Para)
+func (this foo) Do() string {
+	fmt.Println("foo do,", this.Id, ",", this.Name, ",", this.Para)
 	return this.Name
 }
 
-func (this bar)Do()string  {
+func (this bar) Do() string {
 	fmt.Println("foo do")
 	return ""
 }
@@ -93,9 +92,8 @@ type bar struct {
 func TestPipelineConfigReflection(t3 *testing.T) {
 	var regStruct map[string]interface{}
 	regStruct = make(map[string]interface{})
-	regStruct["Foo"] = foo{Id:1,Name:"medcl"}
+	regStruct["Foo"] = foo{Id: 1, Name: "medcl"}
 	regStruct["Bar"] = bar{}
-
 
 	str := "Bar"
 	if regStruct[str] != nil {
@@ -111,9 +109,9 @@ func TestPipelineConfigReflection(t3 *testing.T) {
 		t := reflect.ValueOf(regStruct[str]).Type()
 		v := reflect.New(t).Elem()
 		fmt.Println(v)
-		v1:=v.Interface().(do)
+		v1 := v.Interface().(do)
 		v1.Do()
-		assert.Equal(t3, "",v1.Do())
+		assert.Equal(t3, "", v1.Do())
 	}
 
 	str = "Foo"
@@ -132,21 +130,19 @@ func TestPipelineConfigReflection(t3 *testing.T) {
 			f.SetInt(55)
 		}
 		f = v.FieldByName("Para")
-		fmt.Println(f.Kind() )
+		fmt.Println(f.Kind())
 		if f.IsValid() && f.CanSet() && f.Kind() == reflect.Map {
-			para:=map[string]interface{}{}
-			para["key"]="value123"
+			para := map[string]interface{}{}
+			para["key"] = "value123"
 			f.Set(reflect.ValueOf(para))
 		}
 
 		fmt.Println(v)
-		v1:=v.Interface().(do)
+		v1 := v.Interface().(do)
 		v1.Do()
-		assert.Equal(t3, "tom",v1.Do())
-
+		assert.Equal(t3, "tom", v1.Do())
 
 	}
-
 
 	//get another instance again
 	str = "Foo"
@@ -154,11 +150,10 @@ func TestPipelineConfigReflection(t3 *testing.T) {
 		t := reflect.ValueOf(regStruct[str]).Type()
 		v := reflect.New(t).Elem()
 		fmt.Println(v)
-		v1:=v.Interface().(do)
+		v1 := v.Interface().(do)
 		v1.Do()
-		assert.Equal(t3, "",v1.Do())
+		assert.Equal(t3, "", v1.Do())
 
 	}
-
 
 }

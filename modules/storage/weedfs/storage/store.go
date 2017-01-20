@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/util"
 	"net/url"
 	"strconv"
 	"strings"
-	"github.com/medcl/gopa/core/util"
 )
 
 type Store struct {

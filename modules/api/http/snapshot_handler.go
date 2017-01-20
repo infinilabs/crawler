@@ -19,10 +19,10 @@ package handler
 import (
 	log "github.com/cihub/seelog"
 	_ "github.com/jmoiron/jsonq"
+	. "github.com/medcl/gopa/core/api"
 	"github.com/medcl/gopa/core/store"
 	"github.com/medcl/gopa/modules/config"
 	"net/http"
-	. "github.com/medcl/gopa/core/api"
 )
 
 func (this API) SnapshotAction(w http.ResponseWriter, req *http.Request) {

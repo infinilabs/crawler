@@ -21,7 +21,7 @@ config for each joint
 */
 type JointConfig struct {
 	//Name       string            `json:"name"`       //optional instance name for this joint
-	JointName  string            `json:"joint_name"` //the joint name
+	JointName  string                 `json:"joint_name"` //the joint name
 	Parameters map[string]interface{} `json:"parameters"` //kv parameters for this joint
 }
 
@@ -29,11 +29,9 @@ type JointConfig struct {
 config for each pipeline, a pipeline have more than one joints
 */
 type PipelineConfig struct {
-	Name string `json:"name"`
-	Context      *Context `json:"context"`
-	InputJoint   *JointConfig       `json:"input_joint"`
-	ProcessJoints []*JointConfig     `json:"process_joints"`
-	OutputJoint  *JointConfig       `json:"output_joint"`
+	Name          string         `json:"name"`
+	Context       *Context       `json:"context"`
+	InputJoint    *JointConfig   `json:"input_joint"`
+	ProcessJoints []*JointConfig `json:"process_joints"`
+	OutputJoint   *JointConfig   `json:"output_joint"`
 }
-
-

@@ -114,7 +114,7 @@ func get(page *PageItem, url string, cookie string) ([]byte, error) {
 
 	resp, err := client.Do(reqest)
 
-	log.Trace("response: ", err,", ",resp)
+	log.Trace("response: ", err, ", ", resp)
 
 	if resp != nil && (resp.StatusCode == 301 || resp.StatusCode == 302) {
 		log.Debug("got redirect: ", url, " => ", resp.Header.Get("Location"))
@@ -129,14 +129,13 @@ func get(page *PageItem, url string, cookie string) ([]byte, error) {
 		return nil, err
 	}
 
-
 	log.Trace("status code,", resp.StatusCode, ",size,", resp.ContentLength)
 
-	log.Trace("host: ",resp.Request.Host," url: ",resp.Request.URL.String())
+	log.Trace("host: ", resp.Request.Host, " url: ", resp.Request.URL.String())
 
 	//update host, redirects may change the host
-	page.Host=resp.Request.Host
-	page.Url=resp.Request.URL.String()
+	page.Host = resp.Request.Host
+	page.Url = resp.Request.URL.String()
 
 	page.StatusCode = resp.StatusCode
 	if resp.Header != nil {

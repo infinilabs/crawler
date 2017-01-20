@@ -142,8 +142,8 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 
 	pipeline = NewPipeline("crawler")
 
-	init:=InitTaskJoint{}
-	init.Set(TaskID,taskId)
+	init := InitTaskJoint{}
+	init.Set(TaskID, taskId)
 
 	pipeline.Context(&Context{Phrase: config.PhraseCrawler}).
 		Start(init).

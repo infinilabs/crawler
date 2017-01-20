@@ -22,13 +22,13 @@ type API struct {
 	api.Handler
 }
 
-func InitAPI()  {
+func InitAPI() {
 
-	apis:=API{}
-	api.HandleMethod(api.GET,"/joint/",apis.handleGetPipelineJointsRequest)
-	api.HandleMethod(api.POST,"/joint/",apis.handlePostPipelineJointsRequest)
-	api.HandleMethod(api.POST,"/pipeline/:id",apis.handlePostPipelinesRequest)
-	api.HandleMethod(api.GET,"/pipeline/",apis.handleGetPipelinesRequest)
-	api.HandleMethod(api.GET,"/user/",apis.handleUserLoginRequest)
+	apis := API{}
+	api.HandleMethod(api.GET, "/joint/", apis.handleGetPipelineJointsRequest)
+	api.HandleMethod(api.POST, "/joint/", apis.handlePostPipelineJointsRequest)
+	api.HandleMethod(api.POST, "/pipeline/:id", apis.handlePostPipelinesRequest)
+	api.HandleMethod(api.GET, "/pipeline/", apis.handleGetPipelinesRequest)
+	api.HandleMethod(api.GET, "/user/", apis.handleUserLoginRequest)
 
 }

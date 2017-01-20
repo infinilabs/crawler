@@ -20,13 +20,13 @@ import (
 	logger "github.com/cihub/seelog"
 	_ "github.com/jmoiron/jsonq"
 	"github.com/julienschmidt/httprouter"
+	. "github.com/medcl/gopa/core/api"
 	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/modules/config"
 	"net/http"
 	"strconv"
-	. "github.com/medcl/gopa/core/api"
 )
 
 func (this API) TaskDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {

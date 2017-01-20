@@ -5,12 +5,12 @@
 package websocket
 
 import (
+	"fmt"
 	"github.com/gorilla/websocket"
 	"net/http"
 	"strings"
-	"time"
-	"fmt"
 	"sync"
+	"time"
 )
 
 const (
@@ -35,12 +35,12 @@ var upgrader = websocket.Upgrader{
 // connection is an middleman between the websocket connection and the hub.
 type WebsocketConnection struct {
 	// The websocket connection.
-	ws            *websocket.Conn
+	ws *websocket.Conn
 
 	// Buffered channel of outbound messages.
 	signalChannel chan []byte
 
-	handlers      map[string]WebsocketHandlerFunc
+	handlers map[string]WebsocketHandlerFunc
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -65,6 +65,7 @@ func (c *WebsocketConnection) readPump() {
 }
 
 var l sync.Mutex
+
 // write writes a message with the given message type and payload.
 func (c *WebsocketConnection) internalWrite(mt int, payload []byte) error {
 	l.Lock()
@@ -102,19 +103,19 @@ type MsgType string
 
 const (
 	PrivateMessage MsgType = "PRIVATE"
-	PublicMessage MsgType =  "PUBLIC"
-	ConfigMessage MsgType =  "CONFIG"
+	PublicMessage  MsgType = "PUBLIC"
+	ConfigMessage  MsgType = "CONFIG"
 )
 
 func (c *WebsocketConnection) WritePrivateMessage(msg string) error {
 
-	return c.WriteMessage(PrivateMessage,msg)
+	return c.WriteMessage(PrivateMessage, msg)
 }
 
 // the right way to write message, don't call c.write directly
-func (c *WebsocketConnection) WriteMessage(t MsgType,msg string) error {
+func (c *WebsocketConnection) WriteMessage(t MsgType, msg string) error {
 
-	msg=string(t)+" "+msg
+	msg = string(t) + " " + msg
 
 	return c.internalWrite(websocket.TextMessage, []byte(msg))
 }
@@ -154,8 +155,7 @@ func ServeWs(w http.ResponseWriter, r *http.Request) {
 	c.readPump()
 }
 
-
 func (c *WebsocketConnection) Broadcast(msg string) {
-	c.WriteMessage(PublicMessage,msg)
+	c.WriteMessage(PublicMessage, msg)
 
 }

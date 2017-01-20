@@ -20,13 +20,13 @@ import (
 	"github.com/medcl/gopa/core/module"
 	"github.com/medcl/gopa/modules/api"
 	"github.com/medcl/gopa/modules/cluster"
+	"github.com/medcl/gopa/modules/core"
 	"github.com/medcl/gopa/modules/crawler"
 	"github.com/medcl/gopa/modules/dispatcher"
 	"github.com/medcl/gopa/modules/filter"
 	"github.com/medcl/gopa/modules/queue"
 	"github.com/medcl/gopa/modules/stats"
 	"github.com/medcl/gopa/modules/storage"
-	"github.com/medcl/gopa/modules/core"
 	"github.com/medcl/gopa/modules/ui"
 )
 

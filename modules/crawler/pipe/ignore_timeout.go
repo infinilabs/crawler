@@ -21,6 +21,7 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/stats"
 )
+
 const IgnoreTimeout JointKey = "ignore_timeout"
 
 func (this IgnoreTimeoutJoint) Name() string {

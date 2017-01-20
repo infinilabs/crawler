@@ -19,6 +19,7 @@ package pipe
 import (
 	. "github.com/medcl/gopa/core/pipeline"
 )
+
 const Empty JointKey = "empty"
 
 type EmptyJoint struct {

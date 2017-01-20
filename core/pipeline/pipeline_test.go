@@ -24,7 +24,6 @@ import (
 	"testing"
 )
 
-
 type crawlerJoint struct {
 	Parameters
 }
@@ -37,12 +36,11 @@ func (this crawlerJoint) Process(s *Context) (*Context, error) {
 	s.Data[("webpage")] = "hello world gogo "
 	s.Data["received_url"] = this.Data["url"]
 	s.Data[("status")] = true
-	fmt.Println("start to crawlling url: ",this.Get("url"))// + this.GetParameter("url").(string))
+	fmt.Println("start to crawlling url: ", this.Get("url")) // + this.GetParameter("url").(string))
 	return s, nil
 }
 
 type parserJoint struct {
-
 }
 
 func (this parserJoint) Name() string {
@@ -72,7 +70,6 @@ func (this saveJoint) Process(s *Context) (*Context, error) {
 }
 
 type publishJoint struct {
-
 }
 
 func (this publishJoint) Name() string {
@@ -95,7 +92,7 @@ func TestPipeline(t *testing.T) {
 	context.Parameters.Data["url"] = "gogol.com"
 	context.Parameters.Data["webpage"] = "hello world gogo "
 
-	crawler:=crawlerJoint{}
+	crawler := crawlerJoint{}
 
 	context = pipeline.Context(context).
 		Start(crawler).

@@ -5,14 +5,14 @@ import (
 	"flag"
 	"fmt"
 	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/modules/storage/weedfs/directory"
+	"github.com/medcl/gopa/modules/storage/weedfs/storage"
 	"math/rand"
 	"mime"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/medcl/gopa/modules/storage/weedfs/directory"
-	"github.com/medcl/gopa/modules/storage/weedfs/storage"
 )
 
 var (

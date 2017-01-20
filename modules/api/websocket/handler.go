@@ -29,8 +29,8 @@ import (
 type Command struct {
 }
 
-func getHelpMessage() string{
-	help:="COMMAND LIST\n" +
+func getHelpMessage() string {
+	help := "COMMAND LIST\n" +
 		"seed [url] eg: seed http://elastic.co\n" +
 		"log [level]  eg: log debug"
 	return help
@@ -55,7 +55,7 @@ func (this Command) UpdateLogLevel(c *WebsocketConnection, a []string) {
 	level := a[1]
 	if len(level) > 0 {
 		level := strings.ToLower(level)
-		logging.SetLogging(global.Env(), level,"")
+		logging.SetLogging(global.Env(), level, "")
 		c.WritePrivateMessage("setting log level to  " + level)
 		return
 	}

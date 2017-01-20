@@ -24,7 +24,6 @@ import (
 
 const SaveTask JointKey = "save_task"
 
-
 type SaveTaskJoint struct {
 	IsCreate bool
 }

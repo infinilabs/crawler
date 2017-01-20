@@ -17,32 +17,27 @@ limitations under the License.
 package http
 
 import (
-	"net/http"
 	"github.com/julienschmidt/httprouter"
 	"github.com/medcl/gopa/core/api"
+	"net/http"
 	"time"
 )
 
+func (this API) handleUserLoginRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
-func   (this API)handleUserLoginRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-
-	b,v:=api.GetSession(w,req,"key")
-	if(!b){
-		api.SetSession(w,req,"key","hello "+time.Now().String())
-		api.SetFlash(w,req,"user logged in")
+	b, v := api.GetSession(w, req, "key")
+	if !b {
+		api.SetSession(w, req, "key", "hello "+time.Now().String())
+		api.SetFlash(w, req, "user logged in")
 	}
 
-	b,v=api.GetFlash(w,req)
-	if(b){
-		 this.WriteJson(w,v,200)
+	b, v = api.GetFlash(w, req)
+	if b {
+		this.WriteJson(w, v, 200)
 		return
 	}
 
-	this.WriteJson(w,v,200)
-
-
-
+	this.WriteJson(w, v, 200)
 
 	return
 }
-

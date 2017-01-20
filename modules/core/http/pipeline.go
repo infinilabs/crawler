@@ -17,56 +17,52 @@ limitations under the License.
 package http
 
 import (
-	"net/http"
+	log "github.com/cihub/seelog"
 	"github.com/julienschmidt/httprouter"
 	. "github.com/medcl/gopa/core/pipeline"
-	log	"github.com/cihub/seelog"
+	"net/http"
 
 	"encoding/json"
 )
 
-
-
-func   (this API)handleGetPipelineJointsRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (this API) handleGetPipelineJointsRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	log.Debug("get joints")
-	joints:=GetAllRegisteredJoints()
-	this.WriteJson(w,joints,http.StatusOK)
+	joints := GetAllRegisteredJoints()
+	this.WriteJson(w, joints, http.StatusOK)
 
 	return
 }
 
-func   (this API)handlePostPipelineJointsRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (this API) handlePostPipelineJointsRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	log.Debug("post joints")
 	config := PipelineConfig{}
 
-	data,err:=this.GetRawBody(req)
-	if(err!=nil){
-		this.Error(w,err)
+	data, err := this.GetRawBody(req)
+	if err != nil {
+		this.Error(w, err)
 		return
 	}
 
-	err=json.Unmarshal(data,&config)
-	if(err!=nil){
-		this.Error(w,err)
+	err = json.Unmarshal(data, &config)
+	if err != nil {
+		this.Error(w, err)
 		return
 	}
 	//TODO save for later use
 	pipe := NewPipelineFromConfig(&config)
 	pipe.Run()
 
-	this.WriteJson(w,config,http.StatusOK)
+	this.WriteJson(w, config, http.StatusOK)
 
 	return
 }
 
-func   (this API)handleGetPipelinesRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (this API) handleGetPipelinesRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
 	return
 }
 
-
-func   (this API)handlePostPipelinesRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (this API) handlePostPipelinesRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
 	return
 }
-

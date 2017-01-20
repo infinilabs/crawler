@@ -17,26 +17,26 @@ limitations under the License.
 package crawler
 
 import (
+	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/modules/crawler/pipe"
-	log "github.com/cihub/seelog"
 )
 
 func InitJoints() {
 	log.Debug("start register joints")
-	pipeline.Register(pipe.Empty,pipe.EmptyJoint{})
-	pipeline.Register(pipe.UrlCheckedFilter,pipe.UrlCheckedFilterJoint{})
-	pipeline.Register(pipe.Fetch,pipe.FetchJoint{})
-	pipeline.Register(pipe.UrlNormalization,pipe.UrlNormalizationJoint{})
-	pipeline.Register(pipe.SaveTask,pipe.SaveTaskJoint{})
-	pipeline.Register(pipe.HtmlToText,pipe.HtmlToTextJoint{})
-	pipeline.Register(pipe.IgnoreTimeout,pipe.IgnoreTimeoutJoint{})
-	pipeline.Register(pipe.LoadMetadata,pipe.LoadMetadataJoint{})
-	pipeline.Register(pipe.ParsePage,pipe.ParsePageJoint{})
-	pipeline.Register(pipe.SaveToDB,pipe.SaveToDBJoint{})
-	pipeline.Register(pipe.SaveToFileSystem,pipe.SaveToFileSystemJoint{})
-	pipeline.Register(pipe.InitTask,pipe.InitTaskJoint{})
-	pipeline.Register(pipe.UrlExtFilter,pipe.UrlExtFilterJoint{})
+	pipeline.Register(pipe.Empty, pipe.EmptyJoint{})
+	pipeline.Register(pipe.UrlCheckedFilter, pipe.UrlCheckedFilterJoint{})
+	pipeline.Register(pipe.Fetch, pipe.FetchJoint{})
+	pipeline.Register(pipe.UrlNormalization, pipe.UrlNormalizationJoint{})
+	pipeline.Register(pipe.SaveTask, pipe.SaveTaskJoint{})
+	pipeline.Register(pipe.HtmlToText, pipe.HtmlToTextJoint{})
+	pipeline.Register(pipe.IgnoreTimeout, pipe.IgnoreTimeoutJoint{})
+	pipeline.Register(pipe.LoadMetadata, pipe.LoadMetadataJoint{})
+	pipeline.Register(pipe.ParsePage, pipe.ParsePageJoint{})
+	pipeline.Register(pipe.SaveToDB, pipe.SaveToDBJoint{})
+	pipeline.Register(pipe.SaveToFileSystem, pipe.SaveToFileSystemJoint{})
+	pipeline.Register(pipe.InitTask, pipe.InitTaskJoint{})
+	pipeline.Register(pipe.UrlExtFilter, pipe.UrlExtFilterJoint{})
 	log.Debug("end register joints")
 
 }

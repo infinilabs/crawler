@@ -1,9 +1,9 @@
 package api
 
 import (
+	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"sync"
-	"github.com/julienschmidt/httprouter"
 )
 
 var RegisteredHandler map[string]http.Handler
@@ -31,16 +31,16 @@ func Handle(pattern string, handler http.Handler) {
 	l.Unlock()
 }
 
-func HandleMethod(method Method,pattern string, handler func (w http.ResponseWriter, req *http.Request, ps httprouter.Params)) {
+func HandleMethod(method Method, pattern string, handler func(w http.ResponseWriter, req *http.Request, ps httprouter.Params)) {
 	l.Lock()
 	if RegisteredMethodHandler == nil {
-		RegisteredMethodHandler = map[string]map[string]func (w http.ResponseWriter, req *http.Request, ps httprouter.Params){}
+		RegisteredMethodHandler = map[string]map[string]func(w http.ResponseWriter, req *http.Request, ps httprouter.Params){}
 	}
 
-	m:=RegisteredMethodHandler[string(method)]
-	if(m==nil){
-		RegisteredMethodHandler[string(method)]=map[string]func (w http.ResponseWriter, req *http.Request, ps httprouter.Params){}
+	m := RegisteredMethodHandler[string(method)]
+	if m == nil {
+		RegisteredMethodHandler[string(method)] = map[string]func(w http.ResponseWriter, req *http.Request, ps httprouter.Params){}
 	}
-	RegisteredMethodHandler[string(method)][pattern]=handler
+	RegisteredMethodHandler[string(method)][pattern] = handler
 	l.Unlock()
 }

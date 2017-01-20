@@ -19,8 +19,8 @@ package handler
 import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/medcl/gopa/core/env"
-	"net/http"
 	"github.com/medcl/gopa/core/global"
+	"net/http"
 )
 
 func (this API) IndexAction(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {

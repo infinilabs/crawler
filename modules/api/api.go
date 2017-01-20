@@ -19,7 +19,11 @@ package http
 import (
 	"net/http"
 
+	"crypto/tls"
+	"errors"
 	log "github.com/cihub/seelog"
+	"github.com/gorilla/context"
+	"github.com/gorilla/sessions"
 	"github.com/julienschmidt/httprouter"
 	apis "github.com/medcl/gopa/core/api"
 	. "github.com/medcl/gopa/core/env"
@@ -30,10 +34,6 @@ import (
 	_ "net/http/pprof"
 	"path"
 	"path/filepath"
-	"errors"
-	"crypto/tls"
-	"github.com/gorilla/sessions"
-	"github.com/gorilla/context"
 )
 
 var router *httprouter.Router
@@ -44,11 +44,11 @@ var store = sessions.NewCookieStore([]byte("1c6f2afbccef959ac5c8b81f690c1be7"))
 func (this APIModule) internalStart(env *Env) {
 
 	store.Options = &sessions.Options{
-		Domain:     "localhost", //TODO config　http　domain
-		Path:       "/",
-		MaxAge:     60 * 15,
-		Secure:     true,
-		HttpOnly:   true,
+		Domain:   "localhost", //TODO config　http　domain
+		Path:     "/",
+		MaxAge:   60 * 15,
+		Secure:   true,
+		HttpOnly: true,
 	}
 
 	handler := API{}
@@ -79,7 +79,6 @@ func (this APIModule) internalStart(env *Env) {
 	router.GET("/domain/:id", handler.DomainGetAction)
 	router.DELETE("/domain/:id", BasicAuth(handler.DomainDeleteAction, user, pass))
 
-
 	mux.HandleFunc("/setting/logger", handler.LoggingSettingAction)
 	mux.HandleFunc("/setting/logger/", handler.LoggingSettingAction)
 
@@ -102,38 +101,36 @@ func (this APIModule) internalStart(env *Env) {
 	if apis.RegisteredMethodHandler != nil {
 		for k, v := range apis.RegisteredMethodHandler {
 			for m, n := range v {
-				log.Debug("register custom http handler: ", k," ",m)
-				router.Handle(k,m,n)
+				log.Debug("register custom http handler: ", k, " ", m)
+				router.Handle(k, m, n)
 			}
 		}
 	}
 
 	address := util.AutoGetAddress(env.SystemConfig.HttpBinding)
 
-	if(len(this.env.SystemConfig.CertPath)>0){
+	if len(this.env.SystemConfig.CertPath) > 0 {
 		log.Debug("start ssl endpoint")
 
-		certFile:=path.Join(this.env.SystemConfig.CertPath,"*c*rt*")
-		match,err:=filepath.Glob(certFile)
-		if(err!=nil){
+		certFile := path.Join(this.env.SystemConfig.CertPath, "*c*rt*")
+		match, err := filepath.Glob(certFile)
+		if err != nil {
 			panic(err)
 		}
-		if(len(match)<=0){
+		if len(match) <= 0 {
 			panic(errors.New("no cert file found, the file name must end with .crt"))
 		}
-		certFile=match[0]
+		certFile = match[0]
 
-
-		keyFile:=path.Join(this.env.SystemConfig.CertPath,"*key*")
-		match,err=filepath.Glob(keyFile)
-		if(err!=nil){
+		keyFile := path.Join(this.env.SystemConfig.CertPath, "*key*")
+		match, err = filepath.Glob(keyFile)
+		if err != nil {
 			panic(err)
 		}
-		if(len(match)<=0){
+		if len(match) <= 0 {
 			panic(errors.New("no key file found, the file name must end with .key"))
 		}
-		keyFile=match[0]
-
+		keyFile = match[0]
 
 		cfg := &tls.Config{
 			MinVersion:               tls.VersionTLS12,
@@ -155,16 +152,16 @@ func (this APIModule) internalStart(env *Env) {
 		}
 
 		log.Info("https server listen at: https://", address)
-		err=srv.ListenAndServeTLS(certFile, keyFile)
-		if(err!=nil){
+		err = srv.ListenAndServeTLS(certFile, keyFile)
+		if err != nil {
 			log.Error(err)
 			panic(err)
 		}
 
-	}else{
+	} else {
 		log.Info("http server listen at: http://", address)
-		err:=http.ListenAndServe(address, context.ClearHandler(mux))
-		if(err!=nil){
+		err := http.ListenAndServe(address, context.ClearHandler(mux))
+		if err != nil {
 			log.Error(err)
 			panic(err)
 		}

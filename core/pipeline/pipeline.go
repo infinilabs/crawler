@@ -17,20 +17,19 @@ limitations under the License.
 package pipeline
 
 import (
+	"errors"
 	"fmt"
 	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/rs/xid"
+	"reflect"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
-	"github.com/medcl/gopa/core/global"
-	"runtime"
-	"reflect"
-	"errors"
 )
-
 
 type ParaKey string
 
@@ -38,9 +37,9 @@ type Context struct {
 	DryRun bool
 	Parameters
 	Phrase    model.TaskPhrase `json:"phrase"`
-	breakFlag bool `json:"-"`
-	exitFlag  bool `json:"-"`
-	Payload   interface{} `json:"-"`
+	breakFlag bool             `json:"-"`
+	exitFlag  bool             `json:"-"`
+	Payload   interface{}      `json:"-"`
 }
 
 /**
@@ -51,7 +50,6 @@ func (this *Context) Break(msg interface{}) {
 	this.breakFlag = true
 	this.Payload = msg
 }
-
 
 func (this *Context) IsBreak() bool {
 	return this.breakFlag
@@ -72,23 +70,21 @@ func (this *Context) Exit(msg interface{}) {
 	this.Payload = msg
 }
 
-
 type Parameters struct {
-	Data map[string]interface{} `json:"data"`
-	l    sync.RWMutex
+	Data   map[string]interface{} `json:"data"`
+	l      sync.RWMutex
 	inited bool
 }
 
-
 func (this *Parameters) Init() {
-	if(this.inited){
+	if this.inited {
 		return
 	}
 	this.l.Lock()
 	if this.Data == nil {
 		this.Data = map[string]interface{}{}
 	}
-	this.inited=true
+	this.inited = true
 	this.l.Unlock()
 }
 
@@ -101,9 +97,9 @@ func (this *Parameters) GetString(key ParaKey) (string, bool) {
 	return s, ok
 }
 
-func (this *Parameters) Has(key ParaKey) (bool) {
+func (this *Parameters) Has(key ParaKey) bool {
 	this.Init()
-	_,ok := this.Data[string(key)]
+	_, ok := this.Data[string(key)]
 	return ok
 }
 
@@ -128,7 +124,7 @@ func (this *Parameters) GetMap(key ParaKey) (map[string]interface{}, bool) {
 func (this *Parameters) Get(key ParaKey) interface{} {
 	this.Init()
 	this.l.RLock()
-	s:=string(key)
+	s := string(key)
 	v := this.Data[s]
 	this.l.RUnlock()
 	return v
@@ -137,7 +133,7 @@ func (this *Parameters) Get(key ParaKey) interface{} {
 func (this *Parameters) Set(key ParaKey, value interface{}) {
 	this.Init()
 	this.l.Lock()
-	s:=string(key)
+	s := string(key)
 	this.Data[s] = value
 	this.l.Unlock()
 }
@@ -173,7 +169,6 @@ func (this *Parameters) MustGetMap(key ParaKey) map[string]interface{} {
 	}
 	return s
 }
-
 
 type Joint interface {
 	Name() string
@@ -295,7 +290,7 @@ func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
 
 	pipe.Context(config.Context)
 
-	if config.InputJoint!=nil {
+	if config.InputJoint != nil {
 		input := GetJointInstance(config.InputJoint)
 		pipe.Start(input)
 	}
@@ -305,7 +300,7 @@ func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
 		pipe.Join(j)
 	}
 
-	if config.OutputJoint!=nil {
+	if config.OutputJoint != nil {
 		output := GetJointInstance(config.OutputJoint)
 		pipe.End(output)
 	}
@@ -315,7 +310,7 @@ func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
 
 var typeRegistry = make(map[string]interface{})
 
-func GetAllRegisteredJoints()map[string]interface{}  {
+func GetAllRegisteredJoints() map[string]interface{} {
 	return typeRegistry
 }
 
@@ -328,19 +323,19 @@ func GetJointInstance(cfg *JointConfig) Joint {
 		if f.IsValid() && f.CanSet() && f.Kind() == reflect.Map {
 			f.Set(reflect.ValueOf(cfg.Parameters))
 		}
-		v1:=v.Interface().(Joint)
+		v1 := v.Interface().(Joint)
 		return v1
 	}
-	panic(errors.New(cfg.JointName+" not found"))
+	panic(errors.New(cfg.JointName + " not found"))
 }
 
 type JointKey string
 
-func Register(jointName JointKey,joint Joint){
-	k:=string(jointName)
-	RegisterByName(k,joint)
+func Register(jointName JointKey, joint Joint) {
+	k := string(jointName)
+	RegisterByName(k, joint)
 }
 
-func RegisterByName(jointName string,joint Joint){
-	typeRegistry[jointName]=joint
+func RegisterByName(jointName string, joint Joint) {
+	typeRegistry[jointName] = joint
 }

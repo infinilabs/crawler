@@ -18,18 +18,17 @@ package ui
 
 import (
 	"github.com/medcl/gopa/core/api"
-	"net/http"
 	"github.com/medcl/gopa/static"
+	"net/http"
 )
 
 type API struct {
 	api.Handler
 }
 
-func InitAPI()  {
+func InitAPI() {
 
-	apis:=API{}
-
+	apis := API{}
 
 	//UI pages
 	api.HandleFunc("/ui/", apis.DashboardAction)
@@ -39,6 +38,5 @@ func InitAPI()  {
 	api.HandleFunc("/ui/explore/", apis.ExplorePageAction)
 	api.HandleFunc("/ui/boltdb/", apis.BoltDBStatusAction)
 	api.Handle("/static/", http.FileServer(static.FS(false)))
-
 
 }

@@ -2,11 +2,11 @@ package directory
 
 import (
 	"encoding/hex"
+	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/util"
+	"github.com/medcl/gopa/modules/storage/weedfs/storage"
 	"strconv"
 	"strings"
-	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/modules/storage/weedfs/storage"
-	"github.com/medcl/gopa/core/util"
 )
 
 type FileId struct {

@@ -1,8 +1,8 @@
 package storage
 
 import (
-	"io"
 	log "github.com/cihub/seelog"
+	"io"
 	"os"
 	"path"
 	"strconv"

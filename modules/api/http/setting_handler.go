@@ -17,20 +17,20 @@ limitations under the License.
 package handler
 
 import (
+	"encoding/json"
 	log "github.com/cihub/seelog"
+	. "github.com/medcl/gopa/core/api"
+	"github.com/medcl/gopa/core/config"
 	logging "github.com/medcl/gopa/core/logger"
 	"net/http"
-	"encoding/json"
-	"github.com/medcl/gopa/core/config"
-	. "github.com/medcl/gopa/core/api"
 )
 
 func (this API) LoggingSettingAction(w http.ResponseWriter, req *http.Request) {
 	if req.Method == GET.String() {
 
 		cfg := logging.GetLoggingConfig()
-		if cfg!=nil {
-			this.WriteJson(w,cfg,200)
+		if cfg != nil {
+			this.WriteJson(w, cfg, 200)
 		} else {
 			this.Error500(w, "config not available")
 		}
@@ -45,11 +45,11 @@ func (this API) LoggingSettingAction(w http.ResponseWriter, req *http.Request) {
 
 		configStr := string(body)
 
-		cfg:=config.LoggingConfig{}
+		cfg := config.LoggingConfig{}
 
-		err=json.Unmarshal([]byte(configStr),&cfg)
+		err = json.Unmarshal([]byte(configStr), &cfg)
 
-		if(err!=nil){
+		if err != nil {
 			this.Error(w, err)
 
 		}

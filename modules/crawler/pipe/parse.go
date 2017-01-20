@@ -29,7 +29,6 @@ import (
 
 const ParsePage JointKey = "parse"
 
-
 type ParsePageJoint struct {
 	links         map[string]interface{}
 	DispatchLinks bool

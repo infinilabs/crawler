@@ -3,13 +3,13 @@ package directory
 import (
 	"encoding/gob"
 	"errors"
+	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/modules/storage/weedfs/storage"
 	"math/rand"
 	"os"
 	"path"
 	"strconv"
 	"sync"
-	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/modules/storage/weedfs/storage"
 )
 
 const (

@@ -10,13 +10,11 @@ import (
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/modules/config"
 	"github.com/medcl/gopa/modules/ui/templates/boltdb"
-	"github.com/medcl/gopa/modules/ui/templates/dashboard"
-	"github.com/medcl/gopa/modules/ui/templates/tasks"
 	"github.com/medcl/gopa/modules/ui/templates/console"
+	"github.com/medcl/gopa/modules/ui/templates/dashboard"
 	"github.com/medcl/gopa/modules/ui/templates/explore"
+	"github.com/medcl/gopa/modules/ui/templates/tasks"
 )
-
-
 
 func (h API) BoltDBStatusAction(w http.ResponseWriter, r *http.Request) {
 	db := global.Lookup(config.REGISTER_BOLTDB).(*storm.DB)
@@ -56,21 +54,20 @@ func indexes(r *http.Request) ([]int, error) {
 	return a, nil
 }
 
-
 func (h API) DashboardAction(w http.ResponseWriter, r *http.Request) {
 
-	 dashboard.Index(w)
+	dashboard.Index(w)
 }
 
 func (h API) TasksPageAction(w http.ResponseWriter, r *http.Request) {
 
-	 tasks.Index(w)
+	tasks.Index(w)
 }
 func (h API) ConsolePageAction(w http.ResponseWriter, r *http.Request) {
 
-	 console.Index(w)
+	console.Index(w)
 }
 func (h API) ExplorePageAction(w http.ResponseWriter, r *http.Request) {
 
-	 explore.Index(w)
+	explore.Index(w)
 }

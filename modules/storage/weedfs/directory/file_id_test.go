@@ -1,8 +1,8 @@
 package directory
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func TestSerialDeserialization(t *testing.T) {

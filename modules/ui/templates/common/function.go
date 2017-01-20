@@ -16,8 +16,8 @@ limitations under the License.
 
 package common
 
-func NavCurrent(cur,nav string) string{
-	if(cur==nav){
+func NavCurrent(cur, nav string) string {
+	if cur == nav {
 		return " class=\"uk-active\" "
 	}
 	return ""

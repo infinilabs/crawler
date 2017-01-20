@@ -8,6 +8,7 @@ package raft
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	log "github.com/cihub/seelog"
@@ -26,7 +27,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"crypto/tls"
 )
 
 const (
@@ -196,7 +196,7 @@ func (s *RaftModule) Open() error {
 // sent join requests to seed host
 func join(joinAddr, raftAddr string) error {
 
-	log.Debug("start join address, ",joinAddr,",",raftAddr)
+	log.Debug("start join address, ", joinAddr, ",", raftAddr)
 	raftAddr = util.GetValidAddress(raftAddr)
 
 	b, err := json.Marshal(map[string]string{"addr": raftAddr})
@@ -207,8 +207,7 @@ func join(joinAddr, raftAddr string) error {
 
 	joinAddr = util.GetValidAddress(joinAddr)
 
-
-	if(len(global.Env().SystemConfig.CertPath)>0){
+	if len(global.Env().SystemConfig.CertPath) > 0 {
 		url := fmt.Sprintf("https://%s/cluster/node/_join", joinAddr)
 
 		log.Info("try to join the cluster, ", url, ", ", string(b))
