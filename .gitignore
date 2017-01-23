@@ -48,3 +48,4 @@ target/
 /bin-run/
 /leveldb
 /core/env/commit_log.go
+/dist

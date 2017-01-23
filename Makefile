@@ -60,7 +60,7 @@ all: clean config update_ui cross-build
 
 all-platform: clean config update_ui cross-build-all-platform
 
-cross-build-all-platform: clean config test build-bsd
+cross-build-all-platform: clean config build-bsd
 	GOOS=windows GOARCH=amd64     $(GOBUILD) -o bin/windows64/gopa.exe
 	GOOS=windows GOARCH=386       $(GOBUILD) -o bin/windows32/gopa.exe
 	GOOS=darwin  GOARCH=amd64     $(GOBUILD) -o bin/darwin64/gopa
@@ -128,6 +128,7 @@ fetch-depends:
 	$(GO) get github.com/gorilla/sessions
 	$(GO) get github.com/mattn/go-sqlite3
 	$(GO) get github.com/jinzhu/gorm
+	$(GO) get github.com/stretchr/testify/assert
 
 dist: cross-build package
 

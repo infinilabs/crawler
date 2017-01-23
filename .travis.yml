@@ -1,15 +1,24 @@
 language: go
-os:
-  - osx
-script: make clean fetch-depends config cross-build-all-platform package-all-platform
 go:
-- 1.6
+  - 1.7
+env:
+  - "PATH=/home/travis/gopath/bin:$PATH"
+before_install:
+  - go get github.com/mitchellh/gox
+  - go get github.com/tcnksm/ghr
+  - make clean config update_ui update_template_ui fetch-depends
+script:
+  - go test -v -covermode=count -coverprofile=coverage.out
+after_success:
+  - gox -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}"
+  - ghr --username medcl --token $GITHUB_TOKEN --replace --prerelease --debug pre-release dist/
+
 deploy:
   provider: releases
   skip_cleanup: false
   api_key:
     secure: Y34W9IfgIPA+/kkVfysNs6s/Zx5Rz2TK1Og1Tr9EGzDofadCs5e0Pjke1sU+VTcKIo8T4JGoDw5oUhC5CTsrq3iBa47hseFdQuERzLUKdEtaWIORTNcrJZJqitw/Fs50A6KPpN7Tvi6rOGD+pUi+lgYXbNvspyuVdHvW6HbcTvk=
-  file: bin/*.tar.gz 
+  file: dist/*
   file_glob: true
   on:
     repo: medcl/gopa
