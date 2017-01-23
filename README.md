@@ -1,6 +1,6 @@
 # Gopa #
 
-![https://github.com/medcl/gopa](https://github.com/medcl/gopa/blob/master/static/assets/img/logo.svg)
+![https://github.com/medcl/gopa](https://raw.githubusercontent.com/medcl/gopa/master/static/assets/img/logo.png)
 
 [狗爬], A Spider Written in Go.
 
