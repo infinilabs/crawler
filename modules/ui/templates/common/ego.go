@@ -15,7 +15,7 @@ func Body(w io.Writer) error {
 	return nil
 }
 func Footer(w io.Writer) error {
-	_, _ = io.WriteString(w, "\n\n\n<div class=\"tm-footer\">\n    <div class=\"uk-container uk-container-center uk-text-center\">\n        <br>\n        <hr class=\"uk-article-divider\" >\n        <ul class=\"uk-subnav uk-subnav-line uk-flex-center\">\n            <li><a href=\"http://github.com/medcl/gopa\">GitHub</a></li>\n            <li><a href=\"http://github.com/medcl/gopa/issues\">Issues</a></li>\n            <li><a href=\"https://github.com/medcl/gopa/releases\">Releases</a></li>\n            <li><a href=\"http://github.com/medcl/gopa/blob/master/CHANGES.md\">Changelog</a></li>\n        </ul>\n\n        <div class=\"uk-panel\">\n            <p>Made by <a href=\"http://log.medcl.net\">Medcl</a> with love and tea.<br>Licensed under <a target=\"_blank\" href=\" http://www.apache.org/licenses/LICENSE-2.0\">Apache License, Version 2.0</a>.</p>\n            <a href=\"/static\"><img src=\"/static/assets/img/logo.svg\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></a>\n        </div>\n\n    </div>\n</div>\n\n</body>\n</html>\n")
+	_, _ = io.WriteString(w, "\n\n\n<div class=\"tm-footer\">\n    <div class=\"uk-container uk-container-center uk-text-center\">\n        <br>\n        <hr class=\"uk-article-divider\" >\n        <ul class=\"uk-subnav uk-subnav-line uk-flex-center\">\n            <li><a href=\"http://github.com/medcl/gopa\">GitHub</a></li>\n            <li><a href=\"http://github.com/medcl/gopa/issues\">Issues</a></li>\n            <li><a href=\"https://github.com/medcl/gopa/releases\">Releases</a></li>\n            <li><a href=\"http://github.com/medcl/gopa/blob/master/CHANGES.md\">Changelog</a></li>\n        </ul>\n\n        <div class=\"uk-panel\">\n            <p>Made by <a href=\"http://log.medcl.net\">Medcl</a> with love and tea.<br>Licensed under <a target=\"_blank\" href=\"https://github.com/medcl/gopa/blob/master/LICENSE\">Apache License, Version 2.0</a>.</p>\n            <a href=\"/static\"><img src=\"/static/assets/img/logo.svg\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></a>\n        </div>\n\n    </div>\n</div>\n\n</body>\n</html>\n")
 	return nil
 }
 func Head(w io.Writer, title string, customHeaderBlock string) error {
@@ -31,17 +31,22 @@ func Head(w io.Writer, title string, customHeaderBlock string) error {
 	return nil
 }
 func Nav(w io.Writer, current string) error {
-	_, _ = io.WriteString(w, "\n\n<nav class=\"tm-navbar uk-navbar uk-navbar-attached\">\n  <div class=\"uk-container uk-container-center\">\n\n    <a class=\"uk-navbar-brand uk-hidden-small\" href=\"/ui/\"><img class=\"uk-margin uk-margin-remove\" src=\"/static/assets/img/logo.svg\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></a>\n\n    <ul class=\"uk-navbar-nav uk-hidden-small\">\n      <li ")
-	_, _ = fmt.Fprint(w, NavCurrent(current, "Dashboard"))
-	_, _ = io.WriteString(w, " ><a href=\"/ui/\">Dashboard</a></li>\n      <li ")
-	_, _ = fmt.Fprint(w, NavCurrent(current, "Tasks"))
-	_, _ = io.WriteString(w, " ><a href=\"/ui/tasks/\">Tasks</a></li>\n      <li ")
-	_, _ = fmt.Fprint(w, NavCurrent(current, "Explore"))
-	_, _ = io.WriteString(w, "  ><a href=\"/ui/explore/\">Explore</a></li>\n      <li ")
-	_, _ = fmt.Fprint(w, NavCurrent(current, "Console"))
-	_, _ = io.WriteString(w, " ><a href=\"/ui/console/\">Console</a></li>\n      <li ")
-	_, _ = fmt.Fprint(w, NavCurrent(current, "BoltDB"))
-	_, _ = io.WriteString(w, " ><a href=\"/ui/boltdb/\">BoltDB</a></li>\n    </ul>\n\n    <a href=\"#tm-offcanvas\" class=\"uk-navbar-toggle uk-visible-small\" data-uk-offcanvas=\"\"></a>\n\n    <div class=\"uk-navbar-brand uk-navbar-center uk-visible-small\"><img src=\"/static/assets/img/logo.svg\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></div>\n\n  </div>\n</nav>\n\n<div style=\"height: 15px;clear: both\"></div>\n")
+	_, _ = io.WriteString(w, "\n\n<nav class=\"tm-navbar uk-navbar uk-navbar-attached\">\n  <div class=\"uk-container uk-container-center\">\n\n    <a class=\"uk-navbar-brand uk-hidden-small\" href=\"/ui/\"><img class=\"uk-margin uk-margin-remove\" src=\"/static/assets/img/logo.svg\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></a>\n\n    <ul class=\"uk-navbar-nav uk-hidden-small\">\n\n      ")
+	if len(navs) > 0 {
+		for _, obj := range navs {
+
+			_, _ = io.WriteString(w, "\n      <li ")
+			_, _ = fmt.Fprint(w, NavCurrent(current, obj.name))
+			_, _ = io.WriteString(w, " ><a href=\"")
+			_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(obj.url)))
+			_, _ = io.WriteString(w, "\">")
+			_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(obj.displayName)))
+			_, _ = io.WriteString(w, "</a></li>\n      ")
+
+		}
+	}
+
+	_, _ = io.WriteString(w, "\n    </ul>\n\n    <a href=\"#tm-offcanvas\" class=\"uk-navbar-toggle uk-visible-small\" data-uk-offcanvas=\"\"></a>\n\n    <div class=\"uk-navbar-brand uk-navbar-center uk-visible-small\"><img src=\"/static/assets/img/logo.svg\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></div>\n\n  </div>\n</nav>\n\n<div style=\"height: 15px;clear: both\"></div>\n")
 	return nil
 }
 func OffCanvas(w io.Writer) error {

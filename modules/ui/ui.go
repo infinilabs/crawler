@@ -18,6 +18,7 @@ package ui
 
 import (
 	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/modules/ui/templates"
 )
 
 type UIModule struct {
@@ -28,6 +29,8 @@ func (this UIModule) Name() string {
 }
 
 func (this UIModule) Start(env *Env) {
+
+	templates.InitUI()
 
 	InitAPI()
 }

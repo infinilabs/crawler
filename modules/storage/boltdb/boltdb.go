@@ -27,7 +27,6 @@ import (
 	"github.com/medcl/gopa/core/store"
 	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules/config"
-	"path"
 	"time"
 )
 
@@ -48,10 +47,9 @@ func (this BoltdbStore) Open() error {
 	v := global.Lookup(config.REGISTER_BOLTDB)
 	if v != nil {
 		boltDb := v.(*bolt.DB)
-		db, err = storm.Open("boltdb", storm.UseDB(boltDb), storm.Codec(protobuf.Codec))
+		db, err = storm.Open(this.FileName, storm.UseDB(boltDb), storm.Codec(protobuf.Codec))
 	} else {
-		file := path.Join(global.Env().SystemConfig.Data, "boltdb")
-		db, err = storm.Open(file, storm.BoltOptions(0600, &bolt.Options{Timeout: 5 * time.Second}), storm.Codec(protobuf.Codec))
+		db, err = storm.Open(this.FileName, storm.BoltOptions(0600, &bolt.Options{Timeout: 5 * time.Second}), storm.Codec(protobuf.Codec))
 	}
 	if err != nil {
 		log.Errorf("error open boltdb: %s, %s", this.FileName, err)

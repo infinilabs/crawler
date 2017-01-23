@@ -14,11 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package common
+package templates
 
-func NavCurrent(cur, nav string) string {
-	if cur == nav {
-		return " class=\"uk-active\" "
-	}
-	return ""
+import "github.com/medcl/gopa/modules/ui/templates/common"
+
+func InitUI() {
+	common.RegisterNav("Dashboard", "Dashboard", "/ui/")
+	common.RegisterNav("Tasks", "Tasks", "/ui/tasks/")
+	//common.RegisterNav("Explore","Explore","/ui/explore/")
+	common.RegisterNav("Console", "Console", "/ui/console/")
+	common.RegisterNav("BoltDB", "BoltDB", "/ui/boltdb/")
 }

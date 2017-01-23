@@ -6,11 +6,15 @@
     <a class="uk-navbar-brand uk-hidden-small" href="/ui/"><img class="uk-margin uk-margin-remove" src="/static/assets/img/logo.svg" height="30" title="GOPA" alt="GOPA"></a>
 
     <ul class="uk-navbar-nav uk-hidden-small">
-      <li <%== NavCurrent(current,"Dashboard") %> ><a href="/ui/">Dashboard</a></li>
-      <li <%== NavCurrent(current,"Tasks") %> ><a href="/ui/tasks/">Tasks</a></li>
-      <li <%== NavCurrent(current,"Explore") %>  ><a href="/ui/explore/">Explore</a></li>
-      <li <%== NavCurrent(current,"Console") %> ><a href="/ui/console/">Console</a></li>
-      <li <%== NavCurrent(current,"BoltDB") %> ><a href="/ui/boltdb/">BoltDB</a></li>
+
+      <% if len(navs)>0 {
+      for _,obj:=range navs{
+      %>
+      <li <%== NavCurrent(current,obj.name) %> ><a href="<%= obj.url %>"><%= obj.displayName %></a></li>
+      <%
+      }
+      }
+      %>
     </ul>
 
     <a href="#tm-offcanvas" class="uk-navbar-toggle uk-visible-small" data-uk-offcanvas=""></a>
