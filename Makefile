@@ -126,6 +126,7 @@ fetch-depends:
 	$(GO) get github.com/asdine/storm/codec/protobuf
 	$(GO) get github.com/ryanuber/go-glob
 	$(GO) get github.com/gorilla/sessions
+	$(GO) get github.com/mattn/go-sqlite3
 	$(GO) get github.com/jinzhu/gorm
 
 dist: cross-build package
