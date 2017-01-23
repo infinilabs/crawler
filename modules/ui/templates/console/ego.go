@@ -14,7 +14,7 @@ func Index(w io.Writer) error {
 	_, _ = io.WriteString(w, "\n\n")
 	_, _ = io.WriteString(w, "\n\n")
 	common.Head(w, "Console", "")
-	_, _ = io.WriteString(w, "\n\n<link rel=\"stylesheet\" href=\"/static/assets/uikit-2.27.1/css/components/notify.min.css\" />\n<script src=\"/static/assets/js/jquery.hotkeys-0.7.9.min.js\"></script>\n<script src=\"/static/assets/uikit-2.27.1/js/components/notify.min.js\"></script>\n<script src=\"/static/assets/js/page/console.js\"></script>\n<style type=\"text/css\">\n    pre{\n        margin-top:0px;\n        margin-bottom:0px;\n        padding-top:4px;\n        padding-bottom:4px;\n    }\n    .request pre{\n        color:royalblue;\n    }\n    #log {\n        max-height: 400px;\n    }\n    #logging {\n        height: 500px;\n        max-height: 1000px;\n    }\n</style>\n")
+	_, _ = io.WriteString(w, "\n\n<link rel=\"stylesheet\" href=\"/static/assets/uikit-2.27.1/css/components/notify.min.css\" />\n<script src=\"/static/assets/js/jquery.hotkeys-0.7.9.min.js\"></script>\n<script src=\"/static/assets/uikit-2.27.1/js/components/notify.min.js\"></script>\n<script src=\"/static/assets/js/page/console.js\"></script>\n<style type=\"text/css\">\n    pre{\n        margin-top:0px;\n        margin-bottom:0px;\n        padding-top:4px;\n        padding-bottom:4px;\n    }\n    .request pre{\n        color:royalblue;\n    }\n    #log {\n        max-height: 200px;\n    }\n    #logging {\n        height: 500px;\n        max-height: 1000px;\n    }\n</style>\n")
 	common.Body(w)
 	_, _ = io.WriteString(w, "\n")
 	common.Nav(w, "Console")

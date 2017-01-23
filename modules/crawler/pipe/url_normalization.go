@@ -162,10 +162,14 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 	context.Set(CONTEXT_HOST, currentURI.Host)
 	context.Set(CONTEXT_URL_PATH, currentURI.Path)
 
-	task := context.Get(CONTEXT_CRAWLER_TASK).(*model.Task)
-	task.Domain = currentURI.Host
-	task.Scheme = currentURI.Scheme
-	task.UrlPath = currentURI.Path
+	t := context.Get(CONTEXT_CRAWLER_TASK)
+	if(t!=nil){
+		task:=t.(*model.Task)
+		task.Domain = currentURI.Host
+		task.Scheme = currentURI.Scheme
+		task.UrlPath = currentURI.Path
+	}
+
 
 	filePath := ""
 	filename := ""

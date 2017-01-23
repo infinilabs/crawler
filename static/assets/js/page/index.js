@@ -14,15 +14,11 @@ function loadData(){
     $.get('/stats').done(function (data) {
         if(data["queue.check"]){
             $("#checker_task_num").text(data["queue.check"].pop+" / "+data["queue.check"].push+", valid: "+data["checker.url"].valid_seed);
-            //option.series[0].data[0].value = ((data["queue.check"].pop/data["queue.check"].push)*100).toFixed(2) - 0;
         }
 
         if(data["crawler.pipeline"]){
             $("#crawler_task_num").text(safeGetValue(data["crawler.pipeline"].finished)+" / "+data["crawler.pipeline"].total+", error: "+safeGetValue(data["crawler.pipeline"].error)+", break: "+safeGetValue(data["crawler.pipeline"].break)+", queue: "+safeGetValue(data["queue.fetch"].pop)+" / "+data["queue.fetch"].push);
-            //option.series[1].data[0].value = (((parseInt(safeGetValue(data["queue.fetch"].pop)))/parseInt(safeGetValue(data["queue.fetch"].push)))*100).toFixed(2) - 0;
         }
-
-        //myChart.setOption(option, true);
     });
 
 

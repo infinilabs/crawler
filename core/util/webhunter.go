@@ -27,10 +27,21 @@ import (
 	"strings"
 	"time"
 
-	"errors"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/model"
+	"github.com/medcl/gopa/core/errors"
+	"fmt"
 )
+
+func GetHost(url string)string  {
+	uri, err := ParseRequestURI(url)
+	if(err!=nil){
+		log.Trace(err)
+		return ""
+	}
+	return uri.Host
+}
+
 
 //parse to get url root
 func GetRootUrl(source *URL) string {
@@ -75,9 +86,23 @@ func noRedirect(req *http.Request, via []*http.Request) error {
 	return errors.New("catch http redirect!")
 }
 
+func getUrl(url string) (string,error) {
+	if(!strings.HasPrefix(url,"http")){
+		return url,errors.New("invalid url, "+url)
+		//url="http://"+url
+	}
+	return url,nil
+}
+
 func get(page *PageItem, url string, cookie string) ([]byte, error) {
 
 	log.Debug("let's get :" + url)
+
+	var err error
+	url,err=getUrl(url)
+	if(err!=nil){
+		return nil,errors.New("invalid url: "+url)
+	}
 
 	client := &http.Client{
 		CheckRedirect: noRedirect,
@@ -120,7 +145,7 @@ func get(page *PageItem, url string, cookie string) ([]byte, error) {
 		log.Debug("got redirect: ", url, " => ", resp.Header.Get("Location"))
 		location := resp.Header.Get("Location")
 		if len(location) > 0 && location != url {
-			return get(page, location, cookie)
+			return nil,errors.NewWithPayload(errors.URLRedirected,fmt.Sprint("got redirect: ", url, " => ", location),location)
 		}
 	}
 
@@ -149,7 +174,7 @@ func get(page *PageItem, url string, cookie string) ([]byte, error) {
 	case "gzip":
 		reader, err = gzip.NewReader(resp.Body)
 		if err != nil {
-			log.Error(url, err)
+			log.Error(url,", ", err)
 			return nil, err
 		}
 		defer reader.Close()
@@ -160,7 +185,7 @@ func get(page *PageItem, url string, cookie string) ([]byte, error) {
 	if reader != nil {
 		body, err := ioutil.ReadAll(reader)
 		if err != nil {
-			log.Error(url, err)
+			log.Error(url,", ", err)
 			return nil, err
 		}
 		page.Body = body
@@ -243,7 +268,6 @@ func post(url string, cookie string, postStr string) []byte {
 }
 
 func HttpGetWithCookie(page *PageItem, resource string, cookie string) (msg []byte, err error) {
-
 	out, err := get(page, resource, cookie)
 	return out, err
 }

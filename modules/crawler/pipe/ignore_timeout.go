@@ -34,6 +34,7 @@ type IgnoreTimeoutJoint struct {
 
 func (this IgnoreTimeoutJoint) Process(context *Context) (*Context, error) {
 
+	//TODO ignore within time period, rather than total count
 	host := context.MustGetString(CONTEXT_HOST)
 	timeoutCount := stats.Stat("domain.stats", host+"."+stats.STATS_FETCH_TIMEOUT_COUNT)
 	if timeoutCount > this.IgnoreTimeoutAfterCount {

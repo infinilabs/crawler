@@ -31,3 +31,29 @@ func TestGet(t *testing.T) {
 	fmt.Println("", string(data))
 	fmt.Println("", string(data1))
 }
+
+func TestGetHost(t *testing.T) {
+
+	url:="/index.html"
+	host:=GetHost(url)
+	fmt.Println("",host)
+
+
+	url="www.baidu.com/index.html"
+	host=GetHost(url)
+	fmt.Println("www.baidu.com",host)
+
+	url="//www.baidu.com/index.html"
+	host=GetHost(url)
+	fmt.Println("www.baidu.com",host)
+
+	url="http://www.baidu.com/index.html"
+	host=GetHost(url)
+	fmt.Println("www.baidu.com",host)
+
+	url="https://www.baidu.com/index.html"
+	host=GetHost(url)
+	fmt.Println("www.baidu.com",host)
+}
+
+

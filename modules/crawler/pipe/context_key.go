@@ -24,6 +24,7 @@ const (
 	CONTEXT_URL                  ParaKey = "URL"
 	CONTEXT_REFERENCE_URL        ParaKey = "REFERENCE_URL"
 	CONTEXT_DEPTH                ParaKey = "DEPTH"
+	CONTEXT_BREADTH                ParaKey = "BREADTH"
 	CONTEXT_PAGE_BODY_BYTES      ParaKey = "PAGE_BODY_BYTES"
 	CONTEXT_PAGE_BODY_PLAIN_TEXT ParaKey = "PAGE_BODY_PLAIN_TEXT" //extracted plain text from html
 	CONTEXT_PAGE_ITEM            ParaKey = "PAGE"

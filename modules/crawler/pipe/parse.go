@@ -25,6 +25,7 @@ import (
 	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/modules/config"
 	"strings"
+	"github.com/medcl/gopa/core/util"
 )
 
 const ParsePage JointKey = "parse"
@@ -32,7 +33,9 @@ const ParsePage JointKey = "parse"
 type ParsePageJoint struct {
 	links         map[string]interface{}
 	DispatchLinks bool
-	MaxDepth      int
+	MaxDepth      int //max depth of page to follow
+	MaxBreadth    int //max breadth of the domain to follow
+	MaxPageOfBreadth map[int]int //max page to fetch in each level's breadth, eg: 1:100;2:50;3:5;4:1
 }
 
 func (this ParsePageJoint) Name() string {
@@ -42,7 +45,9 @@ func (this ParsePageJoint) Name() string {
 func (this ParsePageJoint) Process(s *Context) (*Context, error) {
 
 	refUrl := s.MustGetString(CONTEXT_URL)
+	refHost := s.MustGetString(CONTEXT_HOST)
 	depth := s.MustGetInt(CONTEXT_DEPTH)
+	breadth := s.MustGetInt(CONTEXT_BREADTH)
 	fileContent := s.MustGetBytes(CONTEXT_PAGE_BODY_BYTES)
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(fileContent))
 	if err != nil {
@@ -104,13 +109,25 @@ func (this ParsePageJoint) Process(s *Context) (*Context, error) {
 
 	//if reach max depth, skip for future fetch
 	if depth >= this.MaxDepth {
+		log.Trace("skip while reach max depth, ",depth,", ",refUrl)
+		return s, nil
+	}
+	//if reach max breadth, skip for future fetch
+	if breadth >= this.MaxBreadth {
+		log.Trace("skip while reach max breadth, ",breadth,", ",refUrl)
 		return s, nil
 	}
 
 	//dispatch links
 	for url := range this.links {
 		if this.DispatchLinks {
-			queue.Push(config.CheckChannel, model.NewTaskSeed(url, refUrl, depth+1).MustGetBytes())
+			host:=util.GetHost(url)
+			b:=breadth
+			if(host!=""&&refHost!=host){
+				b++
+				log.Trace("auto incre breadth, ",b,", ",refUrl,"->",url)
+			}
+			queue.Push(config.CheckChannel, model.NewTaskSeed(url, refUrl, depth+1,b).MustGetBytes())
 		}
 	}
 

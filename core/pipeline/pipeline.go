@@ -34,7 +34,7 @@ import (
 type ParaKey string
 
 type Context struct {
-	DryRun bool
+	DryRun bool `json:"dry_run"`
 	Parameters
 	Phrase    model.TaskPhrase `json:"phrase"`
 	breakFlag bool             `json:"-"`

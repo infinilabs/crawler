@@ -130,7 +130,7 @@ func (this CheckerModule) execute() {
 
 	stats.Increment("checker.url", "valid_seed")
 
-	log.Debugf("send url: %s ,depth: %d to  fetch queue", string(url.Url), url.Depth)
+	log.Debugf("send url: %s ,depth: %d, breadth: %d, to fetch queue", string(url.Url), url.Depth, url.Breadth)
 	elapsedTime := time.Now().Sub(startTime)
 	stats.Timing("checker.url", "time", elapsedTime.Nanoseconds())
 }

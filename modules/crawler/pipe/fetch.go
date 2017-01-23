@@ -17,7 +17,6 @@ limitations under the License.
 package pipe
 
 import (
-	"errors"
 	"fmt"
 	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/model"
@@ -25,6 +24,9 @@ import (
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/util"
 	"time"
+	"github.com/medcl/gopa/core/errors"
+	"github.com/medcl/gopa/modules/config"
+	"github.com/medcl/gopa/core/queue"
 )
 
 const Fetch JointKey = "fetch"
@@ -85,6 +87,17 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 			flg <- signal{flag: true}
 
 		} else {
+
+			e,ok:=err.(*errors.Error)
+			if(ok){
+				if(e.Code==errors.URLRedirected){
+					depth := context.MustGetInt(CONTEXT_DEPTH)
+					breadth := context.MustGetInt(CONTEXT_BREADTH)
+					task:=model.NewTaskSeed(e.Payload.(string), requestUrl, depth,breadth)
+					log.Trace(err)
+					queue.Push(config.CheckChannel, task.MustGetBytes())
+				}
+			}
 			flg <- signal{flag: false, err: err}
 		}
 	}()

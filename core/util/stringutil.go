@@ -20,6 +20,7 @@ import (
 	. "strings"
 	"unicode"
 	"unicode/utf16"
+	"encoding/json"
 )
 
 func ContainStr(s, substr string) bool {
@@ -66,4 +67,14 @@ func MergeSpace(in string) (out string) {
 		}
 	}
 	return
+}
+
+func ToJson(in interface{},indent bool) string{
+	var b []byte
+	if(indent){
+		b,_=json.MarshalIndent(in," "," ")
+	}else{
+		b,_=json.Marshal(in)
+	}
+	return string(b)
 }

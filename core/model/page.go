@@ -63,6 +63,7 @@ type Seed struct {
 	Url        string `storm:"index" json:"url,omitempty"` // the seed url may not cleaned, may miss the domain part, need reference to provide the complete url information
 	Reference  string `json:"reference,omitempty"`
 	Depth      int    `storm:"index" json:"depth,omitempty"`
+	Breadth    int    `storm:"index" json:"breadth,omitempty"`
 	CreateTime *Time  `storm:"index" json:"created,omitempty"`
 }
 
@@ -96,6 +97,7 @@ func (this Seed) Get(url string) Seed {
 	task.Url = url
 	task.Reference = ""
 	task.Depth = 0
+	task.Breadth = 0
 	return task
 }
 
@@ -113,6 +115,8 @@ var delimiter = "|#|"
 func (this Seed) GetBytes() ([]byte, error) {
 	var buf bytes.Buffer
 
+	buf.WriteString(fmt.Sprint(this.Breadth))
+	buf.WriteString(delimiter)
 	buf.WriteString(fmt.Sprint(this.Depth))
 	buf.WriteString(delimiter)
 	buf.WriteString(this.Reference)
@@ -136,17 +140,20 @@ func fromBytes(b []byte) (Seed, error) {
 	array := strings.Split(str, delimiter)
 	task := Seed{}
 	i, _ := strconv.Atoi(array[0])
+	task.Breadth = i
+	i, _ = strconv.Atoi(array[1])
 	task.Depth = i
-	task.Reference = array[1]
-	task.Url = array[2]
+	task.Reference = array[2]
+	task.Url = array[3]
 
 	return task, nil
 }
 
-func NewTaskSeed(url, ref string, depth int) Seed {
+func NewTaskSeed(url, ref string, depth int,breadth int) Seed {
 	task := Seed{}
 	task.Url = url
 	task.Reference = ref
 	task.Depth = depth
+	task.Breadth = breadth
 	return task
 }

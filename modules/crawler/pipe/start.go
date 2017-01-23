@@ -58,6 +58,7 @@ func (this InitTaskJoint) Process(context *Context) (*Context, error) {
 	context.Set(CONTEXT_ORIGINAL_URL, task.Seed.Url)        //TODO remove
 	context.Set(CONTEXT_URL, task.Seed.Url)                 //TODO remove
 	context.Set(CONTEXT_DEPTH, task.Seed.Depth)             //TODO remove
+	context.Set(CONTEXT_BREADTH, task.Seed.Breadth)             //TODO remove
 	context.Set(CONTEXT_REFERENCE_URL, task.Seed.Reference) //TODO remove
 
 	return context, nil

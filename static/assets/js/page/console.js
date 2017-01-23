@@ -72,6 +72,7 @@ $(function () {
         conn.send(msg.val());
         appendRequestLog(msg.val())
         msg.val("");
+        scrollDiv();
         return false
     });
 
@@ -186,7 +187,8 @@ function updateLogging(enabled){
 
 window.onload = function(){
     var s = setInterval("scrollDiv()", 10000);
-}
+};
+
 function scrollDiv(){
     var logging = document.getElementById("logging");
     logging.scrollTop = logging.scrollHeight;
