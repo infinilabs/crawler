@@ -60,8 +60,7 @@ all: clean config update_ui cross-build
 
 all-platform: clean config update_ui cross-build-all-platform
 
-cross-build-all-platform: clean config
-	$(GO) test
+cross-build-all-platform: clean config test build-bsd
 	GOOS=windows GOARCH=amd64     $(GOBUILD) -o bin/windows64/gopa.exe
 	GOOS=windows GOARCH=386       $(GOBUILD) -o bin/windows32/gopa.exe
 	GOOS=darwin  GOARCH=amd64     $(GOBUILD) -o bin/darwin64/gopa
@@ -69,15 +68,8 @@ cross-build-all-platform: clean config
 	GOOS=linux  GOARCH=amd64      $(GOBUILD) -o bin/linux64/gopa
 	GOOS=linux  GOARCH=386        $(GOBUILD) -o bin/linux32/gopa
 	GOOS=linux  GOARCH=arm        $(GOBUILD) -o bin/linux_arm/gopa
-	GOOS=freebsd  GOARCH=amd64    $(GOBUILD) -o bin/freebsd64/gopa
-	GOOS=freebsd  GOARCH=386      $(GOBUILD) -o bin/freebsd32/gopa
-	GOOS=netbsd  GOARCH=amd64     $(GOBUILD) -o bin/netbsd64/gopa
-	GOOS=netbsd  GOARCH=386       $(GOBUILD) -o bin/netbsd32/gopa
-	GOOS=openbsd  GOARCH=amd64    $(GOBUILD) -o bin/openbsd64/gopa
-	GOOS=openbsd  GOARCH=386      $(GOBUILD) -o bin/openbsd32/gopa
 
-build-bsd: clean config update_ui
-	$(GO) test
+build-bsd:
 	GOOS=freebsd  GOARCH=amd64    $(GOBUILD) -o bin/freebsd64/gopa
 	GOOS=freebsd  GOARCH=386      $(GOBUILD) -o bin/freebsd32/gopa
 	GOOS=netbsd  GOARCH=amd64     $(GOBUILD) -o bin/netbsd64/gopa
@@ -134,6 +126,7 @@ fetch-depends:
 	$(GO) get github.com/asdine/storm/codec/protobuf
 	$(GO) get github.com/ryanuber/go-glob
 	$(GO) get github.com/gorilla/sessions
+	$(GO) get github.com/jinzhu/gorm
 
 dist: cross-build package
 
@@ -183,14 +176,3 @@ check:
 errcheck:
 	go get github.com/kisielk/errcheck
 	errcheck -blank $(PACKAGES)
-
-
-update_vendor:
-	which glide >/dev/null || curl https://glide.sh/get | sh
-	which glide-vc || go get -v -u github.com/sgotti/glide-vc
-	rm -r vendor && mv _vendor/src vendor || true
-	rm -rf _vendor
-	glide update -s -v -u
-	glide vc --only-code --no-tests
-	mkdir -p _vendor
-	mv vendor _vendor/src
