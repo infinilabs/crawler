@@ -18,6 +18,7 @@ package store
 
 import (
 	"errors"
+	"github.com/jinzhu/gorm"
 )
 
 type Store interface {
@@ -71,6 +72,7 @@ type Result struct {
 
 var handler Store
 var theORMHandler ORM
+var conn *gorm.DB
 
 func GetValue(bucket string, key []byte) []byte {
 	return getHandler().GetValue(bucket, key)
@@ -140,4 +142,13 @@ func RegisterStoreHandler(h Store) {
 
 func RegisterORMHandler(h ORM) {
 	theORMHandler = h
+}
+
+func RegisterConnection(h *gorm.DB) {
+	conn = h
+}
+
+// create a session for each business unit of execution (e.g. a web request or goworkers job)
+func GetDBConnection() *gorm.DB {
+	return conn
 }
