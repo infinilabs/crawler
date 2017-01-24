@@ -103,7 +103,7 @@ func (this *Env) init() error {
 }
 
 func EmptyEnv() *Env {
-	return &Env{}
+	return &Env{SystemConfig:&SystemConfig{},RuntimeConfig:&RuntimeConfig{}}
 }
 
 //high priority config, init from the environment or startup, can't be changed

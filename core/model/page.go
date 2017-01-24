@@ -59,12 +59,10 @@ type PageLink struct {
 }
 
 type Seed struct {
-	ID         int    `storm:"id,increment" json:"id,omitempty"`
-	Url        string `storm:"index" json:"url,omitempty"` // the seed url may not cleaned, may miss the domain part, need reference to provide the complete url information
+	Url        string `storm:"index" json:"url,omitempty" gorm:"type:not null;varchar(500);unique_index"` // the seed url may not cleaned, may miss the domain part, need reference to provide the complete url information
 	Reference  string `json:"reference,omitempty"`
 	Depth      int    `storm:"index" json:"depth,omitempty"`
 	Breadth    int    `storm:"index" json:"breadth,omitempty"`
-	CreateTime *Time  `storm:"index" json:"created,omitempty"`
 }
 
 type TaskStatus int
@@ -76,16 +74,15 @@ const TaskFetchSuccess = 3
 type TaskPhrase int
 
 type Task struct {
-	ID            string      `storm:"id,unique" json:"id"`
-	Url           string      `storm:"index" json:"url,omitempty"`
+	Seed
+	ID            string      `storm:"id,unique" json:"id" gorm:"not null;unique;primary_key"`
 	Domain        string      `storm:"index" json:"domain,omitempty"` // elastic.co
 	Scheme        string      `json:"schema,omitempty"`               // elastic.co
 	UrlPath       string      `json:"path,omitempty"`                 // /index.html
 	Phrase        TaskPhrase  `storm:"index" json:"phrase"`
 	Status        TaskStatus  `storm:"index" json:"status"`
-	Seed          *Seed       `storm:"inline" json:"seed,omitempty"`
-	Page          *PageItem   `storm:"inline" json:"page,omitempty"`
-	Message       interface{} `storm:"inline" json:"message,omitempty"`
+	Page          *PageItem   `storm:"inline" json:"page,omitempty" gorm:"-"`
+	Message       interface{} `storm:"inline" json:"message,omitempty" gorm:"-"`
 	CreateTime    *Time       `storm:"index" json:"created,omitempty"`
 	UpdateTime    *Time       `storm:"index" json:"updated,omitempty"`
 	LastCheckTime *Time       `storm:"index" json:"checked,omitempty"`

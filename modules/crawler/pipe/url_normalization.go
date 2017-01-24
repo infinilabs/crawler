@@ -46,6 +46,10 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 	var currentURI, referenceURI *u.URL
 	var err error
 
+	if(len(url)<=0){
+		context.ErrorExit("url can't be null")
+	}
+
 	log.Trace("start parse url,", url)
 
 	var tempUrl = url
@@ -167,6 +171,7 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 		task:=t.(*model.Task)
 		task.Domain = currentURI.Host
 		task.Scheme = currentURI.Scheme
+		task.Url = url
 		task.UrlPath = currentURI.Path
 	}
 

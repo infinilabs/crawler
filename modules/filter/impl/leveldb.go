@@ -26,13 +26,12 @@ import (
 type LeveldbFilter struct {
 	persistFileName string
 	filter          *leveldb.DB
-	l               sync.RWMutex
+	l  sync.Mutex
 }
 
 func (filter *LeveldbFilter) Open(fileName string) error {
 	filter.l.Lock()
 	defer filter.l.Unlock()
-
 	filter.persistFileName = fileName
 	db, err := leveldb.OpenFile(fileName, &opt.Options{DisableBlockCache: true, DisableBufferPool: true, BlockCacher: opt.NoCacher})
 	filter.filter = db
@@ -47,8 +46,7 @@ func (filter *LeveldbFilter) Open(fileName string) error {
 }
 
 func (this *LeveldbFilter) Close() error {
-	this.l.Lock()
-	defer this.l.Unlock()
+
 	log.Debug("start persist leveldb, file:", this.persistFileName)
 
 	err := this.filter.Close()
@@ -62,8 +60,12 @@ func (this *LeveldbFilter) Close() error {
 func (filter *LeveldbFilter) Exists(key []byte) bool {
 	filter.l.Lock()
 	defer filter.l.Unlock()
-	value, _ := filter.filter.Get(key, nil)
-	if value != nil {
+
+	value, err := filter.filter.Get(key, nil)
+	if(err!=nil){
+		return false
+	}
+	if value != nil&&len(value)>0 {
 		return true
 	}
 	return false
@@ -72,13 +74,21 @@ func (filter *LeveldbFilter) Exists(key []byte) bool {
 func (filter *LeveldbFilter) Add(key []byte) error {
 	filter.l.Lock()
 	defer filter.l.Unlock()
-	filter.filter.Put(key, []byte(""), nil)
+
+	err:=filter.filter.Put(key, []byte("v"), nil)
+	if(err!=nil){
+		panic(err)
+	}
 	return nil
 }
 
 func (filter *LeveldbFilter) Delete(key []byte) error {
 	filter.l.Lock()
 	defer filter.l.Unlock()
-	filter.filter.Delete(key, nil)
+
+	err:=filter.filter.Delete(key, nil)
+	if(err!=nil){
+		panic(err)
+	}
 	return nil
 }

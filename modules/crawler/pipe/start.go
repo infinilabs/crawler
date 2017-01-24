@@ -54,6 +54,11 @@ func (this InitTaskJoint) Process(context *Context) (*Context, error) {
 		panic(errors.New("task not set"))
 	}
 
+	//if(this.Task==nil){
+	//	this.Task=model.Task{}
+	//	panic(errors.New("nil task"))
+	//}
+
 	context.Set(CONTEXT_CRAWLER_TASK, task)
 	context.Set(CONTEXT_ORIGINAL_URL, task.Seed.Url)        //TODO remove
 	context.Set(CONTEXT_URL, task.Seed.Url)                 //TODO remove

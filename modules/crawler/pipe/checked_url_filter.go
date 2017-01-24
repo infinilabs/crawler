@@ -18,11 +18,11 @@ package pipe
 
 import (
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/filter"
 	. "github.com/medcl/gopa/core/pipeline"
-	"github.com/medcl/gopa/core/stats"
-	"github.com/medcl/gopa/modules/config"
 	"regexp"
+	"github.com/medcl/gopa/modules/config"
+	"github.com/medcl/gopa/core/filter"
+	"github.com/medcl/gopa/core/stats"
 )
 
 const UrlCheckedFilter JointKey = "url_checked_filter"
@@ -41,19 +41,18 @@ func (this UrlCheckedFilterJoint) Process(context *Context) (*Context, error) {
 	url := context.MustGetString(CONTEXT_URL)
 	//统一 url 格式 , url 此处应该不能是相对路径
 
-	log.Trace("cheking url:", url)
-
 	b, err := filter.CheckThenAdd(config.CheckFilter, []byte(url))
+	log.Trace("cheking url:", url,",hit:",b)
+
 	//checking
 	if b {
 		stats.Increment("checker.url", "duplicated")
-		log.Debug("duplicated url,already checked,  url:", url)
-		context.Exit("duplicated url,already checked,  url:" + url)
+		log.Trace("duplicated url,already checked,  url:", url)
+		context.ErrorExit("duplicated url,already checked,  url:" + url)
 		return context, nil
 	}
 	if err != nil {
 		log.Error(err)
-		panic(err)
 		context.Break("check url error, url: " + url + ", " + err.Error())
 	}
 

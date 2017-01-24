@@ -44,7 +44,7 @@ func (this UrlExtFilterJoint) Process(context *Context) (*Context, error) {
 	}
 
 	if (!this.valid(orgUrl)) || (url != orgUrl && (!this.valid(url))) {
-		context.Exit("invalid url ext, " + url)
+		context.ErrorExit("invalid url ext, " + url)
 	}
 
 	return context, nil

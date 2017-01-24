@@ -29,6 +29,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"github.com/medcl/gopa/core/util"
 )
 
 type ParaKey string
@@ -37,6 +38,7 @@ type Context struct {
 	DryRun bool `json:"dry_run"`
 	Parameters
 	Phrase    model.TaskPhrase `json:"phrase"`
+	IgnoreBroken bool 	   `json:"ignore_broken"`
 	breakFlag bool             `json:"-"`
 	exitFlag  bool             `json:"-"`
 	Payload   interface{}      `json:"-"`
@@ -58,14 +60,14 @@ func (this *Context) IsBreak() bool {
 /**
 break all pipelines, without execute the end phrase
 */
-func (this *Context) IsExit() bool {
+func (this *Context) IsErrorExit() bool {
 	return this.exitFlag
 }
 
 /**
 tell pipeline to exit all
 */
-func (this *Context) Exit(msg interface{}) {
+func (this *Context) ErrorExit(msg interface{}) {
 	this.exitFlag = true
 	this.Payload = msg
 }
@@ -204,6 +206,10 @@ func (this *Pipeline) GetID() string {
 	return this.id
 }
 
+func (this *Pipeline) GetContext() *Context {
+	return this.context
+}
+
 func (this *Pipeline) Start(s Joint) *Pipeline {
 	this.joints = []Joint{s}
 	return this
@@ -236,8 +242,10 @@ func (this *Pipeline) Run() *Context {
 				stats.Increment(this.name+".pipeline", "error")
 			}
 		}
+		if !this.context.IsErrorExit()&&(!(this.context.IgnoreBroken&&this.context.IsBreak())){
+			this.endPipeline()
+		}
 
-		this.endPipeline()
 		stats.Increment(this.name+".pipeline", "finished")
 	}()
 
@@ -249,7 +257,12 @@ func (this *Pipeline) Run() *Context {
 			stats.Increment(this.name+".pipeline", "break")
 			break
 		}
-		if this.context.IsExit() {
+		if this.context.IsErrorExit() {
+			if(global.Env().IsDebug){
+				log.Debug(util.ToJson(this.id,true))
+				log.Debug(util.ToJson(this.name,true))
+				log.Debug(util.ToJson(this.context,true))
+			}
 			log.Trace("exit joint,", v.Name())
 			stats.Increment(this.name+".pipeline", "exit")
 			break
@@ -271,7 +284,7 @@ func (this *Pipeline) Run() *Context {
 }
 
 func (this *Pipeline) endPipeline() {
-	if this.context.IsExit() {
+	if this.context.IsErrorExit() {
 		log.Debug("exit pipeline, ", this.name, ", ", this.context.Payload)
 		return
 	}

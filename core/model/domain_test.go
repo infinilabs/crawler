@@ -14,36 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package storage
+package model
 
 import (
-	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/core/store"
-	"github.com/medcl/gopa/modules/storage/boltdb"
+	"testing"
 )
 
-var impl boltdb.BoltdbStore
+func TestDomainGet(t *testing.T) {
 
-func (this StorageModule) Name() string {
-	return "Storage"
-}
 
-func (this StorageModule) Start(env *Env) {
-
-	impl = boltdb.BoltdbStore{FileName: env.SystemConfig.GetDataDir() + "/boltdb"}
-	err := impl.Open()
-	if err != nil {
-		panic(err)
-	}
-	store.RegisterStoreHandler(impl)
-	//store.RegisterORMHandler(impl)
-}
-
-func (this StorageModule) Stop() error {
-	err := impl.Close()
-	return err
-
-}
-
-type StorageModule struct {
 }

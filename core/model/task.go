@@ -5,10 +5,11 @@ import (
 	"github.com/medcl/gopa/core/store"
 	"github.com/rs/xid"
 	"time"
+	"github.com/medcl/gopa/core/errors"
 )
 
 func CreateTask(task *Task) error {
-	log.Trace("start create crawler task")
+	log.Trace("start create crawler task, ",task.Url)
 	time := time.Now()
 	task.ID = xid.New().String()
 	task.Status = TaskCreated
@@ -22,7 +23,7 @@ func CreateTask(task *Task) error {
 }
 
 func UpdateTask(task *Task) {
-	log.Trace("start update crawler task")
+	log.Trace("start update crawler task, ",task.Url)
 	time := time.Now()
 	task.UpdateTime = &time
 	err := store.Update(task)
@@ -44,16 +45,20 @@ func DeleteTask(id string) error {
 func GetTask(id string) (Task, error) {
 	log.Trace("start get seed: ", id)
 	task := Task{}
-	err := store.Get("ID", id, &task)
+	err := store.GetBy("id", id, &task)
 	if err != nil {
 		log.Debug(id, ", ", err)
 	}
+	if(len(task.ID)==0||task.CreateTime==nil){
+		panic(errors.New("not found,"+id))
+	}
+
 	return task, err
 }
 func GetTaskByField(k, v string) (Task, error) {
 	log.Trace("start get seed: ", k, ", ", v)
 	task := Task{}
-	err := store.Get(k, v, &task)
+	err := store.GetBy(k, v, &task)
 	if err != nil {
 		log.Debug(k, ", ", err)
 	}
@@ -63,11 +68,11 @@ func GetTaskByField(k, v string) (Task, error) {
 func GetTaskList(from, size int, domain string) (int, []Task, error) {
 	log.Trace("start get all crawler tasks")
 	var tasks []Task
-	queryO := store.Query{Sort: "CreateTime", From: from, Size: size}
+	queryO := store.Query{Sort: "create_time desc", From: from, Size: size}
 	if len(domain) > 0 {
-		queryO.Filter = &store.Cond{Name: "Domain", Value: domain}
+		queryO.Filter = &store.Cond{Name: "domain", Value: domain}
 	}
-	err, result := store.Search(&Task{}, &tasks, &queryO)
+	err, result := store.Search(&tasks, &queryO)
 	if err != nil {
 		log.Trace(err)
 	}
@@ -77,8 +82,8 @@ func GetTaskList(from, size int, domain string) (int, []Task, error) {
 func GetPendingFetchTasks() (int, []Task, error) {
 	log.Trace("start get all crawler tasks")
 	var tasks []Task
-	queryO := store.Query{Sort: "CreateTime", Filter: &store.Cond{Name: "Phrase", Value: 1}}
-	err, result := store.Search(&Task{}, &tasks, &queryO)
+	queryO := store.Query{Sort: "create_time desc", Filter: &store.Cond{Name: "phrase", Value: 1}}
+	err, result := store.Search(&tasks, &queryO)
 	if err != nil {
 		log.Trace(err)
 	}

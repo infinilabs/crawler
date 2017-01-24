@@ -56,7 +56,7 @@ func (this BoltdbStore) Open() error {
 		return err
 	}
 
-	buckets := []string{config.TaskBucketKey, config.StatsBucketKey, config.SnapshotBucketKey, config.SnapshotMappingBucketKey}
+	buckets := []string{config.KVBucketKey, config.TaskBucketKey, config.StatsBucketKey, config.SnapshotBucketKey, config.SnapshotMappingBucketKey}
 	for _, bucket := range buckets {
 		db.Bolt.Update(func(tx *bolt.Tx) error {
 			_, err := tx.CreateBucketIfNotExists([]byte(bucket))

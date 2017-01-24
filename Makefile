@@ -22,8 +22,9 @@ FILES     := $$(find . -name '*.go' | grep -vE 'vendor')
 
 .PHONY: all build update test clean
 
+default: clean build
 
-build: clean config update_ui update_template_ui
+build: config update_ui update_template_ui
 	@echo $(GOPATH)
 	@echo $(NEWGOPATH)
 	$(GOBUILD) -o bin/gopa
@@ -81,6 +82,7 @@ format:
 	gofmt -l -s -w .
 
 clean_data:
+	rm -rif dist
 	rm -rif data
 	rm -rif log
 

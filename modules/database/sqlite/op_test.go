@@ -23,6 +23,7 @@ import (
 	"github.com/medcl/gopa/core/util"
 	"testing"
 	"time"
+	"github.com/medcl/gopa/core/model"
 )
 
 type UserInfo struct {
@@ -72,4 +73,23 @@ func Test1(t *testing.T) {
 		fmt.Println(g)
 	}
 
+	db.AutoMigrate(model.Domain{})
+	domain:=model.Domain{}
+	domain.Host="baidu.com"
+	time:=time.Now()
+	domain.CreateTime=&time
+	domain.UpdateTime=&time
+
+	db.Create(&domain)
+	domain=model.Domain{}
+	domain.Host="baidu.com"
+	db.Find(&domain)
+	fmt.Println(util.ToJson(domain,true))
+
+	var us []UserInfo
+	db.Model(&u).Where("depart_name=?","dev").Find(&us)
+	fmt.Println(us)
+
 }
+
+

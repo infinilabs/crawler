@@ -17,7 +17,6 @@ limitations under the License.
 package store
 
 import (
-	"errors"
 	"github.com/jinzhu/gorm"
 )
 
@@ -39,40 +38,7 @@ type Store interface {
 	DeleteBucket(bucket string, key []byte, value []byte) error
 }
 
-type ORM interface {
-	Save(o interface{}) error
-
-	Update(o interface{}) error
-
-	Delete(o interface{}) error
-
-	Search(t1, t2 interface{}, q *Query) (error, Result)
-
-	Get(key string, value interface{}, to interface{}) error
-
-	Count(o interface{}) (int, error)
-}
-
-type Query struct {
-	Sort   string
-	From   int
-	Size   int
-	Filter *Cond
-}
-
-type Cond struct {
-	Name  string
-	Value interface{}
-}
-
-type Result struct {
-	Total  int
-	Result interface{}
-}
-
 var handler Store
-var theORMHandler ORM
-var conn *gorm.DB
 
 func GetValue(bucket string, key []byte) []byte {
 	return getHandler().GetValue(bucket, key)
@@ -98,55 +64,16 @@ func DeleteBucket(bucket string, key []byte, value []byte) error {
 	return getHandler().DeleteBucket(bucket, key, value)
 }
 
-func Get(field string, value interface{}, to interface{}) error {
-	return getORMHandler().Get(field, value, to)
-}
-
-func Save(o interface{}) error {
-	return getORMHandler().Save(o)
-}
-
-func Update(o interface{}) error {
-	return getORMHandler().Update(o)
-}
-
-func Delete(o interface{}) error {
-	return getORMHandler().Delete(o)
-}
-
-func Count(o interface{}) (int, error) {
-	return getORMHandler().Count(o)
-}
-
-func Search(t1, t2 interface{}, q *Query) (error, Result) {
-	return getORMHandler().Search(t1, t2, q)
-}
-
-func getHandler() Store {
-	if handler == nil {
-		panic(errors.New("store handler is not registered"))
-	}
-	return handler
-}
-
-func getORMHandler() ORM {
-	if theORMHandler == nil {
-		panic(errors.New("ORM handler is not registered"))
-	}
-	return theORMHandler
-}
-
 func RegisterStoreHandler(h Store) {
 	handler = h
-}
-
-func RegisterORMHandler(h ORM) {
-	theORMHandler = h
 }
 
 func RegisterConnection(h *gorm.DB) {
 	conn = h
 }
+
+
+var conn *gorm.DB
 
 // create a session for each business unit of execution (e.g. a web request or goworkers job)
 func GetDBConnection() *gorm.DB {

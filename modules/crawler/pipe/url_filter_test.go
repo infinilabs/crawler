@@ -34,10 +34,10 @@ func TestUrlFilter(t *testing.T) {
 
 	context.Set(CONTEXT_URL, "mailto:gg@gg.com")
 	parse.Process(context)
-	assert.Equal(t, true, context.IsExit())
+	assert.Equal(t, true, context.IsErrorExit())
 
 	context.Set(CONTEXT_URL, "asfasdf.gif")
 	parse.Process(context)
-	assert.Equal(t, true, context.IsExit())
+	assert.Equal(t, true, context.IsErrorExit())
 
 }

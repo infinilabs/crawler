@@ -84,55 +84,66 @@ func (this CheckerModule) execute() {
 		return
 	}
 
-	url := model.TaskSeedFromBytes(data)
+	seed := model.TaskSeedFromBytes(data)
 
 	stats.Increment("checker.url", "finished")
 
-	task := model.Task{Seed: &url}
+	task := model.Task{}
+	task.Url= seed.Url
+	task.Reference= seed.Reference
+	task.Depth= seed.Depth
+	task.Breadth= seed.Breadth
 
+	pipeline:=this.runPipe(global.Env().IsDebug,&task)
+
+	//send to disk queue
+	if len(task.Domain) > 0 && !pipeline.GetContext().IsErrorExit() && !pipeline.GetContext().IsBreak(){
+		stats.Increment("domain.stats", task.Domain+"."+stats.STATS_FETCH_TOTAL_COUNT)
+
+		err:= model.IncrementDomainLinkCount(task.Domain)
+		if err != nil {
+			log.Error(err)
+		}
+		log.Trace("load host settings, ", task.Domain)
+
+		queue.Push(config.FetchChannel, []byte(task.ID))
+
+		stats.Increment("checker.url", "valid_seed")
+
+		log.Debugf("send url: %s ,depth: %d, breadth: %d, to fetch queue", string(seed.Url), seed.Depth, seed.Breadth)
+		elapsedTime := time.Now().Sub(startTime)
+		stats.Timing("checker.url", "time", elapsedTime.Nanoseconds())
+	} else {
+		log.Debug("ignored url, ", seed.Url)
+	}
+}
+
+func (this CheckerModule) runPipe(debug bool,task *model.Task) *Pipeline  {
 	var pipeline *Pipeline
 	defer func() {
 
-		if !global.Env().IsDebug {
+		if !debug {
 			if r := recover(); r != nil {
 				if _, ok := r.(runtime.Error); ok {
 					err := r.(error)
 					log.Error("pipeline: ", pipeline.GetID(), ", taskId: ", task.ID, ", ", err)
 				}
-				log.Error("error in crawler")
+				log.Error("error in checker")
 			}
 		}
 	}()
 	pipeline = NewPipeline("checker")
 
-	pipeline.Context(&Context{Phrase: config.PhraseChecker}).
-		Start(InitTaskJoint{Task: &task}).
+	context:=&Context{Phrase: config.PhraseChecker,	IgnoreBroken:true}
+	pipeline.Context(context).
+		Start(InitTaskJoint{Task: task}).
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
 		Join(UrlExtFilterJoint{}).
 		Join(UrlCheckedFilterJoint{}).
 		End(SaveTaskJoint{IsCreate: true}).
 		Run()
 
-	//send to disk queue
-	if len(task.Domain) > 0 {
-		stats.Increment("domain.stats", task.Domain+"."+stats.STATS_FETCH_TOTAL_COUNT)
-
-		err, d := model.GetDomain(task.Domain)
-		if err != nil {
-			log.Error(err)
-		}
-		log.Trace("load host settings, ", d.Host)
-
-		queue.Push(config.FetchChannel, []byte(task.ID))
-	} else {
-		log.Debug("invalid domain, ", url.Url)
-	}
-
-	stats.Increment("checker.url", "valid_seed")
-
-	log.Debugf("send url: %s ,depth: %d, breadth: %d, to fetch queue", string(url.Url), url.Depth, url.Breadth)
-	elapsedTime := time.Now().Sub(startTime)
-	stats.Timing("checker.url", "time", elapsedTime.Nanoseconds())
+	return pipeline
 }
 
 func (this CheckerModule) Stop() error {

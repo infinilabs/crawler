@@ -5,9 +5,10 @@ import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/stats"
-	"github.com/medcl/gopa/core/store"
 	"runtime"
 	"sync"
+	"github.com/medcl/gopa/modules/config"
+	"github.com/medcl/gopa/core/store"
 )
 
 func (this StatsStoreModule) Name() string {
@@ -20,7 +21,12 @@ func (this StatsStoreModule) Start(env *Env) {
 }
 
 func (this StatsStoreModule) Stop() error {
-	store.Save(s)
+	v,_:=json.Marshal(s.Data)
+	s.ID = "statsd"
+	err:=store.AddValue(string(config.KVBucketKey),[]byte(s.ID),v)
+	if(err!=nil){
+		log.Error(err)
+	}
 	log.Trace("save stats db,", s.ID)
 	return nil
 }
@@ -105,9 +111,13 @@ func initStats() {
 	if s == nil {
 		s = &stats.Stats{}
 		s.ID = "statsd"
-		err := store.Get("ID", "statsd", s)
+		v:=store.GetValue(string(config.KVBucketKey),[]byte(s.ID))
+		d:=map[string]map[string]int64{}
+		err:=json.Unmarshal(v,&d)
 		if err != nil {
+			log.Debug(err)
 		}
+		s.Data=&d
 	}
 
 	if s.Data == nil {

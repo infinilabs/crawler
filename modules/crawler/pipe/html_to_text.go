@@ -98,7 +98,7 @@ func (this HtmlToTextJoint) Process(context *Context) (*Context, error) {
 	src = re.ReplaceAllString(src, "\n")
 
 	if this.MergeWhitespace {
-		src = strings.TrimSpace(util.MergeSpace(src))
+		src = util.MergeSpace(src)
 	}
 
 	src = strings.Replace(src, "&#8216;", "'", -1)

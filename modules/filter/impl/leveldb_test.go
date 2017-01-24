@@ -14,36 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package storage
+package impl
 
 import (
-	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/core/store"
-	"github.com/medcl/gopa/modules/storage/boltdb"
+	"testing"
+	"fmt"
+	"github.com/stretchr/testify/assert"
 )
 
-var impl boltdb.BoltdbStore
-
-func (this StorageModule) Name() string {
-	return "Storage"
-}
-
-func (this StorageModule) Start(env *Env) {
-
-	impl = boltdb.BoltdbStore{FileName: env.SystemConfig.GetDataDir() + "/boltdb"}
-	err := impl.Open()
-	if err != nil {
-		panic(err)
+func Test1(t *testing.T) {
+	filter:=LeveldbFilter{}
+	filter.Open("/tmp/filter")
+	for i:=0;i<1000;i++{
+		filter.Add([]byte("key"))
+		b:=filter.Exists([]byte("key"))
+		assert.Equal(t, true, b)
+		if(!b){
+			fmt.Print("not exists")
+		}
 	}
-	store.RegisterStoreHandler(impl)
-	//store.RegisterORMHandler(impl)
-}
-
-func (this StorageModule) Stop() error {
-	err := impl.Close()
-	return err
 
 }
 
-type StorageModule struct {
-}
+

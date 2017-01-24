@@ -5,6 +5,7 @@ import (
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/queue"
+	"github.com/medcl/gopa/core/errors"
 )
 
 const (
@@ -17,6 +18,7 @@ const (
 	FetchFilter    filter.FilterKey = "fetch_filter"
 )
 
+const KVBucketKey string = "Kv"
 const TaskBucketKey string = "Task"
 const StatsBucketKey string = "Stats"
 const SnapshotBucketKey string = "Snapshot"
@@ -28,3 +30,7 @@ const PhraseParse model.TaskPhrase = 3   //parse content
 const PhraseUpdate model.TaskPhrase = 4  //scheduled update
 
 const REGISTER_BOLTDB global.RegisterKey = "REGISTER_BOLTDB"
+
+
+const ErrorExitedPipeline errors.ErrorCode = 1000
+const ErrorBrokenPipeline errors.ErrorCode = 1001

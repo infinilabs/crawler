@@ -25,6 +25,8 @@ import (
 	"github.com/medcl/gopa/core/store"
 	"os"
 	"path"
+	"github.com/medcl/gopa/core/model"
+	"github.com/influxdata/influxdb/cmd/influx_tsm/stats"
 )
 
 func (this DatabaseModule) Name() string {
@@ -35,7 +37,7 @@ var db *gorm.DB
 
 func (this DatabaseModule) Start(env *Env) {
 	os.MkdirAll(path.Join(global.Env().SystemConfig.GetDataDir(), "database/"), 0777)
-	fileName := fmt.Sprintf("file:%s?cache=shared&mode=rwc", path.Join(global.Env().SystemConfig.GetDataDir(), "database/db.sqlite"))
+	fileName := fmt.Sprintf("file:%s?cache=shared&mode=rwc&_busy_timeout=50000000", path.Join(global.Env().SystemConfig.GetDataDir(), "database/db.sqlite"))
 
 	var err error
 	db, err = gorm.Open("sqlite3", fileName)
@@ -43,7 +45,9 @@ func (this DatabaseModule) Start(env *Env) {
 		panic("failed to connect database")
 	}
 	// Migrate the schema
-	//db.AutoMigrate(&Product{})
+	db.AutoMigrate(&model.Domain{})
+	db.AutoMigrate(&model.Task{})
+	db.AutoMigrate(&stats.Stats{})
 
 	store.RegisterConnection(db)
 }

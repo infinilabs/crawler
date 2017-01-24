@@ -25,6 +25,7 @@ import (
 	. "github.com/medcl/gopa/modules/crawler/pipe"
 	"runtime"
 	"time"
+	"github.com/medcl/gopa/core/util"
 )
 
 var signalChannels []*chan bool
@@ -135,7 +136,7 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 					err := r.(error)
 					log.Error("pipeline: ", pipeline.GetID(), ", taskId: ", taskId, ", ", err)
 				}
-				log.Error("error in crawler")
+				log.Debug("error in crawler,",util.ToJson(pipeline.GetContext(),true))
 			}
 		}
 	}()
