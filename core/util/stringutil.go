@@ -21,6 +21,8 @@ import (
 	"unicode"
 	"unicode/utf16"
 	"encoding/json"
+	"bytes"
+	"github.com/golang/go/src/pkg/strings"
 )
 
 func ContainStr(s, substr string) bool {
@@ -54,19 +56,20 @@ func SubString(str string, begin, length int) (substr string) {
 
 // Removes all unnecessary whitespaces
 func MergeSpace(in string) (out string) {
+	var buffer bytes.Buffer
 	white := false
 	for _, c := range in {
 		if unicode.IsSpace(c) {
 			if !white {
-				out = out + " "
+				buffer.WriteString(" ")
 			}
 			white = true
 		} else {
-			out = out + string(c)
+			buffer.WriteRune(c)
 			white = false
 		}
 	}
-	return
+	return strings.TrimSpace(buffer.String())
 }
 
 func ToJson(in interface{},indent bool) string{
