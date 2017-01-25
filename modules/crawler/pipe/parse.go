@@ -26,6 +26,7 @@ import (
 	"github.com/medcl/gopa/modules/config"
 	"strings"
 	"github.com/medcl/gopa/core/util"
+	"github.com/medcl/gopa/core/filter"
 )
 
 const ParsePage JointKey = "parse"
@@ -121,13 +122,15 @@ func (this ParsePageJoint) Process(s *Context) (*Context, error) {
 	//dispatch links
 	for url := range this.links {
 		if this.DispatchLinks {
-			host:=util.GetHost(url)
-			b:=breadth
-			if(host!=""&&refHost!=host){
-				b++
-				log.Trace("auto incre breadth, ",b,", ",refUrl,"->",url)
+			if(!filter.Exists(config.CheckFilter,[]byte(url))){
+				host:=util.GetHost(url)
+				b:=breadth
+				if(host!=""&&refHost!=host){
+					b++
+					log.Trace("auto incre breadth, ",b,", ",refUrl,"->",url)
+				}
+				queue.Push(config.CheckChannel, model.NewTaskSeed(url, refUrl, depth+1,b).MustGetBytes())
 			}
-			queue.Push(config.CheckChannel, model.NewTaskSeed(url, refUrl, depth+1,b).MustGetBytes())
 		}
 	}
 

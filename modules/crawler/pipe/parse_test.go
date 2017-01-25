@@ -31,7 +31,9 @@ func TestProcessLinks(t *testing.T) {
 	context := pipeline.Context{}
 	context.Init()
 	context.Set(CONTEXT_URL, "http://elasticsearch.cn/")
+	context.Set(CONTEXT_HOST, "elasticsearch.cn")
 	context.Set(CONTEXT_DEPTH, 1)
+	context.Set(CONTEXT_BREADTH, 1)
 	context.Set(CONTEXT_PAGE_BODY_BYTES, []byte(body))
 	parse := ParsePageJoint{}
 	parse.Process(&context)
