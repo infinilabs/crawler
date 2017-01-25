@@ -83,8 +83,8 @@ type Task struct {
 	Status        TaskStatus  `storm:"index" json:"status"`
 	Page          *PageItem   `storm:"inline" json:"page,omitempty" gorm:"-"`
 	Message       interface{} `storm:"inline" json:"message,omitempty" gorm:"-"`
-	CreateTime    *Time       `storm:"index" json:"created,omitempty"`
-	UpdateTime    *Time       `storm:"index" json:"updated,omitempty"`
+	CreateTime    *Time       `storm:"index" json:"created,omitempty" gorm:"index"`
+	UpdateTime    *Time       `storm:"index" json:"updated,omitempty" gorm:"index"`
 	LastCheckTime *Time       `storm:"index" json:"checked,omitempty"`
 	Snapshot      string      `json:"snapshot,omitempty"` //Snapshot storage info
 }
