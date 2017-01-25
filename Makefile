@@ -24,7 +24,7 @@ FILES     := $$(find . -name '*.go' | grep -vE 'vendor')
 
 default: clean build
 
-build: config update_ui update_template_ui
+build: config update-ui update-template-ui
 	@echo $(GOPATH)
 	@echo $(NEWGOPATH)
 	$(GOBUILD) -o bin/gopa
@@ -33,33 +33,33 @@ build: config update_ui update_template_ui
 build-cluster-test: build
 	cd bin && mkdir node1 node2 node3 && cp gopa node1 && cp gopa node2 && cp gopa node3
 
-build-grace: clean config update_ui
+build-grace: clean config update-ui
 	$(GOBUILD) -gcflags "-N -l" -race -o bin/gopa
 
-update_ui:
+update-ui:
 	$(GO) get github.com/infinitbyte/esc
 	(cd static&& esc -ignore="static.go|build_static.sh|.DS_Store" -o static.go -pkg static ../static )
 
-update_template_ui:
+update-template-ui:
 	$(GO) get github.com/infinitbyte/ego/cmd/ego
 	cd modules/ui/templates/ && ego -package templates
 
 tar: build
 	cd bin && tar cfz ../bin/gopa.tar.gz gopa
 
-cross-build: clean config update_ui
+cross-build: clean config update-ui
 	$(GO) test
 	GOOS=windows GOARCH=amd64 $(GOBUILD) -o bin/windows64/gopa.exe
 	GOOS=darwin  GOARCH=amd64 $(GOBUILD) -o bin/darwin64/gopa
 	GOOS=linux  GOARCH=amd64 $(GOBUILD) -o bin/linux64/gopa
 
-build-linux: clean config update_ui
+build-linux: clean config update-ui
 	$(GO) test
 	GOOS=linux  GOARCH=amd64 $(GOBUILD) -o bin/linux64/gopa
 
-all: clean config update_ui cross-build
+all: clean config update-ui cross-build
 
-all-platform: clean config update_ui cross-build-all-platform
+all-platform: clean config update-ui cross-build-all-platform
 
 cross-build-all-platform: clean config build-bsd
 	GOOS=windows GOARCH=amd64     $(GOBUILD) -o bin/windows64/gopa.exe
@@ -94,10 +94,10 @@ clean: clean_data
 	mkdir bin/darwin64
 
 
-update_commit_log:
+update-commit-log:
 	echo -e "package env\nconst LastCommitLog  =\""`git log -1 --pretty=format:"%h, %ad, %an, %s"` "\"\nconst BuildDate  =\"`date`\"" > core/env/commit_log.go
 
-config: update_commit_log
+config: update-commit-log
 	@echo "init config"
 	$(GO) env
 
