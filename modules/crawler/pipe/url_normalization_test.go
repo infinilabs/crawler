@@ -98,3 +98,17 @@ func TestNormailzeLinks3(t *testing.T) {
 	assert.Equal(t, "/2015", context.MustGetString(CONTEXT_SAVE_PATH))
 	assert.Equal(t, "/beijing_a_1_b_9_c_3_0.html", context.MustGetString(CONTEXT_SAVE_FILENAME))
 }
+
+func TestNormailzeLinks4(t *testing.T) {
+
+	context := &pipeline.Context{}
+	context.Init()
+	parse := UrlNormalizationJoint{}
+
+	context.Set(CONTEXT_URL, "../2015/chengdu.html")
+	context.Set(CONTEXT_REFERENCE_URL, "http://conf.elasticsearch.cn/2015/chengdu.html")
+	parse.Process(context)
+	assert.Equal(t, "http://conf.elasticsearch.cn/2015/chengdu.html", context.MustGetString(CONTEXT_URL))
+	assert.Equal(t, "/2015", context.MustGetString(CONTEXT_SAVE_PATH))
+	assert.Equal(t, "/chengdu.html", context.MustGetString(CONTEXT_SAVE_FILENAME))
+}

@@ -53,14 +53,6 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 
 	log.Trace("start parse url,", url)
 
-	if(strings.ContainsAny(url,"..")){
-		if u, err := u.Parse(url); err != nil {
-			panic(err)
-		} else {
-			url= purell.NormalizeURL(u, purell.FlagsUsuallySafeGreedy|purell.FlagRemoveDuplicateSlashes|purell.FlagRemoveFragment)
-		}
-	}
-
 	var tempUrl = url
 
 
@@ -148,6 +140,16 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 		}
 	}
 
+	url = tempUrl
+
+	if(strings.ContainsAny(url,"..")){
+
+		url= purell.NormalizeURL(currentURI, purell.FlagsUsuallySafeGreedy|purell.FlagRemoveDuplicateSlashes|purell.FlagRemoveFragment)
+		//update currentURI
+		currentURI, _ = u.Parse(url)
+		log.Trace("purell parsed url,", url)
+	}
+
 	////resolve domain specific filter
 	if this.FollowSubDomain && currentURI != nil && referenceURI != nil {
 		log.Tracef("try to check domain rule, %s vs %s", referenceURI.Host, currentURI.Host)
@@ -173,7 +175,6 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 
 	}
 
-	url = tempUrl
 
 	context.Set(CONTEXT_URL, url)
 	context.Set(CONTEXT_HOST, currentURI.Host)

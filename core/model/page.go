@@ -78,6 +78,7 @@ type Task struct {
 	ID            string      `storm:"id,unique" json:"id" gorm:"not null;unique;primary_key"`
 	Domain        string      `storm:"index" json:"domain,omitempty"` // elastic.co
 	Scheme        string      `json:"schema,omitempty"`               // elastic.co
+	OriginUrl       string     `json:"origin_url,omitempty"`                 // /index.html
 	UrlPath       string      `json:"path,omitempty"`                 // /index.html
 	Phrase        TaskPhrase  `storm:"index" json:"phrase"`
 	Status        TaskStatus  `storm:"index" json:"status"`

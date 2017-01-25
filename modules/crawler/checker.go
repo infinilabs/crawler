@@ -89,6 +89,7 @@ func (this CheckerModule) execute() {
 	stats.Increment("checker.url", "finished")
 
 	task := model.Task{}
+	task.OriginUrl= seed.Url
 	task.Url= seed.Url
 	task.Reference= seed.Reference
 	task.Depth= seed.Depth
