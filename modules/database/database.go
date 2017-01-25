@@ -26,7 +26,7 @@ import (
 	"os"
 	"path"
 	"github.com/medcl/gopa/core/model"
-	"github.com/influxdata/influxdb/cmd/influx_tsm/stats"
+	"github.com/medcl/gopa/core/stats"
 )
 
 func (this DatabaseModule) Name() string {

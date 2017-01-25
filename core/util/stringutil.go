@@ -22,7 +22,6 @@ import (
 	"unicode/utf16"
 	"encoding/json"
 	"bytes"
-	"github.com/golang/go/src/pkg/strings"
 )
 
 func ContainStr(s, substr string) bool {
@@ -69,7 +68,7 @@ func MergeSpace(in string) (out string) {
 			white = false
 		}
 	}
-	return strings.TrimSpace(buffer.String())
+	return TrimSpace(buffer.String())
 }
 
 func ToJson(in interface{},indent bool) string{
