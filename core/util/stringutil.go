@@ -17,11 +17,11 @@ limitations under the License.
 package util
 
 import (
+	"bytes"
+	"encoding/json"
 	. "strings"
 	"unicode"
 	"unicode/utf16"
-	"encoding/json"
-	"bytes"
 )
 
 func ContainStr(s, substr string) bool {
@@ -71,12 +71,12 @@ func MergeSpace(in string) (out string) {
 	return TrimSpace(buffer.String())
 }
 
-func ToJson(in interface{},indent bool) string{
+func ToJson(in interface{}, indent bool) string {
 	var b []byte
-	if(indent){
-		b,_=json.MarshalIndent(in," "," ")
-	}else{
-		b,_=json.Marshal(in)
+	if indent {
+		b, _ = json.MarshalIndent(in, " ", " ")
+	} else {
+		b, _ = json.Marshal(in)
 	}
 	return string(b)
 }

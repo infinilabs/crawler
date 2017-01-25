@@ -22,5 +22,4 @@ import (
 
 func TestDomainGet(t *testing.T) {
 
-
 }

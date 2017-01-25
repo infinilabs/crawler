@@ -59,10 +59,10 @@ type PageLink struct {
 }
 
 type Seed struct {
-	Url        string `storm:"index" json:"url,omitempty" gorm:"type:not null;varchar(500);unique_index"` // the seed url may not cleaned, may miss the domain part, need reference to provide the complete url information
-	Reference  string `json:"reference,omitempty"`
-	Depth      int    `storm:"index" json:"depth,omitempty"`
-	Breadth    int    `storm:"index" json:"breadth,omitempty"`
+	Url       string `storm:"index" json:"url,omitempty" gorm:"type:not null;varchar(500);unique_index"` // the seed url may not cleaned, may miss the domain part, need reference to provide the complete url information
+	Reference string `json:"reference,omitempty"`
+	Depth     int    `storm:"index" json:"depth,omitempty"`
+	Breadth   int    `storm:"index" json:"breadth,omitempty"`
 }
 
 type TaskStatus int
@@ -78,7 +78,7 @@ type Task struct {
 	ID            string      `storm:"id,unique" json:"id" gorm:"not null;unique;primary_key"`
 	Domain        string      `storm:"index" json:"domain,omitempty"` // elastic.co
 	Scheme        string      `json:"schema,omitempty"`               // elastic.co
-	OriginUrl       string     `json:"origin_url,omitempty"`                 // /index.html
+	OriginUrl     string      `json:"origin_url,omitempty"`           // /index.html
 	UrlPath       string      `json:"path,omitempty"`                 // /index.html
 	Phrase        TaskPhrase  `storm:"index" json:"phrase"`
 	Status        TaskStatus  `storm:"index" json:"status"`
@@ -147,7 +147,7 @@ func fromBytes(b []byte) (Seed, error) {
 	return task, nil
 }
 
-func NewTaskSeed(url, ref string, depth int,breadth int) Seed {
+func NewTaskSeed(url, ref string, depth int, breadth int) Seed {
 	task := Seed{}
 	task.Url = url
 	task.Reference = ref

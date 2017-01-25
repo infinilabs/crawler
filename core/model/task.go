@@ -2,14 +2,14 @@ package model
 
 import (
 	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/errors"
 	"github.com/medcl/gopa/core/store"
 	"github.com/rs/xid"
 	"time"
-	"github.com/medcl/gopa/core/errors"
 )
 
 func CreateTask(task *Task) error {
-	log.Trace("start create crawler task, ",task.Url)
+	log.Trace("start create crawler task, ", task.Url)
 	time := time.Now()
 	task.ID = xid.New().String()
 	task.Status = TaskCreated
@@ -23,7 +23,7 @@ func CreateTask(task *Task) error {
 }
 
 func UpdateTask(task *Task) {
-	log.Trace("start update crawler task, ",task.Url)
+	log.Trace("start update crawler task, ", task.Url)
 	time := time.Now()
 	task.UpdateTime = &time
 	err := store.Update(task)
@@ -49,8 +49,8 @@ func GetTask(id string) (Task, error) {
 	if err != nil {
 		log.Debug(id, ", ", err)
 	}
-	if(len(task.ID)==0||task.CreateTime==nil){
-		panic(errors.New("not found,"+id))
+	if len(task.ID) == 0 || task.CreateTime == nil {
+		panic(errors.New("not found," + id))
 	}
 
 	return task, err

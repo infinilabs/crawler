@@ -60,10 +60,10 @@ func (this InitTaskJoint) Process(context *Context) (*Context, error) {
 	//}
 
 	context.Set(CONTEXT_CRAWLER_TASK, task)
-	context.Set(CONTEXT_ORIGINAL_URL, task.OriginUrl)        //TODO remove
+	context.Set(CONTEXT_ORIGINAL_URL, task.OriginUrl)  //TODO remove
 	context.Set(CONTEXT_URL, task.Url)                 //TODO remove
 	context.Set(CONTEXT_DEPTH, task.Depth)             //TODO remove
-	context.Set(CONTEXT_BREADTH, task.Breadth)             //TODO remove
+	context.Set(CONTEXT_BREADTH, task.Breadth)         //TODO remove
 	context.Set(CONTEXT_REFERENCE_URL, task.Reference) //TODO remove
 
 	return context, nil

@@ -17,38 +17,36 @@ limitations under the License.
 package filter
 
 import (
-	"testing"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/modules/config"
 	"github.com/medcl/gopa/core/global"
+	"github.com/medcl/gopa/modules/config"
+	"github.com/stretchr/testify/assert"
 	"os"
+	"testing"
 )
 
 func Test(t *testing.T) {
 
-	env:=env.EmptyEnv()
+	env := env.EmptyEnv()
 
-	env.SystemConfig.Data="/tmp/filter_test12"
+	env.SystemConfig.Data = "/tmp/filter_test12"
 	os.RemoveAll(env.SystemConfig.Data)
 
 	global.RegisterEnv(env)
 
-	filter:=FilterModule{}
+	filter := FilterModule{}
 	filter.Start(env)
-	b,_:=filter.CheckThenAdd(config.CheckFilter,[]byte("key"))
+	b, _ := filter.CheckThenAdd(config.CheckFilter, []byte("key"))
 	assert.Equal(t, false, b)
-	for i:=0;i<1000;i++{
-		b,_:=filter.CheckThenAdd(config.CheckFilter,[]byte("key"))
+	for i := 0; i < 1000; i++ {
+		b, _ := filter.CheckThenAdd(config.CheckFilter, []byte("key"))
 		assert.Equal(t, true, b)
-		b=filter.Exists(config.CheckFilter,[]byte("key"))
+		b = filter.Exists(config.CheckFilter, []byte("key"))
 		assert.Equal(t, true, b)
-		if(!b){
+		if !b {
 			fmt.Print("not exists")
 		}
 	}
 
 }
-
-

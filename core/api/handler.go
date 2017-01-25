@@ -19,7 +19,7 @@ package api
 import (
 	"encoding/json"
 	"github.com/jmoiron/jsonq"
-	 "github.com/medcl/gopa/core/errors"
+	"github.com/medcl/gopa/core/errors"
 	"github.com/medcl/gopa/core/global"
 	"io/ioutil"
 	"net/http"
@@ -151,7 +151,7 @@ func (this Handler) GetJson(r *http.Request) (*jsonq.JsonQuery, error) {
 		return nil, err
 	}
 	if len(content) == 0 {
-		return nil, errors.NewWithCode(errors.JSONIsEmpty,r.URL.String())
+		return nil, errors.NewWithCode(errors.JSONIsEmpty, r.URL.String())
 	}
 
 	data := map[string]interface{}{}
@@ -170,7 +170,7 @@ func (this Handler) GetRawBody(r *http.Request) ([]byte, error) {
 		return nil, err
 	}
 	if len(content) == 0 {
-		return nil, errors.NewWithCode(errors.BodyEmpty,r.URL.String())
+		return nil, errors.NewWithCode(errors.BodyEmpty, r.URL.String())
 	}
 	return content, nil
 }

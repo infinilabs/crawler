@@ -19,35 +19,34 @@ package errors
 type ErrorCode int
 
 var (
-	Default ErrorCode = 1
-	JSONIsEmpty ErrorCode = 100
-	BodyEmpty  ErrorCode =101
-	URLRedirected  ErrorCode =102
+	Default       ErrorCode = 1
+	JSONIsEmpty   ErrorCode = 100
+	BodyEmpty     ErrorCode = 101
+	URLRedirected ErrorCode = 102
 )
 
-
 type Error struct {
-	Code ErrorCode
-	Message string
+	Code       ErrorCode
+	Message    string
 	InnerError error
-	Payload interface{}
+	Payload    interface{}
 }
 
-func (this *Error) Error()string  {
-	if(this.InnerError!=nil){
+func (this *Error) Error() string {
+	if this.InnerError != nil {
 		return this.InnerError.Error()
 	}
 	return this.Message
 }
 
-func NewWithCode(code ErrorCode,msg string) error {
-	return &Error{Code:code,Message:msg}
+func NewWithCode(code ErrorCode, msg string) error {
+	return &Error{Code: code, Message: msg}
 }
 
-func NewWithPayload(code ErrorCode,msg string,payload interface{}) error {
-	return &Error{Code:code,Message:msg,Payload:payload}
+func NewWithPayload(code ErrorCode, msg string, payload interface{}) error {
+	return &Error{Code: code, Message: msg, Payload: payload}
 }
 
 func New(text string) error {
-	return &Error{Code:Default,Message:text}
+	return &Error{Code: Default, Message: text}
 }

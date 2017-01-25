@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/util"
 	"testing"
 	"time"
-	"github.com/medcl/gopa/core/model"
 )
 
 type UserInfo struct {
@@ -74,22 +74,20 @@ func Test1(t *testing.T) {
 	}
 
 	db.AutoMigrate(model.Domain{})
-	domain:=model.Domain{}
-	domain.Host="baidu.com"
-	time:=time.Now()
-	domain.CreateTime=&time
-	domain.UpdateTime=&time
+	domain := model.Domain{}
+	domain.Host = "baidu.com"
+	time := time.Now()
+	domain.CreateTime = &time
+	domain.UpdateTime = &time
 
 	db.Create(&domain)
-	domain=model.Domain{}
-	domain.Host="baidu.com"
+	domain = model.Domain{}
+	domain.Host = "baidu.com"
 	db.Find(&domain)
-	fmt.Println(util.ToJson(domain,true))
+	fmt.Println(util.ToJson(domain, true))
 
 	var us []UserInfo
-	db.Model(&u).Where("depart_name=?","dev").Find(&us)
+	db.Model(&u).Where("depart_name=?", "dev").Find(&us)
 	fmt.Println(us)
 
 }
-
-

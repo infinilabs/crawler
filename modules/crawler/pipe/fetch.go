@@ -19,14 +19,14 @@ package pipe
 import (
 	"fmt"
 	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/errors"
 	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
+	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/util"
-	"time"
-	"github.com/medcl/gopa/core/errors"
 	"github.com/medcl/gopa/modules/config"
-	"github.com/medcl/gopa/core/queue"
+	"time"
 )
 
 const Fetch JointKey = "fetch"
@@ -88,12 +88,12 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 
 		} else {
 
-			e,ok:=err.(*errors.Error)
-			if(ok){
-				if(e.Code==errors.URLRedirected){
+			e, ok := err.(*errors.Error)
+			if ok {
+				if e.Code == errors.URLRedirected {
 					depth := context.MustGetInt(CONTEXT_DEPTH)
 					breadth := context.MustGetInt(CONTEXT_BREADTH)
-					task:=model.NewTaskSeed(e.Payload.(string), requestUrl, depth,breadth)
+					task := model.NewTaskSeed(e.Payload.(string), requestUrl, depth, breadth)
 					log.Trace(err)
 					queue.Push(config.CheckChannel, task.MustGetBytes())
 				}

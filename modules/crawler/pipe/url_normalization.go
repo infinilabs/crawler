@@ -17,11 +17,11 @@ limitations under the License.
 package pipe
 
 import (
+	"github.com/PuerkitoBio/purell"
 	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/util"
-	"github.com/PuerkitoBio/purell"
 	u "net/url"
 	"sort"
 	"strings"
@@ -47,15 +47,13 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 	var currentURI, referenceURI *u.URL
 	var err error
 
-	if(len(url)<=0){
+	if len(url) <= 0 {
 		context.ErrorExit("url can't be null")
 	}
 
 	log.Trace("start parse url,", url)
 
 	var tempUrl = url
-
-
 
 	//adding default http protocol
 	if strings.HasPrefix(url, "//") {
@@ -142,9 +140,9 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 
 	url = tempUrl
 
-	if(strings.ContainsAny(url,"..")){
+	if strings.ContainsAny(url, "..") {
 
-		url= purell.NormalizeURL(currentURI, purell.FlagsUsuallySafeGreedy|purell.FlagRemoveDuplicateSlashes|purell.FlagRemoveFragment)
+		url = purell.NormalizeURL(currentURI, purell.FlagsUsuallySafeGreedy|purell.FlagRemoveDuplicateSlashes|purell.FlagRemoveFragment)
 		//update currentURI
 		currentURI, _ = u.Parse(url)
 		log.Trace("purell parsed url,", url)
@@ -175,20 +173,18 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 
 	}
 
-
 	context.Set(CONTEXT_URL, url)
 	context.Set(CONTEXT_HOST, currentURI.Host)
 	context.Set(CONTEXT_URL_PATH, currentURI.Path)
 
 	t := context.Get(CONTEXT_CRAWLER_TASK)
-	if(t!=nil){
-		task:=t.(*model.Task)
+	if t != nil {
+		task := t.(*model.Task)
 		task.Domain = currentURI.Host
 		task.Scheme = currentURI.Scheme
 		task.Url = url
 		task.UrlPath = currentURI.Path
 	}
-
 
 	filePath := ""
 	filename := ""
@@ -226,20 +222,20 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 
 			for _, key := range keys {
 				value := queryMap[key]
-				len:=len(value)
+				len := len(value)
 				if value != nil && len > 0 {
 					if len > 0 {
 						filenamePrefix = filenamePrefix + key + "_"
 						for i := 0; i < len; i++ {
 							v := value[i]
 							if v != "" && len > 0 {
-								filenamePrefix = (filenamePrefix + v+"_")
+								filenamePrefix = (filenamePrefix + v + "_")
 							}
 						}
 					}
 				}
 			}
-			filenamePrefix=strings.TrimRight(filenamePrefix,"_")
+			filenamePrefix = strings.TrimRight(filenamePrefix, "_")
 		}
 	}
 
@@ -250,7 +246,7 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 		//the url should has at least one folder
 		//http://xx.com/1112/12
 		filePath = currentURI.Path[0:index]
-		log.Trace("filepath: ",filePath)
+		log.Trace("filepath: ", filePath)
 		//if the page extension is missing
 		if !strings.Contains(currentURI.Path, ".") {
 			if strings.HasSuffix(currentURI.Path, "/") {
@@ -268,26 +264,26 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 		filename = currentURI.Path
 	}
 
-	if(len(filenamePrefix)>0){
+	if len(filenamePrefix) > 0 {
 		log.Tracef("get file prefix: %s", filenamePrefix)
-		if(strings.Contains(filename,"/")){
+		if strings.Contains(filename, "/") {
 			log.Tracef("filename contains / : %s", filename)
-			index := strings.LastIndex(filename, "/")+1
+			index := strings.LastIndex(filename, "/") + 1
 			start := filename[0:index]
-			end := filename[index:len(filename)]
-			log.Tracef("filename start: %s, end: %s", start,end)
+			end := filename[index:]
+			log.Tracef("filename start: %s, end: %s", start, end)
 
-			if(strings.Contains(end,".")){
+			if strings.Contains(end, ".") {
 				index := strings.LastIndex(end, ".")
-				start1:= end[0:index]
-				end1 := end[index:len(end)]
-				filename=start+start1+"_"+filenamePrefix+end1
-			}else{
-				filename=start+"_"+filenamePrefix+end
+				start1 := end[0:index]
+				end1 := end[index:]
+				filename = start + start1 + "_" + filenamePrefix + end1
+			} else {
+				filename = start + "_" + filenamePrefix + end
 			}
 
-		}else{
-			filename = filenamePrefix+"_" + filename
+		} else {
+			filename = filenamePrefix + "_" + filename
 		}
 	}
 

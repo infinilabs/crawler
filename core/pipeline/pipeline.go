@@ -23,13 +23,13 @@ import (
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/stats"
+	"github.com/medcl/gopa/core/util"
 	"github.com/rs/xid"
 	"reflect"
 	"runtime"
 	"strings"
 	"sync"
 	"time"
-	"github.com/medcl/gopa/core/util"
 )
 
 type ParaKey string
@@ -37,11 +37,11 @@ type ParaKey string
 type Context struct {
 	DryRun bool `json:"dry_run"`
 	Parameters
-	Phrase    model.TaskPhrase `json:"phrase"`
-	IgnoreBroken bool 	   `json:"ignore_broken"`
-	breakFlag bool             `json:"-"`
-	exitFlag  bool             `json:"-"`
-	Payload   interface{}      `json:"-"`
+	Phrase       model.TaskPhrase `json:"phrase"`
+	IgnoreBroken bool             `json:"ignore_broken"`
+	breakFlag    bool             `json:"-"`
+	exitFlag     bool             `json:"-"`
+	Payload      interface{}      `json:"-"`
 }
 
 /**
@@ -242,7 +242,7 @@ func (this *Pipeline) Run() *Context {
 				stats.Increment(this.name+".pipeline", "error")
 			}
 		}
-		if !this.context.IsErrorExit()&&(!(this.context.IgnoreBroken&&this.context.IsBreak())){
+		if !this.context.IsErrorExit() && (!(this.context.IgnoreBroken && this.context.IsBreak())) {
 			this.endPipeline()
 		}
 
@@ -258,10 +258,10 @@ func (this *Pipeline) Run() *Context {
 			break
 		}
 		if this.context.IsErrorExit() {
-			if(global.Env().IsDebug){
-				log.Debug(util.ToJson(this.id,true))
-				log.Debug(util.ToJson(this.name,true))
-				log.Debug(util.ToJson(this.context,true))
+			if global.Env().IsDebug {
+				log.Debug(util.ToJson(this.id, true))
+				log.Debug(util.ToJson(this.name, true))
+				log.Debug(util.ToJson(this.context, true))
 			}
 			log.Trace("exit joint,", v.Name())
 			stats.Increment(this.name+".pipeline", "exit")

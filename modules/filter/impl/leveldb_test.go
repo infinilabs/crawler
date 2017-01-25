@@ -17,23 +17,21 @@ limitations under the License.
 package impl
 
 import (
-	"testing"
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func Test1(t *testing.T) {
-	filter:=LeveldbFilter{}
+	filter := LeveldbFilter{}
 	filter.Open("/tmp/filter")
-	for i:=0;i<1000;i++{
+	for i := 0; i < 1000; i++ {
 		filter.Add([]byte("key"))
-		b:=filter.Exists([]byte("key"))
+		b := filter.Exists([]byte("key"))
 		assert.Equal(t, true, b)
-		if(!b){
+		if !b {
 			fmt.Print("not exists")
 		}
 	}
 
 }
-
-

@@ -27,7 +27,7 @@ func CreateDomain(host string) Domain {
 	return domain
 }
 
-func IncrementDomainLinkCount(host string) (error) {
+func IncrementDomainLinkCount(host string) error {
 	domain := Domain{}
 	domain.Host = host
 
@@ -50,10 +50,10 @@ func GetDomainList(from, size int, domain string) (int, []Domain, error) {
 
 	query := store.Query{From: from, Size: size}
 	if len(domain) > 0 {
-		query.Filter=&store.Cond{Name:"domain",Value:domain}
+		query.Filter = &store.Cond{Name: "domain", Value: domain}
 	}
 
-	err,r:=store.Search(&domains,&query)
+	err, r := store.Search(&domains, &query)
 
 	return r.Total, domains, err
 }

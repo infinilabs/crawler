@@ -22,11 +22,11 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/global"
+	"github.com/medcl/gopa/core/model"
+	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/store"
 	"os"
 	"path"
-	"github.com/medcl/gopa/core/model"
-	"github.com/medcl/gopa/core/stats"
 )
 
 func (this DatabaseModule) Name() string {

@@ -72,7 +72,6 @@ func RegisterConnection(h *gorm.DB) {
 	conn = h
 }
 
-
 var conn *gorm.DB
 
 // create a session for each business unit of execution (e.g. a web request or goworkers job)

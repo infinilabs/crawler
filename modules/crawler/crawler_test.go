@@ -17,47 +17,44 @@ limitations under the License.
 package crawler
 
 import (
-	"testing"
-	"github.com/medcl/gopa/core/model"
-	"github.com/stretchr/testify/assert"
-	"github.com/medcl/gopa/core/global"
-	"github.com/medcl/gopa/core/env"
 	"fmt"
+	"github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/global"
+	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/util"
-	f "github.com/medcl/gopa/modules/filter"
 	db "github.com/medcl/gopa/modules/database"
+	f "github.com/medcl/gopa/modules/filter"
+	"github.com/stretchr/testify/assert"
 	"os"
+	"testing"
 )
 
-
 func Test1(t *testing.T) {
-	env:=env.EmptyEnv()
-	env.SystemConfig.Data="/tmp/filter_"+util.RandomPickName()
+	env := env.EmptyEnv()
+	env.SystemConfig.Data = "/tmp/filter_" + util.RandomPickName()
 	os.RemoveAll(env.SystemConfig.Data)
-	env.IsDebug=true
+	env.IsDebug = true
 	global.RegisterEnv(env)
 
-	checker:=CheckerModule{}
+	checker := CheckerModule{}
 
-	filter:=f.FilterModule{}
+	filter := f.FilterModule{}
 	filter.Start(env)
 
 	db.DatabaseModule{}.Start(env)
 
 	task := model.Task{}
-	task.Url= "http://elasticsearch.cn"
+	task.Url = "http://elasticsearch.cn"
 
-	pipeline:=checker.runPipe(true,&task)
-	fmt.Println(util.ToJson(pipeline.GetContext(),true))
-	assert.Equal(t,false,pipeline.GetContext().IsErrorExit())
+	pipeline := checker.runPipe(true, &task)
+	fmt.Println(util.ToJson(pipeline.GetContext(), true))
+	assert.Equal(t, false, pipeline.GetContext().IsErrorExit())
 
-	for i:=0;i<10000;i++{
-		pipeline:=checker.runPipe(true,&task)
+	for i := 0; i < 10000; i++ {
+		pipeline := checker.runPipe(true, &task)
 		assert.Equal(t, true, pipeline.GetContext().IsErrorExit())
-		if(!pipeline.GetContext().IsErrorExit()){
+		if !pipeline.GetContext().IsErrorExit() {
 			fmt.Print("not exists")
 		}
 	}
 }
-
-

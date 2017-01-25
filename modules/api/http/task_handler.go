@@ -68,7 +68,7 @@ func (this API) TaskAction(w http.ResponseWriter, req *http.Request, ps httprout
 		}
 		logger.Trace("receive new seed:", seed)
 
-		task := model.NewTaskSeed(seed, "", 0,0)
+		task := model.NewTaskSeed(seed, "", 0, 0)
 
 		queue.Push(config.CheckChannel, task.MustGetBytes())
 

@@ -119,9 +119,9 @@ func Search(o interface{}, q *Query) (error, Result) {
 
 	var c int
 	var err error
-	db1:=GetDBConnection().Model(o)
-	if(len(q.Sort)>0){
-		db1=db1.Order(q.Sort)
+	db1 := GetDBConnection().Model(o)
+	if len(q.Sort) > 0 {
+		db1 = db1.Order(q.Sort)
 	}
 
 	if q.Filter != nil {

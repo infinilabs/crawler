@@ -18,11 +18,11 @@ package pipe
 
 import (
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/pipeline"
-	"regexp"
-	"github.com/medcl/gopa/modules/config"
 	"github.com/medcl/gopa/core/filter"
+	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/stats"
+	"github.com/medcl/gopa/modules/config"
+	"regexp"
 )
 
 const UrlCheckedFilter JointKey = "url_checked_filter"
@@ -42,7 +42,7 @@ func (this UrlCheckedFilterJoint) Process(context *Context) (*Context, error) {
 	//统一 url 格式 , url 此处应该不能是相对路径
 
 	b, err := filter.CheckThenAdd(config.CheckFilter, []byte(url))
-	log.Trace("cheking url:", url,",hit:",b)
+	log.Trace("cheking url:", url, ",hit:", b)
 
 	//checking
 	if b {

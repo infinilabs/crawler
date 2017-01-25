@@ -20,22 +20,22 @@ import (
 	"bytes"
 	"github.com/PuerkitoBio/goquery"
 	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/filter"
 	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/queue"
+	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules/config"
 	"strings"
-	"github.com/medcl/gopa/core/util"
-	"github.com/medcl/gopa/core/filter"
 )
 
 const ParsePage JointKey = "parse"
 
 type ParsePageJoint struct {
-	links         map[string]interface{}
-	DispatchLinks bool
-	MaxDepth      int //max depth of page to follow
-	MaxBreadth    int //max breadth of the domain to follow
+	links            map[string]interface{}
+	DispatchLinks    bool
+	MaxDepth         int         //max depth of page to follow
+	MaxBreadth       int         //max breadth of the domain to follow
 	MaxPageOfBreadth map[int]int //max page to fetch in each level's breadth, eg: 1:100;2:50;3:5;4:1
 }
 
@@ -110,26 +110,26 @@ func (this ParsePageJoint) Process(s *Context) (*Context, error) {
 
 	//if reach max depth, skip for future fetch
 	if depth >= this.MaxDepth {
-		log.Trace("skip while reach max depth, ",depth,", ",refUrl)
+		log.Trace("skip while reach max depth, ", depth, ", ", refUrl)
 		return s, nil
 	}
 	//if reach max breadth, skip for future fetch
 	if breadth >= this.MaxBreadth {
-		log.Trace("skip while reach max breadth, ",breadth,", ",refUrl)
+		log.Trace("skip while reach max breadth, ", breadth, ", ", refUrl)
 		return s, nil
 	}
 
 	//dispatch links
 	for url := range this.links {
 		if this.DispatchLinks {
-			if(!filter.Exists(config.CheckFilter,[]byte(url))){
-				host:=util.GetHost(url)
-				b:=breadth
-				if(host!=""&&refHost!=host){
+			if !filter.Exists(config.CheckFilter, []byte(url)) {
+				host := util.GetHost(url)
+				b := breadth
+				if host != "" && refHost != host {
 					b++
-					log.Trace("auto incre breadth, ",b,", ",refUrl,"->",url)
+					log.Trace("auto incre breadth, ", b, ", ", refUrl, "->", url)
 				}
-				queue.Push(config.CheckChannel, model.NewTaskSeed(url, refUrl, depth+1,b).MustGetBytes())
+				queue.Push(config.CheckChannel, model.NewTaskSeed(url, refUrl, depth+1, b).MustGetBytes())
 			}
 		}
 	}

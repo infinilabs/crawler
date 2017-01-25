@@ -21,11 +21,11 @@ import (
 	. "github.com/medcl/gopa/core/env"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/queue"
+	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules/config"
 	. "github.com/medcl/gopa/modules/crawler/pipe"
 	"runtime"
 	"time"
-	"github.com/medcl/gopa/core/util"
 )
 
 var signalChannels []*chan bool
@@ -136,7 +136,7 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 					err := r.(error)
 					log.Error("pipeline: ", pipeline.GetID(), ", taskId: ", taskId, ", ", err)
 				}
-				log.Debug("error in crawler,",util.ToJson(pipeline.GetContext(),true))
+				log.Debug("error in crawler,", util.ToJson(pipeline.GetContext(), true))
 			}
 		}
 	}()
@@ -153,7 +153,7 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 		Join(LoadMetadataJoint{}).
 		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 10}).
 		Join(FetchJoint{}).
-		Join(ParsePageJoint{DispatchLinks: true, MaxDepth: 30,MaxBreadth:2}).
+		Join(ParsePageJoint{DispatchLinks: true, MaxDepth: 30, MaxBreadth: 2}).
 		Join(HtmlToTextJoint{MergeWhitespace: true}).
 		//Join(SaveToFileSystemJoint{}).
 		Join(SaveToDBJoint{CompressBody: true}).

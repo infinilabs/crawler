@@ -26,7 +26,7 @@ import (
 type LeveldbFilter struct {
 	persistFileName string
 	filter          *leveldb.DB
-	l  sync.Mutex
+	l               sync.Mutex
 }
 
 func (filter *LeveldbFilter) Open(fileName string) error {
@@ -62,10 +62,10 @@ func (filter *LeveldbFilter) Exists(key []byte) bool {
 	defer filter.l.Unlock()
 
 	value, err := filter.filter.Get(key, nil)
-	if(err!=nil){
+	if err != nil {
 		return false
 	}
-	if value != nil&&len(value)>0 {
+	if value != nil && len(value) > 0 {
 		return true
 	}
 	return false
@@ -75,8 +75,8 @@ func (filter *LeveldbFilter) Add(key []byte) error {
 	filter.l.Lock()
 	defer filter.l.Unlock()
 
-	err:=filter.filter.Put(key, []byte("v"), nil)
-	if(err!=nil){
+	err := filter.filter.Put(key, []byte("v"), nil)
+	if err != nil {
 		panic(err)
 	}
 	return nil
@@ -86,8 +86,8 @@ func (filter *LeveldbFilter) Delete(key []byte) error {
 	filter.l.Lock()
 	defer filter.l.Unlock()
 
-	err:=filter.filter.Delete(key, nil)
-	if(err!=nil){
+	err := filter.filter.Delete(key, nil)
+	if err != nil {
 		panic(err)
 	}
 	return nil

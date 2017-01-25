@@ -22,11 +22,11 @@ import (
 )
 
 func TestMergeSpacke(t *testing.T) {
-	str:="hello world     !"
-	str=MergeSpace(str)
-	assert.Equal(t, "hello world !",str)
+	str := "hello world     !"
+	str = MergeSpace(str)
+	assert.Equal(t, "hello world !", str)
 
-	str=" hello world  \n \r  !"
-	str=MergeSpace(str)
-	assert.Equal(t, "hello world !",str)
+	str = " hello world  \n \r  !"
+	str = MergeSpace(str)
+	assert.Equal(t, "hello world !", str)
 }
