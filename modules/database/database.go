@@ -23,7 +23,6 @@ import (
 	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/model"
-	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/store"
 	"os"
 	"path"
@@ -47,7 +46,6 @@ func (this DatabaseModule) Start(env *Env) {
 	// Migrate the schema
 	db.AutoMigrate(&model.Domain{})
 	db.AutoMigrate(&model.Task{})
-	db.AutoMigrate(&stats.Stats{})
 
 	store.RegisterConnection(db)
 }
