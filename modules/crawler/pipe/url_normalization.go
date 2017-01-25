@@ -21,6 +21,7 @@ import (
 	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/util"
+	"github.com/PuerkitoBio/purell"
 	u "net/url"
 	"sort"
 	"strings"
@@ -52,7 +53,18 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 
 	log.Trace("start parse url,", url)
 
+	if(strings.ContainsAny(url,"..")){
+		if u, err := u.Parse(url); err != nil {
+			panic(err)
+		} else {
+			url= purell.NormalizeURL(u, purell.FlagsUsuallySafeGreedy|purell.FlagRemoveDuplicateSlashes|purell.FlagRemoveFragment)
+		}
+	}
+
 	var tempUrl = url
+
+
+
 	//adding default http protocol
 	if strings.HasPrefix(url, "//") {
 		tempUrl = strings.TrimLeft(url, "//")
@@ -162,6 +174,7 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 	}
 
 	url = tempUrl
+
 	context.Set(CONTEXT_URL, url)
 	context.Set(CONTEXT_HOST, currentURI.Host)
 	context.Set(CONTEXT_URL_PATH, currentURI.Path)
@@ -212,19 +225,20 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 
 			for _, key := range keys {
 				value := queryMap[key]
-				if value != nil && len(value) > 0 {
-					if len(value) > 0 {
+				len:=len(value)
+				if value != nil && len > 0 {
+					if len > 0 {
 						filenamePrefix = filenamePrefix + key + "_"
-						for i := 0; i < len(value); i++ {
+						for i := 0; i < len; i++ {
 							v := value[i]
-							if v != "" && len(v) > 0 {
-								filenamePrefix = filenamePrefix + v + "_"
+							if v != "" && len > 0 {
+								filenamePrefix = (filenamePrefix + v+"_")
 							}
 						}
 					}
-
 				}
 			}
+			filenamePrefix=strings.TrimRight(filenamePrefix,"_")
 		}
 	}
 
@@ -235,7 +249,7 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 		//the url should has at least one folder
 		//http://xx.com/1112/12
 		filePath = currentURI.Path[0:index]
-
+		log.Trace("filepath: ",filePath)
 		//if the page extension is missing
 		if !strings.Contains(currentURI.Path, ".") {
 			if strings.HasSuffix(currentURI.Path, "/") {
@@ -253,7 +267,29 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 		filename = currentURI.Path
 	}
 
-	filename = filenamePrefix + filename
+	if(len(filenamePrefix)>0){
+		log.Tracef("get file prefix: %s", filenamePrefix)
+		if(strings.Contains(filename,"/")){
+			log.Tracef("filename contains / : %s", filename)
+			index := strings.LastIndex(filename, "/")+1
+			start := filename[0:index]
+			end := filename[index:len(filename)]
+			log.Tracef("filename start: %s, end: %s", start,end)
+
+			if(strings.Contains(end,".")){
+				index := strings.LastIndex(end, ".")
+				start1:= end[0:index]
+				end1 := end[index:len(end)]
+				filename=start+start1+"_"+filenamePrefix+end1
+			}else{
+				filename=start+"_"+filenamePrefix+end
+			}
+
+		}else{
+			filename = filenamePrefix+"_" + filename
+		}
+	}
+
 	context.Set(CONTEXT_SAVE_PATH, filePath)
 	context.Set(CONTEXT_SAVE_FILENAME, filename)
 	log.Debugf("finished normalization,%s, %s, %s ", url, filePath, filename)
