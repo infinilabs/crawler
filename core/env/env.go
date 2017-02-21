@@ -112,6 +112,7 @@ type SystemConfig struct {
 	NodeName           string `node_name`
 	ConfigFile         string `gopa.yml`
 	LogLevel           string `info`
+	APIBinding         string `api_bind`
 	HttpBinding        string `http_bind`
 	ClusterBinding     string `cluster_bind`
 	ClusterSeeds       string `cluster_seeds`
@@ -134,8 +135,11 @@ func (this *SystemConfig) Init() {
 	if len(this.NodeName) == 0 {
 		this.NodeName = util.RandomPickName()
 	}
+	if len(this.APIBinding) == 0 {
+		this.APIBinding = ":8001"
+	}
 	if len(this.HttpBinding) == 0 {
-		this.HttpBinding = ":8001"
+		this.HttpBinding = ":9001"
 	}
 
 	if len(this.ClusterBinding) == 0 {

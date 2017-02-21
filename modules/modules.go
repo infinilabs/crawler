@@ -32,7 +32,7 @@ import (
 )
 
 func Register() {
-	//register modules
+	////register modules
 	module.Register(core.CoreModule{})
 	module.Register(database.DatabaseModule{})
 	module.Register(filter.FilterModule{})

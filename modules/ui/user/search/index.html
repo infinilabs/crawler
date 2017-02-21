@@ -1,0 +1,36 @@
+<%! func Search(w io.Writer) error %>
+
+<%% import "github.com/medcl/gopa/modules/ui/admin/common" %%>
+
+<% common.Head(w, "Search","") %>
+<% common.Body(w) %>
+<% common.Nav(w,"Search") %>
+
+
+
+<div class="tm-middle">
+    <div class="uk-container uk-container-center">
+
+        <div class="uk-grid" data-uk-grid-margin="">
+            <div class="tm-sidebar uk-width-medium-1-4 uk-hidden-small uk-row-first">
+
+
+
+            </div>
+            <div class="tm-main uk-width-medium-3-4">
+
+                <article class="uk-article">
+
+                    Search.
+
+                </article>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<% common.OffCanvas(w) %>
+
+<% common.Footer(w) %>

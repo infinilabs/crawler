@@ -18,8 +18,137 @@ package ui
 
 import (
 	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/modules/ui/templates"
+	uis "github.com/medcl/gopa/core/http"
+	"github.com/medcl/gopa/modules/ui/admin"
+	"github.com/medcl/gopa/modules/ui/user"
+	"github.com/medcl/gopa/modules/ui/websocket"
+	"github.com/medcl/gopa/static"
+	"net/http"
+
+	"crypto/tls"
+	"errors"
+	log "github.com/cihub/seelog"
+	"github.com/gorilla/context"
+	"github.com/gorilla/sessions"
+	"github.com/julienschmidt/httprouter"
+	"github.com/medcl/gopa/core/logger"
+	"github.com/medcl/gopa/core/util"
+	_ "net/http/pprof"
+	"path"
+	"path/filepath"
 )
+
+var router *httprouter.Router
+var mux *http.ServeMux
+
+var store = sessions.NewCookieStore([]byte("1c6f2afbccef959ac5c8b81f690c1be7"))
+
+func (this UIModule) internalStart(env *Env) {
+
+	store.Options = &sessions.Options{
+		Domain:   "localhost", //TODO config　http　domain
+		Path:     "/",
+		MaxAge:   60 * 15,
+		Secure:   true,
+		HttpOnly: true,
+	}
+
+	router = httprouter.New()
+	mux = http.NewServeMux()
+	websocket.InitWebSocket(env)
+
+	mux.HandleFunc("/ws", websocket.ServeWs)
+	mux.Handle("/", router)
+
+	//Index
+	//router.GET("/favicon.ico", handler.IndexAction)
+
+	//init common
+	mux.Handle("/static/", http.FileServer(static.FS(false)))
+
+	//registered handlers
+	if uis.RegisteredUIHandler != nil {
+		for k, v := range uis.RegisteredUIHandler {
+			log.Debug("register custom http handler: ", k)
+			mux.Handle(k, v)
+		}
+	}
+	if uis.RegisteredUIFuncHandler != nil {
+		for k, v := range uis.RegisteredUIFuncHandler {
+			log.Debug("register custom http handler: ", k)
+			mux.HandleFunc(k, v)
+		}
+	}
+	if uis.RegisteredUIMethodHandler != nil {
+		for k, v := range uis.RegisteredUIMethodHandler {
+			for m, n := range v {
+				log.Debug("register custom http handler: ", k, " ", m)
+				router.Handle(k, m, n)
+			}
+		}
+	}
+
+	address := util.AutoGetAddress(env.SystemConfig.HttpBinding)
+
+	if len(env.SystemConfig.CertPath) > 0 {
+		log.Debug("start ssl endpoint")
+
+		certFile := path.Join(env.SystemConfig.CertPath, "*c*rt*")
+		match, err := filepath.Glob(certFile)
+		if err != nil {
+			panic(err)
+		}
+		if len(match) <= 0 {
+			panic(errors.New("no cert file found, the file name must end with .crt"))
+		}
+		certFile = match[0]
+
+		keyFile := path.Join(env.SystemConfig.CertPath, "*key*")
+		match, err = filepath.Glob(keyFile)
+		if err != nil {
+			panic(err)
+		}
+		if len(match) <= 0 {
+			panic(errors.New("no key file found, the file name must end with .key"))
+		}
+		keyFile = match[0]
+
+		cfg := &tls.Config{
+			MinVersion:               tls.VersionTLS12,
+			CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+			PreferServerCipherSuites: true,
+			CipherSuites: []uint16{
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+				tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+			},
+		}
+
+		srv := &http.Server{
+			Addr:         address,
+			Handler:      context.ClearHandler(mux),
+			TLSConfig:    cfg,
+			TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+		}
+
+		log.Info("https server listen at: https://", address)
+		err = srv.ListenAndServeTLS(certFile, keyFile)
+		if err != nil {
+			log.Error(err)
+			panic(err)
+		}
+
+	} else {
+		log.Info("http server listen at: http://", address)
+		err := http.ListenAndServe(address, context.ClearHandler(mux))
+		if err != nil {
+			log.Error(err)
+			panic(err)
+		}
+	}
+
+}
 
 type UIModule struct {
 }
@@ -30,12 +159,27 @@ func (this UIModule) Name() string {
 
 func (this UIModule) Start(env *Env) {
 
-	templates.InitUI()
+	//init admin ui //TODO ui module enable/disable config
+	admin.InitUI()
 
-	InitAPI()
+	//init search ui
+	user.InitUI()
+
+	//register websocket logger
+	logger.RegisterWebsocketHandler(LoggerReceiver)
+
+	go func() {
+		this.internalStart(env)
+	}()
+
 }
 
 func (this UIModule) Stop() error {
 
 	return nil
+}
+
+func LoggerReceiver(message string, level log.LogLevel, context log.LogContextInterface) {
+
+	websocket.BroadcastMessage(message)
 }

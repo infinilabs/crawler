@@ -37,14 +37,14 @@
 
                 <!--</li>-->
                 <li class="uk-parent" data-uk-dropdown="" aria-haspopup="true" aria-expanded="false">
-                    <a href=""><i class="uk-icon-plus-square"></i></a>
+                    <a href=""><i class="uk-icon-plus-square"></i>&nbsp;Menu</a>
 
                     <div class="uk-dropdown uk-dropdown-navbar uk-dropdown-bottom" aria-hidden="true" tabindex="" style="top: 40px; left: 0px;">
                         <ul class="uk-nav uk-nav-navbar">
-                            <li class="uk-nav-header"><i class="uk-icon-tasks"></i> Tasks</li>
+                            <li class="uk-nav-header"><i class="uk-icon-tasks"></i>&nbsp;Tasks</li>
                             <li><a href="#create-task-modal" data-uk-modal>Create a task</a></li>
-                            <li class="uk-nav-divider"></li>
-                            <li><a href="#"><i class="uk-icon-power-off"></i> Logout</a></li>
+                            <!--<li class="uk-nav-divider"></li>-->
+                            <!--<li><a href="#"><i class="uk-icon-power-off"></i> Logout</a></li>-->
                         </ul>
                     </div>
 
@@ -105,9 +105,16 @@
                                 <textarea type="text" placeholder="Paste your urls here, one line one url" rows="10" class="uk-width-1-1"></textarea>
                                 <input type="text" placeholder="MaxDepth, eg: 30">
                                 <input type="text" placeholder="MaxBreadth, eg: 3">
+                                <br/>
 
-                                <input type="checkbox" id="form-s-c" />
-                                <label for="form-s-c">Follow Sub-domain</label>
+                                <label for="form-s-c"><input type="checkbox" checked id="form-s-c" />Follow Sub-domain; </label>
+
+                                <label for="img-ext"><input name="include-ext" checked type="checkbox" id="img-ext" />Include Images; </label>
+
+                                <label for="css-ext"><input  name="include-ext" checked type="checkbox" id="css-ext" />Include Css; </label>
+
+                                <label for="js-ext"><input  name="include-ext" checked type="checkbox" id="js-ext" />Include JS; </label>
+
                             </fieldset>
                             <button class="uk-button">Create</button>
                         </form>

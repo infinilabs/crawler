@@ -87,7 +87,7 @@ type Task struct {
 	CreateTime    *Time       `storm:"index" json:"created,omitempty" gorm:"index"`
 	UpdateTime    *Time       `storm:"index" json:"updated,omitempty" gorm:"index"`
 	LastCheckTime *Time       `storm:"index" json:"checked,omitempty"`
-	Snapshot      string      `json:"snapshot,omitempty"` //Snapshot storage info
+	//Snapshot      string      `json:"snapshot,omitempty"` //Snapshot storage info
 }
 
 func (this Seed) Get(url string) Seed {

@@ -14,8 +14,8 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/hashicorp/raft"
 	"github.com/hashicorp/raft-boltdb"
-	apihandler "github.com/medcl/gopa/core/api"
 	"github.com/medcl/gopa/core/global"
+	apihandler "github.com/medcl/gopa/core/http"
 	"github.com/medcl/gopa/core/util"
 	. "github.com/medcl/gopa/modules/cluster/discovery/config"
 	"io"
@@ -184,11 +184,11 @@ func (s *RaftModule) Open() error {
 		}()
 	}
 
-	apihandler.HandleFunc("/cluster/status", s.clusterInfo)
-	apihandler.HandleFunc("/cluster/node/_join", s.handleJoin)
+	apihandler.HandleAPIFunc("/cluster/status", s.clusterInfo)
+	apihandler.HandleAPIFunc("/cluster/node/_join", s.handleJoin)
 
-	apihandler.HandleFunc("/cache", s.handleKeyRequest)
-	apihandler.HandleFunc("/cache/", s.handleKeyRequest)
+	apihandler.HandleAPIFunc("/cache", s.handleKeyRequest)
+	apihandler.HandleAPIFunc("/cache/", s.handleKeyRequest)
 
 	return nil
 }

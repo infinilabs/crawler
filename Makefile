@@ -42,7 +42,7 @@ update-ui:
 
 update-template-ui:
 	$(GO) get github.com/infinitbyte/ego/cmd/ego
-	cd modules/ui/templates/ && ego -package templates
+	cd modules/ui/ && ego
 
 tar: build
 	cd bin && tar cfz ../bin/gopa.tar.gz gopa

@@ -14,26 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package core
+package http
 
 import (
-	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/modules/core/api"
+	"github.com/julienschmidt/httprouter"
+	"github.com/medcl/gopa/core/http"
+	"net/http"
+	"time"
 )
 
-type CoreModule struct {
-}
+func (this API) handleUserLoginRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
-func (this CoreModule) Name() string {
-	return "Core"
-}
+	b, v := api.GetSession(w, req, "key")
+	if !b {
+		api.SetSession(w, req, "key", "hello "+time.Now().String())
+		api.SetFlash(w, req, "user logged in")
+	}
 
-func (this CoreModule) Start(env *Env) {
+	b, v = api.GetFlash(w, req)
+	if b {
+		this.WriteJson(w, v, 200)
+		return
+	}
 
-	http.InitAPI()
-}
+	this.WriteJson(w, v, 200)
 
-func (this CoreModule) Stop() error {
-
-	return nil
+	return
 }

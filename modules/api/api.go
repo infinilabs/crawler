@@ -25,12 +25,9 @@ import (
 	"github.com/gorilla/context"
 	"github.com/gorilla/sessions"
 	"github.com/julienschmidt/httprouter"
-	apis "github.com/medcl/gopa/core/api"
 	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/core/logger"
+	apis "github.com/medcl/gopa/core/http"
 	"github.com/medcl/gopa/core/util"
-	. "github.com/medcl/gopa/modules/api/http"
-	"github.com/medcl/gopa/modules/api/websocket"
 	_ "net/http/pprof"
 	"path"
 	"path/filepath"
@@ -51,55 +48,26 @@ func (this APIModule) internalStart(env *Env) {
 		HttpOnly: true,
 	}
 
-	handler := API{}
 	router = httprouter.New()
-
-	user := "gopa"
-	pass := "gopa"
-
 	mux = http.NewServeMux()
-	websocket.InitWebSocket(env)
 
-	mux.HandleFunc("/ws", websocket.ServeWs)
 	mux.Handle("/", router)
 
-	//Index
-	router.GET("/", handler.IndexAction)
-	router.GET("/favicon.ico", handler.IndexAction)
-
-	//APIs
-	mux.HandleFunc("/stats", handler.StatsAction)
-
-	router.POST("/task/", handler.TaskAction)
-	router.GET("/task", handler.TaskAction)
-	router.GET("/task/:id", handler.TaskGetAction)
-	router.DELETE("/task/:id", BasicAuth(handler.TaskDeleteAction, user, pass))
-
-	router.GET("/domain", handler.DomainAction)
-	router.GET("/domain/:id", handler.DomainGetAction)
-	router.DELETE("/domain/:id", BasicAuth(handler.DomainDeleteAction, user, pass))
-
-	mux.HandleFunc("/setting/logger", handler.LoggingSettingAction)
-	mux.HandleFunc("/setting/logger/", handler.LoggingSettingAction)
-
-	//Snapshot
-	mux.HandleFunc("/snapshot/", handler.SnapshotAction)
-
 	//registered handlers
-	if apis.RegisteredHandler != nil {
-		for k, v := range apis.RegisteredHandler {
+	if apis.RegisteredAPIHandler != nil {
+		for k, v := range apis.RegisteredAPIHandler {
 			log.Debug("register custom http handler: ", k)
 			mux.Handle(k, v)
 		}
 	}
-	if apis.RegisteredFuncHandler != nil {
-		for k, v := range apis.RegisteredFuncHandler {
+	if apis.RegisteredAPIFuncHandler != nil {
+		for k, v := range apis.RegisteredAPIFuncHandler {
 			log.Debug("register custom http handler: ", k)
 			mux.HandleFunc(k, v)
 		}
 	}
-	if apis.RegisteredMethodHandler != nil {
-		for k, v := range apis.RegisteredMethodHandler {
+	if apis.RegisteredAPIMethodHandler != nil {
+		for k, v := range apis.RegisteredAPIMethodHandler {
 			for m, n := range v {
 				log.Debug("register custom http handler: ", k, " ", m)
 				router.Handle(k, m, n)
@@ -107,7 +75,7 @@ func (this APIModule) internalStart(env *Env) {
 		}
 	}
 
-	address := util.AutoGetAddress(env.SystemConfig.HttpBinding)
+	address := util.AutoGetAddress(env.SystemConfig.APIBinding)
 
 	if len(this.env.SystemConfig.CertPath) > 0 {
 		log.Debug("start ssl endpoint")
@@ -151,7 +119,7 @@ func (this APIModule) internalStart(env *Env) {
 			TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
 		}
 
-		log.Info("https server listen at: https://", address)
+		log.Info("api server listen at: https://", address)
 		err = srv.ListenAndServeTLS(certFile, keyFile)
 		if err != nil {
 			log.Error(err)
@@ -159,7 +127,7 @@ func (this APIModule) internalStart(env *Env) {
 		}
 
 	} else {
-		log.Info("http server listen at: http://", address)
+		log.Info("api server listen at: http://", address)
 		err := http.ListenAndServe(address, context.ClearHandler(mux))
 		if err != nil {
 			log.Error(err)
@@ -169,29 +137,8 @@ func (this APIModule) internalStart(env *Env) {
 
 }
 
-func BasicAuth(h httprouter.Handle, requiredUser, requiredPassword string) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		// Get the Basic Authentication credentials
-		user, password, hasAuth := r.BasicAuth()
-
-		if hasAuth && user == requiredUser && password == requiredPassword {
-			// Delegate request to the given handle
-			h(w, r, ps)
-		} else {
-			// Request Basic Authentication otherwise
-			w.Header().Set("WWW-Authenticate", "Basic realm=Restricted")
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-		}
-	}
-}
-
 func (this APIModule) Name() string {
 	return "API"
-}
-
-func LoggerReceiver(message string, level log.LogLevel, context log.LogContextInterface) {
-
-	websocket.BroadcastMessage(message)
 }
 
 func (this APIModule) Start(config *Env) {
@@ -201,8 +148,6 @@ func (this APIModule) Start(config *Env) {
 	go func() {
 		this.internalStart(config)
 	}()
-
-	logger.RegisterWebsocketHandler(LoggerReceiver)
 
 }
 

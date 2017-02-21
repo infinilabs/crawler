@@ -33,6 +33,7 @@ const SaveToDB JointKey = "save2db"
 type SaveToDBJoint struct {
 	context      *Context
 	CompressBody bool
+	Bucket       string
 }
 
 func (this SaveToDBJoint) Name() string {

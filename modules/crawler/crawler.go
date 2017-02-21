@@ -149,14 +149,14 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 	pipeline.Context(&Context{Phrase: config.PhraseCrawler}).
 		Start(init).
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
-		Join(UrlExtFilterJoint{}).
+		//Join(UrlExtFilterJoint{}).
 		Join(LoadMetadataJoint{}).
 		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 10}).
 		Join(FetchJoint{}).
 		Join(ParsePageJoint{DispatchLinks: true, MaxDepth: 30, MaxBreadth: 2}).
 		Join(HtmlToTextJoint{MergeWhitespace: true}).
 		//Join(SaveToFileSystemJoint{}).
-		Join(SaveToDBJoint{CompressBody: true}).
+		Join(SaveToDBJoint{CompressBody: true, Bucket: "Global"}).
 		//Join(PublishJoint{}).
 		End(SaveTaskJoint{}).
 		Run()

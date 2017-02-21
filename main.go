@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	_ "expvar"
 	"flag"
 	"fmt"
 	log "github.com/cihub/seelog"
@@ -29,7 +30,6 @@ import (
 	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules"
 	"net/http"
-	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"runtime"
@@ -43,6 +43,11 @@ var (
 	startTime       time.Time
 	finalQuitSignal chan bool
 )
+
+//var (
+//	counter       *ratecounter.RateCounter
+//	//hitsperminute = expvar.NewInt("hits_per_minute")
+//)
 
 func onStart() {
 	fmt.Println(GetWelcomeMessage())
@@ -81,7 +86,7 @@ func main() {
 	var startPprof = flag.Bool("pprof", false, "start pprof service, endpoint: http://localhost:6060/debug/pprof/")
 	var isDebug = flag.Bool("debug", false, "enable debug")
 
-	var httpBinding = flag.String("http_bind", "", "the http binding address, eg: 127.0.0.1:8001")
+	var apiBinding = flag.String("api_bind", "", "the http binding address, eg: 127.0.0.1:8001")
 	var clusterBinding = flag.String("cluster_bind", "", "the cluster binding address, eg: 127.0.0.1:13001")
 	var clusterSeed = flag.String("cluster_seeds", "", "the cluster address to start join in, seprated by comma, eg: 127.0.0.1:8001,127.0.0.1:8002,127.0.0.1:8003")
 	var clusterName = flag.String("cluster_name", "gopa", "the cluster name, default: gopa")
@@ -145,7 +150,7 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	logger.SetLogging(EmptyEnv(), *logLevel, *logDir)
 
-	sysConfig := SystemConfig{ConfigFile: *configFile, LogLevel: *logLevel, HttpBinding: *httpBinding, ClusterBinding: *clusterBinding, ClusterSeeds: *clusterSeed, ClusterName: *clusterName, Data: *dataDir, Log: *logDir, CertPath: *serverCertPath}
+	sysConfig := SystemConfig{ConfigFile: *configFile, LogLevel: *logLevel, APIBinding: *apiBinding, ClusterBinding: *clusterBinding, ClusterSeeds: *clusterSeed, ClusterName: *clusterName, Data: *dataDir, Log: *logDir, CertPath: *serverCertPath}
 	sysConfig.Init()
 
 	env = Environment(sysConfig)

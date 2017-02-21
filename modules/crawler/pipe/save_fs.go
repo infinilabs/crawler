@@ -44,14 +44,14 @@ func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 	this.context = c
 
 	if len(this.baseDir) == 0 {
-		this.baseDir = global.Env().SystemConfig.Data + "/web"
+		this.baseDir = global.Env().SystemConfig.GetDataDir() + "/web"
 	}
 
 	url, ok := c.GetString(CONTEXT_URL)
 	if !ok {
 		return nil, errors.New("invalid url")
 	}
-	task := c.Get(CONTEXT_PAGE_ITEM).(*model.Task)
+	task := c.Get(CONTEXT_CRAWLER_TASK).(*model.Task)
 	pageItem := c.Get(CONTEXT_PAGE_ITEM).(*model.PageItem)
 
 	domain := c.MustGetString(CONTEXT_HOST)

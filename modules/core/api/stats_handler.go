@@ -14,26 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package core
+package http
 
 import (
-	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/modules/core/api"
+	"github.com/medcl/gopa/core/stats"
+	"net/http"
 )
 
-type CoreModule struct {
+func getMapValue(mapData map[string]int, key string, defaultValue int32) int {
+	data := mapData[key]
+	return data
 }
 
-func (this CoreModule) Name() string {
-	return "Core"
-}
+func (this API) StatsAction(w http.ResponseWriter, req *http.Request) {
 
-func (this CoreModule) Start(env *Env) {
-
-	http.InitAPI()
-}
-
-func (this CoreModule) Stop() error {
-
-	return nil
+	m := stats.StatsAll()
+	this.WriteJsonHeader(w)
+	this.Write(w, *m)
 }

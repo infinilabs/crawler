@@ -37,6 +37,7 @@ type ParsePageJoint struct {
 	MaxDepth         int         //max depth of page to follow
 	MaxBreadth       int         //max breadth of the domain to follow
 	MaxPageOfBreadth map[int]int //max page to fetch in each level's breadth, eg: 1:100;2:50;3:5;4:1
+	//TODO support save link,script
 }
 
 func (this ParsePageJoint) Name() string {

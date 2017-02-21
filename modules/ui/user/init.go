@@ -14,26 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package core
+package user
 
 import (
-	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/modules/core/api"
+	api "github.com/medcl/gopa/core/http"
 )
 
-type CoreModule struct {
-}
+func InitUI() {
 
-func (this CoreModule) Name() string {
-	return "Core"
-}
+	//UI pages init
+	ui := UserUI{}
+	api.HandleUIMethod(api.GET, "/", ui.IndexPageAction)
 
-func (this CoreModule) Start(env *Env) {
-
-	http.InitAPI()
-}
-
-func (this CoreModule) Stop() error {
-
-	return nil
 }
