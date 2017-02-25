@@ -17,10 +17,12 @@ limitations under the License.
 package main
 
 import (
+	"expvar"
 	_ "expvar"
 	"flag"
 	"fmt"
 	log "github.com/cihub/seelog"
+	"github.com/elastic/beats/libbeat/monitoring"
 	"github.com/medcl/gopa/core/daemon"
 	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/global"
@@ -70,6 +72,31 @@ func onShutdown() {
 	fmt.Println(" ")
 }
 
+// report expvar and all metrics
+func metricsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+	first := true
+	report := func(key string, value interface{}) {
+		if !first {
+			fmt.Fprintf(w, ",\n")
+		}
+		first = false
+		if str, ok := value.(string); ok {
+			fmt.Fprintf(w, "%q: %q", key, str)
+		} else {
+			fmt.Fprintf(w, "%q: %v", key, value)
+		}
+	}
+
+	fmt.Fprintf(w, "{\n")
+	monitoring.Do(monitoring.Full, report)
+	expvar.Do(func(kv expvar.KeyValue) {
+		report(kv.Key, kv.Value)
+	})
+	fmt.Fprintf(w, "\n}\n")
+}
+
 func main() {
 
 	onStart()
@@ -83,7 +110,7 @@ func main() {
 
 	var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to this file")
 	var memprofile = flag.String("memprofile", "", "write memory profile to this file")
-	var startPprof = flag.Bool("pprof", false, "start pprof service, endpoint: http://localhost:6060/debug/pprof/")
+	var httpprof = flag.Bool("pprof", false, "start pprof/expvar service, endpoint: http://localhost:6060/debug/pprof/ and http://localhost:6060/debug/vars")
 	var isDebug = flag.Bool("debug", false, "enable debug")
 
 	var apiBinding = flag.String("api_bind", "", "the http binding address, eg: 127.0.0.1:8001")
@@ -96,9 +123,21 @@ func main() {
 
 	flag.Parse()
 
-	if *startPprof {
+	if *httpprof {
 		go func() {
-			http.ListenAndServe("localhost:6060", nil)
+			log.Debug("start pprof server")
+			mux := http.NewServeMux()
+
+			// register pprof handler
+			mux.HandleFunc("/debug/pprof/", func(w http.ResponseWriter, r *http.Request) {
+				http.DefaultServeMux.ServeHTTP(w, r)
+			})
+
+			// register metrics handler
+			mux.HandleFunc("/debug/vars", metricsHandler)
+
+			endpoint := http.ListenAndServe("localhost:6060", mux)
+			log.Debug("stop pprof server: %v", endpoint)
 		}()
 	}
 
