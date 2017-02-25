@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/global"
+	"github.com/medcl/gopa/core/util"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -102,8 +103,24 @@ func TestPipeline(t *testing.T) {
 		Run()
 
 	fmt.Println(context.Data)
-	assert.Equal(t, context.Parameters.Data["published"], "true")
-	assert.Equal(t, context.Parameters.Data["saved"], "true")
-	assert.Equal(t, context.Parameters.Data["status"], true)
-	assert.Equal(t, context.Parameters.Data["domain"], "http://gogo.com")
+	assert.Equal(t, "true", context.Parameters.Data["published"])
+	assert.Equal(t, "true", context.Parameters.Data["saved"])
+	assert.Equal(t, true, context.Parameters.Data["status"])
+	assert.Equal(t, "http://gogo.com", context.Parameters.Data["domain"])
+}
+
+const key1 ParaKey = "DEPTH"
+const key2 ParaKey = "DEPTH2"
+
+func TestContext(t *testing.T) {
+	global.RegisterEnv(env.EmptyEnv())
+	context := &Context{}
+	context.Parameters.Init()
+	context.Parameters.Set(key1, 23)
+	fmt.Println(util.ToJson(context, true))
+	v := context.MustGetInt(key1)
+	assert.Equal(t, 23, v)
+	v = context.MustGetInt(key2)
+	assert.Equal(t, 0, v)
+
 }

@@ -147,8 +147,10 @@ curl -XPOST http://127.0.0.1:8001/joint/ -d'
  "name": "test_pipe_line",
  "context": {
   "data": {
-   "URL": "http://baidu.com",
-   "HOST": "baidu.com"
+   "URL": "http://facebook.com",
+   "HOST": "facebook.com",
+   "DEPTH": 0,
+   "BREADTH": 0
   },
   "phrase": 0
  },
@@ -161,7 +163,9 @@ curl -XPOST http://127.0.0.1:8001/joint/ -d'
  "process_joints": [
  {
    "joint_name": "fetch",
-   "parameters": {}
+   "parameters": {
+   "proxy": "socks5://127.0.0.1:9742"
+   }
   }
  ],
  "output_joint": null

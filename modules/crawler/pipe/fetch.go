@@ -30,11 +30,13 @@ import (
 )
 
 const Fetch JointKey = "fetch"
+const Proxy ParaKey = "proxy"
+const Cookie ParaKey = "cookie"
 
 type FetchJoint struct {
+	Parameters
 	context *Context
 	timeout time.Duration
-	cookie  string
 }
 
 func (this FetchJoint) Name() string {
@@ -65,8 +67,14 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 		pageItem := model.PageItem{}
 		context.Set(CONTEXT_PAGE_LAST_FETCH, time.Now().UTC())
 
+		cookie,_:=this.GetString(Cookie)
+		//proxy,_:=this.GetString(Proxy) //"socks5://127.0.0.1:9150"  //TODO 这个是全局配置,后续的url应该也使用同样的配置,应该在domain setting里面
+		//先全局,再domain,再task,再pipeline,层层覆盖
+		proxy:="socks5://127.0.0.1:9742"
+		log.Info("proxy:",proxy)
+
 		//start to fetch remote content
-		body, err := util.HttpGetWithCookie(&pageItem, requestUrl, this.cookie)
+		body, err := util.HttpGetWithCookie(&pageItem, requestUrl, cookie, proxy)
 
 		if err == nil {
 			if body != nil {
@@ -91,6 +99,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 			e, ok := err.(*errors.Error)
 			if ok {
 				if e.Code == errors.URLRedirected {
+					log.Trace(util.ToJson(context,true))
 					depth := context.MustGetInt(CONTEXT_DEPTH)
 					breadth := context.MustGetInt(CONTEXT_BREADTH)
 					task := model.NewTaskSeed(e.Payload.(string), requestUrl, depth, breadth)
