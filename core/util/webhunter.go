@@ -31,6 +31,7 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/errors"
 	. "github.com/medcl/gopa/core/model"
+	"golang.org/x/net/proxy"
 )
 
 func GetHost(url string) string {
@@ -93,7 +94,10 @@ func getUrl(url string) (string, error) {
 	return url, nil
 }
 
-func get(page *PageItem, url string, cookie string) ([]byte, error) {
+/**
+proxyStr, eg: "socks5://127.0.0.1:9150"
+*/
+func get(page *PageItem, url string, cookie string, proxyStr string) ([]byte, error) {
 
 	log.Debug("let's get :" + url)
 
@@ -107,6 +111,35 @@ func get(page *PageItem, url string, cookie string) ([]byte, error) {
 		CheckRedirect: noRedirect,
 		//CheckRedirect: nil,
 	}
+
+	if proxyStr != "" {
+
+		// Create a transport that uses Tor Browser's SocksPort.  If
+		// talking to a system tor, this may be an AF_UNIX socket, or
+		// 127.0.0.1:9050 instead.
+		tbProxyURL, err := Parse(proxyStr)
+		if err != nil {
+			return nil, errors.New(fmt.Sprintf("Failed to parse proxy URL: %v", err))
+		}
+
+		// Get a proxy Dialer that will create the connection on our
+		// behalf via the SOCKS5 proxy.  Specify the authentication
+		// and re-create the dialer/transport/client if tor's
+		// IsolateSOCKSAuth is needed.
+		tbDialer, err := proxy.FromURL(tbProxyURL, proxy.Direct)
+		if err != nil {
+			return nil, errors.New(fmt.Sprintf("Failed to obtain proxy dialer: %v", err))
+		}
+
+		// Make a http.Transport that uses the proxy dialer, and a
+		// http.Client that uses the transport.
+		tbTransport := &http.Transport{Dial: tbDialer.Dial}
+		//http.DefaultClient.Transport = &http.Transport{Dial: tbDialer.Dial}
+
+		client.Transport = tbTransport
+
+	}
+
 	reqest, _ := http.NewRequest("GET", url, nil)
 
 	//req.SetBasicAuth("user", "password")
@@ -266,8 +299,8 @@ func post(url string, cookie string, postStr string) []byte {
 	return nil
 }
 
-func HttpGetWithCookie(page *PageItem, resource string, cookie string) (msg []byte, err error) {
-	out, err := get(page, resource, cookie)
+func HttpGetWithCookie(page *PageItem, resource string, cookie string, proxy string) (msg []byte, err error) {
+	out, err := get(page, resource, cookie, proxy)
 	return out, err
 }
 

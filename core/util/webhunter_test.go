@@ -25,7 +25,7 @@ import (
 
 func TestGet(t *testing.T) {
 	t1 := model.PageItem{}
-	data, _ := get(&t1, "http://es-guide-preview.elasticsearch.cn", "")
+	data, _ := get(&t1, "http://es-guide-preview.elasticsearch.cn", "", "")
 
 	data1, _ := json.Marshal(t1)
 	fmt.Println("", string(data))
