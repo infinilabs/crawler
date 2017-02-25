@@ -143,6 +143,7 @@ func (this *Parameters) Set(key ParaKey, value interface{}) {
 func (this *Parameters) MustGetString(key ParaKey) string {
 	s, ok := this.GetString(key)
 	if !ok {
+		log.Debug(util.ToJson(this.Data, true))
 		panic(fmt.Errorf("%s not found in context", key))
 	}
 	return s
@@ -151,22 +152,24 @@ func (this *Parameters) MustGetString(key ParaKey) string {
 func (this *Parameters) MustGetBytes(key ParaKey) []byte {
 	s, ok := this.Get(key).([]byte)
 	if !ok {
+		log.Debug(util.ToJson(this.Data, true))
 		panic(fmt.Errorf("%s not found in context", key))
 	}
 	return s
 }
 
+/*
+return 0 if not key was found
+*/
 func (this *Parameters) MustGetInt(key ParaKey) int {
-	s, ok := this.GetInt(key)
-	if !ok {
-		panic(fmt.Errorf("%s not found in context", key))
-	}
+	s, _ := this.GetInt(key)
 	return s
 }
 
 func (this *Parameters) MustGetMap(key ParaKey) map[string]interface{} {
 	s, ok := this.GetMap(key)
 	if !ok {
+		log.Debug(util.ToJson(this.Data, true))
 		panic(fmt.Errorf("%s not found in context", key))
 	}
 	return s
@@ -297,6 +300,8 @@ func (this *Pipeline) endPipeline() {
 }
 
 func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
+	log.Tracef("pipeline config: %v", util.ToJson(config, true))
+
 	pipe := &Pipeline{}
 	pipe.id = xid.New().String()
 	pipe.name = strings.TrimSpace(config.Name)
@@ -317,6 +322,8 @@ func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
 		output := GetJointInstance(config.OutputJoint)
 		pipe.End(output)
 	}
+
+	log.Tracef("get pipeline: %v", util.ToJson(pipe, true))
 
 	return pipe
 }
