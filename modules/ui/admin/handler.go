@@ -7,8 +7,10 @@ import (
 
 	"github.com/asdine/storm"
 	"github.com/boltdb/bolt"
+	"github.com/julienschmidt/httprouter"
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/http"
+	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/modules/config"
 	"github.com/medcl/gopa/modules/ui/admin/boltdb"
 	"github.com/medcl/gopa/modules/ui/admin/console"
@@ -16,6 +18,7 @@ import (
 	"github.com/medcl/gopa/modules/ui/admin/explore"
 	"github.com/medcl/gopa/modules/ui/admin/setting"
 	"github.com/medcl/gopa/modules/ui/admin/tasks"
+	"gopkg.in/yaml.v2"
 )
 
 type AdminUI struct {
@@ -67,12 +70,23 @@ func (h AdminUI) DashboardAction(w http.ResponseWriter, r *http.Request) {
 
 func (h AdminUI) TasksPageAction(w http.ResponseWriter, r *http.Request) {
 
-	tasks.Index(w)
+	var task []model.Task
+	var count1, count2 int
+	var host = h.GetParameterOrDefault(r, "domain", "")
+	var from = h.GetIntOrDefault(r, "from", 0)
+	var size = h.GetIntOrDefault(r, "size", 20)
+	count1, task, _ = model.GetTaskList(from, size, host)
+
+	var domains []model.Domain
+	count2, domains, _ = model.GetDomainList(0, 50, "")
+	tasks.Index(w, r, host, from, size, count1, task, count2, domains)
 }
+
 func (h AdminUI) ConsolePageAction(w http.ResponseWriter, r *http.Request) {
 
 	console.Index(w)
 }
+
 func (h AdminUI) ExplorePageAction(w http.ResponseWriter, r *http.Request) {
 
 	explore.Index(w)
@@ -80,5 +94,17 @@ func (h AdminUI) ExplorePageAction(w http.ResponseWriter, r *http.Request) {
 
 func (h AdminUI) SettingPageAction(w http.ResponseWriter, r *http.Request) {
 
-	setting.Setting(w)
+	o, _ := yaml.Marshal(global.Env().RuntimeConfig)
+
+	setting.Setting(w, string(o))
+}
+
+func (h AdminUI) UpdateSettingAction(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+
+	body, _ := h.GetRawBody(r)
+	yaml.Unmarshal(body, global.Env().RuntimeConfig) //TODO extract method, save to file
+
+	o, _ := yaml.Marshal(global.Env().RuntimeConfig)
+
+	setting.Setting(w, string(o))
 }

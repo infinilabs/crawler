@@ -10,8 +10,8 @@ OLDGOPATH:= $(GOPATH)
 NEWGOPATH:= $(GOPATH):$(CURDIR)/_vendor
 
 GO        := GO15VENDOREXPERIMENT="1" go
-GOBUILD  := GOPATH=$(NEWGOPATH) $(GO) build
-GOTEST   := GOPATH=$(NEWGOPATH) $(GO) test
+GOBUILD  := GOPATH=$(NEWGOPATH) $(GO) build -ldflags -s
+GOTEST   := GOPATH=$(NEWGOPATH) $(GO) test -ldflags -s
 
 ARCH      := "`uname -s`"
 LINUX     := "Linux"
@@ -131,6 +131,8 @@ fetch-depends:
 	$(GO) get github.com/mattn/go-sqlite3
 	$(GO) get github.com/jinzhu/gorm
 	$(GO) get github.com/stretchr/testify/assert
+	$(GO) get github.com/spf13/viper
+	$(GO) get -t github.com/RoaringBitmap/roaring
 
 dist: cross-build package
 

@@ -78,7 +78,14 @@ type RuledFetchConfig struct {
 	LinkTemplate       string
 }
 
+type Test struct {
+	Name     string
+	LastName string `last_name`
+}
+
 type RuntimeConfig struct {
+	Test *Test
+
 	IndexingConfig *IndexingConfig `indexing`
 
 	ChannelConfig *ChannelConfig `channel`

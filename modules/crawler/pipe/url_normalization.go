@@ -23,6 +23,7 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/util"
 	u "net/url"
+	"path"
 	"sort"
 	"strings"
 	"time"
@@ -61,7 +62,11 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 		tempUrl = "http:" + url
 	}
 
-	currentURI, _ = u.Parse(tempUrl)
+	currentURI, err = u.Parse(tempUrl)
+	if err != nil {
+		log.Error("ref url parsed failed, ", err)
+		panic(err)
+	}
 
 	log.Tracef("currentURI,schema:%s, host:%s", currentURI.Scheme, currentURI.Host)
 	refUrlStr, refExists := context.GetString(CONTEXT_REFERENCE_URL)
@@ -285,6 +290,15 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 		} else {
 			filename = filenamePrefix + "_" + filename
 		}
+	}
+
+	if len(filename) == 0 {
+		filename = defaultFileName
+	}
+
+	if !strings.Contains(filename, ".") {
+		filePath = path.Join(filePath, filename)
+		filename = defaultFileName
 	}
 
 	context.Set(CONTEXT_SAVE_PATH, filePath)

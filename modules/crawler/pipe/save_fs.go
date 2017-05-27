@@ -29,18 +29,18 @@ import (
 	"strings"
 )
 
-const SaveToFileSystem JointKey = "save2fs"
+const SaveSnapshotToFileSystem JointKey = "save_snapshot_fs"
 
-type SaveToFileSystemJoint struct {
+type SaveSnapshotToFileSystemJoint struct {
 	context *Context
 	baseDir string
 }
 
-func (this SaveToFileSystemJoint) Name() string {
-	return string(SaveToFileSystem)
+func (this SaveSnapshotToFileSystemJoint) Name() string {
+	return string(SaveSnapshotToFileSystem)
 }
 
-func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
+func (this SaveSnapshotToFileSystemJoint) Process(c *Context) (*Context, error) {
 	this.context = c
 
 	if len(this.baseDir) == 0 {
@@ -59,8 +59,6 @@ func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 	file := c.MustGetString(CONTEXT_SAVE_FILENAME)
 	folder := path.Join(this.baseDir, domain, dir)
 
-	os.MkdirAll(folder, 0777)
-
 	fullPath := path.Join(folder, file)
 
 	if util.FileExists(fullPath) {
@@ -68,24 +66,32 @@ func (this SaveToFileSystemJoint) Process(c *Context) (*Context, error) {
 		return c, nil
 	}
 
-	log.Trace("save url,", url, ",domain,", task.Domain, ",fullpath,", fullPath)
+	log.Trace("save url,", url, ",domain,", task.Domain, ",folder,", folder, ",file:", file, ",fullpath,", fullPath)
+
+	err := os.MkdirAll(folder, 0777)
+	if err != nil {
+		log.Error(fullPath, ",", err)
+		panic(err)
+	}
 
 	fout, err := os.Create(fullPath)
 	if err != nil {
-		log.Error(fullPath, err)
+		log.Error(fullPath, ",", err)
+		panic(err)
 		return nil, err
 	}
 
 	defer fout.Close()
 	_, err = fout.Write(pageItem.Body)
 	if err != nil {
+		log.Error(fullPath, ",", err)
 		return nil, err
 	}
 
 	return c, nil
 }
 
-func (this SaveToFileSystemJoint) getSavedPath(urlStr string) (string, string) {
+func (this SaveSnapshotToFileSystemJoint) getSavedPath(urlStr string) (string, string) {
 
 	log.Debug("start saving url,", urlStr)
 	myurl1, _ := url.Parse(urlStr)

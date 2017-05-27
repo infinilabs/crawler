@@ -19,7 +19,11 @@ package util
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"runtime"
+	"strconv"
 	. "strings"
+	"time"
 	"unicode"
 	"unicode/utf16"
 )
@@ -79,4 +83,26 @@ func ToJson(in interface{}, indent bool) string {
 		b, _ = json.Marshal(in)
 	}
 	return string(b)
+}
+
+func ToInt(str string) (int, error) {
+	if IndexAny(str, ".") > 0 {
+		nonFractionalPart := Split(str, ".")
+		return strconv.Atoi(nonFractionalPart[0])
+	} else {
+		return strconv.Atoi(str)
+	}
+
+}
+
+func FormatTime(date *time.Time) string {
+	return date.Format("2006-01-02 15:04:05")
+}
+
+func GetRuntimeErrorMessage(r runtime.Error) string {
+	if r != nil {
+		return r.Error()
+	}
+	panic(errors.New("nil runtime error"))
+	return "nil runtime error"
 }

@@ -73,7 +73,7 @@ func (h *Hub) RunHub() {
 	if global.Env().IsDebug {
 
 		go func() {
-			t := time.NewTicker(time.Duration(5) * time.Second)
+			t := time.NewTicker(time.Duration(10) * time.Second)
 			for {
 				select {
 				case <-t.C:

@@ -132,9 +132,8 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 	defer func() {
 		if !env.IsDebug {
 			if r := recover(); r != nil {
-				if _, ok := r.(runtime.Error); ok {
-					err := r.(error)
-					log.Error("pipeline: ", pipeline.GetID(), ", taskId: ", taskId, ", ", err)
+				if e, ok := r.(runtime.Error); ok {
+					log.Error("pipeline: ", pipeline.GetID(), ", taskId: ", taskId, ", ", util.GetRuntimeErrorMessage(e))
 				}
 				log.Debug("error in crawler,", util.ToJson(pipeline.GetContext(), true))
 			}
@@ -155,8 +154,8 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 		Join(FetchJoint{}).
 		Join(ParsePageJoint{DispatchLinks: true, MaxDepth: 30, MaxBreadth: 2}).
 		Join(HtmlToTextJoint{MergeWhitespace: true}).
-		//Join(SaveToFileSystemJoint{}).
-		Join(SaveToDBJoint{CompressBody: true, Bucket: "Global"}).
+		Join(SaveSnapshotToFileSystemJoint{}).
+		Join(SaveSnapshotToDBJoint{CompressBody: true, Bucket: "Global"}).
 		//Join(PublishJoint{}).
 		End(SaveTaskJoint{}).
 		Run()

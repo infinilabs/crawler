@@ -67,11 +67,10 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 		pageItem := model.PageItem{}
 		context.Set(CONTEXT_PAGE_LAST_FETCH, time.Now().UTC())
 
-		cookie,_:=this.GetString(Cookie)
-		//proxy,_:=this.GetString(Proxy) //"socks5://127.0.0.1:9150"  //TODO 这个是全局配置,后续的url应该也使用同样的配置,应该在domain setting里面
+		cookie, _ := this.GetString(Cookie)
+		proxy, _ := this.GetString(Proxy) //"socks5://127.0.0.1:9150"  //TODO 这个是全局配置,后续的url应该也使用同样的配置,应该在domain setting里面
 		//先全局,再domain,再task,再pipeline,层层覆盖
-		proxy:="socks5://127.0.0.1:9742"
-		log.Info("proxy:",proxy)
+		log.Trace("proxy:", proxy)
 
 		//start to fetch remote content
 		body, err := util.HttpGetWithCookie(&pageItem, requestUrl, cookie, proxy)
@@ -87,7 +86,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 			}
 
 			//update url, in case catch redirects
-			context.Set(CONTEXT_URL, pageItem.Url) //don't update, so what? will be bad, if url got redirected, you will got wrong url
+			context.Set(CONTEXT_URL, pageItem.Url) //should update here, if url got redirected, the url is change
 			context.Set(CONTEXT_HOST, pageItem.Host)
 			context.Set(CONTEXT_PAGE_BODY_BYTES, body)
 			context.Set(CONTEXT_PAGE_ITEM, &pageItem)
@@ -99,7 +98,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 			e, ok := err.(*errors.Error)
 			if ok {
 				if e.Code == errors.URLRedirected {
-					log.Trace(util.ToJson(context,true))
+					log.Trace(util.ToJson(context, true))
 					depth := context.MustGetInt(CONTEXT_DEPTH)
 					breadth := context.MustGetInt(CONTEXT_BREADTH)
 					task := model.NewTaskSeed(e.Payload.(string), requestUrl, depth, breadth)
@@ -118,7 +117,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 	case <-t.C:
 		log.Error("fetching url time out, ", requestUrl, ", ", this.timeout)
 		stats.Increment("domain.stats", domain+"."+stats.STATS_FETCH_TIMEOUT_COUNT)
-		panic(errors.New(fmt.Sprintf("fetching url time out, %s, %s", requestUrl, this.timeout)))
+		context.Break(fmt.Sprintf("fetching url time out, %s, %s", requestUrl, this.timeout))
 		return nil, errors.New("fetch url time out")
 	case value := <-flg:
 		if value.flag {
@@ -128,7 +127,6 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 			log.Debug("fetching url error exit, ", requestUrl)
 			if value.err != nil {
 				context.Break(value.err.Error())
-				panic(value.err.Error())
 			}
 			stats.Increment("domain.stats", domain+"."+stats.STATS_FETCH_FAIL_COUNT)
 		}

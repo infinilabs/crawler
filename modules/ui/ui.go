@@ -43,6 +43,11 @@ var mux *http.ServeMux
 
 var store = sessions.NewCookieStore([]byte("1c6f2afbccef959ac5c8b81f690c1be7"))
 
+var faviconAction = func(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	w.Header().Set("Location", "/static/assets/img/favicon.ico")
+	w.WriteHeader(301)
+}
+
 func (this UIModule) internalStart(env *Env) {
 
 	store.Options = &sessions.Options{
@@ -61,7 +66,7 @@ func (this UIModule) internalStart(env *Env) {
 	mux.Handle("/", router)
 
 	//Index
-	//router.GET("/favicon.ico", handler.IndexAction)
+	router.GET("/favicon.ico", faviconAction)
 
 	//init common
 	mux.Handle("/static/", http.FileServer(static.FS(false)))

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package http
+package ajax
 
 import (
 	"encoding/json"
@@ -25,7 +25,11 @@ import (
 	"net/http"
 )
 
-func (this API) LoggingSettingAction(w http.ResponseWriter, req *http.Request) {
+type Ajax struct {
+	Handler
+}
+
+func (this Ajax) LoggingSettingAction(w http.ResponseWriter, req *http.Request) {
 	if req.Method == GET.String() {
 
 		cfg := logging.GetLoggingConfig()

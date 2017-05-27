@@ -48,7 +48,10 @@ type Context struct {
 break all pipelines, but the end phrase not included
 */
 func (this *Context) Break(msg interface{}) {
-	log.Trace("break,", msg)
+	log.Trace("break,", this, ",", msg)
+	if this == nil {
+		panic(errors.New("context is nil"))
+	}
 	this.breakFlag = true
 	this.Payload = msg
 }
@@ -132,6 +135,18 @@ func (this *Parameters) Get(key ParaKey) interface{} {
 	return v
 }
 
+func (this *Parameters) GetOrDefault(key ParaKey, val interface{}) interface{} {
+	this.Init()
+	this.l.RLock()
+	s := string(key)
+	v := this.Data[s]
+	this.l.RUnlock()
+	if v == nil {
+		return val
+	}
+	return v
+}
+
 func (this *Parameters) Set(key ParaKey, value interface{}) {
 	this.Init()
 	this.l.Lock()
@@ -145,6 +160,14 @@ func (this *Parameters) MustGetString(key ParaKey) string {
 	if !ok {
 		log.Debug(util.ToJson(this.Data, true))
 		panic(fmt.Errorf("%s not found in context", key))
+	}
+	return s
+}
+
+func (this *Parameters) GetStringOrDefault(key ParaKey, val string) string {
+	s, ok := this.GetString(key)
+	if (!ok) || len(s) == 0 {
+		return val
 	}
 	return s
 }
@@ -236,10 +259,9 @@ func (this *Pipeline) Run() *Context {
 	defer func() {
 		if !global.Env().IsDebug {
 			if r := recover(); r != nil {
-				if _, ok := r.(runtime.Error); ok {
-					err := r.(error)
-					log.Errorf("%s: %v", this.name, err)
-					//this.context.Break(err.Error())
+				if e, ok := r.(runtime.Error); ok {
+					//log.Errorf("%v", err)
+					this.context.Break(util.GetRuntimeErrorMessage(e))
 				}
 				log.Trace("error in pipeline, ", this.name)
 				stats.Increment(this.name+".pipeline", "error")

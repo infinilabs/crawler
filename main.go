@@ -22,7 +22,6 @@ import (
 	"flag"
 	"fmt"
 	log "github.com/cihub/seelog"
-	"github.com/elastic/beats/libbeat/monitoring"
 	"github.com/medcl/gopa/core/daemon"
 	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/global"
@@ -90,7 +89,6 @@ func metricsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintf(w, "{\n")
-	monitoring.Do(monitoring.Full, report)
 	expvar.Do(func(kv expvar.KeyValue) {
 		report(kv.Key, kv.Value)
 	})

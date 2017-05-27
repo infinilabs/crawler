@@ -18,6 +18,7 @@ package admin
 
 import (
 	api "github.com/medcl/gopa/core/http"
+	"github.com/medcl/gopa/modules/ui/admin/ajax"
 	"github.com/medcl/gopa/modules/ui/admin/common"
 )
 
@@ -39,5 +40,11 @@ func InitUI() {
 	api.HandleUIFunc("/admin/explore/", ui.ExplorePageAction)
 	api.HandleUIFunc("/admin/boltdb/", ui.BoltDBStatusAction)
 	api.HandleUIFunc("/admin/setting/", ui.SettingPageAction)
+	api.HandleUIMethod(api.POST, "/admin/setting/", ui.UpdateSettingAction)
+
+	//Ajax
+	ajax := ajax.Ajax{}
+	api.HandleUIFunc("/setting/logger", ajax.LoggingSettingAction)
+	api.HandleUIFunc("/setting/logger/", ajax.LoggingSettingAction)
 
 }

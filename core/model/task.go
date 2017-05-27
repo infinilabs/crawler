@@ -66,7 +66,7 @@ func GetTaskByField(k, v string) (Task, error) {
 }
 
 func GetTaskList(from, size int, domain string) (int, []Task, error) {
-	log.Trace("start get all crawler tasks")
+	log.Tracef("start get crawler tasks, %v-%v, %v", from, size, domain)
 	var tasks []Task
 	queryO := store.Query{Sort: "create_time desc", From: from, Size: size}
 	if len(domain) > 0 {

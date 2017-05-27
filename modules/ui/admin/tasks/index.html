@@ -1,11 +1,14 @@
-<%! func Index(w io.Writer) error %>
+<%! func Index(w io.Writer,r *http.Request,domain string,from,size,taskCount int,tasks []model.Task,domainsCount int,domains []model.Domain) error %>
 
 <%% import "github.com/medcl/gopa/modules/ui/admin/common" %%>
+<%% import "github.com/medcl/gopa/core/model" %%>
+<%% import "net/http" %%>
 
 <% common.Head(w, "Tasks","") %>
 <link rel="stylesheet" href="/static/assets/css/tasks.css" />
 <script src="/static/assets/js/jquery.timeago.js"></script>
 <script src="/static/assets/js/page/tasks.js"></script>
+<script src="/static/assets/uikit-2.27.1/js/components/pagination.min.js"></script>
 
 <% common.Body(w) %>
 <% common.Nav(w,"Tasks") %>
@@ -40,32 +43,42 @@
 
 
             <div class="uk-width-2-10">
-                <div class="uk-alert" ><span id="domain-alert"></span></div>
+                <div class="uk-alert" ><span id="domain-alert">Total <%= domainsCount%></span></div>
                 <ul id="domain-records" class="uk-list">
-                    <li>...</li>
-                    <li>...</li>
-                    <li>...</li>
+                    <% if len(domains)>0 {
+                    for _,domain:=range domains{
+                    %>
+                    <%== GetDomainRow(domain) %>
+                    <%
+                    }
+                    }
+                    %>
                 </ul>
             </div>
 
             <div class="uk-width-8-10">
-                <div class="uk-alert" ><span id="alert"></span></div>
+                <div class="uk-alert" ><span id="alert">Total <%= taskCount%></span></div>
 
                 <table id="tasks" class="uk-table uk-table-hover uk-table-striped" cellspacing="0" width="100%">
                     <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Path</th>
-                        <th>Title</th>
-                        <th>Size</th>
+                        <th>URL</th>
                         <th>Updated</th>
                     </tr>
                     </thead>
                     <tbody id="records">
+                    <% if len(tasks)>0 {
+                    for _,task:=range tasks{
+                    %>
+                    <%== GetTaskRow(task) %>
+                    <%
+                    }
+                    }
+                    %>
                     </tbody>
                 </table>
 
-                <ul class="uk-pagination" data-uk-pagination="{items:100, itemsOnPage:10}"></ul>
+                <%== common.GetPagination(domain,from,size, taskCount, "") %>
 
             </div>
         </div>

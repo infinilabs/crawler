@@ -28,19 +28,19 @@ import (
 	"strings"
 )
 
-const SaveToDB JointKey = "save2db"
+const SaveSnapshotToDB JointKey = "save_snapshot_db"
 
-type SaveToDBJoint struct {
+type SaveSnapshotToDBJoint struct {
 	context      *Context
 	CompressBody bool
 	Bucket       string
 }
 
-func (this SaveToDBJoint) Name() string {
-	return string(SaveToDB)
+func (this SaveSnapshotToDBJoint) Name() string {
+	return string(SaveSnapshotToDB)
 }
 
-func (this SaveToDBJoint) Process(c *Context) (*Context, error) {
+func (this SaveSnapshotToDBJoint) Process(c *Context) (*Context, error) {
 	this.context = c
 
 	url := c.MustGetString(CONTEXT_URL)
@@ -51,7 +51,7 @@ func (this SaveToDBJoint) Process(c *Context) (*Context, error) {
 	saveFile := c.MustGetString(CONTEXT_SAVE_FILENAME)
 	domain := c.MustGetString(CONTEXT_HOST)
 
-	saveKey := GetKey(task.Domain, path.Join(savePath, saveFile))
+	saveKey := GetKey(path.Join(task.Domain, savePath, saveFile))
 	log.Debug("save url to db, url:", url, ",domain:", task.Domain, ",path:", savePath, ",file:", saveFile, ",saveKey:", string(saveKey))
 
 	if this.CompressBody {
@@ -67,7 +67,7 @@ func (this SaveToDBJoint) Process(c *Context) (*Context, error) {
 	return c, nil
 }
 
-const KeyDelimiter string = ""
+const KeyDelimiter string = "/"
 
 func GetKey(args ...string) []byte {
 	key := config.SnapshotMappingBucketKey

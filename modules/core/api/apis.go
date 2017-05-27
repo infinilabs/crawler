@@ -47,9 +47,6 @@ func InitAPI() {
 	api.HandleAPIMethod(api.GET, "/domain/:id", apis.DomainGetAction)
 	api.HandleAPIMethod(api.DELETE, "/domain/:id", api.BasicAuth(apis.DomainDeleteAction, user, pass))
 
-	api.HandleAPIFunc("/setting/logger", apis.LoggingSettingAction)
-	api.HandleAPIFunc("/setting/logger/", apis.LoggingSettingAction)
-
 	//Snapshot
 	api.HandleAPIFunc("/snapshot/", apis.SnapshotAction)
 

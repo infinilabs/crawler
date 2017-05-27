@@ -22,6 +22,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/medcl/gopa/core/errors"
 	"github.com/medcl/gopa/core/global"
+	"github.com/medcl/gopa/core/util"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -142,6 +143,17 @@ func (this Handler) GetParameterOrDefault(r *http.Request, key string, defaultVa
 		return v
 	}
 	return defaultValue
+}
+
+func (this Handler) GetIntOrDefault(r *http.Request, key string, defaultValue int) int {
+
+	v := this.GetParameter(r, key)
+	s, ok := util.ToInt(v)
+	if ok != nil {
+		return defaultValue
+	}
+	return s
+
 }
 
 func (this Handler) GetJson(r *http.Request) (*jsonq.JsonQuery, error) {

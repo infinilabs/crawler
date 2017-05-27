@@ -24,6 +24,7 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/stats"
+	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules/config"
 	. "github.com/medcl/gopa/modules/crawler/pipe"
 	"runtime"
@@ -125,9 +126,8 @@ func (this CheckerModule) runPipe(debug bool, task *model.Task) *Pipeline {
 
 		if !debug {
 			if r := recover(); r != nil {
-				if _, ok := r.(runtime.Error); ok {
-					err := r.(error)
-					log.Error("pipeline: ", pipeline.GetID(), ", taskId: ", task.ID, ", ", err)
+				if e, ok := r.(runtime.Error); ok {
+					log.Error("pipeline: ", pipeline.GetID(), ", taskId: ", task.ID, ", ", util.GetRuntimeErrorMessage(e))
 				}
 				log.Error("error in checker")
 			}

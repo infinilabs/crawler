@@ -173,7 +173,7 @@ func (s *RaftModule) Open() error {
 
 	if global.Env().IsDebug {
 		go func() {
-			t := time.NewTicker(time.Duration(1) * time.Second)
+			t := time.NewTicker(time.Duration(10) * time.Second)
 
 			for {
 				select {

@@ -16,6 +16,11 @@ limitations under the License.
 
 package common
 
+import (
+	"bytes"
+	"strconv"
+)
+
 func NavCurrent(cur, nav string) string {
 	if cur == nav {
 		return " class=\"uk-active\" "
@@ -34,4 +39,57 @@ var navs []navObj
 func RegisterNav(name, displayName string, url string) {
 	obj := navObj{name: name, displayName: displayName, url: url}
 	navs = append(navs, obj)
+}
+
+func GetPagination(domain string, from, size, total int, url string) string {
+
+	var cur = from / size
+
+	var buffer bytes.Buffer
+	buffer.WriteString("<ul class=\"uk-pagination\" data-uk-pagination=\"{items:")
+	buffer.WriteString(strconv.Itoa(total))
+	buffer.WriteString(", itemsOnPage:")
+	buffer.WriteString(strconv.Itoa(size))
+	buffer.WriteString(",currentPage:")
+	buffer.WriteString(strconv.Itoa(cur))
+	buffer.WriteString("}\"></ul>")
+	buffer.WriteString("<script type=\"text/javascript\">")
+	buffer.WriteString("    $(function() {")
+
+	buffer.WriteString("$('[data-uk-pagination]').on('select.uk.pagination', function(e, pageIndex){")
+	buffer.WriteString("var size=")
+	buffer.WriteString(strconv.Itoa(size))
+	buffer.WriteString(";")
+	buffer.WriteString("var from=pageIndex*size;")
+
+	var moreArgs bytes.Buffer
+	moreArgs.WriteString("var args='")
+	if domain != "" {
+		var domainStr = "&domain=" + domain
+		moreArgs.WriteString(domainStr)
+	}
+	moreArgs.WriteString("';")
+
+	if moreArgs.Len() > 0 {
+		buffer.Write(moreArgs.Bytes())
+	}
+
+	buffer.WriteString("window.location='?from='+from+'&size='+size+args")
+
+	buffer.WriteString("});")
+
+	buffer.WriteString("   });")
+	buffer.WriteString("</script>")
+
+	return buffer.String()
+}
+
+func GetJSBlock(buffer *bytes.Buffer, js string) {
+
+	buffer.WriteString("<script type=\"text/javascript\">")
+	buffer.WriteString("    $(function() {")
+	buffer.WriteString(js)
+	buffer.WriteString("   });")
+	buffer.WriteString("</script>")
+
 }

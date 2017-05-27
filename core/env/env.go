@@ -21,6 +21,7 @@ import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
 	"github.com/medcl/gopa/core/util"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
@@ -53,6 +54,8 @@ func Environment(sysConfig SystemConfig) *Env {
 
 func (this *Env) loadRuntimeConfig() (RuntimeConfig, error) {
 
+	viper.SetConfigType("yaml")
+
 	var configFile = "./gopa.yml"
 	if this.SystemConfig != nil && len(this.SystemConfig.ConfigFile) > 0 {
 		configFile = this.SystemConfig.ConfigFile
@@ -84,6 +87,9 @@ func (this *Env) loadRuntimeConfig() (RuntimeConfig, error) {
 		config.TaskConfig = (&TaskConfig{}).Init()
 		config.RuledFetchConfig = (&RuledFetchConfig{}) //.Init()
 	}
+
+	o, _ := yaml.Marshal(config)
+	log.Debug(string(o))
 
 	config.TaskConfig.LinkUrlExtractRegex = regexp.MustCompile(config.TaskConfig.LinkUrlExtractRegexStr)
 	config.TaskConfig.FetchUrlPattern = regexp.MustCompile(config.TaskConfig.FetchUrlPatternStr)

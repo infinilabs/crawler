@@ -221,7 +221,7 @@ func get(page *PageItem, url string, cookie string, proxyStr string) ([]byte, er
 			return nil, err
 		}
 		page.Body = body
-		page.Size = len(body)
+		page.Size = uint64(len(body))
 		return body, nil
 
 	}
