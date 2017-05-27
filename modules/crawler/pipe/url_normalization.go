@@ -145,7 +145,7 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 
 	url = tempUrl
 
-	if strings.ContainsAny(url, "..") {
+	if strings.Contains(url, "..") {
 
 		url = purell.NormalizeURL(currentURI, purell.FlagsUsuallySafeGreedy|purell.FlagRemoveDuplicateSlashes|purell.FlagRemoveFragment)
 		//update currentURI
