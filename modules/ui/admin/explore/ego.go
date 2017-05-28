@@ -19,8 +19,6 @@ func Index(w io.Writer) error {
 	_, _ = io.WriteString(w, "\n")
 	common.Nav(w, "Explore")
 	_, _ = io.WriteString(w, "\n\n\n\n<div class=\"tm-middle\">\n    <div class=\"uk-container uk-container-center\">\n\n        <div class=\"uk-grid\" data-uk-grid-margin=\"\">\n            <div class=\"tm-sidebar uk-width-medium-1-4 uk-hidden-small uk-row-first\">\n\n\n\n            </div>\n            <div class=\"tm-main uk-width-medium-3-4\">\n\n                <article class=\"uk-article\">\n\n                    Explore.\n\n                </article>\n\n            </div>\n        </div>\n\n    </div>\n</div>\n\n")
-	common.OffCanvas(w)
-	_, _ = io.WriteString(w, "\n\n")
 	common.Footer(w)
 	_, _ = io.WriteString(w, "\n")
 	return nil

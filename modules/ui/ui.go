@@ -159,7 +159,7 @@ type UIModule struct {
 }
 
 func (this UIModule) Name() string {
-	return "UI"
+	return "Web UI"
 }
 
 func (this UIModule) Start(env *Env) {
