@@ -22,7 +22,7 @@ import (
 	"github.com/medcl/gopa/modules/cluster"
 	"github.com/medcl/gopa/modules/crawler"
 	"github.com/medcl/gopa/modules/database"
-	"github.com/medcl/gopa/modules/dispatcher"
+	"github.com/medcl/gopa/modules/dispatch"
 	"github.com/medcl/gopa/modules/filter"
 	"github.com/medcl/gopa/modules/queue"
 	"github.com/medcl/gopa/modules/stats"
@@ -40,7 +40,7 @@ func Register() {
 	module.Register(queue.DiskQueue{})
 	module.Register(crawler.CheckerModule{})
 	module.Register(crawler.CrawlerModule{})
-	module.Register(dispatcher.DispatcherModule{})
+	module.Register(dispatch.DispatchModule{})
 	module.Register(cluster.ClusterModule{})
 	module.Register(ui.UIModule{})
 	module.Register(api.APIModule{})

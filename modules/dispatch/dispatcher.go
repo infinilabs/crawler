@@ -1,4 +1,4 @@
-package dispatcher
+package dispatch
 
 import (
 	log "github.com/cihub/seelog"
@@ -11,17 +11,17 @@ import (
 	"time"
 )
 
-type DispatcherModule struct {
+type DispatchModule struct {
 }
 
-func (this DispatcherModule) Name() string {
+func (this DispatchModule) Name() string {
 	return "Dispatcher"
 }
 
 var signalChannel chan bool
 var quitChannel chan bool
 
-func (this DispatcherModule) Start(env *Env) {
+func (this DispatchModule) Start(env *Env) {
 	signalChannel = make(chan bool, 2)
 	quitChannel = make(chan bool, 3)
 	go func() {
@@ -101,7 +101,7 @@ func (this DispatcherModule) Start(env *Env) {
 	}()
 }
 
-func (this DispatcherModule) Stop() error {
+func (this DispatchModule) Stop() error {
 	signalChannel <- true
 	signalChannel <- true
 	return nil
