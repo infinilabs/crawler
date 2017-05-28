@@ -33,6 +33,7 @@ func (this IndexModule) Start(env *Env) {
 					continue
 				}
 				//indexing to es or blevesearch
+
 			}
 
 		}

@@ -17,9 +17,11 @@ limitations under the License.
 package storage
 
 import (
+	"github.com/golang/go/src/pkg/path"
 	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/store"
 	"github.com/medcl/gopa/modules/storage/boltdb"
+	"os"
 )
 
 var impl boltdb.BoltdbStore
@@ -30,7 +32,9 @@ func (this StorageModule) Name() string {
 
 func (this StorageModule) Start(env *Env) {
 
-	impl = boltdb.BoltdbStore{FileName: env.SystemConfig.GetDataDir() + "/boltdb"}
+	folder := path.Join(env.SystemConfig.GetDataDir(), "blob")
+	os.MkdirAll(folder, 0777)
+	impl = boltdb.BoltdbStore{FileName: path.Join(folder, "/bolt.db")}
 	err := impl.Open()
 	if err != nil {
 		panic(err)

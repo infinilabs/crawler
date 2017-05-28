@@ -156,7 +156,7 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 		Join(HtmlToTextJoint{MergeWhitespace: true}).
 		Join(SaveSnapshotToFileSystemJoint{}).
 		Join(SaveSnapshotToDBJoint{CompressBody: true, Bucket: "Global"}).
-		//Join(PublishJoint{}).
+		Join(PublishJoint{}).
 		End(SaveTaskJoint{}).
 		Run()
 

@@ -10,6 +10,7 @@
 2. dynamic change logging setting from the console, can be filter log by level, message, file and function name
 3. dynamic create pipeline
 4. add tls to security api and websocket
+5. add proxy to crawler pipeline
 
 ##### improvement
 1. use template engine, UI refactoring
@@ -17,6 +18,7 @@
 
 ##### bugfix
 1. fix incorrect stats number, incorrect task filter
+2. fix incorrect redirect handler, url ignored
 
 #### v0.7
 ##### features:
