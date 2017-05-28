@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package http
+package api
 
 import (
 	"net/http"
@@ -28,6 +28,7 @@ import (
 	. "github.com/medcl/gopa/core/env"
 	apis "github.com/medcl/gopa/core/http"
 	"github.com/medcl/gopa/core/util"
+	handlers "github.com/medcl/gopa/modules/api/handlers"
 	_ "net/http/pprof"
 	"path"
 	"path/filepath"
@@ -146,6 +147,7 @@ func (this APIModule) Start(config *Env) {
 	this.env = config
 	//API server
 	go func() {
+		handlers.InitAPI()
 		this.internalStart(config)
 	}()
 
