@@ -27,8 +27,6 @@ func TestLoad(t *testing.T) {
 	fmt.Sprintln(env)
 	fmt.Sprintln(env.SystemConfig)
 	config := env.RuntimeConfig
-	assert.Equal(t, "gopa", config.ClusterConfig.Name)
-	assert.Equal(t, "debug", config.LoggingConfig.Level)
 	assert.Equal(t, "http://eshost:9200", config.IndexingConfig.Host)
 	assert.Equal(t, "gopa", config.IndexingConfig.Index)
 	//assert.Equal(t,"data",config.PathConfig.Data)

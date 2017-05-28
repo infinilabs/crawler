@@ -19,8 +19,8 @@ package pipe
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	log "github.com/cihub/seelog"
-	"github.com/golang/go/src/pkg/encoding/json"
 	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/queue"

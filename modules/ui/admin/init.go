@@ -24,12 +24,12 @@ import (
 
 func InitUI() {
 	//Nav init
-	common.RegisterNav("Dashboard", "Dashboard", "/admin/")
+	common.RegisterNav("Console", "Console", "/admin/console/")
+	//common.RegisterNav("Dashboard", "Dashboard", "/admin/")
 	common.RegisterNav("Tasks", "Tasks", "/admin/tasks/")
 	//common.RegisterNav("Explore","Explore","/ui/explore/")
-	common.RegisterNav("Console", "Console", "/admin/console/")
 	common.RegisterNav("BoltDB", "BoltDB", "/admin/boltdb/")
-	common.RegisterNav("Setting", "Setting", "/admin/setting/")
+	//common.RegisterNav("Setting", "Setting", "/admin/setting/")
 
 	//UI pages init
 	ui := AdminUI{}

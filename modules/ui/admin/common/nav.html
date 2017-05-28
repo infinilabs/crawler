@@ -2,8 +2,13 @@
 
 <nav class="tm-navbar uk-navbar uk-navbar-attached">
   <div class="uk-container uk-container-center">
-
-    <a class="uk-navbar-brand uk-hidden-small" href="/admin/"><img class="uk-margin uk-margin-remove" src="/static/assets/img/logo.svg" height="30" title="GOPA" alt="GOPA"></a>
+    <%
+    logoUrl:="/admin/"
+    if len(navs)>0 {
+      logoUrl=navs[0].url
+    }
+    %>
+    <a class="uk-navbar-brand uk-hidden-small" href="<%= logoUrl %>"><img class="uk-margin uk-margin-remove" src="/static/assets/img/logo.svg" height="30" title="GOPA" alt="GOPA"></a>
 
     <ul class="uk-navbar-nav uk-hidden-small">
 

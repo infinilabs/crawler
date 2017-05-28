@@ -16,7 +16,7 @@ limitations under the License.
 
 package env
 
-const VERSION = "0.8.0_SNAPSHOT"
+const VERSION = "0.9.0_SNAPSHOT"
 
 func GetWelcomeMessage() string {
 	s := ("  ________ ________ __________  _____   \n")

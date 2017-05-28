@@ -31,7 +31,16 @@ func Head(w io.Writer, title string, customHeaderBlock string) error {
 	return nil
 }
 func Nav(w io.Writer, current string) error {
-	_, _ = io.WriteString(w, "\n\n<nav class=\"tm-navbar uk-navbar uk-navbar-attached\">\n  <div class=\"uk-container uk-container-center\">\n\n    <a class=\"uk-navbar-brand uk-hidden-small\" href=\"/admin/\"><img class=\"uk-margin uk-margin-remove\" src=\"/static/assets/img/logo.svg\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></a>\n\n    <ul class=\"uk-navbar-nav uk-hidden-small\">\n\n      ")
+	_, _ = io.WriteString(w, "\n\n<nav class=\"tm-navbar uk-navbar uk-navbar-attached\">\n  <div class=\"uk-container uk-container-center\">\n    ")
+
+	logoUrl := "/admin/"
+	if len(navs) > 0 {
+		logoUrl = navs[0].url
+	}
+
+	_, _ = io.WriteString(w, "\n    <a class=\"uk-navbar-brand uk-hidden-small\" href=\"")
+	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(logoUrl)))
+	_, _ = io.WriteString(w, "\"><img class=\"uk-margin uk-margin-remove\" src=\"/static/assets/img/logo.svg\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></a>\n\n    <ul class=\"uk-navbar-nav uk-hidden-small\">\n\n      ")
 	if len(navs) > 0 {
 		for _, obj := range navs {
 

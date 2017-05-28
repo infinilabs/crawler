@@ -17,11 +17,11 @@ limitations under the License.
 package storage
 
 import (
-	"github.com/golang/go/src/pkg/path"
 	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/store"
 	"github.com/medcl/gopa/modules/storage/boltdb"
 	"os"
+	"path"
 )
 
 var impl boltdb.BoltdbStore
