@@ -20,10 +20,11 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/global"
+	"github.com/golang/go/src/pkg/encoding/json"
 	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
-	"github.com/medcl/gopa/core/util"
+	"github.com/medcl/gopa/core/queue"
+	"github.com/medcl/gopa/modules/config"
 )
 
 const Publish JointKey = "publish"
@@ -63,8 +64,22 @@ func (this PublishJoint) Process(c *Context) (*Context, error) {
 		}
 		data["links"] = maps
 	}
-	esClient := util.ElasticsearchClient{Host: global.Env().RuntimeConfig.IndexingConfig.Host, Index: global.Env().RuntimeConfig.IndexingConfig.Index}
-	_, err := esClient.IndexDoc(id, data)
+
+	docs := model.IndexDocument{
+		Index:  "gopa",
+		Type:   "doc",
+		Id:     id,
+		Source: data,
+	}
+
+	bytes, err := json.Marshal(docs)
+	if err != nil {
+		log.Error(err)
+		return c, err
+	}
+
+	err = queue.Push(config.IndexChannel, bytes)
+
 	if err != nil {
 		log.Error(err)
 		return c, err

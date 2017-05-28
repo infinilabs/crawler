@@ -22,7 +22,7 @@ FILES     := $$(find . -name '*.go' | grep -vE 'vendor')
 
 .PHONY: all build update test clean
 
-default: clean build
+default: clean format build
 
 build: config update-ui update-template-ui
 	@echo $(GOPATH)

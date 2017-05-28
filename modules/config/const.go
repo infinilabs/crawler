@@ -11,7 +11,8 @@ import (
 const (
 	FetchChannel      queue.QueueKey = "fetch"
 	CheckChannel      queue.QueueKey = "check"
-	DispatcherChannel queue.QueueKey = "dispatcher"
+	DispatcherChannel queue.QueueKey = "dispatch"
+	IndexChannel      queue.QueueKey = "index"
 
 	DispatchFilter filter.FilterKey = "dispatch_filter"
 	CheckFilter    filter.FilterKey = "check_filter"

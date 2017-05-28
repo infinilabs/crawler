@@ -14,4 +14,51 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package elasticsearch
+package util
+
+import (
+	"encoding/json"
+	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/util"
+)
+
+type ElasticsearchClient struct {
+	Host  string
+	Index string
+}
+
+type InsertResponse struct {
+	Created bool   `json:"created"`
+	Index   string `json:"_index"`
+	Type    string `json:"_type"`
+	ID      string `json:"_id"`
+	Version int    `json:"_version"`
+}
+
+func (c *ElasticsearchClient) IndexDoc(id string, data map[string]interface{}) (*InsertResponse, error) {
+
+	typeName := "webpage"
+	url := c.Host + "/" + c.Index + "/" + typeName + "/" + id
+
+	js, err := json.Marshal(data)
+
+	log.Debug("indexing doc: ", url, ",", string(js))
+
+	if err != nil {
+		return nil, err
+	}
+	response := util.HttpPost(url, "", string(js))
+	if err != nil {
+		return nil, err
+	}
+
+	log.Debug("indexing response: ", string(response))
+
+	esResp := &InsertResponse{}
+	err = json.Unmarshal(response, esResp)
+	if err != nil {
+		return &InsertResponse{}, err
+	}
+
+	return esResp, nil
+}

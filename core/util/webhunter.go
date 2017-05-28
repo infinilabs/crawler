@@ -228,7 +228,7 @@ func get(page *PageItem, url string, cookie string, proxyStr string) ([]byte, er
 	return nil, nil
 }
 
-func post(url string, cookie string, postStr string) []byte {
+func HttpPost(url string, cookie string, postStr string) []byte {
 
 	log.Debug("let's post: " + url)
 

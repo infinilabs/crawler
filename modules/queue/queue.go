@@ -28,9 +28,11 @@ func (this DiskQueue) Start(env *Env) {
 	pendingFetchDiskQueue := NewDiskQueue("pending_fetch", path, 100*1024*1024, 1, 1<<10, 2500, 5*time.Second)
 	pendingCheckDiskQueue := NewDiskQueue("pending_check", path, 100*1024*1024, 1, 1<<10, 2500, 5*time.Second)
 	pendingDispatchDiskQueue := NewDiskQueue("pending_dispatch", path, 100*1024*1024, 1, 1<<10, 2500, 5*time.Second)
+	pendingIndexDiskQueue := NewDiskQueue("pending_index", path, 100*1024*1024, 1, 1<<10, 2500, 5*time.Second)
 	queues[config.FetchChannel] = &pendingFetchDiskQueue
 	queues[config.CheckChannel] = &pendingCheckDiskQueue
 	queues[config.DispatcherChannel] = &pendingDispatchDiskQueue
+	queues[config.IndexChannel] = &pendingIndexDiskQueue
 	//TODO configable
 	Register(this)
 }
@@ -67,7 +69,7 @@ func (this DiskQueue) Stop() error {
 	for _, v := range queues {
 		err := (*v).Close()
 		if err != nil {
-			log.Error(err)
+			log.Debug(err)
 		}
 	}
 	return nil

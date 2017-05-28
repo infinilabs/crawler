@@ -15,7 +15,7 @@ type DispatchModule struct {
 }
 
 func (this DispatchModule) Name() string {
-	return "Dispatcher"
+	return "Dispatch"
 }
 
 var signalChannel chan bool
