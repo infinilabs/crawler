@@ -2,8 +2,8 @@ package cluster
 
 import (
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/modules/cluster/discovery/raft"
+	."github.com/medcl/gopa/core/config"
 )
 
 type ClusterModule struct {
@@ -13,7 +13,7 @@ func (this ClusterModule) Name() string {
 	return "Cluster"
 }
 
-func (this ClusterModule) Start(env *Env) {
+func (this ClusterModule) Start(cfg *Config) {
 
 	s := raft.New()
 	if err := s.Open(); err != nil {

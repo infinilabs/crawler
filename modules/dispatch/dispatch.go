@@ -2,12 +2,12 @@ package dispatch
 
 import (
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/filter"
 	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/modules/config"
+	. "github.com/medcl/gopa/core/config"
 	"time"
 )
 
@@ -21,7 +21,7 @@ func (this DispatchModule) Name() string {
 var signalChannel chan bool
 var quitChannel chan bool
 
-func (this DispatchModule) Start(env *Env) {
+func (this DispatchModule) Start(cfg *Config) {
 	signalChannel = make(chan bool, 2)
 	quitChannel = make(chan bool, 3)
 	go func() {

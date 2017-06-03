@@ -18,25 +18,25 @@ package filter
 
 import (
 	"fmt"
-	"github.com/medcl/gopa/core/env"
+	."github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/modules/config"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+	"github.com/medcl/gopa/core/util"
 )
 
 func Test(t *testing.T) {
 
-	env := env.EmptyEnv()
-
-	env.SystemConfig.Data = "/tmp/filter_test12"
-	os.RemoveAll(env.SystemConfig.Data)
-
-	global.RegisterEnv(env)
+	env1 := EmptyEnv()
+	env1.SystemConfig.PathConfig.Data = "/tmp/filter_" + util.RandomPickName()
+	os.RemoveAll(env1.SystemConfig.PathConfig.Data)
+	env1.IsDebug = true
+	global.RegisterEnv(env1)
 
 	filter := FilterModule{}
-	filter.Start(env)
+	filter.Start(GetModuleConfig(filter.Name()))
 	b, _ := filter.CheckThenAdd(config.CheckFilter, []byte("key"))
 	assert.Equal(t, false, b)
 	for i := 0; i < 1000; i++ {

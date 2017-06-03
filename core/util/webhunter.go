@@ -177,7 +177,7 @@ func get(page *PageItem, url string, cookie string, proxyStr string) ([]byte, er
 		log.Debug("got redirect: ", url, " => ", resp.Header.Get("Location"))
 		location := resp.Header.Get("Location")
 		if len(location) > 0 && location != url {
-			return nil, errors.NewWithPayload(errors.URLRedirected, fmt.Sprint("got redirect: ", url, " => ", location), location)
+			return nil, errors.NewWithPayload(err,errors.URLRedirected, location,fmt.Sprint("got redirect: ", url, " => ", location))
 		}
 	}
 

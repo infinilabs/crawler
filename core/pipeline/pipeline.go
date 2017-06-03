@@ -35,7 +35,7 @@ import (
 type ParaKey string
 
 type Context struct {
-	DryRun bool `json:"dry_run"`
+	Simulate bool `json:"simulate"`
 	Parameters
 	Phrase       model.TaskPhrase `json:"phrase"`
 	IgnoreBroken bool             `json:"ignore_broken"`
@@ -200,8 +200,6 @@ func (this *Parameters) MustGetMap(key ParaKey) map[string]interface{} {
 
 type Joint interface {
 	Name() string
-	//Input()map[string]bool
-	//Output()map[string]bool
 	Process(s *Context) (*Context, error)
 }
 

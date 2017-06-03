@@ -18,7 +18,6 @@ package impl
 
 import (
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/config"
 	"github.com/medcl/gopa/core/util"
 	. "github.com/zeebo/sbloom"
 	"hash/fnv"
@@ -47,7 +46,8 @@ func (filter *BloomFilter) Open(fileName string) error {
 		}
 		log.Info("bloomFilter successfully reloaded:", fileName)
 	} else {
-		probItems := config.GetIntConfig("BloomFilter", "ItemSize", 100000)
+
+		probItems := 100000 //config.GetIntConfig("BloomFilter", "ItemSize", 100000)
 		log.Debug("initializing bloom-filter", fileName, ",virual size is,", probItems)
 		filter.filter = NewFilter(fnv.New64(), probItems)
 		log.Info("bloomFilter successfully initialized:", fileName)

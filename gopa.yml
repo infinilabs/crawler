@@ -5,7 +5,7 @@ channel:
   fetch_chan_buff_size: 0
 
 crawler:
-  enabled: true
+  max_go_routine: true
   load_pending_fetch_from_file: true
 
 parser:
@@ -26,3 +26,38 @@ task.default:
 indexing:
   host: "http://eshost:9200"
   index: "gopa"
+
+modules:
+- module: crawler
+  enabled: true
+  max_go_routine: 1
+
+- module: cluster
+  enabled: true
+
+- module: api
+  enabled: true
+
+- module: web
+  enabled: true
+
+- module: storage
+  enabled: true
+
+- module: filter
+  enabled: true
+
+- module: queue
+  enabled: true
+
+- module: checker
+  enabled: true
+
+- module: index
+  enabled: true
+
+- module: dispatch
+  enabled: true
+
+- module: database
+  enabled: true

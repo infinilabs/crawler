@@ -95,17 +95,18 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 
 		} else {
 
-			e, ok := err.(*errors.Error)
-			if ok {
-				if e.Code == errors.URLRedirected {
-					log.Trace(util.ToJson(context, true))
-					depth := context.MustGetInt(CONTEXT_DEPTH)
-					breadth := context.MustGetInt(CONTEXT_BREADTH)
-					task := model.NewTaskSeed(e.Payload.(string), requestUrl, depth, breadth)
-					log.Trace(err)
-					queue.Push(config.CheckChannel, task.MustGetBytes())
-				}
+
+			code,payload:=errors.CodeWithPayload(err)
+
+			if code == errors.URLRedirected {
+				log.Trace(util.ToJson(context, true))
+				depth := context.MustGetInt(CONTEXT_DEPTH)
+				breadth := context.MustGetInt(CONTEXT_BREADTH)
+				task := model.NewTaskSeed(payload.(string), requestUrl, depth, breadth)
+				log.Trace(err)
+				queue.Push(config.CheckChannel, task.MustGetBytes())
 			}
+
 			flg <- signal{flag: false, err: err}
 		}
 	}()

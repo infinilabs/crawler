@@ -65,7 +65,7 @@ type Handler struct {
 
 func (this Handler) WriteHeader(w http.ResponseWriter, code int) {
 	w.WriteHeader(code)
-	if len(global.Env().SystemConfig.CertPath) > 0 {
+	if len(global.Env().SystemConfig.PathConfig.Cert) > 0 {
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 	}
 	this.wroteHeader = true
@@ -164,7 +164,7 @@ func (this Handler) GetJson(r *http.Request) (*jsonq.JsonQuery, error) {
 		return nil, err
 	}
 	if len(content) == 0 {
-		return nil, errors.NewWithCode(errors.JSONIsEmpty, r.URL.String())
+		return nil, errors.NewWithCode(err, errors.JSONIsEmpty, r.URL.String())
 	}
 
 	data := map[string]interface{}{}
@@ -183,7 +183,7 @@ func (this Handler) GetRawBody(r *http.Request) ([]byte, error) {
 		return nil, err
 	}
 	if len(content) == 0 {
-		return nil, errors.NewWithCode(errors.BodyEmpty, r.URL.String())
+		return nil, errors.NewWithCode(err, errors.BodyEmpty, r.URL.String())
 	}
 	return content, nil
 }

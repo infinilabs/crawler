@@ -2,9 +2,9 @@ package index
 
 import (
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/modules/config"
+	."github.com/medcl/gopa/core/config"
 )
 
 type IndexModule struct {
@@ -16,7 +16,7 @@ func (this IndexModule) Name() string {
 
 var signalChannel chan bool
 
-func (this IndexModule) Start(env *Env) {
+func (this IndexModule) Start(cfg *Config) {
 	signalChannel = make(chan bool, 1)
 	go func() {
 		for {

@@ -23,16 +23,11 @@ import (
 )
 
 func TestLoad(t *testing.T) {
-	env := Environment(SystemConfig{ConfigFile: "../../gopa.yml", LogLevel: "debug"})
-	fmt.Sprintln(env)
-	fmt.Sprintln(env.SystemConfig)
-	config := env.RuntimeConfig
-	assert.Equal(t, "http://eshost:9200", config.IndexingConfig.Host)
-	assert.Equal(t, "gopa", config.IndexingConfig.Index)
-	//assert.Equal(t,"data",config.PathConfig.Data)
-	//assert.Equal(t,"log",config.PathConfig.Log)
+	env := Environment("../../gopa.full.yml")
+	fmt.Println(env)
+	fmt.Println(env.SystemConfig)
 
-	assert.Equal(t, true, config.ParserConfig.Enabled)
-	assert.Equal(t, true, config.CrawlerConfig.Enabled)
+	assert.Equal(t, "gopa1", env.SystemConfig.ClusterConfig.Name)
+	assert.Equal(t, "node1", env.SystemConfig.NodeConfig.Name)
 
 }

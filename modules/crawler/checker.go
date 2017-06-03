@@ -18,7 +18,6 @@ package crawler
 
 import (
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
@@ -26,6 +25,7 @@ import (
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules/config"
+	. "github.com/medcl/gopa/core/config"
 	. "github.com/medcl/gopa/modules/crawler/pipe"
 	"runtime"
 	"time"
@@ -39,7 +39,7 @@ func (this CheckerModule) Name() string {
 	return "Checker"
 }
 
-func (this CheckerModule) Start(env *Env) {
+func (this CheckerModule) Start(cfg *Config) {
 	if checkerStarted {
 		log.Error("url checker is already checkerStarted, please stop it first.")
 		return

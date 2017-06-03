@@ -1,85 +1,426 @@
-/*
-Copyright 2016 Medcl (m AT medcl.net)
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
+//copied from github.com/elastic/beats
 package config
 
 import (
+	"encoding/json"
+	"errors"
+	"flag"
+	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
+
 	log "github.com/cihub/seelog"
-	cfg "github.com/robfig/config"
+	"github.com/elastic/go-ucfg"
+	"github.com/elastic/go-ucfg/cfgutil"
+	cfgflag "github.com/elastic/go-ucfg/flag"
+	"github.com/elastic/go-ucfg/yaml"
+	"github.com/medcl/gopa/core/util"
+	"github.com/medcl/gopa/core/util/file"
 )
 
-var loadingConfig *cfg.Config
-var runtimeConfig RuntimeConfig
+var flagStrictPerms = flag.Bool("strict.perms", true, "Strict permission checking on config files")
 
-func GetStringConfig(configSection string, configKey string, defaultValue string) string {
-	if loadingConfig == nil {
-		log.Trace("loadingConfig is nil,just return")
-		return defaultValue
+// IsStrictPerms returns true if strict permission checking on config files is
+// enabled.
+func IsStrictPerms() bool {
+	if !*flagStrictPerms || os.Getenv("BEAT_STRICT_PERMS") == "false" {
+		return false
 	}
-
-	//loading or initializing bloom filter
-	value, error := loadingConfig.String(configSection, configKey)
-	if error != nil {
-		value = defaultValue
-	}
-	log.Trace("get config value,", configSection, ".", configKey, ":", value)
-	return value
+	return true
 }
 
-func GetFloatConfig(configSection string, configKey string, defaultValue float64) float64 {
-	if loadingConfig == nil {
-		log.Trace("loadingConfig is nil,just return")
-		return defaultValue
-	}
+// Config object to store hierarchical configurations into.
+// See https://godoc.org/github.com/elastic/go-ucfg#Config
+type Config ucfg.Config
 
-	//loading or initializing bloom filter
-	value, error := loadingConfig.Float(configSection, configKey)
-	if error != nil {
-		value = defaultValue
-	}
-	log.Trace("get config value,", configSection, ".", configKey, ":", value)
-	return value
+// ConfigNamespace storing at most one configuration section by name and sub-section.
+type ConfigNamespace struct {
+	C map[string]*Config `config:",inline"`
 }
 
-func GetIntConfig(configSection string, configKey string, defaultValue int) int {
-	if loadingConfig == nil {
-		log.Trace("loadingConfig is nil,just return")
-		return defaultValue
-	}
-
-	//loading or initializing bloom filter
-	value, error := loadingConfig.Int(configSection, configKey)
-	if error != nil {
-		value = defaultValue
-	}
-	log.Trace("get config value,", configSection, ".", configKey, ":", value)
-	return value
+type flagOverwrite struct {
+	config *ucfg.Config
+	path   string
+	value  string
 }
 
-func GetBoolConfig(configSection string, configKey string, defaultValue bool) bool {
-	if loadingConfig == nil {
-		log.Trace("loadingConfig is nil,just return")
-		return defaultValue
+var configOpts = []ucfg.Option{
+	ucfg.PathSep("."),
+	ucfg.ResolveEnv,
+	ucfg.VarExp,
+}
+
+var debugBlacklist = util.MakeStringSet(
+	"password",
+	"passphrase",
+	"key_passphrase",
+	"pass",
+	"proxy_url",
+	"url",
+	"urls",
+	"host",
+	"hosts",
+)
+
+func NewConfig() *Config {
+	return fromConfig(ucfg.New())
+}
+
+func NewConfigFrom(from interface{}) (*Config, error) {
+	c, err := ucfg.NewFrom(from, configOpts...)
+	return fromConfig(c), err
+}
+
+func MergeConfigs(cfgs ...*Config) (*Config, error) {
+	config := NewConfig()
+	for _, c := range cfgs {
+		if err := config.Merge(c); err != nil {
+			return nil, err
+		}
+	}
+	return config, nil
+}
+
+func NewConfigWithYAML(in []byte, source string) (*Config, error) {
+	opts := append(
+		[]ucfg.Option{
+			ucfg.MetaData(ucfg.Meta{Source: source}),
+		},
+		configOpts...,
+	)
+	c, err := yaml.NewConfig(in, opts...)
+	return fromConfig(c), err
+}
+
+func NewFlagConfig(
+	set *flag.FlagSet,
+	def *Config,
+	name string,
+	usage string,
+) *Config {
+	opts := append(
+		[]ucfg.Option{
+			ucfg.MetaData(ucfg.Meta{Source: "command line flag"}),
+		},
+		configOpts...,
+	)
+
+	var to *ucfg.Config
+	if def != nil {
+		to = def.access()
 	}
 
-	//loading or initializing bloom filter
-	value, error := loadingConfig.Bool(configSection, configKey)
-	if error != nil {
-		value = defaultValue
+	config := cfgflag.ConfigVar(set, to, name, usage, opts...)
+	return fromConfig(config)
+}
+
+func NewFlagOverwrite(
+	set *flag.FlagSet,
+	config *Config,
+	name, path, def, usage string,
+) *string {
+	if config == nil {
+		panic("Missing configuration")
 	}
-	log.Trace("get config value,", configSection, ".", configKey, ":", value)
-	return value
+	if path == "" {
+		panic("empty path")
+	}
+
+	if def != "" {
+		err := config.SetString(path, -1, def)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	f := &flagOverwrite{
+		config: config.access(),
+		path:   path,
+		value:  def,
+	}
+
+	if set == nil {
+		flag.Var(f, name, usage)
+	} else {
+		set.Var(f, name, usage)
+	}
+
+	return &f.value
+}
+
+func LoadFile(path string) (*Config, error) {
+	if IsStrictPerms() {
+		if err := ownerHasExclusiveWritePerms(path); err != nil {
+			return nil, err
+		}
+	}
+
+	c, err := yaml.NewConfigWithFile(path, configOpts...)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg := fromConfig(c)
+
+	log.Debugf("load config file '%v'", path)
+	return cfg, err
+}
+
+func LoadFiles(paths ...string) (*Config, error) {
+	merger := cfgutil.NewCollector(nil, configOpts...)
+	for _, path := range paths {
+		cfg, err := LoadFile(path)
+		if err := merger.Add(cfg.access(), err); err != nil {
+			return nil, err
+		}
+	}
+	return fromConfig(merger.Config()), nil
+}
+
+func (c *Config) Merge(from interface{}) error {
+	return c.access().Merge(from, configOpts...)
+}
+
+func (c *Config) Unpack(to interface{}) error {
+	return c.access().Unpack(to, configOpts...)
+}
+
+func (c *Config) Path() string {
+	return c.access().Path(".")
+}
+
+func (c *Config) PathOf(field string) string {
+	return c.access().PathOf(field, ".")
+}
+
+func (c *Config) HasField(name string) bool {
+	return c.access().HasField(name)
+}
+
+func (c *Config) CountField(name string) (int, error) {
+	return c.access().CountField(name)
+}
+
+func (c *Config) Bool(name string, idx int) (bool, error) {
+	return c.access().Bool(name, idx, configOpts...)
+}
+
+func (c *Config) String(name string, idx int) (string, error) {
+	return c.access().String(name, idx, configOpts...)
+}
+
+func (c *Config) Int(name string, idx int) (int64, error) {
+	return c.access().Int(name, idx, configOpts...)
+}
+
+func (c *Config) Float(name string, idx int) (float64, error) {
+	return c.access().Float(name, idx, configOpts...)
+}
+
+func (c *Config) Child(name string, idx int) (*Config, error) {
+	sub, err := c.access().Child(name, idx, configOpts...)
+	return fromConfig(sub), err
+}
+
+func (c *Config) SetBool(name string, idx int, value bool) error {
+	return c.access().SetBool(name, idx, value, configOpts...)
+}
+
+func (c *Config) SetInt(name string, idx int, value int64) error {
+	return c.access().SetInt(name, idx, value, configOpts...)
+}
+
+func (c *Config) SetFloat(name string, idx int, value float64) error {
+	return c.access().SetFloat(name, idx, value, configOpts...)
+}
+
+func (c *Config) SetString(name string, idx int, value string) error {
+	return c.access().SetString(name, idx, value, configOpts...)
+}
+
+func (c *Config) SetChild(name string, idx int, value *Config) error {
+	return c.access().SetChild(name, idx, value.access(), configOpts...)
+}
+
+func (c *Config) IsDict() bool {
+	return c.access().IsDict()
+}
+
+func (c *Config) IsArray() bool {
+	return c.access().IsArray()
+}
+
+func (c *Config) Enabled() bool {
+	testEnabled := struct {
+		Enabled bool `config:"enabled"`
+	}{true}
+
+	if c == nil {
+		return true //enable by default if no config was found
+	}
+	if err := c.Unpack(&testEnabled); err != nil {
+		// if unpacking fails, expect 'enabled' being set to default value
+		return true
+	}
+	return testEnabled.Enabled
+}
+
+func fromConfig(in *ucfg.Config) *Config {
+	return (*Config)(in)
+}
+
+func (c *Config) access() *ucfg.Config {
+	return (*ucfg.Config)(c)
+}
+
+func (c *Config) GetFields() []string {
+	return c.access().GetFields()
+}
+
+func (f *flagOverwrite) String() string {
+	return f.value
+}
+
+func (f *flagOverwrite) Set(v string) error {
+	opts := append(
+		[]ucfg.Option{
+			ucfg.MetaData(ucfg.Meta{Source: "command line flag"}),
+		},
+		configOpts...,
+	)
+
+	err := f.config.SetString(f.path, -1, v, opts...)
+	if err != nil {
+		return err
+	}
+	f.value = v
+	return nil
+}
+
+func (f *flagOverwrite) Get() interface{} {
+	return f.value
+}
+
+// Validate checks at most one sub-namespace being set.
+func (ns *ConfigNamespace) Validate() error {
+	if len(ns.C) > 1 {
+		return errors.New("more then one namespace configured")
+	}
+	return nil
+}
+
+// Name returns the configuration sections it's name if a section has been set.
+func (ns *ConfigNamespace) Name() string {
+	for name := range ns.C {
+		return name
+	}
+	return ""
+}
+
+// Config return the sub-configuration section if a section has been set.
+func (ns *ConfigNamespace) Config() *Config {
+	for _, cfg := range ns.C {
+		return cfg
+	}
+	return nil
+}
+
+// IsSet returns true if a sub-configuration section has been set.
+func (ns *ConfigNamespace) IsSet() bool {
+	return len(ns.C) != 0
+}
+
+func configDebugString(c *Config, filterPrivate bool) string {
+	var bufs []string
+
+	if c.IsDict() {
+		var content map[string]interface{}
+		if err := c.Unpack(&content); err != nil {
+			return fmt.Sprintf("<config error> %v", err)
+		}
+		if filterPrivate {
+			filterDebugObject(content)
+		}
+		j, _ := json.MarshalIndent(content, "", "  ")
+		bufs = append(bufs, string(j))
+	}
+	if c.IsArray() {
+		var content []interface{}
+		if err := c.Unpack(&content); err != nil {
+			return fmt.Sprintf("<config error> %v", err)
+		}
+		if filterPrivate {
+			filterDebugObject(content)
+		}
+		j, _ := json.MarshalIndent(content, "", "  ")
+		bufs = append(bufs, string(j))
+	}
+
+	if len(bufs) == 0 {
+		return ""
+	}
+	return strings.Join(bufs, "\n")
+}
+
+func filterDebugObject(c interface{}) {
+	switch cfg := c.(type) {
+	case map[string]interface{}:
+		for k, v := range cfg {
+			if debugBlacklist.Has(k) {
+				if arr, ok := v.([]interface{}); ok {
+					for i := range arr {
+						arr[i] = "xxxxx"
+					}
+				} else {
+					cfg[k] = "xxxxx"
+				}
+			} else {
+				filterDebugObject(v)
+			}
+		}
+
+	case []interface{}:
+		for _, elem := range cfg {
+			filterDebugObject(elem)
+		}
+	}
+}
+
+// ownerHasExclusiveWritePerms asserts that the current user or root is the
+// owner of the config file and that the config file is (at most) writable by
+// the owner or root (e.g. group and other cannot have write access).
+func ownerHasExclusiveWritePerms(name string) error {
+	if runtime.GOOS == "windows" {
+		return nil
+	}
+
+	info, err := file.Stat(name)
+	if err != nil {
+		return err
+	}
+
+	euid := os.Geteuid()
+	fileUID, _ := info.UID()
+	perm := info.Mode().Perm()
+
+	if fileUID != 0 && euid != fileUID {
+		return fmt.Errorf(`config file ("%v") must be owned by the beat user `+
+			`(uid=%v) or root`, name, euid)
+	}
+
+	// Test if group or other have write permissions.
+	if perm&0022 > 0 {
+		nameAbs, err := filepath.Abs(name)
+		if err != nil {
+			nameAbs = name
+		}
+		return fmt.Errorf(`config file ("%v") can only be writable by the `+
+			`owner but the permissions are "%v" (to fix the permissions use: `+
+			`'chmod go-w %v')`,
+			name, perm, nameAbs)
+	}
+
+	return nil
 }

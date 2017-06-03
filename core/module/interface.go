@@ -16,10 +16,12 @@ limitations under the License.
 
 package module
 
-import . "github.com/medcl/gopa/core/env"
+import (
+	"github.com/medcl/gopa/core/config"
+)
 
 type Module interface {
-	Name() string
-	Start(config *Env)
+	Start(config *config.Config)
 	Stop() error
+	Name() string
 }

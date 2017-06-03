@@ -39,7 +39,7 @@ func (this SaveTaskJoint) Process(context *Context) (*Context, error) {
 
 	log.Trace("end process")
 	if context.IsErrorExit() {
-		return context, errors.NewWithCode(config.ErrorExitedPipeline, "exited pipeline")
+		return context, errors.NewWithCode(errors.New("error in process"),config.ErrorExitedPipeline, "pipeline exited")
 	}
 
 	task := context.Get(CONTEXT_CRAWLER_TASK).(*model.Task)

@@ -17,7 +17,6 @@ limitations under the License.
 package ui
 
 import (
-	. "github.com/medcl/gopa/core/env"
 	uis "github.com/medcl/gopa/core/http"
 	"github.com/medcl/gopa/modules/ui/admin"
 	"github.com/medcl/gopa/modules/ui/user"
@@ -36,6 +35,8 @@ import (
 	_ "net/http/pprof"
 	"path"
 	"path/filepath"
+	."github.com/medcl/gopa/core/config"
+	"github.com/medcl/gopa/core/global"
 )
 
 var router *httprouter.Router
@@ -48,7 +49,7 @@ var faviconAction = func(w http.ResponseWriter, req *http.Request, ps httprouter
 	w.WriteHeader(301)
 }
 
-func (this UIModule) internalStart(env *Env) {
+func (this UIModule) internalStart(cfg *Config) {
 
 	store.Options = &sessions.Options{
 		Domain:   "localhost", //TODO config　http　domain
@@ -60,7 +61,7 @@ func (this UIModule) internalStart(env *Env) {
 
 	router = httprouter.New()
 	mux = http.NewServeMux()
-	websocket.InitWebSocket(env)
+	websocket.InitWebSocket(global.Env())
 
 	mux.HandleFunc("/ws", websocket.ServeWs)
 	mux.Handle("/", router)
@@ -93,12 +94,12 @@ func (this UIModule) internalStart(env *Env) {
 		}
 	}
 
-	address := util.AutoGetAddress(env.SystemConfig.HttpBinding)
+	address := util.AutoGetAddress(global.Env().SystemConfig.HttpBinding)
 
-	if len(env.SystemConfig.CertPath) > 0 {
+	if global.Env().SystemConfig.TLSEnabled {
 		log.Debug("start ssl endpoint")
 
-		certFile := path.Join(env.SystemConfig.CertPath, "*c*rt*")
+		certFile := path.Join(global.Env().SystemConfig.PathConfig.Cert, "*c*rt*")
 		match, err := filepath.Glob(certFile)
 		if err != nil {
 			panic(err)
@@ -108,7 +109,7 @@ func (this UIModule) internalStart(env *Env) {
 		}
 		certFile = match[0]
 
-		keyFile := path.Join(env.SystemConfig.CertPath, "*key*")
+		keyFile := path.Join(global.Env().SystemConfig.PathConfig.Cert, "*key*")
 		match, err = filepath.Glob(keyFile)
 		if err != nil {
 			panic(err)
@@ -159,10 +160,10 @@ type UIModule struct {
 }
 
 func (this UIModule) Name() string {
-	return "Web UI"
+	return "Web"
 }
 
-func (this UIModule) Start(env *Env) {
+func (this UIModule) Start(cfg *Config) {
 
 	//init admin ui //TODO ui module enable/disable config
 	admin.InitUI()
@@ -174,7 +175,7 @@ func (this UIModule) Start(env *Env) {
 	logger.RegisterWebsocketHandler(LoggerReceiver)
 
 	go func() {
-		this.internalStart(env)
+		this.internalStart(cfg)
 	}()
 
 }

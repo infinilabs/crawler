@@ -31,8 +31,8 @@ func (this API) IndexAction(w http.ResponseWriter, req *http.Request, _ httprout
 	}
 
 	data := map[string]interface{}{}
-	data["cluster_name"] = global.Env().SystemConfig.ClusterName
-	data["name"] = global.Env().SystemConfig.NodeName
+	data["cluster_name"] = global.Env().SystemConfig.ClusterConfig.Name
+	data["name"] = global.Env().SystemConfig.NodeConfig.Name
 	version := map[string]interface{}{}
 	version["number"] = env.VERSION
 	version["build_commit"] = env.LastCommitLog

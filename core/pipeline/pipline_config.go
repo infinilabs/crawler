@@ -20,7 +20,6 @@ package pipeline
 config for each joint
 */
 type JointConfig struct {
-	//Name       string            `json:"name"`       //optional instance name for this joint
 	JointName  string                 `json:"joint_name"` //the joint name
 	Parameters map[string]interface{} `json:"parameters"` //kv parameters for this joint
 }

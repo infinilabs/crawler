@@ -23,9 +23,12 @@ import (
 	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules/config"
+	. "github.com/medcl/gopa/core/config"
+	."github.com/medcl/gopa/modules/crawler/config"
 	. "github.com/medcl/gopa/modules/crawler/pipe"
 	"runtime"
 	"time"
+	"github.com/medcl/gopa/core/global"
 )
 
 var signalChannels []*chan bool
@@ -37,7 +40,11 @@ func (this CrawlerModule) Name() string {
 	return "Crawler"
 }
 
-func (this CrawlerModule) Start(env *Env) {
+func (this CrawlerModule) Start(cfg *Config) {
+
+	config:=GetDefaultCrawlerConfig()
+	cfg.Unpack(&config)
+	this.config=&config
 
 	//TODO
 	InitJoints()
@@ -47,10 +54,12 @@ func (this CrawlerModule) Start(env *Env) {
 		return
 	}
 
-	numGoRoutine := env.RuntimeConfig.MaxGoRoutine
+
+	numGoRoutine := 1// env.RuntimeConfig.CrawlerConfig.MaxGoRoutine
 	signalChannels = make([]*chan bool, numGoRoutine)
 	quitChannels = make([]*chan bool, numGoRoutine)
-	if env.RuntimeConfig.CrawlerConfig.Enabled {
+	//if env.RuntimeConfig.CrawlerConfig.Enabled
+	if true {
 		//start fetcher
 		for i := 0; i < numGoRoutine; i++ {
 			log.Trace("start crawler:", i)
@@ -58,7 +67,7 @@ func (this CrawlerModule) Start(env *Env) {
 			quitC := make(chan bool, 1)
 			signalChannels[i] = &signalC
 			quitChannels[i] = &quitC
-			go this.runPipeline(env, &signalC, &quitC, i)
+			go this.runPipeline(global.Env(), &signalC, &quitC, i)
 
 		}
 	} else {
@@ -160,9 +169,9 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 		End(SaveTaskJoint{}).
 		Run()
 
-	if env.RuntimeConfig.TaskConfig.FetchDelayThreshold > 0 {
-		log.Debug("sleep ", env.RuntimeConfig.TaskConfig.FetchDelayThreshold, "ms to control crawling speed")
-		time.Sleep(time.Duration(env.RuntimeConfig.TaskConfig.FetchDelayThreshold) * time.Millisecond)
+	if this.config.FetchDelayThresholdInMs > 0 {
+		log.Debug("sleep ",this.config.FetchDelayThresholdInMs, "ms to control crawling speed")
+		time.Sleep(time.Duration(this.config.FetchDelayThresholdInMs) * time.Millisecond)
 		log.Debug("wake up now,continue crawing")
 	}
 
@@ -170,4 +179,5 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 }
 
 type CrawlerModule struct {
+	config *CrawlerConfig
 }

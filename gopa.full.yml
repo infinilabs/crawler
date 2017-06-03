@@ -1,0 +1,44 @@
+cluster:
+  name: gopa1
+node.name: node1
+max_go_routine: 10
+
+path.data: data
+path.logs: log
+path.certs: cert
+
+logging.level: debug
+
+network:
+  host: 127.0.0.1
+
+cluster.seeds:
+
+channel:
+  checker_chan_buff_size: 0
+  fetch_chan_buff_size: 0
+
+
+
+modules:
+  crawler:
+    enabled: true
+    load_pending_fetch_from_file: true
+  parser:
+    enabled: true
+    parse_file_log: true
+    reparse_file_log: true
+  indexing:
+    host: "http://eshost:9200"
+    index: "gopa"
+
+
+task.default:
+  split_by_url_parameter: "p,pn,page,start,index"
+  save_url_pattern: ".*"
+  link_extract_pattern: "(\\s+(src2|src|href|HREF|SRC))\\s*=\\s*[\"']?(.*?)[\"']"
+  link_extract_group: 3
+  follow_same_domain: true
+  follow_sub_domain: true
+  skip_page_parse_pattern: ".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b"
+  fetch_url_pattern": ".*"

@@ -14,9 +14,9 @@ type Command struct {
 }
 
 type RaftConfig struct {
-	Bind    string   `json:bind`
-	Seeds   []string `json:seeds`
-	DataDir string   `json:data`
+	Bind    string   `json:"bind"`
+	Seeds   []string `json:"seeds"`
+	DataDir string   `json:"data"`
 }
 
 func (this *RaftConfig) Init() {
@@ -28,9 +28,9 @@ func (this *RaftConfig) Init() {
 		this.Bind = ":13001"
 	}
 
-	join := global.Env().SystemConfig.ClusterSeeds
+	join := global.Env().SystemConfig.ClusterConfig.Seeds
 
-	log.Debug("get cluster seeds: ", global.Env().SystemConfig.ClusterSeeds)
+	log.Debug("get cluster seeds: ", global.Env().SystemConfig.ClusterConfig.Seeds)
 
 	if len(join) > 0 {
 		arr := strings.Split(join, ",")

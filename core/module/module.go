@@ -18,19 +18,18 @@ package module
 
 import (
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/env"
 )
 
 type Modules struct {
-	env     *Env
 	modules []Module
+	configs map[string]interface{}
 }
 
 var m *Modules
 
-func New(env *Env) {
+func New() {
 	mod := Modules{}
-	mod.env = env
 	m = &mod
 }
 
@@ -42,9 +41,17 @@ func Start() {
 
 	log.Trace("start to start modules")
 	for _, v := range m.modules {
-		log.Debug("starting module: ", v.Name())
-		v.Start(m.env)
-		log.Info("started module: ", v.Name())
+
+		cfg := env.GetModuleConfig(v.Name())
+
+		log.Trace("module: ",v.Name(), ", enabled: ", cfg.Enabled())
+
+		if cfg.Enabled() {
+			log.Debug("starting module: ", v.Name())
+			v.Start(cfg)
+			log.Info("started module: ", v.Name())
+		}
+
 	}
 	log.Info("all modules started")
 }

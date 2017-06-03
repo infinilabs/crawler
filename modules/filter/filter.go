@@ -2,12 +2,12 @@ package filter
 
 import (
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/filter"
 	. "github.com/medcl/gopa/core/filter"
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/modules/config"
 	"github.com/medcl/gopa/modules/filter/impl"
+	. "github.com/medcl/gopa/core/config"
 	"path"
 	"sync"
 )
@@ -61,7 +61,7 @@ func initFilter(key FilterKey) {
 
 var filters map[FilterKey]*impl.LeveldbFilter
 
-func (this FilterModule) Start(env *Env) {
+func (this FilterModule) Start(cfg *Config) {
 
 	filters = map[FilterKey]*impl.LeveldbFilter{}
 

@@ -16,7 +16,14 @@ limitations under the License.
 
 package errors
 
+import (
+	"fmt"
+	"io"
+)
+
 type ErrorCode int
+
+type ErrorPayload interface{}
 
 var (
 	Default       ErrorCode = 1
@@ -25,28 +32,194 @@ var (
 	URLRedirected ErrorCode = 102
 )
 
-type Error struct {
-	Code       ErrorCode
-	Message    string
-	InnerError error
-	Payload    interface{}
-}
-
-func (this *Error) Error() string {
-	if this.InnerError != nil {
-		return this.InnerError.Error()
+func NewWithCode(err error, code ErrorCode, msg string) error {
+	if err == nil {
+		return nil
 	}
-	return this.Message
+	return wrapper{
+		cause: cause{
+			cause: err,
+			msg:   msg,
+			code:  code,
+		},
+		stack: callers(),
+	}
 }
 
-func NewWithCode(code ErrorCode, msg string) error {
-	return &Error{Code: code, Message: msg}
+func NewWithPayload(err error, code ErrorCode, payload interface{}, msg string) error {
+	if err == nil {
+		return nil
+	}
+	return wrapper{
+		cause: cause{
+			cause:   err,
+			msg:     msg,
+			code:    code,
+			payload: payload,
+		},
+		stack: callers(),
+	}
 }
 
-func NewWithPayload(code ErrorCode, msg string, payload interface{}) error {
-	return &Error{Code: code, Message: msg, Payload: payload}
+// _error is an error implementation returned by New and Errorf
+// that implements its own fmt.Formatter.
+type _error struct {
+	msg string
+	*stack
 }
 
-func New(text string) error {
-	return &Error{Code: Default, Message: text}
+func (e _error) Error() string { return e.msg }
+
+func (e _error) Format(s fmt.State, verb rune) {
+	switch verb {
+	case 'v':
+		if s.Flag('+') {
+			io.WriteString(s, e.msg)
+			fmt.Fprintf(s, "%+v", e.StackTrace())
+			return
+		}
+		fallthrough
+	case 's':
+		io.WriteString(s, e.msg)
+	}
+}
+
+// New returns an error with the supplied message.
+func New(message string) error {
+	return _error{
+		message,
+		callers(),
+	}
+}
+
+// Errorf formats according to a format specifier and returns the string
+// as a value that satisfies error.
+func Errorf(format string, args ...interface{}) error {
+	return _error{
+		fmt.Sprintf(format, args...),
+		callers(),
+	}
+}
+
+type cause struct {
+	code    ErrorCode
+	cause   error
+	msg     string
+	payload interface{}
+}
+
+func (c cause) Error() string        { return fmt.Sprintf("%s: %v", c.msg, c.Cause()) }
+func (c cause) Cause() error         { return c.cause }
+func (c cause) Code() ErrorCode      { return c.code }
+func (c cause) Payload() interface{} { return c.payload }
+
+// wrapper is an error implementation returned by Wrap and Wrapf
+// that implements its own fmt.Formatter.
+type wrapper struct {
+	cause
+	*stack
+}
+
+func (w wrapper) Format(s fmt.State, verb rune) {
+	switch verb {
+	case 'v':
+		if s.Flag('+') {
+			fmt.Fprintf(s, "%+v\n", w.Cause())
+			fmt.Fprintf(s, "%+v: %s", w.StackTrace()[0], w.msg)
+			return
+		}
+		fallthrough
+	case 's':
+		io.WriteString(s, w.Error())
+	}
+}
+
+// Wrap returns an error annotating err with message.
+// If err is nil, Wrap returns nil.
+func Wrap(err error, message string) error {
+	if err == nil {
+		return nil
+	}
+	return wrapper{
+		cause: cause{
+			cause: err,
+			msg:   message,
+		},
+		stack: callers(),
+	}
+}
+
+// Wrapf returns an error annotating err with the format specifier.
+// If err is nil, Wrapf returns nil.
+func Wrapf(err error, format string, args ...interface{}) error {
+	if err == nil {
+		return nil
+	}
+	return wrapper{
+		cause: cause{
+			cause: err,
+			msg:   fmt.Sprintf(format, args...),
+		},
+		stack: callers(),
+	}
+}
+
+// Cause returns the underlying cause of the error, if possible.
+// An error value has a cause if it implements the following
+// interface:
+//
+//     type Causer interface {
+//            Cause() error
+//     }
+//
+// If the error does not implement Cause, the original error will
+// be returned. If the error is nil, nil will be returned without further
+// investigation.
+func Cause(err error) error {
+	type causer interface {
+		Cause() error
+	}
+
+	for err != nil {
+		cause, ok := err.(causer)
+		if !ok {
+			break
+		}
+		err = cause.Cause()
+	}
+	return err
+}
+
+func Code(err error) ErrorCode {
+	code := Default
+	type causer interface {
+		Code() ErrorCode
+	}
+
+	for err != nil {
+		cause, ok := err.(causer)
+		if !ok {
+			break
+		}
+		code = cause.Code()
+	}
+	return code
+}
+
+func CodeWithPayload(err error) (ErrorCode, interface{}) {
+	type causer interface {
+		Code() ErrorCode
+		Payload() interface{}
+	}
+
+	for err != nil {
+		cause, ok := err.(causer)
+		if !ok {
+			break
+		}
+		code := cause.Code()
+		payload := cause.Payload()
+		return code, payload
+	}
+	return Default, nil
 }

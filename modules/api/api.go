@@ -32,6 +32,8 @@ import (
 	_ "net/http/pprof"
 	"path"
 	"path/filepath"
+	."github.com/medcl/gopa/core/config"
+	"github.com/medcl/gopa/core/global"
 )
 
 var router *httprouter.Router
@@ -78,10 +80,10 @@ func (this APIModule) internalStart(env *Env) {
 
 	address := util.AutoGetAddress(env.SystemConfig.APIBinding)
 
-	if len(this.env.SystemConfig.CertPath) > 0 {
+	if this.env.SystemConfig.TLSEnabled {
 		log.Debug("start ssl endpoint")
 
-		certFile := path.Join(this.env.SystemConfig.CertPath, "*c*rt*")
+		certFile := path.Join(this.env.SystemConfig.PathConfig.Cert, "*c*rt*")
 		match, err := filepath.Glob(certFile)
 		if err != nil {
 			panic(err)
@@ -91,7 +93,7 @@ func (this APIModule) internalStart(env *Env) {
 		}
 		certFile = match[0]
 
-		keyFile := path.Join(this.env.SystemConfig.CertPath, "*key*")
+		keyFile := path.Join(this.env.SystemConfig.PathConfig.Cert, "*key*")
 		match, err = filepath.Glob(keyFile)
 		if err != nil {
 			panic(err)
@@ -142,13 +144,13 @@ func (this APIModule) Name() string {
 	return "API"
 }
 
-func (this APIModule) Start(config *Env) {
+func (this APIModule) Start(cfg *Config) {
 
-	this.env = config
+	this.env = global.Env()
 	//API server
 	go func() {
 		handlers.InitAPI()
-		this.internalStart(config)
+		this.internalStart(global.Env())
 	}()
 
 }

@@ -207,7 +207,7 @@ func join(joinAddr, raftAddr string) error {
 
 	joinAddr = util.GetValidAddress(joinAddr)
 
-	if len(global.Env().SystemConfig.CertPath) > 0 {
+	if len(global.Env().SystemConfig.PathConfig.Cert) > 0 {
 		url := fmt.Sprintf("https://%s/cluster/node/_join", joinAddr)
 
 		log.Info("try to join the cluster, ", url, ", ", string(b))

@@ -17,150 +17,125 @@ limitations under the License.
 package env
 
 import (
-	"errors"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
 	"github.com/medcl/gopa/core/util"
-	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"os"
-	"path"
 	"path/filepath"
-	"regexp"
+	"strings"
 )
 
 type Env struct {
-	SystemConfig  *SystemConfig
+
+	// static configs
+	SystemConfig *SystemConfig
+
+	// dynamic configs
 	RuntimeConfig *RuntimeConfig
-	IsDebug       bool
-	LoggingLevel  string
+
+	IsDebug bool
+
+	LoggingLevel string
 }
 
-func Environment(sysConfig SystemConfig) *Env {
+func Environment(configFile string) *Env {
 
 	env := Env{}
-
+	sysConfig := LoadSystemConfig(configFile)
 	env.SystemConfig = &sysConfig
-	config, err := env.loadRuntimeConfig()
+
+	var err error
+	env.RuntimeConfig, err = env.loadRuntimeConfig()
 	if err != nil {
+		log.Error(err)
 		panic(err)
 	}
-	env.RuntimeConfig = &config
-	env.init()
 
 	return &env
 }
 
-func (this *Env) loadRuntimeConfig() (RuntimeConfig, error) {
+var moduleConfig map[string]*Config
 
-	viper.SetConfigType("yaml")
+var (
+	defaultRuntimeConfig = RuntimeConfig{}
+)
+
+func (this *Env) loadRuntimeConfig() (*RuntimeConfig, error) {
+
+	moduleConfig = map[string]*Config{}
 
 	var configFile = "./gopa.yml"
 	if this.SystemConfig != nil && len(this.SystemConfig.ConfigFile) > 0 {
 		configFile = this.SystemConfig.ConfigFile
 	}
 
-	//load external yaml config
 	filename, _ := filepath.Abs(configFile)
-	var config RuntimeConfig
+	var cfg RuntimeConfig
 
 	if util.FileExists(filename) {
 		log.Debug("load configFile:", filename)
-
-		yamlFile, err := ioutil.ReadFile(filename)
-
+		cfg, err := LoadFile(filename)
 		if err != nil {
-			panic(err)
+			log.Error(err)
+			return nil, err
 		}
-		err = yaml.Unmarshal(yamlFile, &config)
-		if err != nil {
-			panic(err)
+		config := defaultRuntimeConfig
+
+		if err := cfg.Unpack(&config); err != nil {
+			log.Error(err)
+			return nil, err
 		}
+
+		parseModuleConfig(config.Modules)
+
 	} else {
-		//init default Config
-		config = RuntimeConfig{}
-		config.IndexingConfig = (&IndexingConfig{}).Init()
-		config.ChannelConfig = (&ChannelConfig{}).Init()
-		config.CrawlerConfig = (&CrawlerConfig{}).Init()
-		config.ParserConfig = (&ParserConfig{}) //.Init()
-		config.TaskConfig = (&TaskConfig{}).Init()
-		config.RuledFetchConfig = (&RuledFetchConfig{}) //.Init()
+		log.Debug("no config file was found")
+
+		cfg = defaultRuntimeConfig
 	}
 
-	o, _ := yaml.Marshal(config)
-	log.Debug(string(o))
-
-	config.TaskConfig.LinkUrlExtractRegex = regexp.MustCompile(config.TaskConfig.LinkUrlExtractRegexStr)
-	config.TaskConfig.FetchUrlPattern = regexp.MustCompile(config.TaskConfig.FetchUrlPatternStr)
-	config.TaskConfig.SavingUrlPattern = regexp.MustCompile(config.TaskConfig.SavingUrlPatternStr)
-	config.TaskConfig.SkipPageParsePattern = regexp.MustCompile(config.TaskConfig.SkipPageParsePatternStr)
-
-	return config, nil
+	return &cfg, nil
 }
 
-func (this *Env) init() error {
+func parseModuleConfig(cfgs []*Config) []*Config {
+	results := []*Config{}
+	for _, cfg := range cfgs {
+		//set map for modules and module config
+		log.Trace(getModuleName(cfg), ",", cfg.Enabled())
+		config, err := NewConfigFrom(cfg)
+		if err != nil {
+			panic(err)
+		}
 
-	if this.RuntimeConfig.MaxGoRoutine < 1 {
-		this.RuntimeConfig.MaxGoRoutine = 1
+		name := getModuleName(cfg)
+		moduleConfig[name] = cfg
+
+		results = append(results, config)
 	}
 
-	return nil
+	return results
+}
+
+func GetModuleConfig(name string) *Config {
+	cfg := moduleConfig[strings.ToLower(name)]
+	return cfg
+}
+
+func getModuleName(c *Config) string {
+	cfgObj := struct {
+		Module string `config:"module"`
+	}{}
+
+	if c == nil {
+		return ""
+	}
+	if err := c.Unpack(&cfgObj); err != nil {
+		return ""
+	}
+
+	return cfgObj.Module
 }
 
 func EmptyEnv() *Env {
-	return &Env{SystemConfig: &SystemConfig{}, RuntimeConfig: &RuntimeConfig{}}
-}
-
-//high priority config, init from the environment or startup, can't be changed
-type SystemConfig struct {
-	ClusterName        string `cluster_name`
-	NodeName           string `node_name`
-	ConfigFile         string `gopa.yml`
-	LogLevel           string `info`
-	APIBinding         string `api_bind`
-	HttpBinding        string `http_bind`
-	ClusterBinding     string `cluster_bind`
-	ClusterSeeds       string `cluster_seeds`
-	AllowMultiInstance bool   `multi_instance`
-	Data               string `data`
-	Log                string `log`
-	CertPath           string `cert_path`
-}
-
-func (this *SystemConfig) Init() {
-	if len(this.Data) == 0 {
-		this.Data = "data"
-	}
-	if len(this.Log) == 0 {
-		this.Log = "log"
-	}
-	if len(this.ClusterName) == 0 {
-		this.ClusterName = "gopa"
-	}
-	if len(this.NodeName) == 0 {
-		this.NodeName = util.RandomPickName()
-	}
-	if len(this.APIBinding) == 0 {
-		this.APIBinding = ":8001"
-	}
-	if len(this.HttpBinding) == 0 {
-		this.HttpBinding = ":9001"
-	}
-
-	if len(this.ClusterBinding) == 0 {
-		this.ClusterBinding = ":13001"
-	}
-
-	this.AllowMultiInstance = false
-	os.MkdirAll(this.GetDataDir(), 0777)
-	os.MkdirAll(this.Log, 0777)
-}
-
-func (this *SystemConfig) GetDataDir() string {
-	if this.AllowMultiInstance == false {
-		return path.Join(this.Data, this.ClusterName, "nodes", "0")
-	}
-	//TODO auto select next nodes folder, eg: nodes/1 nodes/2
-	panic(errors.New("not supported yet"))
+	system:=GetDefaultSystemConfig()
+	return &Env{SystemConfig: &system, RuntimeConfig: &RuntimeConfig{}}
 }

@@ -49,7 +49,7 @@ func SetLogging(env *Env, logLevel string, logFile string) {
 	if env != nil {
 		envLevel := strings.ToLower(env.LoggingLevel)
 		if env.SystemConfig != nil {
-			envLogFile := env.SystemConfig.Log + "/gopa.log"
+			envLogFile := env.SystemConfig.PathConfig.Log + "/gopa.log"
 			if len(envLogFile) > 0 {
 				file = envLogFile
 			}

@@ -18,7 +18,7 @@ package crawler
 
 import (
 	"fmt"
-	"github.com/medcl/gopa/core/env"
+	."github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/util"
@@ -30,18 +30,18 @@ import (
 )
 
 func Test1(t *testing.T) {
-	env := env.EmptyEnv()
-	env.SystemConfig.Data = "/tmp/filter_" + util.RandomPickName()
-	os.RemoveAll(env.SystemConfig.Data)
-	env.IsDebug = true
-	global.RegisterEnv(env)
+	env1 := EmptyEnv()
+	env1.SystemConfig.PathConfig.Data = "/tmp/filter_" + util.RandomPickName()
+	os.RemoveAll(env1.SystemConfig.PathConfig.Data)
+	env1.IsDebug = true
+	global.RegisterEnv(env1)
 
 	checker := CheckerModule{}
 
 	filter := f.FilterModule{}
-	filter.Start(env)
+	filter.Start(GetModuleConfig(filter.Name()))
 
-	db.DatabaseModule{}.Start(env)
+	db.DatabaseModule{}.Start(GetModuleConfig("database"))
 
 	task := model.Task{}
 	task.Url = "http://elasticsearch.cn"

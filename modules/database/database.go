@@ -20,12 +20,12 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/store"
 	"os"
 	"path"
+	"github.com/medcl/gopa/core/config"
 )
 
 func (this DatabaseModule) Name() string {
@@ -34,7 +34,7 @@ func (this DatabaseModule) Name() string {
 
 var db *gorm.DB
 
-func (this DatabaseModule) Start(env *Env) {
+func (this DatabaseModule) Start(cfg *config.Config) {
 	os.MkdirAll(path.Join(global.Env().SystemConfig.GetDataDir(), "database/"), 0777)
 	fileName := fmt.Sprintf("file:%s?cache=shared&mode=rwc&_busy_timeout=50000000", path.Join(global.Env().SystemConfig.GetDataDir(), "database/db.sqlite"))
 

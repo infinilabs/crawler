@@ -22,7 +22,7 @@ FILES     := $$(find . -name '*.go' | grep -vE 'vendor')
 
 .PHONY: all build update test clean
 
-default: clean format build
+default: clean build
 
 build: config update-ui update-template-ui
 	@echo $(GOPATH)
@@ -109,7 +109,6 @@ fetch-depends:
 	$(GO) get github.com/clarkduvall/hyperloglog
 	$(GO) get github.com/PuerkitoBio/goquery
 	$(GO) get github.com/syndtr/goleveldb/leveldb
-	$(GO) get gopkg.in/yaml.v2
 	$(GO) get github.com/jmoiron/jsonq
 	$(GO) get github.com/gorilla/websocket
 	$(GO) get github.com/boltdb/bolt/...
@@ -133,6 +132,7 @@ fetch-depends:
 	$(GO) get github.com/stretchr/testify/assert
 	$(GO) get github.com/spf13/viper
 	$(GO) get -t github.com/RoaringBitmap/roaring
+	$(GO) get github.com/elastic/go-ucfg
 
 dist: cross-build package
 
@@ -163,11 +163,12 @@ package-all-platform:
 	cd bin && tar cfz ../bin/openbsd32.tar.gz     openbsd32/gopa
 
 test:
-	$(GO) test -timeout 60s  ./...
-	GORACE="halt_on_error=1" go test -race -timeout 120s test ./...
+	go get -u github.com/kardianos/govendor
+	govendor test +local
+	#$(GO) test -timeout 60s ./... --ignore ./vendor
+	#GORACE="halt_on_error=1" go test ./... -race -timeout 120s  --ignore ./vendor
 
 check:
-	bash gitcookie.sh
 	$(GO) get github.com/golang/lint/golint
 
 	@echo "vet"
