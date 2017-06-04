@@ -25,15 +25,15 @@ import (
 	"github.com/gorilla/context"
 	"github.com/gorilla/sessions"
 	"github.com/julienschmidt/httprouter"
+	. "github.com/medcl/gopa/core/config"
 	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/global"
 	apis "github.com/medcl/gopa/core/http"
 	"github.com/medcl/gopa/core/util"
 	handlers "github.com/medcl/gopa/modules/api/handlers"
 	_ "net/http/pprof"
 	"path"
 	"path/filepath"
-	."github.com/medcl/gopa/core/config"
-	"github.com/medcl/gopa/core/global"
 )
 
 var router *httprouter.Router

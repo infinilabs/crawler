@@ -44,7 +44,7 @@ func Start() {
 
 		cfg := env.GetModuleConfig(v.Name())
 
-		log.Trace("module: ",v.Name(), ", enabled: ", cfg.Enabled())
+		log.Trace("module: ", v.Name(), ", enabled: ", cfg.Enabled())
 
 		if cfg.Enabled() {
 			log.Debug("starting module: ", v.Name())

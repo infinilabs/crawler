@@ -17,9 +17,13 @@ limitations under the License.
 package env
 
 import (
+	"fmt"
 	log "github.com/cihub/seelog"
+	"github.com/elastic/go-ucfg"
+	"github.com/elastic/go-ucfg/yaml"
 	. "github.com/medcl/gopa/core/config"
 	"github.com/medcl/gopa/core/util"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -40,7 +44,7 @@ type Env struct {
 func Environment(configFile string) *Env {
 
 	env := Env{}
-	sysConfig := LoadSystemConfig(configFile)
+	sysConfig := loadSystemConfig(configFile)
 	env.SystemConfig = &sysConfig
 
 	var err error
@@ -54,6 +58,51 @@ func Environment(configFile string) *Env {
 }
 
 var moduleConfig map[string]*Config
+
+var (
+	defaultSystemConfig = SystemConfig{
+		ClusterConfig: ClusterConfig{
+			Name: "gopa",
+		},
+		NetworkConfig: NetworkConfig{
+			Host: "127.0.0.1",
+		},
+		NodeConfig: NodeConfig{
+			Name: util.RandomPickName(),
+		},
+		PathConfig: PathConfig{
+			Data: "data",
+			Log:  "log",
+			Cert: "cert",
+		},
+
+		APIBinding:         ":8001",
+		HttpBinding:        ":9001",
+		ClusterBinding:     ":13001",
+		AllowMultiInstance: false,
+	}
+)
+
+func loadSystemConfig(cfgFile string) SystemConfig {
+	cfg := defaultSystemConfig
+	cfg.ConfigFile = cfgFile
+	if util.IsExist(cfgFile) {
+		config, err := yaml.NewConfigWithFile(cfgFile, ucfg.PathSep("."))
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		err = config.Unpack(&cfg)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+
+	os.MkdirAll(cfg.GetDataDir(), 0777)
+	os.MkdirAll(cfg.PathConfig.Log, 0777)
+	return cfg
+}
 
 var (
 	defaultRuntimeConfig = RuntimeConfig{}
@@ -136,6 +185,6 @@ func getModuleName(c *Config) string {
 }
 
 func EmptyEnv() *Env {
-	system:=GetDefaultSystemConfig()
+	system := defaultSystemConfig
 	return &Env{SystemConfig: &system, RuntimeConfig: &RuntimeConfig{}}
 }

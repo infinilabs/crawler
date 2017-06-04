@@ -4,8 +4,8 @@ package util
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"github.com/medcl/gopa/core/errors"
+	"strings"
 )
 
 // Event metadata constants. These keys are used within libbeat to identify

@@ -68,6 +68,7 @@ type TaskConfig struct {
 	FetchDelayThreshold int
 	TaskDBFilename      string `task_db_filename`
 }
+
 //
 //func (this *TaskConfig) Init() *TaskConfig {
 //	this.TaskDBFilename = "taskdb"

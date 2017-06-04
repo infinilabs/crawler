@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 package config
+
 //
 //type ChannelConfig struct {
 //	CheckerChanBuffSize int `checker_chan_buff_size`
@@ -68,7 +69,6 @@ package config
 //}
 
 type RuntimeConfig struct {
-
 	Modules []*Config `config:"modules"`
 
 	//IndexingConfig *IndexingConfig `indexing`

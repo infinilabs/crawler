@@ -30,13 +30,13 @@ import (
 	"github.com/gorilla/context"
 	"github.com/gorilla/sessions"
 	"github.com/julienschmidt/httprouter"
+	. "github.com/medcl/gopa/core/config"
+	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/logger"
 	"github.com/medcl/gopa/core/util"
 	_ "net/http/pprof"
 	"path"
 	"path/filepath"
-	."github.com/medcl/gopa/core/config"
-	"github.com/medcl/gopa/core/global"
 )
 
 var router *httprouter.Router

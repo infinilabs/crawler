@@ -1,20 +1,64 @@
 package stats
 
 import (
+	"fmt"
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/env"
+	. "github.com/medcl/gopa/core/config"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/modules/stats/statsd"
 	"sync"
 	"time"
 )
 
+type StatsDConfig struct {
+	Host              string        `config:"host"`
+	Port              int           `config:"port"`
+	Namespace         string        `config:"namespace"`
+	IntervalInSeconds time.Duration `config:"interval_seconds"`
+}
+type StatsDModule struct {
+}
+
+var statsdInited bool
+var statsdbuffer *statsd.StatsdBuffer
+var l1 sync.RWMutex
+
+var defaultStatsdConfig = StatsDConfig{
+	Host:              "localhost",
+	Port:              8125,
+	Namespace:         "gopa",
+	IntervalInSeconds: 1,
+}
+
 func (this StatsDModule) Name() string {
 	return "StatsD"
 }
 
-func (this StatsDModule) Start(env *Env) {
-	initStatsd()
+func (this StatsDModule) Start(cfg *Config) {
+	if statsdInited {
+		return
+	}
+
+	config := defaultStatsdConfig
+	cfg.Unpack(&config)
+
+	addr := fmt.Sprintf("%s:%d", config.Host, config.Port)
+	l1.Lock()
+	statsdclient := statsd.NewStatsdClient(addr, config.Namespace)
+
+	log.Debug("statsd connec to, ", addr)
+
+	err := statsdclient.CreateSocket()
+	if nil != err {
+		log.Warn(err)
+		return
+	}
+
+	interval := time.Second * config.IntervalInSeconds // aggregate stats and flush every 1 seconds
+	statsdbuffer = statsd.NewStatsdBuffer(interval, statsdclient)
+
+	statsdInited = true
+	l1.Unlock()
 	stats.Register(this)
 }
 
@@ -25,39 +69,11 @@ func (this StatsDModule) Stop() error {
 	return nil
 }
 
-type StatsDModule struct {
-}
-
-var statsdInited bool
-var statsdbuffer *statsd.StatsdBuffer
-var l1 sync.RWMutex
-
-func initStatsd() {
-	if statsdInited {
-		return
-	}
-	l1.Lock()
-	prefix := "gopa."
-	statsdclient := statsd.NewStatsdClient("statsdhost:8125", prefix) //TODO configable
-	err := statsdclient.CreateSocket()
-	if nil != err {
-		log.Warn(err)
-		return
-	}
-
-	interval := time.Second * 1 // aggregate stats and flush every 1 seconds
-	statsdbuffer = statsd.NewStatsdBuffer(interval, statsdclient)
-
-	statsdInited = true
-	l1.Unlock()
-}
-
 func (this StatsDModule) Increment(category, key string) {
 	this.IncrementBy(category, key, 1)
 }
 
 func (this StatsDModule) IncrementBy(category, key string, value int64) {
-	initStatsd()
 	statsdbuffer.Incr(category+"."+key, value)
 }
 
@@ -66,18 +82,15 @@ func (this StatsDModule) Decrement(category, key string) {
 }
 
 func (this StatsDModule) DecrementBy(category, key string, value int64) {
-	initStatsd()
 	statsdbuffer.Decr(category+"."+key, value)
 }
 
 func (this StatsDModule) Timing(category, key string, v int64) {
-	initStatsd()
 	statsdbuffer.Timing(category+"."+key, v)
 
 }
 
 func (this StatsDModule) Gauge(category, key string, v int64) {
-	initStatsd()
 	statsdbuffer.Gauge(category+"."+key, v)
 }
 

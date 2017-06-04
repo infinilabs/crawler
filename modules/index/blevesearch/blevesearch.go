@@ -19,6 +19,7 @@ package blevesearch
 import (
 	"fmt"
 	"github.com/blevesearch/bleve"
+	. "github.com/blevesearch/bleve/mapping"
 	"github.com/cihub/seelog"
 )
 
@@ -50,4 +51,22 @@ func main() {
 	}
 
 	fmt.Println(searchResults)
+}
+
+func buildIndexMapping() (*IndexMapping, error) {
+	indexMapping := bleve.NewIndexMapping()
+
+	var err error
+	err = indexMapping.AddCustomAnalyzer("test",
+		map[string]interface{}{
+			"type":          `custom`,
+			"char_filters":  []interface{}{},
+			"tokenizer":     `icu_th`,
+			"token_filters": []interface{}{},
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return indexMapping, nil
 }

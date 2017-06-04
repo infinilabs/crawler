@@ -133,6 +133,7 @@ fetch-depends:
 	$(GO) get github.com/spf13/viper
 	$(GO) get -t github.com/RoaringBitmap/roaring
 	$(GO) get github.com/elastic/go-ucfg
+	$(GO) get github.com/blevesearch/bleve
 
 dist: cross-build package
 

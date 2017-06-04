@@ -3,7 +3,7 @@ package stats
 import (
 	"encoding/json"
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/env"
+	. "github.com/medcl/gopa/core/config"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/store"
 	"github.com/medcl/gopa/modules/config"
@@ -15,7 +15,7 @@ func (this StatsStoreModule) Name() string {
 	return "StatsStore"
 }
 
-func (this StatsStoreModule) Start(env *Env) {
+func (this StatsStoreModule) Start(cfg *Config) {
 	initStats()
 	stats.Register(this)
 }

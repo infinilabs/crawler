@@ -22,9 +22,14 @@ import (
 	"github.com/medcl/gopa/core/util"
 )
 
+type ElasticsearchConfig struct {
+	Endpoint string `config:"elasticsearch.endpoint"`
+	Index    string `config:"elasticsearch.index"`
+}
+
 type ElasticsearchClient struct {
-	Host  string
-	Index string
+	Endpoint string
+	Index    string
 }
 
 type InsertResponse struct {
@@ -38,7 +43,7 @@ type InsertResponse struct {
 func (c *ElasticsearchClient) IndexDoc(id string, data map[string]interface{}) (*InsertResponse, error) {
 
 	typeName := "webpage"
-	url := c.Host + "/" + c.Index + "/" + typeName + "/" + id
+	url := c.Endpoint + "/" + c.Index + "/" + typeName + "/" + id
 
 	js, err := json.Marshal(data)
 

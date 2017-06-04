@@ -95,8 +95,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 
 		} else {
 
-
-			code,payload:=errors.CodeWithPayload(err)
+			code, payload := errors.CodeWithPayload(err)
 
 			if code == errors.URLRedirected {
 				log.Trace(util.ToJson(context, true))

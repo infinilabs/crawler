@@ -1,17 +1,21 @@
-max_go_routine: 10
+cluster:
+  name: gopa
+node.name: node1
+
+path.data: data
+path.logs: log
+path.certs: cert
+
+logging.level: debug
+
+network:
+  host: 127.0.0.1
+
+#cluster.seeds:
 
 channel:
   checker_chan_buff_size: 0
   fetch_chan_buff_size: 0
-
-crawler:
-  max_go_routine: true
-  load_pending_fetch_from_file: true
-
-parser:
-  enabled: true
-  parse_file_log: true
-  reparse_file_log: true
 
 task.default:
   split_by_url_parameter: "p,pn,page,start,index"
@@ -23,9 +27,6 @@ task.default:
   skip_page_parse_pattern: ".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b"
   fetch_url_pattern": ".*"
 
-indexing:
-  host: "http://eshost:9200"
-  index: "gopa"
 
 modules:
 - module: crawler
@@ -55,9 +56,19 @@ modules:
 
 - module: index
   enabled: true
+  elasticsearch:
+    endpoint: http://192.168.3.206:9200
+    index: gopa1
 
 - module: dispatch
   enabled: true
 
 - module: database
   enabled: true
+
+- module: statsd
+  enabled: true
+  host: 192.168.3.208
+  port: 8125
+  namespace: gopa
+  interval_seconds: 1

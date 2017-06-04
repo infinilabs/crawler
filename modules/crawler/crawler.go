@@ -18,17 +18,17 @@ package crawler
 
 import (
 	log "github.com/cihub/seelog"
+	. "github.com/medcl/gopa/core/config"
 	. "github.com/medcl/gopa/core/env"
+	"github.com/medcl/gopa/core/global"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules/config"
-	. "github.com/medcl/gopa/core/config"
-	."github.com/medcl/gopa/modules/crawler/config"
+	. "github.com/medcl/gopa/modules/crawler/config"
 	. "github.com/medcl/gopa/modules/crawler/pipe"
 	"runtime"
 	"time"
-	"github.com/medcl/gopa/core/global"
 )
 
 var signalChannels []*chan bool
@@ -42,9 +42,9 @@ func (this CrawlerModule) Name() string {
 
 func (this CrawlerModule) Start(cfg *Config) {
 
-	config:=GetDefaultCrawlerConfig()
+	config := GetDefaultCrawlerConfig()
 	cfg.Unpack(&config)
-	this.config=&config
+	this.config = &config
 
 	//TODO
 	InitJoints()
@@ -54,8 +54,7 @@ func (this CrawlerModule) Start(cfg *Config) {
 		return
 	}
 
-
-	numGoRoutine := 1// env.RuntimeConfig.CrawlerConfig.MaxGoRoutine
+	numGoRoutine := 1 // env.RuntimeConfig.CrawlerConfig.MaxGoRoutine
 	signalChannels = make([]*chan bool, numGoRoutine)
 	quitChannels = make([]*chan bool, numGoRoutine)
 	//if env.RuntimeConfig.CrawlerConfig.Enabled
@@ -170,7 +169,7 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 		Run()
 
 	if this.config.FetchDelayThresholdInMs > 0 {
-		log.Debug("sleep ",this.config.FetchDelayThresholdInMs, "ms to control crawling speed")
+		log.Debug("sleep ", this.config.FetchDelayThresholdInMs, "ms to control crawling speed")
 		time.Sleep(time.Duration(this.config.FetchDelayThresholdInMs) * time.Millisecond)
 		log.Debug("wake up now,continue crawing")
 	}

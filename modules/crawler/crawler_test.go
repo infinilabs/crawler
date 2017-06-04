@@ -18,7 +18,7 @@ package crawler
 
 import (
 	"fmt"
-	."github.com/medcl/gopa/core/env"
+	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/util"

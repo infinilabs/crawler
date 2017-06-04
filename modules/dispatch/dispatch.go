@@ -2,12 +2,12 @@ package dispatch
 
 import (
 	log "github.com/cihub/seelog"
+	. "github.com/medcl/gopa/core/config"
 	"github.com/medcl/gopa/core/filter"
 	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/modules/config"
-	. "github.com/medcl/gopa/core/config"
 	"time"
 )
 
