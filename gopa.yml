@@ -1,6 +1,6 @@
 cluster:
   name: gopa
-node.name: node1
+#node.name: node1
 
 path.data: data
 path.logs: log
@@ -58,7 +58,7 @@ modules:
   enabled: true
   elasticsearch:
     endpoint: http://192.168.3.206:9200
-    index: gopa1
+    index: gopa
 
 - module: dispatch
   enabled: true
