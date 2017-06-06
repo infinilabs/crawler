@@ -28,6 +28,14 @@ import (
 	"strings"
 )
 
+const VERSION = "0.9.0_SNAPSHOT"
+
+var (
+	LastCommitLog string
+	BuildDate string
+)
+
+
 type Env struct {
 
 	// static configs
