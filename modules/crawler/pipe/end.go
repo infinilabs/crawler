@@ -21,7 +21,6 @@ import (
 	"github.com/medcl/gopa/core/errors"
 	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
-	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules/config"
 )
 
@@ -71,10 +70,6 @@ func (this SaveTaskJoint) Process(context *Context) (*Context, error) {
 
 	if this.IsCreate {
 		log.Trace("create task, url:", task.Url)
-		if task.Url == "http://plusx.cn" {
-			log.Error(util.ToJson(this.Name(), true))
-			log.Error(util.ToJson(context, true))
-		}
 		model.CreateTask(task)
 	} else {
 		model.UpdateTask(task)

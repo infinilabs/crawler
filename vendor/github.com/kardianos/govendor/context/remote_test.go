@@ -252,7 +252,7 @@ func TestFetchAgain(t *testing.T) {
 	commitRev2, commitTime2 := remote.Setup().Commit()
 
 	g.In("co1")
-	g.Check(c.ModifyStatus(StatusGroup{Status: []Status{Status{Location: LocationVendor}}}, Fetch))
+	g.Check(c.ModifyStatus(StatusGroup{Status: []Status{{Location: LocationVendor}}}, Fetch))
 	g.Check(c.Alter())
 	g.Check(c.WriteVendorFile())
 
