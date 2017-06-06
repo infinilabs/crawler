@@ -44,7 +44,7 @@ If you are running `Gopa` as daemon, you can stop it like this:
 
 ## UI
 
-Visit `http://127.0.0.1:8001/ui/` for more details.
+Visit `http://127.0.0.1:9001/` for more details.
 
 
 License
