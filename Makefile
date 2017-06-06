@@ -10,8 +10,8 @@ OLDGOPATH:= $(GOPATH)
 NEWGOPATH:= $(GOPATH):$(CURDIR)/vendor
 
 GO        := GO15VENDOREXPERIMENT="1" go
-GOBUILD  := GOPATH=$(NEWGOPATH) $(GO) build -ldflags -s
-GOTEST   := GOPATH=$(NEWGOPATH) $(GO) test -ldflags -s
+GOBUILD  := GOPATH=$(NEWGOPATH) CGO_ENABLED=1  $(GO) build -ldflags -s
+GOTEST   := GOPATH=$(NEWGOPATH) CGO_ENABLED=1  $(GO) test -ldflags -s
 
 ARCH      := "`uname -s`"
 LINUX     := "Linux"
@@ -59,7 +59,7 @@ build-win: clean config update-ui
 
 build-linux: clean config update-ui
 	GOOS=linux  GOARCH=amd64 CGO_ENABLED=1  go build -o bin/linux64/gopa --tags "libsqlite3 linux"
-	GOOS=linux  GOARCH=386   CGO_ENABLED=1   go build -o bin/linux32/gopa --tags "libsqlite3 linux"
+	GOOS=linux  GOARCH=386   CGO_ENABLED=1  go build -o bin/linux32/gopa --tags "libsqlite3 linux"
 
 all: clean config update-ui cross-build
 
