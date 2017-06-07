@@ -2,7 +2,7 @@ language: go
 os:
   - osx
   - linux
-script: make clean fetch-depends config cross-build-all-platform package-all-platform
+script: make clean config build
 go:
   - 1.x
   - 1.6
