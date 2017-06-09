@@ -37,6 +37,7 @@ func InitJoints() {
 	pipeline.Register(pipe.SaveSnapshotToFileSystem, pipe.SaveSnapshotToFileSystemJoint{})
 	pipeline.Register(pipe.InitTask, pipe.InitTaskJoint{})
 	pipeline.Register(pipe.UrlExtFilter, pipe.UrlExtFilterJoint{})
+	pipeline.Register(pipe.Hash, pipe.HashJoint{})
 	log.Debug("end register joints")
 
 }

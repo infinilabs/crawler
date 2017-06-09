@@ -28,18 +28,26 @@ import (
 )
 
 func Test(t *testing.T) {
-
+	var filter FilterModule
 	env1 := EmptyEnv()
 	env1.SystemConfig.PathConfig.Data = "/tmp/filter_" + util.RandomPickName()
 	os.RemoveAll(env1.SystemConfig.PathConfig.Data)
 	env1.IsDebug = true
 	global.RegisterEnv(env1)
 
-	filter := FilterModule{}
+	filter = FilterModule{}
 	filter.Start(GetModuleConfig(filter.Name()))
 	b, _ := filter.CheckThenAdd(config.CheckFilter, []byte("key"))
 	assert.Equal(t, false, b)
+
 	for i := 0; i < 1000; i++ {
+		go run(&filter, t)
+	}
+
+}
+
+func run(filter *FilterModule, t *testing.T) {
+	for i := 0; i < 100000; i++ {
 		b, _ := filter.CheckThenAdd(config.CheckFilter, []byte("key"))
 		assert.Equal(t, true, b)
 		b = filter.Exists(config.CheckFilter, []byte("key"))
@@ -48,5 +56,4 @@ func Test(t *testing.T) {
 			fmt.Print("not exists")
 		}
 	}
-
 }

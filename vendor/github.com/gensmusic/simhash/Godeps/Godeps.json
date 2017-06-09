@@ -1,0 +1,37 @@
+{
+	"ImportPath": "github.com/gensmusic/simhash",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v79",
+	"Deps": [
+		{
+			"ImportPath": "github.com/gensmusic/jiebago",
+			"Comment": "v0.3.2-3-gcf315ce",
+			"Rev": "cf315ce8139b4902e415b397250e74dac4972feb"
+		},
+		{
+			"ImportPath": "github.com/gensmusic/jiebago/analyse",
+			"Comment": "v0.3.2-3-gcf315ce",
+			"Rev": "cf315ce8139b4902e415b397250e74dac4972feb"
+		},
+		{
+			"ImportPath": "github.com/gensmusic/jiebago/dictionary",
+			"Comment": "v0.3.2-3-gcf315ce",
+			"Rev": "cf315ce8139b4902e415b397250e74dac4972feb"
+		},
+		{
+			"ImportPath": "github.com/gensmusic/jiebago/finalseg",
+			"Comment": "v0.3.2-3-gcf315ce",
+			"Rev": "cf315ce8139b4902e415b397250e74dac4972feb"
+		},
+		{
+			"ImportPath": "github.com/gensmusic/jiebago/posseg",
+			"Comment": "v0.3.2-3-gcf315ce",
+			"Rev": "cf315ce8139b4902e415b397250e74dac4972feb"
+		},
+		{
+			"ImportPath": "github.com/gensmusic/jiebago/util",
+			"Comment": "v0.3.2-3-gcf315ce",
+			"Rev": "cf315ce8139b4902e415b397250e74dac4972feb"
+		}
+	]
+}

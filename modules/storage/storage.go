@@ -40,7 +40,7 @@ func (this StorageModule) Start(cfg *config.Config) {
 	if err != nil {
 		panic(err)
 	}
-	store.RegisterStoreHandler(impl)
+	store.RegisterKVStoreHandler(impl)
 	//store.RegisterORMHandler(impl)
 }
 

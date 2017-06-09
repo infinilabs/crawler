@@ -137,7 +137,10 @@ fetch-depends:
 	$(GO) get github.com/spf13/viper
 	$(GO) get -t github.com/RoaringBitmap/roaring
 	$(GO) get github.com/elastic/go-ucfg
+	$(GO) get github.com/jasonlvhit/gocron
 	$(GO) get github.com/blevesearch/bleve
+	$(GO) get github.com/gensmusic/simhash
+	$(GO) get github.com/gensmusic/jiebago/...
 
 dist: cross-build package
 

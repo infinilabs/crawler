@@ -47,7 +47,7 @@ func (this DatabaseModule) Start(cfg *config.Config) {
 	db.AutoMigrate(&model.Domain{})
 	db.AutoMigrate(&model.Task{})
 
-	store.RegisterConnection(db)
+	store.RegisterDBConnection(db)
 }
 
 func (this DatabaseModule) Stop() error {
