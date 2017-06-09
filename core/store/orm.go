@@ -17,7 +17,7 @@ limitations under the License.
 package store
 
 import (
-	"github.com/medcl/gopa/core/errors"
+	"github.com/jinzhu/gorm"
 	"sync"
 )
 
@@ -54,48 +54,46 @@ type Result struct {
 	Result interface{}
 }
 
-var theORMHandler ORM
-
 func GetBy(field string, value interface{}, to interface{}) error {
 	dbLock.Lock()
 	defer dbLock.Unlock()
 
-	return GetDBConnection().Where(field+" = ?", value).First(to).Error
+	return getDBConnection().Where(field+" = ?", value).First(to).Error
 }
 
 func Get(o interface{}) error {
 	dbLock.Lock()
 	defer dbLock.Unlock()
 
-	return GetDBConnection().First(o).Error
+	return getDBConnection().First(o).Error
 }
 
 func Save(o interface{}) error {
 	dbLock.Lock()
 	defer dbLock.Unlock()
 
-	return GetDBConnection().Save(o).Error
+	return getDBConnection().Save(o).Error
 }
 
 func Create(o interface{}) error {
 	dbLock.Lock()
 	defer dbLock.Unlock()
 
-	return GetDBConnection().Create(o).Error
+	return getDBConnection().Create(o).Error
 }
 
 func Update(o interface{}) error {
 	dbLock.Lock()
 	defer dbLock.Unlock()
 
-	return GetDBConnection().Save(o).Error
+	return getDBConnection().Save(o).Error
 }
 
 func Delete(o interface{}) error {
 	dbLock.Lock()
 	defer dbLock.Unlock()
 
-	return GetDBConnection().Delete(o).Error
+	return getDBConnection().Delete(o).Error
 }
 
 func Count(o interface{}) (int, error) {
@@ -103,7 +101,7 @@ func Count(o interface{}) (int, error) {
 	defer dbLock.Unlock()
 
 	var count int
-	return count, GetDBConnection().Model(&o).Count(count).Error
+	return count, getDBConnection().Model(&o).Count(count).Error
 }
 
 func Search(o interface{}, q *Query) (error, Result) {
@@ -119,7 +117,7 @@ func Search(o interface{}, q *Query) (error, Result) {
 
 	var c int
 	var err error
-	db1 := GetDBConnection().Model(o)
+	db1 := getDBConnection().Model(o)
 	if len(q.Sort) > 0 {
 		db1 = db1.Order(q.Sort)
 	}
@@ -138,20 +136,13 @@ func Search(o interface{}, q *Query) (error, Result) {
 	return err, resut
 }
 
-func getHandler() Store {
-	if handler == nil {
-		panic(errors.New("store handler is not registered"))
-	}
-	return handler
+var conn *gorm.DB
+
+// create a session for each business unit of execution (e.g. a web request or goworkers job)
+func getDBConnection() *gorm.DB {
+	return conn
 }
 
-func getORMHandler() ORM {
-	if theORMHandler == nil {
-		panic(errors.New("ORM handler is not registered"))
-	}
-	return theORMHandler
-}
-
-func RegisterORMHandler(h ORM) {
-	theORMHandler = h
+func RegisterDBConnection(h *gorm.DB) {
+	conn = h
 }

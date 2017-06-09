@@ -8,6 +8,33 @@ import (
 	"time"
 )
 
+type TaskStatus int
+
+const TaskCreated TaskStatus = 0
+const TaskFetchFailed TaskStatus = 2
+const TaskFetchSuccess TaskStatus = 3
+
+type TaskPhrase int
+
+type Task struct {
+	Seed
+	ID              string      `storm:"id,unique" json:"id" gorm:"not null;unique;primary_key"`
+	Domain          string      `storm:"index" json:"domain,omitempty"` // elastic.co
+	Scheme          string      `json:"schema,omitempty"`               // elastic.co
+	OriginUrl       string      `json:"origin_url,omitempty"`           // /index.html
+	UrlPath         string      `json:"path,omitempty"`                 // /index.html
+	Phrase          TaskPhrase  `storm:"index" json:"phrase"`
+	Status          TaskStatus  `storm:"index" json:"status"`
+	Page            *PageItem   `storm:"inline" json:"page,omitempty" gorm:"-"`
+	Message         interface{} `storm:"inline" json:"message,omitempty" gorm:"-"`
+	CreateTime      *time.Time  `storm:"index" json:"created,omitempty" gorm:"index"`
+	UpdateTime      *time.Time  `storm:"index" json:"updated,omitempty" gorm:"index"`
+	LastCheckTime   *time.Time  `storm:"index" json:"checked,omitempty"`
+	Snapshot        string      `json:"snapshot,omitempty"` //Last Snapshot ID
+	SnapshotHash    string      `storm:"snapshot_hash" json:"snapshot_hash,omitempty"`
+	SnapshotSimHash string      `storm:"snapshot_simhash" json:"snapshot_simhash,omitempty"`
+}
+
 func CreateTask(task *Task) error {
 	log.Trace("start create crawler task, ", task.Url)
 	time := time.Now()
