@@ -71,6 +71,8 @@ func (this ParsePageJoint) Process(s *Context) error {
 		metadata["title"] = title
 	}
 
+	this.links = map[string]interface{}{}
+
 	doc.Find("meta").Each(func(i int, s *goquery.Selection) {
 		name, exist := s.Attr("name")
 		name = strings.TrimSpace(name)
@@ -81,13 +83,31 @@ func (this ParsePageJoint) Process(s *Context) error {
 			}
 		}
 
+		//check meta refresh
+		equiv, exist := s.Attr("http-equiv")
+		equiv = strings.TrimSpace(strings.ToLower(equiv))
+		if exist && len(equiv) > 0 && equiv=="refresh" {
+			content, exist := s.Attr("content")
+			if exist {
+				//0; url=/2016/beijing.html
+				arr:=strings.Split(content,"=")
+				if(len(arr)==2){
+					url:=arr[1]
+					this.links[url]="http-equiv-refresh"
+				}else{
+					log.Error("unexpected http-equiv",content)
+				}
+
+			}
+		}
+
+
 	})
 
 	if len(metadata) > 0 {
 		s.Set(CONTEXT_PAGE_METADATA, metadata)
 	}
 
-	this.links = map[string]interface{}{}
 	doc.Find("a").Each(func(i int, s *goquery.Selection) {
 		href, exist := s.Attr("href")
 		href = strings.TrimSpace(href)
