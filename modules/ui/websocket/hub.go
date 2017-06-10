@@ -10,6 +10,7 @@ import (
 	"github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/logger"
+	"github.com/medcl/gopa/core/stats"
 	"strings"
 	"time"
 )
@@ -73,11 +74,10 @@ func (h *Hub) RunHub() {
 	if global.Env().IsDebug {
 
 		go func() {
-			t := time.NewTicker(time.Duration(10) * time.Second)
+			t := time.NewTicker(time.Duration(30) * time.Second)
 			for {
 				select {
 				case <-t.C:
-					fmt.Println("sending test msg to broadcast")
 					h.broadcast <- "testing websocket broadcast"
 				}
 			}
@@ -118,7 +118,9 @@ func (h *Hub) broadcastMessage(msg string) {
 func BroadcastMessage(msg string) {
 	select {
 	case h.broadcast <- msg:
+		stats.Increment("websocket", "sended")
 	default:
-		fmt.Println("websocket broadcast too busy, msg droped")
+		stats.Increment("websocket", "dropped")
+		fmt.Println("websocket broadcast too busy, msg dropped")
 	}
 }

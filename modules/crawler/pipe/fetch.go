@@ -48,7 +48,7 @@ type signal struct {
 	err  error
 }
 
-func (this FetchJoint) Process(context *Context) (*Context, error) {
+func (this FetchJoint) Process(context *Context) error {
 
 	this.timeout = 10 * time.Second
 	this.context = context
@@ -58,7 +58,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 
 	if len(requestUrl) == 0 {
 		log.Error("invalid fetchUrl")
-		return context, errors.New("invalid fetchUrl")
+		return errors.New("invalid fetchUrl")
 	}
 
 	log.Debug("start fetch url,", requestUrl)
@@ -73,10 +73,18 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 		log.Trace("proxy:", proxy)
 
 		//start to fetch remote content
-		body, err := util.HttpGetWithCookie(&pageItem, requestUrl, cookie, proxy)
+		result, err := util.HttpGetWithCookie(requestUrl, cookie, proxy)
 
-		if err == nil {
-			if body != nil {
+		if err == nil && result != nil {
+
+			pageItem.Body = result.Body
+			pageItem.Url = result.Url
+			pageItem.StatusCode = result.StatusCode
+			pageItem.Size = result.Size
+			pageItem.Host = result.Host
+			pageItem.Headers = result.Headers
+
+			if result.Body != nil {
 				if pageItem.StatusCode == 404 {
 					log.Info("skip while 404, ", requestUrl, " , ", pageItem.StatusCode)
 					context.Break("fetch 404")
@@ -88,7 +96,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 			//update url, in case catch redirects
 			context.Set(CONTEXT_URL, pageItem.Url) //should update here, if url got redirected, the url is change
 			context.Set(CONTEXT_HOST, pageItem.Host)
-			context.Set(CONTEXT_PAGE_BODY_BYTES, body)
+			context.Set(CONTEXT_PAGE_BODY_BYTES, result.Body)
 			context.Set(CONTEXT_PAGE_ITEM, &pageItem)
 			log.Debug("exit fetchUrl method:", requestUrl)
 			flg <- signal{flag: true}
@@ -118,7 +126,7 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 		log.Error("fetching url time out, ", requestUrl, ", ", this.timeout)
 		stats.Increment("domain.stats", domain+"."+stats.STATS_FETCH_TIMEOUT_COUNT)
 		context.Break(fmt.Sprintf("fetching url time out, %s, %s", requestUrl, this.timeout))
-		return nil, errors.New("fetch url time out")
+		return errors.New("fetch url time out")
 	case value := <-flg:
 		if value.flag {
 			log.Debug("fetching url normal exit, ", requestUrl)
@@ -130,8 +138,8 @@ func (this FetchJoint) Process(context *Context) (*Context, error) {
 			}
 			stats.Increment("domain.stats", domain+"."+stats.STATS_FETCH_FAIL_COUNT)
 		}
-		return context, nil
+		return nil
 	}
 
-	return context, nil
+	return nil
 }

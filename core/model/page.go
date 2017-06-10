@@ -58,7 +58,8 @@ type PageLink struct {
 }
 
 type Seed struct {
-	Url       string `storm:"index" json:"url,omitempty" gorm:"type:not null;varchar(500);unique_index"` // the seed url may not cleaned, may miss the domain part, need reference to provide the complete url information
+	Url       string `storm:"index" json:"url,omitempty" gorm:"type:not null;varchar(500)"`
+	//Url       string `storm:"index" json:"url,omitempty" gorm:"type:not null;varchar(500);unique_index"` // the seed url may not cleaned, may miss the domain part, need reference to provide the complete url information
 	Reference string `json:"reference,omitempty"`
 	Depth     int    `storm:"index" json:"depth,omitempty"`
 	Breadth   int    `storm:"index" json:"breadth,omitempty"`

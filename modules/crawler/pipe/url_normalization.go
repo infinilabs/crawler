@@ -43,7 +43,7 @@ func (this UrlNormalizationJoint) Name() string {
 	return string(UrlNormalization)
 }
 
-func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
+func (this UrlNormalizationJoint) Process(context *Context) error {
 	url := context.MustGetString(CONTEXT_URL)
 	var currentURI, referenceURI *u.URL
 	var err error
@@ -139,7 +139,7 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 		if err != nil {
 			log.Error(err)
 			context.Break(err.Error())
-			return context, err
+			return err
 		}
 	}
 
@@ -167,12 +167,12 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 			if !(ref[len(ref)-1] == cur[len(cur)-1] && ref[len(ref)-2] == cur[len(cur)-2]) {
 				log.Debug("domain mismatch,", referenceURI.Host, " vs ", currentURI.Host)
 				context.Break("domain missmatch," + referenceURI.Host + " vs " + currentURI.Host)
-				return context, nil //known exception, not error
+				return nil //known exception, not error
 			}
 		} else {
 			if referenceURI.Host != currentURI.Host {
 				context.Break("domain missmatch," + referenceURI.Host + " vs " + currentURI.Host)
-				return context, nil //known exception, not error
+				return nil //known exception, not error
 			}
 		}
 
@@ -305,5 +305,5 @@ func (this UrlNormalizationJoint) Process(context *Context) (*Context, error) {
 	context.Set(CONTEXT_SAVE_FILENAME, filename)
 	log.Debugf("finished normalization,%s, %s, %s ", url, filePath, filename)
 
-	return context, nil
+	return nil
 }

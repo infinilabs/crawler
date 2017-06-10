@@ -17,52 +17,55 @@ limitations under the License.
 package pipe
 
 import (
-	. "github.com/medcl/gopa/core/pipeline"
 	"crypto/sha1"
 	"fmt"
-	."github.com/gensmusic/simhash"
 	log "github.com/cihub/seelog"
+	. "github.com/gensmusic/simhash"
+	. "github.com/medcl/gopa/core/pipeline"
 	"path"
 )
 
 const Hash JointKey = "hash"
 
 type HashJoint struct {
-	Simhash bool
 	DictRoot string
+	Simhash  bool
 }
 
 func (this HashJoint) Name() string {
 	return string(Hash)
 }
 
-func (this HashJoint) Process(context *Context) (*Context, error) {
-
-	this.loadDict()
+func (this HashJoint) Process(context *Context) error {
 
 	body := context.MustGetString(CONTEXT_PAGE_BODY_PLAIN_TEXT)
 
 	h := sha1.New()
 	h.Write([]byte(body))
 	bs := h.Sum(nil)
-	context.Set(CONTEXT_PAGE_HASH,fmt.Sprintf("%x", bs))
-	hash1:=Simhash(&body,100)
-	context.Set(CONTEXT_PAGE_SIMHASH_100,fmt.Sprintf("%x", hash1))
-	hash2:=Simhash(&body,500)
-	context.Set(CONTEXT_PAGE_SIMHASH_500,fmt.Sprintf("%x", hash2))
-	return context, nil
+	context.Set(CONTEXT_PAGE_HASH, fmt.Sprintf("%x", bs))
+
+	if this.Simhash {
+		this.loadDict()
+		hash1 := Simhash(&body, 100)
+		context.Set(CONTEXT_PAGE_SIMHASH_100, fmt.Sprintf("%x", hash1))
+		hash2 := Simhash(&body, 500)
+		context.Set(CONTEXT_PAGE_SIMHASH_500, fmt.Sprintf("%x", hash2))
+	}
+
+	return nil
 }
 
-func (this HashJoint)loadDict()  {
-	mainDict:="config/dict/main.dict.txt"
-	idfDict:="config/dict/idf.txt"
-	stopwordsDict:="config/dict/stop_words.txt"
-	if(len(this.DictRoot)>0){
-		mainDict=path.Join(this.DictRoot,mainDict)
-		idfDict=path.Join(this.DictRoot,idfDict)
-		stopwordsDict=path.Join(this.DictRoot,stopwordsDict)
+func (this HashJoint) loadDict() {
+	mainDict := "config/dict/main.dict.txt"
+	idfDict := "config/dict/idf.txt"
+	stopwordsDict := "config/dict/stop_words.txt"
+	if len(this.DictRoot) > 0 {
+		mainDict = path.Join(this.DictRoot, mainDict)
+		idfDict = path.Join(this.DictRoot, idfDict)
+		stopwordsDict = path.Join(this.DictRoot, stopwordsDict)
 	}
-	if err := LoadDictionary(mainDict,idfDict ,stopwordsDict ); err != nil {
+	if err := LoadDictionary(mainDict, idfDict, stopwordsDict); err != nil {
 		log.Error("Failed to load dictionary:", err)
 		panic(err)
 	}

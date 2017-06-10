@@ -40,7 +40,7 @@ func (this SaveSnapshotToFileSystemJoint) Name() string {
 	return string(SaveSnapshotToFileSystem)
 }
 
-func (this SaveSnapshotToFileSystemJoint) Process(c *Context) (*Context, error) {
+func (this SaveSnapshotToFileSystemJoint) Process(c *Context) error {
 	this.context = c
 
 	if len(this.baseDir) == 0 {
@@ -49,7 +49,7 @@ func (this SaveSnapshotToFileSystemJoint) Process(c *Context) (*Context, error) 
 
 	url, ok := c.GetString(CONTEXT_URL)
 	if !ok {
-		return nil, errors.New("invalid url")
+		return errors.New("invalid url")
 	}
 	task := c.Get(CONTEXT_CRAWLER_TASK).(*model.Task)
 	pageItem := c.Get(CONTEXT_PAGE_ITEM).(*model.PageItem)
@@ -63,7 +63,7 @@ func (this SaveSnapshotToFileSystemJoint) Process(c *Context) (*Context, error) 
 
 	if util.FileExists(fullPath) {
 		log.Warnf("file: %s already exists, ignore,url: %s", fullPath, url)
-		return c, nil
+		return nil
 	}
 
 	log.Trace("save url,", url, ",domain,", task.Domain, ",folder,", folder, ",file:", file, ",fullpath,", fullPath)
@@ -78,17 +78,17 @@ func (this SaveSnapshotToFileSystemJoint) Process(c *Context) (*Context, error) 
 	if err != nil {
 		log.Error(fullPath, ",", err)
 		panic(err)
-		return nil, err
+		return err
 	}
 
 	defer fout.Close()
 	_, err = fout.Write(pageItem.Body)
 	if err != nil {
 		log.Error(fullPath, ",", err)
-		return nil, err
+		return err
 	}
 
-	return c, nil
+	return nil
 }
 
 func (this SaveSnapshotToFileSystemJoint) getSavedPath(urlStr string) (string, string) {

@@ -34,7 +34,7 @@ func (this HtmlToTextJoint) Name() string {
 	return string(HtmlToText)
 }
 
-func (this HtmlToTextJoint) Process(context *Context) (*Context, error) {
+func (this HtmlToTextJoint) Process(context *Context) error {
 
 	//TODO all configable
 	body := context.MustGetBytes(CONTEXT_PAGE_BODY_BYTES)
@@ -116,5 +116,5 @@ func (this HtmlToTextJoint) Process(context *Context) (*Context, error) {
 	log.Trace("get text: ", src)
 
 	context.Set(CONTEXT_PAGE_BODY_PLAIN_TEXT, src)
-	return context, nil
+	return nil
 }

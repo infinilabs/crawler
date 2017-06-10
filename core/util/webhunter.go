@@ -30,7 +30,6 @@ import (
 	"fmt"
 	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/errors"
-	. "github.com/medcl/gopa/core/model"
 	"golang.org/x/net/proxy"
 )
 
@@ -94,10 +93,21 @@ func getUrl(url string) (string, error) {
 	return url, nil
 }
 
+type Result struct{
+	Host       string
+	Url        string
+	Headers    map[string][]string
+	Body       []byte
+	StatusCode int
+	Size       uint64
+}
+
 /**
 proxyStr, eg: "socks5://127.0.0.1:9150"
 */
-func get(page *PageItem, url string, cookie string, proxyStr string) ([]byte, error) {
+func get(url string, cookie string, proxyStr string) (*Result, error) {
+
+	var page *Result
 
 	log.Debug("let's get :" + url)
 
@@ -190,6 +200,7 @@ func get(page *PageItem, url string, cookie string, proxyStr string) ([]byte, er
 
 	log.Trace("host: ", resp.Request.Host, " url: ", resp.Request.URL.String())
 
+	page=&Result{}
 	//update host, redirects may change the host
 	page.Host = resp.Request.Host
 	page.Url = resp.Request.URL.String()
@@ -222,7 +233,7 @@ func get(page *PageItem, url string, cookie string, proxyStr string) ([]byte, er
 		}
 		page.Body = body
 		page.Size = uint64(len(body))
-		return body, nil
+		return page, nil
 
 	}
 	return nil, nil
@@ -299,8 +310,8 @@ func HttpPost(url string, cookie string, postStr string) []byte {
 	return nil
 }
 
-func HttpGetWithCookie(page *PageItem, resource string, cookie string, proxy string) (msg []byte, err error) {
-	out, err := get(page, resource, cookie, proxy)
+func HttpGetWithCookie( resource string, cookie string, proxy string) (result *Result, err error) {
+	out, err := get(resource, cookie, proxy)
 	return out, err
 }
 

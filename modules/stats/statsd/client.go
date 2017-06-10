@@ -23,7 +23,7 @@ type Logger interface {
 //  func init() {
 //   statsd.UDPPayloadSize = 16 * 1024
 //  }
-var UDPPayloadSize int = 512
+var UDPPayloadSize int =  16 * 1024
 
 // Hostname is exported so clients can set it to something different than the default
 var Hostname string

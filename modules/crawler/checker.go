@@ -140,7 +140,7 @@ func (this CheckerModule) runPipe(debug bool, task *model.Task) *Pipeline {
 		Start(InitTaskJoint{Task: task}).
 		Join(UrlNormalizationJoint{FollowSubDomain: true}).
 		Join(UrlExtFilterJoint{}).
-		Join(UrlCheckedFilterJoint{}).
+		Join(UrlCheckFilterJoint{}).
 		End(SaveTaskJoint{IsCreate: true}).
 		Run()
 

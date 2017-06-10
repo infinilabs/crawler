@@ -24,7 +24,6 @@ import (
 	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/util"
-	"github.com/rs/xid"
 	"reflect"
 	"runtime"
 	"strings"
@@ -200,7 +199,7 @@ func (this *Parameters) MustGetMap(key ParaKey) map[string]interface{} {
 
 type Joint interface {
 	Name() string
-	Process(s *Context) (*Context, error)
+	Process(s *Context) (error)
 }
 
 type Pipeline struct {
@@ -213,7 +212,7 @@ type Pipeline struct {
 
 func NewPipeline(name string) *Pipeline {
 	pipe := &Pipeline{}
-	pipe.id = xid.New().String()
+	pipe.id = util.GetIncrementID("pipe")
 	pipe.name = strings.TrimSpace(name)
 	pipe.context = &Context{}
 	pipe.context.Parameters.Init()
@@ -291,13 +290,13 @@ func (this *Pipeline) Run() *Context {
 			break
 		}
 		startTime := time.Now()
-		this.context, err = v.Process(this.context)
+		err = v.Process(this.context)
 		elapsedTime := time.Now().Sub(startTime)
 		stats.Timing(this.name+".pipeline", v.Name(), elapsedTime.Nanoseconds())
 		if err != nil {
 			stats.Increment(this.name+".pipeline", "error")
 			log.Errorf("%s-%s: %v", this.name, v.Name(), err)
-			this.context.Break(err.Error())
+			this.context.Break(err)
 			panic(err)
 		}
 		log.Trace(this.name, ", end joint,", v.Name())
@@ -305,7 +304,6 @@ func (this *Pipeline) Run() *Context {
 
 	return this.context
 }
-
 func (this *Pipeline) endPipeline() {
 	if this.context.IsErrorExit() {
 		log.Debug("exit pipeline, ", this.name, ", ", this.context.Payload)
@@ -323,7 +321,7 @@ func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
 	log.Tracef("pipeline config: %v", util.ToJson(config, true))
 
 	pipe := &Pipeline{}
-	pipe.id = xid.New().String()
+	pipe.id =util.GetIncrementID("pipe")
 	pipe.name = strings.TrimSpace(config.Name)
 
 	pipe.Context(config.Context)

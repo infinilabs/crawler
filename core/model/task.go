@@ -4,8 +4,9 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/errors"
 	"github.com/medcl/gopa/core/store"
-	"github.com/rs/xid"
+
 	"time"
+	"github.com/medcl/gopa/core/util"
 )
 
 type TaskStatus int
@@ -38,7 +39,7 @@ type Task struct {
 func CreateTask(task *Task) error {
 	log.Trace("start create crawler task, ", task.Url)
 	time := time.Now()
-	task.ID = xid.New().String()
+	task.ID =util.GetIncrementID("task")
 	task.Status = TaskCreated
 	task.CreateTime = &time
 	task.UpdateTime = &time

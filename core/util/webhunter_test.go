@@ -19,17 +19,15 @@ package util
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/medcl/gopa/core/model"
 	"testing"
 )
 
 func TestGet(t *testing.T) {
-	t1 := model.PageItem{}
-	data, _ := get(&t1, "http://es-guide-preview.elasticsearch.cn", "", "")
+	data, _ := get("http://es-guide-preview.elasticsearch.cn", "", "")
 
-	data1, _ := json.Marshal(t1)
-	fmt.Println("", string(data))
+	data1, _ := json.Marshal(data)
 	fmt.Println("", string(data1))
+	//assert.Equal(t,data.StatusCode,301)
 }
 
 func TestGetHost(t *testing.T) {

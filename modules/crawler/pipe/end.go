@@ -34,11 +34,11 @@ func (this SaveTaskJoint) Name() string {
 	return string(SaveTask)
 }
 
-func (this SaveTaskJoint) Process(context *Context) (*Context, error) {
+func (this SaveTaskJoint) Process(context *Context) error {
 
 	log.Trace("end process")
 	if context.IsErrorExit() {
-		return context, errors.NewWithCode(errors.New("error in process"), config.ErrorExitedPipeline, "pipeline exited")
+		return errors.NewWithCode(errors.New("error in process"), config.ErrorExitedPipeline, "pipeline exited")
 	}
 
 	task := context.Get(CONTEXT_CRAWLER_TASK).(*model.Task)
@@ -66,6 +66,18 @@ func (this SaveTaskJoint) Process(context *Context) (*Context, error) {
 		if b {
 			task.Page.Text = text
 		}
+
+		simhash, b := context.GetString(CONTEXT_PAGE_SIMHASH_100)
+		if b {
+			task.SnapshotSimHash = simhash
+		}
+
+		hash, b := context.GetString(CONTEXT_PAGE_HASH)
+		if b {
+			task.SnapshotHash = hash
+		}
+
+
 	}
 
 	if this.IsCreate {
@@ -75,5 +87,5 @@ func (this SaveTaskJoint) Process(context *Context) (*Context, error) {
 		model.UpdateTask(task)
 	}
 
-	return context, nil
+	return nil
 }

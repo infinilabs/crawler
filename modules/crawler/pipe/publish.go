@@ -36,7 +36,7 @@ func (this PublishJoint) Name() string {
 	return string(Publish)
 }
 
-func (this PublishJoint) Process(c *Context) (*Context, error) {
+func (this PublishJoint) Process(c *Context) error {
 
 	m := md5.Sum([]byte(c.MustGetString(CONTEXT_URL)))
 	id := hex.EncodeToString(m[:]) //TODO make sure page id align with task id
@@ -75,15 +75,15 @@ func (this PublishJoint) Process(c *Context) (*Context, error) {
 	bytes, err := json.Marshal(docs)
 	if err != nil {
 		log.Error(err)
-		return c, err
+		return err
 	}
 
 	err = queue.Push(config.IndexChannel, bytes)
 
 	if err != nil {
 		log.Error(err)
-		return c, err
+		return err
 	}
 
-	return c, nil
+	return nil
 }

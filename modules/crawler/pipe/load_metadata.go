@@ -30,9 +30,9 @@ func (this LoadMetadataJoint) Name() string {
 	return string(LoadMetadata)
 }
 
-func (this LoadMetadataJoint) Process(context *Context) (*Context, error) {
+func (this LoadMetadataJoint) Process(context *Context) error {
 
 	//url:=context.MustGetString(CONTEXT_URL)
 
-	return context, nil
+	return nil
 }

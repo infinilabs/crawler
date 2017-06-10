@@ -55,7 +55,7 @@ modules:
   enabled: true
 
 - module: index
-  enabled: true
+  enabled: false
   elasticsearch:
     endpoint: http://192.168.3.206:9200
     index: gopa
@@ -70,5 +70,5 @@ modules:
   enabled: true
   host: 192.168.3.208
   port: 8125
-  namespace: gopa
+  namespace: gopa.
   interval_seconds: 1

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"github.com/quipo/statsd"
 )
 
 func TestBufferedTotal(t *testing.T) {
@@ -83,4 +84,24 @@ func TestBufferedTotal(t *testing.T) {
 	if !reflect.DeepEqual(expected, actual) {
 		t.Errorf("did not receive all metrics: Expected: %T %v, Actual: %T %v ", expected, expected, actual, actual)
 	}
+}
+
+func TestSendDataToStatsd(t *testing.T)  {
+	statsdclient := statsd.NewStatsdClient("192.168.3.208:8125", "medcl.")
+
+
+	err := statsdclient.CreateSocket()
+	if nil != err {
+		fmt.Println(err)
+		return
+	}
+
+	interval := time.Second * 1
+	statsdbuffer := statsd.NewStatsdBuffer(interval, statsdclient)
+	for ; ;  {
+		statsdbuffer.Incr("gopa"+"."+"key", 1000)
+		//statsdbuffer.Close()
+		time.Sleep(1*time.Second)
+	}
+
 }

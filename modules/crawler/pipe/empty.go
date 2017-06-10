@@ -29,7 +29,7 @@ func (this EmptyJoint) Name() string {
 	return string(Empty)
 }
 
-func (this EmptyJoint) Process(s *Context) (*Context, error) {
+func (this EmptyJoint) Process(s *Context) error {
 
-	return s, nil
+	return nil
 }

@@ -31,7 +31,7 @@ func TestProcessHash(t *testing.T) {
 	context.Set(CONTEXT_URL, "http://elasticsearch.cn/")
 	context.Set(CONTEXT_DEPTH, 1)
 	context.Set(CONTEXT_PAGE_BODY_PLAIN_TEXT, body)
-	parse := HashJoint{DictRoot:"../../../"}
+	parse := HashJoint{DictRoot: "../../../"}
 	parse.Process(&context)
 
 	hash := context.MustGetString(CONTEXT_PAGE_HASH)
@@ -47,7 +47,7 @@ func TestProcessHash(t *testing.T) {
 	context.Set(CONTEXT_URL, "http://elasticsearch.cn/")
 	context.Set(CONTEXT_DEPTH, 1)
 	context.Set(CONTEXT_PAGE_BODY_PLAIN_TEXT, body)
-	parse = HashJoint{DictRoot:"../../../"}
+	parse = HashJoint{DictRoot: "../../../"}
 	parse.Process(&context)
 	hash2 := context.MustGetString(CONTEXT_PAGE_SIMHASH_100)
 	fmt.Println(hash1)

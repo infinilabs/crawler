@@ -26,7 +26,7 @@ var l1 sync.RWMutex
 var defaultStatsdConfig = StatsDConfig{
 	Host:              "localhost",
 	Port:              8125,
-	Namespace:         "gopa",
+	Namespace:         "gopa.",
 	IntervalInSeconds: 1,
 }
 
@@ -44,6 +44,7 @@ func (this StatsDModule) Start(cfg *Config) {
 
 	addr := fmt.Sprintf("%s:%d", config.Host, config.Port)
 	l1.Lock()
+	defer l1.Unlock()
 	statsdclient := statsd.NewStatsdClient(addr, config.Namespace)
 
 	log.Debug("statsd connec to, ", addr)
@@ -58,7 +59,7 @@ func (this StatsDModule) Start(cfg *Config) {
 	statsdbuffer = statsd.NewStatsdBuffer(interval, statsdclient)
 
 	statsdInited = true
-	l1.Unlock()
+
 	stats.Register(this)
 }
 

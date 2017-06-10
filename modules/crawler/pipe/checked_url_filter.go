@@ -25,22 +25,21 @@ import (
 	"regexp"
 )
 
-const UrlCheckedFilter JointKey = "url_checked_filter"
+const UrlCheckFilter JointKey = "url_check_filter"
 
-type UrlCheckedFilterJoint struct {
+type UrlCheckFilterJoint struct {
 	Parameters
 	//ignore files end with js,css,apk,zip
 	SkipPageParsePattern *regexp.Regexp
 }
 
-func (this UrlCheckedFilterJoint) Name() string {
-	return string(UrlCheckedFilter)
+func (this UrlCheckFilterJoint) Name() string {
+	return string(UrlCheckFilter)
 }
 
-func (this UrlCheckedFilterJoint) Process(context *Context) (*Context, error) {
+func (this UrlCheckFilterJoint) Process(context *Context) error {
 	url := context.MustGetString(CONTEXT_URL)
 	//统一 url 格式 , url 此处应该不能是相对路径
-
 	b, err := filter.CheckThenAdd(config.CheckFilter, []byte(url))
 	log.Trace("cheking url:", url, ",hit:", b)
 
@@ -49,12 +48,12 @@ func (this UrlCheckedFilterJoint) Process(context *Context) (*Context, error) {
 		stats.Increment("checker.url", "duplicated")
 		log.Trace("duplicated url,already checked,  url:", url)
 		context.ErrorExit("duplicated url,already checked,  url:" + url)
-		return context, nil
+		return nil
 	}
 	if err != nil {
 		log.Error(err)
 		context.Break("check url error, url: " + url + ", " + err.Error())
 	}
 
-	return context, nil
+	return nil
 }

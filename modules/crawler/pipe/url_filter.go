@@ -34,7 +34,7 @@ func (this UrlExtFilterJoint) Name() string {
 	return string(UrlExtFilter)
 }
 
-func (this UrlExtFilterJoint) Process(context *Context) (*Context, error) {
+func (this UrlExtFilterJoint) Process(context *Context) error {
 	this.SkipPageParsePattern = regexp.MustCompile(".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b")
 	url := context.MustGetString(CONTEXT_URL)
 	orgUrl := context.MustGetString(CONTEXT_ORIGINAL_URL)
@@ -47,7 +47,7 @@ func (this UrlExtFilterJoint) Process(context *Context) (*Context, error) {
 		context.ErrorExit("invalid url ext, " + url)
 	}
 
-	return context, nil
+	return nil
 }
 
 func (this UrlExtFilterJoint) valid(url string) bool {

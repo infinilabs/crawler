@@ -25,7 +25,7 @@ import (
 func InitJoints() {
 	log.Debug("start register joints")
 	pipeline.Register(pipe.Empty, pipe.EmptyJoint{})
-	pipeline.Register(pipe.UrlCheckedFilter, pipe.UrlCheckedFilterJoint{})
+	pipeline.Register(pipe.UrlCheckFilter, pipe.UrlCheckFilterJoint{})
 	pipeline.Register(pipe.Fetch, pipe.FetchJoint{})
 	pipeline.Register(pipe.UrlNormalization, pipe.UrlNormalizationJoint{})
 	pipeline.Register(pipe.SaveTask, pipe.SaveTaskJoint{})

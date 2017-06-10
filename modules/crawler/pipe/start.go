@@ -36,7 +36,7 @@ func (this InitTaskJoint) Name() string {
 	return string(InitTask)
 }
 
-func (this InitTaskJoint) Process(context *Context) (*Context, error) {
+func (this InitTaskJoint) Process(context *Context) error {
 
 	seelog.Trace("start process")
 
@@ -66,5 +66,5 @@ func (this InitTaskJoint) Process(context *Context) (*Context, error) {
 	context.Set(CONTEXT_BREADTH, task.Breadth)         //TODO remove
 	context.Set(CONTEXT_REFERENCE_URL, task.Reference) //TODO remove
 
-	return context, nil
+	return nil
 }

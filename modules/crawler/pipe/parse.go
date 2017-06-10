@@ -44,7 +44,7 @@ func (this ParsePageJoint) Name() string {
 	return string(ParsePage)
 }
 
-func (this ParsePageJoint) Process(s *Context) (*Context, error) {
+func (this ParsePageJoint) Process(s *Context) error {
 
 	refUrl := s.MustGetString(CONTEXT_URL)
 	refHost := s.MustGetString(CONTEXT_HOST)
@@ -112,12 +112,12 @@ func (this ParsePageJoint) Process(s *Context) (*Context, error) {
 	//if reach max depth, skip for future fetch
 	if depth >= this.MaxDepth {
 		log.Trace("skip while reach max depth, ", depth, ", ", refUrl)
-		return s, nil
+		return nil
 	}
 	//if reach max breadth, skip for future fetch
 	if breadth >= this.MaxBreadth {
 		log.Trace("skip while reach max breadth, ", breadth, ", ", refUrl)
-		return s, nil
+		return nil
 	}
 
 	//dispatch links
@@ -135,5 +135,5 @@ func (this ParsePageJoint) Process(s *Context) (*Context, error) {
 		}
 	}
 
-	return s, nil
+	return nil
 }

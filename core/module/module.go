@@ -60,9 +60,12 @@ func Stop() {
 	log.Trace("start to stop modules")
 	for i := len(m.modules) - 1; i >= 0; i-- {
 		v := m.modules[i]
-		log.Debug("stopping module: ", v.Name())
-		v.Stop()
-		log.Info("stoped module: ", v.Name())
+		cfg := env.GetModuleConfig(v.Name())
+		if cfg.Enabled() {
+			log.Debug("stopping module: ", v.Name())
+			v.Stop()
+			log.Info("stoped module: ", v.Name())
+		}
 	}
 	log.Info("all modules stopeed")
 }

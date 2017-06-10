@@ -32,7 +32,7 @@ type IgnoreTimeoutJoint struct {
 	IgnoreTimeoutAfterCount int64
 }
 
-func (this IgnoreTimeoutJoint) Process(context *Context) (*Context, error) {
+func (this IgnoreTimeoutJoint) Process(context *Context) error {
 
 	//TODO ignore within time period, rather than total count
 	host := context.MustGetString(CONTEXT_HOST)
@@ -42,5 +42,5 @@ func (this IgnoreTimeoutJoint) Process(context *Context) (*Context, error) {
 		context.Break("too much timeout on this domain, ignored " + host)
 		log.Warnf("hit timeout host, %s , ignore after,%d ", host, timeoutCount)
 	}
-	return context, nil
+	return nil
 }
