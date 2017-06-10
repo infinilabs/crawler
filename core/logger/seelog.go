@@ -102,9 +102,6 @@ func SetLogging(env *Env, logLevel string, logFile string) {
 
 	//logging receivers
 	receivers := []interface{}{consoleWriter, bufferedWriter}
-	if loggingConfig.RealtimePushEnabled {
-		receivers = append(receivers)
-	}
 
 	root, err := log.NewSplitDispatcher(formatter, receivers)
 	if err != nil {
