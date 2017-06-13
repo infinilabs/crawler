@@ -199,7 +199,7 @@ func (this *Parameters) MustGetMap(key ParaKey) map[string]interface{} {
 
 type Joint interface {
 	Name() string
-	Process(s *Context) (error)
+	Process(s *Context) error
 }
 
 type Pipeline struct {
@@ -321,7 +321,7 @@ func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
 	log.Tracef("pipeline config: %v", util.ToJson(config, true))
 
 	pipe := &Pipeline{}
-	pipe.id =util.GetIncrementID("pipe")
+	pipe.id = util.GetIncrementID("pipe")
 	pipe.name = strings.TrimSpace(config.Name)
 
 	pipe.Context(config.Context)

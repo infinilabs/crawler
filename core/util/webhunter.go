@@ -93,7 +93,7 @@ func getUrl(url string) (string, error) {
 	return url, nil
 }
 
-type Result struct{
+type Result struct {
 	Host       string
 	Url        string
 	Headers    map[string][]string
@@ -200,7 +200,7 @@ func get(url string, cookie string, proxyStr string) (*Result, error) {
 
 	log.Trace("host: ", resp.Request.Host, " url: ", resp.Request.URL.String())
 
-	page=&Result{}
+	page = &Result{}
 	//update host, redirects may change the host
 	page.Host = resp.Request.Host
 	page.Url = resp.Request.URL.String()
@@ -310,7 +310,7 @@ func HttpPost(url string, cookie string, postStr string) []byte {
 	return nil
 }
 
-func HttpGetWithCookie( resource string, cookie string, proxy string) (result *Result, err error) {
+func HttpGetWithCookie(resource string, cookie string, proxy string) (result *Result, err error) {
 	out, err := get(resource, cookie, proxy)
 	return out, err
 }

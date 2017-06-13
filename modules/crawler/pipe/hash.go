@@ -56,7 +56,13 @@ func (this HashJoint) Process(context *Context) error {
 	return nil
 }
 
+var loaded = false
+
 func (this HashJoint) loadDict() {
+	if loaded {
+		return
+	}
+	log.Debug("loading jieba dict files")
 	mainDict := "config/dict/main.dict.txt"
 	idfDict := "config/dict/idf.txt"
 	stopwordsDict := "config/dict/stop_words.txt"
@@ -69,4 +75,5 @@ func (this HashJoint) loadDict() {
 		log.Error("Failed to load dictionary:", err)
 		panic(err)
 	}
+	loaded = true
 }

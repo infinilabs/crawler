@@ -113,6 +113,8 @@ func (this HtmlToTextJoint) Process(context *Context) error {
 	src = strings.Replace(src, "&amp; ", "& ", -1)
 	src = strings.Replace(src, "&amp;amp; ", "& ", -1)
 
+	src = src
+
 	log.Trace("get text: ", src)
 
 	context.Set(CONTEXT_PAGE_BODY_PLAIN_TEXT, src)

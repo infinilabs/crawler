@@ -86,21 +86,20 @@ func (this ParsePageJoint) Process(s *Context) error {
 		//check meta refresh
 		equiv, exist := s.Attr("http-equiv")
 		equiv = strings.TrimSpace(strings.ToLower(equiv))
-		if exist && len(equiv) > 0 && equiv=="refresh" {
+		if exist && len(equiv) > 0 && equiv == "refresh" {
 			content, exist := s.Attr("content")
 			if exist {
 				//0; url=/2016/beijing.html
-				arr:=strings.Split(content,"=")
-				if(len(arr)==2){
-					url:=arr[1]
-					this.links[url]="http-equiv-refresh"
-				}else{
-					log.Error("unexpected http-equiv",content)
+				arr := strings.Split(content, "=")
+				if len(arr) == 2 {
+					url := arr[1]
+					this.links[url] = "http-equiv-refresh"
+				} else {
+					log.Error("unexpected http-equiv", content)
 				}
 
 			}
 		}
-
 
 	})
 

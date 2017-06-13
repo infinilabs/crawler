@@ -2,10 +2,9 @@ package util
 
 import (
 	"fmt"
-	"sync"
 	"github.com/rs/xid"
+	"sync"
 )
-
 
 var lock sync.Mutex
 
@@ -30,9 +29,9 @@ func GetIncrementID(prefix string) string {
 		idseed[prefix] = int64(0)
 	}
 
-	v:=idseed[prefix]
+	v := idseed[prefix]
 	v++
-	idseed[prefix]=v
-	id := fmt.Sprintf("%s-%d", prefix,v)
+	idseed[prefix] = v
+	id := fmt.Sprintf("%s-%d", prefix, v)
 	return id
 }

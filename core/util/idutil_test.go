@@ -18,42 +18,42 @@ package util
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 	"time"
-	"sync"
 )
 
 func TestIDGenerator(t *testing.T) {
-	for j:=0;j<100 ;j++  {
+	for j := 0; j < 100; j++ {
 		go func() {
 			for i := 0; i < 10; i++ {
-				id:=GetIncrementID("a")
+				id := GetIncrementID("a")
 				fmt.Println(id)
 			}
 		}()
 		go func() {
 			for i := 0; i < 10; i++ {
-				id:=GetIncrementID("b")
+				id := GetIncrementID("b")
 				fmt.Println(id)
 			}
 		}()
 	}
 
-	time.Sleep(1*time.Second)
+	time.Sleep(1 * time.Second)
 
 }
 func TestIDGenerator1(t *testing.T) {
-	var set=map[string]interface{}{}
-	var s =sync.RWMutex{}
-	for j:=0;j<100 ;j++  {
+	var set = map[string]interface{}{}
+	var s = sync.RWMutex{}
+	for j := 0; j < 100; j++ {
 		go func() {
 			for i := 0; i < 10; i++ {
-				id:=GetUUID()
+				id := GetUUID()
 				fmt.Println(id)
 				s.Lock()
 				if _, ok := idseed[id]; ok {
 					panic(id)
-				}else{
+				} else {
 					set[id] = true
 				}
 				s.Unlock()
@@ -61,6 +61,6 @@ func TestIDGenerator1(t *testing.T) {
 		}()
 	}
 
-	time.Sleep(1*time.Second)
+	time.Sleep(1 * time.Second)
 
 }

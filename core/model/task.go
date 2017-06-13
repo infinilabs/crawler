@@ -5,8 +5,8 @@ import (
 	"github.com/medcl/gopa/core/errors"
 	"github.com/medcl/gopa/core/store"
 
-	"time"
 	"github.com/medcl/gopa/core/util"
+	"time"
 )
 
 type TaskStatus int
@@ -39,7 +39,7 @@ type Task struct {
 func CreateTask(task *Task) error {
 	log.Trace("start create crawler task, ", task.Url)
 	time := time.Now()
-	task.ID =util.GetIncrementID("task")
+	task.ID = util.GetIncrementID("task")
 	task.Status = TaskCreated
 	task.CreateTime = &time
 	task.UpdateTime = &time

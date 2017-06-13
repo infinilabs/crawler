@@ -24,6 +24,7 @@ import (
 	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/queue"
+	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules/config"
 )
 

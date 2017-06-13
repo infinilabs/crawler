@@ -77,7 +77,6 @@ func (this SaveTaskJoint) Process(context *Context) error {
 			task.SnapshotHash = hash
 		}
 
-
 	}
 
 	if this.IsCreate {

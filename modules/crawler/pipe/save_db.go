@@ -22,10 +22,10 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/store"
+	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules/config"
 	"path"
 	"strings"
-	"github.com/medcl/gopa/core/util"
 )
 
 const SaveSnapshotToDB JointKey = "save_snapshot_db"
@@ -40,7 +40,7 @@ func (this SaveSnapshotToDBJoint) Name() string {
 	return string(SaveSnapshotToDB)
 }
 
-func (this SaveSnapshotToDBJoint) Process(c *Context) ( error) {
+func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 	this.context = c
 
 	url := c.MustGetString(CONTEXT_URL)
@@ -64,7 +64,7 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) ( error) {
 	stats.IncrementBy("domain.stats", domain+"."+stats.STATS_STORAGE_FILE_SIZE, int64(len(pageItem.Body)))
 	stats.Increment("domain.stats", domain+"."+stats.STATS_STORAGE_FILE_COUNT)
 
-	return  nil
+	return nil
 }
 
 const KeyDelimiter string = "/"
