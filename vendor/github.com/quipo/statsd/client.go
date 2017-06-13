@@ -2,12 +2,13 @@ package statsd
 
 import (
 	"fmt"
-	"github.com/medcl/gopa/modules/stats/statsd/event"
 	"log"
 	"net"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/quipo/statsd/event"
 )
 
 // Logger interface compatible with log.Logger
@@ -23,7 +24,7 @@ type Logger interface {
 //  func init() {
 //   statsd.UDPPayloadSize = 16 * 1024
 //  }
-var UDPPayloadSize int =  16 * 1024
+var UDPPayloadSize int = 512
 
 // Hostname is exported so clients can set it to something different than the default
 var Hostname string

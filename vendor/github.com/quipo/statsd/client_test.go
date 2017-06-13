@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/medcl/gopa/modules/stats/statsd/event"
+	"github.com/quipo/statsd/event"
 )
 
 // MockNetConn is a mock for net.Conn

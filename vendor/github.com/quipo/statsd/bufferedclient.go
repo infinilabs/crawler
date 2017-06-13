@@ -1,9 +1,11 @@
 package statsd
 
 import (
-	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/modules/stats/statsd/event"
+	"log"
+	"os"
 	"time"
+
+	"github.com/quipo/statsd/event"
 )
 
 // request to close the buffered statsd collector
@@ -20,8 +22,8 @@ type StatsdBuffer struct {
 	eventChannel  chan event.Event
 	events        map[string]event.Event
 	closeChannel  chan closeRequest
+	Logger        Logger
 	Verbose       bool
-	errorCount    int
 }
 
 // NewStatsdBuffer Factory
@@ -32,6 +34,7 @@ func NewStatsdBuffer(interval time.Duration, client *StatsdClient) *StatsdBuffer
 		eventChannel:  make(chan event.Event, 100),
 		events:        make(map[string]event.Event, 0),
 		closeChannel:  make(chan closeRequest, 0),
+		Logger:        log.New(os.Stdout, "[BufferedStatsdClient] ", log.Ldate|log.Ltime),
 		Verbose:       true,
 	}
 	go sb.collector()
@@ -126,7 +129,7 @@ func (sb *StatsdBuffer) collector() {
 	// on a panic event, flush all the pending stats before panicking
 	defer func(sb *StatsdBuffer) {
 		if r := recover(); r != nil {
-			log.Error("Caught panic, flushing stats before throwing the panic again")
+			sb.Logger.Println("Caught panic, flushing stats before throwing the panic again")
 			sb.flush()
 			panic(r)
 		}
@@ -153,7 +156,7 @@ func (sb *StatsdBuffer) collector() {
 			}
 		case c := <-sb.closeChannel:
 			if sb.Verbose {
-				log.Error("Asked to terminate. Flushing stats before returning.")
+				sb.Logger.Println("Asked to terminate. Flushing stats before returning.")
 			}
 			c.reply <- sb.flush()
 			return
@@ -187,20 +190,11 @@ func (sb *StatsdBuffer) flush() (err error) {
 	}
 	err = sb.statsd.CreateSocket()
 	if nil != err {
-		sb.errorCount++
-		if sb.errorCount < 5 || sb.errorCount > 10 {
-			log.Error("Error establishing UDP connection for sending statsd events:", err)
-			if sb.errorCount > 50 {
-				sb.errorCount = 0
-			}
-		} else {
-			log.Warn("Error establishing UDP connection for sending statsd events:", err)
-		}
-
+		sb.Logger.Println("Error establishing UDP connection for sending statsd events:", err)
 		return err
 	}
 	if err := sb.statsd.SendEvents(sb.events); err != nil {
-		log.Warn(err)
+		sb.Logger.Println(err)
 		return err
 	}
 	sb.events = make(map[string]event.Event)
