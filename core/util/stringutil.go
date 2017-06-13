@@ -103,3 +103,9 @@ func GetRuntimeErrorMessage(r runtime.Error) string {
 	panic(errors.New("nil runtime error"))
 	return "nil runtime error"
 }
+
+func XSSHandle(src string) string {
+	src = Replace(src, ">", "&lt; ", -1)
+	src = Replace(src, ">", "&gt; ", -1)
+	return src
+}
