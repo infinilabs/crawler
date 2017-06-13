@@ -27,6 +27,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"github.com/medcl/gopa/core/errors"
 )
 
 const UrlNormalization JointKey = "url_normalization"
@@ -35,6 +36,7 @@ type UrlNormalizationJoint struct {
 	timeout             time.Duration
 	splitByUrlParameter []string
 	FollowSubDomain     bool
+	maxFileNameLength int
 }
 
 var defaultFileName = "default.html"
@@ -300,6 +302,19 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 		filePath = path.Join(filePath, filename)
 		filename = defaultFileName
 	}
+
+
+
+	//set default filename limit
+	if(this.maxFileNameLength<=0){
+		this.maxFileNameLength=200;
+	}
+
+	//verify filename
+	if(len(filename)>this.maxFileNameLength){
+		panic(errors.New("file name too long"))
+	}
+
 
 	context.Set(CONTEXT_SAVE_PATH, filePath)
 	context.Set(CONTEXT_SAVE_FILENAME, filename)
