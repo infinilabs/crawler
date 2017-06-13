@@ -23,6 +23,7 @@ import (
 	. "github.com/gensmusic/simhash"
 	. "github.com/medcl/gopa/core/pipeline"
 	"path"
+	"sync"
 )
 
 const Hash JointKey = "hash"
@@ -57,11 +58,15 @@ func (this HashJoint) Process(context *Context) error {
 }
 
 var loaded = false
-
+var lock sync.Mutex
 func (this HashJoint) loadDict() {
+	lock.Lock()
+	defer lock.Unlock()
 	if loaded {
 		return
 	}
+
+
 	log.Debug("loading jieba dict files")
 	mainDict := "config/dict/main.dict.txt"
 	idfDict := "config/dict/idf.txt"
