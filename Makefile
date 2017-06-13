@@ -142,6 +142,7 @@ fetch-depends:
 	$(GO) get github.com/blevesearch/bleve
 	$(GO) get github.com/gensmusic/simhash
 	$(GO) get github.com/gensmusic/jiebago/...
+	$(GO) github.com/quipo/statsd
 
 dist: cross-build package
 
