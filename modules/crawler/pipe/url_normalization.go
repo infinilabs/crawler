@@ -67,7 +67,7 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 	currentURI, err = u.Parse(tempUrl)
 	if err != nil {
 		log.Error("ref url parsed failed, ", err)
-		panic(err)
+		context.ErrorExit(err.Error())
 	}
 
 	log.Tracef("currentURI,schema:%s, host:%s", currentURI.Scheme, currentURI.Host)

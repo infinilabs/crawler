@@ -31,7 +31,7 @@ task.default:
 modules:
 - module: crawler
   enabled: true
-  max_go_routine: 1
+  max_go_routine: 10
 
 - module: cluster
   enabled: true
@@ -55,7 +55,7 @@ modules:
   enabled: true
 
 - module: index
-  enabled: false
+  enabled: true
   elasticsearch:
     endpoint: http://192.168.3.206:9200
     index: gopa
@@ -71,4 +71,3 @@ modules:
   host: 192.168.3.208
   port: 8125
   namespace: gopa.
-  interval_seconds: 1
