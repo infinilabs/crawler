@@ -33,10 +33,12 @@ import (
 const UrlNormalization JointKey = "url_normalization"
 
 type UrlNormalizationJoint struct {
-	timeout             time.Duration
-	splitByUrlParameter []string
-	FollowSubDomain     bool
-	maxFileNameLength   int
+	timeout              time.Duration
+	splitByUrlParameter  []string
+	FollowAllDomain      bool
+	FollowDomainSettings bool
+	FollowSubDomain      bool
+	maxFileNameLength    int
 }
 
 var defaultFileName = "default.html"
@@ -46,7 +48,11 @@ func (this UrlNormalizationJoint) Name() string {
 }
 
 func (this UrlNormalizationJoint) Process(context *Context) error {
-	url := context.MustGetString(CONTEXT_URL)
+
+	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
+	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+
+	url := task.Url
 	var currentURI, referenceURI *u.URL
 	var err error
 
@@ -66,17 +72,20 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 
 	currentURI, err = u.Parse(tempUrl)
 	if err != nil {
-		log.Error("ref url parsed failed, ", err)
+		log.Debug("url parsed failed, ", err, ",", tempUrl)
 		context.ErrorExit(err.Error())
 	}
 
 	log.Tracef("currentURI,schema:%s, host:%s", currentURI.Scheme, currentURI.Host)
-	refUrlStr, refExists := context.GetString(CONTEXT_REFERENCE_URL)
-	if refExists && refUrlStr != "" {
+	refUrlStr := task.Reference
+	var refExists bool
+	if refUrlStr != "" {
 		log.Trace("ref url exists, ", refUrlStr)
 		referenceURI, err = u.ParseRequestURI(refUrlStr)
-		if err != nil {
-			log.Trace("ref url parsed failed, ", err)
+		if err == nil {
+			refExists = true
+		} else {
+			log.Warn("ref url parsed failed, ", err)
 		}
 	}
 
@@ -85,6 +94,7 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 
 		log.Trace("host is nil, ", url)
 
+		//try to fix link with reference
 		if refExists && referenceURI != nil {
 
 			log.Trace("ref is not nil, try to fix relative link: ", url)
@@ -129,6 +139,16 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 			log.Trace("fixed link: ", url)
 		}
 
+		//try to fix link with host
+		if task.Host != "" {
+			if strings.HasPrefix(url, "/") {
+				url = "http://" + task.Host + url
+			} else {
+				url = "http://" + task.Host + "/" + url
+			}
+			log.Trace("new relatived url with host,", url)
+		}
+
 		tempUrl = url
 		if strings.HasPrefix(url, "//") {
 			tempUrl = strings.TrimLeft(url, "//")
@@ -156,7 +176,7 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 	}
 
 	////resolve domain specific filter
-	if this.FollowSubDomain && currentURI != nil && referenceURI != nil {
+	if !this.FollowAllDomain && this.FollowSubDomain && currentURI != nil && referenceURI != nil {
 		log.Tracef("try to check domain rule, %s vs %s", referenceURI.Host, currentURI.Host)
 		//TODO handler com.cn and .com,using a TLC-domain list
 
@@ -180,18 +200,9 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 
 	}
 
-	context.Set(CONTEXT_URL, url)
-	context.Set(CONTEXT_HOST, currentURI.Host)
-	context.Set(CONTEXT_URL_PATH, currentURI.Path)
-
-	t := context.Get(CONTEXT_CRAWLER_TASK)
-	if t != nil {
-		task := t.(*model.Task)
-		task.Domain = currentURI.Host
-		task.Scheme = currentURI.Scheme
-		task.Url = url
-		task.UrlPath = currentURI.Path
-	}
+	task.Url = url
+	task.Host = currentURI.Host
+	task.Schema = currentURI.Scheme
 
 	filePath := ""
 	filename := ""
@@ -313,8 +324,8 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 		panic(errors.New("file name too long"))
 	}
 
-	context.Set(CONTEXT_SAVE_PATH, filePath)
-	context.Set(CONTEXT_SAVE_FILENAME, filename)
+	snapshot.Path = filePath
+	snapshot.File = filename
 	log.Debugf("finished normalization,%s, %s, %s ", url, filePath, filename)
 
 	return nil

@@ -18,6 +18,7 @@ package pipe
 
 import (
 	"fmt"
+	. "github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/pipeline"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -28,28 +29,42 @@ func TestProcessHash(t *testing.T) {
 
 	context := pipeline.Context{}
 	context.Init()
-	context.Set(CONTEXT_URL, "http://elasticsearch.cn/")
-	context.Set(CONTEXT_DEPTH, 1)
-	context.Set(CONTEXT_PAGE_BODY_PLAIN_TEXT, body)
+	task := Task{}
+	task.Url = "http://elasticsearch.cn/"
+	task.Depth = 1
+
+	context.Set(CONTEXT_CRAWLER_TASK, &task)
 	parse := HashJoint{DictRoot: "../../../"}
+
+	snapshot := Snapshot{}
+	snapshot.Payload = []byte(body)
+	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+
 	parse.Process(&context)
 
-	hash := context.MustGetString(CONTEXT_PAGE_HASH)
+	hash := snapshot.Hash
 	assert.Equal(t, "b96aa2d91a6b69648250c8d4938b19c0750d7c50", hash)
 
-	hash1 := context.MustGetString(CONTEXT_PAGE_SIMHASH_100)
+	hash1 := task.SnapshotSimHash
 	//assert.Equal(t, "13442536247490772857", hash1)
 
 	body = "Just some test content,你好啊,!!"
 
+	task1 := Task{}
+	task.Url = "http://elasticsearch.cn/"
+	task.Depth = 1
+
 	context = pipeline.Context{}
 	context.Init()
-	context.Set(CONTEXT_URL, "http://elasticsearch.cn/")
-	context.Set(CONTEXT_DEPTH, 1)
-	context.Set(CONTEXT_PAGE_BODY_PLAIN_TEXT, body)
+	context.Set(CONTEXT_CRAWLER_TASK, &task1)
 	parse = HashJoint{DictRoot: "../../../"}
+
+	snapshot = Snapshot{}
+	snapshot.Payload = []byte(body)
+	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+
 	parse.Process(&context)
-	hash2 := context.MustGetString(CONTEXT_PAGE_SIMHASH_100)
+	hash2 := snapshot.SimHash
 	fmt.Println(hash1)
 	fmt.Println(hash2)
 	assert.Equal(t, hash2, hash1)

@@ -18,7 +18,7 @@ func GetTaskRow(task model.Task) string {
 	var buffer bytes.Buffer
 	buffer.WriteString("<tr>")
 
-	writeTag(&buffer, "td", task.Url)
+	writeTag(&buffer, "td", util.SubStringWithSuffix(task.Url, 100, "..."))
 	date := util.FormatTime(task.UpdateTime)
 	buffer.WriteString("<td class='timeago' title='" + date + "' >" + date + "</td>")
 

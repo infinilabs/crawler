@@ -32,7 +32,5 @@ func (this LoadMetadataJoint) Name() string {
 
 func (this LoadMetadataJoint) Process(context *Context) error {
 
-	//url:=context.MustGetString(CONTEXT_URL)
-
 	return nil
 }

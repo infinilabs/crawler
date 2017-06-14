@@ -90,7 +90,7 @@ func (this CheckerModule) execute() {
 	stats.Increment("checker.url", "finished")
 
 	task := model.Task{}
-	task.OriginUrl = seed.Url
+	task.OriginalUrl = seed.Url
 	task.Url = seed.Url
 	task.Reference = seed.Reference
 	task.Depth = seed.Depth
@@ -99,14 +99,14 @@ func (this CheckerModule) execute() {
 	pipeline := this.runPipe(global.Env().IsDebug, &task)
 
 	//send to disk queue
-	if len(task.Domain) > 0 && !pipeline.GetContext().IsErrorExit() && !pipeline.GetContext().IsBreak() {
-		stats.Increment("domain.stats", task.Domain+"."+stats.STATS_FETCH_TOTAL_COUNT)
+	if len(task.Host) > 0 && !pipeline.GetContext().IsErrorExit() && !pipeline.GetContext().IsBreak() {
+		stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_TOTAL_COUNT)
 
-		err := model.IncrementDomainLinkCount(task.Domain)
+		err := model.IncrementDomainLinkCount(task.Host)
 		if err != nil {
 			log.Error(err)
 		}
-		log.Trace("load host settings, ", task.Domain)
+		log.Trace("load host settings, ", task.Host)
 
 		queue.Push(config.FetchChannel, []byte(task.ID))
 
@@ -138,7 +138,7 @@ func (this CheckerModule) runPipe(debug bool, task *model.Task) *Pipeline {
 	context := &Context{Phrase: config.PhraseChecker, IgnoreBroken: true}
 	pipeline.Context(context).
 		Start(InitTaskJoint{Task: task}).
-		Join(UrlNormalizationJoint{FollowSubDomain: true}).
+		Join(UrlNormalizationJoint{FollowAllDomain: true, FollowSubDomain: true}).
 		Join(UrlExtFilterJoint{}).
 		Join(UrlCheckFilterJoint{}).
 		End(SaveTaskJoint{IsCreate: true}).

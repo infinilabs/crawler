@@ -35,7 +35,6 @@ const Cookie ParaKey = "cookie"
 
 type FetchJoint struct {
 	Parameters
-	context *Context
 	timeout time.Duration
 }
 
@@ -51,21 +50,26 @@ type signal struct {
 func (this FetchJoint) Process(context *Context) error {
 
 	this.timeout = 10 * time.Second
-	this.context = context
-	t := time.NewTimer(this.timeout)
-	defer t.Stop()
-	requestUrl := context.MustGetString(CONTEXT_URL)
+	timer := time.NewTimer(this.timeout)
+	defer timer.Stop()
+
+	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
+	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+
+	requestUrl := task.Url
 
 	if len(requestUrl) == 0 {
-		log.Error("invalid fetchUrl")
+		log.Error("invalid fetchUrl,", requestUrl)
+		context.ErrorExit("invalid fetch url")
 		return errors.New("invalid fetchUrl")
 	}
+
+	t1 := time.Now().UTC()
+	task.LastFetchTime = &t1
 
 	log.Debug("start fetch url,", requestUrl)
 	flg := make(chan signal, 1)
 	go func() {
-		pageItem := model.PageItem{}
-		context.Set(CONTEXT_PAGE_LAST_FETCH, time.Now().UTC())
 
 		cookie, _ := this.GetString(Cookie)
 		proxy, _ := this.GetString(Proxy) //"socks5://127.0.0.1:9150"  //TODO 这个是全局配置,后续的url应该也使用同样的配置,应该在domain setting里面
@@ -77,27 +81,22 @@ func (this FetchJoint) Process(context *Context) error {
 
 		if err == nil && result != nil {
 
-			pageItem.Body = result.Body
-			pageItem.Url = result.Url
-			pageItem.StatusCode = result.StatusCode
-			pageItem.Size = result.Size
-			pageItem.Host = result.Host
-			pageItem.Headers = result.Headers
+			task.Url = result.Url //update url, in case catch redirects
+			task.Host = result.Host
+
+			snapshot.Payload = result.Body
+			snapshot.StatusCode = result.StatusCode
+			snapshot.Size = result.Size
+			snapshot.Headers = result.Headers
 
 			if result.Body != nil {
-				if pageItem.StatusCode == 404 {
-					log.Info("skip while 404, ", requestUrl, " , ", pageItem.StatusCode)
+				if snapshot.StatusCode == 404 {
+					log.Info("skip while 404, ", requestUrl, " , ", snapshot.StatusCode)
 					context.Break("fetch 404")
 					flg <- signal{flag: false, err: errors.New("404 NOT FOUND")}
 					return
 				}
 			}
-
-			//update url, in case catch redirects
-			context.Set(CONTEXT_URL, pageItem.Url) //should update here, if url got redirected, the url is change
-			context.Set(CONTEXT_HOST, pageItem.Host)
-			context.Set(CONTEXT_PAGE_BODY_BYTES, result.Body)
-			context.Set(CONTEXT_PAGE_ITEM, &pageItem)
 			log.Debug("exit fetchUrl method:", requestUrl)
 			flg <- signal{flag: true}
 
@@ -107,9 +106,7 @@ func (this FetchJoint) Process(context *Context) error {
 
 			if code == errors.URLRedirected {
 				log.Trace(util.ToJson(context, true))
-				depth := context.MustGetInt(CONTEXT_DEPTH)
-				breadth := context.MustGetInt(CONTEXT_BREADTH)
-				task := model.NewTaskSeed(payload.(string), requestUrl, depth, breadth)
+				task := model.NewTaskSeed(payload.(string), requestUrl, task.Depth, task.Breadth)
 				log.Trace(err)
 				queue.Push(config.CheckChannel, task.MustGetBytes())
 			}
@@ -118,25 +115,23 @@ func (this FetchJoint) Process(context *Context) error {
 		}
 	}()
 
-	domain := context.MustGetString(CONTEXT_HOST)
-
 	//监听通道，由于设有超时，不可能泄露
 	select {
-	case <-t.C:
+	case <-timer.C:
 		log.Error("fetching url time out, ", requestUrl, ", ", this.timeout)
-		stats.Increment("domain.stats", domain+"."+stats.STATS_FETCH_TIMEOUT_COUNT)
+		stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
 		context.Break(fmt.Sprintf("fetching url time out, %s, %s", requestUrl, this.timeout))
 		return errors.New("fetch url time out")
 	case value := <-flg:
 		if value.flag {
 			log.Debug("fetching url normal exit, ", requestUrl)
-			stats.Increment("domain.stats", domain+"."+stats.STATS_FETCH_SUCCESS_COUNT)
+			stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_SUCCESS_COUNT)
 		} else {
 			log.Debug("fetching url error exit, ", requestUrl)
 			if value.err != nil {
 				context.Break(value.err.Error())
 			}
-			stats.Increment("domain.stats", domain+"."+stats.STATS_FETCH_FAIL_COUNT)
+			stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_FAIL_COUNT)
 		}
 		return nil
 	}

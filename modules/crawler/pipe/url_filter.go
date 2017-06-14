@@ -21,6 +21,8 @@ import (
 	. "github.com/medcl/gopa/core/pipeline"
 	"regexp"
 	"strings"
+
+	"github.com/medcl/gopa/core/model"
 )
 
 const UrlExtFilter JointKey = "url_ext_filter"
@@ -36,15 +38,15 @@ func (this UrlExtFilterJoint) Name() string {
 
 func (this UrlExtFilterJoint) Process(context *Context) error {
 	this.SkipPageParsePattern = regexp.MustCompile(".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b")
-	url := context.MustGetString(CONTEXT_URL)
-	orgUrl := context.MustGetString(CONTEXT_ORIGINAL_URL)
 
-	if orgUrl == "" {
-		orgUrl = url
+	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
+
+	if task.OriginalUrl != "" && !this.valid(task.OriginalUrl) {
+		context.ErrorExit("invalid url ext, " + task.OriginalUrl)
 	}
 
-	if (!this.valid(orgUrl)) || (url != orgUrl && (!this.valid(url))) {
-		context.ErrorExit("invalid url ext, " + url)
+	if task.Url != "" && !this.valid(task.Url) {
+		context.ErrorExit("invalid url ext, " + task.Url)
 	}
 
 	return nil

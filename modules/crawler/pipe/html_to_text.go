@@ -18,6 +18,7 @@ package pipe
 
 import (
 	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/util"
 	"regexp"
@@ -37,7 +38,9 @@ func (this HtmlToTextJoint) Name() string {
 func (this HtmlToTextJoint) Process(context *Context) error {
 
 	//TODO all configable
-	body := context.MustGetBytes(CONTEXT_PAGE_BODY_BYTES)
+	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+
+	body := snapshot.Payload
 	src := string(body)
 	//将HTML标签全转换成小写
 	re, _ := regexp.Compile("\\<[\\S\\s]+?\\>")
@@ -113,10 +116,8 @@ func (this HtmlToTextJoint) Process(context *Context) error {
 	src = strings.Replace(src, "&amp; ", "& ", -1)
 	src = strings.Replace(src, "&amp;amp; ", "& ", -1)
 
-	src = src
-
 	log.Trace("get text: ", src)
 
-	context.Set(CONTEXT_PAGE_BODY_PLAIN_TEXT, src)
+	snapshot.Text = src
 	return nil
 }

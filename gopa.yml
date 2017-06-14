@@ -32,6 +32,7 @@ modules:
 - module: crawler
   enabled: true
   max_go_routine: 10
+  fetch_threshold_ms: 10
 
 - module: cluster
   enabled: true

@@ -38,32 +38,36 @@ func (this PublishJoint) Name() string {
 
 func (this PublishJoint) Process(c *Context) error {
 
-	m := md5.Sum([]byte(c.MustGetString(CONTEXT_URL)))
-	id := hex.EncodeToString(m[:]) //TODO make sure page id align with task id
+	//domain := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Domain)
+	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
+	//snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+
+	m := md5.Sum([]byte(task.Url))
+	id := hex.EncodeToString(m[:])
 
 	data := map[string]interface{}{}
 
-	data["original_url"] = c.MustGetString(CONTEXT_ORIGINAL_URL)
-	data["url"] = c.MustGetString(CONTEXT_URL)
-	data["host"] = c.MustGetString(CONTEXT_HOST)
-	data["summary"] = c.MustGetString(CONTEXT_PAGE_BODY_PLAIN_TEXT)
-	data["save_path"] = c.MustGetString(CONTEXT_SAVE_PATH)
-	data["save_file"] = c.MustGetString(CONTEXT_SAVE_FILENAME)
+	//data["original_url"] = c.MustGetString(CONTEXT_ORIGINAL_URL)
+	//data["url"] = c.MustGetString(CONTEXT_URL)
+	//data["host"] = c.MustGetString(CONTEXT_HOST)
+	//data["summary"] = c.MustGetString(CONTEXT_PAGE_BODY_PLAIN_TEXT)
+	//data["save_path"] = c.MustGetString(CONTEXT_SAVE_PATH)
+	//data["save_file"] = c.MustGetString(CONTEXT_SAVE_FILENAME)
+	//
+	//meta, b := c.GetMap(CONTEXT_PAGE_METADATA)
+	//if b {
+	//	data["metadata"] = meta
+	//}
 
-	meta, b := c.GetMap(CONTEXT_PAGE_METADATA)
-	if b {
-		data["metadata"] = meta
-	}
-
-	links, b := c.GetMap(CONTEXT_PAGE_LINKS)
-	if b {
-		maps := []model.PageLink{}
-		for k, v := range links {
-			item := model.PageLink{Url: k, Label: v.(string)}
-			maps = append(maps, item)
-		}
-		data["links"] = maps
-	}
+	//links, b := c.GetMap(CONTEXT_PAGE_LINKS)
+	//if b {
+	//	maps := []model.PageLink{}
+	//	for k, v := range links {
+	//		item := model.PageLink{Url: k, Label: v.(string)}
+	//		maps = append(maps, item)
+	//	}
+	//	data["links"] = maps
+	//}
 
 	docs := model.IndexDocument{
 		Index:  "gopa",

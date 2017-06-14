@@ -18,8 +18,10 @@ package pipe
 
 import (
 	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/stats"
+	"github.com/medcl/gopa/modules/config"
 )
 
 const IgnoreTimeout JointKey = "ignore_timeout"
@@ -34,11 +36,13 @@ type IgnoreTimeoutJoint struct {
 
 func (this IgnoreTimeoutJoint) Process(context *Context) error {
 
+	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
+
 	//TODO ignore within time period, rather than total count
-	host := context.MustGetString(CONTEXT_HOST)
-	timeoutCount := stats.Stat("domain.stats", host+"."+stats.STATS_FETCH_TIMEOUT_COUNT)
+	host := task.Host
+	timeoutCount := stats.Stat("domain.stats", host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
 	if timeoutCount > this.IgnoreTimeoutAfterCount {
-		stats.Increment("domain.stats", host+"."+stats.STATS_FETCH_TIMEOUT_IGNORE_COUNT)
+		stats.Increment("domain.stats", host+"."+config.STATS_FETCH_TIMEOUT_IGNORE_COUNT)
 		context.Break("too much timeout on this domain, ignored " + host)
 		log.Warnf("hit timeout host, %s , ignore after,%d ", host, timeoutCount)
 	}

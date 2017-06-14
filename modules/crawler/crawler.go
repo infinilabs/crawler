@@ -57,7 +57,6 @@ func (this CrawlerModule) Start(cfg *Config) {
 	numGoRoutine := config.MaxGoRoutine
 	signalChannels = make([]*chan bool, numGoRoutine)
 	quitChannels = make([]*chan bool, numGoRoutine)
-	//if env.RuntimeConfig.CrawlerConfig.Enabled
 	if true {
 		//start fetcher
 		for i := 0; i < numGoRoutine; i++ {
@@ -155,12 +154,11 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 
 	pipeline.Context(&Context{Phrase: config.PhraseCrawler}).
 		Start(init).
-		Join(UrlNormalizationJoint{FollowSubDomain: true}).
-		//Join(UrlExtFilterJoint{}).
+		Join(UrlNormalizationJoint{FollowAllDomain: true, FollowSubDomain: true}).
 		Join(LoadMetadataJoint{}).
 		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 10}).
 		Join(FetchJoint{}).
-		Join(ParsePageJoint{DispatchLinks: true, MaxDepth: 30, MaxBreadth: 2}).
+		Join(ParsePageJoint{DispatchLinks: true, MaxDepth: 30, MaxBreadth: 3}).
 		Join(HtmlToTextJoint{MergeWhitespace: true}).
 		Join(HashJoint{Simhash: true}).
 		Join(SaveSnapshotToFileSystemJoint{}).
@@ -169,9 +167,9 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 		End(SaveTaskJoint{}).
 		Run()
 
-	if this.config.FetchDelayThresholdInMs > 0 {
-		log.Debug("sleep ", this.config.FetchDelayThresholdInMs, "ms to control crawling speed")
-		time.Sleep(time.Duration(this.config.FetchDelayThresholdInMs) * time.Millisecond)
+	if this.config.FetchThresholdInMs > 0 {
+		log.Debug("sleep ", this.config.FetchThresholdInMs, "ms to control crawling speed")
+		time.Sleep(time.Duration(this.config.FetchThresholdInMs) * time.Millisecond)
 		log.Debug("wake up now,continue crawing")
 	}
 

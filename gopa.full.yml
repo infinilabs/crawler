@@ -32,13 +32,3 @@ modules:
     host: "http://eshost:9200"
     index: "gopa"
 
-
-task.default:
-  split_by_url_parameter: "p,pn,page,start,index"
-  save_url_pattern: ".*"
-  link_extract_pattern: "(\\s+(src2|src|href|HREF|SRC))\\s*=\\s*[\"']?(.*?)[\"']"
-  link_extract_group: 3
-  follow_same_domain: true
-  follow_sub_domain: true
-  skip_page_parse_pattern: ".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b"
-  fetch_url_pattern": ".*"

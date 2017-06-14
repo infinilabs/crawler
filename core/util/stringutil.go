@@ -36,6 +36,13 @@ func StringToUTF16(s string) []uint16 {
 	return utf16.Encode([]rune(s + "\x00"))
 }
 
+func SubStringWithSuffix(str string, length int, suffix string) string {
+	if len(str) > length {
+		str = SubString(str, 0, length) + suffix
+	}
+	return str
+}
+
 func SubString(str string, begin, length int) (substr string) {
 	rs := []rune(str)
 	lth := len(rs)

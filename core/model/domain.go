@@ -9,6 +9,7 @@ import (
 type Domain struct {
 	Host       string         `storm:"id,unique" json:"host,omitempty" gorm:"not null;unique;primary_key"`
 	LinksCount int64          `json:"links_count,omitempty"`
+	Favicon    string         `json:"favicon,omitempty"`
 	Settings   *DomainSetting `storm:"inline" json:"settings,omitempty"`
 	CreateTime *time.Time     `storm:"index" json:"created,omitempty"`
 	UpdateTime *time.Time     `storm:"index" json:"updated,omitempty"`
@@ -50,7 +51,7 @@ func GetDomainList(from, size int, domain string) (int, []Domain, error) {
 
 	query := store.Query{From: from, Size: size}
 	if len(domain) > 0 {
-		query.Filter = &store.Cond{Name: "domain", Value: domain}
+		query.Filter = &store.Cond{Name: "host", Value: domain}
 	}
 
 	err, r := store.Search(&domains, &query)

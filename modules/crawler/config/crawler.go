@@ -1,16 +1,15 @@
 package config
 
 type CrawlerConfig struct {
-	MaxGoRoutine         int  `config:"max_go_routine"`
-	LoadPendingFetchJobs bool `config:"load_pending_fetch_from_file"` //fetch url parse and extracted from saved page,load data from:"pending_fetch.urls"
+	MaxGoRoutine int `config:"max_go_routine"`
 	//Fetch Speed Control
-	FetchDelayThresholdInMs int `config:"fetch_delay_threshold_ms"`
+	FetchThresholdInMs int `config:"fetch_threshold_ms"`
 }
 
 var (
 	defaultCrawlerConfig = CrawlerConfig{
-		MaxGoRoutine:            1,
-		FetchDelayThresholdInMs: 0,
+		MaxGoRoutine:       1,
+		FetchThresholdInMs: 0,
 	}
 )
 

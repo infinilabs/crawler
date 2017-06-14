@@ -5,14 +5,14 @@ import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
 	"github.com/medcl/gopa/core/stats"
-	"sync"
 	"github.com/quipo/statsd"
+	"sync"
 )
 
 type StatsDConfig struct {
-	Host              string        `config:"host"`
-	Port              int           `config:"port"`
-	Namespace         string        `config:"namespace"`
+	Host      string `config:"host"`
+	Port      int    `config:"port"`
+	Namespace string `config:"namespace"`
 }
 type StatsDModule struct {
 }
@@ -22,9 +22,9 @@ var statsdclient *statsd.StatsdClient
 var l1 sync.RWMutex
 
 var defaultStatsdConfig = StatsDConfig{
-	Host:              "localhost",
-	Port:              8125,
-	Namespace:         "gopa.",
+	Host:      "localhost",
+	Port:      8125,
+	Namespace: "gopa.",
 }
 
 func (this StatsDModule) Name() string {
@@ -44,7 +44,7 @@ func (this StatsDModule) Start(cfg *Config) {
 	defer l1.Unlock()
 	statsdclient = statsd.NewStatsdClient(addr, config.Namespace)
 
-	log.Debug("statsd connec to, ", addr,",prefix:",config.Namespace)
+	log.Debug("statsd connec to, ", addr, ",prefix:", config.Namespace)
 
 	err := statsdclient.CreateSocket()
 	if nil != err {

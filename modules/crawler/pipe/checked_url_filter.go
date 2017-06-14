@@ -19,6 +19,7 @@ package pipe
 import (
 	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/filter"
+	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/modules/config"
@@ -38,8 +39,12 @@ func (this UrlCheckFilterJoint) Name() string {
 }
 
 func (this UrlCheckFilterJoint) Process(context *Context) error {
-	url := context.MustGetString(CONTEXT_URL)
-	//统一 url 格式 , url 此处应该不能是相对路径
+
+	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
+
+	url := task.Url
+
+	//the url input here should not be a relative path
 	b, err := filter.CheckThenAdd(config.CheckFilter, []byte(url))
 	log.Trace("cheking url:", url, ",hit:", b)
 

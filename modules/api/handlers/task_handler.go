@@ -164,7 +164,7 @@ func (this API) DomainAction(w http.ResponseWriter, req *http.Request, ps httpro
 		newDomains := []model.Domain{}
 		for _, v := range domains {
 
-			total := stats.Stat("domain.stats", v.Host+"."+stats.STATS_FETCH_TOTAL_COUNT)
+			total := stats.Stat("domain.stats", v.Host+"."+config.STATS_FETCH_TOTAL_COUNT)
 			v.LinksCount = total
 			newDomains = append(newDomains, v)
 		}

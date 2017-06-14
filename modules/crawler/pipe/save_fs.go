@@ -17,7 +17,6 @@ limitations under the License.
 package pipe
 
 import (
-	"errors"
 	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/model"
@@ -32,7 +31,6 @@ import (
 const SaveSnapshotToFileSystem JointKey = "save_snapshot_fs"
 
 type SaveSnapshotToFileSystemJoint struct {
-	context *Context
 	baseDir string
 }
 
@@ -41,22 +39,19 @@ func (this SaveSnapshotToFileSystemJoint) Name() string {
 }
 
 func (this SaveSnapshotToFileSystemJoint) Process(c *Context) error {
-	this.context = c
 
 	if len(this.baseDir) == 0 {
 		this.baseDir = global.Env().SystemConfig.GetDataDir() + "/web"
 	}
 
-	url, ok := c.GetString(CONTEXT_URL)
-	if !ok {
-		return errors.New("invalid url")
-	}
-	task := c.Get(CONTEXT_CRAWLER_TASK).(*model.Task)
-	pageItem := c.Get(CONTEXT_PAGE_ITEM).(*model.PageItem)
+	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
+	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 
-	domain := c.MustGetString(CONTEXT_HOST)
-	dir := c.MustGetString(CONTEXT_SAVE_PATH)
-	file := c.MustGetString(CONTEXT_SAVE_FILENAME)
+	url := task.Url
+
+	domain := task.Host
+	dir := snapshot.Path
+	file := snapshot.File
 	folder := path.Join(this.baseDir, domain, dir)
 
 	fullPath := path.Join(folder, file)
@@ -66,7 +61,7 @@ func (this SaveSnapshotToFileSystemJoint) Process(c *Context) error {
 		return nil
 	}
 
-	log.Trace("save url,", url, ",domain,", task.Domain, ",folder,", folder, ",file:", file, ",fullpath,", fullPath)
+	log.Trace("save url,", url, ",domain,", task.Host, ",folder,", folder, ",file:", file, ",fullpath,", fullPath)
 
 	err := os.MkdirAll(folder, 0777)
 	if err != nil {
@@ -82,7 +77,8 @@ func (this SaveSnapshotToFileSystemJoint) Process(c *Context) error {
 	}
 
 	defer fout.Close()
-	_, err = fout.Write(pageItem.Body)
+	_, err = fout.Write(snapshot.Payload)
+	fout.Sync()
 	if err != nil {
 		log.Error(fullPath, ",", err)
 		return err

@@ -32,7 +32,6 @@ import (
 const ParsePage JointKey = "parse"
 
 type ParsePageJoint struct {
-	links            map[string]interface{}
 	DispatchLinks    bool
 	MaxDepth         int         //max depth of page to follow
 	MaxBreadth       int         //max breadth of the domain to follow
@@ -44,34 +43,29 @@ func (this ParsePageJoint) Name() string {
 	return string(ParsePage)
 }
 
-func (this ParsePageJoint) Process(s *Context) error {
+func (this ParsePageJoint) Process(context *Context) error {
 
-	refUrl := s.MustGetString(CONTEXT_URL)
-	refHost := s.MustGetString(CONTEXT_HOST)
-	depth := s.MustGetInt(CONTEXT_DEPTH)
-	breadth := s.MustGetInt(CONTEXT_BREADTH)
-	fileContent := s.MustGetBytes(CONTEXT_PAGE_BODY_BYTES)
+	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
+	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+
+	refUrl := task.Url
+	refHost := task.Host
+	depth := task.Depth
+	breadth := task.Breadth
+	fileContent := snapshot.Payload
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(fileContent))
 	if err != nil {
 		panic(err)
 	}
 
 	title := doc.Find("title").Text()
-
-	selected := doc.Find("body")
-	body, err := selected.Html()
-	if err != nil {
-		panic(err)
-	} else {
-		s.Set(CONTEXT_PAGE_BODY_BYTES, []byte(body))
+	if len(title) > 0 {
+		snapshot.Title = title
 	}
+
+	links := map[string]interface{}{}
 
 	metadata := map[string]interface{}{}
-	if len(title) > 0 {
-		metadata["title"] = title
-	}
-
-	this.links = map[string]interface{}{}
 
 	doc.Find("meta").Each(func(i int, s *goquery.Selection) {
 		name, exist := s.Attr("name")
@@ -93,7 +87,7 @@ func (this ParsePageJoint) Process(s *Context) error {
 				arr := strings.Split(content, "=")
 				if len(arr) == 2 {
 					url := arr[1]
-					this.links[url] = "http-equiv-refresh"
+					links[url] = "http-equiv-refresh"
 				} else {
 					log.Error("unexpected http-equiv", content)
 				}
@@ -104,7 +98,7 @@ func (this ParsePageJoint) Process(s *Context) error {
 	})
 
 	if len(metadata) > 0 {
-		s.Set(CONTEXT_PAGE_METADATA, metadata)
+		snapshot.Metadata = &metadata
 	}
 
 	doc.Find("a").Each(func(i int, s *goquery.Selection) {
@@ -120,27 +114,39 @@ func (this ParsePageJoint) Process(s *Context) error {
 
 			if len(text) > 0 {
 				log.Trace("get link: ", text, " , ", href)
-				this.links[href] = text
+				links[href] = text
 			}
 		}
 
 	})
 
-	s.Set(CONTEXT_PAGE_LINKS, this.links)
+	if len(links) > 0 {
+		context.Set(CONTEXT_PAGE_LINKS, links)
+		snapshot.Links = model.LinkGroup{
+			Internal: []model.PageLink{},
+			External: []model.PageLink{},
+		}
+
+		//TODO parse internal and external links
+		//snapshot.Links.External=this.links
+		//snapshot.Links.Internal=this.links
+	}
 
 	//if reach max depth, skip for future fetch
-	if depth >= this.MaxDepth {
+	if depth > this.MaxDepth {
 		log.Trace("skip while reach max depth, ", depth, ", ", refUrl)
+		context.Break("skip while reach max depth")
 		return nil
 	}
 	//if reach max breadth, skip for future fetch
-	if breadth >= this.MaxBreadth {
+	if breadth > this.MaxBreadth {
 		log.Trace("skip while reach max breadth, ", breadth, ", ", refUrl)
+		context.Break("skip while reach max breadth")
 		return nil
 	}
 
 	//dispatch links
-	for url := range this.links {
+	for url := range links {
 		if this.DispatchLinks {
 			if !filter.Exists(config.CheckFilter, []byte(url)) {
 				host := util.GetHost(url)

@@ -21,7 +21,6 @@ import (
 	"fmt"
 	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/global"
-	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/util"
 	"reflect"
@@ -33,14 +32,16 @@ import (
 
 type ParaKey string
 
+type Phrase int
+
 type Context struct {
 	Simulate bool `json:"simulate"`
 	Parameters
-	Phrase       model.TaskPhrase `json:"phrase"`
-	IgnoreBroken bool             `json:"ignore_broken"`
-	breakFlag    bool             `json:"-"`
-	exitFlag     bool             `json:"-"`
-	Payload      interface{}      `json:"-"`
+	Phrase       Phrase      `json:"phrase"`
+	IgnoreBroken bool        `json:"ignore_broken"`
+	breakFlag    bool        `json:"-"`
+	exitFlag     bool        `json:"-"`
+	Payload      interface{} `json:"-"`
 }
 
 /**
@@ -116,12 +117,26 @@ func (this *Parameters) GetInt(key ParaKey) (int, bool) {
 	return s, ok
 }
 
+func (this *Parameters) MustGet(key ParaKey) interface{} {
+	this.Init()
+
+	s := string(key)
+
+	this.l.RLock()
+	v, ok := this.Data[s]
+	this.l.RUnlock()
+
+	if !ok {
+		log.Debug(util.ToJson(this.Data, true))
+		panic(fmt.Errorf("%s not found in context", key))
+	}
+
+	return v
+}
+
 func (this *Parameters) GetMap(key ParaKey) (map[string]interface{}, bool) {
 	v := this.Get(key)
 	s, ok := v.(map[string]interface{})
-	if ok {
-		return s, ok
-	}
 	return s, ok
 }
 
@@ -295,7 +310,7 @@ func (this *Pipeline) Run() *Context {
 		stats.Timing(this.name+".pipeline", v.Name(), elapsedTime.Nanoseconds())
 		if err != nil {
 			stats.Increment(this.name+".pipeline", "error")
-			log.Errorf("%s-%s: %v", this.name, v.Name(), err)
+			log.Debug("%s-%s: %v", this.name, v.Name(), err)
 			this.context.Break(err)
 			panic(err)
 		}

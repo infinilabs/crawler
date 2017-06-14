@@ -52,7 +52,7 @@ func (c *ElasticsearchClient) IndexDoc(id string, data map[string]interface{}) (
 	if err != nil {
 		return nil, err
 	}
-	response := util.HttpPost(url, "", string(js))
+	response := util.HttpPostJSON(url, "", string(js))
 	if err != nil {
 		return nil, err
 	}

@@ -21,6 +21,8 @@ import (
 	"github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
+	"github.com/medcl/gopa/core/util"
+	"time"
 )
 
 const InitTask JointKey = "init_task"
@@ -32,6 +34,10 @@ type InitTaskJoint struct {
 	Task *model.Task
 }
 
+func NewTaskJoint(task *model.Task) Joint {
+	return InitTaskJoint{Task: task}
+}
+
 func (this InitTaskJoint) Name() string {
 	return string(InitTask)
 }
@@ -41,30 +47,40 @@ func (this InitTaskJoint) Process(context *Context) error {
 	seelog.Trace("start process")
 
 	var task *model.Task
+
 	if this.Task != nil {
 		task = this.Task
 	} else if this.Has(TaskID) {
 		//init task record
 		t, err := model.GetTask(this.MustGetString(TaskID))
 		if err != nil {
+			context.ErrorExit("task init error")
 			panic(err)
 		}
 		task = &t
 	} else {
+		context.ErrorExit("task init error")
 		panic(errors.New("task not set"))
 	}
 
-	//if(this.Task==nil){
-	//	this.Task=model.Task{}
-	//	panic(errors.New("nil task"))
-	//}
+	if task == nil {
+		context.ErrorExit("task init error")
+		panic(errors.New("nil task"))
+	}
+
+	//init snapshot
+	var snapshot = &model.Snapshot{
+		ID: util.GetUUID(),
+	}
+
+	//update last check time
+	t1 := time.Now().UTC()
+	task.LastCheckTime = &t1
+
+	//update next check time //TODO
 
 	context.Set(CONTEXT_CRAWLER_TASK, task)
-	context.Set(CONTEXT_ORIGINAL_URL, task.OriginUrl)  //TODO remove
-	context.Set(CONTEXT_URL, task.Url)                 //TODO remove
-	context.Set(CONTEXT_DEPTH, task.Depth)             //TODO remove
-	context.Set(CONTEXT_BREADTH, task.Breadth)         //TODO remove
-	context.Set(CONTEXT_REFERENCE_URL, task.Reference) //TODO remove
+	context.Set(CONTEXT_CRAWLER_SNAPSHOT, snapshot)
 
 	return nil
 }

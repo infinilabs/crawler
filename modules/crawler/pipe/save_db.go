@@ -31,7 +31,6 @@ import (
 const SaveSnapshotToDB JointKey = "save_snapshot_db"
 
 type SaveSnapshotToDBJoint struct {
-	context      *Context
 	CompressBody bool
 	Bucket       string
 }
@@ -41,28 +40,27 @@ func (this SaveSnapshotToDBJoint) Name() string {
 }
 
 func (this SaveSnapshotToDBJoint) Process(c *Context) error {
-	this.context = c
+	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
+	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 
-	url := c.MustGetString(CONTEXT_URL)
+	url := task.Url
 
-	task := c.Get(CONTEXT_CRAWLER_TASK).(*model.Task)
-	pageItem := c.Get(CONTEXT_PAGE_ITEM).(*model.PageItem)
-	savePath := c.MustGetString(CONTEXT_SAVE_PATH)
-	saveFile := c.MustGetString(CONTEXT_SAVE_FILENAME)
-	domain := c.MustGetString(CONTEXT_HOST)
+	savePath := snapshot.Path
+	saveFile := snapshot.File
+	domain := task.Host
 
-	saveKey := GetKey(path.Join(task.Domain, savePath, saveFile))
-	log.Debug("save url to db, url:", url, ",domain:", task.Domain, ",path:", savePath, ",file:", saveFile, ",saveKey:", string(saveKey))
+	saveKey := GetKey(path.Join(task.Host, savePath, saveFile))
+	log.Debug("save url to db, url:", url, ",domain:", task.Host, ",path:", savePath, ",file:", saveFile, ",saveKey:", string(saveKey))
 
 	if this.CompressBody {
-		store.AddValueCompress(config.SnapshotBucketKey, saveKey, pageItem.Body)
+		store.AddValueCompress(config.SnapshotBucketKey, saveKey, snapshot.Payload)
 
 	} else {
-		store.AddValue(config.SnapshotBucketKey, saveKey, pageItem.Body)
+		store.AddValue(config.SnapshotBucketKey, saveKey, snapshot.Payload)
 	}
 
-	stats.IncrementBy("domain.stats", domain+"."+stats.STATS_STORAGE_FILE_SIZE, int64(len(pageItem.Body)))
-	stats.Increment("domain.stats", domain+"."+stats.STATS_STORAGE_FILE_COUNT)
+	stats.IncrementBy("domain.stats", domain+"."+config.STATS_STORAGE_FILE_SIZE, int64(len(snapshot.Payload)))
+	stats.Increment("domain.stats", domain+"."+config.STATS_STORAGE_FILE_COUNT)
 
 	return nil
 }

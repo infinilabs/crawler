@@ -19,6 +19,7 @@ package pipe
 import (
 	"fmt"
 	"github.com/jaytaylor/html2text"
+	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/pipeline"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -33,13 +34,19 @@ func TestProcessText(t *testing.T) {
 
 	context := pipeline.Context{}
 	context.Init()
-	context.Set(CONTEXT_URL, "http://elasticsearch.cn/")
-	context.Set(CONTEXT_DEPTH, 1)
-	context.Set(CONTEXT_PAGE_BODY_BYTES, []byte(body))
+	task := model.Task{}
+	task.Url = "http://elasticsearch.cn/"
+	task.Depth = 1
+
+	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	snapshot := model.Snapshot{}
+	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	snapshot.Payload = []byte(body)
+
 	parse := HtmlToTextJoint{}
 	parse.Process(&context)
 
-	text := context.MustGetString(CONTEXT_PAGE_BODY_PLAIN_TEXT)
+	text := snapshot.Text
 	fmt.Println(text)
 	assert.Equal(t, "\nElastic中文社区\nmyLink\nbaidu\n/wiki/Marking/Users\n", text)
 
@@ -48,10 +55,12 @@ func TestProcessText(t *testing.T) {
 	if e != nil {
 		panic(e)
 	}
-	context.Set(CONTEXT_PAGE_BODY_BYTES, b)
+	snapshot = model.Snapshot{}
+	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	snapshot.Payload = b
 	parse.Process(&context)
 
-	text = context.MustGetString(CONTEXT_PAGE_BODY_PLAIN_TEXT)
+	text = snapshot.Text
 	fmt.Println(text)
 	assert.Equal(t, "\nElastic中文社区\nlink\nHidden text, should not displayed!\nH1 title\nH2 title\n", text)
 
@@ -59,10 +68,12 @@ func TestProcessText(t *testing.T) {
 	if e != nil {
 		panic(e)
 	}
-	context.Set(CONTEXT_PAGE_BODY_BYTES, b)
+	snapshot = model.Snapshot{}
+	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	snapshot.Payload = b
 	parse.Process(&context)
 
-	text = context.MustGetString(CONTEXT_PAGE_BODY_PLAIN_TEXT)
+	text = snapshot.Text
 	fmt.Println(text)
 	//	assert.Equal(t, "  ", text)
 

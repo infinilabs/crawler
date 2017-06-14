@@ -41,7 +41,7 @@ func (this SaveTaskJoint) Process(context *Context) error {
 		return errors.NewWithCode(errors.New("error in process"), config.ErrorExitedPipeline, "pipeline exited")
 	}
 
-	task := context.Get(CONTEXT_CRAWLER_TASK).(*model.Task)
+	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	task.Status = model.TaskFetchSuccess
 	task.Phrase = context.Phrase
 
@@ -52,31 +52,15 @@ func (this SaveTaskJoint) Process(context *Context) error {
 	}
 
 	//update url
-	task.Url = context.MustGetString(CONTEXT_URL)
-	pageItem := context.Get(CONTEXT_PAGE_ITEM)
+	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 
-	if pageItem != nil {
-		task.Page = pageItem.(*model.PageItem)
-		meta, b := context.GetMap(CONTEXT_PAGE_METADATA)
-		if b {
-			task.Page.Metadata = &meta
-		}
-
-		text, b := context.GetString(CONTEXT_PAGE_BODY_PLAIN_TEXT)
-		if b {
-			task.Page.Text = text
-		}
-
-		simhash, b := context.GetString(CONTEXT_PAGE_SIMHASH_100)
-		if b {
-			task.SnapshotSimHash = simhash
-		}
-
-		hash, b := context.GetString(CONTEXT_PAGE_HASH)
-		if b {
-			task.SnapshotHash = hash
-		}
-
+	//update last snapshot
+	if snapshot != nil {
+		task.SnapshotVersion = task.SnapshotVersion + 1
+		task.SnapshotVersion = task.SnapshotVersion //TODO update version
+		task.SnapshotID = snapshot.ID
+		task.SnapshotHash = snapshot.Hash
+		task.SnapshotSimHash = snapshot.SimHash
 	}
 
 	if this.IsCreate {

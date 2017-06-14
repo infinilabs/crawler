@@ -5,7 +5,12 @@ import (
 	"github.com/medcl/gopa/core/errors"
 	"github.com/medcl/gopa/core/store"
 
+	"bytes"
+	"fmt"
+	"github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/util"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -15,25 +20,98 @@ const TaskCreated TaskStatus = 0
 const TaskFetchFailed TaskStatus = 2
 const TaskFetchSuccess TaskStatus = 3
 
-type TaskPhrase int
+type Seed struct {
+	Url       string `storm:"index" json:"url,omitempty" gorm:"type:not null;varchar(500)"` // the seed url may not cleaned, may miss the domain part, need reference to provide the complete url information
+	Reference string `json:"reference_url,omitempty"`
+	Depth     int    `storm:"index" json:"depth,omitempty"`
+	Breadth   int    `storm:"index" json:"breadth,omitempty"`
+}
+
+func (this Seed) Get(url string) Seed {
+	task := Seed{}
+	task.Url = url
+	task.Reference = ""
+	task.Depth = 0
+	task.Breadth = 0
+	return task
+}
+
+func (this Seed) MustGetBytes() []byte {
+
+	bytes, err := this.GetBytes()
+	if err != nil {
+		panic(err)
+	}
+	return bytes
+}
+
+var delimiter = "|#|"
+
+func (this Seed) GetBytes() ([]byte, error) {
+	var buf bytes.Buffer
+
+	buf.WriteString(fmt.Sprint(this.Breadth))
+	buf.WriteString(delimiter)
+	buf.WriteString(fmt.Sprint(this.Depth))
+	buf.WriteString(delimiter)
+	buf.WriteString(this.Reference)
+	buf.WriteString(delimiter)
+	buf.WriteString(this.Url)
+
+	return buf.Bytes(), nil
+}
+
+func TaskSeedFromBytes(b []byte) Seed {
+	task, err := fromBytes(b)
+	if err != nil {
+		panic(err)
+	}
+	return task
+}
+
+func fromBytes(b []byte) (Seed, error) {
+
+	str := string(b)
+	array := strings.Split(str, delimiter)
+	task := Seed{}
+	i, _ := strconv.Atoi(array[0])
+	task.Breadth = i
+	i, _ = strconv.Atoi(array[1])
+	task.Depth = i
+	task.Reference = array[2]
+	task.Url = array[3]
+
+	return task, nil
+}
+
+func NewTaskSeed(url, ref string, depth int, breadth int) Seed {
+	task := Seed{}
+	task.Url = url
+	task.Reference = ref
+	task.Depth = depth
+	task.Breadth = breadth
+	return task
+}
 
 type Task struct {
 	Seed
-	ID              string      `storm:"id,unique" json:"id" gorm:"not null;unique;primary_key"`
-	Domain          string      `storm:"index" json:"domain,omitempty"` // elastic.co
-	Scheme          string      `json:"schema,omitempty"`               // elastic.co
-	OriginUrl       string      `json:"origin_url,omitempty"`           // /index.html
-	UrlPath         string      `json:"path,omitempty"`                 // /index.html
-	Phrase          TaskPhrase  `storm:"index" json:"phrase"`
-	Status          TaskStatus  `storm:"index" json:"status"`
-	Page            *PageItem   `storm:"inline" json:"page,omitempty" gorm:"-"`
-	Message         interface{} `storm:"inline" json:"message,omitempty" gorm:"-"`
-	CreateTime      *time.Time  `storm:"index" json:"created,omitempty" gorm:"index"`
-	UpdateTime      *time.Time  `storm:"index" json:"updated,omitempty" gorm:"index"`
-	LastCheckTime   *time.Time  `storm:"index" json:"checked,omitempty"`
-	Snapshot        string      `json:"snapshot,omitempty"` //Last Snapshot ID
-	SnapshotHash    string      `storm:"snapshot_hash" json:"snapshot_hash,omitempty"`
-	SnapshotSimHash string      `storm:"snapshot_simhash" json:"snapshot_simhash,omitempty"`
+	ID            string          `storm:"id,unique" json:"id" gorm:"not null;unique;primary_key"`
+	Host          string          `storm:"index" json:"host,omitempty"`
+	Schema        string          `json:"schema,omitempty"`
+	OriginalUrl   string          `json:"origin_url,omitempty"`
+	Phrase        pipeline.Phrase `storm:"phrase" json:"status"`
+	Status        TaskStatus      `storm:"index" json:"status"`
+	Message       interface{}     `storm:"inline" json:"message,omitempty" gorm:"-"`
+	CreateTime    *time.Time      `storm:"index" json:"created,omitempty" gorm:"index"`
+	UpdateTime    *time.Time      `storm:"index" json:"updated,omitempty" gorm:"index"`
+	LastFetchTime *time.Time      `storm:"index" json:"last_fetch,omitempty"`
+	LastCheckTime *time.Time      `storm:"index" json:"last_check,omitempty"`
+	NextCheckTime *time.Time      `storm:"index" json:"next_check,omitempty"`
+
+	SnapshotVersion int    `json:"snapshot_version,omitempty"`
+	SnapshotID      string `json:"snapshot_id,omitempty"`                               //Last Snapshot's ID
+	SnapshotHash    string `storm:"snapshot_hash" json:"snapshot_hash,omitempty"`       //Last Snapshot's Hash
+	SnapshotSimHash string `storm:"snapshot_simhash" json:"snapshot_simhash,omitempty"` //Last Snapshot's Simhash
 }
 
 func CreateTask(task *Task) error {
@@ -83,6 +161,7 @@ func GetTask(id string) (Task, error) {
 
 	return task, err
 }
+
 func GetTaskByField(k, v string) (Task, error) {
 	log.Trace("start get seed: ", k, ", ", v)
 	task := Task{}
@@ -98,7 +177,7 @@ func GetTaskList(from, size int, domain string) (int, []Task, error) {
 	var tasks []Task
 	queryO := store.Query{Sort: "create_time desc", From: from, Size: size}
 	if len(domain) > 0 {
-		queryO.Filter = &store.Cond{Name: "domain", Value: domain}
+		queryO.Filter = &store.Cond{Name: "host", Value: domain}
 	}
 	err, result := store.Search(&tasks, &queryO)
 	if err != nil {

@@ -239,7 +239,7 @@ func get(url string, cookie string, proxyStr string) (*Result, error) {
 	return nil, nil
 }
 
-func HttpPost(url string, cookie string, postStr string) []byte {
+func HttpPostJSON(url string, cookie string, postStr string) []byte {
 
 	log.Debug("let's post: " + url)
 
@@ -255,7 +255,8 @@ func HttpPost(url string, cookie string, postStr string) []byte {
 	reqest.Header.Set("Accept-Charset", "GBK,utf-8;q=0.7,*;q=0.3")
 	reqest.Header.Set("Accept-Encoding", "gzip,deflate,sdch")
 	//	reqest.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	reqest.Header.Add("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+	//reqest.Header.Add("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+	reqest.Header.Add("Content-Type", "application/json;charset=utf-8")
 	reqest.Header.Set("Accept-Language", "zh-CN,zh;q=0.8")
 	reqest.Header.Set("Cache-Control", "max-age=0")
 	reqest.Header.Set("Connection", "keep-alive")

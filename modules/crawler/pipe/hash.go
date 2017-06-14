@@ -21,6 +21,7 @@ import (
 	"fmt"
 	log "github.com/cihub/seelog"
 	. "github.com/gensmusic/simhash"
+	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
 	"path"
 	"sync"
@@ -39,19 +40,20 @@ func (this HashJoint) Name() string {
 
 func (this HashJoint) Process(context *Context) error {
 
-	body := context.MustGetString(CONTEXT_PAGE_BODY_PLAIN_TEXT)
+	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+
+	body := string(snapshot.Payload)
 
 	h := sha1.New()
 	h.Write([]byte(body))
 	bs := h.Sum(nil)
-	context.Set(CONTEXT_PAGE_HASH, fmt.Sprintf("%x", bs))
+
+	snapshot.Hash = fmt.Sprintf("%x", bs)
 
 	if this.Simhash {
 		this.loadDict()
-		hash1 := Simhash(&body, 100)
-		context.Set(CONTEXT_PAGE_SIMHASH_100, fmt.Sprintf("%x", hash1))
-		hash2 := Simhash(&body, 500)
-		context.Set(CONTEXT_PAGE_SIMHASH_500, fmt.Sprintf("%x", hash2))
+		hash1 := Simhash(&body, 200)
+		snapshot.SimHash = fmt.Sprintf("%x", hash1)
 	}
 
 	return nil
@@ -59,13 +61,13 @@ func (this HashJoint) Process(context *Context) error {
 
 var loaded = false
 var lock sync.Mutex
+
 func (this HashJoint) loadDict() {
 	lock.Lock()
 	defer lock.Unlock()
 	if loaded {
 		return
 	}
-
 
 	log.Debug("loading jieba dict files")
 	mainDict := "config/dict/main.dict.txt"

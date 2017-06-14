@@ -17,6 +17,7 @@ limitations under the License.
 package pipe
 
 import (
+	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/pipeline"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -30,12 +31,15 @@ func TestProcessLinks(t *testing.T) {
 
 	context := pipeline.Context{}
 	context.Init()
-	context.Set(CONTEXT_URL, "http://elasticsearch.cn/")
-	context.Set(CONTEXT_HOST, "elasticsearch.cn")
-	context.Set(CONTEXT_DEPTH, 1)
-	context.Set(CONTEXT_BREADTH, 1)
-	context.Set(CONTEXT_PAGE_BODY_BYTES, []byte(body))
+	task := model.Task{}
+	task.Url = "http://elasticsearch.cn/"
+	task.Host = "elasticsearch.cn"
+
+	context.Set(CONTEXT_CRAWLER_TASK, &task)
 	parse := ParsePageJoint{}
+	snapshot := model.Snapshot{}
+	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	snapshot.Payload = []byte(body)
 	parse.Process(&context)
 
 	links := context.MustGetMap(CONTEXT_PAGE_LINKS)

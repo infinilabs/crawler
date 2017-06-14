@@ -50,7 +50,7 @@ func Test1(t *testing.T) {
 	fmt.Println(util.ToJson(pipeline.GetContext(), true))
 	assert.Equal(t, false, pipeline.GetContext().IsErrorExit())
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10; i++ {
 		pipeline := checker.runPipe(true, &task)
 		assert.Equal(t, true, pipeline.GetContext().IsErrorExit())
 		if !pipeline.GetContext().IsErrorExit() {
