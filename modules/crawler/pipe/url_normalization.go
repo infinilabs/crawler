@@ -326,7 +326,7 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 
 	snapshot.Path = filePath
 	snapshot.File = filename
-	log.Debugf("finished normalization,%s, %s, %s ", url, filePath, filename)
+	log.Debugf("finished normalization,%s, %s, %s, %s ",task.ID, url, filePath, filename)
 
 	return nil
 }
