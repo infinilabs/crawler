@@ -108,10 +108,11 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 				var parentUrlFullPath string
 
 				if referenceURI.Path != "" {
-					var index = strings.LastIndex(referenceURI.Path, "/")
+					var index = util.UnicodeIndex(referenceURI.Path, "/")
 
 					if index > 0 {
 						parentPath = util.SubString(referenceURI.Path, 0, index)
+						log.Trace("parentPath,",referenceURI.Path,"=>",parentPath,",index:",index)
 
 						if !strings.HasSuffix(parentPath, "/") {
 							parentPath = parentPath + "/"

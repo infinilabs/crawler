@@ -204,3 +204,24 @@ func TestNormailzeLinks4(t *testing.T) {
 	assert.Equal(t, "/2015", snapshot.Path)
 	assert.Equal(t, "/chengdu.html", snapshot.File)
 }
+
+func TestNormailzeLinks5(t *testing.T) {
+
+	context := &pipeline.Context{}
+	context.Init()
+	parse := UrlNormalizationJoint{}
+
+	task := model.Task{}
+	task.Url = "../../../../articles/%E4%BF%A1/%E4%B9%89/%E5%AE%97/%E4%BF%A1%E4%B9%89%E5%AE%97.html"
+	task.Reference = "http://wiki.example.org/articles/%E8%82%AF/%E5%A1%94/%E5%9F%BA/%E8%82%AF%E5%A1%94%E5%9F%BA%E5%B7%9E.html"
+	task.Depth = 1
+	task.Breadth = 1
+
+	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	snapshot := model.Snapshot{}
+	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+
+	parse.Process(context)
+
+	assert.Equal(t, "http://wiki.example.org/articles/%E4%BF%A1/%E4%B9%89/%E5%AE%97/%E4%BF%A1%E4%B9%89%E5%AE%97.html", task.Url)
+}
