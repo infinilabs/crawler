@@ -97,9 +97,9 @@ func metricsHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	onStart()
+	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	defer logger.Flush()
+	onStart()
 
 	var logLevel = flag.String("log", "info", "the log level,options:trace,debug,info,warn,error, default: info")
 	var configFile = flag.String("config", "gopa.yml", "the location of config file, default: gopa.yml")
@@ -108,16 +108,18 @@ func main() {
 
 	var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to this file")
 	var memprofile = flag.String("memprofile", "", "write memory profile to this file")
-	var httpprof = flag.Bool("pprof", false, "start pprof/expvar service, endpoint: http://localhost:6060/debug/pprof/ and http://localhost:6060/debug/vars")
+	var httpprof = flag.String("pprof", "", "enable and setup pprof/expvar service, eg: localhost:6060 , and endpoint will be: http://localhost:6060/debug/pprof/ and http://localhost:6060/debug/vars")
 	var isDebug = flag.Bool("debug", false, "enable debug")
 
 	var logDir = flag.String("log_path", "log", "the log path, default: log")
 
 	flag.Parse()
 
-	if *httpprof {
+	logger.SetLogging(EmptyEnv(), *logLevel, *logDir)
+
+	if *httpprof!="" {
 		go func() {
-			log.Debug("start pprof server")
+			log.Infof("pprof listen at: http://%s/debug/pprof/",*httpprof)
 			mux := http.NewServeMux()
 
 			// register pprof handler
@@ -128,7 +130,7 @@ func main() {
 			// register metrics handler
 			mux.HandleFunc("/debug/vars", metricsHandler)
 
-			endpoint := http.ListenAndServe("localhost:6060", mux)
+			endpoint := http.ListenAndServe(*httpprof, mux)
 			log.Debug("stop pprof server: %v", endpoint)
 		}()
 	}
@@ -178,9 +180,6 @@ func main() {
 
 	}
 
-	runtime.GOMAXPROCS(runtime.NumCPU())
-	logger.SetLogging(EmptyEnv(), *logLevel, *logDir)
-
 	env = Environment(*configFile)
 	env.IsDebug = *isDebug
 	//put env into global registrar
@@ -206,10 +205,10 @@ func main() {
 
 	go func() {
 		s := <-sigc
-		log.Info("got signal:", s)
+		log.Debug("got signal:", s)
 		if s == os.Interrupt || s.(os.Signal) == syscall.SIGINT || s.(os.Signal) == syscall.SIGTERM ||
 			s.(os.Signal) == syscall.SIGKILL || s.(os.Signal) == syscall.SIGQUIT {
-			log.Infof("got signal:%s ,start shutting down", s.String())
+			log.Debug("got signal:%s ,start shutting down", s.String())
 			//wait workers to exit
 			module.Stop()
 			util.ClearInstanceLock()

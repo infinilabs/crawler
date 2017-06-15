@@ -47,13 +47,13 @@ func Start() {
 		log.Trace("module: ", v.Name(), ", enabled: ", cfg.Enabled())
 
 		if cfg.Enabled() {
-			log.Debug("starting module: ", v.Name())
+			log.Trace("starting module: ", v.Name())
 			v.Start(cfg)
-			log.Info("started module: ", v.Name())
+			log.Debug("started module: ", v.Name())
 		}
 
 	}
-	log.Info("all modules started")
+	log.Debug("all modules started")
 }
 
 func Stop() {
@@ -62,10 +62,10 @@ func Stop() {
 		v := m.modules[i]
 		cfg := env.GetModuleConfig(v.Name())
 		if cfg.Enabled() {
-			log.Debug("stopping module: ", v.Name())
+			log.Trace("stopping module: ", v.Name())
 			v.Stop()
-			log.Info("stoped module: ", v.Name())
+			log.Debug("stoped module: ", v.Name())
 		}
 	}
-	log.Info("all modules stopeed")
+	log.Debug("all modules stopeed")
 }
