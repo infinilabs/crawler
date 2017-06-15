@@ -17,8 +17,10 @@ limitations under the License.
 package pipe
 
 import (
+	"fmt"
 	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/pipeline"
+	"github.com/medcl/gopa/core/util"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -26,6 +28,15 @@ import (
 func TestProcessLinks(t *testing.T) {
 	body := "<!DOCTYPE html> <html> <head> <meta content=\"text/html;charset=utf-8\" http-equiv=\"Content-Type\" /> <meta content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no\" name=\"viewport\" /> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,Chrome=1\" /> <meta name=\"renderer\" content=\"webkit\" /> <title>Elastic中文社区</title> <meta name=\"keywords\" content=\"Elasticsearch中文社区，实时数据分析，实时数据检索, Elastic Stack，ELK，elasticsearch、logstash、kibana、beats等相关技术交流探讨\" /> <meta name=\"description\" content=\"Elasticsearch中文社区，elasticsearch、logstash、kibana,beats等相关技术交流探讨\" /> <base href=\"http://elasticsearch.cn/\" /><!--[if IE]></base><![endif]--> <link href=\"http://elasticsearch.cn/static/css/default/img/favicon.ico?v=20151125\" rel=\"shortcut icon\" type=\"image/x-icon\" /> <link rel=\"stylesheet\" type=\"text/css\" href=\"http://elasticsearch.cn/static/css/bootstrap.css\" /> <link rel=\"stylesheet\" type=\"text/css\" href=\"http://elasticsearch.cn/static/css/icon.css\" /> <link href=\"http://elasticsearch.cn/static/css/default/common.css?v=20151125\" rel=\"stylesheet\" type=\"text/css\" /> <link href=\"http://elasticsearch.cn/static/css/default/link.css?v=20151125\" rel=\"stylesheet\" type=\"text/css\" /> <link href=\"http://elasticsearch.cn/static/js/plug_module/style.css?v=20151125\" rel=\"stylesheet\" type=\"text/css\" /> </head> <body> <div style=\"display:none;\" id=\"__crond\"><a href=\"google.com\">myLink</a>" +
 		"<a href=\"//baidu.com\">baidu</a>" +
+		"<h1>h1<span>123</span></h1>" +
+		"<H1>H2<span>234</span></H1>" +
+		"<H2>H2<span>234</span></H2>" +
+		"<H3>H3<span>234</span></H3>" +
+		"<H4>H4<span>234</span></H4>" +
+		"<B>b<span>234</span></B>" +
+		"<i>i<span>234</span></i>" +
+		"<img src=logo.png />" +
+		"<img src=http://google.com/logo.png alt=google />" +
 		"<a href=\"/wiki/Marking/Users\">/wiki/Marking/Users</a>" +
 		" </div> </body> </html>"
 
@@ -42,9 +53,11 @@ func TestProcessLinks(t *testing.T) {
 	snapshot.Payload = []byte(body)
 	parse.Process(&context)
 
-	links := context.MustGetMap(CONTEXT_PAGE_LINKS)
+	o := context.MustGet(CONTEXT_PAGE_LINKS)
+	links := o.(map[string]string)
 	println(links["google.com"])
 	assert.Equal(t, "baidu", links["//baidu.com"])
 	assert.Equal(t, "/wiki/Marking/Users", links["/wiki/Marking/Users"])
 	assert.Equal(t, "myLink", links["google.com"])
+	fmt.Println(util.ToJson(snapshot, true))
 }

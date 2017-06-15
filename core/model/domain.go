@@ -1,7 +1,6 @@
 package model
 
 import (
-	log "github.com/cihub/seelog"
 	"github.com/medcl/gopa/core/store"
 	"time"
 )
@@ -35,7 +34,6 @@ func IncrementDomainLinkCount(host string) error {
 	store.Get(&domain)
 
 	if domain.CreateTime == nil {
-		log.Trace("create domain setting, ", host)
 		domain = CreateDomain(host)
 	}
 
@@ -46,7 +44,6 @@ func IncrementDomainLinkCount(host string) error {
 }
 
 func GetDomainList(from, size int, domain string) (int, []Domain, error) {
-	log.Trace("start get all domain settings")
 	var domains []Domain
 
 	query := store.Query{From: from, Size: size}
@@ -57,4 +54,10 @@ func GetDomainList(from, size int, domain string) (int, []Domain, error) {
 	err, r := store.Search(&domains, &query)
 
 	return r.Total, domains, err
+}
+
+func GetDomain(domain string) (Domain, error) {
+	var d = Domain{Host: domain}
+	err := store.Get(&d)
+	return d, err
 }

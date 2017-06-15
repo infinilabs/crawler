@@ -230,7 +230,11 @@ func get(url string, cookie string, proxyStr string) (*Result, error) {
 
 	page.StatusCode = resp.StatusCode
 	if resp.Header != nil {
-		page.Headers = resp.Header
+		page.Headers = map[string][]string{}
+		for k, v := range resp.Header {
+			page.Headers[strings.ToLower(k)] = v
+		}
+
 	}
 
 	defer resp.Body.Close()

@@ -26,6 +26,7 @@ import (
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules/config"
+	"net/http"
 	"time"
 )
 
@@ -90,12 +91,38 @@ func (this FetchJoint) Process(context *Context) error {
 			snapshot.Headers = result.Headers
 
 			if result.Body != nil {
+
 				if snapshot.StatusCode == 404 {
 					log.Info("skip while 404, ", requestUrl, " , ", snapshot.StatusCode)
 					context.Break("fetch 404")
 					flg <- signal{flag: false, err: errors.New("404 NOT FOUND")}
 					return
 				}
+
+				//detect content-type
+				if snapshot.Headers != nil && len(snapshot.Headers) > 0 {
+					v, ok := snapshot.Headers["content-type"]
+					if ok {
+						if len(v) > 0 {
+							s := v[0]
+							if s != "" {
+								snapshot.ContentType = s
+							} else {
+								n := 512 // Only the first 512 bytes are used to sniff the content type.
+								buffer := make([]byte, n)
+								if len(snapshot.Payload) < n {
+									n = len(snapshot.Payload)
+								}
+								// Always returns a valid content-type and "application/octet-stream" if no others seemed to match.
+								contentType := http.DetectContentType(buffer[:n])
+								snapshot.ContentType = contentType
+							}
+						}
+
+					}
+
+				}
+
 			}
 			log.Debug("exit fetchUrl method:", requestUrl)
 			flg <- signal{flag: true}

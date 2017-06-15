@@ -111,13 +111,7 @@ func main() {
 	var httpprof = flag.Bool("pprof", false, "start pprof/expvar service, endpoint: http://localhost:6060/debug/pprof/ and http://localhost:6060/debug/vars")
 	var isDebug = flag.Bool("debug", false, "enable debug")
 
-	//var apiBinding = flag.String("api_bind", "", "the http binding address, eg: 127.0.0.1:8001")
-	//var clusterBinding = flag.String("cluster_bind", "", "the cluster binding address, eg: 127.0.0.1:13001")
-	//var clusterSeed = flag.String("cluster_seeds", "", "the cluster address to start join in, seprated by comma, eg: 127.0.0.1:8001,127.0.0.1:8002,127.0.0.1:8003")
-	//var clusterName = flag.String("cluster_name", "gopa", "the cluster name, default: gopa")
-	//var dataDir = flag.String("data_path", "data", "the data path, default: data")
 	var logDir = flag.String("log_path", "log", "the log path, default: log")
-	//var serverCertPath = flag.String("cert_path", "", "the cert files for http server, if you want enable https instead of http, the folder should contain 2 files: server.cert, server.key")
 
 	flag.Parse()
 

@@ -40,9 +40,8 @@ type InsertResponse struct {
 	Version int    `json:"_version"`
 }
 
-func (c *ElasticsearchClient) IndexDoc(id string, data map[string]interface{}) (*InsertResponse, error) {
+func (c *ElasticsearchClient) IndexDoc(typeName, id string, data map[string]interface{}) (*InsertResponse, error) {
 
-	typeName := "webpage"
 	url := c.Endpoint + "/" + c.Index + "/" + typeName + "/" + id
 
 	js, err := json.Marshal(data)

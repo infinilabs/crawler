@@ -62,6 +62,15 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 	stats.IncrementBy("domain.stats", domain+"."+config.STATS_STORAGE_FILE_SIZE, int64(len(snapshot.Payload)))
 	stats.Increment("domain.stats", domain+"."+config.STATS_STORAGE_FILE_COUNT)
 
+	//update task's snapshot
+	if snapshot != nil {
+		task.SnapshotVersion = task.SnapshotVersion + 1
+		snapshot.Version = task.SnapshotVersion
+		task.SnapshotID = snapshot.ID
+		task.SnapshotHash = snapshot.Hash
+		task.SnapshotSimHash = snapshot.SimHash
+	}
+
 	return nil
 }
 

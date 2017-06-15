@@ -96,22 +96,22 @@ func NewTaskSeed(url, ref string, depth int, breadth int) Seed {
 type Task struct {
 	Seed
 	ID            string          `storm:"id,unique" json:"id" gorm:"not null;unique;primary_key"`
-	Host          string          `storm:"index" json:"host,omitempty"`
+	Host          string          `storm:"index" json:"-"`
 	Schema        string          `json:"schema,omitempty"`
-	OriginalUrl   string          `json:"origin_url,omitempty"`
-	Phrase        pipeline.Phrase `storm:"phrase" json:"status"`
+	OriginalUrl   string          `json:"original_url,omitempty"`
+	Phrase        pipeline.Phrase `storm:"phrase" json:"phrase"`
 	Status        TaskStatus      `storm:"index" json:"status"`
-	Message       interface{}     `storm:"inline" json:"message,omitempty" gorm:"-"`
-	CreateTime    *time.Time      `storm:"index" json:"created,omitempty" gorm:"index"`
-	UpdateTime    *time.Time      `storm:"index" json:"updated,omitempty" gorm:"index"`
-	LastFetchTime *time.Time      `storm:"index" json:"last_fetch,omitempty"`
-	LastCheckTime *time.Time      `storm:"index" json:"last_check,omitempty"`
-	NextCheckTime *time.Time      `storm:"index" json:"next_check,omitempty"`
+	Message       string          `storm:"inline" json:"-"`
+	CreateTime    *time.Time      `storm:"index" json:"created,omitempty"`
+	UpdateTime    *time.Time      `storm:"index" json:"updated,omitempty"`
+	LastFetchTime *time.Time      `storm:"index" json:"-"`
+	LastCheckTime *time.Time      `storm:"index" json:"-"`
+	NextCheckTime *time.Time      `storm:"index" json:"-"`
 
-	SnapshotVersion int    `json:"snapshot_version,omitempty"`
-	SnapshotID      string `json:"snapshot_id,omitempty"`                               //Last Snapshot's ID
-	SnapshotHash    string `storm:"snapshot_hash" json:"snapshot_hash,omitempty"`       //Last Snapshot's Hash
-	SnapshotSimHash string `storm:"snapshot_simhash" json:"snapshot_simhash,omitempty"` //Last Snapshot's Simhash
+	SnapshotVersion int    `json:"-"`
+	SnapshotID      string `json:"-"` //Last Snapshot's ID
+	SnapshotHash    string `json:"-"` //Last Snapshot's Hash
+	SnapshotSimHash string `json:"-"` //Last Snapshot's Simhash
 }
 
 func CreateTask(task *Task) error {

@@ -118,9 +118,10 @@ func (this CrawlerModule) runPipeline(env *Env, signalC *chan bool, quitC *chan 
 					log.Trace(err)
 					continue
 				}
-				log.Trace("shard:", shard, ",task received:", string(taskID))
-				this.execute(string(taskID), env)
-				log.Trace("shard:", shard, ",task finished:", string(taskID))
+				id := string(taskID)
+				log.Trace("shard:", shard, ",task received:", id)
+				this.execute(id, env)
+				log.Trace("shard:", shard, ",task finished:", id)
 
 			}
 		}

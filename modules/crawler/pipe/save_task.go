@@ -21,6 +21,7 @@ import (
 	"github.com/medcl/gopa/core/errors"
 	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
+	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules/config"
 )
 
@@ -48,19 +49,7 @@ func (this SaveTaskJoint) Process(context *Context) error {
 	if context.IsBreak() {
 		log.Trace("broken pipeline,", context.Payload)
 		task.Status = model.TaskFetchFailed
-		task.Message = context.Payload
-	}
-
-	//update url
-	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
-
-	//update last snapshot
-	if snapshot != nil {
-		task.SnapshotVersion = task.SnapshotVersion + 1
-		task.SnapshotVersion = task.SnapshotVersion //TODO update version
-		task.SnapshotID = snapshot.ID
-		task.SnapshotHash = snapshot.Hash
-		task.SnapshotSimHash = snapshot.SimHash
+		task.Message = util.ToJson(context.Payload, false)
 	}
 
 	if this.IsCreate {

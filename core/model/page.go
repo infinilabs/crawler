@@ -29,27 +29,25 @@ type LinkGroup struct {
 }
 
 type Snapshot struct {
-	ID      string `storm:"id,unique" json:"id,omitempty" gorm:"not null;unique;primary_key"`
+	ID      string `json:"id,omitempty" gorm:"not null;unique;primary_key"`
 	Version int    `json:"version,omitempty"`
-	//Host    string `storm:"index" json:"host,omitempty"`
-	//Url     string `storm:"index" json:"url,omitempty"`
-	Path string `storm:"index" json:"path,omitempty"` //path of this file
-	File string `storm:"index" json:"file,omitempty"` //filename of this page
+	Path    string `json:"path,omitempty"` //path of this file
+	File    string `json:"file,omitempty"` //filename of this page
 
-	StatusCode int    `storm:"index" json:"status_code,omitempty"`
+	StatusCode int    `json:"-"`
 	Payload    []byte `json:"-"`
 	Size       uint64 `json:"size,omitempty"`
 
-	Headers    map[string][]string     `storm:"inline" json:"headers,omitempty"` // key:value
-	Metadata   *map[string]interface{} `storm:"inline" json:"metadata,omitempty"`
-	Parameters []KV                    `storm:"inline" json:"parameters,omitempty"` // key:value
+	Headers    map[string][]string     `json:"-"`
+	Metadata   *map[string]interface{} `json:"-"`
+	Parameters []KV                    `json:"-"`
 
-	Language string `storm:"index" json:"lang,omitempty"`
+	Language string `json:"lang,omitempty"`
 
 	Title       string `json:"title,omitempty"`
 	Summary     string `json:"summary,omitempty"`
 	Text        string `json:"text,omitempty"`
-	ContentType string `json:"content-type,omitempty"`
+	ContentType string `json:"content_type,omitempty"`
 
 	Tags []string `json:"tags,omitempty"`
 
@@ -71,10 +69,10 @@ type Snapshot struct {
 	Classifications  []string                `json:"classifications,omitempty"`
 	EnrichedFeatures *map[string]interface{} `json:"enriched_features,omitempty"`
 
-	Hash    string `storm:"index" json:"hash,omitempty"`
-	SimHash string `storm:"index" json:"sim_hash,omitempty"`
+	Hash    string `json:"hash,omitempty"`
+	SimHash string `json:"sim_hash,omitempty"`
 
-	CreateTime *time.Time `storm:"index" json:"created,omitempty"`
+	CreateTime *time.Time `json:"created,omitempty"`
 }
 
 type PageLink struct {

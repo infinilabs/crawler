@@ -60,10 +60,10 @@ func (this ParsePageJoint) Process(context *Context) error {
 
 	title := doc.Find("title").Text()
 	if len(title) > 0 {
-		snapshot.Title = title
+		snapshot.Title = util.XSSHandle(title)
 	}
 
-	links := map[string]interface{}{}
+	links := map[string]string{}
 
 	metadata := map[string]interface{}{}
 
@@ -73,7 +73,7 @@ func (this ParsePageJoint) Process(context *Context) error {
 		if exist && len(name) > 0 {
 			content, exist := s.Attr("content")
 			if exist {
-				metadata[name] = content
+				metadata[strings.ToLower(name)] = content
 			}
 		}
 
@@ -96,10 +96,6 @@ func (this ParsePageJoint) Process(context *Context) error {
 		}
 
 	})
-
-	if len(metadata) > 0 {
-		snapshot.Metadata = &metadata
-	}
 
 	doc.Find("a").Each(func(i int, s *goquery.Selection) {
 		href, exist := s.Attr("href")
@@ -127,9 +123,53 @@ func (this ParsePageJoint) Process(context *Context) error {
 			External: []model.PageLink{},
 		}
 
-		//TODO parse internal and external links
-		//snapshot.Links.External=this.links
-		//snapshot.Links.Internal=this.links
+		for link, label := range links {
+			host := util.GetHost(link)
+			l := model.PageLink{
+				Label: util.XSSHandle(label),
+				Url:   link,
+			}
+			if host != "" && host != task.Host {
+				snapshot.Links.External = append(snapshot.Links.External, l)
+			} else {
+				snapshot.Links.Internal = append(snapshot.Links.Internal, l)
+			}
+		}
+	}
+
+	snapshot.H1 = parseTag(doc, "h1")
+	snapshot.H2 = parseTag(doc, "h2")
+	snapshot.H3 = parseTag(doc, "h3")
+	snapshot.H4 = parseTag(doc, "h4")
+	snapshot.Bold = parseTag(doc, "b")
+	snapshot.Italic = parseTag(doc, "i")
+
+	images := map[string]string{}
+	doc.Find("img").Each(func(i int, s *goquery.Selection) {
+		src, exist := s.Attr("src")
+		src = strings.TrimSpace(src)
+		if exist {
+			alt, _ := s.Attr("alt")
+			alt = strings.TrimSpace(alt)
+			images[src] = util.XSSHandle(alt)
+		}
+	})
+
+	snapshot.Images = model.LinkGroup{
+		Internal: []model.PageLink{},
+		External: []model.PageLink{},
+	}
+	for link, label := range images {
+		host := util.GetHost(link)
+		l := model.PageLink{
+			Label: util.XSSHandle(label),
+			Url:   link,
+		}
+		if host != "" && host != task.Host {
+			snapshot.Images.External = append(snapshot.Images.External, l)
+		} else {
+			snapshot.Images.Internal = append(snapshot.Images.Internal, l)
+		}
 	}
 
 	//if reach max depth, skip for future fetch
@@ -161,4 +201,20 @@ func (this ParsePageJoint) Process(context *Context) error {
 	}
 
 	return nil
+}
+
+func parseTag(doc *goquery.Document, tag string) []string {
+	result := []string{}
+	doc.Find(tag).Each(func(i int, s *goquery.Selection) {
+		if len(s.Text()) > 0 {
+			t := s.Text()
+			t = strings.Replace(t, "\n", " ", -1)
+			t = strings.TrimSpace(t)
+			if len(t) > 0 {
+				result = append(result, util.XSSHandle(t))
+			}
+		}
+
+	})
+	return result
 }

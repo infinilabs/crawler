@@ -118,6 +118,6 @@ func (this HtmlToTextJoint) Process(context *Context) error {
 
 	log.Trace("get text: ", src)
 
-	snapshot.Text = src
+	snapshot.Text = util.XSSHandle(src)
 	return nil
 }

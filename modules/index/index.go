@@ -54,7 +54,7 @@ func (this IndexModule) Start(cfg *Config) {
 					panic(err)
 				}
 
-				client.IndexDoc(doc.Id, doc.Source)
+				client.IndexDoc(doc.Type, doc.Id, doc.Source)
 			}
 
 		}

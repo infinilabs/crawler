@@ -29,6 +29,7 @@ build: config update-ui update-template-ui
 	@echo $(NEWGOPATH)
 	$(GOBUILD) -o bin/gopa
 	cp gopa.yml bin/gopa.yml
+	cp -r config bin
 
 
 build-cluster-test: build
