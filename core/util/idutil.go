@@ -18,20 +18,20 @@ var idseed map[string]int64
 
 var lock1 sync.Mutex
 
-func GetIncrementID(prefix string) string {
+func GetIncrementID(bucket string) string {
 	lock1.Lock()
 	defer lock1.Unlock()
 	if idseed == nil {
 		idseed = map[string]int64{}
 	}
 
-	if _, ok := idseed[prefix]; !ok {
-		idseed[prefix] = int64(0)
+	if _, ok := idseed[bucket]; !ok {
+		idseed[bucket] = int64(0)
 	}
 
-	v := idseed[prefix]
+	v := idseed[bucket]
 	v++
-	idseed[prefix] = v
-	id := fmt.Sprintf("%s-%d", prefix, v)
+	idseed[bucket] = v
+	id := fmt.Sprintf("%d", v)
 	return id
 }
