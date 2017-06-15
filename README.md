@@ -26,7 +26,7 @@ Run `./gopa -h` to get the full list of commandline options
 
 * -log option : logging level,can be set to `trace`,`debug`,`info`,`warn`,`error` ,default is `info`
 * -daemon option : run in background as daemon
-* -pprof option : start pprof service, endpoint: http://localhost:6060/debug/pprof/
+* -pprof option : enable and setup pprof/expvar service, eg: localhost:6060 , the endpoint will be: http://localhost:6060/debug/pprof/ and http://localhost:6060/debug/vars
 * -cpuprofile option : write cpu profile to this file
 * -memprofile option : write memory profile to this file
 
