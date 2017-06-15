@@ -47,7 +47,7 @@ update-template-ui:
 	cd modules/ui/ && ego
 
 tar: build
-	cd bin && tar cfz ../bin/gopa.tar.gz gopa config
+	cd bin && tar cfz ../bin/gopa.tar.gz gopa config gopa.yml
 
 cross-build: clean config update-ui
 	$(GO) test
