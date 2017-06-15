@@ -1527,25 +1527,15 @@ var (
 	validPathElement = regexp.MustCompile(`^[-A-Za-z0-9~+][-A-Za-z0-9_.]*$`)
 )
 
-// returns true if url is a valid url.
-func IsValidTLD(host string) bool {
+// returns true if tld is a valid tld, eg: com
+func IsValidTLD(tld string) bool {
 
-	//parts := strings.Split(host, "/")
-	//
-	//if !validTLD[path.Ext(parts[0])] {
-	//	return false
-	//}
-	//
-	//if !validHost.MatchString(parts[0]) {
-	//	return false
-	//}
-	//for _, part := range parts[1:] {
-	//	if !validPathElement.MatchString(part) || part == "testdata" {
-	//		return false
-	//	}
-	//}
+	ok, istld := validTLD[strings.ToUpper(tld)]
+	if ok {
+		return istld
+	}
 
-	return true
+	return false
 }
 
 func joinPath(importPath string, num int) string {

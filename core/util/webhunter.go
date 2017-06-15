@@ -34,11 +34,34 @@ import (
 )
 
 func GetHost(url string) string {
-	uri, err := ParseRequestURI(url)
+
+	if strings.HasPrefix(url, "//") {
+		url = strings.TrimLeft(url, "//")
+	}
+
+	array := strings.Split(url, ".")
+	if len(array) > 0 {
+		t := array[len(array)-1]
+		isTLD := IsValidTLD(t)
+		if isTLD {
+			if !strings.HasPrefix(url, "http") {
+				url = "http://" + url
+			}
+		}
+	}
+
+	if strings.Contains(url, "/") {
+		if !strings.HasPrefix(url, "http") {
+			url = "http://" + url
+		}
+	}
+
+	uri, err := Parse(url)
 	if err != nil {
 		log.Trace(err)
 		return ""
 	}
+
 	return uri.Host
 }
 

@@ -19,6 +19,7 @@ package util
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/magiconair/properties/assert"
 	"testing"
 )
 
@@ -35,20 +36,40 @@ func TestGetHost(t *testing.T) {
 	url := "/index.html"
 	host := GetHost(url)
 	fmt.Println("", host)
+	assert.Equal(t, host, "")
 
 	url = "www.baidu.com/index.html"
 	host = GetHost(url)
 	fmt.Println("www.baidu.com", host)
+	assert.Equal(t, host, "www.baidu.com")
 
 	url = "//www.baidu.com/index.html"
 	host = GetHost(url)
 	fmt.Println("www.baidu.com", host)
+	assert.Equal(t, host, "www.baidu.com")
 
 	url = "http://www.baidu.com/index.html"
 	host = GetHost(url)
 	fmt.Println("www.baidu.com", host)
+	assert.Equal(t, host, "www.baidu.com")
 
 	url = "https://www.baidu.com/index.html"
 	host = GetHost(url)
 	fmt.Println("www.baidu.com", host)
+	assert.Equal(t, host, "www.baidu.com")
+
+	url = "//baidu.com"
+	host = GetHost(url)
+	fmt.Println("baidu.com", host)
+	assert.Equal(t, host, "baidu.com")
+
+	url = "logo.png"
+	host = GetHost(url)
+	fmt.Println("logo.png", host)
+	assert.Equal(t, host, "")
+
+	url = "logo.com"
+	host = GetHost(url)
+	fmt.Println("logo.com", host)
+	assert.Equal(t, host, "logo.com")
 }
