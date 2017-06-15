@@ -138,7 +138,7 @@ func (this CheckerModule) runPipe(debug bool, task *model.Task) *Pipeline {
 	context := &Context{Phrase: config.PhraseChecker, IgnoreBroken: true}
 	pipeline.Context(context).
 		Start(InitTaskJoint{Task: task}).
-		Join(UrlNormalizationJoint{FollowAllDomain: true, FollowSubDomain: true}).
+		Join(UrlNormalizationJoint{FollowAllDomain: false, FollowSubDomain: true}).
 		Join(UrlExtFilterJoint{}).
 		Join(UrlCheckFilterJoint{}).
 		End(SaveTaskJoint{IsCreate: true}).

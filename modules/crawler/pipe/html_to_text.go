@@ -28,7 +28,7 @@ import (
 const HtmlToText JointKey = "html2text"
 
 type HtmlToTextJoint struct {
-	MergeWhitespace bool
+	MergeWhitespace bool //merge whitespace and \n
 }
 
 func (this HtmlToTextJoint) Name() string {

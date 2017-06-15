@@ -61,6 +61,10 @@ func SubString(str string, begin, length int) (substr string) {
 	return string(rs[begin:end])
 }
 
+func NoWordBreak(in string) string  {
+	return Replace(in, "\n", " ", -1)
+}
+
 // Removes all unnecessary whitespaces
 func MergeSpace(in string) (out string) {
 	var buffer bytes.Buffer

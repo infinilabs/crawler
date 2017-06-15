@@ -60,7 +60,7 @@ func (this ParsePageJoint) Process(context *Context) error {
 
 	title := doc.Find("title").Text()
 	if len(title) > 0 {
-		snapshot.Title = util.XSSHandle(title)
+		snapshot.Title = util.NoWordBreak(util.XSSHandle(title))
 	}
 
 	links := map[string]string{}
@@ -208,7 +208,7 @@ func parseTag(doc *goquery.Document, tag string) []string {
 	doc.Find(tag).Each(func(i int, s *goquery.Selection) {
 		if len(s.Text()) > 0 {
 			t := s.Text()
-			t = strings.Replace(t, "\n", " ", -1)
+			t = util.NoWordBreak(t)
 			t = strings.TrimSpace(t)
 			if len(t) > 0 {
 				result = append(result, util.XSSHandle(t))

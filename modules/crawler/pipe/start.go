@@ -67,17 +67,17 @@ func (this InitTaskJoint) Process(context *Context) error {
 		context.ErrorExit("task init error")
 		panic(errors.New("nil task"))
 	}
-
-	//init snapshot
-	var snapshot = &model.Snapshot{
-		ID: util.GetUUID(),
-	}
-
 	//update last check time
 	t1 := time.Now().UTC()
 	task.LastCheckTime = &t1
 
 	//update next check time //TODO
+
+	//init snapshot
+	var snapshot = &model.Snapshot{
+		ID:         util.GetUUID(),
+		CreateTime: &t1,
+	}
 
 	context.Set(CONTEXT_CRAWLER_TASK, task)
 	context.Set(CONTEXT_CRAWLER_SNAPSHOT, snapshot)
