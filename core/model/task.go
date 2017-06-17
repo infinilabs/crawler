@@ -95,18 +95,18 @@ func NewTaskSeed(url, ref string, depth int, breadth int) Seed {
 
 type Task struct {
 	Seed
-	ID            string          `storm:"id,unique" json:"id" gorm:"not null;unique;primary_key"`
-	Host          string          `storm:"index" json:"-"`
+	ID            string          `gorm:"not null;unique;primary_key" json:"id"`
+	Host          string          `gorm:"index" json:"-"`
 	Schema        string          `json:"schema,omitempty"`
 	OriginalUrl   string          `json:"original_url,omitempty"`
-	Phrase        pipeline.Phrase `storm:"phrase" json:"phrase"`
-	Status        TaskStatus      `storm:"index" json:"status"`
-	Message       string          `storm:"inline" json:"-"`
-	CreateTime    *time.Time      `storm:"index" json:"created,omitempty"`
-	UpdateTime    *time.Time      `storm:"index" json:"updated,omitempty"`
-	LastFetchTime *time.Time      `storm:"index" json:"-"`
-	LastCheckTime *time.Time      `storm:"index" json:"-"`
-	NextCheckTime *time.Time      `storm:"index" json:"-"`
+	Phrase        pipeline.Phrase `gorm:"index" json:"phrase"`
+	Status        TaskStatus      `gorm:"index" json:"status"`
+	Message       string          `json:"-"`
+	CreateTime    *time.Time      `gorm:"index" json:"created,omitempty"`
+	UpdateTime    *time.Time      `gorm:"index" json:"updated,omitempty"`
+	LastFetchTime *time.Time      `gorm:"index" json:"-"`
+	LastCheckTime *time.Time      `gorm:"index" json:"-"`
+	NextCheckTime *time.Time      `gorm:"index" json:"-"`
 
 	SnapshotVersion int    `json:"-"`
 	SnapshotID      string `json:"-"` //Last Snapshot's ID
