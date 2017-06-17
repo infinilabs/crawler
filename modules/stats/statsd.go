@@ -14,7 +14,7 @@ type StatsDConfig struct {
 	Host      string `config:"host"`
 	Port      int    `config:"port"`
 	Namespace string `config:"namespace"`
-	IntervalInSeconds string `config:"interval_in_seconds"`
+	IntervalInSeconds time.Duration `config:"interval_in_seconds"`
 }
 type StatsDModule struct {
 }
