@@ -7,24 +7,28 @@ import (
 	"github.com/medcl/gopa/core/stats"
 	"github.com/quipo/statsd"
 	"sync"
+	"time"
 )
 
 type StatsDConfig struct {
 	Host      string `config:"host"`
 	Port      int    `config:"port"`
 	Namespace string `config:"namespace"`
+	IntervalInSeconds string `config:"interval_in_seconds"`
 }
 type StatsDModule struct {
 }
 
 var statsdInited bool
 var statsdclient *statsd.StatsdClient
+var buffer *statsd.StatsdBuffer
 var l1 sync.RWMutex
 
 var defaultStatsdConfig = StatsDConfig{
 	Host:      "localhost",
 	Port:      8125,
 	Namespace: "gopa.",
+	IntervalInSeconds: 2,
 }
 
 func (this StatsDModule) Name() string {
@@ -52,6 +56,9 @@ func (this StatsDModule) Start(cfg *Config) {
 		return
 	}
 
+	interval := time.Second * config.IntervalInSeconds // aggregate stats and flush every 2 seconds
+	buffer = statsd.NewStatsdBuffer(interval, statsdclient)
+
 	statsdInited = true
 
 	stats.Register(this)
@@ -59,6 +66,7 @@ func (this StatsDModule) Start(cfg *Config) {
 
 func (this StatsDModule) Stop() error {
 	if statsdclient != nil {
+		buffer.Close()
 		statsdclient.Close()
 	}
 	return nil
@@ -70,7 +78,10 @@ func (this StatsDModule) Increment(category, key string) {
 }
 
 func (this StatsDModule) IncrementBy(category, key string, value int64) {
-	statsdclient.Incr(category+"."+key, value)
+	if !statsdInited {
+		return
+	}
+	buffer.Incr(category+"."+key, value)
 }
 
 func (this StatsDModule) Decrement(category, key string) {
@@ -78,16 +89,25 @@ func (this StatsDModule) Decrement(category, key string) {
 }
 
 func (this StatsDModule) DecrementBy(category, key string, value int64) {
-	statsdclient.Decr(category+"."+key, value)
+	if !statsdInited {
+		return
+	}
+	buffer.Decr(category+"."+key, value)
 }
 
 func (this StatsDModule) Timing(category, key string, v int64) {
-	statsdclient.Timing(category+"."+key, v)
+	if !statsdInited {
+		return
+	}
+	buffer.Timing(category+"."+key, v)
 
 }
 
 func (this StatsDModule) Gauge(category, key string, v int64) {
-	statsdclient.Gauge(category+"."+key, v)
+	if !statsdInited {
+		return
+	}
+	buffer.Gauge(category+"."+key, v)
 }
 
 func (this StatsDModule) Stat(category, key string) int64 {

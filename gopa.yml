@@ -72,3 +72,4 @@ modules:
   host: 192.168.3.208
   port: 8125
   namespace: gopa.
+  interval_in_seconds: 2
