@@ -43,9 +43,9 @@ func SubStringWithSuffix(str string, length int, suffix string) string {
 	return str
 }
 
-func UnicodeIndex(str,substr string) int {
+func UnicodeIndex(str, substr string) int {
 	// 子串在字符串的字节位置
-	result := Index(str,substr)
+	result := Index(str, substr)
 	if result >= 0 {
 		// 获得子串之前的字符串并转换成[]byte
 		prefix := []byte(str)[0:result]
@@ -76,7 +76,7 @@ func SubString(str string, begin, length int) (substr string) {
 	return string(rs[begin:end])
 }
 
-func NoWordBreak(in string) string  {
+func NoWordBreak(in string) string {
 	return Replace(in, "\n", " ", -1)
 }
 

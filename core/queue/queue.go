@@ -46,7 +46,23 @@ func Push(k QueueKey, v []byte) error {
 
 func Pop(k QueueKey) (error, []byte) {
 	if handler != nil {
-		er, o := handler.Pop(k, 5*time.Second)
+		er, o := handler.Pop(k, -1)
+		if er == nil {
+			stats.Increment("queue."+string(k), "pop")
+		}
+		return er, o
+	}
+	stats.Increment("queue."+string(k), "pop_error")
+	panic(errors.New("channel is not registered"))
+}
+
+func PopTimeout(k QueueKey, timeoutInSeconds time.Duration) (error, []byte) {
+	if timeoutInSeconds < 1 {
+		timeoutInSeconds = 5
+	}
+
+	if handler != nil {
+		er, o := handler.Pop(k, timeoutInSeconds)
 		if er == nil {
 			stats.Increment("queue."+string(k), "pop")
 		}

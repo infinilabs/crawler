@@ -112,7 +112,7 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 
 					if index > 0 {
 						parentPath = util.SubString(referenceURI.Path, 0, index)
-						log.Trace("parentPath,",referenceURI.Path,"=>",parentPath,",index:",index)
+						log.Trace("parentPath,", referenceURI.Path, "=>", parentPath, ",index:", index)
 
 						if !strings.HasSuffix(parentPath, "/") {
 							parentPath = parentPath + "/"
@@ -327,7 +327,7 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 
 	snapshot.Path = filePath
 	snapshot.File = filename
-	log.Debugf("finished normalization,%s, %s, %s, %s ",task.ID, url, filePath, filename)
+	log.Debugf("finished normalization,%s, %s, %s, %s ", task.ID, url, filePath, filename)
 
 	return nil
 }

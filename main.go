@@ -117,9 +117,9 @@ func main() {
 
 	logger.SetLogging(EmptyEnv(), *logLevel, *logDir)
 
-	if *httpprof!="" {
+	if *httpprof != "" {
 		go func() {
-			log.Infof("pprof listen at: http://%s/debug/pprof/",*httpprof)
+			log.Infof("pprof listen at: http://%s/debug/pprof/", *httpprof)
 			mux := http.NewServeMux()
 
 			// register pprof handler

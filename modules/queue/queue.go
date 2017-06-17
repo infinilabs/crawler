@@ -43,20 +43,21 @@ func (this DiskQueue) Push(k QueueKey, v []byte) error {
 
 func (this DiskQueue) Pop(k QueueKey, timeoutInSeconds time.Duration) (error, []byte) {
 
-	if timeoutInSeconds < 1 {
-		timeoutInSeconds = 5
-	}
-
-	timeout := make(chan bool, 1)
-	go func() {
-		time.Sleep(timeoutInSeconds) // sleep 3 second
-		timeout <- true
-	}()
-	select {
-	case b := <-(*queues[k]).ReadChan():
+	if timeoutInSeconds > 0 {
+		timeout := make(chan bool, 1)
+		go func() {
+			time.Sleep(timeoutInSeconds) // sleep 3 second
+			timeout <- true
+		}()
+		select {
+		case b := <-(*queues[k]).ReadChan():
+			return nil, b
+		case <-timeout:
+			return errors.New("time out"), nil
+		}
+	} else {
+		b := <-(*queues[k]).ReadChan()
 		return nil, b
-	case <-timeout:
-		return errors.New("time out"), nil
 	}
 }
 
