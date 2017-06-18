@@ -12,6 +12,8 @@
 
 Mac/Linux: Run `make build` to build the Gopa
 
+Windows:  go with this wiki - [How to build GOPA on windows](https://github.com/medcl/gopa/wiki/How-to-build-GOPA-on-windows)
+
 
 ## Download ##
 
