@@ -19,27 +19,17 @@ func (this DispatchModule) Name() string {
 }
 
 var signalChannel chan bool
-var quitChannel chan bool
 
 func (this DispatchModule) Start(cfg *Config) {
 	signalChannel = make(chan bool, 2)
-	quitChannel = make(chan bool, 3)
 	go func() {
 		for {
 			select {
 			case <-signalChannel:
-				quitChannel <- true
 				log.Trace("dispatcher exited")
 				return
-			default:
-				log.Trace("waiting dispatcher signal")
-				er, v := queue.Pop(config.DispatcherChannel)
-				log.Trace("got dispatcher signal, ", string(v))
-				if er != nil {
-					log.Trace(er)
-					continue
-				}
-
+			case data := <-queue.ReadChan(config.DispatcherChannel):
+				log.Trace("got dispatcher signal, ", string(data))
 				_, tasks, err := model.GetPendingFetchTasks()
 				if err != nil {
 					log.Trace(err)
@@ -74,7 +64,6 @@ func (this DispatchModule) Start(cfg *Config) {
 		for {
 			select {
 			case <-signalChannel:
-				quitChannel <- true
 				log.Trace("auto dispatcher exited")
 				return
 			default:

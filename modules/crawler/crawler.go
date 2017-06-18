@@ -32,7 +32,6 @@ import (
 )
 
 var signalChannels []*chan bool
-var quitChannels []*chan bool
 
 var crawlerStarted bool
 
@@ -56,16 +55,13 @@ func (this CrawlerModule) Start(cfg *Config) {
 
 	numGoRoutine := config.MaxGoRoutine
 	signalChannels = make([]*chan bool, numGoRoutine)
-	quitChannels = make([]*chan bool, numGoRoutine)
 	if true {
 		//start fetcher
 		for i := 0; i < numGoRoutine; i++ {
 			log.Trace("start crawler:", i)
 			signalC := make(chan bool, 1)
-			quitC := make(chan bool, 1)
 			signalChannels[i] = &signalC
-			quitChannels[i] = &quitC
-			go this.runPipeline(global.Env(), &signalC, &quitC, i)
+			go this.runPipeline(global.Env(), &signalC, i)
 
 		}
 	} else {
@@ -87,14 +83,6 @@ func (this CrawlerModule) Stop() error {
 			log.Debug("send exit signal to fetch channel: ", i)
 		}
 
-		//waiting for quit
-		for i, item := range quitChannels {
-			log.Debug("get final exit signal from fetch channel: ", i)
-			if item != nil {
-				<-*item
-			}
-		}
-
 	} else {
 		log.Error("crawler is not crawlerStarted, please start it first.")
 	}
@@ -102,36 +90,20 @@ func (this CrawlerModule) Stop() error {
 	return nil
 }
 
-func (this CrawlerModule) runPipeline(env *Env, signalC *chan bool, quitC *chan bool, shard int) {
+func (this CrawlerModule) runPipeline(env *Env, signalC *chan bool, shard int) {
 
-	quit := make(chan bool, 1)
-
-	go func() {
-		for {
-			select {
-			case <-quit:
-				return
-			default:
-				log.Trace("waiting url to fetch, shard:", shard)
-				err, taskID := queue.Pop(config.FetchChannel)
-				if err != nil {
-					log.Trace(err)
-					continue
-				}
-				id := string(taskID)
-				log.Trace("shard:", shard, ",task received:", id)
-				this.execute(id, env)
-				log.Trace("shard:", shard, ",task finished:", id)
-
-			}
+	var taskID []byte
+	for {
+		select {
+		case <-*signalC:
+			return
+		case taskID = <-queue.ReadChan(config.FetchChannel):
+			id := string(taskID)
+			log.Trace("shard:", shard, ",task received:", id)
+			this.execute(id, env)
+			log.Trace("shard:", shard, ",task finished:", id)
 		}
-	}()
-	log.Trace("crawler Started, shard:", shard)
-	<-*signalC
-	log.Trace("crawler gonna exit, waiting task to finish, shard:", shard)
-	quit <- true
-	log.Trace("crawler finished, shard:", shard)
-	*quitC <- true
+	}
 	log.Trace("crawler exit, shard:", shard)
 }
 

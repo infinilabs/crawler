@@ -11,9 +11,9 @@ import (
 )
 
 type StatsDConfig struct {
-	Host      string `config:"host"`
-	Port      int    `config:"port"`
-	Namespace string `config:"namespace"`
+	Host              string        `config:"host"`
+	Port              int           `config:"port"`
+	Namespace         string        `config:"namespace"`
 	IntervalInSeconds time.Duration `config:"interval_in_seconds"`
 }
 type StatsDModule struct {
@@ -25,9 +25,9 @@ var buffer *statsd.StatsdBuffer
 var l1 sync.RWMutex
 
 var defaultStatsdConfig = StatsDConfig{
-	Host:      "localhost",
-	Port:      8125,
-	Namespace: "gopa.",
+	Host:              "localhost",
+	Port:              8125,
+	Namespace:         "gopa.",
 	IntervalInSeconds: 2,
 }
 

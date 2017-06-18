@@ -27,6 +27,7 @@ type QueueKey string
 type Queue interface {
 	Push(QueueKey, []byte) error
 	Pop(QueueKey, time.Duration) (error, []byte)
+	ReadChan(k QueueKey) chan []byte
 	Close(QueueKey) error
 }
 
@@ -41,6 +42,14 @@ func Push(k QueueKey, v []byte) error {
 		return o
 	}
 	stats.Increment("queue."+string(k), "push_error")
+	panic(errors.New("channel is not registered"))
+}
+
+func ReadChan(k QueueKey) chan []byte {
+	if handler != nil {
+		return handler.ReadChan(k)
+	}
+	stats.Increment("queue."+string(k), "read_chan")
 	panic(errors.New("channel is not registered"))
 }
 

@@ -41,6 +41,11 @@ func (this DiskQueue) Push(k QueueKey, v []byte) error {
 	return (*queues[k]).Put(v)
 }
 
+func (this DiskQueue) ReadChan(k QueueKey) chan []byte {
+
+	return (*queues[k]).ReadChan()
+}
+
 func (this DiskQueue) Pop(k QueueKey, timeoutInSeconds time.Duration) (error, []byte) {
 
 	if timeoutInSeconds > 0 {
