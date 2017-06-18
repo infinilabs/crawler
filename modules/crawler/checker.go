@@ -17,6 +17,7 @@ limitations under the License.
 package crawler
 
 import (
+	"fmt"
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
 	"github.com/medcl/gopa/core/global"
@@ -32,7 +33,7 @@ import (
 )
 
 var signalChannel chan bool
-var quitChannel chan bool
+
 var checkerStarted bool
 
 func (this CheckerModule) Name() string {
@@ -45,49 +46,28 @@ func (this CheckerModule) Start(cfg *Config) {
 		return
 	}
 	signalChannel = make(chan bool)
-	quitChannel = make(chan bool)
 	go this.runCheckerGo()
 	checkerStarted = true
+	log.Trace("Checker started")
 }
 
 func (this CheckerModule) runCheckerGo() {
 
-	quit := make(chan bool, 1)
-
-	go func() {
-		for {
-			select {
-			case <-quit:
-				log.Trace("url checker success stoped")
-				return
-			default:
-				this.execute()
-			}
+	var data []byte
+	for {
+		select {
+		case data = <-queue.ReadChan(config.CheckChannel):
+			this.execute(data)
+		case <-signalChannel:
+			fmt.Println("url checker quit")
 		}
-	}()
 
-	log.Trace("url checker success checkerStarted")
-	<-signalChannel
-	log.Trace("get checker exit signal")
-	quit <- true
-	log.Trace("url checker wait end")
-	quitChannel <- true
-	log.Trace("url checker quit")
+	}
 }
 
-func (this CheckerModule) execute() {
+func (this CheckerModule) execute(data []byte) {
 	startTime := time.Now()
-	log.Trace("waiting url to check")
-
-	err, data := queue.Pop(config.CheckChannel)
-	if err != nil {
-		log.Trace(err)
-		return
-	}
-
 	seed := model.TaskSeedFromBytes(data)
-
-	stats.Increment("checker.url", "finished")
 
 	task := model.Task{}
 	task.OriginalUrl = seed.Url
@@ -118,6 +98,9 @@ func (this CheckerModule) execute() {
 	} else {
 		log.Debug("ignored url, ", seed.Url)
 	}
+
+	stats.Increment("checker.url", "finished")
+
 }
 
 func (this CheckerModule) runPipe(debug bool, task *model.Task) *Pipeline {
@@ -148,12 +131,20 @@ func (this CheckerModule) runPipe(debug bool, task *model.Task) *Pipeline {
 }
 
 func (this CheckerModule) Stop() error {
+	log.Trace("start stop checker")
+
 	if checkerStarted {
+		log.Trace("send signal to checker")
 		signalChannel <- true
+		log.Trace("close queue checker")
 		checkerStarted = false
+		log.Debug("closed queue checker")
+
 	} else {
 		log.Error("url checker is not checkerStarted")
 	}
+	log.Debug("done stop checker")
+
 	return nil
 }
 
