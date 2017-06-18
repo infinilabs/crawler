@@ -28,7 +28,8 @@ func (this DispatchModule) Start(cfg *Config) {
 			case <-signalChannel:
 				log.Trace("dispatcher exited")
 				return
-			case data := <-queue.ReadChan(config.DispatcherChannel):
+			case data := <- queue.ReadChan(config.DispatcherChannel):
+				stats.Increment("queue."+string(config.DispatcherChannel), "pop")
 				log.Trace("got dispatcher signal, ", string(data))
 				_, tasks, err := model.GetPendingFetchTasks()
 				if err != nil {
