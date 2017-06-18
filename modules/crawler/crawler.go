@@ -29,6 +29,7 @@ import (
 	. "github.com/medcl/gopa/modules/crawler/pipe"
 	"runtime"
 	"time"
+	"github.com/medcl/gopa/core/stats"
 )
 
 var signalChannels []*chan bool
@@ -98,6 +99,7 @@ func (this CrawlerModule) runPipeline(env *Env, signalC *chan bool, shard int) {
 		case <-*signalC:
 			return
 		case taskID = <-queue.ReadChan(config.FetchChannel):
+			stats.Increment("queue."+string(config.FetchChannel), "pop")
 			id := string(taskID)
 			log.Trace("shard:", shard, ",task received:", id)
 			this.execute(id, env)

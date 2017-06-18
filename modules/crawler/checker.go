@@ -57,6 +57,7 @@ func (this CheckerModule) runCheckerGo() {
 	for {
 		select {
 		case data = <-queue.ReadChan(config.CheckChannel):
+			stats.Increment("queue."+string(config.CheckChannel), "pop")
 			this.execute(data)
 		case <-signalChannel:
 			fmt.Println("url checker quit")
