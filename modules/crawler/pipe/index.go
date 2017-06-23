@@ -28,16 +28,16 @@ import (
 	"github.com/medcl/gopa/modules/config"
 )
 
-const Publish JointKey = "publish"
+const Publish JointKey = "index"
 
-type PublishJoint struct {
+type IndexJoint struct {
 }
 
-func (this PublishJoint) Name() string {
+func (this IndexJoint) Name() string {
 	return string(Publish)
 }
 
-func (this PublishJoint) Process(c *Context) error {
+func (this IndexJoint) Process(c *Context) error {
 
 	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
