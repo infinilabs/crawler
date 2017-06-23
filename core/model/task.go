@@ -104,11 +104,11 @@ type Task struct {
 	Message       string          `json:"-"`
 	CreateTime    *time.Time      `gorm:"index" json:"created,omitempty"`
 	UpdateTime    *time.Time      `gorm:"index" json:"updated,omitempty"`
-	LastFetchTime *time.Time      `gorm:"index" json:"-"`
-	LastCheckTime *time.Time      `gorm:"index" json:"-"`
-	NextCheckTime *time.Time      `gorm:"index" json:"-"`
+	LastFetchTime *time.Time      `gorm:"index" json:"last_fetch"`
+	LastCheckTime *time.Time      `gorm:"index" json:"last_check"`
+	NextCheckTime *time.Time      `gorm:"index" json:"next_check"`
 
-	SnapshotVersion int    `json:"-"`
+	SnapshotVersion int    `json:"snapshot_version"`
 	SnapshotID      string `json:"-"` //Last Snapshot's ID
 	SnapshotHash    string `json:"-"` //Last Snapshot's Hash
 	SnapshotSimHash string `json:"-"` //Last Snapshot's Simhash
@@ -177,7 +177,7 @@ func GetTaskList(from, size int, domain string) (int, []Task, error) {
 	var tasks []Task
 	queryO := store.Query{Sort: "create_time desc", From: from, Size: size}
 	if len(domain) > 0 {
-		queryO.Filter = &store.Cond{Name: "host", Value: domain}
+		queryO.Conds = store.And(store.Eq("host", domain))
 	}
 	err, result := store.Search(&tasks, &queryO)
 	if err != nil {
@@ -186,10 +186,24 @@ func GetTaskList(from, size int, domain string) (int, []Task, error) {
 	return result.Total, tasks, err
 }
 
-func GetPendingFetchTasks() (int, []Task, error) {
+func GetPendingNewFetchTasks() (int, []Task, error) {
 	log.Trace("start get all crawler tasks")
 	var tasks []Task
-	queryO := store.Query{Sort: "create_time desc", Filter: &store.Cond{Name: "phrase", Value: 1}}
+	queryO := store.Query{Sort: "create_time desc", Conds: store.And(store.Eq("phrase", 1))}
+	err, result := store.Search(&tasks, &queryO)
+	if err != nil {
+		log.Trace(err)
+	}
+	return result.Total, tasks, err
+}
+
+func GetPendingUpdateFetchTasks(offset *time.Time) (int, []Task, error) {
+	t := time.Now()
+	log.Trace("start get all crawler tasks")
+	var tasks []Task
+	queryO := store.Query{Sort: "create_time asc",
+		Conds: store.And(store.Lt("next_check_time", t),
+			store.Gt("create_time", offset.String()))}
 	err, result := store.Search(&tasks, &queryO)
 	if err != nil {
 		log.Trace(err)

@@ -27,6 +27,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+	"github.com/medcl/gopa/core/pipeline"
+	"github.com/medcl/gopa/modules/config"
+	"github.com/medcl/gopa/modules/crawler/pipe"
 )
 
 func Test1(t *testing.T) {

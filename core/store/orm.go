@@ -19,6 +19,8 @@ package store
 import (
 	"github.com/jinzhu/gorm"
 	"sync"
+	log "github.com/cihub/seelog"
+	"github.com/medcl/gopa/core/util"
 )
 
 var dbLock sync.RWMutex
@@ -38,15 +40,65 @@ type ORM interface {
 }
 
 type Query struct {
-	Sort   string
-	From   int
-	Size   int
-	Filter *Cond
+	Sort  string
+	From  int
+	Size  int
+	Conds []*Cond
+	RawQuery string
 }
 
 type Cond struct {
-	Name  string
+	Field string
+	Op    string
 	Value interface{}
+}
+
+func Eq(field string, value interface{}) *Cond {
+	c := Cond{}
+	c.Field = field
+	c.Value = value
+	c.Op = " = "
+	return &c
+}
+
+func NotEq(field string, value interface{}) *Cond {
+	c := Cond{}
+	c.Field = field
+	c.Value = value
+	c.Op = " != "
+	return &c
+}
+
+func Gt(field string, value interface{}) *Cond {
+	c := Cond{}
+	c.Field = field
+	c.Value = value
+	c.Op = " > "
+	return &c
+}
+
+func Lt(field string, value interface{}) *Cond {
+	c := Cond{}
+	c.Field = field
+	c.Value = value
+	c.Op = " < "
+	return &c
+}
+
+func Ge(field string, value interface{}) *Cond {
+	c := Cond{}
+	c.Field = field
+	c.Value = value
+	c.Op = " >= "
+	return &c
+}
+
+func And(conds ...*Cond) []*Cond {
+	t := []*Cond{}
+	for _,c := range conds {
+		t = append(t, c)
+	}
+	return t
 }
 
 type Result struct {
@@ -122,9 +174,15 @@ func Search(o interface{}, q *Query) (error, Result) {
 		db1 = db1.Order(q.Sort)
 	}
 
-	if q.Filter != nil {
-		err = db1.Limit(q.Size).Offset(q.From).Where(q.Filter.Name+" = ?", q.Filter.Value).Find(o).Error
-		db1.Where(q.Filter.Name+" = ?", q.Filter.Value).Count(&c)
+	if q.Conds != nil {
+		q1 := db1.Limit(q.Size).Offset(q.From)
+		for _,c1 := range q.Conds {
+			log.Errorf(c1.Field+c1.Op+" ?", c1.Value)
+			q1=q1.Joins(c1.Field+c1.Op+" ?", c1.Value)
+		}
+		log.Error(util.ToJson(q1,true))
+		err = q1.Find(o).Error
+		q1.Count(&c)
 	} else {
 		err = db1.Limit(q.Size).Offset(q.From).Find(o).Error
 		db1.Count(&c)
