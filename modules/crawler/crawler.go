@@ -131,14 +131,14 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 		Start(init).
 		Join(UrlNormalizationJoint{FollowAllDomain: true, FollowSubDomain: true}).
 		Join(LoadMetadataJoint{}).
-		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 10}).
+		//Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 10}).
 		Join(FetchJoint{}).
 		Join(ParsePageJoint{DispatchLinks: true, MaxDepth: 30, MaxBreadth: 3}).
 		Join(HtmlToTextJoint{MergeWhitespace: false}).
-		Join(HashJoint{Simhash: false}).
+		Join(HashJoint{Simhash: true}).
 		//Join(SaveSnapshotToFileSystemJoint{}).
 		Join(SaveSnapshotToDBJoint{CompressBody: true, Bucket: "Global"}).
-		Join(PublishJoint{}).
+		//Join(IndexJoint{}).
 		End(SaveTaskJoint{}).
 		Run()
 
