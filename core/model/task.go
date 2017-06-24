@@ -19,6 +19,9 @@ type TaskStatus int
 const TaskCreated TaskStatus = 0
 const TaskFetchFailed TaskStatus = 2
 const TaskFetchSuccess TaskStatus = 3
+const Task404Ignore TaskStatus = 4
+const TaskRedirectedIgnore TaskStatus = 5
+const TaskFetchTimeout TaskStatus = 6
 
 type Seed struct {
 	Url       string `storm:"index" json:"url,omitempty" gorm:"type:not null;varchar(500)"` // the seed url may not cleaned, may miss the domain part, need reference to provide the complete url information
@@ -108,10 +111,11 @@ type Task struct {
 	LastCheckTime *time.Time      `gorm:"index" json:"last_check"`
 	NextCheckTime *time.Time      `gorm:"index" json:"next_check"`
 
-	SnapshotVersion int    `json:"snapshot_version"`
-	SnapshotID      string `json:"-"` //Last Snapshot's ID
-	SnapshotHash    string `json:"-"` //Last Snapshot's Hash
-	SnapshotSimHash string `json:"-"` //Last Snapshot's Simhash
+	SnapshotVersion    int        `json:"snapshot_version"`
+	SnapshotID         string     `json:"snapshot_id"`      //Last Snapshot's ID
+	SnapshotHash       string     `json:"snapshot_hash"`    //Last Snapshot's Hash
+	SnapshotSimHash    string     `json:"snapshot_simhash"` //Last Snapshot's Simhash
+	SnapshotCreateTime *time.Time `json:"snapshot_created"` //Last Snapshot's Simhash
 }
 
 func CreateTask(task *Task) error {
@@ -199,11 +203,13 @@ func GetPendingNewFetchTasks() (int, []Task, error) {
 
 func GetPendingUpdateFetchTasks(offset *time.Time) (int, []Task, error) {
 	t := time.Now()
-	log.Trace("start get all crawler tasks")
+	log.Tracef("start get all crawler tasks,last offset: %s,", offset.String())
 	var tasks []Task
 	queryO := store.Query{Sort: "create_time asc",
-		Conds: store.And(store.Lt("next_check_time", t),
-			store.Gt("create_time", offset.String()))}
+		Conds: store.And(
+			store.Lt("next_check_time", t),
+			store.Gt("create_time", offset),
+			store.Eq("status", TaskFetchSuccess))}
 	err, result := store.Search(&tasks, &queryO)
 	if err != nil {
 		log.Trace(err)

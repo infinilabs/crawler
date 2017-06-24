@@ -21,15 +21,15 @@ import (
 	. "github.com/medcl/gopa/core/env"
 	"github.com/medcl/gopa/core/global"
 	"github.com/medcl/gopa/core/model"
+	"github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/util"
+	"github.com/medcl/gopa/modules/config"
+	"github.com/medcl/gopa/modules/crawler/pipe"
 	db "github.com/medcl/gopa/modules/database"
 	f "github.com/medcl/gopa/modules/filter"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
-	"github.com/medcl/gopa/core/pipeline"
-	"github.com/medcl/gopa/modules/config"
-	"github.com/medcl/gopa/modules/crawler/pipe"
 )
 
 func Test1(t *testing.T) {
