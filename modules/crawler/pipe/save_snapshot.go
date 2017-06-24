@@ -17,8 +17,8 @@ limitations under the License.
 package pipe
 
 import (
+	"fmt"
 	log "github.com/cihub/seelog"
-	"github.com/golang/go/src/pkg/fmt"
 	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/stats"
