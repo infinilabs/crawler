@@ -45,7 +45,7 @@ func Push(k QueueKey, v []byte) error {
 	panic(errors.New("channel is not registered"))
 }
 
-func ReadChan(k QueueKey) chan []byte  {
+func ReadChan(k QueueKey) chan []byte {
 	if handler != nil {
 		return handler.ReadChan(k)
 	}

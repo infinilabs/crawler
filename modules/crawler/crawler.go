@@ -23,13 +23,13 @@ import (
 	"github.com/medcl/gopa/core/global"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/queue"
+	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules/config"
 	. "github.com/medcl/gopa/modules/crawler/config"
 	. "github.com/medcl/gopa/modules/crawler/pipe"
 	"runtime"
 	"time"
-	"github.com/medcl/gopa/core/stats"
 )
 
 var signalChannels []*chan bool

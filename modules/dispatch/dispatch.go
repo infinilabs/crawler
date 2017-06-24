@@ -23,9 +23,9 @@ func (this DispatchModule) Start(cfg *Config) {
 	signalChannel = make(chan bool, 2)
 	go func() {
 		now := time.Now()
-		dd, _ := time.ParseDuration("240h")
-		dd1 := now.Add(dd)
-		offset:=&dd1
+		dd, _ := time.ParseDuration("-240h")
+		defaultOffset := now.Add(dd)
+		offset := &defaultOffset
 
 		for {
 			select {
@@ -42,17 +42,21 @@ func (this DispatchModule) Start(cfg *Config) {
 					log.Error(err)
 				}
 
-				isUpdate:=false
+				isUpdate := false
 				//get update task
 				if tasks == nil || total <= 0 {
 					total, tasks, err = model.GetPendingUpdateFetchTasks(offset)
-					log.Errorf("get %v update task",total)
-					isUpdate=true
+					log.Debug("get %v update task", total)
+					isUpdate = true
+					if total == 0 {
+						log.Trace("reset offset, ", defaultOffset)
+						offset = &defaultOffset
+					}
 				}
 
 				if tasks != nil && total > 0 {
 					for _, v := range tasks {
-						log.Debug("get task from db, ", v.ID)
+						log.Trace("get task from db, ", v.ID)
 
 						if err != nil {
 							log.Error(err)
@@ -60,8 +64,8 @@ func (this DispatchModule) Start(cfg *Config) {
 						}
 
 						//update offset
-						if(v.CreateTime.After(*offset)&&isUpdate){
-							offset=v.CreateTime
+						if v.CreateTime.After(*offset) && isUpdate {
+							offset = v.CreateTime
 						}
 
 						queue.Push(config.FetchChannel, []byte(v.ID))

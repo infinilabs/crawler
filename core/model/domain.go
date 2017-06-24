@@ -48,7 +48,7 @@ func GetDomainList(from, size int, domain string) (int, []Domain, error) {
 
 	query := store.Query{From: from, Size: size}
 	if len(domain) > 0 {
-		query.Conds = store.And(store.Eq("host",domain))
+		query.Conds = store.And(store.Eq("host", domain))
 	}
 
 	err, r := store.Search(&domains, &query)

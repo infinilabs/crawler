@@ -44,8 +44,9 @@ func (this FetchJoint) Name() string {
 }
 
 type signal struct {
-	flag bool
-	err  error
+	flag   bool
+	err    error
+	status model.TaskStatus
 }
 
 func (this FetchJoint) Process(context *Context) error {
@@ -74,6 +75,7 @@ func (this FetchJoint) Process(context *Context) error {
 
 		cookie, _ := this.GetString(Cookie)
 		proxy, _ := this.GetString(Proxy) //"socks5://127.0.0.1:9150"  //TODO 这个是全局配置,后续的url应该也使用同样的配置,应该在domain setting里面
+
 		//先全局,再domain,再task,再pipeline,层层覆盖
 		log.Trace("proxy:", proxy)
 
@@ -95,7 +97,7 @@ func (this FetchJoint) Process(context *Context) error {
 				if snapshot.StatusCode == 404 {
 					log.Info("skip while 404, ", requestUrl, " , ", snapshot.StatusCode)
 					context.Break("fetch 404")
-					flg <- signal{flag: false, err: errors.New("404 NOT FOUND")}
+					flg <- signal{flag: false, err: errors.New("404 NOT FOUND"), status: model.Task404Ignore}
 					return
 				}
 
@@ -125,7 +127,7 @@ func (this FetchJoint) Process(context *Context) error {
 
 			}
 			log.Debug("exit fetchUrl method:", requestUrl)
-			flg <- signal{flag: true}
+			flg <- signal{flag: true, status: model.TaskFetchSuccess}
 
 		} else {
 
@@ -136,9 +138,11 @@ func (this FetchJoint) Process(context *Context) error {
 				task := model.NewTaskSeed(payload.(string), requestUrl, task.Depth, task.Breadth)
 				log.Trace(err)
 				queue.Push(config.CheckChannel, task.MustGetBytes())
+				flg <- signal{flag: false, err: err, status: model.TaskRedirectedIgnore}
+				return
 			}
 
-			flg <- signal{flag: false, err: err}
+			flg <- signal{flag: false, err: err, status: model.TaskFetchFailed}
 		}
 	}()
 
@@ -147,6 +151,7 @@ func (this FetchJoint) Process(context *Context) error {
 	case <-timer.C:
 		log.Error("fetching url time out, ", requestUrl, ", ", this.timeout)
 		stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
+		task.Status = model.TaskFetchTimeout
 		context.Break(fmt.Sprintf("fetching url time out, %s, %s", requestUrl, this.timeout))
 		return errors.New("fetch url time out")
 	case value := <-flg:
@@ -160,6 +165,7 @@ func (this FetchJoint) Process(context *Context) error {
 			}
 			stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_FAIL_COUNT)
 		}
+		task.Status = value.status
 		return nil
 	}
 
