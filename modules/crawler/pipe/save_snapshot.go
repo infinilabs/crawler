@@ -18,14 +18,12 @@ package pipe
 
 import (
 	log "github.com/cihub/seelog"
+	"github.com/golang/go/src/pkg/fmt"
 	"github.com/medcl/gopa/core/model"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/store"
-	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules/config"
-	"path"
-	"strings"
 )
 
 const SaveSnapshotToDB JointKey = "save_snapshot_db"
@@ -43,13 +41,34 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 
+	//update task's snapshot, detect duplicated snapshot
+	if snapshot != nil {
+
+		if snapshot.Hash == task.SnapshotHash {
+			log.Debug(fmt.Sprintf("break by same hash: %s, %s", snapshot.Hash, task.Url))
+			c.Break(fmt.Sprintf("same hash: %s, %s", snapshot.Hash, task.Url))
+			return nil
+		}
+
+		task.SnapshotVersion = task.SnapshotVersion + 1
+		task.SnapshotID = snapshot.ID
+		task.SnapshotHash = snapshot.Hash
+		task.SnapshotSimHash = snapshot.SimHash
+		task.SnapshotCreateTime = snapshot.CreateTime
+
+		snapshot.Version = task.SnapshotVersion
+		snapshot.Url = task.Url
+		snapshot.TaskID = task.ID
+	}
+
 	url := task.Url
 
 	savePath := snapshot.Path
 	saveFile := snapshot.File
 	domain := task.Host
 
-	saveKey := GetKey(path.Join(task.Host, savePath, saveFile))
+	saveKey := []byte(snapshot.ID)
+
 	log.Debug("save url to db, url:", url, ",domain:", task.Host, ",path:", savePath, ",file:", saveFile, ",saveKey:", string(saveKey))
 
 	if this.CompressBody {
@@ -59,33 +78,10 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 		store.AddValue(config.SnapshotBucketKey, saveKey, snapshot.Payload)
 	}
 
+	model.CreateSnapshot(snapshot)
+
 	stats.IncrementBy("domain.stats", domain+"."+config.STATS_STORAGE_FILE_SIZE, int64(len(snapshot.Payload)))
 	stats.Increment("domain.stats", domain+"."+config.STATS_STORAGE_FILE_COUNT)
 
-	//update task's snapshot
-	if snapshot != nil {
-		task.SnapshotVersion = task.SnapshotVersion + 1
-		snapshot.Version = task.SnapshotVersion
-		task.SnapshotID = snapshot.ID
-		task.SnapshotHash = snapshot.Hash
-		task.SnapshotSimHash = snapshot.SimHash
-	}
-
 	return nil
-}
-
-const KeyDelimiter string = "/"
-
-func GetKey(args ...string) []byte {
-	key := config.SnapshotMappingBucketKey
-	url := []byte(strings.Join(args, KeyDelimiter))
-	v := store.GetValue(key, url)
-	if v != nil {
-		stats.Increment("save", "duplicated_url")
-		log.Warnf("get snapshotId from db, maybe previous already saved, %s, %s", string(v), string(url))
-		return v
-	}
-	snapshotId := util.GetIncrementID("snapshot")
-	store.AddValue(key, url, []byte(snapshotId))
-	return []byte(snapshotId)
 }

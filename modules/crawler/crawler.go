@@ -23,13 +23,13 @@ import (
 	"github.com/medcl/gopa/core/global"
 	. "github.com/medcl/gopa/core/pipeline"
 	"github.com/medcl/gopa/core/queue"
+	"github.com/medcl/gopa/core/stats"
 	"github.com/medcl/gopa/core/util"
 	"github.com/medcl/gopa/modules/config"
 	. "github.com/medcl/gopa/modules/crawler/config"
 	. "github.com/medcl/gopa/modules/crawler/pipe"
 	"runtime"
 	"time"
-	"github.com/medcl/gopa/core/stats"
 )
 
 var signalChannels []*chan bool
@@ -131,14 +131,14 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 		Start(init).
 		Join(UrlNormalizationJoint{FollowAllDomain: true, FollowSubDomain: true}).
 		Join(LoadMetadataJoint{}).
-		Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 10}).
+		//Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 10}).
 		Join(FetchJoint{}).
 		Join(ParsePageJoint{DispatchLinks: true, MaxDepth: 30, MaxBreadth: 3}).
 		Join(HtmlToTextJoint{MergeWhitespace: false}).
-		Join(HashJoint{Simhash: false}).
+		Join(HashJoint{Simhash: true}).
 		//Join(SaveSnapshotToFileSystemJoint{}).
 		Join(SaveSnapshotToDBJoint{CompressBody: true, Bucket: "Global"}).
-		Join(PublishJoint{}).
+		//Join(IndexJoint{}).
 		End(SaveTaskJoint{}).
 		Run()
 

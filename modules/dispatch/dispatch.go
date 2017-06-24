@@ -3,7 +3,6 @@ package dispatch
 import (
 	log "github.com/cihub/seelog"
 	. "github.com/medcl/gopa/core/config"
-	"github.com/medcl/gopa/core/filter"
 	"github.com/medcl/gopa/core/model"
 	"github.com/medcl/gopa/core/queue"
 	"github.com/medcl/gopa/core/stats"
@@ -23,34 +22,50 @@ var signalChannel chan bool
 func (this DispatchModule) Start(cfg *Config) {
 	signalChannel = make(chan bool, 2)
 	go func() {
+		now := time.Now()
+		dd, _ := time.ParseDuration("-240h")
+		defaultOffset := now.Add(dd)
+		offset := &defaultOffset
+
 		for {
 			select {
 			case <-signalChannel:
 				log.Trace("dispatcher exited")
 				return
-			case data := <- queue.ReadChan(config.DispatcherChannel):
+			case data := <-queue.ReadChan(config.DispatcherChannel):
 				stats.Increment("queue."+string(config.DispatcherChannel), "pop")
 				log.Trace("got dispatcher signal, ", string(data))
-				_, tasks, err := model.GetPendingFetchTasks()
+
+				//get new task
+				total, tasks, err := model.GetPendingNewFetchTasks()
 				if err != nil {
-					log.Trace(err)
-					continue
+					log.Error(err)
 				}
 
-				if tasks != nil {
-					for _, v := range tasks {
-						log.Debug("get task from db, ", v.ID)
+				isUpdate := false
+				//get update task
+				if tasks == nil || total <= 0 {
+					total, tasks, err = model.GetPendingUpdateFetchTasks(offset)
+					log.Debug("get %v update task", total)
+					isUpdate = true
+					if total == 0 {
+						log.Trace("reset offset, ", defaultOffset)
+						offset = &defaultOffset
+					}
+				}
 
-						b, err := filter.CheckThenAdd(config.FetchFilter, []byte(v.ID))
+				if tasks != nil && total > 0 {
+					for _, v := range tasks {
+						log.Trace("get task from db, ", v.ID)
 
 						if err != nil {
 							log.Error(err)
 							panic(err)
 						}
 
-						if b {
-							log.Debug("url seems already fetched, ignore now, ", v.ID)
-							continue
+						//update offset
+						if v.CreateTime.After(*offset) && isUpdate {
+							offset = v.CreateTime
 						}
 
 						queue.Push(config.FetchChannel, []byte(v.ID))

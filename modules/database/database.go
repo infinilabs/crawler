@@ -46,6 +46,7 @@ func (this DatabaseModule) Start(cfg *config.Config) {
 	// Migrate the schema
 	db.AutoMigrate(&model.Domain{})
 	db.AutoMigrate(&model.Task{})
+	db.AutoMigrate(&model.Snapshot{})
 
 	store.RegisterDBConnection(db)
 }

@@ -16,7 +16,10 @@ limitations under the License.
 
 package model
 
-import "time"
+import (
+	"github.com/medcl/gopa/core/store"
+	"time"
+)
 
 type KV struct {
 	Key   string   `json:"key,omitempty"`
@@ -31,43 +34,45 @@ type LinkGroup struct {
 type Snapshot struct {
 	ID      string `json:"id,omitempty" gorm:"not null;unique;primary_key"`
 	Version int    `json:"version,omitempty"`
-	Path    string `json:"path,omitempty"` //path of this file
-	File    string `json:"file,omitempty"` //filename of this page
+	Url     string `json:"url,omitempty"`
+	TaskID  string `json:"task_id,omitempty"`
+	Path    string `json:"path,omitempty"  gorm:"-"` //path of this file
+	File    string `json:"file,omitempty"  gorm:"-"` //filename of this page
 
-	StatusCode int    `json:"-"`
-	Payload    []byte `json:"-"`
+	StatusCode int    `json:"-" gorm:"-"`
+	Payload    []byte `json:"-" gorm:"-"`
 	Size       uint64 `json:"size,omitempty"`
 
-	Headers    map[string][]string     `json:"-"`
-	Metadata   *map[string]interface{} `json:"-"`
-	Parameters []KV                    `json:"-"`
+	Headers    map[string][]string     `json:"-" gorm:"-"`
+	Metadata   *map[string]interface{} `json:"-" gorm:"-"`
+	Parameters []KV                    `json:"-" gorm:"-"`
 
-	Language string `json:"lang,omitempty"`
+	Language string `json:"lang,omitempty" gorm:"-"`
 
 	Title       string `json:"title,omitempty"`
-	Summary     string `json:"summary,omitempty"`
-	Text        string `json:"text,omitempty"`
+	Summary     string `json:"summary,omitempty" gorm:"-"`
+	Text        string `json:"text,omitempty" gorm:"-"`
 	ContentType string `json:"content_type,omitempty"`
 
-	Tags []string `json:"tags,omitempty"`
+	Tags []string `json:"tags,omitempty" gorm:"-"`
 
-	Links LinkGroup `json:"links,omitempty"`
+	Links LinkGroup `json:"links,omitempty" gorm:"-"`
 
 	Images struct {
 		Internal []PageLink `json:"internal,omitempty"`
 		External []PageLink `json:"external,omitempty"`
-	} `json:"images,omitempty"`
+	} `json:"images,omitempty" gorm:"-"`
 
-	H1     []string `json:"h1,omitempty"`
-	H2     []string `json:"h2,omitempty"`
-	H3     []string `json:"h3,omitempty"`
-	H4     []string `json:"h4,omitempty"`
-	H5     []string `json:"h5,omitempty"`
-	Bold   []string `json:"bold,omitempty"`
-	Italic []string `json:"italic,omitempty"`
+	H1     []string `json:"h1,omitempty" gorm:"-"`
+	H2     []string `json:"h2,omitempty" gorm:"-"`
+	H3     []string `json:"h3,omitempty" gorm:"-"`
+	H4     []string `json:"h4,omitempty" gorm:"-"`
+	H5     []string `json:"h5,omitempty" gorm:"-"`
+	Bold   []string `json:"bold,omitempty" gorm:"-"`
+	Italic []string `json:"italic,omitempty" gorm:"-"`
 
-	Classifications  []string                `json:"classifications,omitempty"`
-	EnrichedFeatures *map[string]interface{} `json:"enriched_features,omitempty"`
+	Classifications  []string                `json:"classifications,omitempty" gorm:"-"`
+	EnrichedFeatures *map[string]interface{} `json:"enriched_features,omitempty" gorm:"-"`
 
 	Hash    string `json:"hash,omitempty"`
 	SimHash string `json:"sim_hash,omitempty"`
@@ -78,4 +83,9 @@ type Snapshot struct {
 type PageLink struct {
 	Url   string `json:"url"`
 	Label string `json:"label"`
+}
+
+func CreateSnapshot(snapshot *Snapshot) error {
+	err := store.Save(snapshot)
+	return err
 }

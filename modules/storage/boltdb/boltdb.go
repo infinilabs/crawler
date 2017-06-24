@@ -181,8 +181,10 @@ func (filter BoltdbStore) Search(t1, t2 interface{}, q1 *store.Query) (error, st
 	}
 
 	var q2 storm.Query
-	if q1.Filter != nil {
-		q2 = db.Select(q.Eq(q1.Filter.Name, q1.Filter.Value)) //can't limit here, bug .Limit(q1.Size).Skip(q1.From)
+	if q1.Conds != nil {
+
+		//TODO
+		//q2 = db.Select(q.Eq(q1.Conds.Field, q1.Filter.Value)) //can't limit here, bug .Limit(q1.Size).Skip(q1.From)
 
 	} else {
 		q2 = db.Select(q.True()).Limit(q1.Size).Skip(q1.From)

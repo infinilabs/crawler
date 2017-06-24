@@ -28,7 +28,7 @@ var defaultStatsdConfig = StatsDConfig{
 	Host:              "localhost",
 	Port:              8125,
 	Namespace:         "gopa.",
-	IntervalInSeconds: 2,
+	IntervalInSeconds: 1,
 }
 
 func (this StatsDModule) Name() string {
@@ -66,7 +66,6 @@ func (this StatsDModule) Start(cfg *Config) {
 
 func (this StatsDModule) Stop() error {
 	if statsdclient != nil {
-		buffer.Close()
 		statsdclient.Close()
 	}
 	return nil

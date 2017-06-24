@@ -71,6 +71,9 @@ func (this InitTaskJoint) Process(context *Context) error {
 	t1 := time.Now().UTC()
 	task.LastCheckTime = &t1
 
+	nextT := t1.Add(1 * time.Minute)
+	task.NextCheckTime = &nextT
+
 	//update next check time //TODO
 
 	//init snapshot

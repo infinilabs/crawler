@@ -43,12 +43,11 @@ func (this SaveTaskJoint) Process(context *Context) error {
 	}
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
-	task.Status = model.TaskFetchSuccess
+	//task.Status = model.TaskFetchSuccess
 	task.Phrase = context.Phrase
 
 	if context.IsBreak() {
 		log.Trace("broken pipeline,", context.Payload)
-		task.Status = model.TaskFetchFailed
 		task.Message = util.ToJson(context.Payload, false)
 	}
 
