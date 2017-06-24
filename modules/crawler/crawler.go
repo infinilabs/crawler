@@ -138,7 +138,7 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 		Join(HashJoint{Simhash: true}).
 		//Join(SaveSnapshotToFileSystemJoint{}).
 		Join(SaveSnapshotToDBJoint{CompressBody: true, Bucket: "Global"}).
-		//Join(IndexJoint{}).
+		Join(IndexJoint{}).
 		End(SaveTaskJoint{}).
 		Run()
 
