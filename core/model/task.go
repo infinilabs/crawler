@@ -23,6 +23,24 @@ const Task404Ignore TaskStatus = 4
 const TaskRedirectedIgnore TaskStatus = 5
 const TaskFetchTimeout TaskStatus = 6
 
+func GetTaskStatusText(status TaskStatus) string{
+	switch status {
+	case TaskCreated:
+		return "created"
+	case TaskFetchFailed:
+		return "failed"
+	case Task404Ignore:
+		return "404"
+	case TaskFetchSuccess:
+		return "success"
+	case TaskRedirectedIgnore:
+		return "redirected"
+	case TaskFetchTimeout:
+		return "timeout"
+	}
+	return "unknow"
+}
+
 type Seed struct {
 	Url       string `storm:"index" json:"url,omitempty" gorm:"type:not null;varchar(500)"` // the seed url may not cleaned, may miss the domain part, need reference to provide the complete url information
 	Reference string `json:"reference_url,omitempty"`

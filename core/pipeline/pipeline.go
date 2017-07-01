@@ -272,10 +272,10 @@ func (this *Pipeline) Run() *Context {
 		if !global.Env().IsDebug {
 			if r := recover(); r != nil {
 				if e, ok := r.(runtime.Error); ok {
-					//log.Errorf("%v", err)
+					log.Errorf("%v", r)
 					this.context.Break(util.GetRuntimeErrorMessage(e))
 				}
-				log.Trace("error in pipeline, ", this.name)
+				log.Debug("error in pipeline, ", this.name)
 				stats.Increment(this.name+".pipeline", "error")
 			}
 		}

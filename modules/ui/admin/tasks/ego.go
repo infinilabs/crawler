@@ -38,7 +38,7 @@ func Index(w io.Writer, r *http.Request, domain string, from, size, taskCount in
 
 	_, _ = io.WriteString(w, "\n                </ul>\n            </div>\n\n            <div class=\"uk-width-8-10\">\n                <div class=\"uk-alert\" ><span id=\"alert\">Total ")
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(taskCount)))
-	_, _ = io.WriteString(w, "</span></div>\n\n                <table id=\"tasks\" class=\"uk-table uk-table-hover uk-table-striped\" cellspacing=\"0\" width=\"100%\">\n                    <thead>\n                    <tr>\n                        <th>URL</th>\n                        <th>Updated</th>\n                    </tr>\n                    </thead>\n                    <tbody id=\"records\">\n                    ")
+	_, _ = io.WriteString(w, "</span></div>\n\n                <table id=\"tasks\" class=\"uk-table uk-table-hover uk-table-striped\" cellspacing=\"0\" width=\"100%\">\n                    <thead>\n                    <tr>\n                        <th>URL</th>\n                        <th>LastUpdate</th>\n                        <th>NextCheck</th>\n                        <th>Status</th>\n                    </tr>\n                    </thead>\n                    <tbody id=\"records\">\n                    ")
 	if len(tasks) > 0 {
 		for _, task := range tasks {
 

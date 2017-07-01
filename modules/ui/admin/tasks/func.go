@@ -18,9 +18,24 @@ func GetTaskRow(task model.Task) string {
 	var buffer bytes.Buffer
 	buffer.WriteString("<tr>")
 
-	writeTag(&buffer, "td", util.SubStringWithSuffix(task.Url, 83, "..."))
-	date := util.FormatTime(task.UpdateTime)
-	buffer.WriteString("<td class='timeago' title='" + date + "' >" + date + "</td>")
+	writeTag(&buffer, "td", util.SubStringWithSuffix(task.Url, 60, "..."))
+
+	if(task.SnapshotCreateTime!=nil){
+		date1 := util.FormatTime(task.SnapshotCreateTime)
+		buffer.WriteString("<td class='timeago' title='" + date1 + "' >" + date1 + "</td>")
+	}else{
+		buffer.WriteString("<td >N/A</td>")
+	}
+
+	if(task.NextCheckTime!=nil){
+		date2 := util.FormatTime(task.NextCheckTime)
+		buffer.WriteString("<td class='timeago' title='" + date2 + "' >" + date2 + "</td>")
+
+	}else{
+		buffer.WriteString("<td >N/A</td>")
+	}
+
+	buffer.WriteString("<td >" + model.GetTaskStatusText(task.Status)  + "</td>")
 
 	buffer.WriteString("</tr>")
 	return buffer.String()
