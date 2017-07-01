@@ -54,6 +54,10 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 
 			//extended the nextchecktime
 			task.LastCheckTime = &tNow
+			if task.SnapshotCreateTime == nil {
+				defaultTime := tNow.Add(-m*1)
+				task.SnapshotCreateTime = &defaultTime
+			}
 			timeInterval := GetNextCheckTimeMinutes(false,*task.SnapshotCreateTime,tNow)
 			nextT := tNow.Add(m * time.Duration(timeInterval))
 			task.NextCheckTime = &nextT
@@ -63,6 +67,10 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 
 		//shorten the nextchecktime
 		task.LastCheckTime = &tNow
+		if task.SnapshotCreateTime == nil {
+			defaultTime := tNow.Add(-m*1)
+			task.SnapshotCreateTime = &defaultTime
+		}
 		timeInterval := GetNextCheckTimeMinutes(true,*task.SnapshotCreateTime,tNow)
 		nextT := tNow.Add(m * time.Duration(timeInterval))
 		task.NextCheckTime = &nextT
