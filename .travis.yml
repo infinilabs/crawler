@@ -1,20 +1,19 @@
 language: go
 os:
-  - osx
-  - linux
+- osx
+- linux
 script: make clean config build
 go:
-  - 1.x
-  - 1.6
-  - 1.7.x
-  - master
+- 1.x
+- 1.6
+- 1.7.x
+- master
 deploy:
   provider: releases
-  skip_cleanup: false
   api_key:
-    secure: Y34W9IfgIPA+/kkVfysNs6s/Zx5Rz2TK1Og1Tr9EGzDofadCs5e0Pjke1sU+VTcKIo8T4JGoDw5oUhC5CTsrq3iBa47hseFdQuERzLUKdEtaWIORTNcrJZJqitw/Fs50A6KPpN7Tvi6rOGD+pUi+lgYXbNvspyuVdHvW6HbcTvk=
+    secure: K9EcQOtPXGMH4EJm0P4Fc3cL+xq3A6mEU5RY+IPHLktzzTg8gUHIDb+rPbwQYQcPA3g6Xtr83TtlaBEhhgz0/Kqdl43BmYo5SqA3DeVCL71P9E4B29mf6kdbB4V/E+eDiUK/k3zkWWV0Oj3gPA9pZoyMSk2iRNuX8atgyo3tUIk4Z8m6o50zAFHwZping0TaQSF5YELRWBPTio/I6Qu41KzoIqIicB5Wsd7nMH+PKDDtMGCgp7M4LoN83mdFmJk8QVYQvyDWG6KzTtxi5GGPY1mg9LZuc6FOp1ZOpevLJ2yTEJXk48pTLWsykdFDsZiVzv6sQNe0JVgkcy+doKojANUNXvDChRfQdpVjSjO8kYrKESMW4+U+QMhGhJ3cFMYA+PQWzxCfKJl78msaOqSExDEwcSP5R96WYul7Vebpi9NSp3h8Gw7YN96pkgXerUlzcyoBkOAtLQn8VW3Y0MEZvEsQr1wKuCh55k3YtGRIeulsf8L7EAxk21wrcWQuS/MP7A+Mnsa1hHvqyt3bAMp5CIrfZJ0smOVSoIw9SVvbTFG1ewIb23x/5rnm+Pd0d3YXtoTzJK4uDD3vXIQzidIcWnMS/VkPtQthNTj0mC+BISIrG2xEE1/P1BhuZDUUVR6G2lfC8BWRDTCi0DkOjJEhT8Pa9ZvsF/3uYMHaWxLMdIk=
   file: bin/*.tar.gz
   file_glob: true
   on:
-    repo: medcl/gopa
+    repo: infinitbyte/gopa
     tags: true
