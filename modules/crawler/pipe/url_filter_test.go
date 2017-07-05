@@ -17,8 +17,8 @@ limitations under the License.
 package pipe
 
 import (
-	"github.com/medcl/gopa/core/model"
-	"github.com/medcl/gopa/core/pipeline"
+	"github.com/infinitbyte/gopa/core/model"
+	"github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

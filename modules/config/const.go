@@ -1,11 +1,11 @@
 package config
 
 import (
-	"github.com/medcl/gopa/core/errors"
-	"github.com/medcl/gopa/core/filter"
-	"github.com/medcl/gopa/core/global"
-	"github.com/medcl/gopa/core/pipeline"
-	"github.com/medcl/gopa/core/queue"
+	"github.com/infinitbyte/gopa/core/errors"
+	"github.com/infinitbyte/gopa/core/filter"
+	"github.com/infinitbyte/gopa/core/global"
+	"github.com/infinitbyte/gopa/core/pipeline"
+	"github.com/infinitbyte/gopa/core/queue"
 )
 
 const (

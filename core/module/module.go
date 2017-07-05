@@ -18,7 +18,7 @@ package module
 
 import (
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/env"
+	"github.com/infinitbyte/gopa/core/env"
 )
 
 type Modules struct {

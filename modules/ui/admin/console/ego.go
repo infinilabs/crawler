@@ -5,7 +5,7 @@ package console
 
 import (
 	"fmt"
-	"github.com/medcl/gopa/modules/ui/admin/common"
+	"github.com/infinitbyte/gopa/modules/ui/admin/common"
 	"io"
 )
 

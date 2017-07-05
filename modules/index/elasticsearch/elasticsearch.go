@@ -19,7 +19,7 @@ package util
 import (
 	"encoding/json"
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/util"
+	"github.com/infinitbyte/gopa/core/util"
 )
 
 type ElasticsearchConfig struct {

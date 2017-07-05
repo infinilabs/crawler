@@ -17,7 +17,7 @@ limitations under the License.
 package module
 
 import (
-	"github.com/medcl/gopa/core/config"
+	"github.com/infinitbyte/gopa/core/config"
 )
 
 type Module interface {

@@ -18,13 +18,13 @@ package http
 
 import (
 	logger "github.com/cihub/seelog"
+	. "github.com/infinitbyte/gopa/core/http"
+	"github.com/infinitbyte/gopa/core/model"
+	"github.com/infinitbyte/gopa/core/queue"
+	"github.com/infinitbyte/gopa/core/stats"
+	"github.com/infinitbyte/gopa/modules/config"
 	_ "github.com/jmoiron/jsonq"
 	"github.com/julienschmidt/httprouter"
-	. "github.com/medcl/gopa/core/http"
-	"github.com/medcl/gopa/core/model"
-	"github.com/medcl/gopa/core/queue"
-	"github.com/medcl/gopa/core/stats"
-	"github.com/medcl/gopa/modules/config"
 	"net/http"
 	"strconv"
 )

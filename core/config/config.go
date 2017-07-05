@@ -16,8 +16,8 @@ import (
 	"github.com/elastic/go-ucfg/cfgutil"
 	cfgflag "github.com/elastic/go-ucfg/flag"
 	"github.com/elastic/go-ucfg/yaml"
-	"github.com/medcl/gopa/core/util"
-	"github.com/medcl/gopa/core/util/file"
+	"github.com/infinitbyte/gopa/core/util"
+	"github.com/infinitbyte/gopa/core/util/file"
 )
 
 var flagStrictPerms = flag.Bool("strict.perms", true, "Strict permission checking on config files")

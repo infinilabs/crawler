@@ -1,9 +1,9 @@
 package user
 
 import (
+	"github.com/infinitbyte/gopa/core/http"
+	"github.com/infinitbyte/gopa/modules/ui/user/search"
 	"github.com/julienschmidt/httprouter"
-	"github.com/medcl/gopa/core/http"
-	"github.com/medcl/gopa/modules/ui/user/search"
 	"net/http"
 )
 

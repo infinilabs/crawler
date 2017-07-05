@@ -6,7 +6,7 @@ package boltdb
 import (
 	"fmt"
 	"github.com/boltdb/bolt"
-	"github.com/medcl/gopa/modules/ui/admin/common"
+	"github.com/infinitbyte/gopa/modules/ui/admin/common"
 	"html"
 	"io"
 	"net/http"

@@ -19,11 +19,11 @@ package pipe
 import (
 	"fmt"
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/model"
-	. "github.com/medcl/gopa/core/pipeline"
-	"github.com/medcl/gopa/core/stats"
-	"github.com/medcl/gopa/core/store"
-	"github.com/medcl/gopa/modules/config"
+	"github.com/infinitbyte/gopa/core/model"
+	. "github.com/infinitbyte/gopa/core/pipeline"
+	"github.com/infinitbyte/gopa/core/stats"
+	"github.com/infinitbyte/gopa/core/store"
+	"github.com/infinitbyte/gopa/modules/config"
 )
 
 const SaveSnapshotToDB JointKey = "save_snapshot_db"

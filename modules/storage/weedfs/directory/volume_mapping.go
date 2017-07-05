@@ -4,7 +4,7 @@ import (
 	"encoding/gob"
 	"errors"
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/modules/storage/weedfs/storage"
+	"github.com/infinitbyte/gopa/modules/storage/weedfs/storage"
 	"math/rand"
 	"os"
 	"path"

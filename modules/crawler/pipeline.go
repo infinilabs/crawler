@@ -18,8 +18,8 @@ package crawler
 
 import (
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/pipeline"
-	"github.com/medcl/gopa/modules/crawler/pipe"
+	"github.com/infinitbyte/gopa/core/pipeline"
+	"github.com/infinitbyte/gopa/modules/crawler/pipe"
 )
 
 func InitJoints() {

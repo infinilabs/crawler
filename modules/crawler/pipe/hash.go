@@ -21,8 +21,8 @@ import (
 	"fmt"
 	log "github.com/cihub/seelog"
 	. "github.com/gensmusic/simhash"
-	"github.com/medcl/gopa/core/model"
-	. "github.com/medcl/gopa/core/pipeline"
+	"github.com/infinitbyte/gopa/core/model"
+	. "github.com/infinitbyte/gopa/core/pipeline"
 	"path"
 	"sync"
 )

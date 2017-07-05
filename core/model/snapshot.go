@@ -17,7 +17,7 @@ limitations under the License.
 package model
 
 import (
-	"github.com/medcl/gopa/core/store"
+	"github.com/infinitbyte/gopa/core/store"
 	"time"
 )
 

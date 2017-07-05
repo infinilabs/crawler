@@ -18,11 +18,11 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/infinitbyte/gopa/core/errors"
+	"github.com/infinitbyte/gopa/core/global"
+	"github.com/infinitbyte/gopa/core/util"
 	"github.com/jmoiron/jsonq"
 	"github.com/julienschmidt/httprouter"
-	"github.com/medcl/gopa/core/errors"
-	"github.com/medcl/gopa/core/global"
-	"github.com/medcl/gopa/core/util"
 	"io/ioutil"
 	"net/http"
 	"strings"

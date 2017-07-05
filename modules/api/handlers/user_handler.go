@@ -17,8 +17,8 @@ limitations under the License.
 package http
 
 import (
+	"github.com/infinitbyte/gopa/core/http"
 	"github.com/julienschmidt/httprouter"
-	"github.com/medcl/gopa/core/http"
 	"net/http"
 	"time"
 )

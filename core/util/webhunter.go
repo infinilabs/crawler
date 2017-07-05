@@ -29,7 +29,7 @@ import (
 
 	"fmt"
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/errors"
+	"github.com/infinitbyte/gopa/core/errors"
 	"golang.org/x/net/proxy"
 )
 

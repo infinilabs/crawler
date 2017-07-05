@@ -18,10 +18,10 @@ package filter
 
 import (
 	"fmt"
-	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/core/global"
-	"github.com/medcl/gopa/core/util"
-	"github.com/medcl/gopa/modules/config"
+	. "github.com/infinitbyte/gopa/core/env"
+	"github.com/infinitbyte/gopa/core/global"
+	"github.com/infinitbyte/gopa/core/util"
+	"github.com/infinitbyte/gopa/modules/config"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"

@@ -18,11 +18,11 @@ package websocket
 
 import (
 	"encoding/json"
-	"github.com/medcl/gopa/core/global"
-	logging "github.com/medcl/gopa/core/logger"
-	"github.com/medcl/gopa/core/model"
-	"github.com/medcl/gopa/core/queue"
-	"github.com/medcl/gopa/modules/config"
+	"github.com/infinitbyte/gopa/core/global"
+	logging "github.com/infinitbyte/gopa/core/logger"
+	"github.com/infinitbyte/gopa/core/model"
+	"github.com/infinitbyte/gopa/core/queue"
+	"github.com/infinitbyte/gopa/modules/config"
 	"strings"
 )
 

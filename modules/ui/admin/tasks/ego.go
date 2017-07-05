@@ -5,8 +5,8 @@ package tasks
 
 import (
 	"fmt"
-	"github.com/medcl/gopa/core/model"
-	"github.com/medcl/gopa/modules/ui/admin/common"
+	"github.com/infinitbyte/gopa/core/model"
+	"github.com/infinitbyte/gopa/modules/ui/admin/common"
 	"html"
 	"io"
 	"net/http"

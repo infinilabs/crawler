@@ -3,8 +3,8 @@ package directory
 import (
 	"encoding/hex"
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/util"
-	"github.com/medcl/gopa/modules/storage/weedfs/storage"
+	"github.com/infinitbyte/gopa/core/util"
+	"github.com/infinitbyte/gopa/modules/storage/weedfs/storage"
 	"strconv"
 	"strings"
 )

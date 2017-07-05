@@ -18,12 +18,12 @@ package database
 
 import (
 	"fmt"
+	"github.com/infinitbyte/gopa/core/config"
+	"github.com/infinitbyte/gopa/core/global"
+	"github.com/infinitbyte/gopa/core/model"
+	"github.com/infinitbyte/gopa/core/store"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/medcl/gopa/core/config"
-	"github.com/medcl/gopa/core/global"
-	"github.com/medcl/gopa/core/model"
-	"github.com/medcl/gopa/core/store"
 	"os"
 	"path"
 )

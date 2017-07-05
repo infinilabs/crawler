@@ -19,9 +19,9 @@ package logger
 import (
 	"fmt"
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/config"
-	. "github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/core/util"
+	"github.com/infinitbyte/gopa/core/config"
+	. "github.com/infinitbyte/gopa/core/env"
+	"github.com/infinitbyte/gopa/core/util"
 	"github.com/ryanuber/go-glob"
 	"strings"
 	"sync"

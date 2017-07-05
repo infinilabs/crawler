@@ -18,7 +18,7 @@ package global
 
 import (
 	"errors"
-	"github.com/medcl/gopa/core/env"
+	"github.com/infinitbyte/gopa/core/env"
 	"runtime"
 	"sync"
 )

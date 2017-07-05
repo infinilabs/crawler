@@ -18,7 +18,7 @@ package impl
 
 import (
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/util"
+	"github.com/infinitbyte/gopa/core/util"
 	. "github.com/zeebo/sbloom"
 	"hash/fnv"
 	"io/ioutil"

@@ -3,7 +3,7 @@ package storage
 import (
 	"encoding/hex"
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/util"
+	"github.com/infinitbyte/gopa/core/util"
 	"io"
 	"io/ioutil"
 	"net/http"

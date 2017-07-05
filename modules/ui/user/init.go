@@ -17,7 +17,7 @@ limitations under the License.
 package user
 
 import (
-	api "github.com/medcl/gopa/core/http"
+	api "github.com/infinitbyte/gopa/core/http"
 )
 
 func InitUI() {

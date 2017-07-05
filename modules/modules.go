@@ -17,18 +17,18 @@ limitations under the License.
 package modules
 
 import (
-	"github.com/medcl/gopa/core/module"
-	"github.com/medcl/gopa/modules/api"
-	"github.com/medcl/gopa/modules/cluster"
-	"github.com/medcl/gopa/modules/crawler"
-	"github.com/medcl/gopa/modules/database"
-	"github.com/medcl/gopa/modules/dispatch"
-	"github.com/medcl/gopa/modules/filter"
-	"github.com/medcl/gopa/modules/index"
-	"github.com/medcl/gopa/modules/queue"
-	"github.com/medcl/gopa/modules/stats"
-	"github.com/medcl/gopa/modules/storage"
-	"github.com/medcl/gopa/modules/ui"
+	"github.com/infinitbyte/gopa/core/module"
+	"github.com/infinitbyte/gopa/modules/api"
+	"github.com/infinitbyte/gopa/modules/cluster"
+	"github.com/infinitbyte/gopa/modules/crawler"
+	"github.com/infinitbyte/gopa/modules/database"
+	"github.com/infinitbyte/gopa/modules/dispatch"
+	"github.com/infinitbyte/gopa/modules/filter"
+	"github.com/infinitbyte/gopa/modules/index"
+	"github.com/infinitbyte/gopa/modules/queue"
+	"github.com/infinitbyte/gopa/modules/stats"
+	"github.com/infinitbyte/gopa/modules/storage"
+	"github.com/infinitbyte/gopa/modules/ui"
 )
 
 func Register() {

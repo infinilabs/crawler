@@ -23,10 +23,10 @@ import (
 	lz4 "github.com/bkaradzic/go-lz4"
 	"github.com/boltdb/bolt"
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/global"
-	"github.com/medcl/gopa/core/store"
-	"github.com/medcl/gopa/core/util"
-	"github.com/medcl/gopa/modules/config"
+	"github.com/infinitbyte/gopa/core/global"
+	"github.com/infinitbyte/gopa/core/store"
+	"github.com/infinitbyte/gopa/core/util"
+	"github.com/infinitbyte/gopa/modules/config"
 	"time"
 )
 

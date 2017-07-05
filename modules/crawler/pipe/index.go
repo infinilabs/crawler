@@ -21,11 +21,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/model"
-	. "github.com/medcl/gopa/core/pipeline"
-	"github.com/medcl/gopa/core/queue"
-	"github.com/medcl/gopa/core/util"
-	"github.com/medcl/gopa/modules/config"
+	"github.com/infinitbyte/gopa/core/model"
+	. "github.com/infinitbyte/gopa/core/pipeline"
+	"github.com/infinitbyte/gopa/core/queue"
+	"github.com/infinitbyte/gopa/core/util"
+	"github.com/infinitbyte/gopa/modules/config"
 )
 
 const Publish JointKey = "index"

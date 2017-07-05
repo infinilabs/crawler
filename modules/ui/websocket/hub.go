@@ -7,10 +7,10 @@ package websocket
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/core/global"
-	"github.com/medcl/gopa/core/logger"
-	"github.com/medcl/gopa/core/stats"
+	"github.com/infinitbyte/gopa/core/env"
+	"github.com/infinitbyte/gopa/core/global"
+	"github.com/infinitbyte/gopa/core/logger"
+	"github.com/infinitbyte/gopa/core/stats"
 	"strings"
 	"time"
 )

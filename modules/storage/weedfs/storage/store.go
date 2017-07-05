@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/util"
+	"github.com/infinitbyte/gopa/core/util"
 	"net/url"
 	"strconv"
 	"strings"

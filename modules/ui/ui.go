@@ -17,11 +17,11 @@ limitations under the License.
 package ui
 
 import (
-	uis "github.com/medcl/gopa/core/http"
-	"github.com/medcl/gopa/modules/ui/admin"
-	"github.com/medcl/gopa/modules/ui/user"
-	"github.com/medcl/gopa/modules/ui/websocket"
-	"github.com/medcl/gopa/static"
+	uis "github.com/infinitbyte/gopa/core/http"
+	"github.com/infinitbyte/gopa/modules/ui/admin"
+	"github.com/infinitbyte/gopa/modules/ui/user"
+	"github.com/infinitbyte/gopa/modules/ui/websocket"
+	"github.com/infinitbyte/gopa/static"
 	"net/http"
 
 	"crypto/tls"
@@ -29,11 +29,11 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/gorilla/context"
 	"github.com/gorilla/sessions"
+	. "github.com/infinitbyte/gopa/core/config"
+	"github.com/infinitbyte/gopa/core/global"
+	"github.com/infinitbyte/gopa/core/logger"
+	"github.com/infinitbyte/gopa/core/util"
 	"github.com/julienschmidt/httprouter"
-	. "github.com/medcl/gopa/core/config"
-	"github.com/medcl/gopa/core/global"
-	"github.com/medcl/gopa/core/logger"
-	"github.com/medcl/gopa/core/util"
 	_ "net/http/pprof"
 	"path"
 	"path/filepath"

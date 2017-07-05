@@ -16,7 +16,7 @@ limitations under the License.
 
 package pipe
 
-import . "github.com/medcl/gopa/core/pipeline"
+import . "github.com/infinitbyte/gopa/core/pipeline"
 
 const (
 	CONTEXT_CRAWLER_DOMAIN   ParaKey = "CRAWLER_DOMAIN"

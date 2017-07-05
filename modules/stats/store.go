@@ -3,10 +3,10 @@ package stats
 import (
 	"encoding/json"
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/config"
-	"github.com/medcl/gopa/core/stats"
-	"github.com/medcl/gopa/core/store"
-	"github.com/medcl/gopa/modules/config"
+	. "github.com/infinitbyte/gopa/core/config"
+	"github.com/infinitbyte/gopa/core/stats"
+	"github.com/infinitbyte/gopa/core/store"
+	"github.com/infinitbyte/gopa/modules/config"
 	"runtime"
 	"sync"
 )

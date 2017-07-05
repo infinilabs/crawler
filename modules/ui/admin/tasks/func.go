@@ -3,8 +3,8 @@ package tasks
 import (
 	"bytes"
 	"fmt"
-	"github.com/medcl/gopa/core/model"
-	"github.com/medcl/gopa/core/util"
+	"github.com/infinitbyte/gopa/core/model"
+	"github.com/infinitbyte/gopa/core/util"
 )
 
 func GetDomainRow(domain model.Domain) string {

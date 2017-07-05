@@ -17,7 +17,7 @@ limitations under the License.
 package http
 
 import (
-	"github.com/medcl/gopa/core/http"
+	"github.com/infinitbyte/gopa/core/http"
 )
 
 type API struct {

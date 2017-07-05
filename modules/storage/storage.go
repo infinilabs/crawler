@@ -17,10 +17,10 @@ limitations under the License.
 package storage
 
 import (
-	"github.com/medcl/gopa/core/config"
-	"github.com/medcl/gopa/core/global"
-	"github.com/medcl/gopa/core/store"
-	"github.com/medcl/gopa/modules/storage/boltdb"
+	"github.com/infinitbyte/gopa/core/config"
+	"github.com/infinitbyte/gopa/core/global"
+	"github.com/infinitbyte/gopa/core/store"
+	"github.com/infinitbyte/gopa/modules/storage/boltdb"
 	"os"
 	"path"
 )

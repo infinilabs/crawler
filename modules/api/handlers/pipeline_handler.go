@@ -18,8 +18,8 @@ package http
 
 import (
 	log "github.com/cihub/seelog"
+	. "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/julienschmidt/httprouter"
-	. "github.com/medcl/gopa/core/pipeline"
 	"net/http"
 
 	"encoding/json"

@@ -17,7 +17,7 @@ limitations under the License.
 package http
 
 import (
-	"github.com/medcl/gopa/core/stats"
+	"github.com/infinitbyte/gopa/core/stats"
 	"net/http"
 )
 

@@ -2,13 +2,13 @@ package model
 
 import (
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/errors"
-	"github.com/medcl/gopa/core/store"
+	"github.com/infinitbyte/gopa/core/errors"
+	"github.com/infinitbyte/gopa/core/store"
 
 	"bytes"
 	"fmt"
-	"github.com/medcl/gopa/core/pipeline"
-	"github.com/medcl/gopa/core/util"
+	"github.com/infinitbyte/gopa/core/pipeline"
+	"github.com/infinitbyte/gopa/core/util"
 	"strconv"
 	"strings"
 	"time"

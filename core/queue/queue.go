@@ -18,7 +18,7 @@ package queue
 
 import (
 	"errors"
-	"github.com/medcl/gopa/core/stats"
+	"github.com/infinitbyte/gopa/core/stats"
 	"time"
 )
 

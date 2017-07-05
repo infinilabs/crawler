@@ -21,7 +21,7 @@ import (
 	"strconv"
 
 	log "github.com/cihub/seelog"
-	util "github.com/medcl/gopa/core/util"
+	util "github.com/infinitbyte/gopa/core/util"
 	leveldb "github.com/syndtr/goleveldb/leveldb"
 )
 

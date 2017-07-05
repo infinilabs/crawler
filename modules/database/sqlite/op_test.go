@@ -18,10 +18,10 @@ package sqlite
 
 import (
 	"fmt"
+	"github.com/infinitbyte/gopa/core/model"
+	"github.com/infinitbyte/gopa/core/util"
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/medcl/gopa/core/model"
-	"github.com/medcl/gopa/core/util"
 	"testing"
 	"time"
 )

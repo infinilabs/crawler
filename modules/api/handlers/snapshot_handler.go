@@ -18,10 +18,10 @@ package http
 
 import (
 	log "github.com/cihub/seelog"
+	. "github.com/infinitbyte/gopa/core/http"
+	"github.com/infinitbyte/gopa/core/store"
+	"github.com/infinitbyte/gopa/modules/config"
 	_ "github.com/jmoiron/jsonq"
-	. "github.com/medcl/gopa/core/http"
-	"github.com/medcl/gopa/core/store"
-	"github.com/medcl/gopa/modules/config"
 	"net/http"
 )
 

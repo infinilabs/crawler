@@ -18,11 +18,11 @@ package pipe
 
 import (
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/pipeline"
+	. "github.com/infinitbyte/gopa/core/pipeline"
 	"regexp"
 	"strings"
 
-	"github.com/medcl/gopa/core/model"
+	"github.com/infinitbyte/gopa/core/model"
 )
 
 const UrlExtFilter JointKey = "url_ext_filter"

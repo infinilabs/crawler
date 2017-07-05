@@ -1,23 +1,23 @@
 # Gopa #
 
-![https://github.com/medcl/gopa](https://raw.githubusercontent.com/medcl/gopa/master/static/assets/img/logo.png)
+![https://github.com/infinitbyte/gopa](https://raw.githubusercontent.com/infinitbyte/gopa/master/static/assets/img/logo.png)
 
 [狗爬], A Spider Written in Go.
 
-[![Travis](https://travis-ci.org/medcl/gopa.svg?branch=master)](https://travis-ci.org/medcl/gopa)
-[![Go Report Card](https://goreportcard.com/badge/github.com/medcl/gopa)](https://goreportcard.com/report/github.com/medcl/gopa)
-
+[![Travis](https://travis-ci.org/infinitbyte/gopa.svg?branch=master)](https://travis-ci.org/infinitbyte/gopa)
+[![Go Report Card](https://goreportcard.com/badge/github.com/infinitbyte/gopa)](https://goreportcard.com/report/github.com/infinitbyte/gopa)
+[![Coverage Status](https://coveralls.io/repos/github/infinitbyte/gopa/badge.svg?branch=master)](https://coveralls.io/github/infinitbyte/gopa?branch=master)
 
 ## Build Gopa ##
 
 Mac/Linux: Run `make build` to build the Gopa
 
-Windows:  go with this wiki - [How to build GOPA on windows](https://github.com/medcl/gopa/wiki/How-to-build-GOPA-on-windows)
+Windows:  go with this wiki - [How to build GOPA on windows](https://github.com/infinitbyte/gopa/wiki/How-to-build-GOPA-on-windows)
 
 
 ## Download ##
 
-[Release](https://github.com/medcl/gopa/releases)
+[Release](https://github.com/infinitbyte/gopa/releases)
 
 
 ## Start Gopa ##
@@ -51,4 +51,4 @@ Visit `http://127.0.0.1:9001/` for more details.
 
 License
 =======
-Released under the [Apache License, Version 2.0](https://github.com/medcl/gopa/blob/master/LICENSE) .
+Released under the [Apache License, Version 2.0](https://github.com/infinitbyte/gopa/blob/master/LICENSE) .

@@ -18,8 +18,8 @@ package pipeline
 
 import (
 	"fmt"
-	"github.com/medcl/gopa/core/env"
-	"github.com/medcl/gopa/core/global"
+	"github.com/infinitbyte/gopa/core/env"
+	"github.com/infinitbyte/gopa/core/global"
 	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"

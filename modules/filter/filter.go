@@ -2,12 +2,12 @@ package filter
 
 import (
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/config"
-	"github.com/medcl/gopa/core/filter"
-	. "github.com/medcl/gopa/core/filter"
-	"github.com/medcl/gopa/core/global"
-	"github.com/medcl/gopa/modules/config"
-	"github.com/medcl/gopa/modules/filter/impl"
+	. "github.com/infinitbyte/gopa/core/config"
+	"github.com/infinitbyte/gopa/core/filter"
+	. "github.com/infinitbyte/gopa/core/filter"
+	"github.com/infinitbyte/gopa/core/global"
+	"github.com/infinitbyte/gopa/modules/config"
+	"github.com/infinitbyte/gopa/modules/filter/impl"
 	"path"
 	"sync"
 )

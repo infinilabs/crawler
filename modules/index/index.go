@@ -3,11 +3,11 @@ package index
 import (
 	"encoding/json"
 	log "github.com/cihub/seelog"
-	. "github.com/medcl/gopa/core/config"
-	"github.com/medcl/gopa/core/model"
-	"github.com/medcl/gopa/core/queue"
-	"github.com/medcl/gopa/modules/config"
-	. "github.com/medcl/gopa/modules/index/elasticsearch"
+	. "github.com/infinitbyte/gopa/core/config"
+	"github.com/infinitbyte/gopa/core/model"
+	"github.com/infinitbyte/gopa/core/queue"
+	"github.com/infinitbyte/gopa/modules/config"
+	. "github.com/infinitbyte/gopa/modules/index/elasticsearch"
 )
 
 type IndexModule struct {

@@ -2,7 +2,7 @@ package config
 
 import (
 	log "github.com/cihub/seelog"
-	"github.com/medcl/gopa/core/global"
+	"github.com/infinitbyte/gopa/core/global"
 	"path"
 	"strings"
 )

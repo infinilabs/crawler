@@ -24,7 +24,7 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/clarkduvall/hyperloglog"
 	. "github.com/clarkduvall/hyperloglog"
-	"github.com/medcl/gopa/core/util"
+	"github.com/infinitbyte/gopa/core/util"
 	"sync"
 )
 
