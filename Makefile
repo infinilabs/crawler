@@ -194,3 +194,8 @@ check:
 errcheck:
 	go get github.com/kisielk/errcheck
 	errcheck -blank $(PACKAGES)
+
+cover:
+	go get github.com/mattn/goveralls
+	go test -v -cover -race -coverprofile=data/coverage.out
+	goveralls -coverprofile=data/coverage.out -service=travis-ci -repotoken=$COVERALLS_TOKEN

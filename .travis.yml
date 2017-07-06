@@ -2,12 +2,20 @@ language: go
 os:
 - osx
 - linux
-script: make clean config build
+
+before_install:
+  - go get github.com/mattn/goveralls
+
+script:
+  - make clean config build
+  - $HOME/gopath/bin/goveralls -service=travis-ci
+
 go:
 - 1.x
 - 1.6
 - 1.7.x
 - master
+
 deploy:
   provider: releases
   api_key:
