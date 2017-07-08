@@ -20,15 +20,10 @@ import (
 	"github.com/infinitbyte/gopa/core/util/file"
 )
 
-var flagStrictPerms = flag.Bool("strict.perms", true, "Strict permission checking on config files")
-
 // IsStrictPerms returns true if strict permission checking on config files is
 // enabled.
 func IsStrictPerms() bool {
-	if !*flagStrictPerms || os.Getenv("BEAT_STRICT_PERMS") == "false" {
-		return false
-	}
-	return true
+	return false
 }
 
 // Config object to store hierarchical configurations into.
