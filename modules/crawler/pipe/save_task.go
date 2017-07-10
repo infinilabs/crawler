@@ -33,7 +33,7 @@ type SaveTaskJoint struct {
 
 const isCreate ParaKey = "is_create"
 
-func (this *SaveTaskJoint) IsCreate(v bool) *SaveTaskJoint {
+func (this SaveTaskJoint) IsCreate(v bool) SaveTaskJoint {
 	this.Init()
 	this.Set(isCreate, v)
 	return this

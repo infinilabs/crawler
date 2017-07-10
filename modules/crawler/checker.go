@@ -44,15 +44,43 @@ func (this CheckerModule) Name() string {
 func getDefaultCheckerTaskConfig() TaskConfig {
 	config := PipelineConfig{}
 	config.Name = "checker"
-	config.StartJoint = InitTaskJoint{}
-	save := SaveTaskJoint{}
-	save.IsCreate(true)
-	config.EndJoint = save
-	config.ProcessJoints = []Joint{}
+	start:=JointConfig{}
+	start.Enabled=true
+	start.JointName="init_task"
+	config.StartJoint = &start
+	save := JointConfig{}
+	save.Enabled=true
+	save.JointName="save_task"
+	save.Parameters=util.MapStr{
+		"is_create":true,
+	}
+
+	url_normalization := JointConfig{}
+	url_normalization.Enabled=true
+	url_normalization.JointName="url_normalization"
+	url_normalization.Parameters=util.MapStr{
+		"follow_all_domain":true,
+		"follow_sub_domain":true,
+	}
+
+	url_ext_filter := JointConfig{}
+	url_ext_filter.Enabled=true
+	url_ext_filter.JointName="url_ext_filter"
+
+	url_check_filter := JointConfig{}
+	url_check_filter.Enabled=true
+	url_check_filter.JointName="url_check_filter"
+
+
+	config.EndJoint = &save
+	config.ProcessJoints = []*JointConfig{
+		&url_normalization,&url_ext_filter,&url_check_filter,
+	}
+
 	defaultCheckerConfig := TaskConfig{
 		MaxGoRoutine:          1,
 		FetchThresholdInMs:    0,
-		DefaultPipelineConfig: config,
+		DefaultPipelineConfig: &config,
 	}
 	return defaultCheckerConfig
 }

@@ -367,17 +367,19 @@ func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
 
 	pipe.Context(config.Context)
 
-	if config.StartJoint != nil {
+	if config.StartJoint != nil && config.StartJoint.Enabled {
 		input := GetJointInstance(config.StartJoint)
 		pipe.Start(input)
 	}
 
 	for _, cfg := range config.ProcessJoints {
-		j := GetJointInstance(cfg)
-		pipe.Join(j)
+		if(cfg.Enabled){
+			j := GetJointInstance(cfg)
+			pipe.Join(j)
+		}
 	}
 
-	if config.EndJoint != nil {
+	if config.EndJoint != nil && config.EndJoint.Enabled {
 		output := GetJointInstance(config.EndJoint)
 		pipe.End(output)
 	}
