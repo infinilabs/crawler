@@ -27,15 +27,8 @@ import (
 
 const InitTask JointKey = "init_task"
 
-const TaskID ParaKey = "TASK_ID"
-
 type InitTaskJoint struct {
 	Parameters
-	Task *model.Task
-}
-
-func NewTaskJoint(task *model.Task) Joint {
-	return InitTaskJoint{Task: task}
 }
 
 func (this InitTaskJoint) Name() string {
@@ -48,16 +41,18 @@ func (this InitTaskJoint) Process(context *Context) error {
 
 	var task *model.Task
 
-	if this.Task != nil {
-		task = this.Task
-	} else if this.Has(TaskID) {
+	if context.Has(CONTEXT_CRAWLER_TASK) {
+		task = context.Get(CONTEXT_CRAWLER_TASK).(*model.Task)
+	} else if context.Has(CONTEXT_TASK_ID) {
 		//init task record
-		t, err := model.GetTask(this.MustGetString(TaskID))
+		t, err := model.GetTask(context.MustGetString(CONTEXT_TASK_ID))
 		if err != nil {
 			context.ErrorExit("task init error")
 			panic(err)
 		}
 		task = &t
+		context.Set(CONTEXT_CRAWLER_TASK, task)
+
 	} else {
 		context.ErrorExit("task init error")
 		panic(errors.New("task not set"))
@@ -75,8 +70,6 @@ func (this InitTaskJoint) Process(context *Context) error {
 		ID:         util.GetUUID(),
 		CreateTime: &t1,
 	}
-
-	context.Set(CONTEXT_CRAWLER_TASK, task)
 	context.Set(CONTEXT_CRAWLER_SNAPSHOT, snapshot)
 
 	return nil

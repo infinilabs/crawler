@@ -30,9 +30,11 @@ import (
 const Hash JointKey = "hash"
 
 type HashJoint struct {
-	DictRoot string
-	Simhash  bool
+	Parameters
 }
+
+const simHashEnabled ParaKey = "simhash_enabled"
+const simHashDictFolder ParaKey = "simhash_dict_folder"
 
 func (this HashJoint) Name() string {
 	return string(Hash)
@@ -50,7 +52,7 @@ func (this HashJoint) Process(context *Context) error {
 
 	snapshot.Hash = fmt.Sprintf("%x", bs)
 
-	if this.Simhash {
+	if this.GetBool(simHashEnabled, false) {
 		this.loadDict()
 		hash1 := Simhash(&body, 200)
 		snapshot.SimHash = fmt.Sprintf("%x", hash1)
@@ -73,10 +75,13 @@ func (this HashJoint) loadDict() {
 	mainDict := "config/dict/main.dict.txt"
 	idfDict := "config/dict/idf.txt"
 	stopwordsDict := "config/dict/stop_words.txt"
-	if len(this.DictRoot) > 0 {
-		mainDict = path.Join(this.DictRoot, mainDict)
-		idfDict = path.Join(this.DictRoot, idfDict)
-		stopwordsDict = path.Join(this.DictRoot, stopwordsDict)
+	if this.Has(simHashDictFolder) {
+		dictRoot := this.MustGetString(simHashDictFolder)
+		if len(dictRoot) > 0 {
+			mainDict = path.Join(dictRoot, mainDict)
+			idfDict = path.Join(dictRoot, idfDict)
+			stopwordsDict = path.Join(dictRoot, stopwordsDict)
+		}
 	}
 	if err := LoadDictionary(mainDict, idfDict, stopwordsDict); err != nil {
 		log.Error("Failed to load dictionary:", err)

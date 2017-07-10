@@ -42,7 +42,7 @@ func TestPipelineConfig(t *testing.T) {
 	Register("save", saveJoint{})
 	Register("publish", publishJoint{})
 
-	config.InputJoint = &JointConfig{JointName: "crawler", Parameters: map[string]interface{}{"url": "http://baidu12.com"}}
+	config.StartJoint = &JointConfig{JointName: "crawler", Parameters: map[string]interface{}{"url": "http://baidu12.com"}}
 	joints := []*JointConfig{}
 	joints = append(joints, &JointConfig{JointName: "parser", Parameters: map[string]interface{}{}})
 	joints = append(joints, &JointConfig{JointName: "save", Parameters: map[string]interface{}{}})

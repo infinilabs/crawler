@@ -30,9 +30,11 @@ import (
 const SaveSnapshotToDB JointKey = "save_snapshot_db"
 
 type SaveSnapshotToDBJoint struct {
-	CompressBody bool
-	Bucket       string
+	Parameters
 }
+
+const compressEnabled ParaKey = "compress_enabled"
+const bucket ParaKey = "bucket"
 
 func (this SaveSnapshotToDBJoint) Name() string {
 	return string(SaveSnapshotToDB)
@@ -96,11 +98,11 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 
 	log.Debug("save url to db, url:", url, ",domain:", task.Host, ",path:", savePath, ",file:", saveFile, ",saveKey:", string(saveKey))
 
-	if this.CompressBody {
-		store.AddValueCompress(config.SnapshotBucketKey, saveKey, snapshot.Payload)
+	if this.GetBool(compressEnabled, true) {
+		store.AddValueCompress(this.MustGetString(bucket), saveKey, snapshot.Payload)
 
 	} else {
-		store.AddValue(config.SnapshotBucketKey, saveKey, snapshot.Payload)
+		store.AddValue(this.MustGetString(bucket), saveKey, snapshot.Payload)
 	}
 
 	model.CreateSnapshot(snapshot)

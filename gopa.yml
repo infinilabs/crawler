@@ -31,8 +31,55 @@ task.default:
 modules:
 - module: crawler
   enabled: true
-  max_go_routine: 100
+  max_go_routine: 10
   fetch_threshold_ms: 0
+  default_pipeline_config:
+    name: my_crawler
+    start:
+      joint: init_task
+      enabled: true
+    process:
+      - joint: url_normalization
+        enabled: true
+        parameters:
+          follow_all_domain: true
+          follow_sub_domain: true
+      - joint: load_metadata
+        enabled: true
+      - joint: ignore_timeout
+        parameters:
+          ignore_timeout_after_count: 10
+          max_depth: 20
+          max_breadth: 20
+        enabled: true
+      - joint: fetch
+        enabled: true
+      - joint: parse
+        enabled: true
+        parameters:
+          dispatch_links: true
+      - joint: html2text
+        parameters:
+          merge_whitespace: false
+        enabled: true
+      - joint: hash
+        enabled: true
+        parameters:
+          simhash_enabled: false
+#          simhash_dict_folder: mydict
+      - joint : save_snapshot_fs
+        enabled: false
+      - joint : save_snapshot_db
+        enabled: true
+        parameters:
+          compress_enabled: true
+          bucket: "Snapshot"
+      - joint: index
+        enabled: true
+    end:
+      joint: save_task
+      enabled: true
+
 
 - module: cluster
   enabled: true
@@ -54,6 +101,28 @@ modules:
 
 - module: checker
   enabled: true
+  default_pipeline_config:
+    name: my_checker
+    start:
+      joint: init_task
+      enabled: true
+    process:
+      - joint: url_normalization
+        enabled: true
+        parameters:
+          follow_all_domain: true
+          follow_sub_domain: true
+      - joint: url_ext_filter
+        enabled: true
+      - joint: url_check_filter
+        enabled: true
+    end:
+      joint: save_task
+      enabled: true
+      parameters:
+        is_create: true
+
+
 
 - module: index
   enabled: true

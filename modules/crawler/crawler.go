@@ -42,7 +42,7 @@ func (this CrawlerModule) Name() string {
 
 func (this CrawlerModule) Start(cfg *Config) {
 
-	config := GetDefaultCrawlerConfig()
+	config := GetDefaultTaskConfig()
 	cfg.Unpack(&config)
 	this.config = &config
 
@@ -117,30 +117,21 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 				if e, ok := r.(runtime.Error); ok {
 					log.Error("pipeline: ", pipeline.GetID(), ", taskId: ", taskId, ", ", util.GetRuntimeErrorMessage(e))
 				}
-				log.Debug("error in crawler,", util.ToJson(pipeline.GetContext(), true))
+				log.Debug("error in crawler,", util.ToJson(r, true), util.ToJson(pipeline.GetContext(), true))
 			}
 		}
 	}()
 
-	pipeline = NewPipeline("crawler")
+	context := &Context{Phrase: config.PhraseCrawler}
+	context.Set(CONTEXT_TASK_ID, taskId)
 
-	init := InitTaskJoint{}
-	init.Set(TaskID, taskId)
+	if this.config.DefaultPipelineConfig == nil {
+		panic("default pipeline config can't be null")
+	}
 
-	pipeline.Context(&Context{Phrase: config.PhraseCrawler}).
-		Start(init).
-		Join(UrlNormalizationJoint{FollowAllDomain: true, FollowSubDomain: true}).
-		Join(LoadMetadataJoint{}).
-		//Join(IgnoreTimeoutJoint{IgnoreTimeoutAfterCount: 10}).
-		Join(FetchJoint{}).
-		Join(ParsePageJoint{DispatchLinks: true, MaxDepth: 30, MaxBreadth: 3}).
-		Join(HtmlToTextJoint{MergeWhitespace: false}).
-		Join(HashJoint{Simhash: true}).
-		//Join(SaveSnapshotToFileSystemJoint{}).
-		Join(SaveSnapshotToDBJoint{CompressBody: true, Bucket: "Global"}).
-		Join(IndexJoint{}).
-		End(SaveTaskJoint{}).
-		Run()
+	pipeline = NewPipelineFromConfig(this.config.DefaultPipelineConfig)
+	pipeline.Context(context)
+	pipeline.Run()
 
 	if this.config.FetchThresholdInMs > 0 {
 		log.Debug("sleep ", this.config.FetchThresholdInMs, "ms to control crawling speed")
@@ -152,5 +143,5 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 }
 
 type CrawlerModule struct {
-	config *CrawlerConfig
+	config *TaskConfig
 }

@@ -28,13 +28,13 @@ import (
 	"github.com/infinitbyte/gopa/modules/config"
 )
 
-const Publish JointKey = "index"
+const Index JointKey = "index"
 
 type IndexJoint struct {
 }
 
 func (this IndexJoint) Name() string {
-	return string(Publish)
+	return string(Index)
 }
 
 func (this IndexJoint) Process(c *Context) error {

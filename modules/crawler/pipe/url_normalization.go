@@ -33,13 +33,14 @@ import (
 const UrlNormalization JointKey = "url_normalization"
 
 type UrlNormalizationJoint struct {
-	timeout              time.Duration
-	splitByUrlParameter  []string
-	FollowAllDomain      bool
-	FollowDomainSettings bool
-	FollowSubDomain      bool
-	maxFileNameLength    int
+	Parameters
+	timeout             time.Duration
+	splitByUrlParameter []string
+	maxFileNameLength   int
 }
+
+const followAllDomain ParaKey = "follow_all_domain"
+const followSubDomain ParaKey = "follow_sub_domain"
 
 var defaultFileName = "default.html"
 
@@ -177,10 +178,8 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 	}
 
 	////resolve domain specific filter
-	if !this.FollowAllDomain && this.FollowSubDomain && currentURI != nil && referenceURI != nil {
+	if !this.GetBool(followAllDomain, false) && this.GetBool(followSubDomain, true) && currentURI != nil && referenceURI != nil {
 		log.Tracef("try to check domain rule, %s vs %s", referenceURI.Host, currentURI.Host)
-		//TODO handler com.cn and .com,using a TLC-domain list
-
 		if strings.Contains(currentURI.Host, ".") && strings.Contains(referenceURI.Host, ".") {
 			ref := strings.Split(referenceURI.Host, ".")
 			cur := strings.Split(currentURI.Host, ".")
@@ -213,7 +212,7 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 	//the url is a folder, making folders
 	if strings.HasSuffix(url, "/") {
 		filename = defaultFileName
-		log.Trace("no page name found,use default.html:", url)
+		log.Trace("no page name found, use default.html:", url)
 	}
 
 	// if the url have parameters

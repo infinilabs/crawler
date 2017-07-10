@@ -32,12 +32,17 @@ import (
 const ParsePage JointKey = "parse"
 
 type ParsePageJoint struct {
-	DispatchLinks    bool
-	MaxDepth         int         //max depth of page to follow
-	MaxBreadth       int         //max breadth of the domain to follow
+	Parameters
+	//DispatchLinks    bool
+	//MaxDepth         int         //max depth of page to follow
+	//MaxBreadth       int         //max breadth of the domain to follow
 	MaxPageOfBreadth map[int]int //max page to fetch in each level's breadth, eg: 1:100;2:50;3:5;4:1
 	//TODO support save link,script
 }
+
+const dispatchLinks ParaKey = "dispatch_links"
+const maxDepth ParaKey = "max_depth"
+const maxBreadth ParaKey = "max_breadth"
 
 func (this ParsePageJoint) Name() string {
 	return string(ParsePage)
@@ -173,13 +178,13 @@ func (this ParsePageJoint) Process(context *Context) error {
 	}
 
 	//if reach max depth, skip for future fetch
-	if depth > this.MaxDepth {
+	if depth > this.MustGetInt(maxDepth) {
 		log.Trace("skip while reach max depth, ", depth, ", ", refUrl)
 		context.Break("skip while reach max depth")
 		return nil
 	}
 	//if reach max breadth, skip for future fetch
-	if breadth > this.MaxBreadth {
+	if breadth > this.MustGetInt(maxBreadth) {
 		log.Trace("skip while reach max breadth, ", breadth, ", ", refUrl)
 		context.Break("skip while reach max breadth")
 		return nil
@@ -187,7 +192,7 @@ func (this ParsePageJoint) Process(context *Context) error {
 
 	//dispatch links
 	for url := range links {
-		if this.DispatchLinks {
+		if this.GetBool(dispatchLinks, false) {
 			if !filter.Exists(config.CheckFilter, []byte(url)) {
 				host := util.GetHost(url)
 				b := breadth

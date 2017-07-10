@@ -102,6 +102,15 @@ func (this *Parameters) GetString(key ParaKey) (string, bool) {
 	return s, ok
 }
 
+func (this *Parameters) GetBool(key ParaKey, defaultValue bool) bool {
+	v := this.Get(key)
+	s, ok := v.(bool)
+	if ok {
+		return s
+	}
+	return defaultValue
+}
+
 func (this *Parameters) Has(key ParaKey) bool {
 	this.Init()
 	_, ok := this.Data[string(key)]
@@ -111,6 +120,15 @@ func (this *Parameters) Has(key ParaKey) bool {
 func (this *Parameters) GetInt(key ParaKey) (int, bool) {
 	v := this.Get(key)
 	s, ok := v.(int)
+	if ok {
+		return s, ok
+	}
+	return s, ok
+}
+
+func (this *Parameters) GetInt64(key ParaKey) (int64, bool) {
+	v := this.Get(key)
+	s, ok := v.(int64)
 	if ok {
 		return s, ok
 	}
@@ -203,6 +221,11 @@ func (this *Parameters) MustGetInt(key ParaKey) int {
 	return s
 }
 
+func (this *Parameters) MustGetInt64(key ParaKey) int64 {
+	s, _ := this.GetInt64(key)
+	return s
+}
+
 func (this *Parameters) MustGetMap(key ParaKey) map[string]interface{} {
 	s, ok := this.GetMap(key)
 	if !ok {
@@ -235,8 +258,11 @@ func NewPipeline(name string) *Pipeline {
 }
 
 func (this *Pipeline) Context(s *Context) *Pipeline {
-	this.context = s
-	this.context.Init()
+	if s != nil {
+		this.context = s
+		this.context.Init()
+	}
+
 	return this
 }
 
@@ -341,8 +367,8 @@ func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
 
 	pipe.Context(config.Context)
 
-	if config.InputJoint != nil {
-		input := GetJointInstance(config.InputJoint)
+	if config.StartJoint != nil {
+		input := GetJointInstance(config.StartJoint)
 		pipe.Start(input)
 	}
 
@@ -351,8 +377,8 @@ func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
 		pipe.Join(j)
 	}
 
-	if config.OutputJoint != nil {
-		output := GetJointInstance(config.OutputJoint)
+	if config.EndJoint != nil {
+		output := GetJointInstance(config.EndJoint)
 		pipe.End(output)
 	}
 
@@ -368,6 +394,7 @@ func GetAllRegisteredJoints() map[string]interface{} {
 }
 
 func GetJointInstance(cfg *JointConfig) Joint {
+	log.Trace("get joint instances, ", cfg.JointName)
 	if typeRegistry[cfg.JointName] != nil {
 		t := reflect.ValueOf(typeRegistry[cfg.JointName]).Type()
 		v := reflect.New(t).Elem()

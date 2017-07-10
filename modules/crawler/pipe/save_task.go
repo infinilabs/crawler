@@ -28,7 +28,15 @@ import (
 const SaveTask JointKey = "save_task"
 
 type SaveTaskJoint struct {
-	IsCreate bool
+	Parameters
+}
+
+const isCreate ParaKey = "is_create"
+
+func (this *SaveTaskJoint) IsCreate(v bool) *SaveTaskJoint {
+	this.Init()
+	this.Set(isCreate, v)
+	return this
 }
 
 func (this SaveTaskJoint) Name() string {
@@ -51,7 +59,7 @@ func (this SaveTaskJoint) Process(context *Context) error {
 		task.Message = util.ToJson(context.Payload, false)
 	}
 
-	if this.IsCreate {
+	if this.GetBool(isCreate, false) {
 		log.Trace("create task, url:", task.Url)
 		model.CreateTask(task)
 	} else {

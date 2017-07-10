@@ -27,6 +27,7 @@ import (
 	"github.com/infinitbyte/gopa/core/stats"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
+	. "github.com/infinitbyte/gopa/modules/crawler/config"
 	. "github.com/infinitbyte/gopa/modules/crawler/pipe"
 	"runtime"
 	"time"
@@ -40,11 +41,31 @@ func (this CheckerModule) Name() string {
 	return "Checker"
 }
 
+func getDefaultCheckerTaskConfig() TaskConfig {
+	config := PipelineConfig{}
+	config.Name = "checker"
+	config.StartJoint = InitTaskJoint{}
+	save := SaveTaskJoint{}
+	save.IsCreate(true)
+	config.EndJoint = save
+	config.ProcessJoints = []Joint{}
+	defaultCheckerConfig := TaskConfig{
+		MaxGoRoutine:          1,
+		FetchThresholdInMs:    0,
+		DefaultPipelineConfig: config,
+	}
+	return defaultCheckerConfig
+}
+
 func (this CheckerModule) Start(cfg *Config) {
 	if checkerStarted {
 		log.Error("url checker is already checkerStarted, please stop it first.")
 		return
 	}
+	config := getDefaultCheckerTaskConfig()
+	cfg.Unpack(&config)
+	this.config = &config
+
 	signalChannel = make(chan bool)
 	go this.runCheckerGo()
 	checkerStarted = true
@@ -70,14 +91,14 @@ func (this CheckerModule) execute(data []byte) {
 	startTime := time.Now()
 	seed := model.TaskSeedFromBytes(data)
 
-	task := model.Task{}
+	task := &model.Task{}
 	task.OriginalUrl = seed.Url
 	task.Url = seed.Url
 	task.Reference = seed.Reference
 	task.Depth = seed.Depth
 	task.Breadth = seed.Breadth
 
-	pipeline := this.runPipe(global.Env().IsDebug, &task)
+	pipeline := this.runPipe(global.Env().IsDebug, task)
 
 	//send to disk queue
 	if len(task.Host) > 0 && !pipeline.GetContext().IsErrorExit() && !pipeline.GetContext().IsBreak() {
@@ -117,16 +138,17 @@ func (this CheckerModule) runPipe(debug bool, task *model.Task) *Pipeline {
 			}
 		}
 	}()
-	pipeline = NewPipeline("checker")
 
 	context := &Context{Phrase: config.PhraseChecker, IgnoreBroken: true}
-	pipeline.Context(context).
-		Start(InitTaskJoint{Task: task}).
-		Join(UrlNormalizationJoint{FollowAllDomain: false, FollowSubDomain: true}).
-		Join(UrlExtFilterJoint{}).
-		Join(UrlCheckFilterJoint{}).
-		End(SaveTaskJoint{IsCreate: true}).
-		Run()
+	context.Set(CONTEXT_CRAWLER_TASK, task)
+
+	if this.config.DefaultPipelineConfig == nil {
+		panic("default pipeline config can't be null")
+	}
+
+	pipeline = NewPipelineFromConfig(this.config.DefaultPipelineConfig)
+	pipeline.Context(context)
+	pipeline.Run()
 
 	return pipeline
 }
@@ -150,4 +172,5 @@ func (this CheckerModule) Stop() error {
 }
 
 type CheckerModule struct {
+	config *TaskConfig
 }

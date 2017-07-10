@@ -19,6 +19,7 @@ package pipe
 import . "github.com/infinitbyte/gopa/core/pipeline"
 
 const (
+	CONTEXT_TASK_ID          ParaKey = "CRAWLER_TASK_ID"
 	CONTEXT_CRAWLER_DOMAIN   ParaKey = "CRAWLER_DOMAIN"
 	CONTEXT_CRAWLER_TASK     ParaKey = "CRAWLER_TASK"
 	CONTEXT_CRAWLER_SNAPSHOT ParaKey = "CRAWLER_SNAPSHOT"

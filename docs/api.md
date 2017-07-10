@@ -76,7 +76,7 @@ curl -XGET http://localhost:8001/snapshot/?url=http://xxx.com
 
 * Get cluster
 ``` 
-curl -XGET http://127.0.0.1:8001/cluster/info 
+curl -XGET http://127.0.0.1:8001/cluster/status 
 ```
 ```
 {
@@ -154,20 +154,20 @@ curl -XPOST http://127.0.0.1:8001/joint/ -d'
   },
   "phrase": 0
  },
- "input_joint": {
-  "joint_name": "empty",
+ "start": {
+  "joint": "empty",
   "parameters": {
    "key": "value"
   }
  },
- "process_joints": [
+ "process": [
  {
-   "joint_name": "fetch",
+   "joint": "fetch",
    "parameters": {
    "proxy": "socks5://127.0.0.1:9742"
    }
   }
  ],
- "output_joint": null
+ "end": null
 }'
 ```

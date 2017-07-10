@@ -20,17 +20,18 @@ package pipeline
 config for each joint
 */
 type JointConfig struct {
-	JointName  string                 `json:"joint_name"` //the joint name
-	Parameters map[string]interface{} `json:"parameters"` //kv parameters for this joint
+	JointName  string                 `json:"joint" config:"joint"`           //the joint name
+	Parameters map[string]interface{} `json:"parameters" config:"parameters"` //kv parameters for this joint
+	Enabled    bool                   `json:"enabled" config:"enabled"`
 }
 
 /**
 config for each pipeline, a pipeline have more than one joints
 */
 type PipelineConfig struct {
-	Name          string         `json:"name"`
-	Context       *Context       `json:"context"`
-	InputJoint    *JointConfig   `json:"input_joint"`
-	ProcessJoints []*JointConfig `json:"process_joints"`
-	OutputJoint   *JointConfig   `json:"output_joint"`
+	Name          string         `json:"name" config:"name"`
+	Context       *Context       `json:"context" config:"context"`
+	StartJoint    *JointConfig   `json:"start" config:"start"`
+	ProcessJoints []*JointConfig `json:"process" config:"process"`
+	EndJoint      *JointConfig   `json:"end" config:"end"`
 }

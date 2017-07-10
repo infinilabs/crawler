@@ -28,8 +28,10 @@ import (
 const HtmlToText JointKey = "html2text"
 
 type HtmlToTextJoint struct {
-	MergeWhitespace bool //merge whitespace and \n
+	Parameters
 }
+
+const mergeWhitespace ParaKey = "merge_whitespace" //merge whitespace and \n
 
 func (this HtmlToTextJoint) Name() string {
 	return string(HtmlToText)
@@ -42,29 +44,29 @@ func (this HtmlToTextJoint) Process(context *Context) error {
 
 	body := snapshot.Payload
 	src := string(body)
-	//将HTML标签全转换成小写
+	//lowercase html tags
 	re, _ := regexp.Compile("\\<[\\S\\s]+?\\>")
 	src = re.ReplaceAllStringFunc(src, strings.ToLower)
 
-	//去除STYLE
+	//remove STYLE
 	re, _ = regexp.Compile("\\<style[\\S\\s]+?\\</style\\>")
 	src = re.ReplaceAllString(src, "")
 
-	//去除META
+	//remove META
 	re, _ = regexp.Compile("\\<meta[\\S\\s]+?\\</meta\\>")
 	src = re.ReplaceAllString(src, "")
 
-	//去除注释
+	//remove comments
 	re, _ = regexp.Compile("<!--[\\S\\s]*?-->")
 	src = re.ReplaceAllString(src, "")
 
-	//去除SCRIPT,NOSCRIPT
+	//remove SCRIPT,NOSCRIPT
 	re, _ = regexp.Compile("\\<script[\\S\\s]+?\\</script\\>")
 	src = re.ReplaceAllString(src, "")
 	re, _ = regexp.Compile("\\<noscript[\\S\\s]+?\\</noscript\\>")
 	src = re.ReplaceAllString(src, "")
 
-	//去除iframe,frame
+	//remove iframe,frame
 	re, _ = regexp.Compile("\\<iframe[\\S\\s]+?\\</iframe\\>")
 	src = re.ReplaceAllString(src, "")
 	re, _ = regexp.Compile("\\<frame[\\S\\s]+?\\</frame\\>")
@@ -92,15 +94,15 @@ func (this HtmlToTextJoint) Process(context *Context) error {
 	re, _ = regexp.Compile("\\<code[\\S\\s]+?\\</code\\>")
 	src = re.ReplaceAllString(src, "")
 
-	//去除所有尖括号内的HTML代码，并换成换行符
+	//remove all HTML tags and replaced with \n
 	re, _ = regexp.Compile("\\<[\\S\\s]+?\\>")
 	src = re.ReplaceAllString(src, "\n")
 
-	//去除连续的换行符
+	//remove continued break lines
 	re, _ = regexp.Compile("\\s{2,}")
 	src = re.ReplaceAllString(src, "\n")
 
-	if this.MergeWhitespace {
+	if this.GetBool(mergeWhitespace, false) {
 		src = util.MergeSpace(src)
 	}
 
