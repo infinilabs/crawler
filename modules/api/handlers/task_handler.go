@@ -42,6 +42,7 @@ func (this API) TaskDeleteAction(w http.ResponseWriter, req *http.Request, ps ht
 		this.Error404(w)
 	}
 }
+
 func (this API) TaskGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
 	task, err := model.GetTask(id)

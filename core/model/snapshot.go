@@ -17,6 +17,8 @@ limitations under the License.
 package model
 
 import (
+	log "github.com/cihub/seelog"
+	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/store"
 	"time"
 )
@@ -88,4 +90,30 @@ type PageLink struct {
 func CreateSnapshot(snapshot *Snapshot) error {
 	err := store.Save(snapshot)
 	return err
+}
+
+func GetSnapshotList(from, size int, taskId string) (int, []Snapshot, error) {
+	var snapshots []Snapshot
+	queryO := store.Query{Sort: "create_time desc", From: from, Size: size}
+	if len(taskId) > 0 {
+		queryO.Conds = store.And(store.Eq("task_id", taskId))
+	}
+	err, result := store.Search(&snapshots, &queryO)
+	if err != nil {
+		log.Error(err)
+	}
+	return result.Total, snapshots, err
+}
+
+func GetSnapshot(id string) (Snapshot, error) {
+	snapshot := Snapshot{}
+	err := store.GetBy("id", id, &snapshot)
+	if err != nil {
+		log.Error(id, ", ", err)
+	}
+	if len(snapshot.ID) == 0 || snapshot.CreateTime == nil {
+		panic(errors.New("not found," + id))
+	}
+
+	return snapshot, err
 }

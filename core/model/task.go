@@ -23,7 +23,7 @@ const Task404Ignore TaskStatus = 4
 const TaskRedirectedIgnore TaskStatus = 5
 const TaskFetchTimeout TaskStatus = 6
 
-func GetTaskStatusText(status TaskStatus) string{
+func GetTaskStatusText(status TaskStatus) string {
 	switch status {
 	case TaskCreated:
 		return "created"
@@ -145,7 +145,7 @@ func CreateTask(task *Task) error {
 	task.UpdateTime = &time
 	err := store.Save(task)
 	if err != nil {
-		log.Debug(task.ID, ", ", err)
+		log.Error(task.ID, ", ", err)
 	}
 	return err
 }
@@ -165,7 +165,7 @@ func DeleteTask(id string) error {
 	task := Task{ID: id}
 	err := store.Delete(&task)
 	if err != nil {
-		log.Debug(id, ", ", err)
+		log.Error(id, ", ", err)
 	}
 	return err
 }
@@ -175,7 +175,7 @@ func GetTask(id string) (Task, error) {
 	task := Task{}
 	err := store.GetBy("id", id, &task)
 	if err != nil {
-		log.Debug(id, ", ", err)
+		log.Error(id, ", ", err)
 	}
 	if len(task.ID) == 0 || task.CreateTime == nil {
 		panic(errors.New("not found," + id))
@@ -189,7 +189,7 @@ func GetTaskByField(k, v string) (Task, error) {
 	task := Task{}
 	err := store.GetBy(k, v, &task)
 	if err != nil {
-		log.Debug(k, ", ", err)
+		log.Error(k, ", ", err)
 	}
 	return task, err
 }
@@ -203,7 +203,7 @@ func GetTaskList(from, size int, domain string) (int, []Task, error) {
 	}
 	err, result := store.Search(&tasks, &queryO)
 	if err != nil {
-		log.Trace(err)
+		log.Error(err)
 	}
 	return result.Total, tasks, err
 }
@@ -214,7 +214,7 @@ func GetPendingNewFetchTasks() (int, []Task, error) {
 	queryO := store.Query{Sort: "create_time desc", Conds: store.And(store.Eq("phrase", 1))}
 	err, result := store.Search(&tasks, &queryO)
 	if err != nil {
-		log.Trace(err)
+		log.Error(err)
 	}
 	return result.Total, tasks, err
 }
@@ -230,7 +230,7 @@ func GetPendingUpdateFetchTasks(offset *time.Time) (int, []Task, error) {
 			store.Eq("status", TaskFetchSuccess))}
 	err, result := store.Search(&tasks, &queryO)
 	if err != nil {
-		log.Trace(err)
+		log.Error(err)
 	}
 	return result.Total, tasks, err
 }

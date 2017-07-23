@@ -38,22 +38,35 @@ func InitAPI() {
 	//APIs
 	api.HandleAPIFunc("/stats", apis.StatsAction)
 
+	//Task API
+	api.HandleAPIMethod(api.GET, "/tasks/", apis.TaskAction)
+	api.HandleAPIMethod(api.GET, "/task/", apis.TaskAction)
 	api.HandleAPIMethod(api.POST, "/task/", apis.TaskAction)
-	api.HandleAPIMethod(api.GET, "/task", apis.TaskAction)
 	api.HandleAPIMethod(api.GET, "/task/:id", apis.TaskGetAction)
 	api.HandleAPIMethod(api.DELETE, "/task/:id", api.BasicAuth(apis.TaskDeleteAction, user, pass))
 
-	api.HandleAPIMethod(api.GET, "/domain", apis.DomainAction)
+	//Domain API
+	api.HandleAPIMethod(api.GET, "/domains/", apis.DomainAction)
+	api.HandleAPIMethod(api.GET, "/domain/", apis.DomainAction)
 	api.HandleAPIMethod(api.GET, "/domain/:id", apis.DomainGetAction)
 	api.HandleAPIMethod(api.DELETE, "/domain/:id", api.BasicAuth(apis.DomainDeleteAction, user, pass))
 
-	//Snapshot
-	api.HandleAPIFunc("/snapshot/", apis.SnapshotAction)
+	//Snapshot API
+	api.HandleAPIMethod(api.GET, "/snapshots/", apis.SnapshotListAction)
+	api.HandleAPIMethod(api.GET, "/snapshot/", apis.SnapshotListAction)
+	api.HandleAPIMethod(api.GET, "/snapshot/:id", apis.SnapshotGetAction)
+	api.HandleAPIMethod(api.GET, "/snapshot/:id/payload", apis.SnapshotGetPayloadAction)
 
+	//Pipeline API
+	api.HandleAPIMethod(api.GET, "/joints/", apis.handleGetPipelineJointsRequest)
 	api.HandleAPIMethod(api.GET, "/joint/", apis.handleGetPipelineJointsRequest)
 	api.HandleAPIMethod(api.POST, "/joint/", apis.handlePostPipelineJointsRequest)
-	api.HandleAPIMethod(api.POST, "/pipeline/:id", apis.handlePostPipelinesRequest)
+
+	api.HandleAPIMethod(api.GET, "/pipelines/", apis.handleGetPipelinesRequest)
 	api.HandleAPIMethod(api.GET, "/pipeline/", apis.handleGetPipelinesRequest)
+	api.HandleAPIMethod(api.POST, "/pipeline/:id", apis.handlePostPipelinesRequest)
+
+	//User API
 	api.HandleAPIMethod(api.GET, "/user/", apis.handleUserLoginRequest)
 
 }
