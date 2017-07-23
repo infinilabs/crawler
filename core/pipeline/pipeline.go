@@ -102,13 +102,13 @@ func (this *Parameters) GetString(key ParaKey) (string, bool) {
 	return s, ok
 }
 
-func (this *Parameters) GetBool(key ParaKey, defaultValue bool) bool {
+func (this *Parameters) GetBool(key ParaKey, defaultV bool) bool {
 	v := this.Get(key)
 	s, ok := v.(bool)
 	if ok {
 		return s
 	}
-	return defaultValue
+	return defaultV
 }
 
 func (this *Parameters) Has(key ParaKey) bool {
@@ -117,22 +117,45 @@ func (this *Parameters) Has(key ParaKey) bool {
 	return ok
 }
 
-func (this *Parameters) GetInt(key ParaKey) (int, bool) {
+func (this *Parameters) GetInt(key ParaKey,defaultV int) (int, bool) {
 	v := this.Get(key)
 	s, ok := v.(int)
 	if ok {
 		return s, ok
 	}
-	return s, ok
+	s1, ok := v.(uint)
+	if ok {
+		return int(s1), ok
+	}
+	return defaultV, ok
 }
 
-func (this *Parameters) GetInt64(key ParaKey) (int64, bool) {
+func (this *Parameters) GetIntOrDefault(key ParaKey,defaultV int) (int) {
+	v,_:=this.GetInt(key,defaultV)
+	return v
+}
+
+func (this *Parameters) GetInt64(key ParaKey,defaultV int64) (int64, bool) {
 	v := this.Get(key)
+	log.Error(key,",",v)
+
 	s, ok := v.(int64)
 	if ok {
 		return s, ok
 	}
-	return s, ok
+
+	s1, ok := v.(uint64)
+	if ok {
+		return int64(s1), ok
+	}
+
+	s2, ok := v.(int)
+	if ok {
+		return int64(s2), ok
+	}
+
+	log.Debug(key,",",s,",",ok)
+	return defaultV, ok
 }
 
 func (this *Parameters) MustGet(key ParaKey) interface{} {
@@ -164,6 +187,7 @@ func (this *Parameters) Get(key ParaKey) interface{} {
 	s := string(key)
 	v := this.Data[s]
 	this.l.RUnlock()
+	log.Debug("get context: ",key,",",v,",",reflect.TypeOf(v))
 	return v
 }
 
@@ -217,12 +241,18 @@ func (this *Parameters) MustGetBytes(key ParaKey) []byte {
 return 0 if not key was found
 */
 func (this *Parameters) MustGetInt(key ParaKey) int {
-	s, _ := this.GetInt(key)
+	s, ok := this.GetInt(key,0)
+	if(!ok){
+		panic(fmt.Errorf("%s not found in context", key))
+	}
 	return s
 }
 
 func (this *Parameters) MustGetInt64(key ParaKey) int64 {
-	s, _ := this.GetInt64(key)
+	s, ok:= this.GetInt64(key,0)
+	if(!ok){
+		panic(fmt.Errorf("%s not found in context", key))
+	}
 	return s
 }
 

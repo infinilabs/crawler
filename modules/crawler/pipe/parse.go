@@ -27,15 +27,13 @@ import (
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
 	"strings"
+	"fmt"
 )
 
 const ParsePage JointKey = "parse"
 
 type ParsePageJoint struct {
 	Parameters
-	//DispatchLinks    bool
-	//MaxDepth         int         //max depth of page to follow
-	//MaxBreadth       int         //max breadth of the domain to follow
 	MaxPageOfBreadth map[int]int //max page to fetch in each level's breadth, eg: 1:100;2:50;3:5;4:1
 	//TODO support save link,script
 }
@@ -178,15 +176,15 @@ func (this ParsePageJoint) Process(context *Context) error {
 	}
 
 	//if reach max depth, skip for future fetch
-	if depth > this.MustGetInt(maxDepth) {
+	if depth > this.GetIntOrDefault(maxDepth,10) {
 		log.Trace("skip while reach max depth, ", depth, ", ", refUrl)
-		context.Break("skip while reach max depth")
+		context.Break(fmt.Sprintf("skip while reach max depth: %v",depth))
 		return nil
 	}
 	//if reach max breadth, skip for future fetch
-	if breadth > this.MustGetInt(maxBreadth) {
+	if breadth > this.GetIntOrDefault(maxBreadth,10) {
 		log.Trace("skip while reach max breadth, ", breadth, ", ", refUrl)
-		context.Break("skip while reach max breadth")
+		context.Break(fmt.Sprintf("skip while reach max breadth: %v",breadth))
 		return nil
 	}
 
