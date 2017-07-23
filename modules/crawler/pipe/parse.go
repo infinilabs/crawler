@@ -18,6 +18,7 @@ package pipe
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/filter"
@@ -27,7 +28,6 @@ import (
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
 	"strings"
-	"fmt"
 )
 
 const ParsePage JointKey = "parse"
@@ -176,15 +176,15 @@ func (this ParsePageJoint) Process(context *Context) error {
 	}
 
 	//if reach max depth, skip for future fetch
-	if depth > this.GetIntOrDefault(maxDepth,10) {
+	if depth > this.GetIntOrDefault(maxDepth, 10) {
 		log.Trace("skip while reach max depth, ", depth, ", ", refUrl)
-		context.Break(fmt.Sprintf("skip while reach max depth: %v",depth))
+		context.Break(fmt.Sprintf("skip while reach max depth: %v", depth))
 		return nil
 	}
 	//if reach max breadth, skip for future fetch
-	if breadth > this.GetIntOrDefault(maxBreadth,10) {
+	if breadth > this.GetIntOrDefault(maxBreadth, 10) {
 		log.Trace("skip while reach max breadth, ", breadth, ", ", refUrl)
-		context.Break(fmt.Sprintf("skip while reach max breadth: %v",breadth))
+		context.Break(fmt.Sprintf("skip while reach max breadth: %v", breadth))
 		return nil
 	}
 

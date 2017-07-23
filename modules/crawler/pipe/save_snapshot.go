@@ -57,10 +57,10 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 			//extended the nextchecktime
 			task.LastCheckTime = &tNow
 			if task.SnapshotCreateTime == nil {
-				defaultTime := tNow.Add(-m*1)
+				defaultTime := tNow.Add(-m * 1)
 				task.SnapshotCreateTime = &defaultTime
 			}
-			timeInterval := GetNextCheckTimeMinutes(false,*task.SnapshotCreateTime,tNow)
+			timeInterval := GetNextCheckTimeMinutes(false, *task.SnapshotCreateTime, tNow)
 			nextT := tNow.Add(m * time.Duration(timeInterval))
 			task.NextCheckTime = &nextT
 
@@ -70,10 +70,10 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 		//shorten the nextchecktime
 		task.LastCheckTime = &tNow
 		if task.SnapshotCreateTime == nil {
-			defaultTime := tNow.Add(-m*1)
+			defaultTime := tNow.Add(-m * 1)
 			task.SnapshotCreateTime = &defaultTime
 		}
-		timeInterval := GetNextCheckTimeMinutes(true,*task.SnapshotCreateTime,tNow)
+		timeInterval := GetNextCheckTimeMinutes(true, *task.SnapshotCreateTime, tNow)
 		nextT := tNow.Add(m * time.Duration(timeInterval))
 		task.NextCheckTime = &nextT
 
@@ -114,12 +114,12 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 }
 
 //minutes
-var arrTimeToLess = [11]int{ 24 * 60, 12 * 60, 6 * 60, 3 * 60, 90, 45, 20, 10, 5, 2, 1 }
-var arrTimeToMore = [15]int{ 1, 2, 5, 10, 20, 30, 60, 90, 3 * 60, 6 * 60, 12 * 60, 24 * 60, 2 * 24 * 60, 7 * 24 * 60, 15 * 24 * 60 }
+var arrTimeToLess = [11]int{24 * 60, 12 * 60, 6 * 60, 3 * 60, 90, 45, 20, 10, 5, 2, 1}
+var arrTimeToMore = [15]int{1, 2, 5, 10, 20, 30, 60, 90, 3 * 60, 6 * 60, 12 * 60, 24 * 60, 2 * 24 * 60, 7 * 24 * 60, 15 * 24 * 60}
 
-func GetNextCheckTimeMinutes(fetchSuccess bool,tLastCheckTime time.Time,tNextCheckTime time.Time) int {
-	timeIntervalLast := GetTimeInterval(tLastCheckTime,tNextCheckTime)
-	timeIntervalNext := 24*60
+func GetNextCheckTimeMinutes(fetchSuccess bool, tLastCheckTime time.Time, tNextCheckTime time.Time) int {
+	timeIntervalLast := GetTimeInterval(tLastCheckTime, tNextCheckTime)
+	timeIntervalNext := 24 * 60
 	if fetchSuccess {
 		arrTimeLength := len(arrTimeToLess)
 		for i := 1; i < arrTimeLength; i++ {
@@ -127,36 +127,36 @@ func GetNextCheckTimeMinutes(fetchSuccess bool,tLastCheckTime time.Time,tNextChe
 				timeIntervalNext = arrTimeToLess[0]
 				break
 			}
-			if timeIntervalLast <= arrTimeToLess[arrTimeLength - 2] {
-				timeIntervalNext = arrTimeToLess[arrTimeLength - 1]
+			if timeIntervalLast <= arrTimeToLess[arrTimeLength-2] {
+				timeIntervalNext = arrTimeToLess[arrTimeLength-1]
 				break
 			}
 			if i+1 >= arrTimeLength {
-				timeIntervalNext = arrTimeToLess[arrTimeLength - 1]
+				timeIntervalNext = arrTimeToLess[arrTimeLength-1]
 				break
 			}
-			if timeIntervalLast <= arrTimeToLess[i] && timeIntervalLast > arrTimeToLess[i + 1] {
-				timeIntervalNext = arrTimeToLess[i + 1]
+			if timeIntervalLast <= arrTimeToLess[i] && timeIntervalLast > arrTimeToLess[i+1] {
+				timeIntervalNext = arrTimeToLess[i+1]
 				break
 			}
 		}
-	}else{
+	} else {
 		arrTimeLength := len(arrTimeToMore)
 		for i := 1; i < arrTimeLength; i++ {
 			if timeIntervalLast <= arrTimeToMore[0] {
 				timeIntervalNext = arrTimeToMore[1]
 				break
 			}
-			if timeIntervalLast >= arrTimeToMore[arrTimeLength - 2] {
-				timeIntervalNext = arrTimeToMore[arrTimeLength - 1]
+			if timeIntervalLast >= arrTimeToMore[arrTimeLength-2] {
+				timeIntervalNext = arrTimeToMore[arrTimeLength-1]
 				break
 			}
 			if i+1 >= arrTimeLength {
-				timeIntervalNext = arrTimeToMore[arrTimeLength - 1]
+				timeIntervalNext = arrTimeToMore[arrTimeLength-1]
 				break
 			}
-			if timeIntervalLast >= arrTimeToMore[i] && timeIntervalLast < arrTimeToMore[i + 1] {
-				timeIntervalNext = arrTimeToMore[i + 1]
+			if timeIntervalLast >= arrTimeToMore[i] && timeIntervalLast < arrTimeToMore[i+1] {
+				timeIntervalNext = arrTimeToMore[i+1]
 				break
 			}
 		}
@@ -164,7 +164,7 @@ func GetNextCheckTimeMinutes(fetchSuccess bool,tLastCheckTime time.Time,tNextChe
 	return timeIntervalNext
 }
 
-func GetTimeInterval(timeStart time.Time,timeEnd time.Time) int{
+func GetTimeInterval(timeStart time.Time, timeEnd time.Time) int {
 	ts := timeStart.Sub(timeEnd).Minutes()
 	if ts < 0 {
 		ts = -ts

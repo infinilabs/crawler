@@ -46,7 +46,7 @@ func (this DispatchModule) Start(cfg *Config) {
 				//get update task
 				if tasks == nil || total <= 0 {
 					total, tasks, err = model.GetPendingUpdateFetchTasks(offset)
-					log.Debug("get %v update task", total)
+					log.Debugf("get %v update task", total)
 					isUpdate = true
 					if total == 0 {
 						log.Trace("reset offset, ", defaultOffset)

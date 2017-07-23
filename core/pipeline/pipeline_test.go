@@ -80,7 +80,7 @@ func (this publishJoint) Name() string {
 func (this publishJoint) Process(s *Context) error {
 	fmt.Println("start to end pipeline")
 	s.Parameters.Set("published", "true")
-	return  nil
+	return nil
 }
 
 func TestPipeline(t *testing.T) {
@@ -120,7 +120,7 @@ func TestContext(t *testing.T) {
 	fmt.Println(util.ToJson(context, true))
 	v := context.MustGetInt(key1)
 	assert.Equal(t, 23, v)
-	v,_ = context.GetInt(key2,0)
+	v, _ = context.GetInt(key2, 0)
 	assert.Equal(t, 0, v)
 
 }

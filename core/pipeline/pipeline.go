@@ -117,7 +117,7 @@ func (this *Parameters) Has(key ParaKey) bool {
 	return ok
 }
 
-func (this *Parameters) GetInt(key ParaKey,defaultV int) (int, bool) {
+func (this *Parameters) GetInt(key ParaKey, defaultV int) (int, bool) {
 	v := this.Get(key)
 	s, ok := v.(int)
 	if ok {
@@ -130,14 +130,14 @@ func (this *Parameters) GetInt(key ParaKey,defaultV int) (int, bool) {
 	return defaultV, ok
 }
 
-func (this *Parameters) GetIntOrDefault(key ParaKey,defaultV int) (int) {
-	v,_:=this.GetInt(key,defaultV)
+func (this *Parameters) GetIntOrDefault(key ParaKey, defaultV int) int {
+	v, _ := this.GetInt(key, defaultV)
 	return v
 }
 
-func (this *Parameters) GetInt64(key ParaKey,defaultV int64) (int64, bool) {
+func (this *Parameters) GetInt64(key ParaKey, defaultV int64) (int64, bool) {
 	v := this.Get(key)
-	log.Error(key,",",v)
+	log.Error(key, ",", v)
 
 	s, ok := v.(int64)
 	if ok {
@@ -154,7 +154,7 @@ func (this *Parameters) GetInt64(key ParaKey,defaultV int64) (int64, bool) {
 		return int64(s2), ok
 	}
 
-	log.Debug(key,",",s,",",ok)
+	log.Debug(key, ",", s, ",", ok)
 	return defaultV, ok
 }
 
@@ -187,7 +187,7 @@ func (this *Parameters) Get(key ParaKey) interface{} {
 	s := string(key)
 	v := this.Data[s]
 	this.l.RUnlock()
-	log.Debug("get context: ",key,",",v,",",reflect.TypeOf(v))
+	log.Debug("get context: ", key, ",", v, ",", reflect.TypeOf(v))
 	return v
 }
 
@@ -241,16 +241,16 @@ func (this *Parameters) MustGetBytes(key ParaKey) []byte {
 return 0 if not key was found
 */
 func (this *Parameters) MustGetInt(key ParaKey) int {
-	s, ok := this.GetInt(key,0)
-	if(!ok){
+	s, ok := this.GetInt(key, 0)
+	if !ok {
 		panic(fmt.Errorf("%s not found in context", key))
 	}
 	return s
 }
 
 func (this *Parameters) MustGetInt64(key ParaKey) int64 {
-	s, ok:= this.GetInt64(key,0)
-	if(!ok){
+	s, ok := this.GetInt64(key, 0)
+	if !ok {
 		panic(fmt.Errorf("%s not found in context", key))
 	}
 	return s
@@ -403,7 +403,7 @@ func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
 	}
 
 	for _, cfg := range config.ProcessJoints {
-		if(cfg.Enabled){
+		if cfg.Enabled {
 			j := GetJointInstance(cfg)
 			pipe.Join(j)
 		}
