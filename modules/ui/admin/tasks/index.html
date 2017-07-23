@@ -24,8 +24,8 @@
 
                 <ul class="tm-nav uk-nav" data-uk-nav="">
 
-                    <li class="uk-nav-header">Tasks</li>
-                    <li class="uk-active"><a href="#create-task-modal" data-uk-modal>Create a task</a></li>
+                    <!--<li class="uk-nav-header">Tasks</li>-->
+                    <!--<li class="uk-active"><a href="#create-task-modal" data-uk-modal>Create a task</a></li>-->
                 </ul>
 
             </div>
@@ -59,7 +59,8 @@
             <div class="uk-width-8-10">
                 <div class="uk-alert" ><span id="alert">Total <%= taskCount%></span></div>
 
-                <table id="tasks" class="uk-table uk-table-hover uk-table-striped" cellspacing="0" width="100%">
+                <div class="uk-overflow-container">
+                    <table id="tasks" class="uk-table uk-table-hover uk-table-striped" cellspacing="0" width="100%">
                     <thead>
                     <tr>
                         <th>URL</th>
@@ -80,8 +81,9 @@
                     </tbody>
                 </table>
 
-                <%== common.GetPagination(domain,from,size, taskCount, "") %>
+                    <%== common.GetPagination(domain,from,size, taskCount, "") %>
 
+                </div>
             </div>
         </div>
 

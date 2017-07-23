@@ -3,10 +3,12 @@
 <head>
     <title>Gopa</title>
     <link rel="stylesheet" href="/static/assets/uikit-2.27.1/css/uikit.min.css" />
+    <link rel="stylesheet" href="/static/assets/uikit-2.27.1/css/components/tooltip.min.css" />
     <link rel="icon" href="/static/assets/img/favicon.ico" type="image/x-icon" />
     <link rel="shortcut icon" href="/static/assets/img/favicon.ico" type="image/x-icon" />
     <script src="/static/assets/js/jquery.min.js"></script>
     <script src="/static/assets/uikit-2.27.1/js/uikit.min.js"></script>
+    <script src="/static/assets/uikit-2.27.1/js/components/tooltip.min.js"></script>
     <meta charset="utf-8">
 </head>
 <body class="tm-background">
@@ -131,6 +133,159 @@
         </div>
     </div>
 
+</div>
+
+<div>
+
+
+</div>
+
+<div class="uk-grid" data-uk-grid-margin="">
+
+    <div class="uk-width-2-10 uk-row-first">
+        <div class="uk-alert"><span id="domain-alert">Total 38</span></div>
+        <ul id="domain-records" class="uk-list">
+
+            <span><a href="?domain=localhost:8080">localhost:8080(382)</a></span>
+
+            <span><a href="?domain=www.elastic.co">www.elastic.co(90)</a></span>
+
+            <span><a href="?domain=www.oreilly.com">www.oreilly.com(1)</a></span>
+
+            <span><a href="?domain=github.com">github.com(65)</a></span>
+
+            <span><a href="?domain=creativecommons.org">creativecommons.org(1)</a></span>
+
+            <span><a href="?domain=support.elastic.co">support.elastic.co(1)</a></span>
+
+            <span><a href="?domain=discuss.elastic.co">discuss.elastic.co(3)</a></span>
+
+            <span><a href="?domain=cloud-status.elastic.co">cloud-status.elastic.co(1)</a></span>
+
+            <span><a href="?domain=www.apache.org">www.apache.org(3)</a></span>
+
+            <span><a href="?domain=en.wikipedia.org">en.wikipedia.org(22)</a></span>
+
+            <span><a href="?domain=de.wikipedia.org">de.wikipedia.org(1)</a></span>
+
+            <span><a href="?domain=blog.mikemccandless.com">blog.mikemccandless.com(2)</a></span>
+
+            <span><a href="?domain=elasticsearch.cn">elasticsearch.cn(1)</a></span>
+
+            <span><a href="?domain=geojson.org">geojson.org(1)</a></span>
+
+            <span><a href="?domain=metacpan.org">metacpan.org(1)</a></span>
+
+            <span><a href="?domain=elasticsearch-py.readthedocs.org">elasticsearch-py.readthedocs.org(1)</a></span>
+
+            <span><a href="?domain=people.apache.org">people.apache.org(1)</a></span>
+
+            <span><a href="?domain=download.services.openoffice.org">download.services.openoffice.org(1)</a></span>
+
+            <span><a href="?domain=sourceforge.net">sourceforge.net(1)</a></span>
+
+            <span><a href="?domain=extensions.openoffice.org">extensions.openoffice.org(1)</a></span>
+
+            <span><a href="?domain=mzl.la">mzl.la(1)</a></span>
+
+            <span><a href="?domain=hunspell.github.io">hunspell.github.io(1)</a></span>
+
+            <span><a href="?domain=wikis.oracle.com">wikis.oracle.com(1)</a></span>
+
+            <span><a href="?domain=site.icu-project.org">site.icu-project.org(1)</a></span>
+
+            <span><a href="?domain=lucene.apache.org">lucene.apache.org(1)</a></span>
+
+            <span><a href="?domain=gist.github.com">gist.github.com(1)</a></span>
+
+            <span><a href="?domain=unicode.org">unicode.org(1)</a></span>
+
+            <span><a href="?domain=groovy.codehaus.org">groovy.codehaus.org(1)</a></span>
+
+            <span><a href="?domain=icu-project.org">icu-project.org(1)</a></span>
+
+            <span><a href="?domain=www.unicode.org">www.unicode.org(2)</a></span>
+
+            <span><a href="?domain=userguide.icu-project.org">userguide.icu-project.org(2)</a></span>
+
+            <span><a href="?domain=tools.ietf.org">tools.ietf.org(1)</a></span>
+
+            <span><a href="?domain=snowball.tartarus.org">snowball.tartarus.org(4)</a></span>
+
+            <span><a href="?domain=curl.haxx.se">curl.haxx.se(1)</a></span>
+
+            <span><a href="?domain=www.java.com">www.java.com(1)</a></span>
+
+            <span><a href="?domain=www.w3.org">www.w3.org(1)</a></span>
+
+            <span><a href="?domain=code.google.com">code.google.com(1)</a></span>
+
+            <span><a href="?domain=static.googleusercontent.com">static.googleusercontent.com(1)</a></span>
+
+        </ul>
+    </div>
+
+    <div class="uk-width-8-10">
+        <div class="uk-alert"><span id="alert">Total 603</span></div>
+
+        <table id="tasks" class="uk-table uk-table-hover uk-table-striped" cellspacing="0" width="100%">
+            <thead>
+            <tr>
+                <th>URL</th>
+                <th>LastUpdate</th>
+                <th>NextCheck</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody id="records">
+
+            <tr ><td >http://en.wikipedia.org/wiki/Levenshtein_distance</td><td>N/A</td><td>N/A</td><td>failed
+            </td></tr>
+
+            <tr><td>http://en.wikipedia.org/wiki/Frederick_J._Damerau</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>http://blog.mikemccandless.com/2013/08/a-new-version-of-comp...</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>https://code.google.com/p/cld2/</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>http://www.apache.org/licenses/LICENSE-2.0</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>https://github.com/mikemccand/chromium-compact-language-dete...</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>http://www.w3.org/International/questions/qa-lang-priorities...</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>http://en.wikipedia.org/wiki/Fsync</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>http://www.java.com</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>https://www.elastic.co/downloads/elasticsearch</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>https://www.elastic.co/guide/en/elasticsearch/reference/mast...</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>https://www.elastic.co/guide/en/sense/current/installing.htm...</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>https://github.com/elasticsearch/cookbook-elasticsearch</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>https://github.com/elasticsearch/puppet-elasticsearch</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>http://curl.haxx.se/download.html</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>http://www.elastic.co/downloads/elasticsearch</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>https://www.elastic.co/guide/en/elasticsearch/reference/mast...</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>https://www.elastic.co/guide/en/elasticsearch/reference/mast...</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>https://www.elastic.co/guide/en/elasticsearch/reference/mast...</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            <tr><td>https://www.elastic.co/guide/en/elasticsearch/reference/mast...</td><td>N/A</td><td>N/A</td><td>failed</td></tr>
+
+            </tbody>
+        </table>
+
+        <ul class="uk-pagination" data-uk-pagination="{items:603, itemsOnPage:20,currentPage:2}"><li><a href="#page-1" data-page="0">1</a></li><li><a href="#page-2" data-page="1">2</a></li><li class="uk-active"><span>3</span></li><li><a href="#page-4" data-page="3">4</a></li><li><a href="#page-5" data-page="4">5</a></li><li><a href="#page-6" data-page="5">6</a></li><li><a href="#page-7" data-page="6">7</a></li><li><span>...</span></li><li><a href="#page-31" data-page="30">31</a></li></ul><script type="text/javascript">    $(function() {$('[data-uk-pagination]').on('select.uk.pagination', function(e, pageIndex){var size=20;var from=pageIndex*size;var args='';window.location='?from='+from+'&size='+size+args});   });</script>
+
+    </div>
 </div>
 
 <div class="tm-footer">
