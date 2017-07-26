@@ -56,6 +56,10 @@ func Environment(configFile string) *Env {
 		panic(err)
 	}
 
+	if(env.IsDebug){
+		log.Debug(util.ToJson(env,true))
+	}
+
 	return &env
 }
 
@@ -82,6 +86,7 @@ var (
 		HttpBinding:        ":9001",
 		ClusterBinding:     ":13001",
 		AllowMultiInstance: false,
+		TLSEnabled: false,
 	}
 )
 

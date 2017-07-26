@@ -31,7 +31,7 @@ task.default:
 modules:
 - module: crawler
   enabled: true
-  max_go_routine: 10
+  max_go_routine: 1
   fetch_threshold_ms: 0
   default_pipeline_config:
     name: my_crawler
@@ -42,15 +42,13 @@ modules:
       - joint: url_normalization
         enabled: true
         parameters:
-          follow_all_domain: true
+          follow_all_domain: false
           follow_sub_domain: true
       - joint: load_metadata
         enabled: true
       - joint: ignore_timeout
         parameters:
-          ignore_timeout_after_count: 10
-          max_depth: 20
-          max_breadth: 20
+          ignore_timeout_after_count: 5
         enabled: true
       - joint: fetch
         enabled: true
@@ -58,6 +56,8 @@ modules:
         enabled: true
         parameters:
           dispatch_links: true
+          max_depth: 1
+          max_breadth: 1
       - joint: html2text
         parameters:
           merge_whitespace: false
@@ -75,7 +75,7 @@ modules:
           compress_enabled: true
           bucket: "Snapshot"
       - joint: index
-        enabled: true
+        enabled: false
     end:
       joint: save_task
       enabled: true
@@ -137,7 +137,7 @@ modules:
   enabled: true
 
 - module: statsd
-  enabled: true
+  enabled: false
   host: 192.168.3.208
   port: 8125
   namespace: gopa.
