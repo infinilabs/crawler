@@ -12,7 +12,7 @@
 
 Mac/Linux: Run `make build` to build the Gopa
 
-Windows:  go with this wiki - [How to build GOPA on windows](https://github.com/infinitbyte/gopa/wiki/How-to-build-GOPA-on-windows)
+Windows:  Checkout this wiki page - [How to build GOPA on windows](https://github.com/infinitbyte/gopa/wiki/How-to-build-GOPA-on-windows)
 
 
 ## Download ##
@@ -24,7 +24,7 @@ Windows:  go with this wiki - [How to build GOPA on windows](https://github.com/
 
 After download/build the binary file, run `./gopa` to start the Gopa 
 
-Run `./gopa -h` to get the full list of commandline options
+Run `./gopa -h` to get the full list of command line options
 
 * -log option : logging level,can be set to `trace`,`debug`,`info`,`warn`,`error` ,default is `info`
 * -daemon option : run in background as daemon
@@ -38,7 +38,7 @@ Run `./gopa -h` to get the full list of commandline options
 It's safety to press `ctrl+c` stop the current running Gopa, Gopa will handle the rest,saving the checkpoint,
 you may restore the job later,the world is still in your hand.
 
-If you are running `Gopa` as daemon, you can stop it like this:
+If you are running `Gopa` as daemon, you may stop it like this:
 
 ```
  kill -QUIT `pgrep gopa`

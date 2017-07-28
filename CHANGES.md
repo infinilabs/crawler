@@ -1,15 +1,39 @@
 # Gopa #
-[狗爬], [aims to be] A High Performance Distributed  Spider Written in GO .
+[狗爬], [aims to be] A high performance distributed and lightweight spider written in GO .
 
 ## CHANGES
 
 #### v0.9
 
+##### breaking changes
+1. move repo to infinitbyte/gopa, for better cooperation, namespace changed as well  
+2. separate API and UI, listen on different port
+
 ##### features
+1. task fetch and update with stepped delay
+2. add hash joint to crawler pipeline
+3. dispatch tasks and auto update tasks
+4. add proxy to fetch joint
+5. filter url before push to checker
 
 ##### improvement
+1. multi instance support on local machine
+2. streamline clustering on local machine
+3. modules and pipelines dynamic config ready
+4. pipeline and context refactored to support dynamic parameters
+5. save snapshot to KV store and update task management
+6. optimize shutdown logic, reduce half of goroutines
+7. add a wiki about how to build gopa on windows
+8. remove timeout in queue by default
+9. improve statsd performance with buffered client
+10. refine log level, enable pprof to config listen address
+11. update task ui, limit length of name
 
 ##### bugfix
+1. disable simhash due to poor performance and memory leak
+2. fix wrong relative url by using unicode index
+3. fix statsd not data was send out
+4. fix poor string merge performance
 
 
 #### v0.8
