@@ -6,7 +6,7 @@
 #### v0.9
 
 ##### breaking changes
-1. move repo to infinitbyte/gopa, for better cooperation, namespace changed as well  
+1. move repo to infinitbyte/gopa, for better collaboration, namespace changed as well  
 2. separate API and UI, listen on different port
 
 ##### features
@@ -32,7 +32,7 @@
 ##### bugfix
 1. disable simhash due to poor performance and memory leak
 2. fix wrong relative url by using unicode index
-3. fix statsd not data was send out
+3. fix statsd no data was send out
 4. fix poor string merge performance
 
 
