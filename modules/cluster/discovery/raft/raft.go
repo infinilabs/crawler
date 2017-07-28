@@ -85,15 +85,29 @@ func (s *RaftModule) handleJoin(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(s.cfg.Bind))
 }
 
+func getStatus(raft *raft.Raft) string {
+	if(raft.Leader()==""){
+		return "red"
+	}else {
+		return "green"
+	}
+}
+
 func (s *RaftModule) clusterInfo(w http.ResponseWriter, r *http.Request) {
 
 	stats := map[string]interface{}{}
-	stats["leader"] = s.raft.Leader()
-	stats["local"] = s.cfg.Bind
-	stats["seeds"] = s.raft.Peers()
+	stats["cluster_name"] = global.Env().SystemConfig.ClusterConfig.Name
+	stats["status"] = getStatus(s.raft)
+	stats["number_of_nodes"] = 1
+	stats["number_of_nodes"] = 1
+	stats["timed_out"] = false
+	stats["raft"] = util.MapStr{
+		"leader" : s.raft.Leader(),
+		"seeds" : s.raft.Peers(),
+		"stats": s.raft.Stats(),
+	}
 
-	stats["stats"] = s.raft.Stats()
-	b, _ := json.MarshalIndent(stats, "", "\t")
+	b, _ := json.MarshalIndent(stats, "", "  ")
 	w.Write(b)
 	return
 }
@@ -178,8 +192,8 @@ func (s *RaftModule) Open() error {
 		}()
 	}
 
-	apihandler.HandleAPIFunc("/cluster/status", s.clusterInfo)
-	apihandler.HandleAPIFunc("/cluster/node/_join", s.handleJoin)
+	apihandler.HandleAPIFunc("/_cluster/health", s.clusterInfo)
+	apihandler.HandleAPIFunc("/_cluster/node/_join", s.handleJoin)
 
 	apihandler.HandleAPIFunc("/cache", s.handleKeyRequest)
 	apihandler.HandleAPIFunc("/cache/", s.handleKeyRequest)
@@ -207,7 +221,7 @@ func join(joinAddr, raftAddr string) error {
 	}
 
 	if global.Env().SystemConfig.TLSEnabled && len(global.Env().SystemConfig.PathConfig.Cert) > 0 {
-		url := fmt.Sprintf("https://%s/cluster/node/_join", joinAddr)
+		url := fmt.Sprintf("https://%s/_cluster/node/_join", joinAddr)
 
 		log.Info("try to join the cluster, ", url, ", ", string(b))
 
@@ -230,7 +244,7 @@ func join(joinAddr, raftAddr string) error {
 		return nil
 	}
 
-	url := fmt.Sprintf("http://%s/cluster/node/_join", joinAddr)
+	url := fmt.Sprintf("http://%s/_cluster/node/_join", joinAddr)
 
 	log.Debug("try to join the cluster, ", url, ", ", string(b))
 

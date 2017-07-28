@@ -84,7 +84,7 @@ func (this Handler) Get(req *http.Request, key string, defaultValue string) stri
 func (w Handler) EncodeJson(v interface{}) (b []byte, err error) {
 
 	//if(w.Get("pretty","false")=="true"){
-	b, err = json.MarshalIndent(v, "", " ")
+	b, err = json.MarshalIndent(v, "", "  ")
 	//}else{
 	//	b, err = json.Marshal(v)
 	//}

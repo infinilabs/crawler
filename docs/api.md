@@ -76,25 +76,32 @@ curl -XGET http://localhost:8001/snapshot/?url=http://xxx.com
 
 * Get cluster
 ``` 
-curl -XGET http://127.0.0.1:8001/cluster/status 
+curl -XGET http://127.0.0.1:8001/_cluster/health 
 ```
 ```
 {
-	"addr": "Node at :13003 [Follower]",
-	"leader": ":13000",
-	"stats": {
-		"applied_index": "21",
-		"commit_index": "21",
-		"fsm_pending": "0",
-		"last_contact": "55.516082ms",
-		"last_log_index": "21",
-		"last_log_term": "408",
-		"last_snapshot_index": "0",
-		"last_snapshot_term": "0",
-		"num_peers": "4",
-		"state": "Follower",
-		"term": "408"
-	}
+	"cluster_name": "gopa",
+	"raft": {
+		"leader": "127.0.0.1:13001",
+		"seeds": [
+			"127.0.0.1:13002",
+			"127.0.0.1:13003"
+		],
+		"stats": {
+			"applied_index": "1",
+			"commit_index": "1",
+			"fsm_pending": "0",
+			"last_contact": "never",
+			"last_log_index": "1",
+			"last_log_term": "54",
+			"last_snapshot_index": "0",
+			"last_snapshot_term": "0",
+			"num_peers": "2",
+			"state": "Leader",
+			"term": "54"
+		}
+	},
+	"status": "green"
 }
 ```
 
