@@ -98,6 +98,7 @@ func (w Handler) EncodeJson(v interface{}) (b []byte, err error) {
 func (this Handler) WriteJsonHeader(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	this.wroteHeader = true
 }
 
 type Result struct {

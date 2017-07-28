@@ -2,13 +2,14 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"github.com/infinitbyte/gopa/core/util"
 	"path"
 )
 
 type ClusterConfig struct {
-	Name  string `config:"name"`
-	Seeds string `config:"seeds"`
+	Name  string   `config:"name"`
+	Seeds []string `config:"seeds"`
 }
 
 type NetworkConfig struct {
@@ -43,7 +44,8 @@ type SystemConfig struct {
 	HttpBinding    string `config:"http_bind"`
 	ClusterBinding string `config:"cluster_bind"`
 
-	AllowMultiInstance bool `config:"multi_instance"`
+	AllowMultiInstance bool `config:"allow_multi_instance"`
+	MaxNumOfInstance   int  `config:"max_num_of_instances"`
 	TLSEnabled         bool `config:"tls_enabled"`
 }
 
@@ -58,8 +60,10 @@ func (this *SystemConfig) GetDataDir() string {
 	} else {
 		//auto select next nodes folder, eg: nodes/1 nodes/2
 		i := 0
-		maxInstance := 5
-		for j := 0; j < maxInstance; j++ {
+		if this.MaxNumOfInstance < 1 {
+			this.MaxNumOfInstance = 5
+		}
+		for j := 0; j < this.MaxNumOfInstance; j++ {
 			p := path.Join(this.PathConfig.Data, this.ClusterConfig.Name, "nodes", util.IntToString(i))
 			if !util.FileExists(path.Join(p, ".lock")) {
 				this.workingDir = p
@@ -67,6 +71,6 @@ func (this *SystemConfig) GetDataDir() string {
 			}
 			i++
 		}
-		panic(errors.New("too much instances on this node"))
+		panic(errors.New(fmt.Sprintf("reach max num of instances on this node, limit is: %v", this.MaxNumOfInstance)))
 	}
 }

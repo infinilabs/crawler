@@ -14,6 +14,7 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/hashicorp/raft"
 	"github.com/hashicorp/raft-boltdb"
+	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/global"
 	apihandler "github.com/infinitbyte/gopa/core/http"
 	"github.com/infinitbyte/gopa/core/util"
@@ -88,11 +89,12 @@ func (s *RaftModule) clusterInfo(w http.ResponseWriter, r *http.Request) {
 
 	stats := map[string]interface{}{}
 	stats["leader"] = s.raft.Leader()
+	stats["local"] = s.cfg.Bind
+	stats["seeds"] = s.raft.Peers()
+
 	stats["stats"] = s.raft.Stats()
-	stats["addr"] = s.raft.String()
 	b, _ := json.MarshalIndent(stats, "", "\t")
 	w.Write(b)
-	w.WriteHeader(http.StatusOK)
 	return
 }
 
@@ -101,25 +103,18 @@ func (s *RaftModule) clusterInfo(w http.ResponseWriter, r *http.Request) {
 func (s *RaftModule) Open() error {
 	// Setup Raft configuration.
 	config := raft.DefaultConfig()
-	// Check for any existing peers.
-	peers, err := readPeersJSON(filepath.Join(s.cfg.DataDir, "peers.json"))
-	if err != nil {
-		log.Error(err)
-		return err
-	}
 
-	enableSingle := len(s.cfg.Seeds) == 0
+	//enable it while seed was not set or single_node was enabled
+	enableSingle := (len(s.cfg.Seeds) == 0) && s.cfg.EnableSingleNode
 
 	if !global.Env().IsDebug {
 		//disable raft logging
 		config.LogOutput = new(NullWriter)
 	}
 
-	log.Debug("cluster previous persisted seed peers: ", len(peers), ", ", strings.Join(peers, ","))
-
 	// Allow the node to entry single-mode, potentially electing itself, if
 	// explicitly enabled and there is only 1 node in the cluster already.
-	if enableSingle && len(peers) <= 1 {
+	if enableSingle {
 		log.Debug("raft enabling single-node mode")
 		config.EnableSingleNode = true
 		config.DisableBootstrapAfterElect = false
@@ -140,8 +135,7 @@ func (s *RaftModule) Open() error {
 
 	log.Debug("raft listen on: ", address)
 
-	// Create peer storage.
-	peerStore := raft.NewJSONPeers(s.cfg.DataDir, transport)
+	peerStore := &raft.StaticPeers{StaticPeers: s.cfg.Seeds}
 
 	// Create the snapshot store. This allows the Raft to truncate the log.
 	snapshots, err := raft.NewFileSnapshotStore(s.cfg.DataDir, retainSnapshotCount, os.Stderr)
@@ -166,7 +160,7 @@ func (s *RaftModule) Open() error {
 	if len(s.cfg.Seeds) > 0 {
 		for _, v := range s.cfg.Seeds {
 			if err := join(v, address); err != nil {
-				log.Errorf("failed to join node at %s: %s", v, err.Error())
+				log.Debugf("failed to join node at %s: %s", v, err.Error())
 			}
 		}
 	}
@@ -207,7 +201,12 @@ func join(joinAddr, raftAddr string) error {
 
 	joinAddr = util.GetValidAddress(joinAddr)
 
-	if len(global.Env().SystemConfig.PathConfig.Cert) > 0 {
+	//invalid self clustering
+	if joinAddr == raftAddr {
+		return errors.New(fmt.Sprint("can't cluster with self,", joinAddr, " vs ", raftAddr))
+	}
+
+	if global.Env().SystemConfig.TLSEnabled && len(global.Env().SystemConfig.PathConfig.Cert) > 0 {
 		url := fmt.Sprintf("https://%s/cluster/node/_join", joinAddr)
 
 		log.Info("try to join the cluster, ", url, ", ", string(b))
@@ -218,13 +217,13 @@ func join(joinAddr, raftAddr string) error {
 		client := &http.Client{Transport: tr}
 		resp, err := client.Post(url, "application-type/json", bytes.NewReader(b))
 		if err != nil {
-			log.Error("Get error:", err)
+			log.Debugf("Get error:", err)
 			return err
 		}
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Error(url, err)
+			log.Debugf(url, err)
 			return err
 		}
 		log.Debug(string(body))
@@ -233,19 +232,20 @@ func join(joinAddr, raftAddr string) error {
 
 	url := fmt.Sprintf("http://%s/cluster/node/_join", joinAddr)
 
-	log.Info("try to join the cluster, ", url, ", ", string(b))
+	log.Debug("try to join the cluster, ", url, ", ", string(b))
 
 	resp, err := http.Post(url, "application-type/json", bytes.NewReader(b))
 	if err != nil {
-		log.Error(err)
+		log.Debug(err)
 		return err
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Error(url, err)
+		log.Debugf(url, err)
 		return err
 	}
+	log.Info("connected to peer: ", joinAddr)
 
 	log.Debug(string(body))
 	defer resp.Body.Close()
@@ -264,25 +264,6 @@ func (s *RaftModule) Join(addr string) error {
 	}
 	log.Info("node at %s joined successfully", addr)
 	return nil
-}
-
-func readPeersJSON(path string) ([]string, error) {
-	b, err := ioutil.ReadFile(path)
-	if err != nil && !os.IsNotExist(err) {
-		return nil, err
-	}
-
-	if len(b) == 0 {
-		return nil, nil
-	}
-
-	var peers []string
-	dec := json.NewDecoder(bytes.NewReader(b))
-	if err := dec.Decode(&peers); err != nil {
-		return nil, err
-	}
-
-	return peers, nil
 }
 
 // handle cache function
@@ -465,13 +446,25 @@ func (f *fsm) applyDelete(key string) interface{} {
 }
 
 type fsmSnapshot struct {
-	store map[string]string
+	store        map[string]string
+	clusterState ClusterState
 }
 
 func (f *fsmSnapshot) Persist(sink raft.SnapshotSink) error {
 	err := func() error {
 		// Encode data.
 		b, err := json.Marshal(f.store)
+		if err != nil {
+			return err
+		}
+
+		// Write data to sink.
+		if _, err := sink.Write(b); err != nil {
+			return err
+		}
+
+		// Encode clusterState
+		b, err = json.Marshal(f.clusterState)
 		if err != nil {
 			return err
 		}

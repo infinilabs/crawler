@@ -4,7 +4,6 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/global"
 	"path"
-	"strings"
 )
 
 type Command struct {
@@ -14,28 +13,40 @@ type Command struct {
 }
 
 type RaftConfig struct {
-	Bind    string   `json:"bind"`
-	Seeds   []string `json:"seeds"`
-	DataDir string   `json:"data"`
+	Bind             string   `json:"bind"`
+	Seeds            []string `json:"seeds"`
+	DataDir          string   `json:"data"`
+	EnableSingleNode bool     `json:"enable_single_node"`
+}
+
+type Node struct {
+	IP   string
+	Port int
+}
+
+type ClusterState struct {
+	ActiveNodes   []Node
+	InactiveNodes []Node
 }
 
 func (this *RaftConfig) Init() {
 	this.DataDir = path.Join(global.Env().SystemConfig.GetDataDir(), "raft")
+	this.EnableSingleNode = true
 
 	if len(global.Env().SystemConfig.ClusterBinding) > 0 {
 		this.Bind = global.Env().SystemConfig.ClusterBinding
 	} else {
-		this.Bind = ":13001"
+		this.Bind = "127.0.0.1:13001"
 	}
 
-	join := global.Env().SystemConfig.ClusterConfig.Seeds
+	seeds := global.Env().SystemConfig.ClusterConfig.Seeds
 
-	log.Debug("get cluster seeds: ", global.Env().SystemConfig.ClusterConfig.Seeds)
-
-	if len(join) > 0 {
-		arr := strings.Split(join, ",")
-		for _, v := range arr {
+	if len(seeds) > 0 {
+		log.Debug("get cluster seeds: ", global.Env().SystemConfig.ClusterConfig.Seeds)
+		for _, v := range seeds {
 			this.Seeds = append(this.Seeds, v)
 		}
+	} else {
+		this.Seeds = append(this.Seeds, "127.0.0.1:13001")
 	}
 }

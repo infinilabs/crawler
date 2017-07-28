@@ -82,10 +82,11 @@ var (
 			Cert: "cert",
 		},
 
-		APIBinding:         ":8001",
-		HttpBinding:        ":9001",
-		ClusterBinding:     ":13001",
-		AllowMultiInstance: false,
+		APIBinding:         "127.0.0.1:8001",
+		HttpBinding:        "127.0.0.1:9001",
+		ClusterBinding:     "127.0.0.1:13001",
+		AllowMultiInstance: true,
+		MaxNumOfInstance:   5,
 		TLSEnabled:         false,
 	}
 )

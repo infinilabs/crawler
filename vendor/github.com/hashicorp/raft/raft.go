@@ -270,6 +270,10 @@ func (r *Raft) Leader() string {
 	return leader
 }
 
+func (r *Raft) Peers() []string {
+	return r.peers
+}
+
 // setLeader is used to modify the current leader of the cluster
 func (r *Raft) setLeader(leader string) {
 	r.leaderLock.Lock()
