@@ -17,7 +17,6 @@ limitations under the License.
 package crawler
 
 import (
-	"fmt"
 	log "github.com/cihub/seelog"
 	. "github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/global"
@@ -108,7 +107,7 @@ func (this CheckerModule) runCheckerGo() {
 			stats.Increment("queue."+string(config.CheckChannel), "pop")
 			this.execute(data)
 		case <-signalChannel:
-			fmt.Println("url checker quit")
+			log.Trace("Checker stopped")
 		}
 
 	}

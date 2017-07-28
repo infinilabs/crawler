@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"github.com/infinitbyte/gopa/core/util"
 	"path"
 )
 
@@ -26,6 +27,8 @@ type PathConfig struct {
 
 //high priority config, init from the environment or startup, can't be changed on the fly, need to restart
 type SystemConfig struct {
+	workingDir string `config:"-"`
+
 	ConfigFile string
 
 	ClusterConfig ClusterConfig `config:"cluster"`
@@ -45,9 +48,25 @@ type SystemConfig struct {
 }
 
 func (this *SystemConfig) GetDataDir() string {
-	if this.AllowMultiInstance == false {
-		return path.Join(this.PathConfig.Data, this.ClusterConfig.Name, "nodes", "0")
+	if this.workingDir != "" {
+		return this.workingDir
 	}
-	//TODO auto select next nodes folder, eg: nodes/1 nodes/2
-	panic(errors.New("not supported yet"))
+
+	if this.AllowMultiInstance == false {
+		this.workingDir = path.Join(this.PathConfig.Data, this.ClusterConfig.Name, "nodes", "0")
+		return this.workingDir
+	} else {
+		//auto select next nodes folder, eg: nodes/1 nodes/2
+		i := 0
+		maxInstance := 5
+		for j := 0; j < maxInstance; j++ {
+			p := path.Join(this.PathConfig.Data, this.ClusterConfig.Name, "nodes", util.IntToString(i))
+			if !util.FileExists(path.Join(p, ".lock")) {
+				this.workingDir = p
+				return this.workingDir
+			}
+			i++
+		}
+		panic(errors.New("too much instances on this node"))
+	}
 }

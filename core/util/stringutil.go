@@ -108,6 +108,10 @@ func ToJson(in interface{}, indent bool) string {
 	return string(b)
 }
 
+func IntToString(num int) string {
+	return strconv.Itoa(num)
+}
+
 func ToInt(str string) (int, error) {
 	if IndexAny(str, ".") > 0 {
 		nonFractionalPart := Split(str, ".")

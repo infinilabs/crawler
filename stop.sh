@@ -4,6 +4,6 @@ if test -z "$pid"
 then
   echo "GOPA IS NOT RUNNING"
 else
-  echo "KILL GOPA PID $pid"
-  kill -QUIT $pid
+  echo "KILL GOPA PID:\n$pid"
+  ps x|grep gopa|grep -v grep |awk '{print $1}'|xargs kill -QUIT
 fi

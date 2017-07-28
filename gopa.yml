@@ -6,12 +6,15 @@ path.data: data
 path.logs: log
 path.certs: cert
 
+multi_instance: true
+tls_enabled: false
+
 logging.level: debug
 
 network:
   host: 127.0.0.1
 
-#cluster.seeds:
+cluster.seeds: 127.0.0.1:13001,127.0.0.1:13002,127.0.0.1:13003
 
 channel:
   checker_chan_buff_size: 0

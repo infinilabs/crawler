@@ -219,10 +219,9 @@ func main() {
 
 	go func() {
 		s := <-sigc
-		log.Debug("got signal:", s)
 		if s == os.Interrupt || s.(os.Signal) == syscall.SIGINT || s.(os.Signal) == syscall.SIGTERM ||
 			s.(os.Signal) == syscall.SIGKILL || s.(os.Signal) == syscall.SIGQUIT {
-			log.Debugf("got signal:%s ,start shutting down", s.String())
+			fmt.Printf("\n[gopa] got signal:%s ,start shutting down\n", s.String())
 			//wait workers to exit
 			module.Stop()
 			finalQuitSignal <- true
@@ -230,6 +229,5 @@ func main() {
 	}()
 
 	<-finalQuitSignal
-	log.Debug("finished shutting down")
 
 }

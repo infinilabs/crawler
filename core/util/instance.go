@@ -20,6 +20,7 @@ func CheckInstanceLock(p string) {
 	FilePutContent(file, time.Now().String())
 	log.Trace("lock placed,", file)
 	locked = true
+	log.Info("workspace: ",p)
 }
 
 func ClearInstanceLock() {
