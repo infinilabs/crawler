@@ -188,6 +188,20 @@ func main() {
 
 	//check instance lock
 	util.CheckInstanceLock(env.SystemConfig.GetDataDir())
+	defer func() {
+		if r := recover(); r != nil {
+			if e, ok := r.(runtime.Error); ok {
+				log.Error("main: ", util.GetRuntimeErrorMessage(e))
+			}
+			log.Error("main", util.ToJson(r, true))
+		}
+		log.Flush()
+		logger.Flush()
+
+		//print goodbye message
+		onShutdown()
+		util.ClearInstanceLock()
+	}()
 
 	module.New()
 	modules.Register()
@@ -208,11 +222,9 @@ func main() {
 		log.Debug("got signal:", s)
 		if s == os.Interrupt || s.(os.Signal) == syscall.SIGINT || s.(os.Signal) == syscall.SIGTERM ||
 			s.(os.Signal) == syscall.SIGKILL || s.(os.Signal) == syscall.SIGQUIT {
-			log.Debug("got signal:%s ,start shutting down", s.String())
+			log.Debugf("got signal:%s ,start shutting down", s.String())
 			//wait workers to exit
 			module.Stop()
-			util.ClearInstanceLock()
-			log.Flush()
 			finalQuitSignal <- true
 		}
 	}()
@@ -220,5 +232,4 @@ func main() {
 	<-finalQuitSignal
 	log.Debug("finished shutting down")
 
-	onShutdown()
 }
