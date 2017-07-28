@@ -16,25 +16,10 @@ logging.level: debug
 network:
   host: 127.0.0.1
 
-#cluster.seeds: 127.0.0.1:13001,127.0.0.1:13002,127.0.0.1:13003
 cluster.seeds:
   - 127.0.0.1:13001
   - 127.0.0.1:13002
   - 127.0.0.1:13003
-
-channel:
-  checker_chan_buff_size: 0
-  fetch_chan_buff_size: 0
-
-task.default:
-  split_by_url_parameter: "p,pn,page,start,index"
-  save_url_pattern: ".*"
-  link_extract_pattern: "(\\s+(src2|src|href|HREF|SRC))\\s*=\\s*[\"']?(.*?)[\"']"
-  link_extract_group: 3
-  follow_same_domain: true
-  follow_sub_domain: true
-  skip_page_parse_pattern: ".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b"
-  fetch_url_pattern": ".*"
 
 
 modules:
@@ -75,7 +60,6 @@ modules:
         enabled: true
         parameters:
           simhash_enabled: false
-#          simhash_dict_folder: mydict
       - joint : save_snapshot_fs
         enabled: false
       - joint : save_snapshot_db
