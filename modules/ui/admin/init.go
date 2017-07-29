@@ -17,6 +17,7 @@ limitations under the License.
 package admin
 
 import (
+	"github.com/infinitbyte/gopa/core/global"
 	api "github.com/infinitbyte/gopa/core/http"
 	"github.com/infinitbyte/gopa/modules/ui/admin/ajax"
 	"github.com/infinitbyte/gopa/modules/ui/admin/common"
@@ -28,7 +29,11 @@ func InitUI() {
 	//common.RegisterNav("Dashboard", "Dashboard", "/admin/")
 	common.RegisterNav("Tasks", "Tasks", "/admin/tasks/")
 	//common.RegisterNav("Explore","Explore","/ui/explore/")
-	common.RegisterNav("BoltDB", "BoltDB", "/admin/boltdb/")
+
+	if global.Env().IsDebug {
+		common.RegisterNav("BoltDB", "BoltDB", "/admin/boltdb/")
+	}
+
 	//common.RegisterNav("Setting", "Setting", "/admin/setting/")
 
 	//UI pages init
