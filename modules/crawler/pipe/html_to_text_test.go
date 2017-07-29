@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/pipeline"
-	"github.com/jaytaylor/html2text"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
@@ -77,16 +76,4 @@ func TestProcessText(t *testing.T) {
 	fmt.Println(text)
 	//	assert.Equal(t, "  ", text)
 
-}
-
-func Test1(t *testing.T) {
-	b, e := ioutil.ReadFile("../../../test/samples/csdn.html")
-	if e != nil {
-		panic(e)
-	}
-	text, err := html2text.FromString(string(b))
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(text)
 }
