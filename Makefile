@@ -143,7 +143,9 @@ fetch-depends:
 	$(GO) get github.com/blevesearch/bleve
 	$(GO) get github.com/gensmusic/simhash
 	$(GO) get github.com/gensmusic/jiebago/...
-	$(GO) github.com/quipo/statsd
+	$(GO) get github.com/quipo/statsd
+	$(GO) get github.com/go-sql-driver/mysql
+
 
 dist: cross-build package
 

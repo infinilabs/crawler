@@ -262,7 +262,7 @@ func raiseConversion(opts *options, v value, err error, to string) Error {
 	ctx := v.Context()
 	path := ctx.path(".")
 	t, _ := v.typ(opts)
-	message := fmt.Sprintf("can not convert '%v' into '%v'", t.name, to)
+	message := fmt.Sprintf("can not convert '%v' into '%v', value: %v", t.name, to, v)
 	return raisePathErr(err, v.meta(), message, path)
 }
 

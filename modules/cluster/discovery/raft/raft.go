@@ -86,9 +86,9 @@ func (s *RaftModule) handleJoin(w http.ResponseWriter, r *http.Request) {
 }
 
 func getStatus(raft *raft.Raft) string {
-	if(raft.Leader()==""){
+	if raft.Leader() == "" {
 		return "red"
-	}else {
+	} else {
 		return "green"
 	}
 }
@@ -102,9 +102,9 @@ func (s *RaftModule) clusterInfo(w http.ResponseWriter, r *http.Request) {
 	stats["number_of_nodes"] = 1
 	stats["timed_out"] = false
 	stats["raft"] = util.MapStr{
-		"leader" : s.raft.Leader(),
-		"seeds" : s.raft.Peers(),
-		"stats": s.raft.Stats(),
+		"leader": s.raft.Leader(),
+		"seeds":  s.raft.Peers(),
+		"stats":  s.raft.Stats(),
 	}
 
 	b, _ := json.MarshalIndent(stats, "", "  ")

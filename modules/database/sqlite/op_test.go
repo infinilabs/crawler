@@ -40,7 +40,7 @@ type UserGroup struct {
 }
 
 func Test1(t *testing.T) {
-	util.Unlink("/tmp/test_database12.db")
+	util.FileDelete("/tmp/test_database12.db")
 
 	fileName := fmt.Sprintf("file:%s?cache=shared&mode=rwc", "/tmp/test_database12.db")
 	fmt.Println(fileName)
