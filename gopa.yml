@@ -128,6 +128,10 @@ modules:
 
 - module: database
   enabled: true
+  dialect: sqlite
+#  dialect: mysql
+#  mysql:
+#    connection: root:qeephp@tcp(192.168.3.206:3306)/gopa?charset=utf8&parseTime=true&loc=Local
 
 - module: statsd
   enabled: false

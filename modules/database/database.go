@@ -17,33 +17,56 @@ limitations under the License.
 package database
 
 import (
-	"fmt"
-	"github.com/infinitbyte/gopa/core/config"
-	"github.com/infinitbyte/gopa/core/global"
+	. "github.com/infinitbyte/gopa/core/config"
+	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/store"
+	"github.com/infinitbyte/gopa/modules/database/mysql"
+	"github.com/infinitbyte/gopa/modules/database/sqlite"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"os"
-	"path"
 )
 
 func (this DatabaseModule) Name() string {
 	return "Database"
 }
 
+var (
+	defaultConfig = DatabaseConfig{
+		Dialect: "sqlite",
+		SQLite:  &sqlite.SQLiteConfig{},
+		MySQL:   &mysql.MySQLConfig{},
+	}
+)
+
+func GetDefaultConfig() DatabaseConfig {
+	return defaultConfig
+}
+
 var db *gorm.DB
 
-func (this DatabaseModule) Start(cfg *config.Config) {
-	os.MkdirAll(path.Join(global.Env().SystemConfig.GetDataDir(), "database/"), 0777)
-	fileName := fmt.Sprintf("file:%s?cache=shared&mode=rwc&_busy_timeout=50000000", path.Join(global.Env().SystemConfig.GetDataDir(), "database/db.sqlite"))
+type DatabaseConfig struct {
+	Dialect string               `config:"dialect"` //only `mysql` and `sqlite` are available
+	SQLite  *sqlite.SQLiteConfig `config:"sqlite"`
+	MySQL   *mysql.MySQLConfig   `config:"mysql"`
+}
 
-	var err error
-	db, err = gorm.Open("sqlite3", fileName)
-	if err != nil {
-		panic("failed to connect database")
+func (this DatabaseModule) Start(cfg *Config) {
+
+	//init config
+	config := GetDefaultConfig()
+	cfg.Unpack(&config)
+	this.config = &config
+
+	if config.Dialect == "sqlite" {
+		db = sqlite.GetInstance(config.SQLite)
+	} else if config.Dialect == "mysql" {
+		db = mysql.GetInstance(config.MySQL)
+	} else {
+		panic(errors.New("database is not successful started, invalid type"))
 	}
+
 	// Migrate the schema
 	db.AutoMigrate(&model.Domain{})
 	db.AutoMigrate(&model.Task{})
@@ -59,4 +82,5 @@ func (this DatabaseModule) Stop() error {
 }
 
 type DatabaseModule struct {
+	config *DatabaseConfig
 }
