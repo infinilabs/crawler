@@ -3,7 +3,9 @@ package config
 import (
 	"errors"
 	"fmt"
+	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/util"
+	"io/ioutil"
 	"path"
 )
 
@@ -65,9 +67,30 @@ func (this *SystemConfig) GetDataDir() string {
 		}
 		for j := 0; j < this.MaxNumOfInstance; j++ {
 			p := path.Join(this.PathConfig.Data, this.ClusterConfig.Name, "nodes", util.IntToString(i))
-			if !util.FileExists(path.Join(p, ".lock")) {
+			lockFile := path.Join(p, ".lock")
+			if !util.FileExists(lockFile) {
 				this.workingDir = p
 				return this.workingDir
+			} else {
+				//check if pid is alive
+				b, err := ioutil.ReadFile(lockFile)
+				if err != nil {
+					panic(err)
+				}
+				pid, err := util.ToInt(string(b))
+				if err != nil {
+					panic(err)
+				}
+				if pid <= 0 {
+					panic(errors.New("invalid pid"))
+				}
+
+				procExists := util.CheckProcessExists(pid)
+				if !procExists {
+					util.FileDelete(lockFile)
+					log.Debug("dead process with broken lock file, removed: ", lockFile)
+				}
+				return p
 			}
 			i++
 		}

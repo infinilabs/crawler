@@ -99,7 +99,7 @@ func FileSize(file string) (int64, error) {
 }
 
 // delete file
-func Unlink(file string) error {
+func FileDelete(file string) error {
 	return os.Remove(file)
 }
 
@@ -245,7 +245,7 @@ func delFile(files []os.FileInfo, count int, fileDir string) {
 		if k+1 > deleteNum {
 			break
 		}
-		Unlink(fileDir + v.Name)
+		FileDelete(fileDir + v.Name)
 	}
 
 	return

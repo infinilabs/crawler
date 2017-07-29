@@ -4,7 +4,7 @@ import (
 	log "github.com/cihub/seelog"
 	"os"
 	"path"
-	"time"
+	"syscall"
 )
 
 var locked bool
@@ -17,8 +17,8 @@ func CheckInstanceLock(p string) {
 		log.Flush()
 		os.Exit(1)
 	}
-	FilePutContent(file, time.Now().String())
-	log.Trace("lock placed,", file)
+	FilePutContent(file, IntToString(os.Getpid()))
+	log.Trace("lock placed,", file, " ,pid:", os.Getpid())
 	locked = true
 	log.Info("workspace: ", p)
 }
@@ -27,4 +27,9 @@ func ClearInstanceLock() {
 	if locked {
 		os.Remove(path.Join(file))
 	}
+}
+
+func CheckProcessExists(pid int) bool {
+	err := syscall.Kill(pid, syscall.Signal(0))
+	return err == nil || err == syscall.EPERM
 }
