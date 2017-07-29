@@ -177,6 +177,7 @@ package-all-platform:
 
 test:
 	go get -u github.com/kardianos/govendor
+	go get github.com/stretchr/testify/assert
 	govendor test +local
 	#$(GO) test -timeout 60s ./... --ignore ./vendor
 	#GORACE="halt_on_error=1" go test ./... -race -timeout 120s  --ignore ./vendor

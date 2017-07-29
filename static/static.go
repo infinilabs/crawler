@@ -269,34 +269,6 @@ aNKFFpJiVp0t7yv4ANrQi+zv96HzvTVNWz/IEbp60Wnofr77/wIAAP//iXdWm89bAAA=
 `,
 	},
 
-	"/static/_treemap.html": {
-		local:   "../static/_treemap.html",
-		size:    3740,
-		modtime: 1496674736,
-		compressed: `
-H4sIAAAAAAAA/7RXwY7bNhO+5yn4MxcJK1P2ev8W8a4DFGkPOSWHXortoqDFscQNTSpDSrHT5N0LUrIt
-a0UDDVCfSM7MN9/MkDPyw/9+/fDu9z8+/kYqt1NvXz1Yd1Dw9tUrQgixbUn+Div/2xrtVmQxr/fEcm1n
-FlBu74P4e6fPV5VpAYmzNderrUTrZkUllRigONi7mYDCIHfS6BVptABUUsMFVAeh+ASC5zGz8iusyJt6
-f38+l0rNTM0L6Q4rMmc/nwAf8j6qBx/RFylctaZvfppTUoEsK9dt3j7kti29UoGydsRisaa5ddzJIufW
-grP5s83FcnbH5mwnNXu2wSion+z63LUcQ/7WRCyZBQWFS6htS5pmJ8b+F9iQNbmxbcm4c5jQcDTW65he
-KnZnNL0/uyyMMtg7LbiCDyik5ioJ+wp28I47KA0ebudDs63BHXedXbdOaCYukB0C7Hjd6fSbJL3gyHxV
-ksfAP+sZP41U0DRaJA4bGAlqLoTUZbIYOm0BrTSarAf1p2I544j8QFeELtic3dLsUriX9ii7G8k22Njq
-KFyOhEVlUESFRvkiSqNjfkPuY0Ihbc1dUUXlyMuozLYxVsAtxMy2BguIJaKrcsy0BNOJ7th8JKokIMei
-OsQoSe0Aa6O4650vXsDX3EWLUBt1KONJ/txw4W9fXA5NEC4nsJFrYXYxU4TPDVgXIxbeUyyd3QsfXI4X
-1hWvo9ZO7q7KBtW6ncD2Khhz7JBrK69Raw0abeSxWOOCfzXHlHlZ11P7JyqWrLBtQreKI/glzci20SER
-iUgHj1aE3uDbV7c6t20E16Amou/WAwBANJgRwR0fQskt6UQpcRWaLyRsekakbxxoTN/OrPOTZnsY9Sr/
-Y1IkF3RPZJi/offk+4RNzRG0e3/VktlmYx36djbPjmd+mL3XAvYftgnNaZpO4ich3JdubbOLeQz5nORq
-DbqzFc/IZmC4Yf1MmRF+XH77Rjas5aqBcBpWHnqQ3WPr9xlOR1kvQCmy9nOvH3m/KJVQTieo+TADBlPA
-W7BJOqEEvpUkKeN1DVpEkLpZ6DiW4GhG6F8bxfWnuOZeSf1pVSFsx7c1xBAmXKDXl7JW0oWC3R8zRyvn
-arvK81K6qtmwwuxySm5IzaySBfia36bs2Ugd7MgNoflGmU3eeq1+pj3Wj4unpyCzWFzYD42nC9vH7J+2
-bw0vAjkSDRq+EyceX7D93DvMus0hbFI6KrAv4injCIWLp1KKmGfBpLhGvfvGiRrvF2QW6F7D6D9/oiCH
-DuRwFcR/NU7eAx7uAdcFWGfQJufyhzmf8EfOFOjSVWRGbp+YFOm1RBZK1h/92PuBZAbjWVe0aFp7P42F
-H7r6R1evh25Gz1vxDfj3fRGY/6CPewzMw7iPOWxQJa8vApy8lcH32an/e3AlTpqRu6j0QDOyWE6IfSix
-JjtoCKfePjwdd3dyQxYZiWqwvv//dxHe/v9fRdh/9Yuu51+9yk46NXnJruWvK+uf2hd50pdHCD5P/6j+
-CQAA///u5ISXnA4AAA==
-`,
-	},
-
 	"/static/assets/ace/ace.js": {
 		local:   "../static/assets/ace/ace.js",
 		size:    354518,
@@ -14522,16 +14494,6 @@ k3bq9sEA7Ii442uQgpKIf+P5YadS77P8QEA6qa4QeK3jotRDWlBkNPfvNzGYA3gzns5BBFIwBwgQJgnA
 b2W2p3gaqb/etRMXu7j3AdIer6/KRSoyLxDg40MaVLR+dndhsiW5VVdMAhN8LoqGWo3dX8S9QuUGkDx0
 raYt3tWb8ZM9250t09HfXVd/rrwhmnIr4eZAr5staSsHojY2hd6mDoQsSL1zF2Wu6z7esnksvACA7HWd
 BxHFDKaxwARRr4xfvwkhb9kFciFofUI7+78BAAD//2jW7Hmd2wAA
-`,
-	},
-
-	"/static/flare.csv": {
-		local:   "../static/flare.csv",
-		size:    139,
-		modtime: 1496674736,
-		compressed: `
-H4sIAAAAAAAA/yrOrErVKUgsyeDSKcrPL4GQ+kmJmSmlesn5ueh8/fLyci5LAyyi+olFRYmVelnFXBZm
-6NKJxcmpeSmZeekgaSNjC3T59Pz89JxUQAAAAP//giJ25osAAAA=
 `,
 	},
 

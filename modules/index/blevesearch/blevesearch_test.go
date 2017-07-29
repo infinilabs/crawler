@@ -26,7 +26,7 @@ import (
 func Test(t *testing.T) {
 	// open a new index
 	mapping := bleve.NewIndexMapping()
-	index, err := bleve.New("example.bleve", mapping)
+	index, err := bleve.New("/tmp/example.bleve", mapping)
 	if err != nil {
 		seelog.Error(err)
 	}

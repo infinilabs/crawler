@@ -53,7 +53,7 @@ func main() {
 	fmt.Println(searchResults)
 }
 
-func buildIndexMapping() (*IndexMapping, error) {
+func buildIndexMapping() (*IndexMappingImpl, error) {
 	indexMapping := bleve.NewIndexMapping()
 
 	var err error
