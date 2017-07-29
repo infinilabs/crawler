@@ -89,8 +89,9 @@ func (this *SystemConfig) GetDataDir() string {
 				if !procExists {
 					util.FileDelete(lockFile)
 					log.Debug("dead process with broken lock file, removed: ", lockFile)
+					this.workingDir = p
+					return p
 				}
-				return p
 			}
 			i++
 		}
