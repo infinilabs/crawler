@@ -1,15 +1,13 @@
 // +build !windows
 
-package file_test
+package file
 
 import (
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/elastic/beats/libbeat/common/file"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestStat(t *testing.T) {
@@ -25,7 +23,7 @@ func TestStat(t *testing.T) {
 	}
 	defer os.Remove(link)
 
-	info, err := file.Stat(link)
+	info, err := Stat(link)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,7 +50,7 @@ func TestLstat(t *testing.T) {
 	}
 	defer os.Remove(link)
 
-	info, err := file.Lstat(link)
+	info, err := Lstat(link)
 	if err != nil {
 		t.Fatal(err)
 	}
