@@ -20,13 +20,14 @@ import (
 	"fmt"
 	"github.com/blevesearch/bleve"
 	"github.com/cihub/seelog"
+	"github.com/infinitbyte/gopa/core/util"
 	"testing"
 )
 
 func Test(t *testing.T) {
 	// open a new index
 	mapping := bleve.NewIndexMapping()
-	index, err := bleve.New("/tmp/example.bleve", mapping)
+	index, err := bleve.New("/tmp/"+util.GetUUID()+"/example.bleve", mapping)
 	if err != nil {
 		seelog.Error(err)
 	}

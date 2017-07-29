@@ -30,7 +30,7 @@ type crawlerJoint struct {
 }
 
 func (this crawlerJoint) Name() string {
-	return "crawlerJoint"
+	return "crawler"
 }
 
 func (this crawlerJoint) Process(s *Context) error {
@@ -45,12 +45,12 @@ type parserJoint struct {
 }
 
 func (this parserJoint) Name() string {
-	return "parserJoint"
+	return "parser"
 }
 
 func (this parserJoint) Process(s *Context) error {
-	s.Parameters.Data[("urls")] = "gogo"
-	s.Parameters.Data[("domain")] = "http://gogo.com"
+	s.Data[("urls")] = "gogo"
+	s.Data[("domain")] = "http://gogo.com"
 	//pub urls to channel
 	fmt.Println("start to parse web content")
 	return nil
@@ -60,11 +60,11 @@ type saveJoint struct {
 }
 
 func (this saveJoint) Name() string {
-	return "saveJoint"
+	return "save"
 }
 
 func (this saveJoint) Process(s *Context) error {
-	s.Parameters.Set("saved", "true")
+	s.Set("saved", "true")
 	//pub urls to channel
 	fmt.Println("start to save web content")
 	return nil
@@ -74,12 +74,12 @@ type publishJoint struct {
 }
 
 func (this publishJoint) Name() string {
-	return "publishJoint"
+	return "publish"
 }
 
 func (this publishJoint) Process(s *Context) error {
 	fmt.Println("start to end pipeline")
-	s.Parameters.Set("published", "true")
+	s.Set("published", "true")
 	return nil
 }
 
@@ -89,19 +89,20 @@ func TestPipeline(t *testing.T) {
 
 	pipeline := NewPipeline("crawler_test")
 	context := &Context{}
-	context.Parameters.Init()
-	context.Parameters.Data["url"] = "gogol.com"
-	context.Parameters.Data["webpage"] = "hello world gogo "
+	context.Init()
+	context.Data["url"] = "gogol.com"
+	context.Data["webpage"] = "hello world gogo "
 
 	crawler := crawlerJoint{}
 
-	context = pipeline.Context(context).
+	pipeline.Context(context).
 		Start(crawler).
 		Join(parserJoint{}).
 		Join(saveJoint{}).
 		Join(publishJoint{}).
 		Run()
 
+	fmt.Println(context.Parameters.Data)
 	fmt.Println(context.Data)
 	assert.Equal(t, "true", context.Parameters.Data["published"])
 	assert.Equal(t, "true", context.Parameters.Data["saved"])

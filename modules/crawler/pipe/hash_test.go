@@ -34,7 +34,7 @@ func TestProcessHash(t *testing.T) {
 	task.Depth = 1
 
 	context.Set(CONTEXT_CRAWLER_TASK, &task)
-	parse := HashJoint{DictRoot: "../../../"}
+	parse := HashJoint{}
 
 	snapshot := Snapshot{}
 	snapshot.Payload = []byte(body)
@@ -57,7 +57,7 @@ func TestProcessHash(t *testing.T) {
 	context = pipeline.Context{}
 	context.Init()
 	context.Set(CONTEXT_CRAWLER_TASK, &task1)
-	parse = HashJoint{DictRoot: "../../../"}
+	parse = HashJoint{}
 
 	snapshot = Snapshot{}
 	snapshot.Payload = []byte(body)

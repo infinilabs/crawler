@@ -42,18 +42,24 @@ func TestPipelineConfig(t *testing.T) {
 	Register("save", saveJoint{})
 	Register("publish", publishJoint{})
 
-	config.StartJoint = &JointConfig{JointName: "crawler", Parameters: map[string]interface{}{"url": "http://baidu12.com"}}
+	config.StartJoint = &JointConfig{Enabled: true, JointName: "crawler", Parameters: map[string]interface{}{"url": "http://baidu12.com"}}
 	joints := []*JointConfig{}
-	joints = append(joints, &JointConfig{JointName: "parser", Parameters: map[string]interface{}{}})
-	joints = append(joints, &JointConfig{JointName: "save", Parameters: map[string]interface{}{}})
-	joints = append(joints, &JointConfig{JointName: "publish", Parameters: map[string]interface{}{}})
+	joints = append(joints, &JointConfig{Enabled: true, JointName: "parser", Parameters: map[string]interface{}{}})
+	joints = append(joints, &JointConfig{Enabled: true, JointName: "save", Parameters: map[string]interface{}{}})
+	joints = append(joints, &JointConfig{Enabled: true, JointName: "publish", Parameters: map[string]interface{}{}})
 
 	config.ProcessJoints = joints
+
+	//fmt.Println(util.ToJson(config,true))
 
 	pipe := NewPipelineFromConfig(&config)
 	context := pipe.Run()
 
-	fmt.Println(context.Data)
+	fmt.Println("pipeline context")
+	fmt.Println(context)
+	fmt.Println(config.Context)
+	fmt.Println(context.Data["received_url"])
+
 	assert.Equal(t, "http://baidu12.com", context.Data["received_url"])
 	assert.Equal(t, "true", context.Data["published"])
 	assert.Equal(t, "true", context.Data["saved"])
