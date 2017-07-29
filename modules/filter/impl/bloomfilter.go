@@ -63,13 +63,11 @@ func (filter *BloomFilter) Close() error {
 	//save bloom-filter
 	m, err := filter.filter.GobEncode()
 	if err != nil {
-		log.Error(err)
-		return nil
+		panic(err)
 	}
 	err = ioutil.WriteFile(filter.persistFileName, m, 0600)
 	if err != nil {
 		panic(err)
-		return nil
 	}
 	log.Info("bloomFilter safety persisted.")
 

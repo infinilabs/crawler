@@ -39,9 +39,11 @@ type Context struct {
 	Parameters
 	Phrase       Phrase      `json:"phrase"`
 	IgnoreBroken bool        `json:"ignore_broken"`
-	breakFlag    bool        `json:"-"`
-	exitFlag     bool        `json:"-"`
 	Payload      interface{} `json:"-"`
+
+	//private parameters
+	breakFlag bool
+	exitFlag  bool
 }
 
 /**

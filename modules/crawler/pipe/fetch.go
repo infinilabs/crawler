@@ -169,6 +169,4 @@ func (this FetchJoint) Process(context *Context) error {
 		task.Status = value.status
 		return nil
 	}
-
-	return nil
 }

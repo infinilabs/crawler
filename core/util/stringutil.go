@@ -150,7 +150,6 @@ func GetRuntimeErrorMessage(r runtime.Error) string {
 		return r.Error()
 	}
 	panic(errors.New("nil runtime error"))
-	return "nil runtime error"
 }
 
 func XSSHandle(src string) string {

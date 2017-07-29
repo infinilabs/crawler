@@ -97,6 +97,7 @@ func (this CrawlerModule) runPipeline(env *Env, signalC *chan bool, shard int) {
 	for {
 		select {
 		case <-*signalC:
+			log.Trace("crawler exit, shard:", shard)
 			return
 		case taskID = <-queue.ReadChan(config.FetchChannel):
 			stats.Increment("queue."+string(config.FetchChannel), "pop")
@@ -106,7 +107,6 @@ func (this CrawlerModule) runPipeline(env *Env, signalC *chan bool, shard int) {
 			log.Trace("shard:", shard, ",task finished:", id)
 		}
 	}
-	log.Trace("crawler exit, shard:", shard)
 }
 
 func (this CrawlerModule) execute(taskId string, env *Env) {

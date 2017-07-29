@@ -73,7 +73,6 @@ func (this SaveSnapshotToFileSystemJoint) Process(c *Context) error {
 	if err != nil {
 		log.Error(fullPath, ",", err)
 		panic(err)
-		return err
 	}
 
 	defer fout.Close()
@@ -81,7 +80,7 @@ func (this SaveSnapshotToFileSystemJoint) Process(c *Context) error {
 	fout.Sync()
 	if err != nil {
 		log.Error(fullPath, ",", err)
-		return err
+		panic(err)
 	}
 
 	return nil

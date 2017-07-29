@@ -78,7 +78,6 @@ func GetRootUrl(source *URL) string {
 			return source.Host + "/"
 		}
 	}
-	return ""
 }
 
 //format url, normalize url
