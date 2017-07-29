@@ -42,7 +42,7 @@
     settings: {
       refreshMillis: 60000,
       allowPast: true,
-      allowFuture: false,
+      allowFuture: true,
       localeTitle: false,
       cutoff: 0,
       autoDispose: true,
@@ -50,7 +50,7 @@
         prefixAgo: null,
         prefixFromNow: null,
         suffixAgo: "ago",
-        suffixFromNow: "from now",
+        suffixFromNow: "later",
         inPast: 'any moment now',
         seconds: "< 1 min",
         minute: "~1 min",
@@ -70,7 +70,7 @@
 
     inWords: function(distanceMillis) {
       if (!this.settings.allowPast && ! this.settings.allowFuture) {
-          throw 'timeago allowPast and allowFuture settings can not both be set to false.';
+        throw 'timeago allowPast and allowFuture settings can not both be set to false.';
       }
 
       var $l = this.settings.strings;
@@ -100,16 +100,16 @@
       }
 
       var words = seconds < 45 && substitute($l.seconds, Math.round(seconds)) ||
-        seconds < 90 && substitute($l.minute, 1) ||
-        minutes < 45 && substitute($l.minutes, Math.round(minutes)) ||
-        minutes < 90 && substitute($l.hour, 1) ||
-        hours < 24 && substitute($l.hours, Math.round(hours)) ||
-        hours < 42 && substitute($l.day, 1) ||
-        days < 30 && substitute($l.days, Math.round(days)) ||
-        days < 45 && substitute($l.month, 1) ||
-        days < 365 && substitute($l.months, Math.round(days / 30)) ||
-        years < 1.5 && substitute($l.year, 1) ||
-        substitute($l.years, Math.round(years));
+          seconds < 90 && substitute($l.minute, 1) ||
+          minutes < 45 && substitute($l.minutes, Math.round(minutes)) ||
+          minutes < 90 && substitute($l.hour, 1) ||
+          hours < 24 && substitute($l.hours, Math.round(hours)) ||
+          hours < 42 && substitute($l.day, 1) ||
+          days < 30 && substitute($l.days, Math.round(days)) ||
+          days < 45 && substitute($l.month, 1) ||
+          days < 365 && substitute($l.months, Math.round(days / 30)) ||
+          years < 1.5 && substitute($l.year, 1) ||
+          substitute($l.years, Math.round(years));
 
       var separator = $l.wordSeparator || "";
       if ($l.wordSeparator === undefined) { separator = " "; }
@@ -196,7 +196,7 @@
         $(this).text(inWords(data.datetime));
       } else {
         if ($(this).attr('title').length > 0) {
-            $(this).text($(this).attr('title'));
+          $(this).text($(this).attr('title'));
         }
       }
     }
@@ -229,3 +229,4 @@
   document.createElement("abbr");
   document.createElement("time");
 }));
+

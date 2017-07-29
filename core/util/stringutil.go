@@ -126,6 +126,25 @@ func FormatTime(date *time.Time) string {
 	return date.Format("2006-01-02 15:04:05")
 }
 
+func FormatTimeWithLocalTZ(date *time.Time) string {
+	localLoc, err := time.LoadLocation("Local")
+	if err != nil {
+		panic(errors.New(`Failed to load location "Local"`))
+	}
+	localDateTime := date.In(localLoc)
+
+	return localDateTime.Format("2006-01-02 15:04:05")
+}
+
+func FormatTimeWithTZ(date *time.Time) string {
+	return date.Format("2016-10-24 09:34:19 +0000 UTC")
+}
+
+func GetLocalZone() string {
+	zone, _ := time.Now().Zone() // get the local zone
+	return zone
+}
+
 func GetRuntimeErrorMessage(r runtime.Error) string {
 	if r != nil {
 		return r.Error()

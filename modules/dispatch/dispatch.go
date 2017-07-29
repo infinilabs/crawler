@@ -22,7 +22,7 @@ var signalChannel chan bool
 func (this DispatchModule) Start(cfg *Config) {
 	signalChannel = make(chan bool, 2)
 	go func() {
-		now := time.Now()
+		now := time.Now().UTC()
 		dd, _ := time.ParseDuration("-240h")
 		defaultOffset := now.Add(dd)
 		offset := &defaultOffset

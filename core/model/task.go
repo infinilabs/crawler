@@ -138,7 +138,7 @@ type Task struct {
 
 func CreateTask(task *Task) error {
 	log.Trace("start create crawler task, ", task.Url)
-	time := time.Now()
+	time := time.Now().UTC()
 	task.ID = util.GetIncrementID("task")
 	task.Status = TaskCreated
 	task.CreateTime = &time
@@ -152,7 +152,7 @@ func CreateTask(task *Task) error {
 
 func UpdateTask(task *Task) {
 	log.Trace("start update crawler task, ", task.Url)
-	time := time.Now()
+	time := time.Now().UTC()
 	task.UpdateTime = &time
 	err := store.Update(task)
 	if err != nil {
@@ -220,7 +220,7 @@ func GetPendingNewFetchTasks() (int, []Task, error) {
 }
 
 func GetPendingUpdateFetchTasks(offset *time.Time) (int, []Task, error) {
-	t := time.Now()
+	t := time.Now().UTC()
 	log.Tracef("start get all crawler tasks,last offset: %s,", offset.String())
 	var tasks []Task
 	queryO := store.Query{Sort: "create_time asc",

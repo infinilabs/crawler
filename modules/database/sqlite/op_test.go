@@ -76,7 +76,7 @@ func Test1(t *testing.T) {
 	db.AutoMigrate(model.Domain{})
 	domain := model.Domain{}
 	domain.Host = "baidu.com"
-	time := time.Now()
+	time := time.Now().UTC()
 	domain.CreateTime = &time
 	domain.UpdateTime = &time
 

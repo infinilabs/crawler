@@ -20,7 +20,7 @@ type DomainSetting struct {
 func CreateDomain(host string) Domain {
 	domain := Domain{}
 	domain.Host = host
-	time := time.Now()
+	time := time.Now().UTC()
 	domain.CreateTime = &time
 	domain.UpdateTime = &time
 	store.Create(&domain)

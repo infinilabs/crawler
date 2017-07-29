@@ -28,6 +28,7 @@
 9. improve statsd performance with buffered client
 10. refine log level, enable pprof to config listen address
 11. update task ui, limit length of name
+12. detect dead process, re-place lock file
 
 ##### bugfix
 1. disable simhash due to poor performance and memory leak

@@ -21,14 +21,14 @@ func GetTaskRow(task model.Task) string {
 	writeTag(&buffer, "td", util.SubStringWithSuffix(task.Url, 60, "..."))
 
 	if task.SnapshotCreateTime != nil {
-		date1 := util.FormatTime(task.SnapshotCreateTime)
+		date1 := util.FormatTimeWithLocalTZ(task.SnapshotCreateTime)
 		buffer.WriteString("<td class='timeago' title='" + date1 + "' >" + date1 + "</td>")
 	} else {
 		buffer.WriteString("<td >N/A</td>")
 	}
 
 	if task.NextCheckTime != nil {
-		date2 := util.FormatTime(task.NextCheckTime)
+		date2 := util.FormatTimeWithLocalTZ(task.NextCheckTime)
 		buffer.WriteString("<td class='timeago' title='" + date2 + "' >" + date2 + "</td>")
 
 	} else {
