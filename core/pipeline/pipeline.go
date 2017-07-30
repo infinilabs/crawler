@@ -139,7 +139,6 @@ func (this *Parameters) GetIntOrDefault(key ParaKey, defaultV int) int {
 
 func (this *Parameters) GetInt64(key ParaKey, defaultV int64) (int64, bool) {
 	v := this.Get(key)
-	log.Error(key, ",", v)
 
 	s, ok := v.(int64)
 	if ok {
@@ -245,6 +244,12 @@ return 0 if not key was found
 func (this *Parameters) MustGetInt(key ParaKey) int {
 	s, ok := this.GetInt(key, 0)
 	if !ok {
+		//try int64 finally
+		var s1 int64
+		s1, ok = this.GetInt64(key, 0)
+		if ok {
+			return int(s1)
+		}
 		panic(fmt.Errorf("%s not found in context", key))
 	}
 	return s
