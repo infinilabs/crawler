@@ -92,9 +92,27 @@ func CreateSnapshot(snapshot *Snapshot) error {
 	return err
 }
 
+func DeleteSnapshot(snapshot *Snapshot) error {
+	err := store.Delete(snapshot)
+	return err
+}
+
 func GetSnapshotList(from, size int, taskId string) (int, []Snapshot, error) {
 	var snapshots []Snapshot
 	queryO := store.Query{Sort: "create_time desc", From: from, Size: size}
+	if len(taskId) > 0 {
+		queryO.Conds = store.And(store.Eq("task_id", taskId))
+	}
+	err, result := store.Search(&snapshots, &queryO)
+	if err != nil {
+		log.Error(err)
+	}
+	return result.Total, snapshots, err
+}
+
+func GetSnapshotAllList(taskId string) (int, []Snapshot, error) {
+	var snapshots []Snapshot
+	queryO := store.Query{Sort: "create_time desc"}
 	if len(taskId) > 0 {
 		queryO.Conds = store.And(store.Eq("task_id", taskId))
 	}
