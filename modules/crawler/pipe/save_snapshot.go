@@ -25,6 +25,8 @@ import (
 	"github.com/infinitbyte/gopa/core/store"
 	"github.com/infinitbyte/gopa/modules/config"
 	"time"
+	"strconv"
+	"strings"
 )
 
 const SaveSnapshotToDB JointKey = "save_snapshot_db"
@@ -35,6 +37,12 @@ type SaveSnapshotToDBJoint struct {
 
 const compressEnabled ParaKey = "compress_enabled"
 const bucket ParaKey = "bucket"
+const snapshottimeToless ParaKey = "snapshottime_toless"
+const snapshottimeTomore ParaKey = "snapshottime_tomore"
+
+//minutes
+var arrTimeToLess []int
+var arrTimeToMore []int
 
 func (this SaveSnapshotToDBJoint) Name() string {
 	return string(SaveSnapshotToDB)
@@ -43,6 +51,25 @@ func (this SaveSnapshotToDBJoint) Name() string {
 func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+
+	//init snapshottimeToless
+	arrTimeToLessStr := strings.Split(this.MustGetString(snapshottimeToless),",")
+	arrTimeToLess = make([]int,len(arrTimeToLessStr),len(arrTimeToLessStr))
+	for i := 0; i < len(arrTimeToLessStr); i++ {
+		m,error := strconv.Atoi(arrTimeToLessStr[i])
+		if error == nil {
+			arrTimeToLess[i] = m
+		}
+	}
+	//init snapshottimeTomore
+	arrTimeToMoreStr := strings.Split(this.MustGetString(snapshottimeTomore),",")
+	arrTimeToMore = make([]int,len(arrTimeToMoreStr),len(arrTimeToMoreStr))
+	for i := 0; i < len(arrTimeToMoreStr); i++ {
+		m,error := strconv.Atoi(arrTimeToMoreStr[i])
+		if error == nil {
+			arrTimeToMore[i] = m
+		}
+	}
 
 	//update task's snapshot, detect duplicated snapshot
 	if snapshot != nil {
@@ -113,9 +140,7 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 	return nil
 }
 
-//minutes
-var arrTimeToLess = [11]int{24 * 60, 12 * 60, 6 * 60, 3 * 60, 90, 45, 20, 10, 5, 2, 1}
-var arrTimeToMore = [15]int{1, 2, 5, 10, 20, 30, 60, 90, 3 * 60, 6 * 60, 12 * 60, 24 * 60, 2 * 24 * 60, 7 * 24 * 60, 15 * 24 * 60}
+
 
 func GetNextCheckTimeMinutes(fetchSuccess bool, tLastCheckTime time.Time, tNextCheckTime time.Time) int {
 	timeIntervalLast := GetTimeInterval(tLastCheckTime, tNextCheckTime)
