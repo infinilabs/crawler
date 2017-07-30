@@ -120,7 +120,7 @@ modules:
 - module: index
   enabled: true
   elasticsearch:
-    endpoint: http://192.168.3.206:9200
+    endpoint: http://127.0.0.1:9200
     index: gopa
 
 - module: dispatch
@@ -131,11 +131,11 @@ modules:
   dialect: sqlite
 #  dialect: mysql
 #  mysql:
-#    connection: root:qeephp@tcp(192.168.3.206:3306)/gopa?charset=utf8&parseTime=true&loc=Local
+#    connection: root:password@tcp(127.0.0.1:3306)/gopa?charset=utf8&parseTime=true&loc=Local
 
 - module: statsd
   enabled: false
-  host: 192.168.3.208
+  host: 127.0.0.1
   port: 8125
   namespace: gopa.
   interval_in_seconds: 1
