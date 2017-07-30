@@ -85,6 +85,7 @@ modules:
           bucket: "Snapshot"
           snapshottime_toless: "1440,720,360,180,90,45,20,10,1"
           snapshottime_tomore: "1,10,20,30,60,90,180,360,720,1440,2880,10080,21600"
+          snapshot_maxnum: 10
       - joint: index
         enabled: false
     end:
