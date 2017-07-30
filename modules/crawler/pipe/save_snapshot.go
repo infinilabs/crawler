@@ -39,6 +39,7 @@ const compressEnabled ParaKey = "compress_enabled"
 const bucket ParaKey = "bucket"
 const snapshottimeToless ParaKey = "snapshottime_toless"
 const snapshottimeTomore ParaKey = "snapshottime_tomore"
+const snapshotMaxnum ParaKey = "snapshot_maxnum"
 
 //minutes
 var arrTimeToLess []int
@@ -134,8 +135,30 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 
 	model.CreateSnapshot(snapshot)
 
+	//delete old snapshot
+	//get current snapshot list and total num
+	snapshotTotal, snapshotsList, err := model.GetSnapshotAllList(task.ID)
+	if err == nil {
+		//get max snapshot num
+		maxSnapshotNum := this.MustGetInt64(snapshotMaxnum)
+		//if more than max snapshot num,delete old snapshot
+		if int64(snapshotTotal) > maxSnapshotNum {
+			mustDeleteNum := int64(snapshotTotal) - maxSnapshotNum
+			for i := 0; i < len(snapshotsList); i++  {
+				if i > 0 && i < len(snapshotsList)-1 && mustDeleteNum > 0 {
+					model.DeleteSnapshot(&snapshotsList[i])
+					store.DeleteValue(this.MustGetString(bucket),[]byte(snapshotsList[i].ID),snapshotsList[i].Payload)
+					mustDeleteNum -= 1
+				}
+			}
+		}
+	}
+
+
 	stats.IncrementBy("domain.stats", domain+"."+config.STATS_STORAGE_FILE_SIZE, int64(len(snapshot.Payload)))
 	stats.Increment("domain.stats", domain+"."+config.STATS_STORAGE_FILE_COUNT)
+
+
 
 	return nil
 }
