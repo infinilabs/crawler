@@ -16,9 +16,8 @@ GOTEST   := GOPATH=$(NEWGOPATH) CGO_ENABLED=1  $(GO) test -ldflags -s
 ARCH      := "`uname -s`"
 LINUX     := "Linux"
 MAC       := "Darwin"
-PACKAGES  := $$(go list ./...| grep -vE 'vendor')
-FILES     := $$(find . -name '*.go' | grep -vE 'vendor')
-
+GO_FILES=$(find . -iname '*.go' | grep -v /vendor/)
+PKGS=$(go list ./... | grep -v /vendor/)
 
 .PHONY: all build update test clean
 
@@ -183,20 +182,21 @@ test:
 	#GORACE="halt_on_error=1" go test ./... -race -timeout 120s  --ignore ./vendor
 
 check:
-	$(GO) get github.com/golang/lint/golint
-
-	@echo "vet"
-	@ go tool vet $(FILES) 2>&1 | awk '{print} END{if(NR>0) {exit 1}}'
-	@echo "vet --shadow"
-	@ go tool vet --shadow $(FILES) 2>&1 | awk '{print} END{if(NR>0) {exit 1}}'
-	@echo "golint"
-	@ golint ./... 2>&1 | grep -vE 'context\.Context|LastInsertId|NewLexer|\.pb\.go' | awk '{print} END{if(NR>0) {exit 1}}'
-	@echo "gofmt (simplify)"
-	@ gofmt -s -l -w $(FILES) 2>&1 | awk '{print} END{if(NR>0) {exit 1}}'
+	$(GO)  get github.com/golang/lint/golint
+	$(GO)  get honnef.co/go/tools/cmd/megacheck
+	test -z $(gofmt -s -l $GO_FILES)    # Fail if a .go file hasn't been formatted with gofmt
+	$(GO) test -v -race $(PKGS)            # Run all the tests with the race detector enabled
+	$(GO) vet $(PKGS)                      # go vet is the official Go static analyzer
+	@echo "go tool vet"
+	go tool vet main.go
+	go tool vet core
+	go tool vet modules
+	megacheck $(PKGS)                      # "go vet on steroids" + linter
+	golint -set_exit_status $(PKGS)    # one last linter
 
 errcheck:
 	go get github.com/kisielk/errcheck
-	errcheck -blank $(PACKAGES)
+	errcheck -blank $(PKGS)
 
 cover:
 	go get github.com/mattn/goveralls
