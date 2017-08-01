@@ -35,8 +35,8 @@ func (this API) IndexAction(w http.ResponseWriter, req *http.Request, _ httprout
 	data["name"] = global.Env().SystemConfig.NodeConfig.Name
 	version := map[string]interface{}{}
 	version["number"] = env.VERSION
-	version["build_commit"] = env.LastCommitLog
-	version["build_date"] = env.BuildDate
+	version["build_commit"] = env.GetLastCommitLog()
+	version["build_date"] = env.GetBuildDate()
 	data["version"] = version
 	data["tagline"] = "You Know, for Web"
 

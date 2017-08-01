@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	// ErrWoldBlock indicates on locking pid-file by another process.
+	// ErrWouldBlock indicates on locking pid-file by another process.
 	ErrWouldBlock = syscall.EWOULDBLOCK
 )
 

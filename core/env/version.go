@@ -16,6 +16,10 @@ limitations under the License.
 
 package env
 
+// VERSION is the version of this gopa
+const VERSION = "0.9.0_SNAPSHOT"
+
+// GetWelcomeMessage print welcome message
 func GetWelcomeMessage() string {
 	s := ("  ________ ________ __________  _____   \n")
 	s += (" /  _____/ \\_____  \\\\______   \\/  _  \\  \n")
@@ -25,9 +29,19 @@ func GetWelcomeMessage() string {
 	s += ("        \\/         \\/                \\/ \n")
 
 	commitLog := ""
-	if len(LastCommitLog) > 0 {
-		commitLog = "\n///last commit: " + LastCommitLog + "///"
+	if len(lastCommitLog) > 0 {
+		commitLog = "\n///last commit: " + lastCommitLog + "///"
 	}
 	s += ("[gopa] " + VERSION + "" + commitLog + "\n")
 	return (s)
+}
+
+// GetLastCommitLog returns last commit information of source code
+func GetLastCommitLog() string {
+	return lastCommitLog
+}
+
+// GetBuildDate returns the build datetime of current gopa package
+func GetBuildDate() string {
+	return buildDate
 }

@@ -21,28 +21,28 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/elastic/go-ucfg"
 	"github.com/elastic/go-ucfg/yaml"
-	. "github.com/infinitbyte/gopa/core/config"
+	"github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/util"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-const VERSION = "0.9.0_SNAPSHOT"
-
+// Env is environment object of gopa
 type Env struct {
 
 	// static configs
-	SystemConfig *SystemConfig
+	SystemConfig *config.SystemConfig
 
 	// dynamic configs
-	RuntimeConfig *RuntimeConfig
+	RuntimeConfig *config.RuntimeConfig
 
 	IsDebug bool
 
 	LoggingLevel string
 }
 
+// Environment create a new env instance from a config
 func Environment(configFile string) *Env {
 
 	env := Env{}
@@ -63,20 +63,20 @@ func Environment(configFile string) *Env {
 	return &env
 }
 
-var moduleConfig map[string]*Config
+var moduleConfig map[string]*config.Config
 
 var (
-	defaultSystemConfig = SystemConfig{
-		ClusterConfig: ClusterConfig{
+	defaultSystemConfig = config.SystemConfig{
+		ClusterConfig: config.ClusterConfig{
 			Name: "gopa",
 		},
-		NetworkConfig: NetworkConfig{
+		NetworkConfig: config.NetworkConfig{
 			Host: "127.0.0.1",
 		},
-		NodeConfig: NodeConfig{
+		NodeConfig: config.NodeConfig{
 			Name: util.RandomPickName(),
 		},
-		PathConfig: PathConfig{
+		PathConfig: config.PathConfig{
 			Data: "data",
 			Log:  "log",
 			Cert: "cert",
@@ -91,7 +91,7 @@ var (
 	}
 )
 
-func loadSystemConfig(cfgFile string) SystemConfig {
+func loadSystemConfig(cfgFile string) config.SystemConfig {
 	cfg := defaultSystemConfig
 	cfg.ConfigFile = cfgFile
 	if util.IsExist(cfgFile) {
@@ -113,24 +113,24 @@ func loadSystemConfig(cfgFile string) SystemConfig {
 }
 
 var (
-	defaultRuntimeConfig = RuntimeConfig{}
+	defaultRuntimeConfig = config.RuntimeConfig{}
 )
 
-func (this *Env) loadRuntimeConfig() (*RuntimeConfig, error) {
+func (env *Env) loadRuntimeConfig() (*config.RuntimeConfig, error) {
 
-	moduleConfig = map[string]*Config{}
+	moduleConfig = map[string]*config.Config{}
 
 	var configFile = "./gopa.yml"
-	if this.SystemConfig != nil && len(this.SystemConfig.ConfigFile) > 0 {
-		configFile = this.SystemConfig.ConfigFile
+	if env.SystemConfig != nil && len(env.SystemConfig.ConfigFile) > 0 {
+		configFile = env.SystemConfig.ConfigFile
 	}
 
 	filename, _ := filepath.Abs(configFile)
-	var cfg RuntimeConfig
+	var cfg config.RuntimeConfig
 
 	if util.FileExists(filename) {
 		log.Debug("load configFile:", filename)
-		cfg, err := LoadFile(filename)
+		cfg, err := config.LoadFile(filename)
 		if err != nil {
 			log.Error(err)
 			return nil, err
@@ -153,12 +153,12 @@ func (this *Env) loadRuntimeConfig() (*RuntimeConfig, error) {
 	return &cfg, nil
 }
 
-func parseModuleConfig(cfgs []*Config) []*Config {
-	results := []*Config{}
+func parseModuleConfig(cfgs []*config.Config) []*config.Config {
+	results := []*config.Config{}
 	for _, cfg := range cfgs {
 		//set map for modules and module config
 		log.Trace(getModuleName(cfg), ",", cfg.Enabled())
-		config, err := NewConfigFrom(cfg)
+		config, err := config.NewConfigFrom(cfg)
 		if err != nil {
 			panic(err)
 		}
@@ -172,12 +172,13 @@ func parseModuleConfig(cfgs []*Config) []*Config {
 	return results
 }
 
-func GetModuleConfig(name string) *Config {
+//GetModuleConfig return specify module's config
+func GetModuleConfig(name string) *config.Config {
 	cfg := moduleConfig[strings.ToLower(name)]
 	return cfg
 }
 
-func getModuleName(c *Config) string {
+func getModuleName(c *config.Config) string {
 	cfgObj := struct {
 		Module string `config:"module"`
 	}{}
@@ -192,7 +193,8 @@ func getModuleName(c *Config) string {
 	return cfgObj.Module
 }
 
+// EmptyEnv return a empty env instance
 func EmptyEnv() *Env {
 	system := defaultSystemConfig
-	return &Env{SystemConfig: &system, RuntimeConfig: &RuntimeConfig{}}
+	return &Env{SystemConfig: &system, RuntimeConfig: &config.RuntimeConfig{}}
 }

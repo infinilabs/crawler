@@ -101,7 +101,7 @@ clean: clean_data
 
 
 update-commit-log:
-	echo -e "package env\nconst LastCommitLog  =\""`git log -1 --pretty=format:"%h, %ad, %an, %s"` "\"\nconst BuildDate  =\"`date`\"" > core/env/commit_log.go
+	echo -e "package env\nconst lastCommitLog  =\""`git log -1 --pretty=format:"%h, %ad, %an, %s"` "\"\nconst buildDate  =\"`date`\"" > core/env/commit_log.go
 
 config: update-commit-log
 	@echo "init config"

@@ -13,12 +13,12 @@ import (
 
 // Mark of daemon process - system environment variable _GO_DAEMON=1
 const (
-	MARK_NAME  = "_GO_DAEMON"
-	MARK_VALUE = "1"
+	MarkName  = "_GO_DAEMON"
+	MarkValue = "1"
 )
 
-// Default file permissions for log and pid files.
-const FILE_PERM = os.FileMode(0640)
+// FilePerm set default file permissions for log and pid files.
+const FilePerm = os.FileMode(0640)
 
 // A Context describes daemon context.
 type Context struct {
@@ -94,7 +94,7 @@ func (d *Context) Search() (daemon *os.Process, err error) {
 
 // WasReborn returns true in child process (daemon) and false in parent process.
 func WasReborn() bool {
-	return os.Getenv(MARK_NAME) == MARK_VALUE
+	return os.Getenv(MarkName) == MarkValue
 }
 
 func (d *Context) parent() (child *os.Process, err error) {
@@ -134,10 +134,10 @@ func (d *Context) parent() (child *os.Process, err error) {
 
 func (d *Context) openFiles() (err error) {
 	if d.PidFilePerm == 0 {
-		d.PidFilePerm = FILE_PERM
+		d.PidFilePerm = FilePerm
 	}
 	if d.LogFilePerm == 0 {
-		d.LogFilePerm = FILE_PERM
+		d.LogFilePerm = FilePerm
 	}
 
 	if d.nullFile, err = os.Open(os.DevNull); err != nil {
@@ -191,7 +191,7 @@ func (d *Context) prepareEnv() (err error) {
 		d.Args = os.Args
 	}
 
-	mark := fmt.Sprintf("%s=%s", MARK_NAME, MARK_VALUE)
+	mark := fmt.Sprintf("%s=%s", MarkName, MarkValue)
 	if len(d.Env) == 0 {
 		d.Env = os.Environ()
 	}
