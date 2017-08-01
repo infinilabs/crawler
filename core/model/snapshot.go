@@ -110,19 +110,6 @@ func GetSnapshotList(from, size int, taskId string) (int, []Snapshot, error) {
 	return result.Total, snapshots, err
 }
 
-func GetSnapshotAllList(taskId string) (int, []Snapshot, error) {
-	var snapshots []Snapshot
-	queryO := store.Query{Sort: "create_time desc"}
-	if len(taskId) > 0 {
-		queryO.Conds = store.And(store.Eq("task_id", taskId))
-	}
-	err, result := store.Search(&snapshots, &queryO)
-	if err != nil {
-		log.Error(err)
-	}
-	return result.Total, snapshots, err
-}
-
 func GetSnapshot(id string) (Snapshot, error) {
 	snapshot := Snapshot{}
 	err := store.GetBy("id", id, &snapshot)
