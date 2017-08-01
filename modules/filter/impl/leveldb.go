@@ -65,7 +65,7 @@ func (filter *LeveldbFilter) Exists(key []byte) bool {
 	if err != nil {
 		return false
 	}
-	if value != nil && len(value) > 0 {
+	if len(value) > 0 {
 		return true
 	}
 	return false

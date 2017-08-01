@@ -80,7 +80,7 @@ func (this Command) GetTask(c *WebsocketConnection, a []string) {
 			c.WritePrivateMessage(err.Error())
 		}
 
-		b, err := json.MarshalIndent(task, "", " ")
+		b, _ := json.MarshalIndent(task, "", " ")
 
 		c.WritePrivateMessage(string(b))
 		c.WritePrivateMessage("get task by taskId," + para1 + "\n")
@@ -95,7 +95,7 @@ func (this Command) GetTask(c *WebsocketConnection, a []string) {
 			c.WritePrivateMessage(err.Error())
 		}
 
-		b, err := json.MarshalIndent(task, "", " ")
+		b, _ := json.MarshalIndent(task, "", " ")
 
 		c.WritePrivateMessage(string(b))
 

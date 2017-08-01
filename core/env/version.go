@@ -32,7 +32,7 @@ func GetWelcomeMessage() string {
 	if len(lastCommitLog) > 0 {
 		commitLog = "\n///last commit: " + lastCommitLog + "///"
 	}
-	s += ("[gopa] " + VERSION + "" + commitLog + "\n")
+	s += ("[gopa] " + VERSION + commitLog + "\n")
 	return (s)
 }
 

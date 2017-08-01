@@ -37,7 +37,7 @@ func (this crawlerJoint) Process(s *Context) error {
 	s.Data[("webpage")] = "hello world gogo "
 	s.Data["received_url"] = this.Data["url"]
 	s.Data[("status")] = true
-	fmt.Println("start to crawlling url: ", this.Get("url")) // + this.GetParameter("url").(string))
+	fmt.Println("start to crawlling url: ", this.Get("url"))
 	return nil
 }
 

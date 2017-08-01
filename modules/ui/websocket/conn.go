@@ -5,7 +5,7 @@
 package websocket
 
 import (
-	"fmt"
+	log "github.com/cihub/seelog"
 	"github.com/gorilla/websocket"
 	"net/http"
 	"strings"
@@ -56,7 +56,7 @@ func (c *WebsocketConnection) readPump() {
 		_, message, err := c.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
-				fmt.Sprintln("error: %v", err)
+				log.Errorf("error: %v", err)
 			}
 			break
 		}
@@ -146,7 +146,7 @@ func ServeWs(w http.ResponseWriter, r *http.Request) {
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return
 	}
 	c := &WebsocketConnection{signalChannel: make(chan []byte, 256), ws: ws, handlers: h.handlers}

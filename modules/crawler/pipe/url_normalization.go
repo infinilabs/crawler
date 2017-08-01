@@ -27,14 +27,12 @@ import (
 	"path"
 	"sort"
 	"strings"
-	"time"
 )
 
 const UrlNormalization JointKey = "url_normalization"
 
 type UrlNormalizationJoint struct {
 	Parameters
-	timeout             time.Duration
 	splitByUrlParameter []string
 	maxFileNameLength   int
 }
@@ -67,7 +65,6 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 
 	//adding default http protocol
 	if strings.HasPrefix(url, "//") {
-		tempUrl = strings.TrimLeft(url, "//")
 		tempUrl = "http:" + url
 	}
 
@@ -208,12 +205,6 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 	filename := ""
 
 	filenamePrefix := ""
-
-	//the url is a folder, making folders
-	if strings.HasSuffix(url, "/") {
-		filename = defaultFileName
-		log.Trace("no page name found, use default.html:", url)
-	}
 
 	// if the url have parameters
 	if len(currentURI.Query()) > 0 {

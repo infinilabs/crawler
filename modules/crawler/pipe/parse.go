@@ -109,7 +109,7 @@ func (this ParsePageJoint) Process(context *Context) error {
 				href = hrefs[0]
 			}
 			text := strings.TrimSpace(s.Text())
-			strings.Replace(text, "\t", "", -1)
+			text = strings.Replace(text, "\t", "", -1)
 
 			if len(text) > 0 {
 				log.Trace("get link: ", text, " , ", href)

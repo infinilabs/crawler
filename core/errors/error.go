@@ -222,14 +222,13 @@ func CodeWithPayload(err error) (ErrorCode, interface{}) {
 		Payload() interface{}
 	}
 
-	for err != nil {
+	if err != nil {
 		cause, ok := err.(causer)
-		if !ok {
-			break
+		if ok {
+			code := cause.Code()
+			payload := cause.Payload()
+			return code, payload
 		}
-		code := cause.Code()
-		payload := cause.Payload()
-		return code, payload
 	}
 	return Default, nil
 }

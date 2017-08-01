@@ -61,7 +61,7 @@ func (sysconfig *SystemConfig) GetWorkingDir() string {
 		return sysconfig.workingDir
 	}
 
-	if sysconfig.AllowMultiInstance == false {
+	if !sysconfig.AllowMultiInstance {
 		sysconfig.workingDir = path.Join(sysconfig.PathConfig.Data, sysconfig.ClusterConfig.Name, "nodes", "0")
 		return sysconfig.workingDir
 	}

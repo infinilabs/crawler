@@ -79,13 +79,16 @@ func (this *Context) ErrorExit(msg interface{}) {
 
 type Parameters struct {
 	Data   map[string]interface{} `json:"data"`
-	l      sync.RWMutex
+	l      *sync.RWMutex
 	inited bool
 }
 
 func (this *Parameters) Init() {
 	if this.inited {
 		return
+	}
+	if this.l == nil {
+		this.l = &sync.RWMutex{}
 	}
 	this.l.Lock()
 	if this.Data == nil {
@@ -335,7 +338,6 @@ func (this *Pipeline) Run() *Context {
 		if !global.Env().IsDebug {
 			if r := recover(); r != nil {
 				if e, ok := r.(runtime.Error); ok {
-					log.Errorf("%v", r)
 					this.context.Break(util.GetRuntimeErrorMessage(e))
 				}
 				log.Debug("error in pipeline, ", this.name)

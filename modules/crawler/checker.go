@@ -141,7 +141,7 @@ func (this CheckerModule) execute(data []byte) {
 		stats.Increment("checker.url", "valid_seed")
 
 		log.Debugf("send url: %s ,depth: %d, breadth: %d, to fetch queue", string(seed.Url), seed.Depth, seed.Breadth)
-		elapsedTime := time.Now().Sub(startTime)
+		elapsedTime := time.Since(startTime)
 		stats.Timing("checker.url", "time", elapsedTime.Nanoseconds())
 	} else {
 		log.Debug("ignored url, ", seed.Url)
