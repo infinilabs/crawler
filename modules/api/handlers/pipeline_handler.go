@@ -28,7 +28,7 @@ import (
 func (this API) handleGetPipelineJointsRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	log.Debug("get joints")
 	joints := GetAllRegisteredJoints()
-	this.WriteJson(w, joints, http.StatusOK)
+	this.WriteJSON(w, joints, http.StatusOK)
 
 	return
 }
@@ -52,7 +52,7 @@ func (this API) handlePostPipelineJointsRequest(w http.ResponseWriter, req *http
 	pipe := NewPipelineFromConfig(&config)
 	pipe.Run()
 
-	this.WriteJson(w, config, http.StatusOK)
+	this.WriteJSON(w, config, http.StatusOK)
 
 	return
 }

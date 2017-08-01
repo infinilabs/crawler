@@ -329,6 +329,12 @@ func (rw *rollingFileWriter) deleteOldRolls(history []string) error {
 	return nil
 }
 
+func reportInternalError(err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
 func (rw *rollingFileWriter) getFileRollName(fileName string) string {
 	switch rw.nameMode {
 	case rollingNameModePostfix:
@@ -444,27 +450,28 @@ func (rw *rollingFileWriter) Close() error {
 //      Rolling writer by SIZE
 // --------------------------------------------------
 
-// rollingFileWriterSize performs roll when file exceeds a specified limit.
-type rollingFileWriterSize struct {
+// RollingFileWriterSize performs roll when file exceeds a specified limit.
+type RollingFileWriterSize struct {
 	*rollingFileWriter
 	maxFileSize int64
 }
 
-func NewRollingFileWriterSize(fpath string, atype rollingArchiveType, apath string, maxSize int64, maxRolls int, namemode rollingNameMode) (*rollingFileWriterSize, error) {
+// NewRollingFileWriterSize create a new writer with several parameters
+func NewRollingFileWriterSize(fpath string, atype rollingArchiveType, apath string, maxSize int64, maxRolls int, namemode rollingNameMode) (*RollingFileWriterSize, error) {
 	rw, err := newRollingFileWriter(fpath, rollingTypeSize, atype, apath, maxRolls, namemode)
 	if err != nil {
 		return nil, err
 	}
-	rws := &rollingFileWriterSize{rw, maxSize}
+	rws := &RollingFileWriterSize{rw, maxSize}
 	rws.self = rws
 	return rws, nil
 }
 
-func (rws *rollingFileWriterSize) needsToRoll() (bool, error) {
+func (rws *RollingFileWriterSize) needsToRoll() (bool, error) {
 	return rws.currentFileSize >= rws.maxFileSize, nil
 }
 
-func (rws *rollingFileWriterSize) isFileRollNameValid(rname string) bool {
+func (rws *RollingFileWriterSize) isFileRollNameValid(rname string) bool {
 	if len(rname) == 0 {
 		return false
 	}
@@ -482,13 +489,13 @@ func (p rollSizeFileTailsSlice) Less(i, j int) bool {
 }
 func (p rollSizeFileTailsSlice) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
 
-func (rws *rollingFileWriterSize) sortFileRollNamesAsc(fs []string) ([]string, error) {
+func (rws *RollingFileWriterSize) sortFileRollNamesAsc(fs []string) ([]string, error) {
 	ss := rollSizeFileTailsSlice(fs)
 	sort.Sort(ss)
 	return ss, nil
 }
 
-func (rws *rollingFileWriterSize) getNewHistoryRollFileName(lastRollName string) string {
+func (rws *RollingFileWriterSize) getNewHistoryRollFileName(lastRollName string) string {
 	v := 0
 	if len(lastRollName) != 0 {
 		v, _ = strconv.Atoi(lastRollName)
@@ -496,11 +503,11 @@ func (rws *rollingFileWriterSize) getNewHistoryRollFileName(lastRollName string)
 	return fmt.Sprintf("%d", v+1)
 }
 
-func (rws *rollingFileWriterSize) getCurrentModifiedFileName(originalFileName string, first bool) (string, error) {
+func (rws *RollingFileWriterSize) getCurrentModifiedFileName(originalFileName string, first bool) (string, error) {
 	return originalFileName, nil
 }
 
-func (rws *rollingFileWriterSize) String() string {
+func (rws *RollingFileWriterSize) String() string {
 	return fmt.Sprintf("Rolling file writer (By SIZE): filename: %s, archive: %s, archivefile: %s, maxFileSize: %v, maxRolls: %v",
 		rws.fileName,
 		rollingArchiveTypesStringRepresentation[rws.archiveType],
@@ -513,27 +520,28 @@ func (rws *rollingFileWriterSize) String() string {
 //      Rolling writer by TIME
 // --------------------------------------------------
 
-// rollingFileWriterTime performs roll when a specified time interval has passed.
-type rollingFileWriterTime struct {
+// RollingFileWriterTime performs roll when a specified time interval has passed.
+type RollingFileWriterTime struct {
 	*rollingFileWriter
 	timePattern         string
 	interval            rollingIntervalType
 	currentTimeFileName string
 }
 
+// NewRollingFileWriterTime create rolling writer
 func NewRollingFileWriterTime(fpath string, atype rollingArchiveType, apath string, maxr int,
-	timePattern string, interval rollingIntervalType, namemode rollingNameMode) (*rollingFileWriterTime, error) {
+	timePattern string, interval rollingIntervalType, namemode rollingNameMode) (*RollingFileWriterTime, error) {
 
 	rw, err := newRollingFileWriter(fpath, rollingTypeTime, atype, apath, maxr, namemode)
 	if err != nil {
 		return nil, err
 	}
-	rws := &rollingFileWriterTime{rw, timePattern, interval, ""}
+	rws := &RollingFileWriterTime{rw, timePattern, interval, ""}
 	rws.self = rws
 	return rws, nil
 }
 
-func (rwt *rollingFileWriterTime) needsToRoll() (bool, error) {
+func (rwt *RollingFileWriterTime) needsToRoll() (bool, error) {
 	switch rwt.nameMode {
 	case rollingNameModePostfix:
 		if rwt.originalFileName+rollingLogHistoryDelimiter+time.Now().Format(rwt.timePattern) == rwt.fileName {
@@ -561,7 +569,7 @@ func (rwt *rollingFileWriterTime) needsToRoll() (bool, error) {
 	return false, fmt.Errorf("unknown interval type: %d", rwt.interval)
 }
 
-func (rwt *rollingFileWriterTime) isFileRollNameValid(rname string) bool {
+func (rwt *RollingFileWriterTime) isFileRollNameValid(rname string) bool {
 	if len(rname) == 0 {
 		return false
 	}
@@ -584,17 +592,17 @@ func (p rollTimeFileTailsSlice) Less(i, j int) bool {
 
 func (p rollTimeFileTailsSlice) Swap(i, j int) { p.data[i], p.data[j] = p.data[j], p.data[i] }
 
-func (rwt *rollingFileWriterTime) sortFileRollNamesAsc(fs []string) ([]string, error) {
+func (rwt *RollingFileWriterTime) sortFileRollNamesAsc(fs []string) ([]string, error) {
 	ss := rollTimeFileTailsSlice{data: fs, pattern: rwt.timePattern}
 	sort.Sort(ss)
 	return ss.data, nil
 }
 
-func (rwt *rollingFileWriterTime) getNewHistoryRollFileName(lastRollName string) string {
+func (rwt *RollingFileWriterTime) getNewHistoryRollFileName(lastRollName string) string {
 	return ""
 }
 
-func (rwt *rollingFileWriterTime) getCurrentModifiedFileName(originalFileName string, first bool) (string, error) {
+func (rwt *RollingFileWriterTime) getCurrentModifiedFileName(originalFileName string, first bool) (string, error) {
 	if first {
 		history, err := rwt.getSortedLogHistory()
 		if err != nil {
@@ -614,7 +622,7 @@ func (rwt *rollingFileWriterTime) getCurrentModifiedFileName(originalFileName st
 	return "", fmt.Errorf("Unknown rolling writer mode. Either postfix or prefix must be used")
 }
 
-func (rwt *rollingFileWriterTime) String() string {
+func (rwt *RollingFileWriterTime) String() string {
 	return fmt.Sprintf("Rolling file writer (By TIME): filename: %s, archive: %s, archivefile: %s, maxInterval: %v, pattern: %s, maxRolls: %v",
 		rwt.fileName,
 		rollingArchiveTypesStringRepresentation[rwt.archiveType],

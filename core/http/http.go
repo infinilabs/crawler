@@ -6,12 +6,18 @@ import (
 	"sync"
 )
 
+// RegisteredAPIHandler is a hub for registered api
 var RegisteredAPIHandler map[string]http.Handler
+
+// RegisteredAPIFuncHandler is a hub for registered api
 var RegisteredAPIFuncHandler map[string]func(http.ResponseWriter, *http.Request)
+
+// RegisteredAPIMethodHandler is a hub for registered api
 var RegisteredAPIMethodHandler map[string]map[string]func(w http.ResponseWriter, req *http.Request, ps httprouter.Params)
 
 var l sync.Mutex
 
+// HandleAPIFunc register api handler to specify pattern
 func HandleAPIFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
 	l.Lock()
 	if RegisteredAPIFuncHandler == nil {
@@ -21,6 +27,7 @@ func HandleAPIFunc(pattern string, handler func(http.ResponseWriter, *http.Reque
 	l.Unlock()
 }
 
+// HandleAPI register api handler
 func HandleAPI(pattern string, handler http.Handler) {
 
 	l.Lock()
@@ -31,6 +38,7 @@ func HandleAPI(pattern string, handler http.Handler) {
 	l.Unlock()
 }
 
+// HandleAPIMethod register api handler
 func HandleAPIMethod(method Method, pattern string, handler func(w http.ResponseWriter, req *http.Request, ps httprouter.Params)) {
 	l.Lock()
 	if RegisteredAPIMethodHandler == nil {
@@ -45,10 +53,16 @@ func HandleAPIMethod(method Method, pattern string, handler func(w http.Response
 	l.Unlock()
 }
 
+// RegisteredUIHandler is a hub for registered ui handler
 var RegisteredUIHandler map[string]http.Handler
+
+// RegisteredUIFuncHandler is a hub for registered ui handler
 var RegisteredUIFuncHandler map[string]func(http.ResponseWriter, *http.Request)
+
+// RegisteredUIMethodHandler is a hub for registered ui handler
 var RegisteredUIMethodHandler map[string]map[string]func(w http.ResponseWriter, req *http.Request, ps httprouter.Params)
 
+// HandleUIFunc register ui request handler
 func HandleUIFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
 	l.Lock()
 	if RegisteredUIFuncHandler == nil {
@@ -58,6 +72,7 @@ func HandleUIFunc(pattern string, handler func(http.ResponseWriter, *http.Reques
 	l.Unlock()
 }
 
+// HandleUI register ui request handler
 func HandleUI(pattern string, handler http.Handler) {
 
 	l.Lock()
@@ -68,6 +83,7 @@ func HandleUI(pattern string, handler http.Handler) {
 	l.Unlock()
 }
 
+// HandleUIMethod register ui request handler
 func HandleUIMethod(method Method, pattern string, handler func(w http.ResponseWriter, req *http.Request, ps httprouter.Params)) {
 	l.Lock()
 	if RegisteredUIMethodHandler == nil {

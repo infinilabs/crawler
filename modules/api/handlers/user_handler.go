@@ -33,11 +33,11 @@ func (this API) handleUserLoginRequest(w http.ResponseWriter, req *http.Request,
 
 	b, v = api.GetFlash(w, req)
 	if b {
-		this.WriteJson(w, v, 200)
+		this.WriteJSON(w, v, 200)
 		return
 	}
 
-	this.WriteJson(w, v, 200)
+	this.WriteJSON(w, v, 200)
 
 	return
 }

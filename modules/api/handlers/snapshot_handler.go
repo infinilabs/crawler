@@ -73,7 +73,7 @@ func (this API) SnapshotListAction(w http.ResponseWriter, req *http.Request, ps 
 	if err != nil {
 		this.Error(w, err)
 	} else {
-		this.WriteListResultJson(w, total, snapshots, http.StatusOK)
+		this.WriteJSONListResult(w, total, snapshots, http.StatusOK)
 	}
 
 }
@@ -84,7 +84,7 @@ func (this API) SnapshotGetAction(w http.ResponseWriter, req *http.Request, ps h
 	if err != nil {
 		this.Error(w, err)
 	} else {
-		this.WriteJson(w, snapshot, http.StatusOK)
+		this.WriteJSON(w, snapshot, http.StatusOK)
 
 	}
 

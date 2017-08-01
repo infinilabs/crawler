@@ -26,22 +26,23 @@ package logger
 
 import "fmt"
 
-// consoleWriter is used to write to console
-type consoleWriter struct {
+// ConsoleWriter is used to write to console
+type ConsoleWriter struct {
 }
 
-// Creates a new console writer. Returns error, if the console writer couldn't be created.
-func NewConsoleWriter() (writer *consoleWriter, err error) {
-	newWriter := new(consoleWriter)
+// NewConsoleWriter creates a new console writer. Returns error, if the console writer couldn't be created.
+func NewConsoleWriter() (*ConsoleWriter, error) {
+	newWriter := new(ConsoleWriter)
 
 	return newWriter, nil
 }
 
-// Create folder and file on WriteLog/Write first call
-func (console *consoleWriter) Write(bytes []byte) (int, error) {
+// Write create folder and file on WriteLog/Write first call
+func (console *ConsoleWriter) Write(bytes []byte) (int, error) {
 	return fmt.Print(string(bytes))
 }
 
-func (console *consoleWriter) String() string {
+// String return writer name
+func (console *ConsoleWriter) String() string {
 	return "Console writer"
 }

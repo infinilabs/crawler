@@ -34,7 +34,7 @@ func (this Ajax) LoggingSettingAction(w http.ResponseWriter, req *http.Request) 
 
 		cfg := logging.GetLoggingConfig()
 		if cfg != nil {
-			this.WriteJson(w, cfg, 200)
+			this.WriteJSON(w, cfg, 200)
 		} else {
 			this.Error500(w, "config not available")
 		}
@@ -62,7 +62,7 @@ func (this Ajax) LoggingSettingAction(w http.ResponseWriter, req *http.Request) 
 
 		logging.UpdateLoggingConfig(&cfg)
 
-		this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
+		this.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
 
 	}
 }

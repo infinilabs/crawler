@@ -33,8 +33,8 @@ import (
 	"time"
 )
 
-// bufferedWriter stores data in memory and flushes it every flushPeriod or when buffer is full
-type bufferedWriter struct {
+// BufferedWriter stores data in memory and flushes it every flushPeriod or when buffer is full
+type BufferedWriter struct {
 	flushPeriod time.Duration // data flushes interval (in microseconds)
 	bufferMutex *sync.Mutex   // mutex for buffer operations syncronization
 	innerWriter io.Writer     // inner writer
@@ -45,7 +45,7 @@ type bufferedWriter struct {
 // NewBufferedWriter creates a new buffered writer struct.
 // bufferSize -- size of memory buffer in bytes
 // flushPeriod -- period in which data flushes from memory buffer in milliseconds. 0 - turn off this functionality
-func NewBufferedWriter(innerWriter io.Writer, bufferSize int, flushPeriod time.Duration) (*bufferedWriter, error) {
+func NewBufferedWriter(innerWriter io.Writer, bufferSize int, flushPeriod time.Duration) (*BufferedWriter, error) {
 
 	if innerWriter == nil {
 		return nil, errors.New("argument is nil: innerWriter")
@@ -64,7 +64,7 @@ func NewBufferedWriter(innerWriter io.Writer, bufferSize int, flushPeriod time.D
 		return nil, err
 	}*/
 
-	newWriter := new(bufferedWriter)
+	newWriter := new(BufferedWriter)
 
 	newWriter.innerWriter = innerWriter
 	newWriter.buffer = buffer
@@ -79,7 +79,7 @@ func NewBufferedWriter(innerWriter io.Writer, bufferSize int, flushPeriod time.D
 	return newWriter, nil
 }
 
-func (bufWriter *bufferedWriter) writeBigChunk(bytes []byte) (n int, err error) {
+func (bufWriter *BufferedWriter) writeBigChunk(bytes []byte) (n int, err error) {
 	bufferedLen := bufWriter.buffer.Buffered()
 
 	n, err = bufWriter.flushInner()
@@ -92,7 +92,7 @@ func (bufWriter *bufferedWriter) writeBigChunk(bytes []byte) (n int, err error) 
 }
 
 // Sends data to buffer manager. Waits until all buffers are full.
-func (bufWriter *bufferedWriter) Write(bytes []byte) (n int, err error) {
+func (bufWriter *BufferedWriter) Write(bytes []byte) (n int, err error) {
 
 	bufWriter.bufferMutex.Lock()
 	defer bufWriter.bufferMutex.Unlock()
@@ -115,7 +115,8 @@ func (bufWriter *bufferedWriter) Write(bytes []byte) (n int, err error) {
 	return len(bytes), nil
 }
 
-func (bufWriter *bufferedWriter) Close() error {
+// Close just close
+func (bufWriter *BufferedWriter) Close() error {
 	closer, ok := bufWriter.innerWriter.(io.Closer)
 	if ok {
 		return closer.Close()
@@ -124,7 +125,8 @@ func (bufWriter *bufferedWriter) Close() error {
 	return nil
 }
 
-func (bufWriter *bufferedWriter) Flush() {
+// Flush just flush
+func (bufWriter *BufferedWriter) Flush() {
 
 	bufWriter.bufferMutex.Lock()
 	defer bufWriter.bufferMutex.Unlock()
@@ -132,21 +134,21 @@ func (bufWriter *bufferedWriter) Flush() {
 	bufWriter.flushInner()
 }
 
-func (bufWriter *bufferedWriter) flushInner() (n int, err error) {
+func (bufWriter *BufferedWriter) flushInner() (n int, err error) {
 	bufferedLen := bufWriter.buffer.Buffered()
 	flushErr := bufWriter.buffer.Flush()
 
 	return bufWriter.buffer.Buffered() - bufferedLen, flushErr
 }
 
-func (bufWriter *bufferedWriter) flushBuffer() {
+func (bufWriter *BufferedWriter) flushBuffer() {
 	bufWriter.bufferMutex.Lock()
 	defer bufWriter.bufferMutex.Unlock()
 
 	bufWriter.buffer.Flush()
 }
 
-func (bufWriter *bufferedWriter) flushPeriodically() {
+func (bufWriter *BufferedWriter) flushPeriodically() {
 	if bufWriter.flushPeriod > 0 {
 		ticker := time.NewTicker(bufWriter.flushPeriod)
 		for {
@@ -156,6 +158,6 @@ func (bufWriter *bufferedWriter) flushPeriodically() {
 	}
 }
 
-func (bufWriter *bufferedWriter) String() string {
+func (bufWriter *BufferedWriter) String() string {
 	return fmt.Sprintf("bufferedWriter size: %d, flushPeriod: %d", bufWriter.bufferSize, bufWriter.flushPeriod)
 }

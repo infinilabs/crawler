@@ -23,25 +23,26 @@ import (
 	"sync"
 )
 
+// RegisterKey is used to register custom value and retrieve back
 type RegisterKey string
 
-type Registrar struct {
+type registrar struct {
 	values map[RegisterKey]interface{}
 	sync.Mutex
 }
 
 var (
-	r      *Registrar
+	r      *registrar
 	l      sync.RWMutex
 	inited bool
 	e      *env.Env
 )
 
-func GetRegistrar() *Registrar {
+func getRegistrar() *registrar {
 	if !inited {
 		l.Lock()
 		if !inited {
-			r = &Registrar{values: map[RegisterKey]interface{}{}}
+			r = &registrar{values: map[RegisterKey]interface{}{}}
 			inited = true
 		}
 		l.Unlock()
@@ -50,8 +51,9 @@ func GetRegistrar() *Registrar {
 	return r
 }
 
+// Register is used to register your own key and value
 func Register(k RegisterKey, v interface{}) {
-	reg := GetRegistrar()
+	reg := getRegistrar()
 	if reg == nil {
 		return
 	}
@@ -61,8 +63,9 @@ func Register(k RegisterKey, v interface{}) {
 	reg.values[k] = v
 }
 
+// Lookup is to lookup your own previous registered value
 func Lookup(k RegisterKey) interface{} {
-	reg := GetRegistrar()
+	reg := getRegistrar()
 	if reg == nil {
 		return nil
 	}
@@ -72,10 +75,12 @@ func Lookup(k RegisterKey) interface{} {
 	return reg.values[k]
 }
 
+// RegisterEnv is used to register env to this register hub
 func RegisterEnv(e1 *env.Env) {
 	e = e1
 }
 
+// Env returns registered env, should be available globally
 func Env() *env.Env {
 	if e == nil {
 		panic(errors.New("env is not inited"))

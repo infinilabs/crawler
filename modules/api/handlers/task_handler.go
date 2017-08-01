@@ -36,7 +36,7 @@ func (this API) TaskDeleteAction(w http.ResponseWriter, req *http.Request, ps ht
 		if err != nil {
 			this.Error(w, err)
 		} else {
-			this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
+			this.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
 		}
 	} else {
 		this.Error404(w)
@@ -49,7 +49,7 @@ func (this API) TaskGetAction(w http.ResponseWriter, req *http.Request, ps httpr
 	if err != nil {
 		this.Error(w, err)
 	} else {
-		this.WriteJson(w, task, http.StatusOK)
+		this.WriteJSON(w, task, http.StatusOK)
 
 	}
 
@@ -58,7 +58,7 @@ func (this API) TaskGetAction(w http.ResponseWriter, req *http.Request, ps httpr
 func (this API) TaskAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
 	if req.Method == POST.String() {
-		jsonq, err := this.GetJson(req)
+		jsonq, err := this.GetJSON(req)
 		if err != nil {
 			logger.Error(err)
 		}
@@ -73,7 +73,7 @@ func (this API) TaskAction(w http.ResponseWriter, req *http.Request, ps httprout
 
 		queue.Push(config.CheckChannel, task.MustGetBytes())
 
-		this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
+		this.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
 	} else {
 		logger.Trace("get all tasks")
 
@@ -94,7 +94,7 @@ func (this API) TaskAction(w http.ResponseWriter, req *http.Request, ps httprout
 		if err != nil {
 			this.Error(w, err)
 		} else {
-			this.WriteListResultJson(w, total, tasks, http.StatusOK)
+			this.WriteJSONListResult(w, total, tasks, http.StatusOK)
 		}
 	}
 }
@@ -106,7 +106,7 @@ func (this API) DomainDeleteAction(w http.ResponseWriter, req *http.Request, ps 
 		if err != nil {
 			this.Error(w, err)
 		} else {
-			this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
+			this.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
 		}
 	} else {
 		this.Error404(w)
@@ -119,7 +119,7 @@ func (this API) DomainGetAction(w http.ResponseWriter, req *http.Request, ps htt
 	if err != nil {
 		this.Error(w, err)
 	} else {
-		this.WriteJson(w, task, http.StatusOK)
+		this.WriteJSON(w, task, http.StatusOK)
 
 	}
 
@@ -143,7 +143,7 @@ func (this API) DomainAction(w http.ResponseWriter, req *http.Request, ps httpro
 		//
 		//queue.Push(config.CheckChannel, task.MustGetBytes())
 
-		this.WriteJson(w, map[string]interface{}{"ok": true}, http.StatusOK)
+		this.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
 	} else {
 		logger.Trace("get all domain settings")
 
@@ -173,7 +173,7 @@ func (this API) DomainAction(w http.ResponseWriter, req *http.Request, ps httpro
 		if err != nil {
 			this.Error(w, err)
 		} else {
-			this.WriteListResultJson(w, total, newDomains, http.StatusOK)
+			this.WriteJSONListResult(w, total, newDomains, http.StatusOK)
 		}
 	}
 }

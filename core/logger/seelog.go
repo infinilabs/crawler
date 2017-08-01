@@ -20,7 +20,7 @@ import (
 	"fmt"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/config"
-	. "github.com/infinitbyte/gopa/core/env"
+	"github.com/infinitbyte/gopa/core/env"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/ryanuber/go-glob"
 	"strings"
@@ -30,9 +30,10 @@ import (
 var file string
 var loggingConfig *config.LoggingConfig
 var l sync.Mutex
-var e *Env
+var e *env.Env
 
-func SetLogging(env *Env, logLevel string, logFile string) {
+// SetLogging init set logging
+func SetLogging(env *env.Env, logLevel string, logFile string) {
 
 	e = env
 
@@ -132,10 +133,12 @@ func SetLogging(env *Env, logLevel string, logFile string) {
 
 }
 
+// GetLoggingConfig return logging configs
 func GetLoggingConfig() *config.LoggingConfig {
 	return loggingConfig
 }
 
+// UpdateLoggingConfig update logging config
 func UpdateLoggingConfig(config *config.LoggingConfig) {
 	l.Lock()
 	loggingConfig = config
@@ -143,12 +146,14 @@ func UpdateLoggingConfig(config *config.LoggingConfig) {
 	SetLogging(e, "", "")
 }
 
+// Flush is flush logs to output
 func Flush() {
 	log.Flush()
 }
 
 var websocketHandler func(message string, level log.LogLevel, context log.LogContextInterface)
 
+// RegisterWebsocketHandler used to register websocket handler
 func RegisterWebsocketHandler(func1 func(message string, level log.LogLevel, context log.LogContextInterface)) {
 
 	websocketHandler = func1
@@ -157,13 +162,14 @@ func RegisterWebsocketHandler(func1 func(message string, level log.LogLevel, con
 	}
 }
 
-type CustomReceiver struct { // implements seelog.CustomReceiver
-
+// CustomReceiver is a struct of custom log receiver, which implements seelog.CustomReceiver
+type CustomReceiver struct {
 	config          *config.LoggingConfig
 	minLogLevel     log.LogLevel
 	pushminLogLevel log.LogLevel
 }
 
+// ReceiveMessage impl how to receive log message
 func (ar *CustomReceiver) ReceiveMessage(message string, level log.LogLevel, context log.LogContextInterface) error {
 
 	//truncate huge message
@@ -219,12 +225,18 @@ func (ar *CustomReceiver) ReceiveMessage(message string, level log.LogLevel, con
 
 	return nil
 }
+
+// AfterParse nothing to do here
 func (ar *CustomReceiver) AfterParse(initArgs log.CustomReceiverInitArgs) error {
 	return nil
 }
+
+// Flush logs
 func (ar *CustomReceiver) Flush() {
 
 }
+
+// Close logs
 func (ar *CustomReceiver) Close() error {
 	return nil
 }

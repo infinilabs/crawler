@@ -29,6 +29,6 @@ func getMapValue(mapData map[string]int, key string, defaultValue int32) int {
 func (this API) StatsAction(w http.ResponseWriter, req *http.Request) {
 
 	m := stats.StatsAll()
-	this.WriteJsonHeader(w)
+	this.WriteJSONHeader(w)
 	this.Write(w, *m)
 }

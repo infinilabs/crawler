@@ -26,6 +26,7 @@ var store = sessions.NewCookieStore([]byte("gopa-secret")) //TODO generate secre
 
 const sessionName string = "session-name"
 
+// GetSession return session by session key
 func GetSession(w http.ResponseWriter, r *http.Request, key string) (bool, interface{}) {
 	session, err := store.Get(r, sessionName)
 	if err != nil {
@@ -37,6 +38,7 @@ func GetSession(w http.ResponseWriter, r *http.Request, key string) (bool, inter
 	return v != nil, v
 }
 
+// SetSession set session by session key and session value
 func SetSession(w http.ResponseWriter, r *http.Request, key string, value interface{}) bool {
 	session, err := store.Get(r, sessionName)
 	if err != nil {
@@ -48,6 +50,7 @@ func SetSession(w http.ResponseWriter, r *http.Request, key string, value interf
 	return true
 }
 
+// GetFlash get flash value
 func GetFlash(w http.ResponseWriter, r *http.Request) (bool, []interface{}) {
 	log.Trace("get flash")
 	session, err := store.Get(r, sessionName)
@@ -60,6 +63,7 @@ func GetFlash(w http.ResponseWriter, r *http.Request) (bool, []interface{}) {
 	return f != nil, f
 }
 
+// SetFlash set flash value
 func SetFlash(w http.ResponseWriter, r *http.Request, msg string) bool {
 	log.Trace("set flash")
 	session, err := store.Get(r, sessionName)

@@ -28,18 +28,25 @@ import (
 	"strings"
 )
 
+// Method is object of http method
 type Method string
 
 const (
-	GET    Method = "GET"
-	POST   Method = "POST"
-	PUT    Method = "PUT"
+	// GET is http get method
+	GET Method = "GET"
+	// POST is http post method
+	POST Method = "POST"
+	// PUT is http put method
+	PUT Method = "PUT"
+	// DELETE is http delete method
 	DELETE Method = "DELETE"
-	HEAD   Method = "HEAD"
+	// HEAD is http head method
+	HEAD Method = "HEAD"
 )
 
-func (this Method) String() string {
-	switch this {
+// String return http method as string
+func (method Method) String() string {
+	switch method {
 	case GET:
 		return "GET"
 	case POST:
@@ -54,6 +61,7 @@ func (this Method) String() string {
 	return "N/A"
 }
 
+// Handler is the object of http handler
 type Handler struct {
 	wroteHeader bool
 
@@ -63,16 +71,18 @@ type Handler struct {
 	formParsed bool
 }
 
-func (this Handler) WriteHeader(w http.ResponseWriter, code int) {
+// WriteHeader write status code to http header
+func (handler Handler) WriteHeader(w http.ResponseWriter, code int) {
 	w.WriteHeader(code)
 	if len(global.Env().SystemConfig.PathConfig.Cert) > 0 {
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 	}
-	this.wroteHeader = true
+	handler.wroteHeader = true
 }
 
-func (this Handler) Get(req *http.Request, key string, defaultValue string) string {
-	if !this.formParsed {
+// Get http parameter or return default value
+func (handler Handler) Get(req *http.Request, key string, defaultValue string) string {
+	if !handler.formParsed {
 		req.ParseForm()
 	}
 	if len(req.Form) > 0 {
@@ -81,7 +91,8 @@ func (this Handler) Get(req *http.Request, key string, defaultValue string) stri
 	return defaultValue
 }
 
-func (w Handler) EncodeJson(v interface{}) (b []byte, err error) {
+// EncodeJSON encode the object to json string
+func (handler Handler) EncodeJSON(v interface{}) (b []byte, err error) {
 
 	//if(w.Get("pretty","false")=="true"){
 	b, err = json.MarshalIndent(v, "", "  ")
@@ -95,31 +106,35 @@ func (w Handler) EncodeJson(v interface{}) (b []byte, err error) {
 	return b, nil
 }
 
-func (this Handler) WriteJsonHeader(w http.ResponseWriter) {
+// WriteJSONHeader will write standard json header
+func (handler Handler) WriteJSONHeader(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	this.wroteHeader = true
+	handler.wroteHeader = true
 }
 
+// Result is a general json result
 type Result struct {
 	Total  int         `json:"total"`
 	Result interface{} `json:"result"`
 }
 
-func (this Handler) WriteListResultJson(w http.ResponseWriter, total int, v interface{}, statusCode int) error {
+// WriteJSONListResult output result list to json format
+func (handler Handler) WriteJSONListResult(w http.ResponseWriter, total int, v interface{}, statusCode int) error {
 	result := Result{}
 	result.Total = total
 	result.Result = v
-	return this.WriteJson(w, result, statusCode)
+	return handler.WriteJSON(w, result, statusCode)
 }
 
-func (this Handler) WriteJson(w http.ResponseWriter, v interface{}, statusCode int) error {
-	if !this.wroteHeader {
-		this.WriteJsonHeader(w)
+// WriteJSON output signal result with json format
+func (handler Handler) WriteJSON(w http.ResponseWriter, v interface{}, statusCode int) error {
+	if !handler.wroteHeader {
+		handler.WriteJSONHeader(w)
 		w.WriteHeader(statusCode)
 	}
 
-	b, err := this.EncodeJson(v)
+	b, err := handler.EncodeJSON(v)
 	if err != nil {
 		return err
 	}
@@ -131,14 +146,13 @@ func (this Handler) WriteJson(w http.ResponseWriter, v interface{}, statusCode i
 	return nil
 }
 
-type ErrEmptyJson struct {
-}
-
-func (this Handler) GetParameter(r *http.Request, key string) string {
+// GetParameter return query parameter with argument name
+func (handler Handler) GetParameter(r *http.Request, key string) string {
 	return r.URL.Query().Get(key)
 }
 
-func (this Handler) GetParameterOrDefault(r *http.Request, key string, defaultValue string) string {
+// GetParameterOrDefault return query parameter or return default value
+func (handler Handler) GetParameterOrDefault(r *http.Request, key string, defaultValue string) string {
 	v := r.URL.Query().Get(key)
 	if len(v) > 0 {
 		return v
@@ -146,9 +160,10 @@ func (this Handler) GetParameterOrDefault(r *http.Request, key string, defaultVa
 	return defaultValue
 }
 
-func (this Handler) GetIntOrDefault(r *http.Request, key string, defaultValue int) int {
+// GetIntOrDefault return parameter or default, data type is int
+func (handler Handler) GetIntOrDefault(r *http.Request, key string, defaultValue int) int {
 
-	v := this.GetParameter(r, key)
+	v := handler.GetParameter(r, key)
 	s, ok := util.ToInt(v)
 	if ok != nil {
 		return defaultValue
@@ -157,7 +172,8 @@ func (this Handler) GetIntOrDefault(r *http.Request, key string, defaultValue in
 
 }
 
-func (this Handler) GetJson(r *http.Request) (*jsonq.JsonQuery, error) {
+// GetJSON return json input
+func (handler Handler) GetJSON(r *http.Request) (*jsonq.JsonQuery, error) {
 
 	content, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
@@ -176,7 +192,8 @@ func (this Handler) GetJson(r *http.Request) (*jsonq.JsonQuery, error) {
 	return jq, nil
 }
 
-func (this Handler) GetRawBody(r *http.Request) ([]byte, error) {
+// GetRawBody return raw http request body
+func (handler Handler) GetRawBody(r *http.Request) ([]byte, error) {
 
 	content, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
@@ -189,33 +206,39 @@ func (this Handler) GetRawBody(r *http.Request) ([]byte, error) {
 	return content, nil
 }
 
-func (this Handler) Write(w http.ResponseWriter, b []byte) (int, error) {
-	if !this.wroteHeader {
-		this.WriteHeader(w, http.StatusOK)
+// Write response to client
+func (handler Handler) Write(w http.ResponseWriter, b []byte) (int, error) {
+	if !handler.wroteHeader {
+		handler.WriteHeader(w, http.StatusOK)
 	}
 	return w.Write(b)
 }
 
-func (this Handler) Error404(w http.ResponseWriter) {
-	this.WriteJson(w, map[string]interface{}{"error": 404}, http.StatusNotFound)
+// Error404 output 404 response
+func (handler Handler) Error404(w http.ResponseWriter) {
+	handler.WriteJSON(w, map[string]interface{}{"error": 404}, http.StatusNotFound)
 }
 
-func (this Handler) Error500(w http.ResponseWriter, msg string) {
-	this.WriteJson(w, map[string]interface{}{"error": msg}, http.StatusInternalServerError)
+// Error500 output 500 response
+func (handler Handler) Error500(w http.ResponseWriter, msg string) {
+	handler.WriteJSON(w, map[string]interface{}{"error": msg}, http.StatusInternalServerError)
 }
 
-func (this Handler) Error(w http.ResponseWriter, err error) {
-	this.WriteJson(w, map[string]interface{}{"error": err.Error()}, http.StatusInternalServerError)
+// Error output custom error
+func (handler Handler) Error(w http.ResponseWriter, err error) {
+	handler.WriteJSON(w, map[string]interface{}{"error": err.Error()}, http.StatusInternalServerError)
 }
 
-func (this Handler) Flush(w http.ResponseWriter) {
-	if !this.wroteHeader {
+// Flush flush response message
+func (handler Handler) Flush(w http.ResponseWriter) {
+	if !handler.wroteHeader {
 		w.WriteHeader(http.StatusOK)
 	}
 	flusher := w.(http.Flusher)
 	flusher.Flush()
 }
 
+// BasicAuth register api with basic auth
 func BasicAuth(h httprouter.Handle, requiredUser, requiredPassword string) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		// Get the Basic Authentication credentials
