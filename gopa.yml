@@ -83,9 +83,9 @@ modules:
         parameters:
           compress_enabled: true
           bucket: "Snapshot"
-          snapshottime_toless: "1440,720,360,180,90,45,20,10,1"
-          snapshottime_tomore: "1,10,20,30,60,90,180,360,720,1440,2880,10080,21600"
-          snapshot_maxnum: 10
+          decelerate_steps: "24h,12h,6h,3h,1h30m,45m,20m,10m,1m"
+          accelerate_steps: "1m,10m,20m,30m,60m,1h30m,3h,6h,12h,24h,48h,168h,360h"
+          max_revision: 10
       - joint: index
         enabled: false
     end:
