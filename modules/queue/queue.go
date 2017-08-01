@@ -23,7 +23,7 @@ func (this DiskQueue) Name() string {
 
 func (this DiskQueue) Start(cfg *Config) {
 	queues = make(map[QueueKey]*BackendQueue)
-	path := global.Env().SystemConfig.GetDataDir() + "/queue"
+	path := global.Env().SystemConfig.GetWorkingDir() + "/queue"
 	os.Mkdir(path, 0777)
 	pendingFetchDiskQueue := NewDiskQueue("pending_fetch", path, 100*1024*1024, 1, 1<<10, 2500, 5*time.Second)
 	pendingCheckDiskQueue := NewDiskQueue("pending_check", path, 100*1024*1024, 1, 1<<10, 2500, 5*time.Second)

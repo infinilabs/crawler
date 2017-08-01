@@ -83,7 +83,7 @@ var (
 		},
 
 		APIBinding:         "127.0.0.1:8001",
-		HttpBinding:        "127.0.0.1:9001",
+		HTTPBinding:        "127.0.0.1:9001",
 		ClusterBinding:     "127.0.0.1:13001",
 		AllowMultiInstance: true,
 		MaxNumOfInstance:   5,
@@ -107,7 +107,7 @@ func loadSystemConfig(cfgFile string) SystemConfig {
 		}
 	}
 
-	os.MkdirAll(cfg.GetDataDir(), 0777)
+	os.MkdirAll(cfg.GetWorkingDir(), 0777)
 	os.MkdirAll(cfg.PathConfig.Log, 0777)
 	return cfg
 }

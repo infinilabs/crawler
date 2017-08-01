@@ -94,7 +94,7 @@ func (this UIModule) internalStart(cfg *Config) {
 		}
 	}
 
-	address := util.AutoGetAddress(global.Env().SystemConfig.HttpBinding)
+	address := util.AutoGetAddress(global.Env().SystemConfig.HTTPBinding)
 
 	if global.Env().SystemConfig.TLSEnabled {
 		log.Debug("start ssl endpoint")

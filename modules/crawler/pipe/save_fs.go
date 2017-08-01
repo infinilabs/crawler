@@ -41,7 +41,7 @@ func (this SaveSnapshotToFileSystemJoint) Name() string {
 func (this SaveSnapshotToFileSystemJoint) Process(c *Context) error {
 
 	if len(this.baseDir) == 0 {
-		this.baseDir = global.Env().SystemConfig.GetDataDir() + "/web"
+		this.baseDir = global.Env().SystemConfig.GetWorkingDir() + "/web"
 	}
 
 	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)

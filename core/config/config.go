@@ -1,4 +1,4 @@
-//copied from github.com/elastic/beats
+//Package config , actually copied from github.com/elastic/beats
 package config
 
 import (
@@ -30,8 +30,8 @@ func IsStrictPerms() bool {
 // See https://godoc.org/github.com/elastic/go-ucfg#Config
 type Config ucfg.Config
 
-// ConfigNamespace storing at most one configuration section by name and sub-section.
-type ConfigNamespace struct {
+// Namespace storing at most one configuration section by name and sub-section.
+type Namespace struct {
 	C map[string]*Config `config:",inline"`
 }
 
@@ -59,15 +59,18 @@ var debugBlacklist = util.MakeStringSet(
 	"hosts",
 )
 
+// NewConfig create a pretty new config
 func NewConfig() *Config {
 	return fromConfig(ucfg.New())
 }
 
+// NewConfigFrom get config instance
 func NewConfigFrom(from interface{}) (*Config, error) {
 	c, err := ucfg.NewFrom(from, configOpts...)
 	return fromConfig(c), err
 }
 
+// MergeConfigs just merge configs together
 func MergeConfigs(cfgs ...*Config) (*Config, error) {
 	config := NewConfig()
 	for _, c := range cfgs {
@@ -78,6 +81,7 @@ func MergeConfigs(cfgs ...*Config) (*Config, error) {
 	return config, nil
 }
 
+// NewConfigWithYAML load config from yaml
 func NewConfigWithYAML(in []byte, source string) (*Config, error) {
 	opts := append(
 		[]ucfg.Option{
@@ -89,6 +93,7 @@ func NewConfigWithYAML(in []byte, source string) (*Config, error) {
 	return fromConfig(c), err
 }
 
+// NewFlagConfig will use flags
 func NewFlagConfig(
 	set *flag.FlagSet,
 	def *Config,
@@ -111,6 +116,7 @@ func NewFlagConfig(
 	return fromConfig(config)
 }
 
+// NewFlagOverwrite will use flags which specified
 func NewFlagOverwrite(
 	set *flag.FlagSet,
 	config *Config,
@@ -145,6 +151,7 @@ func NewFlagOverwrite(
 	return &f.value
 }
 
+// LoadFile will load config from specify file
 func LoadFile(path string) (*Config, error) {
 	if IsStrictPerms() {
 		if err := ownerHasExclusiveWritePerms(path); err != nil {
@@ -163,6 +170,7 @@ func LoadFile(path string) (*Config, error) {
 	return cfg, err
 }
 
+// LoadFiles will load configs from specify files
 func LoadFiles(paths ...string) (*Config, error) {
 	merger := cfgutil.NewCollector(nil, configOpts...)
 	for _, path := range paths {
@@ -174,86 +182,118 @@ func LoadFiles(paths ...string) (*Config, error) {
 	return fromConfig(merger.Config()), nil
 }
 
+// Merge a map, a slice, a struct or another Config object into c.
 func (c *Config) Merge(from interface{}) error {
 	return c.access().Merge(from, configOpts...)
 }
 
+// Unpack unpacks c into a struct, a map, or a slice allocating maps, slices,
+// and pointers as necessary.
 func (c *Config) Unpack(to interface{}) error {
 	return c.access().Unpack(to, configOpts...)
 }
 
+// Path gets the absolute path of c separated by sep. If c is a root-Config an
+// empty string will be returned.
 func (c *Config) Path() string {
 	return c.access().Path(".")
 }
 
+// PathOf gets the absolute path of a potential setting field in c with name
+// separated by sep.
 func (c *Config) PathOf(field string) string {
 	return c.access().PathOf(field, ".")
 }
 
+// HasField checks if c has a top-level named key name.
 func (c *Config) HasField(name string) bool {
 	return c.access().HasField(name)
 }
 
+// CountField returns number of entries in a table or 1 if entry is a primitive value.
+// Primitives settings can be handled like a list with 1 entry.
 func (c *Config) CountField(name string) (int, error) {
 	return c.access().CountField(name)
 }
 
+// Bool reads a boolean setting returning an error if the setting has no
+// boolean value.
 func (c *Config) Bool(name string, idx int) (bool, error) {
 	return c.access().Bool(name, idx, configOpts...)
 }
 
+// Strings reads a string setting returning an error if the setting has
+// no string or primitive value convertible to string.
 func (c *Config) String(name string, idx int) (string, error) {
 	return c.access().String(name, idx, configOpts...)
 }
 
+// Int reads an int64 value returning an error if the setting is
+// not integer value, the primitive value is not convertible to int or a conversion
+// would create an integer overflow.
 func (c *Config) Int(name string, idx int) (int64, error) {
 	return c.access().Int(name, idx, configOpts...)
 }
 
+// Float reads a float64 value returning an error if the setting is
+// not a float value or the primitive value is not convertible to float.
 func (c *Config) Float(name string, idx int) (float64, error) {
 	return c.access().Float(name, idx, configOpts...)
 }
 
+// Child returns a child configuration or an error if the setting requested is a
+// primitive value only.
 func (c *Config) Child(name string, idx int) (*Config, error) {
 	sub, err := c.access().Child(name, idx, configOpts...)
 	return fromConfig(sub), err
 }
 
+// SetBool sets a boolean primitive value. An error is returned if the new name
+// is invalid.
 func (c *Config) SetBool(name string, idx int, value bool) error {
 	return c.access().SetBool(name, idx, value, configOpts...)
 }
 
+// SetInt sets an integer primitive value. An error is returned if the new
+// name is invalid.
 func (c *Config) SetInt(name string, idx int, value int64) error {
 	return c.access().SetInt(name, idx, value, configOpts...)
 }
 
+// SetFloat sets an floating point primitive value. An error is returned if
+// the name is invalid.
 func (c *Config) SetFloat(name string, idx int, value float64) error {
 	return c.access().SetFloat(name, idx, value, configOpts...)
 }
 
+// SetString sets string value. An error is returned if the name is invalid.
 func (c *Config) SetString(name string, idx int, value string) error {
 	return c.access().SetString(name, idx, value, configOpts...)
 }
 
+// SetChild adds a sub-configuration. An error is returned if the name is invalid.
 func (c *Config) SetChild(name string, idx int, value *Config) error {
 	return c.access().SetChild(name, idx, value.access(), configOpts...)
 }
 
+// IsDict checks if c has named keys.
 func (c *Config) IsDict() bool {
 	return c.access().IsDict()
 }
 
+// IsArray checks if c has index only accessible settings.
 func (c *Config) IsArray() bool {
 	return c.access().IsArray()
 }
 
+// Enabled was a predefined config, enabled by default if no config was found
 func (c *Config) Enabled() bool {
 	testEnabled := struct {
 		Enabled bool `config:"enabled"`
 	}{true}
 
 	if c == nil {
-		return true //enable by default if no config was found
+		return true
 	}
 	if err := c.Unpack(&testEnabled); err != nil {
 		// if unpacking fails, expect 'enabled' being set to default value
@@ -270,6 +310,7 @@ func (c *Config) access() *ucfg.Config {
 	return (*ucfg.Config)(c)
 }
 
+// GetFields returns a list of all top-level named keys in c.
 func (c *Config) GetFields() []string {
 	return c.access().GetFields()
 }
@@ -299,7 +340,7 @@ func (f *flagOverwrite) Get() interface{} {
 }
 
 // Validate checks at most one sub-namespace being set.
-func (ns *ConfigNamespace) Validate() error {
+func (ns *Namespace) Validate() error {
 	if len(ns.C) > 1 {
 		return errors.New("more then one namespace configured")
 	}
@@ -307,7 +348,7 @@ func (ns *ConfigNamespace) Validate() error {
 }
 
 // Name returns the configuration sections it's name if a section has been set.
-func (ns *ConfigNamespace) Name() string {
+func (ns *Namespace) Name() string {
 	for name := range ns.C {
 		return name
 	}
@@ -315,7 +356,7 @@ func (ns *ConfigNamespace) Name() string {
 }
 
 // Config return the sub-configuration section if a section has been set.
-func (ns *ConfigNamespace) Config() *Config {
+func (ns *Namespace) Config() *Config {
 	for _, cfg := range ns.C {
 		return cfg
 	}
@@ -323,7 +364,7 @@ func (ns *ConfigNamespace) Config() *Config {
 }
 
 // IsSet returns true if a sub-configuration section has been set.
-func (ns *ConfigNamespace) IsSet() bool {
+func (ns *Namespace) IsSet() bool {
 	return len(ns.C) != 0
 }
 

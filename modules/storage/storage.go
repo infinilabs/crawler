@@ -33,7 +33,7 @@ func (this StorageModule) Name() string {
 
 func (this StorageModule) Start(cfg *config.Config) {
 
-	folder := path.Join(global.Env().SystemConfig.GetDataDir(), "blob")
+	folder := path.Join(global.Env().SystemConfig.GetWorkingDir(), "blob")
 	os.MkdirAll(folder, 0777)
 	impl = boltdb.BoltdbStore{FileName: path.Join(folder, "/bolt.db")}
 	err := impl.Open()

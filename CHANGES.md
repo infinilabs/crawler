@@ -8,6 +8,7 @@
 ##### breaking changes
 1. move repo to infinitbyte/gopa, for better collaboration, namespace changed as well  
 2. separate API and UI, listen on different port
+3. add mysql as database option
 
 ##### features
 1. task fetch and update with stepped delay

@@ -172,11 +172,13 @@ func (s *RaftModule) Open() error {
 
 	// If join was specified, make the join request.
 	if len(s.cfg.Seeds) > 0 {
+		log.Debug("start to join cluster")
 		for _, v := range s.cfg.Seeds {
 			if err := join(v, address); err != nil {
 				log.Debugf("failed to join node at %s: %s", v, err.Error())
 			}
 		}
+		log.Debug("end to join cluster")
 	}
 
 	if global.Env().IsDebug {

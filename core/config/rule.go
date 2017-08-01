@@ -16,6 +16,7 @@ limitations under the License.
 
 package config
 
+// MatchRule is container of rules
 type MatchRule struct {
 	Contain    []string
 	NotContain []string
@@ -23,14 +24,17 @@ type MatchRule struct {
 	Suffix     []string
 }
 
+// ShouldMatchRule means some rule should match
 type ShouldMatchRule struct {
 	*MatchRule
 }
 
+// MustMatchRule means some rule must match
 type MustMatchRule struct {
 	*MatchRule
 }
 
+// MustNotMatchRule means some rule must not match
 type MustNotMatchRule struct {
 	*MatchRule
 }

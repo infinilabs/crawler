@@ -50,7 +50,7 @@ func (this CrawlerModule) Start(cfg *Config) {
 	InitJoints()
 
 	if crawlerStarted {
-		log.Error("crawler already crawlerStarted, please stop it first.")
+		log.Error("crawler already started, please stop it first.")
 		return
 	}
 
@@ -66,7 +66,7 @@ func (this CrawlerModule) Start(cfg *Config) {
 
 		}
 	} else {
-		log.Info("crawler currently not enabled")
+		log.Info("crawler currently is not enabled")
 		return
 	}
 

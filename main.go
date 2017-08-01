@@ -187,7 +187,7 @@ func main() {
 	logger.SetLogging(env, *logLevel, *logDir)
 
 	//check instance lock
-	util.CheckInstanceLock(env.SystemConfig.GetDataDir())
+	util.CheckInstanceLock(env.SystemConfig.GetWorkingDir())
 	defer func() {
 		if r := recover(); r != nil {
 			if e, ok := r.(runtime.Error); ok {

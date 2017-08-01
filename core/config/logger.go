@@ -16,6 +16,7 @@ limitations under the License.
 
 package config
 
+// LoggingConfig object to store logging related settings
 type LoggingConfig struct {
 	RealtimePushEnabled  bool   `json:"realtime"`
 	LogLevel             string `json:"log_level"`
