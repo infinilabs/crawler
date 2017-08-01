@@ -4,11 +4,20 @@ os:
 - linux
 
 before_install:
+  - GO_FILES=$(find . -iname '*.go' | grep -v /vendor/)  # All the .go files, excluding vendor/
+  - PKGS=$(go list ./... | grep -v /vendor/)             # All the import paths, excluding vendor/
   - go get github.com/mattn/goveralls
+  - go get github.com/golang/lint/golint
+  - go get honnef.co/go/tools/cmd/megacheck
 
 script:
   - make clean config build
   - $HOME/gopath/bin/goveralls -service=travis-ci
+  - test -z $(gofmt -s -l $GO_FILES)  # Fail if a .go file hasn't been formatted with gofmt
+  - go test -v -race $PKGS            # Run all the tests with the race detector enabled
+  - go vet $PKGS                      # go vet is the official Go static analyzer
+  - megacheck $PKGS                   # "go vet on steroids" + linter
+  - golint -set_exit_status $PKGS     # one last linter
 
 go:
 - 1.x
