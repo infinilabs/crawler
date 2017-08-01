@@ -21,17 +21,24 @@ import (
 	"io"
 )
 
+// ErrorCode is enum object of errors
 type ErrorCode int
 
+// ErrorPayload is detail payload of errors
 type ErrorPayload interface{}
 
 var (
-	Default       ErrorCode = 1
-	JSONIsEmpty   ErrorCode = 100
-	BodyEmpty     ErrorCode = 101
+	// Default unknow error
+	Default ErrorCode = 1
+	// JSONIsEmpty error when json is emtpy
+	JSONIsEmpty ErrorCode = 100
+	// BodyEmpty error when body is empty
+	BodyEmpty ErrorCode = 101
+	// URLRedirected error when url redirected
 	URLRedirected ErrorCode = 102
 )
 
+// NewWithCode create a error with error code and message
 func NewWithCode(err error, code ErrorCode, msg string) error {
 	if err == nil {
 		return nil
@@ -46,6 +53,7 @@ func NewWithCode(err error, code ErrorCode, msg string) error {
 	}
 }
 
+// NewWithPayload create error with error code and payload and message
 func NewWithPayload(err error, code ErrorCode, payload interface{}, msg string) error {
 	if err == nil {
 		return nil
@@ -190,6 +198,7 @@ func Cause(err error) error {
 	return err
 }
 
+// Code return error code
 func Code(err error) ErrorCode {
 	code := Default
 	type causer interface {
@@ -206,6 +215,7 @@ func Code(err error) ErrorCode {
 	return code
 }
 
+// CodeWithPayload return error code and payload
 func CodeWithPayload(err error) (ErrorCode, interface{}) {
 	type causer interface {
 		Code() ErrorCode

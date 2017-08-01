@@ -14,9 +14,9 @@ const (
 	DispatcherChannel queue.QueueKey = "dispatch"
 	IndexChannel      queue.QueueKey = "index"
 
-	DispatchFilter filter.FilterKey = "dispatch_filter"
-	CheckFilter    filter.FilterKey = "check_filter"
-	FetchFilter    filter.FilterKey = "fetch_filter"
+	DispatchFilter filter.Key = "dispatch_filter"
+	CheckFilter    filter.Key = "check_filter"
+	FetchFilter    filter.Key = "fetch_filter"
 )
 
 const KVBucketKey string = "Kv"

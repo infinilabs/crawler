@@ -16,33 +16,40 @@ limitations under the License.
 
 package filter
 
-type FilterKey string
+// Key is the key of filters
+type Key string
 
+// Filter is used to check if the object is in the filter or not
 type Filter interface {
-	Exists(bucket FilterKey, key []byte) bool
-	Add(bucket FilterKey, key []byte) error
-	Delete(bucket FilterKey, key []byte) error
-	CheckThenAdd(bucket FilterKey, key []byte) (bool, error)
+	Exists(bucket Key, key []byte) bool
+	Add(bucket Key, key []byte) error
+	Delete(bucket Key, key []byte) error
+	CheckThenAdd(bucket Key, key []byte) (bool, error)
 }
 
 var handler Filter
 
-func Exists(bucket FilterKey, key []byte) bool {
+// Exists checks if the key are already in filter bucket
+func Exists(bucket Key, key []byte) bool {
 	return handler.Exists(bucket, key)
 }
 
-func Add(bucket FilterKey, key []byte) error {
+// Add will add key to filter bucket
+func Add(bucket Key, key []byte) error {
 	return handler.Add(bucket, key)
 }
 
-func Remove(bucket FilterKey, key []byte) error {
+// Remove will remove key from bucket
+func Remove(bucket Key, key []byte) error {
 	return handler.Delete(bucket, key)
 }
 
-func CheckThenAdd(bucket FilterKey, key []byte) (bool, error) {
+// CheckThenAdd will check first and if the key is not in the filter bucket, then it will add it and return false, if the key is already in the bucket, it will just return true
+func CheckThenAdd(bucket Key, key []byte) (bool, error) {
 	return handler.CheckThenAdd(bucket, key)
 }
 
-func Regsiter(h Filter) {
+// Register used to register filter handler to dealing with filter operations
+func Register(h Filter) {
 	handler = h
 }

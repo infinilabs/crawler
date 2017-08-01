@@ -19,24 +19,24 @@ func (this FilterModule) Name() string {
 	return "Filter"
 }
 
-func (this FilterModule) Exists(bucket FilterKey, key []byte) bool {
+func (this FilterModule) Exists(bucket Key, key []byte) bool {
 	f := filters[bucket]
 	return f.Exists(key)
 }
 
-func (this FilterModule) Add(bucket FilterKey, key []byte) error {
+func (this FilterModule) Add(bucket Key, key []byte) error {
 	f := filters[bucket]
 	return f.Add(key)
 }
 
-func (this FilterModule) Delete(bucket FilterKey, key []byte) error {
+func (this FilterModule) Delete(bucket Key, key []byte) error {
 	f := filters[bucket]
 	return f.Delete(key)
 }
 
 var l sync.RWMutex
 
-func (this FilterModule) CheckThenAdd(bucket FilterKey, key []byte) (b bool, err error) {
+func (this FilterModule) CheckThenAdd(bucket Key, key []byte) (b bool, err error) {
 	f := filters[bucket]
 	l.Lock()
 	defer l.Unlock()
@@ -47,7 +47,7 @@ func (this FilterModule) CheckThenAdd(bucket FilterKey, key []byte) (b bool, err
 	return b, err
 }
 
-func initFilter(key FilterKey) {
+func initFilter(key Key) {
 	//f := impl.EmptyFilter{}
 	f := impl.LeveldbFilter{}
 	file := path.Join(global.Env().SystemConfig.GetWorkingDir(), "filters", string(key))
@@ -59,18 +59,18 @@ func initFilter(key FilterKey) {
 	filters[key] = &f
 }
 
-var filters map[FilterKey]*impl.LeveldbFilter
+var filters map[Key]*impl.LeveldbFilter
 
 func (this FilterModule) Start(cfg *Config) {
 
-	filters = map[FilterKey]*impl.LeveldbFilter{}
+	filters = map[Key]*impl.LeveldbFilter{}
 
 	//TODO dynamic config
 	initFilter(config.DispatchFilter)
 	initFilter(config.FetchFilter)
 	initFilter(config.CheckFilter)
 
-	filter.Regsiter(this)
+	filter.Register(this)
 }
 
 func (this FilterModule) Stop() error {
