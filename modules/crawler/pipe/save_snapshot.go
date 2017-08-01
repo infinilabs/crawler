@@ -25,7 +25,6 @@ import (
 	"github.com/infinitbyte/gopa/core/store"
 	"github.com/infinitbyte/gopa/modules/config"
 	"time"
-	"strconv"
 	"strings"
 )
 
@@ -37,13 +36,13 @@ type SaveSnapshotToDBJoint struct {
 
 const compressEnabled ParaKey = "compress_enabled"
 const bucket ParaKey = "bucket"
-const snapshottimeToless ParaKey = "snapshottime_toless"
-const snapshottimeTomore ParaKey = "snapshottime_tomore"
-const snapshotMaxnum ParaKey = "snapshot_maxnum"
+const decelerateSteps ParaKey = "decelerate_steps"
+const accelerateSteps ParaKey = "accelerate_steps"
+const maxRevision ParaKey = "max_revision"
 
 //minutes
-var arrTimeToLess []int
-var arrTimeToMore []int
+var arrDecelerateSteps []int
+var arrAccelerateSteps []int
 
 func (this SaveSnapshotToDBJoint) Name() string {
 	return string(SaveSnapshotToDB)
@@ -53,22 +52,22 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 
-	//init snapshottimeToless
-	arrTimeToLessStr := strings.Split(this.MustGetString(snapshottimeToless),",")
-	arrTimeToLess = make([]int,len(arrTimeToLessStr),len(arrTimeToLessStr))
-	for i := 0; i < len(arrTimeToLessStr); i++ {
-		m,error := strconv.Atoi(arrTimeToLessStr[i])
+	//init decelerateSteps
+	arrDecelerateStepsStr := strings.Split(this.MustGetString(decelerateSteps),",")
+	arrDecelerateSteps = make([]int,len(arrDecelerateStepsStr),len(arrDecelerateStepsStr))
+	for i := 0; i < len(arrDecelerateStepsStr); i++ {
+		m,error := time.ParseDuration(arrDecelerateStepsStr[i])
 		if error == nil {
-			arrTimeToLess[i] = m
+			arrDecelerateSteps[i] = int(m.Minutes())
 		}
 	}
-	//init snapshottimeTomore
-	arrTimeToMoreStr := strings.Split(this.MustGetString(snapshottimeTomore),",")
-	arrTimeToMore = make([]int,len(arrTimeToMoreStr),len(arrTimeToMoreStr))
-	for i := 0; i < len(arrTimeToMoreStr); i++ {
-		m,error := strconv.Atoi(arrTimeToMoreStr[i])
+	//init accelerateSteps
+	arrAccelerateStepsStr := strings.Split(this.MustGetString(accelerateSteps),",")
+	arrAccelerateSteps = make([]int,len(arrAccelerateStepsStr),len(arrAccelerateStepsStr))
+	for i := 0; i < len(arrAccelerateStepsStr); i++ {
+		m,error := time.ParseDuration(arrAccelerateStepsStr[i])
 		if error == nil {
-			arrTimeToMore[i] = m
+			arrAccelerateSteps[i] = int(m.Minutes())
 		}
 	}
 
@@ -135,20 +134,20 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 
 	model.CreateSnapshot(snapshot)
 
-	//delete old snapshot
+	//TODO optimization algorithm
 	//get current snapshot list and total num
-	snapshotTotal, snapshotsList, err := model.GetSnapshotAllList(task.ID)
+	snapshotTotal, _, err := model.GetSnapshotList(0,1,task.ID)
 	if err == nil {
 		//get max snapshot num
-		maxSnapshotNum := this.MustGetInt64(snapshotMaxnum)
+		maxSnapshotNum := int(this.MustGetInt64(maxRevision))
 		//if more than max snapshot num,delete old snapshot
-		if int64(snapshotTotal) > maxSnapshotNum {
-			mustDeleteNum := int64(snapshotTotal) - maxSnapshotNum
-			for i := 0; i < len(snapshotsList); i++  {
-				if i > 0 && i < len(snapshotsList)-1 && mustDeleteNum > 0 {
+		if snapshotTotal > maxSnapshotNum {
+			mustDeleteNum := snapshotTotal - maxSnapshotNum
+			_, snapshotsList, errReadList := model.GetSnapshotList(1,mustDeleteNum,task.ID)
+			if errReadList == nil {
+				for i := 0; i < len(snapshotsList); i++  {
 					model.DeleteSnapshot(&snapshotsList[i])
 					store.DeleteValue(this.MustGetString(bucket),[]byte(snapshotsList[i].ID),snapshotsList[i].Payload)
-					mustDeleteNum -= 1
 				}
 			}
 		}
@@ -169,42 +168,42 @@ func GetNextCheckTimeMinutes(fetchSuccess bool, tLastCheckTime time.Time, tNextC
 	timeIntervalLast := GetTimeInterval(tLastCheckTime, tNextCheckTime)
 	timeIntervalNext := 24 * 60
 	if fetchSuccess {
-		arrTimeLength := len(arrTimeToLess)
+		arrTimeLength := len(arrDecelerateSteps)
 		for i := 1; i < arrTimeLength; i++ {
-			if timeIntervalLast > arrTimeToLess[0] {
-				timeIntervalNext = arrTimeToLess[0]
+			if timeIntervalLast > arrDecelerateSteps[0] {
+				timeIntervalNext = arrDecelerateSteps[0]
 				break
 			}
-			if timeIntervalLast <= arrTimeToLess[arrTimeLength-2] {
-				timeIntervalNext = arrTimeToLess[arrTimeLength-1]
+			if timeIntervalLast <= arrDecelerateSteps[arrTimeLength-2] {
+				timeIntervalNext = arrDecelerateSteps[arrTimeLength-1]
 				break
 			}
 			if i+1 >= arrTimeLength {
-				timeIntervalNext = arrTimeToLess[arrTimeLength-1]
+				timeIntervalNext = arrDecelerateSteps[arrTimeLength-1]
 				break
 			}
-			if timeIntervalLast <= arrTimeToLess[i] && timeIntervalLast > arrTimeToLess[i+1] {
-				timeIntervalNext = arrTimeToLess[i+1]
+			if timeIntervalLast <= arrDecelerateSteps[i] && timeIntervalLast > arrDecelerateSteps[i+1] {
+				timeIntervalNext = arrDecelerateSteps[i+1]
 				break
 			}
 		}
 	} else {
-		arrTimeLength := len(arrTimeToMore)
+		arrTimeLength := len(arrAccelerateSteps)
 		for i := 1; i < arrTimeLength; i++ {
-			if timeIntervalLast <= arrTimeToMore[0] {
-				timeIntervalNext = arrTimeToMore[1]
+			if timeIntervalLast <= arrAccelerateSteps[0] {
+				timeIntervalNext = arrAccelerateSteps[1]
 				break
 			}
-			if timeIntervalLast >= arrTimeToMore[arrTimeLength-2] {
-				timeIntervalNext = arrTimeToMore[arrTimeLength-1]
+			if timeIntervalLast >= arrAccelerateSteps[arrTimeLength-2] {
+				timeIntervalNext = arrAccelerateSteps[arrTimeLength-1]
 				break
 			}
 			if i+1 >= arrTimeLength {
-				timeIntervalNext = arrTimeToMore[arrTimeLength-1]
+				timeIntervalNext = arrAccelerateSteps[arrTimeLength-1]
 				break
 			}
-			if timeIntervalLast >= arrTimeToMore[i] && timeIntervalLast < arrTimeToMore[i+1] {
-				timeIntervalNext = arrTimeToMore[i+1]
+			if timeIntervalLast >= arrAccelerateSteps[i] && timeIntervalLast < arrAccelerateSteps[i+1] {
+				timeIntervalNext = arrAccelerateSteps[i+1]
 				break
 			}
 		}
