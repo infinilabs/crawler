@@ -44,6 +44,10 @@ modules:
         enabled: true
       - joint: fetch
         enabled: true
+        parameters:
+          timeout_in_seconds: 10
+#          proxy: "socks5://127.0.0.1:1080"
+#          cookie: ""
       - joint: parse
         enabled: true
         parameters:

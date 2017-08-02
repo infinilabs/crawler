@@ -122,22 +122,27 @@ func (this *Parameters) Has(key ParaKey) bool {
 	return ok
 }
 
-func (this *Parameters) GetInt(key ParaKey, defaultV int) (int, bool) {
-	v := this.Get(key)
-	s, ok := v.(int)
+func (this *Parameters) GetIntOrDefault(key ParaKey, defaultV int) int {
+	v, ok := this.GetInt(key, defaultV)
 	if ok {
-		return s, ok
+		return v
 	}
-	s1, ok := v.(uint)
+	return defaultV
+}
+func (this *Parameters) GetInt(key ParaKey, defaultV int) (int, bool) {
+	v, ok := this.GetInt64(key, 0)
 	if ok {
-		return int(s1), ok
+		return int(v), ok
 	}
 	return defaultV, ok
 }
 
-func (this *Parameters) GetIntOrDefault(key ParaKey, defaultV int) int {
-	v, _ := this.GetInt(key, defaultV)
-	return v
+func (this *Parameters) GetInt64OrDefault(key ParaKey, defaultV int64) int64 {
+	v, ok := this.GetInt64(key, defaultV)
+	if ok {
+		return v
+	}
+	return defaultV
 }
 
 func (this *Parameters) GetInt64(key ParaKey, defaultV int64) (int64, bool) {
@@ -156,6 +161,11 @@ func (this *Parameters) GetInt64(key ParaKey, defaultV int64) (int64, bool) {
 	s2, ok := v.(int)
 	if ok {
 		return int64(s2), ok
+	}
+
+	s3, ok := v.(uint)
+	if ok {
+		return int64(s3), ok
 	}
 
 	log.Debug(key, ",", s, ",", ok)
@@ -245,17 +255,11 @@ func (this *Parameters) MustGetBytes(key ParaKey) []byte {
 return 0 if not key was found
 */
 func (this *Parameters) MustGetInt(key ParaKey) int {
-	s, ok := this.GetInt(key, 0)
+	v, ok := this.GetInt(key, 0)
 	if !ok {
-		//try int64 finally
-		var s1 int64
-		s1, ok = this.GetInt64(key, 0)
-		if ok {
-			return int(s1)
-		}
 		panic(fmt.Errorf("%s not found in context", key))
 	}
-	return s
+	return v
 }
 
 func (this *Parameters) MustGetInt64(key ParaKey) int64 {

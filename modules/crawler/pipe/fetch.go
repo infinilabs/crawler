@@ -32,8 +32,9 @@ import (
 
 const Fetch JointKey = "fetch"
 
-const Proxy ParaKey = "proxy"
-const Cookie ParaKey = "cookie"
+const proxy ParaKey = "proxy"
+const cookie ParaKey = "cookie"
+const timeoutInSeconds ParaKey = "timeout_in_seconds"
 
 type FetchJoint struct {
 	Parameters
@@ -52,7 +53,7 @@ type signal struct {
 
 func (this FetchJoint) Process(context *Context) error {
 
-	this.timeout = 10 * time.Second
+	this.timeout = time.Duration(this.MustGetInt64(timeoutInSeconds)) * time.Second
 	timer := time.NewTimer(this.timeout)
 	defer timer.Stop()
 
@@ -74,8 +75,8 @@ func (this FetchJoint) Process(context *Context) error {
 	flg := make(chan signal, 1)
 	go func() {
 
-		cookie, _ := this.GetString(Cookie)
-		proxy, _ := this.GetString(Proxy) //"socks5://127.0.0.1:9150"  //TODO 这个是全局配置,后续的url应该也使用同样的配置,应该在domain setting里面
+		cookie, _ := this.GetString(cookie)
+		proxy, _ := this.GetString(proxy)
 
 		//先全局,再domain,再task,再pipeline,层层覆盖
 		log.Trace("proxy:", proxy)
