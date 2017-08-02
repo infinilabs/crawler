@@ -30,7 +30,7 @@ type ErrorPayload interface{}
 var (
 	// Default unknow error
 	Default ErrorCode = 1
-	// JSONIsEmpty error when json is emtpy
+	// JSONIsEmpty error when json is empty
 	JSONIsEmpty ErrorCode = 100
 	// BodyEmpty error when body is empty
 	BodyEmpty ErrorCode = 101
