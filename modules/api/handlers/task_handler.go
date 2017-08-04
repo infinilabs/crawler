@@ -18,47 +18,55 @@ package http
 
 import (
 	logger "github.com/cihub/seelog"
-	. "github.com/infinitbyte/gopa/core/http"
+	api "github.com/infinitbyte/gopa/core/http"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/queue"
 	"github.com/infinitbyte/gopa/core/stats"
 	"github.com/infinitbyte/gopa/modules/config"
-	_ "github.com/jmoiron/jsonq"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
 )
 
-func (this API) TaskDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	if req.Method == DELETE.String() {
+// TaskDeleteAction handle task delete by id, eg:
+//curl -XDELETE http://127.0.0.1:8001/task/1
+func (handler API) TaskDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	if req.Method == api.DELETE.String() {
 		id := ps.ByName("id")
 		err := model.DeleteTask(id)
 		if err != nil {
-			this.Error(w, err)
+			handler.Error(w, err)
 		} else {
-			this.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
+			handler.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
 		}
 	} else {
-		this.Error404(w)
+		handler.Error404(w)
 	}
 }
 
-func (this API) TaskGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+// TaskGetAction return task model by task_id, eg:
+//curl -XGET http://127.0.0.1:8001/task/1
+func (handler API) TaskGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
 	task, err := model.GetTask(id)
 	if err != nil {
-		this.Error(w, err)
+		handler.Error(w, err)
 	} else {
-		this.WriteJSON(w, task, http.StatusOK)
+		handler.WriteJSON(w, task, http.StatusOK)
 
 	}
 
 }
 
-func (this API) TaskAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+// TaskAction handle task creation and return task list which support parameter: `from`, `size` and `domain`, eg:
+// curl -XPOST "http://localhost:8001/task/" -d '{
+//"seed":"http://elasticsearch.cn"
+//}'
+//curl -XGET http://127.0.0.1:8001/task?from=100&size=10&domain=elasticsearch.cn
+func (handler API) TaskAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
-	if req.Method == POST.String() {
-		jsonq, err := this.GetJSON(req)
+	if req.Method == api.POST.String() {
+		jsonq, err := handler.GetJSON(req)
 		if err != nil {
 			logger.Error(err)
 		}
@@ -73,13 +81,13 @@ func (this API) TaskAction(w http.ResponseWriter, req *http.Request, ps httprout
 
 		queue.Push(config.CheckChannel, task.MustGetBytes())
 
-		this.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
+		handler.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
 	} else {
 		logger.Trace("get all tasks")
 
-		fr := this.GetParameter(req, "from")
-		si := this.GetParameter(req, "size")
-		domain := this.GetParameter(req, "domain")
+		fr := handler.GetParameter(req, "from")
+		si := handler.GetParameter(req, "size")
+		domain := handler.GetParameter(req, "domain")
 
 		from, err := strconv.Atoi(fr)
 		if err != nil {
@@ -92,64 +100,54 @@ func (this API) TaskAction(w http.ResponseWriter, req *http.Request, ps httprout
 
 		total, tasks, err := model.GetTaskList(from, size, domain)
 		if err != nil {
-			this.Error(w, err)
+			handler.Error(w, err)
 		} else {
-			this.WriteJSONListResult(w, total, tasks, http.StatusOK)
+			handler.WriteJSONListResult(w, total, tasks, http.StatusOK)
 		}
 	}
 }
 
-func (this API) DomainDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	if req.Method == DELETE.String() {
+// DomainDeleteAction handle domain deletion, only support delete by id, eg:
+//curl -XDELETE http://127.0.0.1:8001/domain/1
+func (handler API) DomainDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	if req.Method == api.DELETE.String() {
 		id := ps.ByName("id")
 		err := model.DeleteTask(id)
 		if err != nil {
-			this.Error(w, err)
+			handler.Error(w, err)
 		} else {
-			this.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
+			handler.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
 		}
 	} else {
-		this.Error404(w)
+		handler.Error404(w)
 	}
 }
 
-func (this API) DomainGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+// DomainGetAction return domain by domain id, eg:
+//curl -XGET http://127.0.0.1:8001/domain/1
+func (handler API) DomainGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
 	task, err := model.GetTask(id)
 	if err != nil {
-		this.Error(w, err)
+		handler.Error(w, err)
 	} else {
-		this.WriteJSON(w, task, http.StatusOK)
+		handler.WriteJSON(w, task, http.StatusOK)
 
 	}
 
 }
 
-func (this API) DomainAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+// DomainAction return domain list, support parameter: `from`, `size` and `domain`, eg:
+//curl -XGET http://127.0.0.1:8001/domain?from=0&size=10
+func (handler API) DomainAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
-	if req.Method == POST.String() {
-		//jsonq, err := this.GetJson(req)
-		//if err != nil {
-		//	logger.Error(err)
-		//}
-		//
-		//seed, err := jsonq.String("seed")
-		//if err != nil {
-		//	logger.Error(err)
-		//}
-		//logger.Trace("receive new seed:", seed)
-		//
-		//task := model.NewTaskSeed(seed, "", 0)
-		//
-		//queue.Push(config.CheckChannel, task.MustGetBytes())
+	if req.Method == api.GET.String() {
 
-		this.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
-	} else {
 		logger.Trace("get all domain settings")
 
-		fr := this.GetParameter(req, "from")
-		si := this.GetParameter(req, "size")
-		domain := this.GetParameter(req, "domain")
+		fr := handler.GetParameter(req, "from")
+		si := handler.GetParameter(req, "size")
+		domain := handler.GetParameter(req, "domain")
 
 		from, err := strconv.Atoi(fr)
 		if err != nil {
@@ -171,9 +169,9 @@ func (this API) DomainAction(w http.ResponseWriter, req *http.Request, ps httpro
 		}
 
 		if err != nil {
-			this.Error(w, err)
+			handler.Error(w, err)
 		} else {
-			this.WriteJSONListResult(w, total, newDomains, http.StatusOK)
+			handler.WriteJSONListResult(w, total, newDomains, http.StatusOK)
 		}
 	}
 }
