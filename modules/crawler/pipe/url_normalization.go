@@ -21,7 +21,7 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/model"
-	. "github.com/infinitbyte/gopa/core/pipeline"
+	api "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/util"
 	u "net/url"
 	"path"
@@ -29,24 +29,28 @@ import (
 	"strings"
 )
 
-const UrlNormalization JointKey = "url_normalization"
+// UrlNormalization return url_normalization
+const UrlNormalization api.JointKey = "url_normalization"
 
+// UrlNormalizationJoint used to cleanup url and do normalization
 type UrlNormalizationJoint struct {
-	Parameters
+	api.Parameters
 	splitByUrlParameter []string
 	maxFileNameLength   int
 }
 
-const followAllDomain ParaKey = "follow_all_domain"
-const followSubDomain ParaKey = "follow_sub_domain"
+const followAllDomain api.ParaKey = "follow_all_domain"
+const followSubDomain api.ParaKey = "follow_sub_domain"
 
 var defaultFileName = "default.html"
 
-func (this UrlNormalizationJoint) Name() string {
+// Name of this joint is: url_normalization
+func (joint UrlNormalizationJoint) Name() string {
 	return string(UrlNormalization)
 }
 
-func (this UrlNormalizationJoint) Process(context *Context) error {
+// Process will handle relative url and cleanup url
+func (joint UrlNormalizationJoint) Process(context *api.Context) error {
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
@@ -175,7 +179,7 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 	}
 
 	////resolve domain specific filter
-	if !this.GetBool(followAllDomain, false) && this.GetBool(followSubDomain, true) && currentURI != nil && referenceURI != nil {
+	if !joint.GetBool(followAllDomain, false) && joint.GetBool(followSubDomain, true) && currentURI != nil && referenceURI != nil {
 		log.Tracef("try to check domain rule, %s vs %s", referenceURI.Host, currentURI.Host)
 		if strings.Contains(currentURI.Host, ".") && strings.Contains(referenceURI.Host, ".") {
 			ref := strings.Split(referenceURI.Host, ".")
@@ -211,12 +215,12 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 
 		//TODO 不处理非网页内容，去除js 图片 css 压缩包等
 
-		if len(this.splitByUrlParameter) > 0 {
+		if len(joint.splitByUrlParameter) > 0 {
 
-			for i := 0; i < len(this.splitByUrlParameter); i++ {
-				breakTagTemp := currentURI.Query().Get(this.splitByUrlParameter[i])
+			for i := 0; i < len(joint.splitByUrlParameter); i++ {
+				breakTagTemp := currentURI.Query().Get(joint.splitByUrlParameter[i])
 				if breakTagTemp != "" {
-					filenamePrefix = filenamePrefix + this.splitByUrlParameter[i] + "_" + breakTagTemp + "_"
+					filenamePrefix = filenamePrefix + joint.splitByUrlParameter[i] + "_" + breakTagTemp + "_"
 				}
 			}
 		} else {
@@ -306,12 +310,12 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 	}
 
 	//set default filename limit
-	if this.maxFileNameLength <= 0 {
-		this.maxFileNameLength = 200
+	if joint.maxFileNameLength <= 0 {
+		joint.maxFileNameLength = 200
 	}
 
 	//verify filename
-	if len(filename) > this.maxFileNameLength {
+	if len(filename) > joint.maxFileNameLength {
 		panic(errors.New("file name too long"))
 	}
 

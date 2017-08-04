@@ -16,6 +16,7 @@ limitations under the License.
 
 package model
 
+// IndexDocument used to construct indexing document
 type IndexDocument struct {
 	Index  string                 `json:"_index,omitempty"`
 	Type   string                 `json:"_type,omitempty"`

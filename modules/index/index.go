@@ -26,7 +26,7 @@ var (
 	}
 )
 
-func (this IndexModule) Start(cfg *Config) {
+func (module IndexModule) Start(cfg *Config) {
 
 	elasticsearchConfig := defaultESConfig
 	cfg.Unpack(&elasticsearchConfig)
@@ -61,7 +61,7 @@ func (this IndexModule) Start(cfg *Config) {
 	}()
 }
 
-func (this IndexModule) Stop() error {
+func (module IndexModule) Stop() error {
 	signalChannel <- true
 	return nil
 }
