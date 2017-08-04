@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-// hub maintains the set of active connections and broadcasts messages to the
+// Hub maintains the set of active connections and broadcasts messages to the
 // connections.
 type Hub struct {
 	// Registered connections.
@@ -34,6 +34,7 @@ type Hub struct {
 	handlers map[string]WebsocketHandlerFunc
 }
 
+// WebsocketHandlerFunc define the func to handle websocket
 type WebsocketHandlerFunc func(c *WebsocketConnection, array []string)
 
 var h = Hub{
@@ -56,19 +57,21 @@ func (h *Hub) registerHandlers(env *env.Env) {
 	HandleWebSocketCommand("GET_TASK", handler.GetTask)
 }
 
+// InitWebSocket start websocket
 func InitWebSocket(env *env.Env) {
 	if !runningHub {
 		h.registerHandlers(env)
-		go h.RunHub()
+		go h.runHub()
 	}
 }
 
+// HandleWebSocketCommand used to register command and handler
 func HandleWebSocketCommand(cmd string, handler func(c *WebsocketConnection, array []string)) {
 	cmd = strings.ToLower(strings.TrimSpace(cmd))
 	h.handlers[cmd] = WebsocketHandlerFunc(handler)
 }
 
-func (h *Hub) RunHub() {
+func (h *Hub) runHub() {
 	//TODO error　handler,　parameter　assertion
 
 	if global.Env().IsDebug {
@@ -115,6 +118,7 @@ func (h *Hub) broadcastMessage(msg string) {
 	}
 }
 
+// BroadcastMessage send broadcast message to channel and record stats
 func BroadcastMessage(msg string) {
 	select {
 	case h.broadcast <- msg:

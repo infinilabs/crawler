@@ -26,6 +26,7 @@ import (
 	"strings"
 )
 
+// Command struct forms different command
 type Command struct {
 }
 
@@ -36,11 +37,14 @@ func getHelpMessage() string {
 	return help
 }
 
-func (this Command) Help(c *WebsocketConnection, a []string) {
+// Help command returns command help information
+func (command Command) Help(c *WebsocketConnection, a []string) {
 	c.WritePrivateMessage(getHelpMessage())
 }
 
-func (this Command) AddSeed(c *WebsocketConnection, a []string) {
+// AddSeed handle task creation by send a seed, eg:
+//SEED http://elastic.co
+func (command Command) AddSeed(c *WebsocketConnection, a []string) {
 	url := a[1]
 	if len(url) > 0 {
 		queue.Push(config.CheckChannel, model.NewTaskSeed(url, "", 0, 0).MustGetBytes())
@@ -50,7 +54,8 @@ func (this Command) AddSeed(c *WebsocketConnection, a []string) {
 	c.WritePrivateMessage("invalid url")
 }
 
-func (this Command) UpdateLogLevel(c *WebsocketConnection, a []string) {
+// UpdateLogLevel update the logging level, usually used for debug
+func (command Command) UpdateLogLevel(c *WebsocketConnection, a []string) {
 
 	level := a[1]
 	if len(level) > 0 {
@@ -62,7 +67,8 @@ func (this Command) UpdateLogLevel(c *WebsocketConnection, a []string) {
 	c.WritePrivateMessage("invalid setting")
 }
 
-func (this Command) Dispatch(c *WebsocketConnection, a []string) {
+// Dispatch just send a dispatch signal to dispatch service
+func (command Command) Dispatch(c *WebsocketConnection, a []string) {
 
 	err := queue.Push(config.DispatcherChannel, []byte("go"))
 	if err != nil {
@@ -71,7 +77,10 @@ func (this Command) Dispatch(c *WebsocketConnection, a []string) {
 	c.WritePrivateMessage("trigger tasks")
 }
 
-func (this Command) GetTask(c *WebsocketConnection, a []string) {
+// GetTask return task information by send task_id, or task field and value, eg:
+//GET_TASK host elasticsearch.cn
+//GET_TASK 596
+func (command Command) GetTask(c *WebsocketConnection, a []string) {
 
 	if len(a) == 2 {
 		para1 := a[1]
