@@ -32,27 +32,27 @@ type UrlExtFilterJoint struct {
 	SkipPageParsePattern *regexp.Regexp
 }
 
-func (this UrlExtFilterJoint) Name() string {
+func (joint UrlExtFilterJoint) Name() string {
 	return string(UrlExtFilter)
 }
 
-func (this UrlExtFilterJoint) Process(context *Context) error {
-	this.SkipPageParsePattern = regexp.MustCompile(".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b")
+func (joint UrlExtFilterJoint) Process(context *Context) error {
+	joint.SkipPageParsePattern = regexp.MustCompile(".*?\\.((js)|(css)|(rar)|(gz)|(zip)|(exe)|(bmp)|(jpeg)|(gif)|(png)|(jpg)|(apk))\\b")
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 
-	if task.OriginalUrl != "" && !this.valid(task.OriginalUrl) {
+	if task.OriginalUrl != "" && !joint.valid(task.OriginalUrl) {
 		context.ErrorExit("invalid url ext, " + task.OriginalUrl)
 	}
 
-	if task.Url != "" && !this.valid(task.Url) {
+	if task.Url != "" && !joint.valid(task.Url) {
 		context.ErrorExit("invalid url ext, " + task.Url)
 	}
 
 	return nil
 }
 
-func (this UrlExtFilterJoint) valid(url string) bool {
+func (joint UrlExtFilterJoint) valid(url string) bool {
 	if url == "" {
 		return false
 	}
@@ -77,7 +77,7 @@ func (this UrlExtFilterJoint) valid(url string) bool {
 		return false
 	}
 
-	if this.SkipPageParsePattern.Match([]byte(url)) {
+	if joint.SkipPageParsePattern.Match([]byte(url)) {
 		log.Trace("hit SkipPattern pattern,", url)
 		return false
 	}

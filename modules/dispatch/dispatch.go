@@ -13,13 +13,13 @@ import (
 type DispatchModule struct {
 }
 
-func (this DispatchModule) Name() string {
+func (module DispatchModule) Name() string {
 	return "Dispatch"
 }
 
 var signalChannel chan bool
 
-func (this DispatchModule) Start(cfg *Config) {
+func (module DispatchModule) Start(cfg *Config) {
 	signalChannel = make(chan bool, 2)
 	go func() {
 		now := time.Now().UTC()
@@ -106,7 +106,7 @@ func (this DispatchModule) Start(cfg *Config) {
 	}()
 }
 
-func (this DispatchModule) Stop() error {
+func (module DispatchModule) Stop() error {
 	signalChannel <- true
 	signalChannel <- true
 	return nil

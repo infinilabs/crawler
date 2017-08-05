@@ -33,17 +33,17 @@ type SaveTaskJoint struct {
 
 const isCreate ParaKey = "is_create"
 
-func (this SaveTaskJoint) IsCreate(v bool) SaveTaskJoint {
-	this.Init()
-	this.Set(isCreate, v)
-	return this
+func (joint SaveTaskJoint) IsCreate(v bool) SaveTaskJoint {
+	joint.Init()
+	joint.Set(isCreate, v)
+	return joint
 }
 
-func (this SaveTaskJoint) Name() string {
+func (joint SaveTaskJoint) Name() string {
 	return string(SaveTask)
 }
 
-func (this SaveTaskJoint) Process(context *Context) error {
+func (joint SaveTaskJoint) Process(context *Context) error {
 
 	log.Trace("end process")
 	if context.IsErrorExit() {
@@ -59,7 +59,7 @@ func (this SaveTaskJoint) Process(context *Context) error {
 		task.Message = util.ToJson(context.Payload, false)
 	}
 
-	if this.GetBool(isCreate, false) {
+	if joint.GetBool(isCreate, false) {
 		log.Trace("create task, url:", task.Url)
 		model.CreateTask(task)
 	} else {

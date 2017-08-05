@@ -33,11 +33,11 @@ type HtmlToTextJoint struct {
 
 const mergeWhitespace ParaKey = "merge_whitespace" //merge whitespace and \n
 
-func (this HtmlToTextJoint) Name() string {
+func (joint HtmlToTextJoint) Name() string {
 	return string(HtmlToText)
 }
 
-func (this HtmlToTextJoint) Process(context *Context) error {
+func (joint HtmlToTextJoint) Process(context *Context) error {
 
 	//TODO all configable
 	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
@@ -102,7 +102,7 @@ func (this HtmlToTextJoint) Process(context *Context) error {
 	re, _ = regexp.Compile("\\s{2,}")
 	src = re.ReplaceAllString(src, "\n")
 
-	if this.GetBool(mergeWhitespace, false) {
+	if joint.GetBool(mergeWhitespace, false) {
 		src = util.MergeSpace(src)
 	}
 

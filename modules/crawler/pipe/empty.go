@@ -25,11 +25,11 @@ const Empty JointKey = "empty"
 type EmptyJoint struct {
 }
 
-func (this EmptyJoint) Name() string {
+func (joint EmptyJoint) Name() string {
 	return string(Empty)
 }
 
-func (this EmptyJoint) Process(s *Context) error {
+func (joint EmptyJoint) Process(s *Context) error {
 
 	return nil
 }

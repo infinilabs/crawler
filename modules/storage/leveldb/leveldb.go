@@ -37,12 +37,12 @@ type LeveldbStore struct {
 }
 
 //store webpage file
-func (this *LeveldbStore) Store(url string, data []byte) {
+func (store *LeveldbStore) Store(url string, data []byte) {
 	util.FilePutContentWithByte(url, data)
 }
 
 //get webpage file
-func (this *LeveldbStore) Get(key string) []byte {
+func (store *LeveldbStore) Get(key string) []byte {
 	file, error := util.FileGetContent(key)
 	if error != nil {
 		log.Error("get file:", key, error)
@@ -50,155 +50,155 @@ func (this *LeveldbStore) Get(key string) []byte {
 	return file
 }
 
-func (this *LeveldbStore) List(from int, size int) [][]byte {
+func (store *LeveldbStore) List(from int, size int) [][]byte {
 	return nil
 }
 
-func (this *LeveldbStore) TaskEnqueue(url []byte) {
+func (store *LeveldbStore) TaskEnqueue(url []byte) {
 	log.Info("task enqueue:", string(url))
 }
 
-func (this *LeveldbStore) Open() error {
+func (store *LeveldbStore) Open() error {
 
 	//var runtimeConfig= config.InitOrGetConfig()
-	this.WalkPrefix = "walk"
-	this.FetchPrefix = "fetch"
-	this.ParsePrefix = "parse"
-	this.PendingFetchPrefix = "pfetch"
-	this.OffsetPrefix = "offset"
+	store.WalkPrefix = "walk"
+	store.FetchPrefix = "fetch"
+	store.ParsePrefix = "parse"
+	store.PendingFetchPrefix = "pfetch"
+	store.OffsetPrefix = "offset"
 
-	this.PersistFileName = "leveldb"
+	store.PersistFileName = "leveldb"
 
 	//loading or initializing leveldb
-	log.Debug("found leveldb file, start reload,", this.PersistFileName)
+	log.Debug("found leveldb file, start reload,", store.PersistFileName)
 
-	db, err := leveldb.OpenFile(this.PersistFileName, nil)
-	this.Leveldb = db
+	db, err := leveldb.OpenFile(store.PersistFileName, nil)
+	store.Leveldb = db
 
 	if err != nil {
-		log.Error("leveldb:", this.PersistFileName, err)
+		log.Error("leveldb:", store.PersistFileName, err)
 		return err
 	}
 
-	log.Info("leveldb successfully reloaded:", this.PersistFileName)
+	log.Info("leveldb successfully reloaded:", store.PersistFileName)
 
 	return nil
 }
 
-func (this *LeveldbStore) Close() error {
-	err := this.Leveldb.Close()
+func (store *LeveldbStore) Close() error {
+	err := store.Leveldb.Close()
 	if err != nil {
-		log.Error("leveldb:", this.PersistFileName, err)
+		log.Error("leveldb:", store.PersistFileName, err)
 	}
 	return err
 }
 
-func (this *LeveldbStore) PersistBloomFilter() {
+func (store *LeveldbStore) PersistBloomFilter() {
 
 }
 
-func (this *LeveldbStore) UrlHasWalked(url []byte) bool {
+func (store *LeveldbStore) UrlHasWalked(url []byte) bool {
 
-	c := [][]byte{[]byte(this.WalkPrefix), url}
+	c := [][]byte{[]byte(store.WalkPrefix), url}
 
-	return this.Lookup(bytes.Join(c, []byte(":")))
+	return store.Lookup(bytes.Join(c, []byte(":")))
 }
 
-func (this *LeveldbStore) UrlHasFetched(url []byte) bool {
-	c := [][]byte{[]byte(this.FetchPrefix), url}
+func (store *LeveldbStore) UrlHasFetched(url []byte) bool {
+	c := [][]byte{[]byte(store.FetchPrefix), url}
 
-	return this.Lookup(bytes.Join(c, []byte(":")))
+	return store.Lookup(bytes.Join(c, []byte(":")))
 }
 
-func (this *LeveldbStore) FileHasParsed(url []byte) bool {
-	c := [][]byte{[]byte(this.ParsePrefix), url}
+func (store *LeveldbStore) FileHasParsed(url []byte) bool {
+	c := [][]byte{[]byte(store.ParsePrefix), url}
 
-	return this.Lookup(bytes.Join(c, []byte(":")))
+	return store.Lookup(bytes.Join(c, []byte(":")))
 }
 
-func (this *LeveldbStore) PendingFetchUrlHasAdded(url []byte) bool {
-	c := [][]byte{[]byte(this.PendingFetchPrefix), url}
+func (store *LeveldbStore) PendingFetchUrlHasAdded(url []byte) bool {
+	c := [][]byte{[]byte(store.PendingFetchPrefix), url}
 
 	key := bytes.Join(c, []byte(":"))
-	result := this.Lookup(key)
+	result := store.Lookup(key)
 
-	value := this.GetValue(key)
+	value := store.GetValue(key)
 
 	log.Trace("check pending url error,", string(key), ",", result, ",value:", string(value))
 	return result
 }
 
-func (this *LeveldbStore) AddWalkedUrl(url []byte) {
-	c := [][]byte{[]byte(this.WalkPrefix), url}
+func (store *LeveldbStore) AddWalkedUrl(url []byte) {
+	c := [][]byte{[]byte(store.WalkPrefix), url}
 
-	this.Add(bytes.Join(c, []byte(":")))
+	store.Add(bytes.Join(c, []byte(":")))
 }
 
-func (this *LeveldbStore) AddPendingFetchUrl(url []byte) {
-	c := [][]byte{[]byte(this.PendingFetchPrefix), url}
+func (store *LeveldbStore) AddPendingFetchUrl(url []byte) {
+	c := [][]byte{[]byte(store.PendingFetchPrefix), url}
 
 	key := bytes.Join(c, []byte(":"))
-	err := this.Add(key)
+	err := store.Add(key)
 
 	if err != nil {
 		log.Error("add pending url error,", url, ",", err)
 	}
 }
 
-func (this *LeveldbStore) AddSavedUrl(url []byte) {
-	this.AddWalkedUrl(url)
-	this.AddFetchedUrl(url)
+func (store *LeveldbStore) AddSavedUrl(url []byte) {
+	store.AddWalkedUrl(url)
+	store.AddFetchedUrl(url)
 }
 
-func (this *LeveldbStore) LogSavedFile(path string, content string) {
+func (store *LeveldbStore) LogSavedFile(path string, content string) {
 	util.FileAppendNewLine(path, content)
 }
 
-func (this *LeveldbStore) LogPendingFetchUrl(path string, content string) {
+func (store *LeveldbStore) LogPendingFetchUrl(path string, content string) {
 	util.FileAppendNewLine(path, content)
 }
 
-func (this *LeveldbStore) LogFetchFailedUrl(path string, content string) {
-	this.AddFetchFailedUrl([]byte(path))
+func (store *LeveldbStore) LogFetchFailedUrl(path string, content string) {
+	store.AddFetchFailedUrl([]byte(path))
 	util.FileAppendNewLine(path, content)
 }
 
-func (this *LeveldbStore) AddFetchedUrl(url []byte) {
-	c := [][]byte{[]byte(this.FetchPrefix), url}
+func (store *LeveldbStore) AddFetchedUrl(url []byte) {
+	c := [][]byte{[]byte(store.FetchPrefix), url}
 
-	this.Add(bytes.Join(c, []byte(":")))
+	store.Add(bytes.Join(c, []byte(":")))
 
 }
 
-func (this *LeveldbStore) saveFetchedUrlToLocalFile(path string, url string) {
+func (store *LeveldbStore) saveFetchedUrlToLocalFile(path string, url string) {
 	util.FileAppendNewLine(path, url)
 }
 
-func (this *LeveldbStore) AddParsedFile(url []byte) {
-	c := [][]byte{[]byte(this.ParsePrefix), url}
+func (store *LeveldbStore) AddParsedFile(url []byte) {
+	c := [][]byte{[]byte(store.ParsePrefix), url}
 
-	this.Add(bytes.Join(c, []byte(":")))
+	store.Add(bytes.Join(c, []byte(":")))
 }
 
-func (this *LeveldbStore) AddFetchFailedUrl(url []byte) {
-	c := [][]byte{[]byte(this.WalkPrefix), url}
+func (store *LeveldbStore) AddFetchFailedUrl(url []byte) {
+	c := [][]byte{[]byte(store.WalkPrefix), url}
 
-	this.Add(bytes.Join(c, []byte(":")))
+	store.Add(bytes.Join(c, []byte(":")))
 
 	log.Debug("fetch failed url:", string(url))
 }
 
-func (this *LeveldbStore) FileHasSaved(file string) bool {
+func (store *LeveldbStore) FileHasSaved(file string) bool {
 	log.Debug("start check file:", file)
 	return util.FileExists(file)
 }
 
-func (this *LeveldbStore) LoadOffset(fileName string) int64 {
+func (store *LeveldbStore) LoadOffset(fileName string) int64 {
 	log.Debug("start load offsets,", fileName)
 
-	c := [][]byte{([]byte)(this.OffsetPrefix), []byte(fileName)}
+	c := [][]byte{([]byte)(store.OffsetPrefix), []byte(fileName)}
 
-	n := this.GetValue(bytes.Join(c, []byte(":")))
+	n := store.GetValue(bytes.Join(c, []byte(":")))
 
 	if n != nil {
 		ret, err := strconv.ParseInt(string(n), 10, 64)
@@ -213,12 +213,12 @@ func (this *LeveldbStore) LoadOffset(fileName string) int64 {
 	return 0
 }
 
-func (this *LeveldbStore) PersistOffset(fileName string, offset int64) {
+func (store *LeveldbStore) PersistOffset(fileName string, offset int64) {
 	//persist worker's offset
 
-	c := [][]byte{[]byte(this.OffsetPrefix), []byte(fileName)}
+	c := [][]byte{[]byte(store.OffsetPrefix), []byte(fileName)}
 
-	error := this.AddValue(bytes.Join(c, []byte(":")), []byte(strconv.FormatInt(offset, 10)))
+	error := store.AddValue(bytes.Join(c, []byte(":")), []byte(strconv.FormatInt(offset, 10)))
 
 	if error != nil {
 		log.Error(fileName, error)
@@ -226,20 +226,20 @@ func (this *LeveldbStore) PersistOffset(fileName string, offset int64) {
 	}
 }
 
-func (this *LeveldbStore) InitPendingFetchBloomFilter(fileName string) {}
+func (store *LeveldbStore) InitPendingFetchBloomFilter(fileName string) {}
 
 //TODO REMOVE
-func (filter *LeveldbStore) Persist() error {
+func (store *LeveldbStore) Persist() error {
 
-	log.Debug("leveldb start persist,file:", filter.PersistFileName)
+	log.Debug("leveldb start persist,file:", store.PersistFileName)
 
 	log.Info("leveldb safety persisted.")
 
 	return nil
 }
 
-func (filter *LeveldbStore) Lookup(key []byte) bool {
-	value := filter.GetValue(key)
+func (store *LeveldbStore) Lookup(key []byte) bool {
+	value := store.GetValue(key)
 
 	if value != nil {
 		log.Trace("return true,hit key, ", string(key), " : ", value)
@@ -250,15 +250,15 @@ func (filter *LeveldbStore) Lookup(key []byte) bool {
 	return false
 }
 
-func (filter *LeveldbStore) Add(key []byte) error {
+func (store *LeveldbStore) Add(key []byte) error {
 	log.Trace("add key,", string(key))
 
-	return filter.Leveldb.Put(key, []byte("true"), nil)
+	return store.Leveldb.Put(key, []byte("true"), nil)
 }
 
-func (filter *LeveldbStore) GetValue(key []byte) []byte {
+func (store *LeveldbStore) GetValue(key []byte) []byte {
 
-	value, err := filter.Leveldb.Get(key, nil)
+	value, err := store.Leveldb.Get(key, nil)
 	if err != nil {
 		log.Trace("leveldb getValue error, ", err, " , ", string(key), " : ", value)
 		return value
@@ -269,8 +269,8 @@ func (filter *LeveldbStore) GetValue(key []byte) []byte {
 	return value
 }
 
-func (filter *LeveldbStore) AddValue(key []byte, value []byte) error {
+func (store *LeveldbStore) AddValue(key []byte, value []byte) error {
 	log.Trace("add value key,", string(key), " : ", value)
 
-	return filter.Leveldb.Put(key, value, nil)
+	return store.Leveldb.Put(key, value, nil)
 }

@@ -26,7 +26,7 @@ import (
 
 const IgnoreTimeout JointKey = "ignore_timeout"
 
-func (this IgnoreTimeoutJoint) Name() string {
+func (joint IgnoreTimeoutJoint) Name() string {
 	return string(IgnoreTimeout)
 }
 
@@ -36,14 +36,14 @@ type IgnoreTimeoutJoint struct {
 	Parameters
 }
 
-func (this IgnoreTimeoutJoint) Process(context *Context) error {
+func (joint IgnoreTimeoutJoint) Process(context *Context) error {
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 
 	//TODO ignore within time period, rather than total count
 	host := task.Host
 	timeoutCount := stats.Stat("domain.stats", host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
-	if timeoutCount > this.MustGetInt64(ignoreTimeoutAfterCount) {
+	if timeoutCount > joint.MustGetInt64(ignoreTimeoutAfterCount) {
 		stats.Increment("domain.stats", host+"."+config.STATS_FETCH_TIMEOUT_IGNORE_COUNT)
 		context.Break("too much timeout on this domain, ignored " + host)
 		log.Warnf("hit timeout host, %s , ignore after,%d ", host, timeoutCount)

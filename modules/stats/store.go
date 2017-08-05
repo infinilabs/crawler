@@ -11,16 +11,16 @@ import (
 	"sync"
 )
 
-func (this StatsStoreModule) Name() string {
+func (module StatsStoreModule) Name() string {
 	return "StatsStore"
 }
 
-func (this StatsStoreModule) Start(cfg *Config) {
+func (module StatsStoreModule) Start(cfg *Config) {
 	initStats()
-	stats.Register(this)
+	stats.Register(module)
 }
 
-func (this StatsStoreModule) Stop() error {
+func (module StatsStoreModule) Stop() error {
 	v, _ := json.Marshal(s.Data)
 	s.ID = "statsd"
 	err := store.AddValue(string(config.KVBucketKey), []byte(s.ID), v)
@@ -54,11 +54,11 @@ func initData(category, key string) {
 	runtime.Gosched()
 }
 
-func (this StatsStoreModule) Increment(category, key string) {
-	this.IncrementBy(category, key, 1)
+func (module StatsStoreModule) Increment(category, key string) {
+	module.IncrementBy(category, key, 1)
 }
 
-func (this StatsStoreModule) IncrementBy(category, key string, value int64) {
+func (module StatsStoreModule) IncrementBy(category, key string, value int64) {
 	initData(category, key)
 	l.Lock()
 	(*s.Data)[category][key] += value
@@ -66,11 +66,11 @@ func (this StatsStoreModule) IncrementBy(category, key string, value int64) {
 	runtime.Gosched()
 }
 
-func (this StatsStoreModule) Decrement(category, key string) {
-	this.DecrementBy(category, key, 1)
+func (module StatsStoreModule) Decrement(category, key string) {
+	module.DecrementBy(category, key, 1)
 }
 
-func (this StatsStoreModule) DecrementBy(category, key string, value int64) {
+func (module StatsStoreModule) DecrementBy(category, key string, value int64) {
 	initData(category, key)
 	l.Lock()
 	(*s.Data)[category][key] -= value
@@ -78,15 +78,15 @@ func (this StatsStoreModule) DecrementBy(category, key string, value int64) {
 	runtime.Gosched()
 }
 
-func (this StatsStoreModule) Timing(category, key string, v int64) {
+func (module StatsStoreModule) Timing(category, key string, v int64) {
 
 }
 
-func (this StatsStoreModule) Gauge(category, key string, v int64) {
+func (module StatsStoreModule) Gauge(category, key string, v int64) {
 
 }
 
-func (this StatsStoreModule) Stat(category, key string) int64 {
+func (module StatsStoreModule) Stat(category, key string) int64 {
 	initData(category, key)
 	l.RLock()
 	v := ((*s.Data)[category][key])
@@ -94,7 +94,7 @@ func (this StatsStoreModule) Stat(category, key string) int64 {
 	return v
 }
 
-func (this StatsStoreModule) StatsAll() *[]byte {
+func (module StatsStoreModule) StatsAll() *[]byte {
 	initStats()
 	l.RLock()
 	defer l.RUnlock()

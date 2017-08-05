@@ -41,7 +41,7 @@ type FetchJoint struct {
 	timeout time.Duration
 }
 
-func (this FetchJoint) Name() string {
+func (joint FetchJoint) Name() string {
 	return string(Fetch)
 }
 
@@ -51,10 +51,10 @@ type signal struct {
 	status model.TaskStatus
 }
 
-func (this FetchJoint) Process(context *Context) error {
+func (joint FetchJoint) Process(context *Context) error {
 
-	this.timeout = time.Duration(this.MustGetInt64(timeoutInSeconds)) * time.Second
-	timer := time.NewTimer(this.timeout)
+	joint.timeout = time.Duration(joint.MustGetInt64(timeoutInSeconds)) * time.Second
+	timer := time.NewTimer(joint.timeout)
 	defer timer.Stop()
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
@@ -75,8 +75,8 @@ func (this FetchJoint) Process(context *Context) error {
 	flg := make(chan signal, 1)
 	go func() {
 
-		cookie, _ := this.GetString(cookie)
-		proxy, _ := this.GetString(proxy)
+		cookie, _ := joint.GetString(cookie)
+		proxy, _ := joint.GetString(proxy)
 
 		//先全局,再domain,再task,再pipeline,层层覆盖
 		log.Trace("proxy:", proxy)
@@ -151,10 +151,10 @@ func (this FetchJoint) Process(context *Context) error {
 	//监听通道，由于设有超时，不可能泄露
 	select {
 	case <-timer.C:
-		log.Error("fetching url time out, ", requestUrl, ", ", this.timeout)
+		log.Error("fetching url time out, ", requestUrl, ", ", joint.timeout)
 		stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
 		task.Status = model.TaskFetchTimeout
-		context.Break(fmt.Sprintf("fetching url time out, %s, %s", requestUrl, this.timeout))
+		context.Break(fmt.Sprintf("fetching url time out, %s, %s", requestUrl, joint.timeout))
 		return errors.New("fetch url time out")
 	case value := <-flg:
 		if value.flag {

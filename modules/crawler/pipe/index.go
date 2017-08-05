@@ -33,11 +33,11 @@ const Index JointKey = "index"
 type IndexJoint struct {
 }
 
-func (this IndexJoint) Name() string {
+func (joint IndexJoint) Name() string {
 	return string(Index)
 }
 
-func (this IndexJoint) Process(c *Context) error {
+func (joint IndexJoint) Process(c *Context) error {
 
 	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)

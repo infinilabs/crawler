@@ -26,11 +26,11 @@ const LoadMetadata JointKey = "load_metadata"
 type LoadMetadataJoint struct {
 }
 
-func (this LoadMetadataJoint) Name() string {
+func (joint LoadMetadataJoint) Name() string {
 	return string(LoadMetadata)
 }
 
-func (this LoadMetadataJoint) Process(context *Context) error {
+func (joint LoadMetadataJoint) Process(context *Context) error {
 
 	return nil
 }

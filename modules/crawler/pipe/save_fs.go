@@ -34,14 +34,14 @@ type SaveSnapshotToFileSystemJoint struct {
 	baseDir string
 }
 
-func (this SaveSnapshotToFileSystemJoint) Name() string {
+func (joint SaveSnapshotToFileSystemJoint) Name() string {
 	return string(SaveSnapshotToFileSystem)
 }
 
-func (this SaveSnapshotToFileSystemJoint) Process(c *Context) error {
+func (joint SaveSnapshotToFileSystemJoint) Process(c *Context) error {
 
-	if len(this.baseDir) == 0 {
-		this.baseDir = global.Env().SystemConfig.GetWorkingDir() + "/web"
+	if len(joint.baseDir) == 0 {
+		joint.baseDir = global.Env().SystemConfig.GetWorkingDir() + "/web"
 	}
 
 	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
@@ -52,7 +52,7 @@ func (this SaveSnapshotToFileSystemJoint) Process(c *Context) error {
 	domain := task.Host
 	dir := snapshot.Path
 	file := snapshot.File
-	folder := path.Join(this.baseDir, domain, dir)
+	folder := path.Join(joint.baseDir, domain, dir)
 
 	fullPath := path.Join(folder, file)
 
@@ -86,12 +86,12 @@ func (this SaveSnapshotToFileSystemJoint) Process(c *Context) error {
 	return nil
 }
 
-func (this SaveSnapshotToFileSystemJoint) getSavedPath(urlStr string) (string, string) {
+func (joint SaveSnapshotToFileSystemJoint) getSavedPath(urlStr string) (string, string) {
 
 	log.Debug("start saving url,", urlStr)
 	myurl1, _ := url.Parse(urlStr)
 
-	baseDir := path.Join(this.baseDir, myurl1.Host)
+	baseDir := path.Join(joint.baseDir, myurl1.Host)
 	baseDir = strings.Replace(baseDir, `:`, `_`, -1)
 
 	log.Trace("replaced:", baseDir)

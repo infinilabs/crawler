@@ -12,16 +12,16 @@ type CuckooFilterImpl struct {
 	cf              *f.CuckooFilter
 }
 
-func (this *CuckooFilterImpl) Open(fileName string) error {
+func (filter *CuckooFilterImpl) Open(fileName string) error {
 
-	this.cf = f.NewDefaultCuckooFilter()
+	filter.cf = f.NewDefaultCuckooFilter()
 	return nil
 }
 
-func (this *CuckooFilterImpl) Close() error {
-	this.l.Lock()
-	defer this.l.Unlock()
-	log.Debug("start persist leveldb, file:", this.persistFileName)
+func (filter *CuckooFilterImpl) Close() error {
+	filter.l.Lock()
+	defer filter.l.Unlock()
+	log.Debug("start persist leveldb, file:", filter.persistFileName)
 	return nil
 
 }

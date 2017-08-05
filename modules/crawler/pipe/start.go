@@ -31,11 +31,11 @@ type InitTaskJoint struct {
 	Parameters
 }
 
-func (this InitTaskJoint) Name() string {
+func (joint InitTaskJoint) Name() string {
 	return string(InitTask)
 }
 
-func (this InitTaskJoint) Process(context *Context) error {
+func (joint InitTaskJoint) Process(context *Context) error {
 
 	seelog.Trace("start process")
 

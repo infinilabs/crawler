@@ -49,7 +49,7 @@ var faviconAction = func(w http.ResponseWriter, req *http.Request, ps httprouter
 	w.WriteHeader(301)
 }
 
-func (this UIModule) internalStart(cfg *Config) {
+func (module UIModule) internalStart(cfg *Config) {
 
 	store.Options = &sessions.Options{
 		Domain:   "localhost", //TODO config　http　domain
@@ -159,11 +159,11 @@ func (this UIModule) internalStart(cfg *Config) {
 type UIModule struct {
 }
 
-func (this UIModule) Name() string {
+func (module UIModule) Name() string {
 	return "Web"
 }
 
-func (this UIModule) Start(cfg *Config) {
+func (module UIModule) Start(cfg *Config) {
 
 	//init admin ui //TODO ui module enable/disable config
 	admin.InitUI()
@@ -175,12 +175,12 @@ func (this UIModule) Start(cfg *Config) {
 	logger.RegisterWebsocketHandler(LoggerReceiver)
 
 	go func() {
-		this.internalStart(cfg)
+		module.internalStart(cfg)
 	}()
 
 }
 
-func (this UIModule) Stop() error {
+func (module UIModule) Stop() error {
 
 	return nil
 }

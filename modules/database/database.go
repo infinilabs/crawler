@@ -28,7 +28,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
-func (this DatabaseModule) Name() string {
+func (module DatabaseModule) Name() string {
 	return "Database"
 }
 
@@ -52,12 +52,12 @@ type DatabaseConfig struct {
 	MySQL   *mysql.MySQLConfig   `config:"mysql"`
 }
 
-func (this DatabaseModule) Start(cfg *Config) {
+func (module DatabaseModule) Start(cfg *Config) {
 
 	//init config
 	config := GetDefaultConfig()
 	cfg.Unpack(&config)
-	this.config = &config
+	module.config = &config
 
 	if config.Dialect == "sqlite" {
 		db = sqlite.GetInstance(config.SQLite)
@@ -75,7 +75,7 @@ func (this DatabaseModule) Start(cfg *Config) {
 	store.RegisterDBConnection(db)
 }
 
-func (this DatabaseModule) Stop() error {
+func (module DatabaseModule) Stop() error {
 	db.Close()
 	return nil
 

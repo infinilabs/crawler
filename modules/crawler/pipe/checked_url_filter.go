@@ -34,11 +34,11 @@ type UrlCheckFilterJoint struct {
 	SkipPageParsePattern *regexp.Regexp
 }
 
-func (this UrlCheckFilterJoint) Name() string {
+func (joint UrlCheckFilterJoint) Name() string {
 	return string(UrlCheckFilter)
 }
 
-func (this UrlCheckFilterJoint) Process(context *Context) error {
+func (joint UrlCheckFilterJoint) Process(context *Context) error {
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 
