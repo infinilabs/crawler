@@ -24,14 +24,13 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/gorilla/context"
 	"github.com/gorilla/sessions"
-	. "github.com/infinitbyte/gopa/core/config"
-	. "github.com/infinitbyte/gopa/core/env"
+	"github.com/infinitbyte/gopa/core/config"
+	"github.com/infinitbyte/gopa/core/env"
 	"github.com/infinitbyte/gopa/core/global"
 	apis "github.com/infinitbyte/gopa/core/http"
 	"github.com/infinitbyte/gopa/core/util"
 	handlers "github.com/infinitbyte/gopa/modules/api/handlers"
 	"github.com/julienschmidt/httprouter"
-	_ "net/http/pprof"
 	"path"
 	"path/filepath"
 )
@@ -41,7 +40,7 @@ var mux *http.ServeMux
 
 var store = sessions.NewCookieStore([]byte("1c6f2afbccef959ac5c8b81f690c1be7"))
 
-func (this APIModule) internalStart(env *Env) {
+func (module APIModule) internalStart(env *env.Env) {
 
 	store.Options = &sessions.Options{
 		Domain:   "localhost", //TODO config　http　domain
@@ -80,10 +79,10 @@ func (this APIModule) internalStart(env *Env) {
 
 	address := util.AutoGetAddress(env.SystemConfig.APIBinding)
 
-	if this.env.SystemConfig.TLSEnabled {
+	if module.env.SystemConfig.TLSEnabled {
 		log.Debug("start ssl endpoint")
 
-		certFile := path.Join(this.env.SystemConfig.PathConfig.Cert, "*c*rt*")
+		certFile := path.Join(module.env.SystemConfig.PathConfig.Cert, "*c*rt*")
 		match, err := filepath.Glob(certFile)
 		if err != nil {
 			panic(err)
@@ -93,7 +92,7 @@ func (this APIModule) internalStart(env *Env) {
 		}
 		certFile = match[0]
 
-		keyFile := path.Join(this.env.SystemConfig.PathConfig.Cert, "*key*")
+		keyFile := path.Join(module.env.SystemConfig.PathConfig.Cert, "*key*")
 		match, err = filepath.Glob(keyFile)
 		if err != nil {
 			panic(err)
@@ -140,25 +139,29 @@ func (this APIModule) internalStart(env *Env) {
 
 }
 
-func (this APIModule) Name() string {
+// Name return API
+func (module APIModule) Name() string {
 	return "API"
 }
 
-func (this APIModule) Start(cfg *Config) {
+// Start api server
+func (module APIModule) Start(cfg *config.Config) {
 
-	this.env = global.Env()
+	module.env = global.Env()
 	//API server
 	go func() {
 		handlers.InitAPI()
-		this.internalStart(global.Env())
+		module.internalStart(global.Env())
 	}()
 
 }
 
-func (this APIModule) Stop() error {
+// Stop api server
+func (module APIModule) Stop() error {
 	return nil
 }
 
+// APIModule is used to start API server
 type APIModule struct {
-	env *Env
+	env *env.Env
 }

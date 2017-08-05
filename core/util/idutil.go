@@ -24,7 +24,7 @@ var idseed map[string]int64
 var lock1 sync.Mutex
 var persistedPath string
 
-// GetIncrementID
+// GetIncrementID return incremented id in specify bucket
 func GetIncrementID(bucket string) string {
 	lock1.Lock()
 	defer lock1.Unlock()
@@ -79,7 +79,7 @@ func restorePersistID() {
 	}
 }
 
-// SetPersistencePath set the persist path
+// SetIDPersistencePath set the persist path
 func SetIDPersistencePath(path string) {
 	persistedPath = JoinPath(path, ".idseeds")
 }

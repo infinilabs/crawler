@@ -22,16 +22,19 @@ import (
 	"github.com/infinitbyte/gopa/core/util"
 )
 
+// ElasticsearchConfig contains common settings for elasticsearch
 type ElasticsearchConfig struct {
 	Endpoint string `config:"elasticsearch.endpoint"`
 	Index    string `config:"elasticsearch.index"`
 }
 
+// ElasticsearchClient elasticsearch client api
 type ElasticsearchClient struct {
 	Endpoint string
 	Index    string
 }
 
+// InsertResponse is a response object
 type InsertResponse struct {
 	Created bool   `json:"created"`
 	Index   string `json:"_index"`
@@ -40,6 +43,7 @@ type InsertResponse struct {
 	Version int    `json:"_version"`
 }
 
+// IndexDoc index a document into elasticsearch
 func (c *ElasticsearchClient) IndexDoc(typeName, id string, data map[string]interface{}) (*InsertResponse, error) {
 
 	url := c.Endpoint + "/" + c.Index + "/" + typeName + "/" + id

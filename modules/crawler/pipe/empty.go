@@ -20,15 +20,19 @@ import (
 	. "github.com/infinitbyte/gopa/core/pipeline"
 )
 
+// Empty is empty
 const Empty JointKey = "empty"
 
+// EmptyJoint is a place holder
 type EmptyJoint struct {
 }
 
+// Name return empty
 func (joint EmptyJoint) Name() string {
 	return string(Empty)
 }
 
+// Process do nothing
 func (joint EmptyJoint) Process(s *Context) error {
 
 	return nil
