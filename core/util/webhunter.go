@@ -33,6 +33,7 @@ import (
 	"golang.org/x/net/proxy"
 )
 
+// GetHost return the host from a url
 func GetHost(url string) string {
 
 	if strings.HasPrefix(url, "//") {
@@ -65,7 +66,7 @@ func GetHost(url string) string {
 	return uri.Host
 }
 
-//parse to get url root
+//GetRootUrl parse to get url root
 func GetRootUrl(source *URL) string {
 	if strings.HasSuffix(source.Path, "/") {
 		return source.Host + source.Path
@@ -80,7 +81,7 @@ func GetRootUrl(source *URL) string {
 	}
 }
 
-//format url, normalize url
+//FormatUrlForFilter format url, normalize url
 func FormatUrlForFilter(url []byte) []byte {
 	src := string(url)
 	log.Trace("start to normalize url:", src)

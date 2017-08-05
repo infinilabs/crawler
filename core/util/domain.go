@@ -16,7 +16,11 @@ limitations under the License.
 
 package util
 
-//copied from http://git.oschina.net/Unknown/gowalker/blob/master/utils/path.go
+//part of code copied from http://git.oschina.net/Unknown/gowalker/blob/master/utils/path.go
+//http://git.oschina.net/Unknown/gowalker/blob/master/LICENSE
+//Apache License
+//Version 2.0, January 2004
+//http://www.apache.org/licenses/
 
 import (
 	"regexp"

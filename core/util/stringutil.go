@@ -140,8 +140,9 @@ func FormatTimeWithTZ(date *time.Time) string {
 	return date.Format("2016-10-24 09:34:19 +0000 UTC")
 }
 
+// GetLocalZone return a local timezone
 func GetLocalZone() string {
-	zone, _ := time.Now().Zone() // get the local zone
+	zone, _ := time.Now().Zone()
 	return zone
 }
 

@@ -1,5 +1,7 @@
 package file
 
+//https://github.com/elastic/beats/blob/master/LICENSE
+//Licensed under the Apache License, Version 2.0 (the "License");
 import (
 	"os"
 )

@@ -74,7 +74,7 @@ var (
 			Host: "127.0.0.1",
 		},
 		NodeConfig: config.NodeConfig{
-			Name: util.RandomPickName(),
+			Name: util.PickRandomName(),
 		},
 		PathConfig: config.PathConfig{
 			Data: "data",

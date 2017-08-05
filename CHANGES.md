@@ -30,6 +30,7 @@
 10. refine log level, enable pprof to config listen address
 11. update task ui, limit length of name
 12. detect dead process, re-place lock file
+13. persist auto-incremented id sequence to disk
 
 ##### bugfix
 1. disable simhash due to poor performance and memory leak

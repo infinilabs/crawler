@@ -24,15 +24,16 @@ import (
 )
 
 func TestIDGenerator(t *testing.T) {
-	for j := 0; j < 100; j++ {
+	SetIDPersistencePath("/tmp/")
+	for j := 0; j < 5; j++ {
 		go func() {
-			for i := 0; i < 10; i++ {
+			for i := 0; i < 5; i++ {
 				id := GetIncrementID("a")
 				fmt.Println(id)
 			}
 		}()
 		go func() {
-			for i := 0; i < 10; i++ {
+			for i := 0; i < 5; i++ {
 				id := GetIncrementID("b")
 				fmt.Println(id)
 			}
@@ -45,9 +46,9 @@ func TestIDGenerator(t *testing.T) {
 func TestIDGenerator1(t *testing.T) {
 	var set = map[string]interface{}{}
 	var s = sync.RWMutex{}
-	for j := 0; j < 100; j++ {
+	for j := 0; j < 5; j++ {
 		go func() {
-			for i := 0; i < 10; i++ {
+			for i := 0; i < 5; i++ {
 				id := GetUUID()
 				fmt.Println(id)
 				s.Lock()

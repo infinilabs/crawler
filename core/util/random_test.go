@@ -22,10 +22,10 @@ import (
 	"testing"
 )
 
-func TestGetRandomName(t *testing.T) {
+func TestPickRandomName(t *testing.T) {
 
 	for i := 0; i < 100; i++ {
-		name := RandomPickName()
+		name := PickRandomName()
 		fmt.Scanln(name)
 		assert.NotEmpty(t, name)
 	}

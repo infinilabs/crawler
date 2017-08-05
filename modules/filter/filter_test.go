@@ -30,7 +30,7 @@ import (
 func Test(t *testing.T) {
 	var filter FilterModule
 	env1 := EmptyEnv()
-	env1.SystemConfig.PathConfig.Data = "/tmp/filter_" + util.RandomPickName()
+	env1.SystemConfig.PathConfig.Data = "/tmp/filter_" + util.PickRandomName()
 	os.RemoveAll(env1.SystemConfig.PathConfig.Data)
 	env1.IsDebug = true
 	global.RegisterEnv(env1)

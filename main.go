@@ -120,6 +120,9 @@ func main() {
 	//check instance lock
 	util.CheckInstanceLock(environment.SystemConfig.GetWorkingDir())
 
+	//set path to persist id
+	util.SetIDPersistencePath(environment.SystemConfig.GetWorkingDir())
+
 	//cleanup
 	defer func() {
 		if r := recover(); r != nil {
@@ -128,6 +131,7 @@ func main() {
 			}
 			log.Error("main", util.ToJson(r, true))
 		}
+		util.SnapshotPersistID()
 		log.Flush()
 		logger.Flush()
 

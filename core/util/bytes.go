@@ -24,6 +24,7 @@ import (
 	"strings"
 )
 
+// BytesToUint64 convert bytes to type uint64
 func BytesToUint64(b []byte) (v uint64) {
 	length := uint(len(b))
 	for i := uint(0); i < length-1; i++ {
@@ -33,6 +34,8 @@ func BytesToUint64(b []byte) (v uint64) {
 	v += uint64(b[length-1])
 	return
 }
+
+// BytesToUint32 convert bytes to uint32
 func BytesToUint32(b []byte) (v uint32) {
 	length := uint(len(b))
 	for i := uint(0); i < length-1; i++ {
@@ -42,17 +45,22 @@ func BytesToUint32(b []byte) (v uint32) {
 	v += uint32(b[length-1])
 	return
 }
+
+// Uint64toBytes convert uint64 to bytes
 func Uint64toBytes(b []byte, v uint64) {
 	for i := uint(0); i < 8; i++ {
 		b[7-i] = byte(v >> (i * 8))
 	}
 }
+
+// Uint32toBytes convert uint32 to bytes
 func Uint32toBytes(b []byte, v uint32) {
 	for i := uint(0); i < 4; i++ {
 		b[3-i] = byte(v >> (i * 8))
 	}
 }
 
+// DeepCopy return a deep copied object
 func DeepCopy(value interface{}) interface{} {
 	if valueMap, ok := value.(map[string]interface{}); ok {
 		newMap := make(map[string]interface{})
@@ -74,7 +82,8 @@ func DeepCopy(value interface{}) interface{} {
 }
 
 /** https://github.com/cloudfoundry/bytefmt/blob/master/bytes.go start
-https://github.com/cloudfoundry/bytefmt/blob/master/LICENSE  Apache License  Version 2.0, January 2004
+https://github.com/cloudfoundry/bytefmt/blob/master/LICENSE
+Apache License  Version 2.0, January 2004
  **/
 
 const (

@@ -1,4 +1,6 @@
 //copied from github.com/elastic/beats
+//https://github.com/elastic/beats/blob/master/LICENSE
+//Licensed under the Apache License, Version 2.0 (the "License");
 package util
 
 import (
@@ -8,12 +10,11 @@ import (
 	"strings"
 )
 
-// Event metadata constants. These keys are used within libbeat to identify
+// Event metadata constants. These keys are used to identify
 // metadata stored in an event.
 const (
-	EventMetadataKey = "_event_metadata"
-	FieldsKey        = "fields"
-	TagsKey          = "tags"
+	FieldsKey = "fields"
+	TagsKey   = "tags"
 )
 
 var (
