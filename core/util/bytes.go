@@ -86,6 +86,7 @@ https://github.com/cloudfoundry/bytefmt/blob/master/LICENSE
 Apache License  Version 2.0, January 2004
  **/
 
+// ByteSize unit definition
 const (
 	BYTE     = 1.0
 	KILOBYTE = 1024 * BYTE
@@ -96,7 +97,7 @@ const (
 
 var bytesPattern *regexp.Regexp = regexp.MustCompile(`(?i)^(-?\d+)([KMGT]B?|B)$`)
 
-var invalidByteQuantityError = errors.New("Byte quantity must be a positive integer with a unit of measurement like M, MB, G, or GB")
+var errInvalidByteQuantity = errors.New("Byte quantity must be a positive integer with a unit of measurement like M, MB, G, or GB")
 
 // ByteSize returns a human-readable byte string of the form 10M, 12.5K, and so forth.  The following units are available:
 //	T: Terabyte
@@ -147,12 +148,12 @@ func ToMegabytes(s string) (uint64, error) {
 func ToBytes(s string) (uint64, error) {
 	parts := bytesPattern.FindStringSubmatch(strings.TrimSpace(s))
 	if len(parts) < 3 {
-		return 0, invalidByteQuantityError
+		return 0, errInvalidByteQuantity
 	}
 
 	value, err := strconv.ParseUint(parts[1], 10, 0)
 	if err != nil || value < 1 {
-		return 0, invalidByteQuantityError
+		return 0, errInvalidByteQuantity
 	}
 
 	var bytes uint64
