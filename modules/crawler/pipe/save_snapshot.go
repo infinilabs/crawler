@@ -40,10 +40,6 @@ const decelerateSteps ParaKey = "decelerate_steps"
 const accelerateSteps ParaKey = "accelerate_steps"
 const maxRevision ParaKey = "max_revision"
 
-//minutes
-var arrDecelerateSteps []int
-var arrAccelerateSteps []int
-
 func (this SaveSnapshotToDBJoint) Name() string {
 	return string(SaveSnapshotToDB)
 }
@@ -53,56 +49,28 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 
 	//init decelerateSteps
-	arrDecelerateStepsStr := strings.Split(this.MustGetString(decelerateSteps),",")
-	arrDecelerateSteps = make([]int,len(arrDecelerateStepsStr),len(arrDecelerateStepsStr))
-	for i := 0; i < len(arrDecelerateStepsStr); i++ {
-		m,error := time.ParseDuration(arrDecelerateStepsStr[i])
-		if error == nil {
-			arrDecelerateSteps[i] = int(m.Minutes())
-		}
-	}
+	arrDecelerateSteps = initGrabVelocityArr(this.MustGetString(accelerateSteps))
 	//init accelerateSteps
-	arrAccelerateStepsStr := strings.Split(this.MustGetString(accelerateSteps),",")
-	arrAccelerateSteps = make([]int,len(arrAccelerateStepsStr),len(arrAccelerateStepsStr))
-	for i := 0; i < len(arrAccelerateStepsStr); i++ {
-		m,error := time.ParseDuration(arrAccelerateStepsStr[i])
-		if error == nil {
-			arrAccelerateSteps[i] = int(m.Minutes())
-		}
-	}
+	arrAccelerateSteps = initGrabVelocityArr(this.MustGetString(decelerateSteps))
 
 	//update task's snapshot, detect duplicated snapshot
 	if snapshot != nil {
 
 		tNow := time.Now().UTC()
-		m, _ := time.ParseDuration("1m")
+		m, _ := time.ParseDuration("1s")
 
 		if snapshot.Hash == task.SnapshotHash {
 			log.Debug(fmt.Sprintf("break by same hash: %s, %s", snapshot.Hash, task.Url))
 			c.Break(fmt.Sprintf("same hash: %s, %s", snapshot.Hash, task.Url))
 
-			//extended the nextchecktime
-			task.LastCheckTime = &tNow
-			if task.SnapshotCreateTime == nil {
-				defaultTime := tNow.Add(-m * 1)
-				task.SnapshotCreateTime = &defaultTime
-			}
-			timeInterval := GetNextCheckTimeMinutes(false, *task.SnapshotCreateTime, tNow)
-			nextT := tNow.Add(m * time.Duration(timeInterval))
-			task.NextCheckTime = &nextT
+			//extend the nextchecktime
+			setSnapNextCheckTime(task,tNow,m,false)
 
 			return nil
 		}
 
 		//shorten the nextchecktime
-		task.LastCheckTime = &tNow
-		if task.SnapshotCreateTime == nil {
-			defaultTime := tNow.Add(-m * 1)
-			task.SnapshotCreateTime = &defaultTime
-		}
-		timeInterval := GetNextCheckTimeMinutes(true, *task.SnapshotCreateTime, tNow)
-		nextT := tNow.Add(m * time.Duration(timeInterval))
-		task.NextCheckTime = &nextT
+		setSnapNextCheckTime(task,tNow,m,true)
 
 		task.SnapshotVersion = task.SnapshotVersion + 1
 		task.SnapshotID = snapshot.ID
@@ -134,76 +102,86 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 
 	model.CreateSnapshot(snapshot)
 
-	//TODO optimization algorithm
-	//get current snapshot list and total num
-	snapshotTotal, _, err := model.GetSnapshotList(0,1,task.ID)
-	if err == nil {
-		//get max snapshot num
-		maxSnapshotNum := int(this.MustGetInt64(maxRevision))
-		//if more than max snapshot num,delete old snapshot
-		if snapshotTotal > maxSnapshotNum {
-			mustDeleteNum := snapshotTotal - maxSnapshotNum
-			_, snapshotsList, errReadList := model.GetSnapshotList(1,mustDeleteNum,task.ID)
-			if errReadList == nil {
-				for i := 0; i < len(snapshotsList); i++  {
-					model.DeleteSnapshot(&snapshotsList[i])
-					store.DeleteValue(this.MustGetString(bucket),[]byte(snapshotsList[i].ID),snapshotsList[i].Payload)
-				}
-			}
-		}
-	}
-
+	deleteRedundantSnapShot(int(this.MustGetInt64(maxRevision)),this.MustGetString(bucket),task.ID)
 
 	stats.IncrementBy("domain.stats", domain+"."+config.STATS_STORAGE_FILE_SIZE, int64(len(snapshot.Payload)))
 	stats.Increment("domain.stats", domain+"."+config.STATS_STORAGE_FILE_COUNT)
 
-
-
 	return nil
 }
 
+//unit is the second
+var arrDecelerateSteps []int
+var arrAccelerateSteps []int
 
+//init the grab velocity array by cfg parameters
+func initGrabVelocityArr(velocityStr string) []int {
+	arrVelocityStr := strings.Split(velocityStr,",")
+	var velocityArr = make([]int,len(arrVelocityStr),len(arrVelocityStr))
+	for i := 0; i < len(arrVelocityStr); i++ {
+		m,err := time.ParseDuration(arrVelocityStr[i])
+		if err == nil {
+			velocityArr[i] = int(m.Seconds())
+		}
+	}
+	return velocityArr
+}
 
-func GetNextCheckTimeMinutes(fetchSuccess bool, tLastCheckTime time.Time, tNextCheckTime time.Time) int {
+//set snapshot nextchecktime
+func setSnapNextCheckTime(task *model.Task,timeNow time.Time,timeDuration time.Duration,fetchSuccess bool){
+	task.LastCheckTime = &timeNow
+	if task.SnapshotCreateTime == nil {
+		defaultTime := timeNow.Add(-timeDuration * 1)
+		task.SnapshotCreateTime = &defaultTime
+	}
+	timeInterval := GetNextCheckTimeSeconds(fetchSuccess, *task.SnapshotCreateTime, timeNow)
+	fmt.Println(timeInterval)
+	nextT := timeNow.Add(timeDuration * time.Duration(timeInterval))
+	task.NextCheckTime = &nextT
+}
+
+func GetNextCheckTimeSeconds(fetchSuccess bool, tLastCheckTime time.Time, tNextCheckTime time.Time) int {
 	timeIntervalLast := GetTimeInterval(tLastCheckTime, tNextCheckTime)
-	timeIntervalNext := 24 * 60
+	//set one day as default time,unit is the second
+	timeIntervalNext := 24 * 60 * 60
 	if fetchSuccess {
-		arrTimeLength := len(arrDecelerateSteps)
+		arrTimeLength := len(arrAccelerateSteps)
 		for i := 1; i < arrTimeLength; i++ {
-			if timeIntervalLast > arrDecelerateSteps[0] {
-				timeIntervalNext = arrDecelerateSteps[0]
+			if timeIntervalLast > arrAccelerateSteps[0] {
+				timeIntervalNext = arrAccelerateSteps[0]
 				break
 			}
-			if timeIntervalLast <= arrDecelerateSteps[arrTimeLength-2] {
-				timeIntervalNext = arrDecelerateSteps[arrTimeLength-1]
+			if timeIntervalLast <= arrAccelerateSteps[arrTimeLength-2] {
+				timeIntervalNext = arrAccelerateSteps[arrTimeLength-1]
 				break
 			}
 			if i+1 >= arrTimeLength {
-				timeIntervalNext = arrDecelerateSteps[arrTimeLength-1]
+				timeIntervalNext = arrAccelerateSteps[arrTimeLength-1]
 				break
 			}
-			if timeIntervalLast <= arrDecelerateSteps[i] && timeIntervalLast > arrDecelerateSteps[i+1] {
-				timeIntervalNext = arrDecelerateSteps[i+1]
+			if timeIntervalLast <= arrAccelerateSteps[i] && timeIntervalLast > arrAccelerateSteps[i+1] {
+				timeIntervalNext = arrAccelerateSteps[i+1]
 				break
 			}
 		}
+
 	} else {
-		arrTimeLength := len(arrAccelerateSteps)
+		arrTimeLength := len(arrDecelerateSteps)
 		for i := 1; i < arrTimeLength; i++ {
-			if timeIntervalLast <= arrAccelerateSteps[0] {
-				timeIntervalNext = arrAccelerateSteps[1]
+			if timeIntervalLast <= arrDecelerateSteps[0] {
+				timeIntervalNext = arrDecelerateSteps[1]
 				break
 			}
-			if timeIntervalLast >= arrAccelerateSteps[arrTimeLength-2] {
-				timeIntervalNext = arrAccelerateSteps[arrTimeLength-1]
+			if timeIntervalLast >= arrDecelerateSteps[arrTimeLength-2] {
+				timeIntervalNext = arrDecelerateSteps[arrTimeLength-1]
 				break
 			}
 			if i+1 >= arrTimeLength {
-				timeIntervalNext = arrAccelerateSteps[arrTimeLength-1]
+				timeIntervalNext = arrDecelerateSteps[arrTimeLength-1]
 				break
 			}
-			if timeIntervalLast >= arrAccelerateSteps[i] && timeIntervalLast < arrAccelerateSteps[i+1] {
-				timeIntervalNext = arrAccelerateSteps[i+1]
+			if timeIntervalLast >= arrDecelerateSteps[i] && timeIntervalLast < arrDecelerateSteps[i+1] {
+				timeIntervalNext = arrDecelerateSteps[i+1]
 				break
 			}
 		}
@@ -212,9 +190,30 @@ func GetNextCheckTimeMinutes(fetchSuccess bool, tLastCheckTime time.Time, tNextC
 }
 
 func GetTimeInterval(timeStart time.Time, timeEnd time.Time) int {
-	ts := timeStart.Sub(timeEnd).Minutes()
+	ts := timeStart.Sub(timeEnd).Seconds()
 	if ts < 0 {
 		ts = -ts
 	}
 	return int(ts)
+}
+
+//TODO optimization algorithm
+func deleteRedundantSnapShot(maxRevisionNum int,bucketStr string,taskId string){
+	//get current snapshot list and total num
+	snapshotTotal, _, err := model.GetSnapshotList(0,1,taskId)
+	if err == nil {
+		//get max snapshot num
+		maxSnapshotNum := maxRevisionNum
+		//if more than max snapshot num,delete old snapshot
+		if snapshotTotal > maxSnapshotNum {
+			mustDeleteNum := snapshotTotal - maxSnapshotNum
+			_, snapshotsList, errReadList := model.GetSnapshotList(1,mustDeleteNum,taskId)
+			if errReadList == nil {
+				for i := 0; i < len(snapshotsList); i++  {
+					model.DeleteSnapshot(&snapshotsList[i])
+					store.DeleteValue(bucketStr,[]byte(snapshotsList[i].ID),snapshotsList[i].Payload)
+				}
+			}
+		}
+	}
 }
