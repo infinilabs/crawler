@@ -49,9 +49,9 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 
 	//init decelerateSteps
-	arrDecelerateSteps = initGrabVelocityArr(this.MustGetString(accelerateSteps))
+	arrDecelerateSteps = initGrabVelocityArr(this.MustGetString(decelerateSteps))
 	//init accelerateSteps
-	arrAccelerateSteps = initGrabVelocityArr(this.MustGetString(decelerateSteps))
+	arrAccelerateSteps = initGrabVelocityArr(this.MustGetString(accelerateSteps))
 
 	//update task's snapshot, detect duplicated snapshot
 	if snapshot != nil {
@@ -95,7 +95,6 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 
 	if this.GetBool(compressEnabled, true) {
 		store.AddValueCompress(this.MustGetString(bucket), saveKey, snapshot.Payload)
-
 	} else {
 		store.AddValue(this.MustGetString(bucket), saveKey, snapshot.Payload)
 	}
@@ -135,23 +134,22 @@ func setSnapNextCheckTime(task *model.Task,timeNow time.Time,timeDuration time.D
 		task.SnapshotCreateTime = &defaultTime
 	}
 	timeInterval := GetNextCheckTimeSeconds(fetchSuccess, *task.SnapshotCreateTime, timeNow)
-	fmt.Println(timeInterval)
 	nextT := timeNow.Add(timeDuration * time.Duration(timeInterval))
 	task.NextCheckTime = &nextT
 }
 
-func GetNextCheckTimeSeconds(fetchSuccess bool, tLastCheckTime time.Time, tNextCheckTime time.Time) int {
-	timeIntervalLast := GetTimeInterval(tLastCheckTime, tNextCheckTime)
+func GetNextCheckTimeSeconds(fetchSuccess bool, tSnapshotCreateTime time.Time, tTimeNow time.Time) int {
+	timeIntervalLast := GetTimeInterval(tSnapshotCreateTime, tTimeNow)
 	//set one day as default time,unit is the second
 	timeIntervalNext := 24 * 60 * 60
 	if fetchSuccess {
 		arrTimeLength := len(arrAccelerateSteps)
 		for i := 1; i < arrTimeLength; i++ {
-			if timeIntervalLast > arrAccelerateSteps[0] {
+			if timeIntervalLast >= arrAccelerateSteps[0] {
 				timeIntervalNext = arrAccelerateSteps[0]
 				break
 			}
-			if timeIntervalLast <= arrAccelerateSteps[arrTimeLength-2] {
+			if timeIntervalLast < arrAccelerateSteps[arrTimeLength-2] {
 				timeIntervalNext = arrAccelerateSteps[arrTimeLength-1]
 				break
 			}
@@ -159,8 +157,8 @@ func GetNextCheckTimeSeconds(fetchSuccess bool, tLastCheckTime time.Time, tNextC
 				timeIntervalNext = arrAccelerateSteps[arrTimeLength-1]
 				break
 			}
-			if timeIntervalLast <= arrAccelerateSteps[i] && timeIntervalLast > arrAccelerateSteps[i+1] {
-				timeIntervalNext = arrAccelerateSteps[i+1]
+			if timeIntervalLast <= arrAccelerateSteps[i-1] && timeIntervalLast > arrAccelerateSteps[i] {
+				timeIntervalNext = arrAccelerateSteps[i]
 				break
 			}
 		}
@@ -169,10 +167,10 @@ func GetNextCheckTimeSeconds(fetchSuccess bool, tLastCheckTime time.Time, tNextC
 		arrTimeLength := len(arrDecelerateSteps)
 		for i := 1; i < arrTimeLength; i++ {
 			if timeIntervalLast <= arrDecelerateSteps[0] {
-				timeIntervalNext = arrDecelerateSteps[1]
+				timeIntervalNext = arrDecelerateSteps[0]
 				break
 			}
-			if timeIntervalLast >= arrDecelerateSteps[arrTimeLength-2] {
+			if timeIntervalLast > arrDecelerateSteps[arrTimeLength-2] {
 				timeIntervalNext = arrDecelerateSteps[arrTimeLength-1]
 				break
 			}
@@ -180,8 +178,8 @@ func GetNextCheckTimeSeconds(fetchSuccess bool, tLastCheckTime time.Time, tNextC
 				timeIntervalNext = arrDecelerateSteps[arrTimeLength-1]
 				break
 			}
-			if timeIntervalLast >= arrDecelerateSteps[i] && timeIntervalLast < arrDecelerateSteps[i+1] {
-				timeIntervalNext = arrDecelerateSteps[i+1]
+			if timeIntervalLast >= arrDecelerateSteps[i-1] && timeIntervalLast < arrDecelerateSteps[i] {
+				timeIntervalNext = arrDecelerateSteps[i]
 				break
 			}
 		}
