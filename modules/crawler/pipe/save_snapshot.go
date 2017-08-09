@@ -113,7 +113,7 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 var arrDecelerateSteps []int
 var arrAccelerateSteps []int
 
-//init the grab velocity array by cfg parameters
+//init the fetch rate array by cfg parameters
 func initGrabVelocityArr(velocityStr string) []int {
 	arrVelocityStr := strings.Split(velocityStr,",")
 	var velocityArr = make([]int,len(arrVelocityStr),len(arrVelocityStr))
