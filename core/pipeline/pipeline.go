@@ -47,7 +47,7 @@ type Context struct {
 }
 
 /**
-break all pipelines, but the end phrase not included
+Break break all pipelines, but the end phrase not included
 */
 func (context *Context) Break(msg interface{}) {
 	log.Trace("break,", context, ",", msg)
@@ -63,14 +63,14 @@ func (context *Context) IsBreak() bool {
 }
 
 /**
-break all pipelines, without execute the end phrase
+IsErrorExit break all pipelines, without execute the end phrase
 */
 func (context *Context) IsErrorExit() bool {
 	return context.exitFlag
 }
 
 /**
-tell pipeline to exit all
+ErrorExit tell pipeline to exit all
 */
 func (context *Context) ErrorExit(msg interface{}) {
 	context.exitFlag = true

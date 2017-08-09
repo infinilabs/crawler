@@ -18,6 +18,7 @@ package pipe
 
 import api "github.com/infinitbyte/gopa/core/pipeline"
 
+// Crawler common pipeline context keys
 const (
 	CONTEXT_TASK_ID          api.ParaKey = "CRAWLER_TASK_ID"
 	CONTEXT_CRAWLER_DOMAIN   api.ParaKey = "CRAWLER_DOMAIN"

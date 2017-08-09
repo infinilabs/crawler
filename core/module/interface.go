@@ -20,6 +20,7 @@ import (
 	"github.com/infinitbyte/gopa/core/config"
 )
 
+// Module defines system level module structure
 type Module interface {
 	Start(config *config.Config)
 	Stop() error

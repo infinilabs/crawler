@@ -1531,7 +1531,7 @@ var (
 	validPathElement = regexp.MustCompile(`^[-A-Za-z0-9~+][-A-Za-z0-9_.]*$`)
 )
 
-// returns true if tld is a valid tld, eg: com
+// IsValidTLD returns true if tld is a valid tld, eg: com
 func IsValidTLD(tld string) bool {
 
 	ok, istld := validTLD[strings.ToUpper(tld)]

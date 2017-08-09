@@ -82,12 +82,12 @@ type foo struct {
 	Name string
 }
 
-func (this foo) Do() string {
-	fmt.Println("foo do,", this.Id, ",", this.Name, ",", this.Para)
-	return this.Name
+func (joint foo) Do() string {
+	fmt.Println("foo do,", joint.Id, ",", joint.Name, ",", joint.Para)
+	return joint.Name
 }
 
-func (this bar) Do() string {
+func (joint bar) Do() string {
 	fmt.Println("foo do")
 	return ""
 }

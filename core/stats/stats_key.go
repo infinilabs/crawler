@@ -16,6 +16,7 @@ limitations under the License.
 
 package stats
 
+// StatsCount contains stats information
 type StatsCount struct {
 	TotalCount   int `json:"total,omitempty"`
 	SuccessCount int `json:"success,omitempty"`
@@ -24,6 +25,7 @@ type StatsCount struct {
 	Timeout      int `json:"timeout,omitempty"`
 }
 
+// TaskStatus contains task related stats information
 type TaskStatus struct {
 	Stats map[string]map[string]int `json:"stats"`
 }

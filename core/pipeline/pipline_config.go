@@ -17,7 +17,7 @@ limitations under the License.
 package pipeline
 
 /**
-config for each joint
+JointConfig config for each joint
 */
 type JointConfig struct {
 	JointName  string                 `json:"joint" config:"joint"`           //the joint name
@@ -26,7 +26,7 @@ type JointConfig struct {
 }
 
 /**
-config for each pipeline, a pipeline have more than one joints
+PipelineConfig config for each pipeline, a pipeline have more than one joints
 */
 type PipelineConfig struct {
 	Name          string         `json:"name" config:"name"`

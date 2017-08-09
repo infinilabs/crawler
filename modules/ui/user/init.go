@@ -20,9 +20,9 @@ import (
 	api "github.com/infinitbyte/gopa/core/http"
 )
 
+// InitUI init UI pages
 func InitUI() {
 
-	//UI pages init
 	ui := UserUI{}
 	api.HandleUIMethod(api.GET, "/", ui.IndexPageAction)
 
