@@ -29,6 +29,7 @@ type Queue interface {
 	Pop(QueueKey, time.Duration) (error, []byte)
 	ReadChan(k QueueKey) chan []byte
 	Close(QueueKey) error
+	Depth(QueueKey) int64
 }
 
 var handler Queue
@@ -89,6 +90,15 @@ func Close(k QueueKey) error {
 	}
 	stats.Increment("queue."+string(k), "close_error")
 	panic(errors.New("channel is not closed"))
+}
+
+func Depth(k QueueKey) int64 {
+	if handler != nil {
+		o := handler.Depth(k)
+		stats.Increment("queue."+string(k), "depth")
+		return o
+	}
+	panic(errors.New("channel is not registered"))
 }
 
 func Register(h Queue) {

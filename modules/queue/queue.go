@@ -71,6 +71,11 @@ func (module DiskQueue) Close(k QueueKey) error {
 	return b
 }
 
+func (module DiskQueue) Depth(k QueueKey) int64 {
+	b := (*queues[k]).Depth()
+	return b
+}
+
 func (module DiskQueue) Stop() error {
 	for _, v := range queues {
 		err := (*v).Close()
