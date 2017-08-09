@@ -92,7 +92,7 @@ func CreateSnapshot(snapshot *Snapshot) error {
 	return err
 }
 
-//delete the snapshot
+//DeleteSnapshot delete the snapshot
 func DeleteSnapshot(snapshot *Snapshot) error {
 	err := store.Delete(snapshot)
 	return err
