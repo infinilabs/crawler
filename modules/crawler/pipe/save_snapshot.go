@@ -133,13 +133,13 @@ func setSnapNextCheckTime(task *model.Task,timeNow time.Time,timeDuration time.D
 		defaultTime := timeNow.Add(-timeDuration * 1)
 		task.SnapshotCreateTime = &defaultTime
 	}
-	timeInterval := GetNextCheckTimeSeconds(fetchSuccess, *task.SnapshotCreateTime, timeNow)
+	timeInterval := getNextCheckTimeSeconds(fetchSuccess, *task.SnapshotCreateTime, timeNow)
 	nextT := timeNow.Add(timeDuration * time.Duration(timeInterval))
 	task.NextCheckTime = &nextT
 }
 
-func GetNextCheckTimeSeconds(fetchSuccess bool, tSnapshotCreateTime time.Time, tTimeNow time.Time) int {
-	timeIntervalLast := GetTimeInterval(tSnapshotCreateTime, tTimeNow)
+func getNextCheckTimeSeconds(fetchSuccess bool, tSnapshotCreateTime time.Time, tTimeNow time.Time) int {
+	timeIntervalLast := getTimeInterval(tSnapshotCreateTime, tTimeNow)
 	//set one day as default time,unit is the second
 	timeIntervalNext := 24 * 60 * 60
 	if fetchSuccess {
@@ -187,7 +187,7 @@ func GetNextCheckTimeSeconds(fetchSuccess bool, tSnapshotCreateTime time.Time, t
 	return timeIntervalNext
 }
 
-func GetTimeInterval(timeStart time.Time, timeEnd time.Time) int {
+func getTimeInterval(timeStart time.Time, timeEnd time.Time) int {
 	ts := timeStart.Sub(timeEnd).Seconds()
 	if ts < 0 {
 		ts = -ts
