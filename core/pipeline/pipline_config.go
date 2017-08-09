@@ -16,18 +16,14 @@ limitations under the License.
 
 package pipeline
 
-/**
-JointConfig config for each joint
-*/
+// JointConfig configs for each joint
 type JointConfig struct {
 	JointName  string                 `json:"joint" config:"joint"`           //the joint name
 	Parameters map[string]interface{} `json:"parameters" config:"parameters"` //kv parameters for this joint
 	Enabled    bool                   `json:"enabled" config:"enabled"`
 }
 
-/**
-PipelineConfig config for each pipeline, a pipeline have more than one joints
-*/
+// PipelineConfig config for each pipeline, a pipeline may have more than one joints
 type PipelineConfig struct {
 	Name          string         `json:"name" config:"name"`
 	Context       *Context       `json:"context" config:"context"`
