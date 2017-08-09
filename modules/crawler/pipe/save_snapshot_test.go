@@ -19,6 +19,7 @@ package pipe
 import (
 	"testing"
 	"github.com/infinitbyte/gopa/core/model"
+	"github.com/stretchr/testify/assert"
 	"time"
 	"fmt"
 )
@@ -32,19 +33,33 @@ func TestInitGrabVelocityArr(t *testing.T) {
 }
 
 func TestSetSnapNextCheckTime(t *testing.T){
-	arrDecelerateSteps = initGrabVelocityArr("1m,10m,20m,30m,60m,1h30m,3h,6h,12h,24h,48h,168h,360h")
-	fmt.Println(arrDecelerateSteps)
+	arrDecelerateSteps = initGrabVelocityArr("3s,6s,10s,20s,30s,40s,50s,60s,70s")
+	arrAccelerateSteps = initGrabVelocityArr("70s,60s,50s,40s,30s,20s,10s,6s,3s")
 
-	arrAccelerateSteps = initGrabVelocityArr("1m10s,60s,50s,40s,30s,20s,10s,6s,3s")
-	fmt.Println(arrAccelerateSteps)
+	toBeCharge := "2017-01-01 00:00:00.0000000 +0000 UTC"
+	timeLayout := "2006-01-02 15:04:05"
+	loc, _ := time.LoadLocation("Local")
+	theTime, _ := time.ParseInLocation(timeLayout, toBeCharge, loc)
 
 	task := new(model.Task)
-	tNow := time.Now().UTC()
+	task.SnapshotCreateTime = &theTime
+	fmt.Println("----task.SnapshotCreateTime",task.SnapshotCreateTime)
 	m, _ := time.ParseDuration("1s")
+	tNow := theTime.Add(1*m)
+	setSnapNextCheckTime(task,tNow,m,false)
+	fmt.Println("    task.LastCheckTime     ",task.LastCheckTime)
+	fmt.Println("    task.NextCheckTime     ",task.NextCheckTime)
+	timeInterval := GetTimeInterval(*task.LastCheckTime,*task.NextCheckTime)
+	fmt.Println("----timeInterval           ",timeInterval)
+	assert.Equal(t, 3, timeInterval)
+
+	tNow = theTime.Add(71*m)
 	setSnapNextCheckTime(task,tNow,m,true)
-	fmt.Println("task.LastCheckTime     ",task.LastCheckTime)
-	fmt.Println("task.SnapshotCreateTime",task.SnapshotCreateTime)
-	fmt.Println("task.NextCheckTime     ",task.NextCheckTime)
+	fmt.Println("    task.LastCheckTime     ",task.LastCheckTime)
+	fmt.Println("    task.NextCheckTime     ",task.NextCheckTime)
+	timeInterval = GetTimeInterval(*task.LastCheckTime,*task.NextCheckTime)
+	fmt.Println("----timeInterval           ",timeInterval)
+	assert.Equal(t, 70, timeInterval)
 }
 
 func TestDeleteRedundantSnapShot(t *testing.T){
