@@ -24,10 +24,8 @@ import (
 	"github.com/infinitbyte/gopa/modules/config"
 )
 
-const IgnoreTimeout JointKey = "ignore_timeout"
-
 func (joint IgnoreTimeoutJoint) Name() string {
-	return string(IgnoreTimeout)
+	return "ignore_timeout"
 }
 
 const ignoreTimeoutAfterCount ParaKey = "ignore_timeout_after_count"

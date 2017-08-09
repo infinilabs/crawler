@@ -26,8 +26,6 @@ import (
 	"regexp"
 )
 
-const UrlCheckFilter JointKey = "url_check_filter"
-
 type UrlCheckFilterJoint struct {
 	Parameters
 	//ignore files end with js,css,apk,zip
@@ -35,7 +33,7 @@ type UrlCheckFilterJoint struct {
 }
 
 func (joint UrlCheckFilterJoint) Name() string {
-	return string(UrlCheckFilter)
+	return "url_check_filter"
 }
 
 func (joint UrlCheckFilterJoint) Process(context *Context) error {

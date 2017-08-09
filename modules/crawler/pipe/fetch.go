@@ -30,8 +30,6 @@ import (
 	"time"
 )
 
-const Fetch JointKey = "fetch"
-
 const proxy ParaKey = "proxy"
 const cookie ParaKey = "cookie"
 const timeoutInSeconds ParaKey = "timeout_in_seconds"
@@ -42,7 +40,7 @@ type FetchJoint struct {
 }
 
 func (joint FetchJoint) Name() string {
-	return string(Fetch)
+	return "fetch"
 }
 
 type signal struct {

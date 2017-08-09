@@ -25,14 +25,12 @@ import (
 	"time"
 )
 
-const InitTask JointKey = "init_task"
-
 type InitTaskJoint struct {
 	Parameters
 }
 
 func (joint InitTaskJoint) Name() string {
-	return string(InitTask)
+	return "init_task"
 }
 
 func (joint InitTaskJoint) Process(context *Context) error {

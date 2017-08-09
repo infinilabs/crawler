@@ -25,15 +25,13 @@ import (
 	"github.com/infinitbyte/gopa/core/model"
 )
 
-const UrlExtFilter JointKey = "url_ext_filter"
-
 type UrlExtFilterJoint struct {
 	//ignore files end with js,css,apk,zip
 	SkipPageParsePattern *regexp.Regexp
 }
 
 func (joint UrlExtFilterJoint) Name() string {
-	return string(UrlExtFilter)
+	return "url_ext_filter"
 }
 
 func (joint UrlExtFilterJoint) Process(context *Context) error {

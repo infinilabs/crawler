@@ -127,7 +127,7 @@ func main() {
 	defer func() {
 		if r := recover(); r != nil {
 			if e, ok := r.(runtime.Error); ok {
-				log.Error("main: ", util.GetRuntimeErrorMessage(e))
+				log.Error("main: ", util.GetRuntimeErrorMessage(e), e)
 			}
 			log.Error("main", util.ToJson(r, true))
 		}

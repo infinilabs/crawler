@@ -1,7 +1,6 @@
 //Package file copied from github.com/elastic/beats
 //https://github.com/elastic/beats/blob/master/LICENSE
 //Licensed under the Apache License, Version 2.0 (the "License");
-
 package file
 
 import (

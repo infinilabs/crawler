@@ -20,16 +20,13 @@ import (
 	api "github.com/infinitbyte/gopa/core/pipeline"
 )
 
-// LoadMetadata is const value of load_metadata
-const LoadMetadata api.JointKey = "load_metadata"
-
 //LoadMetadataJoint load metadata from db
 type LoadMetadataJoint struct {
 }
 
 // Name is load_metadata
 func (joint LoadMetadataJoint) Name() string {
-	return string(LoadMetadata)
+	return "load_metadata"
 }
 
 // Process load metadata

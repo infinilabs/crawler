@@ -17,9 +17,9 @@ limitations under the License.
 package pipeline
 
 import (
-	"errors"
 	"fmt"
 	log "github.com/cihub/seelog"
+	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/stats"
 	"github.com/infinitbyte/gopa/core/util"
@@ -454,13 +454,14 @@ func GetJointInstance(cfg *JointConfig) Joint {
 	panic(errors.New(cfg.JointName + " not found"))
 }
 
-type JointKey string
-
-func Register(jointName JointKey, joint Joint) {
-	k := string(jointName)
+func Register(joint Joint) {
+	k := string(joint.Name())
 	RegisterByName(k, joint)
 }
 
 func RegisterByName(jointName string, joint Joint) {
+	if typeRegistry[jointName] != nil {
+		panic(errors.Errorf("joint with same name already registered, %s", jointName))
+	}
 	typeRegistry[jointName] = joint
 }

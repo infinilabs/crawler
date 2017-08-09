@@ -30,8 +30,6 @@ import (
 	"strings"
 )
 
-const ParsePage JointKey = "parse"
-
 type ParsePageJoint struct {
 	Parameters
 	MaxPageOfBreadth map[int]int //max page to fetch in each level's breadth, eg: 1:100;2:50;3:5;4:1
@@ -43,7 +41,7 @@ const maxDepth ParaKey = "max_depth"
 const maxBreadth ParaKey = "max_breadth"
 
 func (joint ParsePageJoint) Name() string {
-	return string(ParsePage)
+	return "parse"
 }
 
 func (joint ParsePageJoint) Process(context *Context) error {

@@ -19,7 +19,7 @@ package blevesearch
 import (
 	"fmt"
 	"github.com/blevesearch/bleve"
-	. "github.com/blevesearch/bleve/mapping"
+	mapping "github.com/blevesearch/bleve/mapping"
 	"github.com/cihub/seelog"
 )
 
@@ -53,7 +53,7 @@ func main() {
 	fmt.Println(searchResults)
 }
 
-func buildIndexMapping() (*IndexMappingImpl, error) {
+func buildIndexMapping() (*mapping.IndexMappingImpl, error) {
 	indexMapping := bleve.NewIndexMapping()
 
 	var err error

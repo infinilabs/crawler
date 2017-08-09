@@ -25,8 +25,6 @@ import (
 	"strings"
 )
 
-const HtmlToText JointKey = "html2text"
-
 type HtmlToTextJoint struct {
 	Parameters
 }
@@ -34,7 +32,7 @@ type HtmlToTextJoint struct {
 const mergeWhitespace ParaKey = "merge_whitespace" //merge whitespace and \n
 
 func (joint HtmlToTextJoint) Name() string {
-	return string(HtmlToText)
+	return "html2text"
 }
 
 func (joint HtmlToTextJoint) Process(context *Context) error {

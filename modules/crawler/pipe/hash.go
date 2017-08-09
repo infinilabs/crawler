@@ -27,8 +27,6 @@ import (
 	"sync"
 )
 
-const Hash JointKey = "hash"
-
 type HashJoint struct {
 	Parameters
 }
@@ -37,7 +35,7 @@ const simHashEnabled ParaKey = "simhash_enabled"
 const simHashDictFolder ParaKey = "simhash_dict_folder"
 
 func (joint HashJoint) Name() string {
-	return string(Hash)
+	return "hash"
 }
 
 func (joint HashJoint) Process(context *Context) error {

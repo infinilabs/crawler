@@ -29,9 +29,6 @@ import (
 	"strings"
 )
 
-// UrlNormalization return url_normalization
-const UrlNormalization api.JointKey = "url_normalization"
-
 // UrlNormalizationJoint used to cleanup url and do normalization
 type UrlNormalizationJoint struct {
 	api.Parameters
@@ -46,7 +43,7 @@ var defaultFileName = "default.html"
 
 // Name of this joint is: url_normalization
 func (joint UrlNormalizationJoint) Name() string {
-	return string(UrlNormalization)
+	return "url_normalization"
 }
 
 // Process will handle relative url and cleanup url

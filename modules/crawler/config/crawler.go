@@ -2,6 +2,7 @@ package config
 
 import "github.com/infinitbyte/gopa/core/pipeline"
 
+// TaskConfig defines crawler related configs
 type TaskConfig struct {
 	MaxGoRoutine int `config:"max_go_routine"`
 	//Fetch Speed Control
@@ -17,6 +18,7 @@ var (
 	}
 )
 
+// GetDefaultTaskConfig return a default TaskConfig
 func GetDefaultTaskConfig() TaskConfig {
 	return defaultCrawlerConfig
 }

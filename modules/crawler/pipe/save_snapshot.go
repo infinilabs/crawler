@@ -27,8 +27,6 @@ import (
 	"time"
 )
 
-const SaveSnapshotToDB JointKey = "save_snapshot_db"
-
 type SaveSnapshotToDBJoint struct {
 	Parameters
 }
@@ -37,7 +35,7 @@ const compressEnabled ParaKey = "compress_enabled"
 const bucket ParaKey = "bucket"
 
 func (this SaveSnapshotToDBJoint) Name() string {
-	return string(SaveSnapshotToDB)
+	return "save_snapshot_db"
 }
 
 func (this SaveSnapshotToDBJoint) Process(c *Context) error {

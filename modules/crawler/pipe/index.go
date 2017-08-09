@@ -28,15 +28,13 @@ import (
 	"github.com/infinitbyte/gopa/modules/config"
 )
 
-const Index api.JointKey = "index"
-
 // IndexJoint is used to send snapshot and task info into index
 type IndexJoint struct {
 }
 
 // Name return index
 func (joint IndexJoint) Name() string {
-	return string(Index)
+	return "index"
 }
 
 // Process wrapper index document and send to queue

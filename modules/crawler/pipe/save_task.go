@@ -25,7 +25,7 @@ import (
 	"github.com/infinitbyte/gopa/modules/config"
 )
 
-const SaveTask JointKey = "save_task"
+const name string = "save_task"
 
 type SaveTaskJoint struct {
 	Parameters
@@ -40,7 +40,7 @@ func (joint SaveTaskJoint) IsCreate(v bool) SaveTaskJoint {
 }
 
 func (joint SaveTaskJoint) Name() string {
-	return string(SaveTask)
+	return name
 }
 
 func (joint SaveTaskJoint) Process(context *Context) error {

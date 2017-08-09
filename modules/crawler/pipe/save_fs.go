@@ -28,14 +28,12 @@ import (
 	"strings"
 )
 
-const SaveSnapshotToFileSystem JointKey = "save_snapshot_fs"
-
 type SaveSnapshotToFileSystemJoint struct {
 	baseDir string
 }
 
 func (joint SaveSnapshotToFileSystemJoint) Name() string {
-	return string(SaveSnapshotToFileSystem)
+	return "save_snapshot_fs"
 }
 
 func (joint SaveSnapshotToFileSystemJoint) Process(c *Context) error {
