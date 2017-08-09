@@ -49,7 +49,7 @@ func TestSetSnapNextCheckTime(t *testing.T){
 	setSnapNextCheckTime(task,tNow,m,false)
 	fmt.Println("    task.LastCheckTime     ",task.LastCheckTime)
 	fmt.Println("    task.NextCheckTime     ",task.NextCheckTime)
-	timeInterval := GetTimeInterval(*task.LastCheckTime,*task.NextCheckTime)
+	timeInterval := getTimeInterval(*task.LastCheckTime,*task.NextCheckTime)
 	fmt.Println("----timeInterval           ",timeInterval)
 	assert.Equal(t, 3, timeInterval)
 
@@ -57,7 +57,7 @@ func TestSetSnapNextCheckTime(t *testing.T){
 	setSnapNextCheckTime(task,tNow,m,true)
 	fmt.Println("    task.LastCheckTime     ",task.LastCheckTime)
 	fmt.Println("    task.NextCheckTime     ",task.NextCheckTime)
-	timeInterval = GetTimeInterval(*task.LastCheckTime,*task.NextCheckTime)
+	timeInterval = getTimeInterval(*task.LastCheckTime,*task.NextCheckTime)
 	fmt.Println("----timeInterval           ",timeInterval)
 	assert.Equal(t, 70, timeInterval)
 }
