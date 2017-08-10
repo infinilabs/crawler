@@ -45,7 +45,7 @@ func InitJoints() {
 	pipeline.Register(pipe.SaveSnapshotToDBJoint{})
 	pipeline.Register(pipe.SaveSnapshotToFileSystemJoint{})
 	pipeline.Register(pipe.InitTaskJoint{})
-	pipeline.Register(pipe.UrlExtFilterJoint{})
+	pipeline.Register(pipe.UrlFilterJoint{})
 	pipeline.Register(pipe.HashJoint{})
 	pipeline.Register(pipe.IndexJoint{})
 	log.Debug("end register joints")

@@ -62,7 +62,7 @@ func (joint FetchJoint) Process(context *Context) error {
 
 	if len(requestUrl) == 0 {
 		log.Error("invalid fetchUrl,", requestUrl)
-		context.ErrorExit("invalid fetch url")
+		context.Exit("invalid fetch url")
 		return errors.New("invalid fetchUrl")
 	}
 
@@ -96,7 +96,7 @@ func (joint FetchJoint) Process(context *Context) error {
 
 				if snapshot.StatusCode == 404 {
 					log.Info("skip while 404, ", requestUrl, " , ", snapshot.StatusCode)
-					context.Break("fetch 404")
+					context.End("fetch 404")
 					flg <- signal{flag: false, err: errors.New("404 NOT FOUND"), status: model.Task404Ignore}
 					return
 				}
@@ -152,7 +152,7 @@ func (joint FetchJoint) Process(context *Context) error {
 		log.Error("fetching url time out, ", requestUrl, ", ", joint.timeout)
 		stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
 		task.Status = model.TaskFetchTimeout
-		context.Break(fmt.Sprintf("fetching url time out, %s, %s", requestUrl, joint.timeout))
+		context.End(fmt.Sprintf("fetching url time out, %s, %s", requestUrl, joint.timeout))
 		return errors.New("fetch url time out")
 	case value := <-flg:
 		if value.flag {
@@ -161,7 +161,7 @@ func (joint FetchJoint) Process(context *Context) error {
 		} else {
 			log.Debug("fetching url error exit, ", requestUrl)
 			if value.err != nil {
-				context.Break(value.err.Error())
+				context.End(value.err.Error())
 			}
 			stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_FAIL_COUNT)
 		}

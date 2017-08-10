@@ -58,12 +58,12 @@ func (joint FilterCheckJoint) Process(context *api.Context) error {
 	if b {
 		stats.Increment("checker.url", "duplicated")
 		log.Trace("duplicated url,already checked,  url:", url)
-		context.ErrorExit("duplicated url,already checked,  url:" + url)
+		context.Exit("duplicated url,already checked,  url:" + url)
 		return nil
 	}
 	if err != nil {
 		log.Error(err)
-		context.Break("check url error, url: " + url + ", " + err.Error())
+		context.End("check url error, url: " + url + ", " + err.Error())
 	}
 
 	return nil

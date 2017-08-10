@@ -16,25 +16,19 @@ limitations under the License.
 
 package config
 
-// MatchRule is container of rules
-type MatchRule struct {
-	Contain    []string
-	NotContain []string
-	Prefix     []string
-	Suffix     []string
+// Rule is container of rules
+type Rule struct {
+	Contain []string `config:"contain"`
+	Prefix  []string `config:"prefix"`
+	Suffix  []string `config:"suffix"`
 }
 
-// ShouldMatchRule means some rule should match
-type ShouldMatchRule struct {
-	*MatchRule
-}
-
-// MustMatchRule means some rule must match
-type MustMatchRule struct {
-	*MatchRule
-}
-
-// MustNotMatchRule means some rule must not match
-type MustNotMatchRule struct {
-	*MatchRule
+// Rules defines two fields,
+// Should means any of the rules matched will be work
+// Must means some rule must match
+// MustNot means some rule must not match
+type Rules struct {
+	Should  *Rule `config:"should"`
+	Must    *Rule `config:"must"`
+	MustNot *Rule `config:"must_not"`
 }

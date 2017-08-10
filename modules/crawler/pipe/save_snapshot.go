@@ -50,7 +50,7 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 
 		if snapshot.Hash == task.SnapshotHash {
 			log.Debug(fmt.Sprintf("break by same hash: %s, %s", snapshot.Hash, task.Url))
-			c.Break(fmt.Sprintf("same hash: %s, %s", snapshot.Hash, task.Url))
+			c.End(fmt.Sprintf("same hash: %s, %s", snapshot.Hash, task.Url))
 
 			//extended the nextchecktime
 			task.LastCheckTime = &tNow

@@ -176,13 +176,13 @@ func (joint ParsePageJoint) Process(context *Context) error {
 	//if reach max depth, skip for future fetch
 	if depth > joint.GetIntOrDefault(maxDepth, 10) {
 		log.Trace("skip while reach max depth, ", depth, ", ", refUrl)
-		context.Break(fmt.Sprintf("skip while reach max depth: %v", depth))
+		context.End(fmt.Sprintf("skip while reach max depth: %v", depth))
 		return nil
 	}
 	//if reach max breadth, skip for future fetch
 	if breadth > joint.GetIntOrDefault(maxBreadth, 10) {
 		log.Trace("skip while reach max breadth, ", breadth, ", ", refUrl)
-		context.Break(fmt.Sprintf("skip while reach max breadth: %v", breadth))
+		context.End(fmt.Sprintf("skip while reach max breadth: %v", breadth))
 		return nil
 	}
 

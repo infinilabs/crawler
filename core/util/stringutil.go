@@ -32,6 +32,14 @@ func ContainStr(s, substr string) bool {
 	return Index(s, substr) != -1
 }
 
+func PrefixStr(s, substr string) bool {
+	return HasPrefix(s, substr)
+}
+
+func SuffixStr(s, substr string) bool {
+	return HasSuffix(s, substr)
+}
+
 func StringToUTF16(s string) []uint16 {
 	return utf16.Encode([]rune(s + "\x00"))
 }

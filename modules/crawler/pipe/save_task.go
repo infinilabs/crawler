@@ -46,15 +46,14 @@ func (joint SaveTaskJoint) Name() string {
 func (joint SaveTaskJoint) Process(context *Context) error {
 
 	log.Trace("end process")
-	if context.IsErrorExit() {
+	if context.IsExit() {
 		return errors.NewWithCode(errors.New("error in process"), config.ErrorExitedPipeline, "pipeline exited")
 	}
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
-	//task.Status = model.TaskFetchSuccess
 	task.Phrase = context.Phrase
 
-	if context.IsBreak() {
+	if context.IsEnd() {
 		log.Trace("broken pipeline,", context.Payload)
 		task.Message = util.ToJson(context.Payload, false)
 	}

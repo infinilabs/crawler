@@ -115,6 +115,7 @@ func main() {
 	environment.IsDebug = *isDebug
 	//put env into global registrar
 	global.RegisterEnv(environment)
+
 	logger.SetLogging(environment, *logLevel, *logDir)
 
 	//check instance lock

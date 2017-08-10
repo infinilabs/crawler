@@ -35,8 +35,9 @@ type ParaKey string
 type Phrase int
 
 type Context struct {
-	Simulate bool `json:"simulate"`
 	Parameters
+
+	Simulate     bool        `json:"simulate"`
 	Phrase       Phrase      `json:"phrase"`
 	IgnoreBroken bool        `json:"ignore_broken"`
 	Payload      interface{} `json:"-"`
@@ -46,10 +47,8 @@ type Context struct {
 	exitFlag  bool
 }
 
-/**
-Break break all pipelines, but the end phrase not included
-*/
-func (context *Context) Break(msg interface{}) {
+// End break all pipelines, but the end phrase not included
+func (context *Context) End(msg interface{}) {
 	log.Trace("break,", context, ",", msg)
 	if context == nil {
 		panic(errors.New("context is nil"))
@@ -58,21 +57,18 @@ func (context *Context) Break(msg interface{}) {
 	context.Payload = msg
 }
 
-func (context *Context) IsBreak() bool {
+// IsEnd indicates whether the pipe process is end, end means no more processes will be execute
+func (context *Context) IsEnd() bool {
 	return context.breakFlag
 }
 
-/**
-IsErrorExit break all pipelines, without execute the end phrase
-*/
-func (context *Context) IsErrorExit() bool {
+// IsExit means all pipelines will be breaked and jump to outside, even the end phrase will not be executed as well
+func (context *Context) IsExit() bool {
 	return context.exitFlag
 }
 
-/**
-ErrorExit tell pipeline to exit all
-*/
-func (context *Context) ErrorExit(msg interface{}) {
+// Exit tells pipeline to exit
+func (context *Context) Exit(msg interface{}) {
 	context.exitFlag = true
 	context.Payload = msg
 }
@@ -195,6 +191,13 @@ func (para *Parameters) GetMap(key ParaKey) (map[string]interface{}, bool) {
 	return s, ok
 }
 
+// GetStringArray will return a array which type of the items are string
+func (para *Parameters) GetStringArray(key ParaKey) ([]string, bool) {
+	v := para.Get(key)
+	s, ok := v.([]string)
+	return s, ok
+}
+
 func (para *Parameters) Get(key ParaKey) interface{} {
 	para.Init()
 	para.l.RLock()
@@ -251,9 +254,7 @@ func (para *Parameters) MustGetBytes(key ParaKey) []byte {
 	return s
 }
 
-/*
-return 0 if not key was found
-*/
+// MustGetInt return 0 if not key was found
 func (para *Parameters) MustGetInt(key ParaKey) int {
 	v, ok := para.GetInt(key, 0)
 	if !ok {
@@ -342,13 +343,13 @@ func (pipe *Pipeline) Run() *Context {
 		if !global.Env().IsDebug {
 			if r := recover(); r != nil {
 				if e, ok := r.(runtime.Error); ok {
-					pipe.context.Break(util.GetRuntimeErrorMessage(e))
+					pipe.context.End(util.GetRuntimeErrorMessage(e))
 				}
-				log.Debug("error in pipeline, ", pipe.name)
+				log.Debug("error in pipeline, ", pipe.name, " ", r)
 				stats.Increment(pipe.name+".pipeline", "error")
 			}
 		}
-		if !pipe.context.IsErrorExit() && (!(pipe.context.IgnoreBroken && pipe.context.IsBreak())) {
+		if !pipe.context.IsExit() && (!(pipe.context.IgnoreBroken && pipe.context.IsEnd())) {
 			pipe.endPipeline()
 		}
 
@@ -358,12 +359,12 @@ func (pipe *Pipeline) Run() *Context {
 	var err error
 	for _, v := range pipe.joints {
 		log.Trace("pipe, ", pipe.name, ", start joint,", v.Name())
-		if pipe.context.IsBreak() {
+		if pipe.context.IsEnd() {
 			log.Trace("break joint,", v.Name())
 			stats.Increment(pipe.name+".pipeline", "break")
 			break
 		}
-		if pipe.context.IsErrorExit() {
+		if pipe.context.IsExit() {
 			if global.Env().IsDebug {
 				log.Debug(util.ToJson(pipe.id, true))
 				log.Debug(util.ToJson(pipe.name, true))
@@ -380,7 +381,7 @@ func (pipe *Pipeline) Run() *Context {
 		if err != nil {
 			stats.Increment(pipe.name+".pipeline", "error")
 			log.Debug("%s-%s: %v", pipe.name, v.Name(), err)
-			pipe.context.Break(err)
+			pipe.context.End(err)
 			panic(err)
 		}
 		log.Trace(pipe.name, ", end joint,", v.Name())
@@ -389,7 +390,7 @@ func (pipe *Pipeline) Run() *Context {
 	return pipe.context
 }
 func (pipe *Pipeline) endPipeline() {
-	if pipe.context.IsErrorExit() {
+	if pipe.context.IsExit() {
 		log.Debug("exit pipeline, ", pipe.name, ", ", pipe.context.Payload)
 		return
 	}

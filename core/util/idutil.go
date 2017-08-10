@@ -81,5 +81,5 @@ func restorePersistID() {
 
 // SetIDPersistencePath set the persist path
 func SetIDPersistencePath(path string) {
-	persistedPath = JoinPath(path, ".idseeds")
+	persistedPath = JoinPath(path, ".sequence")
 }

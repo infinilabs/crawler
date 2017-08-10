@@ -45,6 +45,7 @@ func (module CrawlerModule) Start(cfg *Config) {
 	config := GetDefaultTaskConfig()
 	cfg.Unpack(&config)
 	module.config = &config
+	module.rawConfig = cfg
 
 	//TODO
 	InitJoints()
@@ -143,5 +144,6 @@ func (module CrawlerModule) execute(taskId string, env *Env) {
 }
 
 type CrawlerModule struct {
-	config *TaskConfig
+	config    *TaskConfig
+	rawConfig *Config
 }

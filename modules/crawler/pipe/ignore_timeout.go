@@ -43,7 +43,7 @@ func (joint IgnoreTimeoutJoint) Process(context *api.Context) error {
 	timeoutCount := stats.Stat("domain.stats", host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
 	if timeoutCount > joint.MustGetInt64(ignoreTimeoutAfterCount) {
 		stats.Increment("domain.stats", host+"."+config.STATS_FETCH_TIMEOUT_IGNORE_COUNT)
-		context.Break("too much timeout on this domain, ignored " + host)
+		context.End("too much timeout on this domain, ignored " + host)
 		log.Warnf("hit timeout host, %s , ignore after,%d ", host, timeoutCount)
 	}
 	return nil

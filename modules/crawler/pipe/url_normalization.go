@@ -57,7 +57,7 @@ func (joint UrlNormalizationJoint) Process(context *api.Context) error {
 	var err error
 
 	if len(url) <= 0 {
-		context.ErrorExit("url can't be null")
+		context.Exit("url can't be null")
 	}
 
 	log.Trace("start parse url,", url)
@@ -72,7 +72,7 @@ func (joint UrlNormalizationJoint) Process(context *api.Context) error {
 	currentURI, err = u.Parse(tempUrl)
 	if err != nil {
 		log.Debug("url parsed failed, ", err, ",", tempUrl)
-		context.ErrorExit(err.Error())
+		context.Exit(err.Error())
 	}
 
 	log.Tracef("currentURI,schema:%s, host:%s", currentURI.Scheme, currentURI.Host)
@@ -160,7 +160,7 @@ func (joint UrlNormalizationJoint) Process(context *api.Context) error {
 		currentURI, err = u.Parse(tempUrl)
 		if err != nil {
 			log.Error(err)
-			context.Break(err.Error())
+			context.End(err.Error())
 			return err
 		}
 	}
@@ -186,12 +186,12 @@ func (joint UrlNormalizationJoint) Process(context *api.Context) error {
 
 			if !(ref[len(ref)-1] == cur[len(cur)-1] && ref[len(ref)-2] == cur[len(cur)-2]) {
 				log.Debug("domain mismatch,", referenceURI.Host, " vs ", currentURI.Host)
-				context.Break("domain missmatch," + referenceURI.Host + " vs " + currentURI.Host)
+				context.End("domain missmatch," + referenceURI.Host + " vs " + currentURI.Host)
 				return nil //known exception, not error
 			}
 		} else {
 			if referenceURI.Host != currentURI.Host {
-				context.Break("domain missmatch," + referenceURI.Host + " vs " + currentURI.Host)
+				context.End("domain missmatch," + referenceURI.Host + " vs " + currentURI.Host)
 				return nil //known exception, not error
 			}
 		}

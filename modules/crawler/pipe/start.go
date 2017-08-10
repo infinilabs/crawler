@@ -45,19 +45,19 @@ func (joint InitTaskJoint) Process(context *api.Context) error {
 		//init task record
 		t, err := model.GetTask(context.MustGetString(CONTEXT_TASK_ID))
 		if err != nil {
-			context.ErrorExit("task init error")
+			context.Exit("task init error")
 			panic(err)
 		}
 		task = &t
 		context.Set(CONTEXT_CRAWLER_TASK, task)
 
 	} else {
-		context.ErrorExit("task init error")
+		context.Exit("task init error")
 		panic(errors.New("task not set"))
 	}
 
 	if task == nil {
-		context.ErrorExit("task init error")
+		context.Exit("task init error")
 		panic(errors.New("nil task"))
 	}
 

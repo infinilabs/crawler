@@ -130,7 +130,7 @@ func (module CheckerModule) execute(data []byte) {
 	pipeline := module.runPipe(global.Env().IsDebug, task)
 
 	//send to disk queue
-	if len(task.Host) > 0 && !pipeline.GetContext().IsErrorExit() && !pipeline.GetContext().IsBreak() {
+	if len(task.Host) > 0 && !pipeline.GetContext().IsExit() && !pipeline.GetContext().IsEnd() {
 		stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_TOTAL_COUNT)
 
 		err := model.IncrementDomainLinkCount(task.Host)
