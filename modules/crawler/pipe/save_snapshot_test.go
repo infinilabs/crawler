@@ -17,24 +17,24 @@ limitations under the License.
 package pipe
 
 import (
-	"testing"
+	"fmt"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/stretchr/testify/assert"
+	"testing"
 	"time"
-	"fmt"
 )
 
 func TestInitGrabVelocityArr(t *testing.T) {
-	arrDecelerateSteps = initGrabVelocityArr("1m,10m,20m,30m,60m,1h30m,3h,6h,12h,24h,48h,168h,360h")
+	arrDecelerateSteps = initFetchRateArr("1m,10m,20m,30m,60m,1h30m,3h,6h,12h,24h,48h,168h,360h")
 	fmt.Println(arrDecelerateSteps)
 
-	arrAccelerateSteps = initGrabVelocityArr("24h,12h,6h,3h,1h30m,45m,20m,10m,1m")
+	arrAccelerateSteps = initFetchRateArr("24h,12h,6h,3h,1h30m,45m,20m,10m,1m")
 	fmt.Println(arrAccelerateSteps)
 }
 
-func TestSetSnapNextCheckTime(t *testing.T){
-	arrDecelerateSteps = initGrabVelocityArr("3s,6s,10s,20s,30s,40s,50s,60s,70s")
-	arrAccelerateSteps = initGrabVelocityArr("70s,60s,50s,40s,30s,20s,10s,6s,3s")
+func TestSetSnapNextCheckTime(t *testing.T) {
+	arrDecelerateSteps = initFetchRateArr("3s,6s,10s,20s,30s,40s,50s,60s,70s")
+	arrAccelerateSteps = initFetchRateArr("70s,60s,50s,40s,30s,20s,10s,6s,3s")
 
 	toBeCharge := "2017-01-01 00:00:00.0000000 +0000 UTC"
 	timeLayout := "2006-01-02 15:04:05"
@@ -43,25 +43,25 @@ func TestSetSnapNextCheckTime(t *testing.T){
 
 	task := new(model.Task)
 	task.SnapshotCreateTime = &theTime
-	fmt.Println("----task.SnapshotCreateTime",task.SnapshotCreateTime)
+	fmt.Println("----task.SnapshotCreateTime", task.SnapshotCreateTime)
 	m, _ := time.ParseDuration("1s")
-	tNow := theTime.Add(1*m)
-	setSnapNextCheckTime(task,tNow,m,false)
-	fmt.Println("    task.LastCheckTime     ",task.LastCheckTime)
-	fmt.Println("    task.NextCheckTime     ",task.NextCheckTime)
-	timeInterval := getTimeInterval(*task.LastCheckTime,*task.NextCheckTime)
-	fmt.Println("----timeInterval           ",timeInterval)
+	tNow := theTime.Add(1 * m)
+	setSnapNextCheckTime(task, tNow, m, false)
+	fmt.Println("    task.LastCheckTime     ", task.LastCheckTime)
+	fmt.Println("    task.NextCheckTime     ", task.NextCheckTime)
+	timeInterval := getTimeInterval(*task.LastCheckTime, *task.NextCheckTime)
+	fmt.Println("----timeInterval           ", timeInterval)
 	assert.Equal(t, 3, timeInterval)
 
-	tNow = theTime.Add(71*m)
-	setSnapNextCheckTime(task,tNow,m,true)
-	fmt.Println("    task.LastCheckTime     ",task.LastCheckTime)
-	fmt.Println("    task.NextCheckTime     ",task.NextCheckTime)
-	timeInterval = getTimeInterval(*task.LastCheckTime,*task.NextCheckTime)
-	fmt.Println("----timeInterval           ",timeInterval)
+	tNow = theTime.Add(71 * m)
+	setSnapNextCheckTime(task, tNow, m, true)
+	fmt.Println("    task.LastCheckTime     ", task.LastCheckTime)
+	fmt.Println("    task.NextCheckTime     ", task.NextCheckTime)
+	timeInterval = getTimeInterval(*task.LastCheckTime, *task.NextCheckTime)
+	fmt.Println("----timeInterval           ", timeInterval)
 	assert.Equal(t, 70, timeInterval)
 }
 
-func TestDeleteRedundantSnapShot(t *testing.T){
-	deleteRedundantSnapShot(10,"","")
+func TestDeleteRedundantSnapShot(t *testing.T) {
+	deleteRedundantSnapShot(10, "", "")
 }
