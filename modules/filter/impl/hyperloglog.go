@@ -23,15 +23,15 @@ import (
 
 	log "github.com/cihub/seelog"
 	"github.com/clarkduvall/hyperloglog"
-	. "github.com/clarkduvall/hyperloglog"
 	"github.com/infinitbyte/gopa/core/util"
 	"sync"
 )
 
+// HyperLogLogFilter wrapper filter which implements the HyperLogLog and HyperLogLog++ algorithms.
 type HyperLogLogFilter struct {
 	hyperLogLogPrecision uint8
 	persistFileName      string
-	filter               *HyperLogLogPlus
+	filter               *hyperloglog.HyperLogLogPlus
 	l                    sync.Mutex
 }
 
@@ -47,6 +47,7 @@ func hash64(s []byte) hash.Hash64 {
 	return h
 }
 
+// Open local persist file
 func (filter *HyperLogLogFilter) Open(fileName string) error {
 	filter.l.Lock()
 	defer filter.l.Unlock()
@@ -62,7 +63,7 @@ func (filter *HyperLogLogFilter) Open(fileName string) error {
 			log.Error("hyperloglog-filter:", fileName, err)
 		}
 
-		filter.filter = &HyperLogLogPlus{}
+		filter.filter = &hyperloglog.HyperLogLogPlus{}
 		if err := filter.filter.GobDecode(n); err != nil {
 			log.Error("hyperloglog-filter:", fileName, err)
 		}
@@ -82,6 +83,7 @@ func (filter *HyperLogLogFilter) Open(fileName string) error {
 	return nil
 }
 
+// Close hyperloglog file
 func (filter *HyperLogLogFilter) Close() error {
 	filter.l.Lock()
 	defer filter.l.Unlock()
@@ -102,6 +104,7 @@ func (filter *HyperLogLogFilter) Close() error {
 	return nil
 }
 
+// Exists check if the key already in the filter, it will compare by add and check the count, will always add the key to the filter
 func (filter *HyperLogLogFilter) Exists(key []byte) bool {
 	filter.l.Lock()
 	defer filter.l.Unlock()
@@ -119,6 +122,7 @@ func (filter *HyperLogLogFilter) Exists(key []byte) bool {
 	return true
 }
 
+// Add the key to filter
 func (filter *HyperLogLogFilter) Add(key []byte) error {
 	filter.l.Lock()
 	defer filter.l.Unlock()

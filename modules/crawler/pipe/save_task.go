@@ -25,7 +25,7 @@ import (
 	"github.com/infinitbyte/gopa/modules/config"
 )
 
-const SaveTask JointKey = "save_task"
+const name string = "save_task"
 
 type SaveTaskJoint struct {
 	Parameters
@@ -33,33 +33,32 @@ type SaveTaskJoint struct {
 
 const isCreate ParaKey = "is_create"
 
-func (this SaveTaskJoint) IsCreate(v bool) SaveTaskJoint {
-	this.Init()
-	this.Set(isCreate, v)
-	return this
+func (joint SaveTaskJoint) IsCreate(v bool) SaveTaskJoint {
+	joint.Init()
+	joint.Set(isCreate, v)
+	return joint
 }
 
-func (this SaveTaskJoint) Name() string {
-	return string(SaveTask)
+func (joint SaveTaskJoint) Name() string {
+	return name
 }
 
-func (this SaveTaskJoint) Process(context *Context) error {
+func (joint SaveTaskJoint) Process(context *Context) error {
 
 	log.Trace("end process")
-	if context.IsErrorExit() {
+	if context.IsExit() {
 		return errors.NewWithCode(errors.New("error in process"), config.ErrorExitedPipeline, "pipeline exited")
 	}
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
-	//task.Status = model.TaskFetchSuccess
 	task.Phrase = context.Phrase
 
-	if context.IsBreak() {
+	if context.IsEnd() {
 		log.Trace("broken pipeline,", context.Payload)
 		task.Message = util.ToJson(context.Payload, false)
 	}
 
-	if this.GetBool(isCreate, false) {
+	if joint.GetBool(isCreate, false) {
 		log.Trace("create task, url:", task.Url)
 		model.CreateTask(task)
 	} else {

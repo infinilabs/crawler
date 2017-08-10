@@ -30,7 +30,7 @@ type ErrorPayload interface{}
 var (
 	// Default unknow error
 	Default ErrorCode = 1
-	// JSONIsEmpty error when json is emtpy
+	// JSONIsEmpty error when json is empty
 	JSONIsEmpty ErrorCode = 100
 	// BodyEmpty error when body is empty
 	BodyEmpty ErrorCode = 101
@@ -222,14 +222,13 @@ func CodeWithPayload(err error) (ErrorCode, interface{}) {
 		Payload() interface{}
 	}
 
-	for err != nil {
+	if err != nil {
 		cause, ok := err.(causer)
-		if !ok {
-			break
+		if ok {
+			code := cause.Code()
+			payload := cause.Payload()
+			return code, payload
 		}
-		code := cause.Code()
-		payload := cause.Payload()
-		return code, payload
 	}
 	return Default, nil
 }

@@ -164,7 +164,7 @@ type meta struct {
 }
 
 // bucket_ represents the bolt.Bucket type.
-type bucket_ struct {
+type bucketWrapper struct {
 	*bucket
 }
 

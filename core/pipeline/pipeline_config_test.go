@@ -20,12 +20,16 @@ import (
 	"fmt"
 	"github.com/infinitbyte/gopa/core/env"
 	"github.com/infinitbyte/gopa/core/global"
+	"github.com/infinitbyte/gopa/core/util"
 	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
 )
 
 func TestPipelineConfig(t *testing.T) {
+
+	util.SetIDPersistencePath("/tmp")
+
 	global.RegisterEnv(env.EmptyEnv())
 	global.Env().IsDebug = true
 
@@ -37,10 +41,10 @@ func TestPipelineConfig(t *testing.T) {
 	config.Context.Data["url"] = "gogol.com"
 	config.Context.Data["webpage"] = "hello world gogo "
 
-	Register("crawler", crawlerJoint{})
-	Register("parser", parserJoint{})
-	Register("save", saveJoint{})
-	Register("publish", publishJoint{})
+	Register(crawlerJoint{})
+	Register(parserJoint{})
+	Register(saveJoint{})
+	Register(publishJoint{})
 
 	config.StartJoint = &JointConfig{Enabled: true, JointName: "crawler", Parameters: map[string]interface{}{"url": "http://baidu12.com"}}
 	joints := []*JointConfig{}
@@ -82,12 +86,12 @@ type foo struct {
 	Name string
 }
 
-func (this foo) Do() string {
-	fmt.Println("foo do,", this.Id, ",", this.Name, ",", this.Para)
-	return this.Name
+func (joint foo) Do() string {
+	fmt.Println("foo do,", joint.Id, ",", joint.Name, ",", joint.Para)
+	return joint.Name
 }
 
-func (this bar) Do() string {
+func (joint bar) Do() string {
 	fmt.Println("foo do")
 	return ""
 }

@@ -16,7 +16,11 @@ limitations under the License.
 
 package util
 
-//copied from http://git.oschina.net/Unknown/gowalker/blob/master/utils/path.go
+//part of code copied from http://git.oschina.net/Unknown/gowalker/blob/master/utils/path.go
+//http://git.oschina.net/Unknown/gowalker/blob/master/LICENSE
+//Apache License
+//Version 2.0, January 2004
+//http://www.apache.org/licenses/
 
 import (
 	"regexp"
@@ -1527,7 +1531,7 @@ var (
 	validPathElement = regexp.MustCompile(`^[-A-Za-z0-9~+][-A-Za-z0-9_.]*$`)
 )
 
-// returns true if tld is a valid tld, eg: com
+// IsValidTLD returns true if tld is a valid tld, eg: com
 func IsValidTLD(tld string) bool {
 
 	ok, istld := validTLD[strings.ToUpper(tld)]

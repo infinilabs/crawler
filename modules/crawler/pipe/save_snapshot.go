@@ -28,8 +28,6 @@ import (
 	"time"
 )
 
-const SaveSnapshotToDB JointKey = "save_snapshot_db"
-
 type SaveSnapshotToDBJoint struct {
 	Parameters
 }
@@ -41,7 +39,7 @@ const accelerateSteps ParaKey = "accelerate_steps"
 const maxRevision ParaKey = "max_revision"
 
 func (this SaveSnapshotToDBJoint) Name() string {
-	return string(SaveSnapshotToDB)
+	return "save_snapshot_db"
 }
 
 func (this SaveSnapshotToDBJoint) Process(c *Context) error {
@@ -61,7 +59,7 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 
 		if snapshot.Hash == task.SnapshotHash {
 			log.Debug(fmt.Sprintf("break by same hash: %s, %s", snapshot.Hash, task.Url))
-			c.Break(fmt.Sprintf("same hash: %s, %s", snapshot.Hash, task.Url))
+			c.End(fmt.Sprintf("same hash: %s, %s", snapshot.Hash, task.Url))
 
 			//extend the nextchecktime
 			setSnapNextCheckTime(task, tNow, m, false)

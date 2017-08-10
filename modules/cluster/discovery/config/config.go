@@ -29,14 +29,14 @@ type ClusterState struct {
 	InactiveNodes []Node
 }
 
-func (this *RaftConfig) Init() {
-	this.DataDir = path.Join(global.Env().SystemConfig.GetWorkingDir(), "raft")
-	this.EnableSingleNode = true
+func (module *RaftConfig) Init() {
+	module.DataDir = path.Join(global.Env().SystemConfig.GetWorkingDir(), "raft")
+	module.EnableSingleNode = true
 
 	if len(global.Env().SystemConfig.ClusterBinding) > 0 {
-		this.Bind = global.Env().SystemConfig.ClusterBinding
+		module.Bind = global.Env().SystemConfig.ClusterBinding
 	} else {
-		this.Bind = "127.0.0.1:13001"
+		module.Bind = "127.0.0.1:13001"
 	}
 
 	seeds := global.Env().SystemConfig.ClusterConfig.Seeds
@@ -44,9 +44,9 @@ func (this *RaftConfig) Init() {
 	if len(seeds) > 0 {
 		log.Debug("get cluster seeds: ", global.Env().SystemConfig.ClusterConfig.Seeds)
 		for _, v := range seeds {
-			this.Seeds = append(this.Seeds, v)
+			module.Seeds = append(module.Seeds, v)
 		}
 	} else {
-		this.Seeds = append(this.Seeds, "127.0.0.1:13001")
+		module.Seeds = append(module.Seeds, "127.0.0.1:13001")
 	}
 }

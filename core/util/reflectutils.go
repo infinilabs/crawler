@@ -18,6 +18,7 @@ package util
 
 import "reflect"
 
+// Invoke dynamic execute function via function name and parameters
 func Invoke(any interface{}, name string, args ...interface{}) {
 	inputs := make([]reflect.Value, len(args))
 	for i := range args {

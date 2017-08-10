@@ -31,8 +31,8 @@ import (
 	"github.com/infinitbyte/gopa/modules/ui"
 )
 
+// Register is where modules are registered
 func Register() {
-	////register modules
 	module.Register(database.DatabaseModule{})
 	module.Register(filter.FilterModule{})
 	module.Register(storage.StorageModule{})

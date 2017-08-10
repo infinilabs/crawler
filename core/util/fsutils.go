@@ -17,17 +17,16 @@ limitations under the License.
 package util
 
 import (
-	"bufio"
 	"fmt"
+	log "github.com/cihub/seelog"
 	"io"
 	"io/ioutil"
 	"os"
-	"sort"
-
-	log "github.com/cihub/seelog"
+	"path/filepath"
 	"strings"
 )
 
+// JoinPath return joined file path
 func JoinPath(filenames ...string) string {
 
 	hasSlash := false
@@ -49,6 +48,7 @@ func JoinPath(filenames ...string) string {
 	return result
 }
 
+// FileExists check if the path are exists
 func FileExists(path string) bool {
 	_, err := os.Stat(path)
 	if err == nil {
@@ -60,6 +60,7 @@ func FileExists(path string) bool {
 	return false
 }
 
+// CopyFile copy file from src to dst
 func CopyFile(src, dst string) (w int64, err error) {
 	srcFile, err := os.Open(src)
 	if err != nil {
@@ -80,7 +81,7 @@ func CopyFile(src, dst string) (w int64, err error) {
 	return io.Copy(dstFile, srcFile)
 }
 
-// get file modified time
+// FileMTime get file modified time
 func FileMTime(file string) (int64, error) {
 	f, e := os.Stat(file)
 	if e != nil {
@@ -89,7 +90,7 @@ func FileMTime(file string) (int64, error) {
 	return f.ModTime().Unix(), nil
 }
 
-// get file size as how many bytes
+// FileSize get file size as how many bytes
 func FileSize(file string) (int64, error) {
 	f, e := os.Stat(file)
 	if e != nil {
@@ -98,17 +99,17 @@ func FileSize(file string) (int64, error) {
 	return f.Size(), nil
 }
 
-// delete file
+// FileDelete delete file
 func FileDelete(file string) error {
 	return os.Remove(file)
 }
 
-// rename file name
+// Rename handle file rename
 func Rename(file string, to string) error {
 	return os.Rename(file, to)
 }
 
-// put string to file
+// FilePutContent put string to file
 func FilePutContent(file string, content string) (int, error) {
 	fs, e := os.Create(file)
 	if e != nil {
@@ -118,7 +119,7 @@ func FilePutContent(file string, content string) (int, error) {
 	return fs.WriteString(content)
 }
 
-// put string to file
+// FilePutContentWithByte put string to file
 func FilePutContentWithByte(file string, content []byte) (int, error) {
 	fs, e := os.Create(file)
 	if e != nil {
@@ -128,6 +129,7 @@ func FilePutContentWithByte(file string, content []byte) (int, error) {
 	return fs.Write(content)
 }
 
+// FileAppendContentWithByte append bytes to the end of the file
 func FileAppendContentWithByte(file string, content []byte) (int, error) {
 
 	f, err := os.OpenFile(file, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
@@ -139,6 +141,7 @@ func FileAppendContentWithByte(file string, content []byte) (int, error) {
 	return f.Write(content)
 }
 
+// FileAppendNewLine append new line to the end of the file
 func FileAppendNewLine(file string, content string) (int, error) {
 	f, err := os.OpenFile(file, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 	if err != nil {
@@ -149,6 +152,7 @@ func FileAppendNewLine(file string, content string) (int, error) {
 	return f.WriteString(content + "\n")
 }
 
+// FileAppendNewLineWithByte append bytes and break line(\n) to the end of the file
 func FileAppendNewLineWithByte(file string, content []byte) (int, error) {
 	f, err := os.OpenFile(file, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 	if err != nil {
@@ -159,7 +163,7 @@ func FileAppendNewLineWithByte(file string, content []byte) (int, error) {
 	return f.WriteString(string(content) + "\n")
 }
 
-// get string from text file
+// FileGetContent get string from text file
 func FileGetContent(file string) ([]byte, error) {
 	if !IsFile(file) {
 		return nil, os.ErrNotExist
@@ -171,7 +175,7 @@ func FileGetContent(file string) ([]byte, error) {
 	return b, nil
 }
 
-// it returns false when it's a directory or does not exist.
+// IsFile returns false when it's a directory or does not exist.
 func IsFile(file string) bool {
 	f, e := os.Stat(file)
 	if e != nil {
@@ -186,7 +190,7 @@ func IsExist(path string) bool {
 	return err == nil || os.IsExist(err)
 }
 
-//create file
+//CreateFile create file
 func CreateFile(dir string, name string) (string, error) {
 	src := dir + name + "/"
 	if IsExist(src) {
@@ -203,84 +207,8 @@ func CreateFile(dir string, name string) (string, error) {
 	return src, nil
 }
 
-type FileRepos []Repository
-
-type Repository struct {
-	Name     string
-	FileTime int64
-}
-
-func (r FileRepos) Len() int {
-	return len(r)
-}
-
-func (r FileRepos) Less(i, j int) bool {
-	return r[i].FileTime < r[j].FileTime
-}
-
-func (r FileRepos) Swap(i, j int) {
-	r[i], r[j] = r[j], r[i]
-}
-
-// 获取所有文件
-//如果文件达到最上限，按时间删除
-func delFile(files []os.FileInfo, count int, fileDir string) {
-	if len(files) <= count {
-		return
-	}
-
-	result := new(FileRepos)
-
-	for _, file := range files {
-		if file.IsDir() {
-			continue
-		} else {
-			*result = append(*result, Repository{Name: file.Name(), FileTime: file.ModTime().Unix()})
-		}
-	}
-
-	sort.Sort(result)
-	deleteNum := len(files) - count
-	for k, v := range *result {
-		if k+1 > deleteNum {
-			break
-		}
-		FileDelete(fileDir + v.Name)
-	}
-
-	return
-}
-
-func Readln(r *bufio.Reader) (string, error) {
-	var (
-		isPrefix bool  = true
-		err      error = nil
-		line, ln []byte
-	)
-	for isPrefix && err == nil {
-		line, isPrefix, err = r.ReadLine()
-		ln = append(ln, line...)
-	}
-	return string(ln), err
-}
-
-func ReadAllLines(file string) []string {
-	lines := []string{}
-	f, err := os.Open(file)
-	if err != nil {
-		log.Error("error opening file,", file, " ", err)
-		panic(err)
-	}
-
-	r := bufio.NewReader(f)
-	s, e := Readln(r)
-	lines = append(lines, s)
-	for e == nil {
-		s, e = Readln(r)
-		if s != "" {
-			lines = append(lines, s)
-		}
-	}
-
-	return lines
+// FileExtension extract file extension from file name
+func FileExtension(file string) string {
+	ext := filepath.Ext(file)
+	return strings.TrimSpace(ext)
 }

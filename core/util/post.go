@@ -24,6 +24,7 @@ import (
 	log "github.com/cihub/seelog"
 )
 
+// Post http post with a list of values
 func Post(url string, values url.Values) []byte {
 	r, err := http.PostForm(url, values)
 	if err != nil {

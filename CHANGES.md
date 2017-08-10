@@ -16,6 +16,7 @@
 3. dispatch tasks and auto update tasks
 4. add proxy to fetch joint
 5. filter url before push to checker
+6. add rules config to url filter 
 
 ##### improvement
 1. multi instance support on local machine
@@ -30,6 +31,8 @@
 10. refine log level, enable pprof to config listen address
 11. update task ui, limit length of name
 12. detect dead process, re-place lock file
+13. persist auto-incremented id sequence to disk
+14. simplified joint register
 
 ##### bugfix
 1. disable simhash due to poor performance and memory leak

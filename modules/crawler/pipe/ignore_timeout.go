@@ -19,33 +19,31 @@ package pipe
 import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/model"
-	. "github.com/infinitbyte/gopa/core/pipeline"
+	api "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/stats"
 	"github.com/infinitbyte/gopa/modules/config"
 )
 
-const IgnoreTimeout JointKey = "ignore_timeout"
-
-func (this IgnoreTimeoutJoint) Name() string {
-	return string(IgnoreTimeout)
+func (joint IgnoreTimeoutJoint) Name() string {
+	return "ignore_timeout"
 }
 
-const ignoreTimeoutAfterCount ParaKey = "ignore_timeout_after_count"
+const ignoreTimeoutAfterCount api.ParaKey = "ignore_timeout_after_count"
 
 type IgnoreTimeoutJoint struct {
-	Parameters
+	api.Parameters
 }
 
-func (this IgnoreTimeoutJoint) Process(context *Context) error {
+func (joint IgnoreTimeoutJoint) Process(context *api.Context) error {
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 
 	//TODO ignore within time period, rather than total count
 	host := task.Host
 	timeoutCount := stats.Stat("domain.stats", host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
-	if timeoutCount > this.MustGetInt64(ignoreTimeoutAfterCount) {
+	if timeoutCount > joint.MustGetInt64(ignoreTimeoutAfterCount) {
 		stats.Increment("domain.stats", host+"."+config.STATS_FETCH_TIMEOUT_IGNORE_COUNT)
-		context.Break("too much timeout on this domain, ignored " + host)
+		context.End("too much timeout on this domain, ignored " + host)
 		log.Warnf("hit timeout host, %s , ignore after,%d ", host, timeoutCount)
 	}
 	return nil

@@ -36,23 +36,23 @@ type BoltdbStore struct {
 
 var db *storm.DB
 
-func (this BoltdbStore) Open() error {
+func (store BoltdbStore) Open() error {
 
 	//loading or initializing boltdb
-	if util.IsExist(this.FileName) {
-		log.Debug("found boltdb file, start reload,", this.FileName)
+	if util.IsExist(store.FileName) {
+		log.Debug("found boltdb file, start reload,", store.FileName)
 	}
 
 	var err error
 	v := global.Lookup(config.REGISTER_BOLTDB)
 	if v != nil {
 		boltDb := v.(*bolt.DB)
-		db, err = storm.Open(this.FileName, storm.UseDB(boltDb), storm.Codec(protobuf.Codec))
+		db, err = storm.Open(store.FileName, storm.UseDB(boltDb), storm.Codec(protobuf.Codec))
 	} else {
-		db, err = storm.Open(this.FileName, storm.BoltOptions(0600, &bolt.Options{Timeout: 5 * time.Second}), storm.Codec(protobuf.Codec))
+		db, err = storm.Open(store.FileName, storm.BoltOptions(0600, &bolt.Options{Timeout: 5 * time.Second}), storm.Codec(protobuf.Codec))
 	}
 	if err != nil {
-		log.Errorf("error open boltdb: %s, %s", this.FileName, err)
+		log.Errorf("error open boltdb: %s, %s", store.FileName, err)
 		return err
 	}
 
@@ -70,22 +70,22 @@ func (this BoltdbStore) Open() error {
 
 	global.Register(config.REGISTER_BOLTDB, db)
 
-	log.Debug("boltdb successfully started:", this.FileName)
+	log.Debug("boltdb successfully started:", store.FileName)
 
 	return nil
 }
 
-func (this BoltdbStore) Close() error {
+func (store BoltdbStore) Close() error {
 	err := db.Close()
 	if err != nil {
-		log.Error("boltdb:", this.FileName, err)
+		log.Error("boltdb:", store.FileName, err)
 	}
 	return err
 }
 
-func (filter BoltdbStore) GetCompressedValue(bucket string, key []byte) []byte {
+func (store BoltdbStore) GetCompressedValue(bucket string, key []byte) []byte {
 
-	data := filter.GetValue(bucket, key)
+	data := store.GetValue(bucket, key)
 	data, err := lz4.Decode(nil, data)
 	if err != nil {
 		log.Error("Failed to decode:", err)
@@ -94,7 +94,7 @@ func (filter BoltdbStore) GetCompressedValue(bucket string, key []byte) []byte {
 	return data
 }
 
-func (filter BoltdbStore) GetValue(bucket string, key []byte) []byte {
+func (store BoltdbStore) GetValue(bucket string, key []byte) []byte {
 	var ret []byte = nil
 	db.Bolt.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
@@ -107,16 +107,16 @@ func (filter BoltdbStore) GetValue(bucket string, key []byte) []byte {
 	return ret
 }
 
-func (filter BoltdbStore) AddValueCompress(bucket string, key []byte, value []byte) error {
+func (store BoltdbStore) AddValueCompress(bucket string, key []byte, value []byte) error {
 	value, err := lz4.Encode(nil, value)
 	if err != nil {
 		log.Error("Failed to encode:", err)
 		return err
 	}
-	return filter.AddValue(bucket, key, value)
+	return store.AddValue(bucket, key, value)
 }
 
-func (filter BoltdbStore) AddValue(bucket string, key []byte, value []byte) error {
+func (store BoltdbStore) AddValue(bucket string, key []byte, value []byte) error {
 	db.Bolt.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		err := b.Put(key, value)
@@ -125,7 +125,7 @@ func (filter BoltdbStore) AddValue(bucket string, key []byte, value []byte) erro
 	return nil
 }
 
-func (filter BoltdbStore) DeleteValue(bucket string, key []byte, value []byte) error {
+func (store BoltdbStore) DeleteValue(bucket string, key []byte, value []byte) error {
 	db.Bolt.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		err := b.Delete(key)
@@ -134,7 +134,7 @@ func (filter BoltdbStore) DeleteValue(bucket string, key []byte, value []byte) e
 	return nil
 }
 
-func (filter BoltdbStore) DeleteBucket(bucket string, key []byte, value []byte) error {
+func (store BoltdbStore) DeleteBucket(bucket string, key []byte, value []byte) error {
 	db.Bolt.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		err := b.DeleteBucket(key)
@@ -143,29 +143,29 @@ func (filter BoltdbStore) DeleteBucket(bucket string, key []byte, value []byte) 
 	return nil
 }
 
-func (filter BoltdbStore) Get(key string, value interface{}, to interface{}) error {
+func (store BoltdbStore) Get(key string, value interface{}, to interface{}) error {
 	return db.One(key, value, to)
 }
 
-func (filter BoltdbStore) Save(o interface{}) error {
+func (store BoltdbStore) Save(o interface{}) error {
 	return db.Save(o)
 }
 
-func (filter BoltdbStore) Update(o interface{}) error {
+func (store BoltdbStore) Update(o interface{}) error {
 	return db.Update(o)
 }
 
-func (filter BoltdbStore) Delete(o interface{}) error {
+func (store BoltdbStore) Delete(o interface{}) error {
 	return db.DeleteStruct(o)
 }
 
-func (filter BoltdbStore) Count(o interface{}) (int, error) {
+func (store BoltdbStore) Count(o interface{}) (int, error) {
 	return db.Count(o)
 }
 
-func (filter BoltdbStore) Search(t1, t2 interface{}, q1 *store.Query) (error, store.Result) {
+func (s BoltdbStore) Search(t1, t2 interface{}, q1 *store.Query) (error, store.Result) {
 	result := store.Result{}
-	total, err := store.Count(t1)
+	total, err := s.Count(t1)
 	if err != nil {
 		log.Debug(err)
 		total = -1

@@ -30,18 +30,17 @@ import (
 	"time"
 )
 
-const Fetch JointKey = "fetch"
-
-const Proxy ParaKey = "proxy"
-const Cookie ParaKey = "cookie"
+const proxy ParaKey = "proxy"
+const cookie ParaKey = "cookie"
+const timeoutInSeconds ParaKey = "timeout_in_seconds"
 
 type FetchJoint struct {
 	Parameters
 	timeout time.Duration
 }
 
-func (this FetchJoint) Name() string {
-	return string(Fetch)
+func (joint FetchJoint) Name() string {
+	return "fetch"
 }
 
 type signal struct {
@@ -50,10 +49,10 @@ type signal struct {
 	status model.TaskStatus
 }
 
-func (this FetchJoint) Process(context *Context) error {
+func (joint FetchJoint) Process(context *Context) error {
 
-	this.timeout = 10 * time.Second
-	timer := time.NewTimer(this.timeout)
+	joint.timeout = time.Duration(joint.MustGetInt64(timeoutInSeconds)) * time.Second
+	timer := time.NewTimer(joint.timeout)
 	defer timer.Stop()
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
@@ -63,7 +62,7 @@ func (this FetchJoint) Process(context *Context) error {
 
 	if len(requestUrl) == 0 {
 		log.Error("invalid fetchUrl,", requestUrl)
-		context.ErrorExit("invalid fetch url")
+		context.Exit("invalid fetch url")
 		return errors.New("invalid fetchUrl")
 	}
 
@@ -74,8 +73,8 @@ func (this FetchJoint) Process(context *Context) error {
 	flg := make(chan signal, 1)
 	go func() {
 
-		cookie, _ := this.GetString(Cookie)
-		proxy, _ := this.GetString(Proxy) //"socks5://127.0.0.1:9150"  //TODO 这个是全局配置,后续的url应该也使用同样的配置,应该在domain setting里面
+		cookie, _ := joint.GetString(cookie)
+		proxy, _ := joint.GetString(proxy)
 
 		//先全局,再domain,再task,再pipeline,层层覆盖
 		log.Trace("proxy:", proxy)
@@ -97,7 +96,7 @@ func (this FetchJoint) Process(context *Context) error {
 
 				if snapshot.StatusCode == 404 {
 					log.Info("skip while 404, ", requestUrl, " , ", snapshot.StatusCode)
-					context.Break("fetch 404")
+					context.End("fetch 404")
 					flg <- signal{flag: false, err: errors.New("404 NOT FOUND"), status: model.Task404Ignore}
 					return
 				}
@@ -150,10 +149,10 @@ func (this FetchJoint) Process(context *Context) error {
 	//监听通道，由于设有超时，不可能泄露
 	select {
 	case <-timer.C:
-		log.Error("fetching url time out, ", requestUrl, ", ", this.timeout)
+		log.Error("fetching url time out, ", requestUrl, ", ", joint.timeout)
 		stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
 		task.Status = model.TaskFetchTimeout
-		context.Break(fmt.Sprintf("fetching url time out, %s, %s", requestUrl, this.timeout))
+		context.End(fmt.Sprintf("fetching url time out, %s, %s", requestUrl, joint.timeout))
 		return errors.New("fetch url time out")
 	case value := <-flg:
 		if value.flag {
@@ -162,7 +161,7 @@ func (this FetchJoint) Process(context *Context) error {
 		} else {
 			log.Debug("fetching url error exit, ", requestUrl)
 			if value.err != nil {
-				context.Break(value.err.Error())
+				context.End(value.err.Error())
 			}
 			stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_FAIL_COUNT)
 		}

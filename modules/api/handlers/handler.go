@@ -20,10 +20,12 @@ import (
 	"github.com/infinitbyte/gopa/core/http"
 )
 
+// API namespace
 type API struct {
 	api.Handler
 }
 
+// InitAPI register apis
 func InitAPI() {
 
 	apis := API{}

@@ -27,8 +27,6 @@ import (
 	"sync"
 )
 
-const Hash JointKey = "hash"
-
 type HashJoint struct {
 	Parameters
 }
@@ -36,11 +34,11 @@ type HashJoint struct {
 const simHashEnabled ParaKey = "simhash_enabled"
 const simHashDictFolder ParaKey = "simhash_dict_folder"
 
-func (this HashJoint) Name() string {
-	return string(Hash)
+func (joint HashJoint) Name() string {
+	return "hash"
 }
 
-func (this HashJoint) Process(context *Context) error {
+func (joint HashJoint) Process(context *Context) error {
 
 	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 
@@ -52,8 +50,8 @@ func (this HashJoint) Process(context *Context) error {
 
 	snapshot.Hash = fmt.Sprintf("%x", bs)
 
-	if this.GetBool(simHashEnabled, false) {
-		this.loadDict()
+	if joint.GetBool(simHashEnabled, false) {
+		joint.loadDict()
 		hash1 := Simhash(&body, 200)
 		snapshot.SimHash = fmt.Sprintf("%x", hash1)
 	}
@@ -64,19 +62,20 @@ func (this HashJoint) Process(context *Context) error {
 var loaded = false
 var lock sync.Mutex
 
-func (this HashJoint) loadDict() {
-	lock.Lock()
-	defer lock.Unlock()
+func (joint HashJoint) loadDict() {
 	if loaded {
 		return
 	}
+
+	lock.Lock()
+	defer lock.Unlock()
 
 	log.Debug("loading jieba dict files")
 	mainDict := "config/dict/main.dict.txt"
 	idfDict := "config/dict/idf.txt"
 	stopwordsDict := "config/dict/stop_words.txt"
-	if this.Has(simHashDictFolder) {
-		dictRoot := this.MustGetString(simHashDictFolder)
+	if joint.Has(simHashDictFolder) {
+		dictRoot := joint.MustGetString(simHashDictFolder)
 		if len(dictRoot) > 0 {
 			mainDict = path.Join(dictRoot, mainDict)
 			idfDict = path.Join(dictRoot, idfDict)

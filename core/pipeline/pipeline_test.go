@@ -29,26 +29,26 @@ type crawlerJoint struct {
 	Parameters
 }
 
-func (this crawlerJoint) Name() string {
+func (joint crawlerJoint) Name() string {
 	return "crawler"
 }
 
-func (this crawlerJoint) Process(s *Context) error {
+func (joint crawlerJoint) Process(s *Context) error {
 	s.Data[("webpage")] = "hello world gogo "
-	s.Data["received_url"] = this.Data["url"]
+	s.Data["received_url"] = joint.Data["url"]
 	s.Data[("status")] = true
-	fmt.Println("start to crawlling url: ", this.Get("url")) // + this.GetParameter("url").(string))
+	fmt.Println("start to crawlling url: ", joint.Get("url"))
 	return nil
 }
 
 type parserJoint struct {
 }
 
-func (this parserJoint) Name() string {
+func (joint parserJoint) Name() string {
 	return "parser"
 }
 
-func (this parserJoint) Process(s *Context) error {
+func (joint parserJoint) Process(s *Context) error {
 	s.Data[("urls")] = "gogo"
 	s.Data[("domain")] = "http://gogo.com"
 	//pub urls to channel
@@ -59,11 +59,11 @@ func (this parserJoint) Process(s *Context) error {
 type saveJoint struct {
 }
 
-func (this saveJoint) Name() string {
+func (joint saveJoint) Name() string {
 	return "save"
 }
 
-func (this saveJoint) Process(s *Context) error {
+func (joint saveJoint) Process(s *Context) error {
 	s.Set("saved", "true")
 	//pub urls to channel
 	fmt.Println("start to save web content")
@@ -73,11 +73,11 @@ func (this saveJoint) Process(s *Context) error {
 type publishJoint struct {
 }
 
-func (this publishJoint) Name() string {
+func (joint publishJoint) Name() string {
 	return "publish"
 }
 
-func (this publishJoint) Process(s *Context) error {
+func (joint publishJoint) Process(s *Context) error {
 	fmt.Println("start to end pipeline")
 	s.Set("published", "true")
 	return nil

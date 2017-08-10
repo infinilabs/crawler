@@ -23,7 +23,7 @@ import (
 	"fmt"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/daemon"
-	. "github.com/infinitbyte/gopa/core/env"
+	"github.com/infinitbyte/gopa/core/env"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/logger"
 	"github.com/infinitbyte/gopa/core/module"
@@ -40,23 +40,18 @@ import (
 )
 
 var (
-	env             *Env
+	environment     *env.Env
 	startTime       time.Time
 	finalQuitSignal chan bool
 )
 
-//var (
-//	counter       *ratecounter.RateCounter
-//	//hitsperminute = expvar.NewInt("hits_per_minute")
-//)
-
 func onStart() {
-	fmt.Println(GetWelcomeMessage())
+	fmt.Println(env.GetWelcomeMessage())
 	startTime = time.Now()
 }
 
 func onShutdown() {
-	if env.IsDebug {
+	if environment.IsDebug {
 		fmt.Println(string(*stats.StatsAll()))
 	}
 
@@ -67,7 +62,7 @@ func onShutdown() {
 	fmt.Println("   _` |   _ \\   _ \\   _` |     _ \\  |  |   -_) ")
 	fmt.Println(" \\__, | \\___/ \\___/ \\__,_|   _.__/ \\_, | \\___| ")
 	fmt.Println(" ____/                             ___/        ")
-	fmt.Println("[gopa] "+VERSION+", uptime:", time.Now().Sub(startTime))
+	fmt.Println("[gopa] "+env.VERSION+", uptime:", time.Since(startTime))
 	fmt.Println(" ")
 }
 
@@ -114,9 +109,40 @@ func main() {
 	var logDir = flag.String("log_path", "log", "the log path, default: log")
 
 	flag.Parse()
+	logger.SetLogging(env.EmptyEnv(), *logLevel, *logDir)
 
-	logger.SetLogging(EmptyEnv(), *logLevel, *logDir)
+	environment = env.Environment(*configFile)
+	environment.IsDebug = *isDebug
+	//put env into global registrar
+	global.RegisterEnv(environment)
 
+	logger.SetLogging(environment, *logLevel, *logDir)
+
+	//check instance lock
+	util.CheckInstanceLock(environment.SystemConfig.GetWorkingDir())
+
+	//set path to persist id
+	util.SetIDPersistencePath(environment.SystemConfig.GetWorkingDir())
+
+	//cleanup
+	defer func() {
+		util.ClearInstanceLock()
+
+		if r := recover(); r != nil {
+			if e, ok := r.(runtime.Error); ok {
+				log.Error("main: ", e)
+			}
+			log.Error("main: ", r)
+		}
+		util.SnapshotPersistID()
+		log.Flush()
+		logger.Flush()
+
+		//print goodbye message
+		onShutdown()
+	}()
+
+	//profile options
 	if *httpprof != "" {
 		go func() {
 			log.Infof("pprof listen at: http://%s/debug/pprof/", *httpprof)
@@ -138,7 +164,7 @@ func main() {
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
 		if err != nil {
-			log.Error(err)
+			panic(err)
 		}
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
@@ -148,10 +174,10 @@ func main() {
 		if *memprofile != "" {
 			f, err := os.Create(*memprofile)
 			if err != nil {
-				log.Error(err)
+				panic(err)
 			}
 			pprof.WriteHeapProfile(f)
-			defer f.Close()
+			f.Close()
 		}
 	}
 
@@ -180,29 +206,7 @@ func main() {
 
 	}
 
-	env = Environment(*configFile)
-	env.IsDebug = *isDebug
-	//put env into global registrar
-	global.RegisterEnv(env)
-	logger.SetLogging(env, *logLevel, *logDir)
-
-	//check instance lock
-	util.CheckInstanceLock(env.SystemConfig.GetWorkingDir())
-	defer func() {
-		if r := recover(); r != nil {
-			if e, ok := r.(runtime.Error); ok {
-				log.Error("main: ", util.GetRuntimeErrorMessage(e))
-			}
-			log.Error("main", util.ToJson(r, true))
-		}
-		log.Flush()
-		logger.Flush()
-
-		//print goodbye message
-		onShutdown()
-		util.ClearInstanceLock()
-	}()
-
+	//modules
 	module.New()
 	modules.Register()
 	module.Start()

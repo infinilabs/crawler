@@ -17,19 +17,20 @@ limitations under the License.
 package pipe
 
 import (
-	. "github.com/infinitbyte/gopa/core/pipeline"
+	api "github.com/infinitbyte/gopa/core/pipeline"
 )
 
-const Empty JointKey = "empty"
-
+// EmptyJoint is a place holder
 type EmptyJoint struct {
 }
 
-func (this EmptyJoint) Name() string {
-	return string(Empty)
+// Name return empty
+func (joint EmptyJoint) Name() string {
+	return "empty"
 }
 
-func (this EmptyJoint) Process(s *Context) error {
+// Process do nothing
+func (joint EmptyJoint) Process(s *api.Context) error {
 
 	return nil
 }

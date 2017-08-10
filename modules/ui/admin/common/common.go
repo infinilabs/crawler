@@ -21,6 +21,7 @@ import (
 	"strconv"
 )
 
+// NavCurrent return the current nav html code snippet
 func NavCurrent(cur, nav string) string {
 	if cur == nav {
 		return " class=\"uk-active\" "
@@ -36,11 +37,13 @@ type navObj struct {
 
 var navs []navObj
 
+// RegisterNav register a custom nav link
 func RegisterNav(name, displayName string, url string) {
 	obj := navObj{name: name, displayName: displayName, url: url}
 	navs = append(navs, obj)
 }
 
+// GetPagination return a pagination html code snippet
 func GetPagination(domain string, from, size, total int, url string) string {
 
 	var cur = from / size
@@ -84,6 +87,7 @@ func GetPagination(domain string, from, size, total int, url string) string {
 	return buffer.String()
 }
 
+// GetJSBlock return a JS wrapped code block
 func GetJSBlock(buffer *bytes.Buffer, js string) {
 
 	buffer.WriteString("<script type=\"text/javascript\">")

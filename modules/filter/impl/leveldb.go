@@ -45,13 +45,13 @@ func (filter *LeveldbFilter) Open(fileName string) error {
 	return nil
 }
 
-func (this *LeveldbFilter) Close() error {
+func (filter *LeveldbFilter) Close() error {
 
-	log.Debug("start persist leveldb, file:", this.persistFileName)
+	log.Debug("start persist leveldb, file:", filter.persistFileName)
 
-	err := this.filter.Close()
+	err := filter.filter.Close()
 	if err != nil {
-		log.Error("leveldb:", this.persistFileName, err)
+		log.Error("leveldb:", filter.persistFileName, err)
 	}
 	return err
 
@@ -65,7 +65,7 @@ func (filter *LeveldbFilter) Exists(key []byte) bool {
 	if err != nil {
 		return false
 	}
-	if value != nil && len(value) > 0 {
+	if len(value) > 0 {
 		return true
 	}
 	return false

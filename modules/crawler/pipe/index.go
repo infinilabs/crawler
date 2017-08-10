@@ -22,22 +22,23 @@ import (
 	"encoding/json"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/model"
-	. "github.com/infinitbyte/gopa/core/pipeline"
+	api "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/queue"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
 )
 
-const Index JointKey = "index"
-
+// IndexJoint is used to send snapshot and task info into index
 type IndexJoint struct {
 }
 
-func (this IndexJoint) Name() string {
-	return string(Index)
+// Name return index
+func (joint IndexJoint) Name() string {
+	return "index"
 }
 
-func (this IndexJoint) Process(c *Context) error {
+// Process wrapper index document and send to queue
+func (joint IndexJoint) Process(c *api.Context) error {
 
 	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)

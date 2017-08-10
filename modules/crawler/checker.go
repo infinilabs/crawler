@@ -36,7 +36,7 @@ var signalChannel chan bool
 
 var checkerStarted bool
 
-func (this CheckerModule) Name() string {
+func (module CheckerModule) Name() string {
 	return "Checker"
 }
 
@@ -83,29 +83,32 @@ func getDefaultCheckerTaskConfig() TaskConfig {
 	return defaultCheckerConfig
 }
 
-func (this CheckerModule) Start(cfg *Config) {
+func (module CheckerModule) Start(cfg *Config) {
 	if checkerStarted {
 		log.Error("url checker is already checkerStarted, please stop it first.")
 		return
 	}
+
+	InitJoints()
+
 	config := getDefaultCheckerTaskConfig()
 	cfg.Unpack(&config)
-	this.config = &config
+	module.config = &config
 
 	signalChannel = make(chan bool)
-	go this.runCheckerGo()
+	go module.runCheckerGo()
 	checkerStarted = true
 	log.Trace("Checker started")
 }
 
-func (this CheckerModule) runCheckerGo() {
+func (module CheckerModule) runCheckerGo() {
 
 	var data []byte
 	for {
 		select {
 		case data = <-queue.ReadChan(config.CheckChannel):
 			stats.Increment("queue."+string(config.CheckChannel), "pop")
-			this.execute(data)
+			module.execute(data)
 		case <-signalChannel:
 			log.Trace("Checker stopped")
 		}
@@ -113,7 +116,7 @@ func (this CheckerModule) runCheckerGo() {
 	}
 }
 
-func (this CheckerModule) execute(data []byte) {
+func (module CheckerModule) execute(data []byte) {
 	startTime := time.Now()
 	seed := model.TaskSeedFromBytes(data)
 
@@ -124,10 +127,10 @@ func (this CheckerModule) execute(data []byte) {
 	task.Depth = seed.Depth
 	task.Breadth = seed.Breadth
 
-	pipeline := this.runPipe(global.Env().IsDebug, task)
+	pipeline := module.runPipe(global.Env().IsDebug, task)
 
 	//send to disk queue
-	if len(task.Host) > 0 && !pipeline.GetContext().IsErrorExit() && !pipeline.GetContext().IsBreak() {
+	if len(task.Host) > 0 && !pipeline.GetContext().IsExit() && !pipeline.GetContext().IsEnd() {
 		stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_TOTAL_COUNT)
 
 		err := model.IncrementDomainLinkCount(task.Host)
@@ -141,7 +144,7 @@ func (this CheckerModule) execute(data []byte) {
 		stats.Increment("checker.url", "valid_seed")
 
 		log.Debugf("send url: %s ,depth: %d, breadth: %d, to fetch queue", string(seed.Url), seed.Depth, seed.Breadth)
-		elapsedTime := time.Now().Sub(startTime)
+		elapsedTime := time.Since(startTime)
 		stats.Timing("checker.url", "time", elapsedTime.Nanoseconds())
 	} else {
 		log.Debug("ignored url, ", seed.Url)
@@ -151,7 +154,7 @@ func (this CheckerModule) execute(data []byte) {
 
 }
 
-func (this CheckerModule) runPipe(debug bool, task *model.Task) *Pipeline {
+func (module CheckerModule) runPipe(debug bool, task *model.Task) *Pipeline {
 	var pipeline *Pipeline
 	defer func() {
 
@@ -168,18 +171,18 @@ func (this CheckerModule) runPipe(debug bool, task *model.Task) *Pipeline {
 	context := &Context{Phrase: config.PhraseChecker, IgnoreBroken: true}
 	context.Set(CONTEXT_CRAWLER_TASK, task)
 
-	if this.config.DefaultPipelineConfig == nil {
+	if module.config.DefaultPipelineConfig == nil {
 		panic("default pipeline config can't be null")
 	}
 
-	pipeline = NewPipelineFromConfig(this.config.DefaultPipelineConfig)
+	pipeline = NewPipelineFromConfig(module.config.DefaultPipelineConfig)
 	pipeline.Context(context)
 	pipeline.Run()
 
 	return pipeline
 }
 
-func (this CheckerModule) Stop() error {
+func (module CheckerModule) Stop() error {
 	log.Trace("start stop checker")
 
 	if checkerStarted {

@@ -20,44 +20,50 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/filter"
 	"github.com/infinitbyte/gopa/core/model"
-	. "github.com/infinitbyte/gopa/core/pipeline"
+	api "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/stats"
-	"github.com/infinitbyte/gopa/modules/config"
 	"regexp"
 )
 
-const UrlCheckFilter JointKey = "url_check_filter"
-
-type UrlCheckFilterJoint struct {
-	Parameters
+// FilterCheckJointused to check the task url if it is already in the filter, if not in the filter, then add it to task filter, and make sure won't add it next time
+type FilterCheckJoint struct {
+	api.Parameters
 	//ignore files end with js,css,apk,zip
 	SkipPageParsePattern *regexp.Regexp
 }
 
-func (this UrlCheckFilterJoint) Name() string {
-	return string(UrlCheckFilter)
+// filter_key is the filter name used to check and filter
+var filterKey api.ParaKey = "filter_key"
+
+// Name return: filter_check
+func (joint FilterCheckJoint) Name() string {
+	return "filter_check"
 }
 
-func (this UrlCheckFilterJoint) Process(context *Context) error {
+// Process the filtering and add it to the filter
+func (joint FilterCheckJoint) Process(context *api.Context) error {
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 
 	url := task.Url
 
+	key := joint.MustGetString(filterKey)
+	v := filter.Key(key)
+
 	//the url input here should not be a relative path
-	b, err := filter.CheckThenAdd(config.CheckFilter, []byte(url))
+	b, err := filter.CheckThenAdd(v, []byte(url))
 	log.Trace("cheking url:", url, ",hit:", b)
 
 	//checking
 	if b {
 		stats.Increment("checker.url", "duplicated")
 		log.Trace("duplicated url,already checked,  url:", url)
-		context.ErrorExit("duplicated url,already checked,  url:" + url)
+		context.Exit("duplicated url,already checked,  url:" + url)
 		return nil
 	}
 	if err != nil {
 		log.Error(err)
-		context.Break("check url error, url: " + url + ", " + err.Error())
+		context.End("check url error, url: " + url + ", " + err.Error())
 	}
 
 	return nil

@@ -23,6 +23,7 @@ import (
 	"github.com/infinitbyte/gopa/modules/ui/admin/common"
 )
 
+// InitUI register ui handlers
 func InitUI() {
 	//Nav init
 	common.RegisterNav("Console", "Console", "/admin/console/")

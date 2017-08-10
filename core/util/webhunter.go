@@ -23,7 +23,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	. "net/url"
+	uri "net/url"
 	"strings"
 	"time"
 
@@ -33,6 +33,7 @@ import (
 	"golang.org/x/net/proxy"
 )
 
+// GetHost return the host from a url
 func GetHost(url string) string {
 
 	if strings.HasPrefix(url, "//") {
@@ -56,7 +57,7 @@ func GetHost(url string) string {
 		}
 	}
 
-	uri, err := Parse(url)
+	uri, err := uri.Parse(url)
 	if err != nil {
 		log.Trace(err)
 		return ""
@@ -65,23 +66,23 @@ func GetHost(url string) string {
 	return uri.Host
 }
 
-//parse to get url root
-func GetRootUrl(source *URL) string {
+//GetRootUrl parse to get url root
+func GetRootUrl(source *uri.URL) string {
 	if strings.HasSuffix(source.Path, "/") {
 		return source.Host + source.Path
-	} else {
-		index := strings.LastIndex(source.Path, "/")
-		if index > 0 {
-			path := source.Path[0:index]
-			return source.Host + path
-		} else {
-			return source.Host + "/"
-		}
 	}
+
+	index := strings.LastIndex(source.Path, "/")
+	if index > 0 {
+		path := source.Path[0:index]
+		return source.Host + path
+	}
+
+	return source.Host + "/"
 }
 
-//format url, normalize url
-func FormatUrlForFilter(url []byte) []byte {
+//FormatUrlForFilter format url, normalize url
+func formatUrlForFilter(url []byte) []byte {
 	src := string(url)
 	log.Trace("start to normalize url:", src)
 	if strings.HasSuffix(src, "/") {
@@ -92,7 +93,7 @@ func FormatUrlForFilter(url []byte) []byte {
 	return []byte(src)
 }
 
-func GetUrlPathFolderWithoutFile(url []byte) []byte {
+func getUrlPathFolderWithoutFile(url []byte) []byte {
 	src := string(url)
 	log.Trace("start to get url's path folder:", src)
 	if strings.HasSuffix(src, "/") {
@@ -103,7 +104,7 @@ func GetUrlPathFolderWithoutFile(url []byte) []byte {
 	return []byte(src)
 }
 
-func noRedirect(req *http.Request, via []*http.Request) error {
+func noRedirect(*http.Request, []*http.Request) error {
 	return errors.New("catch http redirect!")
 }
 
@@ -115,6 +116,7 @@ func getUrl(url string) (string, error) {
 	return url, nil
 }
 
+// Result is the http request result
 type Result struct {
 	Host       string
 	Url        string
@@ -149,9 +151,9 @@ func get(url string, cookie string, proxyStr string) (*Result, error) {
 		// Create a transport that uses Tor Browser's SocksPort.  If
 		// talking to a system tor, this may be an AF_UNIX socket, or
 		// 127.0.0.1:9050 instead.
-		tbProxyURL, err := Parse(proxyStr)
+		tbProxyURL, err := uri.Parse(proxyStr)
 		if err != nil {
-			return nil, errors.New(fmt.Sprintf("Failed to parse proxy URL: %v", err))
+			return nil, fmt.Errorf("Failed to parse proxy URL: %v", err)
 		}
 
 		// Get a proxy Dialer that will create the connection on our
@@ -160,7 +162,7 @@ func get(url string, cookie string, proxyStr string) (*Result, error) {
 		// IsolateSOCKSAuth is needed.
 		tbDialer, err := proxy.FromURL(tbProxyURL, proxy.Direct)
 		if err != nil {
-			return nil, errors.New(fmt.Sprintf("Failed to obtain proxy dialer: %v", err))
+			return nil, fmt.Errorf("Failed to obtain proxy dialer: %v", err)
 		}
 
 		// Make a http.Transport that uses the proxy dialer, and a
@@ -265,6 +267,7 @@ func get(url string, cookie string, proxyStr string) (*Result, error) {
 	return nil, nil
 }
 
+// HttpPostJSON send a http request with json body
 func HttpPostJSON(url string, cookie string, postStr string) []byte {
 
 	log.Debug("let's post: " + url)
@@ -337,12 +340,14 @@ func HttpPostJSON(url string, cookie string, postStr string) []byte {
 	return nil
 }
 
-func HttpGetWithCookie(resource string, cookie string, proxy string) (result *Result, err error) {
+// HttpGetWithCookie issue http request with cookie
+func HttpGetWithCookie(resource string, cookie string, proxy string) (*Result, error) {
 	out, err := get(resource, cookie, proxy)
 	return out, err
 }
 
-func HttpGet(resource string) (msg []byte, err error) {
+// HttpGet issue simple http request
+func HttpGet(resource string) ([]byte, error) {
 
 	client := &http.Client{
 		Transport: &http.Transport{

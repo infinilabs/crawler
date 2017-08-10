@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-func (this API) handleUserLoginRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (handler API) handleUserLoginRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
 	b, v := api.GetSession(w, req, "key")
 	if !b {
@@ -33,11 +33,11 @@ func (this API) handleUserLoginRequest(w http.ResponseWriter, req *http.Request,
 
 	b, v = api.GetFlash(w, req)
 	if b {
-		this.WriteJSON(w, v, 200)
+		handler.WriteJSON(w, v, 200)
 		return
 	}
 
-	this.WriteJSON(w, v, 200)
+	handler.WriteJSON(w, v, 200)
 
 	return
 }

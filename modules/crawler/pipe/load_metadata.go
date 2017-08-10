@@ -17,20 +17,20 @@ limitations under the License.
 package pipe
 
 import (
-	. "github.com/infinitbyte/gopa/core/pipeline"
+	api "github.com/infinitbyte/gopa/core/pipeline"
 )
 
-const LoadMetadata JointKey = "load_metadata"
-
-//load metadata from db
+//LoadMetadataJoint load metadata from db
 type LoadMetadataJoint struct {
 }
 
-func (this LoadMetadataJoint) Name() string {
-	return string(LoadMetadata)
+// Name is load_metadata
+func (joint LoadMetadataJoint) Name() string {
+	return "load_metadata"
 }
 
-func (this LoadMetadataJoint) Process(context *Context) error {
+// Process load metadata
+func (joint LoadMetadataJoint) Process(context *api.Context) error {
 
 	return nil
 }

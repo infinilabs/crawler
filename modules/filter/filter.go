@@ -15,28 +15,28 @@ import (
 type FilterModule struct {
 }
 
-func (this FilterModule) Name() string {
+func (module FilterModule) Name() string {
 	return "Filter"
 }
 
-func (this FilterModule) Exists(bucket Key, key []byte) bool {
+func (module FilterModule) Exists(bucket Key, key []byte) bool {
 	f := filters[bucket]
 	return f.Exists(key)
 }
 
-func (this FilterModule) Add(bucket Key, key []byte) error {
+func (module FilterModule) Add(bucket Key, key []byte) error {
 	f := filters[bucket]
 	return f.Add(key)
 }
 
-func (this FilterModule) Delete(bucket Key, key []byte) error {
+func (module FilterModule) Delete(bucket Key, key []byte) error {
 	f := filters[bucket]
 	return f.Delete(key)
 }
 
 var l sync.RWMutex
 
-func (this FilterModule) CheckThenAdd(bucket Key, key []byte) (b bool, err error) {
+func (module FilterModule) CheckThenAdd(bucket Key, key []byte) (b bool, err error) {
 	f := filters[bucket]
 	l.Lock()
 	defer l.Unlock()
@@ -61,7 +61,7 @@ func initFilter(key Key) {
 
 var filters map[Key]*impl.LeveldbFilter
 
-func (this FilterModule) Start(cfg *Config) {
+func (module FilterModule) Start(cfg *Config) {
 
 	filters = map[Key]*impl.LeveldbFilter{}
 
@@ -70,10 +70,10 @@ func (this FilterModule) Start(cfg *Config) {
 	initFilter(config.FetchFilter)
 	initFilter(config.CheckFilter)
 
-	filter.Register(this)
+	filter.Register(module)
 }
 
-func (this FilterModule) Stop() error {
+func (module FilterModule) Stop() error {
 	for _, v := range filters {
 		err := (*v).Close()
 		if err != nil {

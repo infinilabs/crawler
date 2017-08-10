@@ -17,11 +17,11 @@ var queues map[QueueKey]*BackendQueue
 type DiskQueue struct {
 }
 
-func (this DiskQueue) Name() string {
+func (module DiskQueue) Name() string {
 	return "Queue"
 }
 
-func (this DiskQueue) Start(cfg *Config) {
+func (module DiskQueue) Start(cfg *Config) {
 	queues = make(map[QueueKey]*BackendQueue)
 	path := global.Env().SystemConfig.GetWorkingDir() + "/queue"
 	os.Mkdir(path, 0777)
@@ -34,19 +34,19 @@ func (this DiskQueue) Start(cfg *Config) {
 	queues[config.DispatcherChannel] = &pendingDispatchDiskQueue
 	queues[config.IndexChannel] = &pendingIndexDiskQueue
 	//TODO configable
-	Register(this)
+	Register(module)
 }
 
-func (this DiskQueue) Push(k QueueKey, v []byte) error {
+func (module DiskQueue) Push(k QueueKey, v []byte) error {
 	return (*queues[k]).Put(v)
 }
 
-func (this DiskQueue) ReadChan(k QueueKey) chan []byte {
+func (module DiskQueue) ReadChan(k QueueKey) chan []byte {
 
 	return (*queues[k]).ReadChan()
 }
 
-func (this DiskQueue) Pop(k QueueKey, timeoutInSeconds time.Duration) (error, []byte) {
+func (module DiskQueue) Pop(k QueueKey, timeoutInSeconds time.Duration) (error, []byte) {
 
 	if timeoutInSeconds > 0 {
 		timeout := make(chan bool, 1)
@@ -66,12 +66,17 @@ func (this DiskQueue) Pop(k QueueKey, timeoutInSeconds time.Duration) (error, []
 	}
 }
 
-func (this DiskQueue) Close(k QueueKey) error {
+func (module DiskQueue) Close(k QueueKey) error {
 	b := (*queues[k]).Close()
 	return b
 }
 
-func (this DiskQueue) Stop() error {
+func (module DiskQueue) Depth(k QueueKey) int64 {
+	b := (*queues[k]).Depth()
+	return b
+}
+
+func (module DiskQueue) Stop() error {
 	for _, v := range queues {
 		err := (*v).Close()
 		if err != nil {

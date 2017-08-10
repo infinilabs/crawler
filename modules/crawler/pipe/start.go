@@ -18,26 +18,24 @@ package pipe
 
 import (
 	"errors"
-	"github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/model"
-	. "github.com/infinitbyte/gopa/core/pipeline"
+	api "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/util"
 	"time"
 )
 
-const InitTask JointKey = "init_task"
-
+// InitTaskJoint basically start the pipeline process, construct a model.Task, may loaded from db with CONTEXT_TASK_ID or manually passed in with CONTEXT_CRAWLER_TASK
 type InitTaskJoint struct {
-	Parameters
+	api.Parameters
 }
 
-func (this InitTaskJoint) Name() string {
-	return string(InitTask)
+// Name return: init_task
+func (joint InitTaskJoint) Name() string {
+	return "init_task"
 }
 
-func (this InitTaskJoint) Process(context *Context) error {
-
-	seelog.Trace("start process")
+// Process task load, init a new snapshot instance
+func (joint InitTaskJoint) Process(context *api.Context) error {
 
 	var task *model.Task
 
@@ -47,19 +45,19 @@ func (this InitTaskJoint) Process(context *Context) error {
 		//init task record
 		t, err := model.GetTask(context.MustGetString(CONTEXT_TASK_ID))
 		if err != nil {
-			context.ErrorExit("task init error")
+			context.Exit("task init error")
 			panic(err)
 		}
 		task = &t
 		context.Set(CONTEXT_CRAWLER_TASK, task)
 
 	} else {
-		context.ErrorExit("task init error")
+		context.Exit("task init error")
 		panic(errors.New("task not set"))
 	}
 
 	if task == nil {
-		context.ErrorExit("task init error")
+		context.Exit("task init error")
 		panic(errors.New("nil task"))
 	}
 

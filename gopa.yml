@@ -34,8 +34,46 @@ modules:
       - joint: url_normalization
         enabled: true
         parameters:
-          follow_all_domain: false
+          follow_all_domain: true
           follow_sub_domain: true
+      - joint: url_filter
+        enabled: true
+        parameters:
+          url_match_rule:
+            must_not:
+              prefix:
+              - "mailto:"
+              - "data:image/"
+              - "#"
+              - "javascript:"
+              contain: []
+              suffix: []
+            must:
+              contain: []
+            should:
+              prefix: []
+              contain: []
+          host_match_rule:
+            must:
+              contain: []
+            should:
+              contain: []
+            must_not:
+              contain: []
+          file_match_rule:
+            must:
+              contain: []
+            should:
+              contain: []
+            must_not:
+              contain: []
+          file_ext_match_rule:
+            should:
+              contain: []
+            must:
+              contain: []
+            must_not:
+              contain: [zip, exe, jar, js, css, rar, gz, zip, bmp, jpeg, gif, png, jpg, apk]
       - joint: load_metadata
         enabled: true
       - joint: ignore_timeout
@@ -44,12 +82,16 @@ modules:
         enabled: true
       - joint: fetch
         enabled: true
+        parameters:
+          timeout_in_seconds: 10
+#          proxy: "socks5://127.0.0.1:1080"
+#          cookie: ""
       - joint: parse
         enabled: true
         parameters:
           dispatch_links: true
-          max_depth: 1
-          max_breadth: 1
+          max_depth: 5
+          max_breadth: 2
       - joint: html2text
         parameters:
           merge_whitespace: false
@@ -104,12 +146,71 @@ modules:
       - joint: url_normalization
         enabled: true
         parameters:
-          follow_all_domain: false
+          follow_all_domain: true
           follow_sub_domain: true
-      - joint: url_ext_filter
+      - joint: url_filter
         enabled: true
-      - joint: url_check_filter
+        parameters:
+          url_match_rule:
+            must_not:
+              prefix:
+              - "mailto:"
+              - "data:image/"
+              - "#"
+              - "javascript:"
+              contain: []
+              suffix: []
+            must:
+              prefix: []
+              contain: []
+              suffix: []
+            should:
+              prefix: []
+              contain: []
+              suffix: []
+          host_match_rule:
+            must:
+              prefix: []
+              contain: []
+              suffix: []
+            should:
+              prefix: []
+              contain: []
+              suffix: []
+            must_not:
+              prefix: []
+              contain: []
+              suffix: []
+          file_match_rule:
+            must:
+              prefix: []
+              contain: []
+              suffix: []
+            should:
+              prefix: []
+              contain: []
+              suffix: []
+            must_not:
+              prefix: []
+              contain: []
+              suffix: []
+          file_ext_match_rule:
+            should:
+              prefix: []
+              contain: []
+              suffix: []
+            must:
+              prefix: []
+              contain: []
+              suffix: []
+            must_not:
+              contain: [zip, exe, jar, js, css, rar, gz, zip, bmp, jpeg, gif, png, jpg, apk]
+              prefix: []
+              suffix: []
+      - joint: filter_check
         enabled: true
+        parameters:
+          filter_key: check_filter
     end:
       joint: save_task
       enabled: true

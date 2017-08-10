@@ -31,7 +31,7 @@ func (this StorageModule) Name() string {
 	return "Storage"
 }
 
-func (this StorageModule) Start(cfg *config.Config) {
+func (module StorageModule) Start(cfg *config.Config) {
 
 	folder := path.Join(global.Env().SystemConfig.GetWorkingDir(), "blob")
 	os.MkdirAll(folder, 0777)
@@ -44,7 +44,7 @@ func (this StorageModule) Start(cfg *config.Config) {
 	//store.RegisterORMHandler(impl)
 }
 
-func (this StorageModule) Stop() error {
+func (module StorageModule) Stop() error {
 	err := impl.Close()
 	return err
 

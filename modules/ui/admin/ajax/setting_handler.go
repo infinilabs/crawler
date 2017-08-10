@@ -20,30 +20,32 @@ import (
 	"encoding/json"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/config"
-	. "github.com/infinitbyte/gopa/core/http"
+	api "github.com/infinitbyte/gopa/core/http"
 	logging "github.com/infinitbyte/gopa/core/logger"
 	"net/http"
 )
 
+// Ajax dealing with AJAX request
 type Ajax struct {
-	Handler
+	api.Handler
 }
 
-func (this Ajax) LoggingSettingAction(w http.ResponseWriter, req *http.Request) {
-	if req.Method == GET.String() {
+// LoggingSettingAction is the ajax request to update logging config
+func (ajax Ajax) LoggingSettingAction(w http.ResponseWriter, req *http.Request) {
+	if req.Method == api.GET.String() {
 
 		cfg := logging.GetLoggingConfig()
 		if cfg != nil {
-			this.WriteJSON(w, cfg, 200)
+			ajax.WriteJSON(w, cfg, 200)
 		} else {
-			this.Error500(w, "config not available")
+			ajax.Error500(w, "config not available")
 		}
 
-	} else if req.Method == PUT.String() || req.Method == POST.String() {
-		body, err := this.GetRawBody(req)
+	} else if req.Method == api.PUT.String() || req.Method == api.POST.String() {
+		body, err := ajax.GetRawBody(req)
 		if err != nil {
 			log.Error(err)
-			this.Error500(w, "config update failed")
+			ajax.Error500(w, "config update failed")
 			return
 		}
 
@@ -54,7 +56,7 @@ func (this Ajax) LoggingSettingAction(w http.ResponseWriter, req *http.Request) 
 		err = json.Unmarshal([]byte(configStr), &cfg)
 
 		if err != nil {
-			this.Error(w, err)
+			ajax.Error(w, err)
 
 		}
 
@@ -62,7 +64,7 @@ func (this Ajax) LoggingSettingAction(w http.ResponseWriter, req *http.Request) 
 
 		logging.UpdateLoggingConfig(&cfg)
 
-		this.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
+		ajax.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
 
 	}
 }

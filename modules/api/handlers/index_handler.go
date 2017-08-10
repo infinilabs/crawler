@@ -23,10 +23,11 @@ import (
 	"net/http"
 )
 
-func (this API) IndexAction(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+// IndexAction returns cluster health information
+func (handler API) IndexAction(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 
 	if req.URL.Path != "/" {
-		this.Error404(w)
+		handler.Error404(w)
 		return
 	}
 
@@ -40,5 +41,5 @@ func (this API) IndexAction(w http.ResponseWriter, req *http.Request, _ httprout
 	data["version"] = version
 	data["tagline"] = "You Know, for Web"
 
-	this.WriteJSON(w, &data, http.StatusOK)
+	handler.WriteJSON(w, &data, http.StatusOK)
 }

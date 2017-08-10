@@ -109,7 +109,6 @@ func (s *RaftModule) clusterInfo(w http.ResponseWriter, r *http.Request) {
 
 	b, _ := json.MarshalIndent(stats, "", "  ")
 	w.Write(b)
-	return
 }
 
 // Open opens the store. If enableSingle is set, and there are no existing peers,
@@ -347,7 +346,6 @@ func (s *RaftModule) handleKeyRequest(w http.ResponseWriter, r *http.Request) {
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
-	return
 }
 
 // Get returns the value for the given key.

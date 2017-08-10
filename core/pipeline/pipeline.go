@@ -17,9 +17,9 @@ limitations under the License.
 package pipeline
 
 import (
-	"errors"
 	"fmt"
 	log "github.com/cihub/seelog"
+	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/stats"
 	"github.com/infinitbyte/gopa/core/util"
@@ -35,8 +35,9 @@ type ParaKey string
 type Phrase int
 
 type Context struct {
-	Simulate bool `json:"simulate"`
 	Parameters
+
+	Simulate     bool        `json:"simulate"`
 	Phrase       Phrase      `json:"phrase"`
 	IgnoreBroken bool        `json:"ignore_broken"`
 	Payload      interface{} `json:"-"`
@@ -46,57 +47,55 @@ type Context struct {
 	exitFlag  bool
 }
 
-/**
-break all pipelines, but the end phrase not included
-*/
-func (this *Context) Break(msg interface{}) {
-	log.Trace("break,", this, ",", msg)
-	if this == nil {
+// End break all pipelines, but the end phrase not included
+func (context *Context) End(msg interface{}) {
+	log.Trace("break,", context, ",", msg)
+	if context == nil {
 		panic(errors.New("context is nil"))
 	}
-	this.breakFlag = true
-	this.Payload = msg
+	context.breakFlag = true
+	context.Payload = msg
 }
 
-func (this *Context) IsBreak() bool {
-	return this.breakFlag
+// IsEnd indicates whether the pipe process is end, end means no more processes will be execute
+func (context *Context) IsEnd() bool {
+	return context.breakFlag
 }
 
-/**
-break all pipelines, without execute the end phrase
-*/
-func (this *Context) IsErrorExit() bool {
-	return this.exitFlag
+// IsExit means all pipelines will be breaked and jump to outside, even the end phrase will not be executed as well
+func (context *Context) IsExit() bool {
+	return context.exitFlag
 }
 
-/**
-tell pipeline to exit all
-*/
-func (this *Context) ErrorExit(msg interface{}) {
-	this.exitFlag = true
-	this.Payload = msg
+// Exit tells pipeline to exit
+func (context *Context) Exit(msg interface{}) {
+	context.exitFlag = true
+	context.Payload = msg
 }
 
 type Parameters struct {
 	Data   map[string]interface{} `json:"data"`
-	l      sync.RWMutex
+	l      *sync.RWMutex
 	inited bool
 }
 
-func (this *Parameters) Init() {
-	if this.inited {
+func (para *Parameters) Init() {
+	if para.inited {
 		return
 	}
-	this.l.Lock()
-	if this.Data == nil {
-		this.Data = map[string]interface{}{}
+	if para.l == nil {
+		para.l = &sync.RWMutex{}
 	}
-	this.inited = true
-	this.l.Unlock()
+	para.l.Lock()
+	if para.Data == nil {
+		para.Data = map[string]interface{}{}
+	}
+	para.inited = true
+	para.l.Unlock()
 }
 
-func (this *Parameters) GetString(key ParaKey) (string, bool) {
-	v := this.Get(key)
+func (para *Parameters) GetString(key ParaKey) (string, bool) {
+	v := para.Get(key)
 	s, ok := v.(string)
 	if ok {
 		return s, ok
@@ -104,8 +103,8 @@ func (this *Parameters) GetString(key ParaKey) (string, bool) {
 	return s, ok
 }
 
-func (this *Parameters) GetBool(key ParaKey, defaultV bool) bool {
-	v := this.Get(key)
+func (para *Parameters) GetBool(key ParaKey, defaultV bool) bool {
+	v := para.Get(key)
 	s, ok := v.(bool)
 	if ok {
 		return s
@@ -113,32 +112,37 @@ func (this *Parameters) GetBool(key ParaKey, defaultV bool) bool {
 	return defaultV
 }
 
-func (this *Parameters) Has(key ParaKey) bool {
-	this.Init()
-	_, ok := this.Data[string(key)]
+func (para *Parameters) Has(key ParaKey) bool {
+	para.Init()
+	_, ok := para.Data[string(key)]
 	return ok
 }
 
-func (this *Parameters) GetInt(key ParaKey, defaultV int) (int, bool) {
-	v := this.Get(key)
-	s, ok := v.(int)
+func (para *Parameters) GetIntOrDefault(key ParaKey, defaultV int) int {
+	v, ok := para.GetInt(key, defaultV)
 	if ok {
-		return s, ok
+		return v
 	}
-	s1, ok := v.(uint)
+	return defaultV
+}
+func (para *Parameters) GetInt(key ParaKey, defaultV int) (int, bool) {
+	v, ok := para.GetInt64(key, 0)
 	if ok {
-		return int(s1), ok
+		return int(v), ok
 	}
 	return defaultV, ok
 }
 
-func (this *Parameters) GetIntOrDefault(key ParaKey, defaultV int) int {
-	v, _ := this.GetInt(key, defaultV)
-	return v
+func (para *Parameters) GetInt64OrDefault(key ParaKey, defaultV int64) int64 {
+	v, ok := para.GetInt64(key, defaultV)
+	if ok {
+		return v
+	}
+	return defaultV
 }
 
-func (this *Parameters) GetInt64(key ParaKey, defaultV int64) (int64, bool) {
-	v := this.Get(key)
+func (para *Parameters) GetInt64(key ParaKey, defaultV int64) (int64, bool) {
+	v := para.Get(key)
 
 	s, ok := v.(int64)
 	if ok {
@@ -155,118 +159,122 @@ func (this *Parameters) GetInt64(key ParaKey, defaultV int64) (int64, bool) {
 		return int64(s2), ok
 	}
 
+	s3, ok := v.(uint)
+	if ok {
+		return int64(s3), ok
+	}
+
 	log.Debug(key, ",", s, ",", ok)
 	return defaultV, ok
 }
 
-func (this *Parameters) MustGet(key ParaKey) interface{} {
-	this.Init()
+func (para *Parameters) MustGet(key ParaKey) interface{} {
+	para.Init()
 
 	s := string(key)
 
-	this.l.RLock()
-	v, ok := this.Data[s]
-	this.l.RUnlock()
+	para.l.RLock()
+	v, ok := para.Data[s]
+	para.l.RUnlock()
 
 	if !ok {
-		log.Debug(util.ToJson(this.Data, true))
+		log.Debug(util.ToJson(para.Data, true))
 		panic(fmt.Errorf("%s not found in context", key))
 	}
 
 	return v
 }
 
-func (this *Parameters) GetMap(key ParaKey) (map[string]interface{}, bool) {
-	v := this.Get(key)
+func (para *Parameters) GetMap(key ParaKey) (map[string]interface{}, bool) {
+	v := para.Get(key)
 	s, ok := v.(map[string]interface{})
 	return s, ok
 }
 
-func (this *Parameters) Get(key ParaKey) interface{} {
-	this.Init()
-	this.l.RLock()
+// GetStringArray will return a array which type of the items are string
+func (para *Parameters) GetStringArray(key ParaKey) ([]string, bool) {
+	v := para.Get(key)
+	s, ok := v.([]string)
+	return s, ok
+}
+
+func (para *Parameters) Get(key ParaKey) interface{} {
+	para.Init()
+	para.l.RLock()
 	s := string(key)
-	v := this.Data[s]
-	this.l.RUnlock()
+	v := para.Data[s]
+	para.l.RUnlock()
 	log.Debug("get context: ", key, ",", v, ",", reflect.TypeOf(v))
 	return v
 }
 
-func (this *Parameters) GetOrDefault(key ParaKey, val interface{}) interface{} {
-	this.Init()
-	this.l.RLock()
+func (para *Parameters) GetOrDefault(key ParaKey, val interface{}) interface{} {
+	para.Init()
+	para.l.RLock()
 	s := string(key)
-	v := this.Data[s]
-	this.l.RUnlock()
+	v := para.Data[s]
+	para.l.RUnlock()
 	if v == nil {
 		return val
 	}
 	return v
 }
 
-func (this *Parameters) Set(key ParaKey, value interface{}) {
-	this.Init()
-	this.l.Lock()
+func (para *Parameters) Set(key ParaKey, value interface{}) {
+	para.Init()
+	para.l.Lock()
 	s := string(key)
-	this.Data[s] = value
-	this.l.Unlock()
+	para.Data[s] = value
+	para.l.Unlock()
 }
 
-func (this *Parameters) MustGetString(key ParaKey) string {
-	s, ok := this.GetString(key)
+func (para *Parameters) MustGetString(key ParaKey) string {
+	s, ok := para.GetString(key)
 	if !ok {
-		log.Debug(util.ToJson(this.Data, true))
+		log.Debug(util.ToJson(para.Data, true))
 		panic(fmt.Errorf("%s not found in context", key))
 	}
 	return s
 }
 
-func (this *Parameters) GetStringOrDefault(key ParaKey, val string) string {
-	s, ok := this.GetString(key)
+func (para *Parameters) GetStringOrDefault(key ParaKey, val string) string {
+	s, ok := para.GetString(key)
 	if (!ok) || len(s) == 0 {
 		return val
 	}
 	return s
 }
 
-func (this *Parameters) MustGetBytes(key ParaKey) []byte {
-	s, ok := this.Get(key).([]byte)
+func (para *Parameters) MustGetBytes(key ParaKey) []byte {
+	s, ok := para.Get(key).([]byte)
 	if !ok {
-		log.Debug(util.ToJson(this.Data, true))
+		log.Debug(util.ToJson(para.Data, true))
 		panic(fmt.Errorf("%s not found in context", key))
 	}
 	return s
 }
 
-/*
-return 0 if not key was found
-*/
-func (this *Parameters) MustGetInt(key ParaKey) int {
-	s, ok := this.GetInt(key, 0)
+// MustGetInt return 0 if not key was found
+func (para *Parameters) MustGetInt(key ParaKey) int {
+	v, ok := para.GetInt(key, 0)
 	if !ok {
-		//try int64 finally
-		var s1 int64
-		s1, ok = this.GetInt64(key, 0)
-		if ok {
-			return int(s1)
-		}
 		panic(fmt.Errorf("%s not found in context", key))
 	}
-	return s
+	return v
 }
 
-func (this *Parameters) MustGetInt64(key ParaKey) int64 {
-	s, ok := this.GetInt64(key, 0)
+func (para *Parameters) MustGetInt64(key ParaKey) int64 {
+	s, ok := para.GetInt64(key, 0)
 	if !ok {
 		panic(fmt.Errorf("%s not found in context", key))
 	}
 	return s
 }
 
-func (this *Parameters) MustGetMap(key ParaKey) map[string]interface{} {
-	s, ok := this.GetMap(key)
+func (para *Parameters) MustGetMap(key ParaKey) map[string]interface{} {
+	s, ok := para.GetMap(key)
 	if !ok {
-		log.Debug(util.ToJson(this.Data, true))
+		log.Debug(util.ToJson(para.Data, true))
 		panic(fmt.Errorf("%s not found in context", key))
 	}
 	return s
@@ -294,105 +302,104 @@ func NewPipeline(name string) *Pipeline {
 	return pipe
 }
 
-func (this *Pipeline) Context(s *Context) *Pipeline {
+func (pipe *Pipeline) Context(s *Context) *Pipeline {
 	if s != nil {
-		this.context = s
-		this.context.Init()
+		pipe.context = s
+		pipe.context.Init()
 	}
 
-	return this
+	return pipe
 }
 
-func (this *Pipeline) GetID() string {
-	return this.id
+func (pipe *Pipeline) GetID() string {
+	return pipe.id
 }
 
-func (this *Pipeline) GetContext() *Context {
-	return this.context
+func (pipe *Pipeline) GetContext() *Context {
+	return pipe.context
 }
 
-func (this *Pipeline) Start(s Joint) *Pipeline {
-	this.joints = []Joint{s}
-	return this
+func (pipe *Pipeline) Start(s Joint) *Pipeline {
+	pipe.joints = []Joint{s}
+	return pipe
 }
 
-func (this *Pipeline) Join(s Joint) *Pipeline {
-	this.joints = append(this.joints, s)
-	return this
+func (pipe *Pipeline) Join(s Joint) *Pipeline {
+	pipe.joints = append(pipe.joints, s)
+	return pipe
 }
 
-func (this *Pipeline) End(s Joint) *Pipeline {
-	this.endJoint = s
-	return this
+func (pipe *Pipeline) End(s Joint) *Pipeline {
+	pipe.endJoint = s
+	return pipe
 }
 
-func (this *Pipeline) Run() *Context {
+func (pipe *Pipeline) Run() *Context {
 
-	stats.Increment(this.name+".pipeline", "total")
+	stats.Increment(pipe.name+".pipeline", "total")
 
 	//final phrase
 	defer func() {
 		if !global.Env().IsDebug {
 			if r := recover(); r != nil {
 				if e, ok := r.(runtime.Error); ok {
-					log.Errorf("%v", r)
-					this.context.Break(util.GetRuntimeErrorMessage(e))
+					pipe.context.End(util.GetRuntimeErrorMessage(e))
 				}
-				log.Debug("error in pipeline, ", this.name)
-				stats.Increment(this.name+".pipeline", "error")
+				log.Debug("error in pipeline, ", pipe.name, " ", r)
+				stats.Increment(pipe.name+".pipeline", "error")
 			}
 		}
-		if !this.context.IsErrorExit() && (!(this.context.IgnoreBroken && this.context.IsBreak())) {
-			this.endPipeline()
+		if !pipe.context.IsExit() && (!(pipe.context.IgnoreBroken && pipe.context.IsEnd())) {
+			pipe.endPipeline()
 		}
 
-		stats.Increment(this.name+".pipeline", "finished")
+		stats.Increment(pipe.name+".pipeline", "finished")
 	}()
 
 	var err error
-	for _, v := range this.joints {
-		log.Trace("pipe, ", this.name, ", start joint,", v.Name())
-		if this.context.IsBreak() {
+	for _, v := range pipe.joints {
+		log.Trace("pipe, ", pipe.name, ", start joint,", v.Name())
+		if pipe.context.IsEnd() {
 			log.Trace("break joint,", v.Name())
-			stats.Increment(this.name+".pipeline", "break")
+			stats.Increment(pipe.name+".pipeline", "break")
 			break
 		}
-		if this.context.IsErrorExit() {
+		if pipe.context.IsExit() {
 			if global.Env().IsDebug {
-				log.Debug(util.ToJson(this.id, true))
-				log.Debug(util.ToJson(this.name, true))
-				log.Debug(util.ToJson(this.context, true))
+				log.Debug(util.ToJson(pipe.id, true))
+				log.Debug(util.ToJson(pipe.name, true))
+				log.Debug(util.ToJson(pipe.context, true))
 			}
 			log.Trace("exit joint,", v.Name())
-			stats.Increment(this.name+".pipeline", "exit")
+			stats.Increment(pipe.name+".pipeline", "exit")
 			break
 		}
 		startTime := time.Now()
-		err = v.Process(this.context)
+		err = v.Process(pipe.context)
 		elapsedTime := time.Now().Sub(startTime)
-		stats.Timing(this.name+".pipeline", v.Name(), elapsedTime.Nanoseconds())
+		stats.Timing(pipe.name+".pipeline", v.Name(), elapsedTime.Nanoseconds())
 		if err != nil {
-			stats.Increment(this.name+".pipeline", "error")
-			log.Debug("%s-%s: %v", this.name, v.Name(), err)
-			this.context.Break(err)
+			stats.Increment(pipe.name+".pipeline", "error")
+			log.Debug("%s-%s: %v", pipe.name, v.Name(), err)
+			pipe.context.End(err)
 			panic(err)
 		}
-		log.Trace(this.name, ", end joint,", v.Name())
+		log.Trace(pipe.name, ", end joint,", v.Name())
 	}
 
-	return this.context
+	return pipe.context
 }
-func (this *Pipeline) endPipeline() {
-	if this.context.IsErrorExit() {
-		log.Debug("exit pipeline, ", this.name, ", ", this.context.Payload)
+func (pipe *Pipeline) endPipeline() {
+	if pipe.context.IsExit() {
+		log.Debug("exit pipeline, ", pipe.name, ", ", pipe.context.Payload)
 		return
 	}
 
-	log.Trace("start finish pipeline, ", this.name)
-	if this.endJoint != nil {
-		this.endJoint.Process(this.context)
+	log.Trace("start finish pipeline, ", pipe.name)
+	if pipe.endJoint != nil {
+		pipe.endJoint.Process(pipe.context)
 	}
-	log.Trace("end finish pipeline, ", this.name)
+	log.Trace("end finish pipeline, ", pipe.name)
 }
 
 func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
@@ -448,13 +455,14 @@ func GetJointInstance(cfg *JointConfig) Joint {
 	panic(errors.New(cfg.JointName + " not found"))
 }
 
-type JointKey string
-
-func Register(jointName JointKey, joint Joint) {
-	k := string(jointName)
+func Register(joint Joint) {
+	k := string(joint.Name())
 	RegisterByName(k, joint)
 }
 
 func RegisterByName(jointName string, joint Joint) {
+	if typeRegistry[jointName] != nil {
+		panic(errors.Errorf("joint with same name already registered, %s", jointName))
+	}
 	typeRegistry[jointName] = joint
 }

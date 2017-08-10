@@ -10,6 +10,7 @@ import (
 var locked bool
 var file string
 
+// CheckInstanceLock make sure there is not a lock placed before check, and place a lock after check
 func CheckInstanceLock(p string) {
 	file = path.Join(p, ".lock")
 	if FileExists(file) {
@@ -23,12 +24,14 @@ func CheckInstanceLock(p string) {
 	log.Info("workspace: ", p)
 }
 
+// ClearInstanceLock remove the lock
 func ClearInstanceLock() {
 	if locked {
 		os.Remove(path.Join(file))
 	}
 }
 
+// CheckProcessExists check if the pid is running
 func CheckProcessExists(pid int) bool {
 	err := syscall.Kill(pid, syscall.Signal(0))
 	return err == nil || err == syscall.EPERM

@@ -54,14 +54,6 @@ func TestDiskQueue(t *testing.T) {
 	assert.Equal(t, msgOut, msg)
 }
 
-type md struct {
-	depth        int64
-	readFileNum  int64
-	writeFileNum int64
-	readPos      int64
-	writePos     int64
-}
-
 func BenchmarkDiskQueuePut16(b *testing.B) {
 	benchmarkDiskQueuePut(16, b)
 }

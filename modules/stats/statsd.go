@@ -31,11 +31,11 @@ var defaultStatsdConfig = StatsDConfig{
 	IntervalInSeconds: 1,
 }
 
-func (this StatsDModule) Name() string {
+func (module StatsDModule) Name() string {
 	return "StatsD"
 }
 
-func (this StatsDModule) Start(cfg *Config) {
+func (module StatsDModule) Start(cfg *Config) {
 	if statsdInited {
 		return
 	}
@@ -61,40 +61,40 @@ func (this StatsDModule) Start(cfg *Config) {
 
 	statsdInited = true
 
-	stats.Register(this)
+	stats.Register(module)
 }
 
-func (this StatsDModule) Stop() error {
+func (module StatsDModule) Stop() error {
 	if statsdclient != nil {
 		statsdclient.Close()
 	}
 	return nil
 }
 
-func (this StatsDModule) Increment(category, key string) {
+func (module StatsDModule) Increment(category, key string) {
 
-	this.IncrementBy(category, key, 1)
+	module.IncrementBy(category, key, 1)
 }
 
-func (this StatsDModule) IncrementBy(category, key string, value int64) {
+func (module StatsDModule) IncrementBy(category, key string, value int64) {
 	if !statsdInited {
 		return
 	}
 	buffer.Incr(category+"."+key, value)
 }
 
-func (this StatsDModule) Decrement(category, key string) {
-	this.DecrementBy(category, key, 1)
+func (module StatsDModule) Decrement(category, key string) {
+	module.DecrementBy(category, key, 1)
 }
 
-func (this StatsDModule) DecrementBy(category, key string, value int64) {
+func (module StatsDModule) DecrementBy(category, key string, value int64) {
 	if !statsdInited {
 		return
 	}
 	buffer.Decr(category+"."+key, value)
 }
 
-func (this StatsDModule) Timing(category, key string, v int64) {
+func (module StatsDModule) Timing(category, key string, v int64) {
 	if !statsdInited {
 		return
 	}
@@ -102,17 +102,17 @@ func (this StatsDModule) Timing(category, key string, v int64) {
 
 }
 
-func (this StatsDModule) Gauge(category, key string, v int64) {
+func (module StatsDModule) Gauge(category, key string, v int64) {
 	if !statsdInited {
 		return
 	}
 	buffer.Gauge(category+"."+key, v)
 }
 
-func (this StatsDModule) Stat(category, key string) int64 {
+func (module StatsDModule) Stat(category, key string) int64 {
 	return 0
 }
 
-func (this StatsDModule) StatsAll() *[]byte {
+func (module StatsDModule) StatsAll() *[]byte {
 	return nil
 }

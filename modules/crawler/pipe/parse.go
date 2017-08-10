@@ -30,8 +30,6 @@ import (
 	"strings"
 )
 
-const ParsePage JointKey = "parse"
-
 type ParsePageJoint struct {
 	Parameters
 	MaxPageOfBreadth map[int]int //max page to fetch in each level's breadth, eg: 1:100;2:50;3:5;4:1
@@ -42,11 +40,11 @@ const dispatchLinks ParaKey = "dispatch_links"
 const maxDepth ParaKey = "max_depth"
 const maxBreadth ParaKey = "max_breadth"
 
-func (this ParsePageJoint) Name() string {
-	return string(ParsePage)
+func (joint ParsePageJoint) Name() string {
+	return "parse"
 }
 
-func (this ParsePageJoint) Process(context *Context) error {
+func (joint ParsePageJoint) Process(context *Context) error {
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
@@ -109,7 +107,7 @@ func (this ParsePageJoint) Process(context *Context) error {
 				href = hrefs[0]
 			}
 			text := strings.TrimSpace(s.Text())
-			strings.Replace(text, "\t", "", -1)
+			text = strings.Replace(text, "\t", "", -1)
 
 			if len(text) > 0 {
 				log.Trace("get link: ", text, " , ", href)
@@ -176,21 +174,21 @@ func (this ParsePageJoint) Process(context *Context) error {
 	}
 
 	//if reach max depth, skip for future fetch
-	if depth > this.GetIntOrDefault(maxDepth, 10) {
+	if depth > joint.GetIntOrDefault(maxDepth, 10) {
 		log.Trace("skip while reach max depth, ", depth, ", ", refUrl)
-		context.Break(fmt.Sprintf("skip while reach max depth: %v", depth))
+		context.End(fmt.Sprintf("skip while reach max depth: %v", depth))
 		return nil
 	}
 	//if reach max breadth, skip for future fetch
-	if breadth > this.GetIntOrDefault(maxBreadth, 10) {
+	if breadth > joint.GetIntOrDefault(maxBreadth, 10) {
 		log.Trace("skip while reach max breadth, ", breadth, ", ", refUrl)
-		context.Break(fmt.Sprintf("skip while reach max breadth: %v", breadth))
+		context.End(fmt.Sprintf("skip while reach max breadth: %v", breadth))
 		return nil
 	}
 
 	//dispatch links
 	for url := range links {
-		if this.GetBool(dispatchLinks, false) {
+		if joint.GetBool(dispatchLinks, false) {
 			if !filter.Exists(config.CheckFilter, []byte(url)) {
 				host := util.GetHost(url)
 				b := breadth

@@ -9,11 +9,11 @@ import (
 type ClusterModule struct {
 }
 
-func (this ClusterModule) Name() string {
+func (module ClusterModule) Name() string {
 	return "Cluster"
 }
 
-func (this ClusterModule) Start(cfg *Config) {
+func (module ClusterModule) Start(cfg *Config) {
 
 	s := raft.New()
 	if err := s.Open(); err != nil {
@@ -22,7 +22,7 @@ func (this ClusterModule) Start(cfg *Config) {
 	}
 }
 
-func (this ClusterModule) Stop() error {
+func (module ClusterModule) Stop() error {
 
 	return nil
 

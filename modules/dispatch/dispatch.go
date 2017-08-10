@@ -2,7 +2,7 @@ package dispatch
 
 import (
 	log "github.com/cihub/seelog"
-	. "github.com/infinitbyte/gopa/core/config"
+	cfg "github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/queue"
 	"github.com/infinitbyte/gopa/core/stats"
@@ -10,16 +10,19 @@ import (
 	"time"
 )
 
+// DispatchModule handle task dispatch, include new task and update task
 type DispatchModule struct {
 }
 
-func (this DispatchModule) Name() string {
+// Name return Dispatch
+func (module DispatchModule) Name() string {
 	return "Dispatch"
 }
 
 var signalChannel chan bool
 
-func (this DispatchModule) Start(cfg *Config) {
+// Start dispatch module
+func (module DispatchModule) Start(cfg *cfg.Config) {
 	signalChannel = make(chan bool, 2)
 	go func() {
 		now := time.Now().UTC()
@@ -106,7 +109,8 @@ func (this DispatchModule) Start(cfg *Config) {
 	}()
 }
 
-func (this DispatchModule) Stop() error {
+// Stop dispatch module
+func (module DispatchModule) Stop() error {
 	signalChannel <- true
 	signalChannel <- true
 	return nil

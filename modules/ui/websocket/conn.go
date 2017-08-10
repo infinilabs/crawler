@@ -5,7 +5,7 @@
 package websocket
 
 import (
-	"fmt"
+	log "github.com/cihub/seelog"
 	"github.com/gorilla/websocket"
 	"net/http"
 	"strings"
@@ -32,7 +32,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-// connection is an middleman between the websocket connection and the hub.
+// WebsocketConnection is an middleman between the websocket connection and the hub.
 type WebsocketConnection struct {
 	// The websocket connection.
 	ws *websocket.Conn
@@ -56,7 +56,7 @@ func (c *WebsocketConnection) readPump() {
 		_, message, err := c.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
-				fmt.Sprintln("error: %v", err)
+				log.Errorf("error: %v", err)
 			}
 			break
 		}
@@ -99,20 +99,25 @@ func (c *WebsocketConnection) writePump() {
 	}
 }
 
+// MsgType is the type of different message
 type MsgType string
 
 const (
+	// PrivateMessage means message is 1 to 1
 	PrivateMessage MsgType = "PRIVATE"
-	PublicMessage  MsgType = "PUBLIC"
-	ConfigMessage  MsgType = "CONFIG"
+	// PublicMessage means broadcast message
+	PublicMessage MsgType = "PUBLIC"
+	// ConfigMessage used to send configuration
+	ConfigMessage MsgType = "CONFIG"
 )
 
+// WritePrivateMessage will send msg to channel
 func (c *WebsocketConnection) WritePrivateMessage(msg string) error {
 
 	return c.WriteMessage(PrivateMessage, msg)
 }
 
-// the right way to write message, don't call c.write directly
+// WriteMessage will use the right way to write message, don't call c.write directly
 func (c *WebsocketConnection) WriteMessage(t MsgType, msg string) error {
 
 	msg = string(t) + " " + msg
@@ -141,12 +146,12 @@ func (c *WebsocketConnection) parseMessage(msg []byte) {
 
 }
 
-// serveWs handles websocket requests from the peer.
+// ServeWs handles websocket requests from the peer.
 func ServeWs(w http.ResponseWriter, r *http.Request) {
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return
 	}
 	c := &WebsocketConnection{signalChannel: make(chan []byte, 256), ws: ws, handlers: h.handlers}
@@ -155,6 +160,7 @@ func ServeWs(w http.ResponseWriter, r *http.Request) {
 	c.readPump()
 }
 
+// Broadcast public message to all channels
 func (c *WebsocketConnection) Broadcast(msg string) {
 	c.WriteMessage(PublicMessage, msg)
 

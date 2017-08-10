@@ -19,6 +19,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
  [nsq]: https://github.com/nsqio/nsq
 */
+
 package queue
 
 import (
@@ -84,7 +85,7 @@ type diskQueue struct {
 	exitSyncChan      chan int
 }
 
-// newDiskQueue instantiates a new instance of diskQueue, retrieving metadata
+// NewDiskQueue instantiates a new instance of diskQueue, retrieving metadata
 // from the filesystem and starting the read ahead goroutine
 func NewDiskQueue(name string, dataPath string, maxBytesPerFile int64,
 	minMsgSize int32, maxMsgSize int32,

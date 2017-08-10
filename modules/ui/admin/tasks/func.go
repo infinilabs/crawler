@@ -7,6 +7,7 @@ import (
 	"github.com/infinitbyte/gopa/core/util"
 )
 
+// GetDomainRow return html blocks to display a domain info
 func GetDomainRow(domain model.Domain) string {
 	var buffer bytes.Buffer
 	link := fmt.Sprintf("<a href=\"?domain=%v\">%v(%v)</a>", domain.Host, domain.Host, domain.LinksCount)
@@ -14,6 +15,7 @@ func GetDomainRow(domain model.Domain) string {
 	return buffer.String()
 }
 
+// GetTaskRow return html blocks to display a task info
 func GetTaskRow(task model.Task) string {
 	var buffer bytes.Buffer
 	buffer.WriteString("<tr>")

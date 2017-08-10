@@ -36,15 +36,16 @@ var signalChannels []*chan bool
 
 var crawlerStarted bool
 
-func (this CrawlerModule) Name() string {
+func (module CrawlerModule) Name() string {
 	return "Crawler"
 }
 
-func (this CrawlerModule) Start(cfg *Config) {
+func (module CrawlerModule) Start(cfg *Config) {
 
 	config := GetDefaultTaskConfig()
 	cfg.Unpack(&config)
-	this.config = &config
+	module.config = &config
+	module.rawConfig = cfg
 
 	//TODO
 	InitJoints()
@@ -62,7 +63,7 @@ func (this CrawlerModule) Start(cfg *Config) {
 			log.Trace("start crawler:", i)
 			signalC := make(chan bool, 1)
 			signalChannels[i] = &signalC
-			go this.runPipeline(global.Env(), &signalC, i)
+			go module.runPipeline(global.Env(), &signalC, i)
 
 		}
 	} else {
@@ -73,7 +74,7 @@ func (this CrawlerModule) Start(cfg *Config) {
 	crawlerStarted = true
 }
 
-func (this CrawlerModule) Stop() error {
+func (module CrawlerModule) Stop() error {
 	if crawlerStarted {
 		crawlerStarted = false
 		log.Debug("start shutting down crawler")
@@ -91,7 +92,7 @@ func (this CrawlerModule) Stop() error {
 	return nil
 }
 
-func (this CrawlerModule) runPipeline(env *Env, signalC *chan bool, shard int) {
+func (module CrawlerModule) runPipeline(env *Env, signalC *chan bool, shard int) {
 
 	var taskID []byte
 	for {
@@ -103,13 +104,13 @@ func (this CrawlerModule) runPipeline(env *Env, signalC *chan bool, shard int) {
 			stats.Increment("queue."+string(config.FetchChannel), "pop")
 			id := string(taskID)
 			log.Trace("shard:", shard, ",task received:", id)
-			this.execute(id, env)
+			module.execute(id, env)
 			log.Trace("shard:", shard, ",task finished:", id)
 		}
 	}
 }
 
-func (this CrawlerModule) execute(taskId string, env *Env) {
+func (module CrawlerModule) execute(taskId string, env *Env) {
 	var pipeline *Pipeline
 	defer func() {
 		if !env.IsDebug {
@@ -125,17 +126,17 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 	context := &Context{Phrase: config.PhraseCrawler}
 	context.Set(CONTEXT_TASK_ID, taskId)
 
-	if this.config.DefaultPipelineConfig == nil {
+	if module.config.DefaultPipelineConfig == nil {
 		panic("default pipeline config can't be null")
 	}
 
-	pipeline = NewPipelineFromConfig(this.config.DefaultPipelineConfig)
+	pipeline = NewPipelineFromConfig(module.config.DefaultPipelineConfig)
 	pipeline.Context(context)
 	pipeline.Run()
 
-	if this.config.FetchThresholdInMs > 0 {
-		log.Debug("sleep ", this.config.FetchThresholdInMs, "ms to control crawling speed")
-		time.Sleep(time.Duration(this.config.FetchThresholdInMs) * time.Millisecond)
+	if module.config.FetchThresholdInMs > 0 {
+		log.Debug("sleep ", module.config.FetchThresholdInMs, "ms to control crawling speed")
+		time.Sleep(time.Duration(module.config.FetchThresholdInMs) * time.Millisecond)
 		log.Debug("wake up now,continue crawing")
 	}
 
@@ -143,5 +144,6 @@ func (this CrawlerModule) execute(taskId string, env *Env) {
 }
 
 type CrawlerModule struct {
-	config *TaskConfig
+	config    *TaskConfig
+	rawConfig *Config
 }

@@ -21,34 +21,33 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/model"
-	. "github.com/infinitbyte/gopa/core/pipeline"
+	api "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/util"
 	u "net/url"
 	"path"
 	"sort"
 	"strings"
-	"time"
 )
 
-const UrlNormalization JointKey = "url_normalization"
-
+// UrlNormalizationJoint used to cleanup url and do normalization
 type UrlNormalizationJoint struct {
-	Parameters
-	timeout             time.Duration
+	api.Parameters
 	splitByUrlParameter []string
 	maxFileNameLength   int
 }
 
-const followAllDomain ParaKey = "follow_all_domain"
-const followSubDomain ParaKey = "follow_sub_domain"
+const followAllDomain api.ParaKey = "follow_all_domain"
+const followSubDomain api.ParaKey = "follow_sub_domain"
 
 var defaultFileName = "default.html"
 
-func (this UrlNormalizationJoint) Name() string {
-	return string(UrlNormalization)
+// Name of this joint is: url_normalization
+func (joint UrlNormalizationJoint) Name() string {
+	return "url_normalization"
 }
 
-func (this UrlNormalizationJoint) Process(context *Context) error {
+// Process will handle relative url and cleanup url
+func (joint UrlNormalizationJoint) Process(context *api.Context) error {
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
@@ -58,7 +57,7 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 	var err error
 
 	if len(url) <= 0 {
-		context.ErrorExit("url can't be null")
+		context.Exit("url can't be null")
 	}
 
 	log.Trace("start parse url,", url)
@@ -67,14 +66,13 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 
 	//adding default http protocol
 	if strings.HasPrefix(url, "//") {
-		tempUrl = strings.TrimLeft(url, "//")
 		tempUrl = "http:" + url
 	}
 
 	currentURI, err = u.Parse(tempUrl)
 	if err != nil {
 		log.Debug("url parsed failed, ", err, ",", tempUrl)
-		context.ErrorExit(err.Error())
+		context.Exit(err.Error())
 	}
 
 	log.Tracef("currentURI,schema:%s, host:%s", currentURI.Scheme, currentURI.Host)
@@ -162,7 +160,7 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 		currentURI, err = u.Parse(tempUrl)
 		if err != nil {
 			log.Error(err)
-			context.Break(err.Error())
+			context.End(err.Error())
 			return err
 		}
 	}
@@ -178,7 +176,7 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 	}
 
 	////resolve domain specific filter
-	if !this.GetBool(followAllDomain, false) && this.GetBool(followSubDomain, true) && currentURI != nil && referenceURI != nil {
+	if !joint.GetBool(followAllDomain, false) && joint.GetBool(followSubDomain, true) && currentURI != nil && referenceURI != nil {
 		log.Tracef("try to check domain rule, %s vs %s", referenceURI.Host, currentURI.Host)
 		if strings.Contains(currentURI.Host, ".") && strings.Contains(referenceURI.Host, ".") {
 			ref := strings.Split(referenceURI.Host, ".")
@@ -188,12 +186,12 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 
 			if !(ref[len(ref)-1] == cur[len(cur)-1] && ref[len(ref)-2] == cur[len(cur)-2]) {
 				log.Debug("domain mismatch,", referenceURI.Host, " vs ", currentURI.Host)
-				context.Break("domain missmatch," + referenceURI.Host + " vs " + currentURI.Host)
+				context.End("domain missmatch," + referenceURI.Host + " vs " + currentURI.Host)
 				return nil //known exception, not error
 			}
 		} else {
 			if referenceURI.Host != currentURI.Host {
-				context.Break("domain missmatch," + referenceURI.Host + " vs " + currentURI.Host)
+				context.End("domain missmatch," + referenceURI.Host + " vs " + currentURI.Host)
 				return nil //known exception, not error
 			}
 		}
@@ -209,23 +207,17 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 
 	filenamePrefix := ""
 
-	//the url is a folder, making folders
-	if strings.HasSuffix(url, "/") {
-		filename = defaultFileName
-		log.Trace("no page name found, use default.html:", url)
-	}
-
 	// if the url have parameters
 	if len(currentURI.Query()) > 0 {
 
 		//TODO 不处理非网页内容，去除js 图片 css 压缩包等
 
-		if len(this.splitByUrlParameter) > 0 {
+		if len(joint.splitByUrlParameter) > 0 {
 
-			for i := 0; i < len(this.splitByUrlParameter); i++ {
-				breakTagTemp := currentURI.Query().Get(this.splitByUrlParameter[i])
+			for i := 0; i < len(joint.splitByUrlParameter); i++ {
+				breakTagTemp := currentURI.Query().Get(joint.splitByUrlParameter[i])
 				if breakTagTemp != "" {
-					filenamePrefix = filenamePrefix + this.splitByUrlParameter[i] + "_" + breakTagTemp + "_"
+					filenamePrefix = filenamePrefix + joint.splitByUrlParameter[i] + "_" + breakTagTemp + "_"
 				}
 			}
 		} else {
@@ -315,12 +307,12 @@ func (this UrlNormalizationJoint) Process(context *Context) error {
 	}
 
 	//set default filename limit
-	if this.maxFileNameLength <= 0 {
-		this.maxFileNameLength = 200
+	if joint.maxFileNameLength <= 0 {
+		joint.maxFileNameLength = 200
 	}
 
 	//verify filename
-	if len(filename) > this.maxFileNameLength {
+	if len(filename) > joint.maxFileNameLength {
 		panic(errors.New("file name too long"))
 	}
 

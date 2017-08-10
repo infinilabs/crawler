@@ -46,11 +46,6 @@ func TestLoadDefaultCfg(t *testing.T) {
 
 }
 
-type ModuleConfig struct {
-	Module  string `config:"module"     validate:"required"`
-	Enabled bool   `config:"enabled"`
-}
-
 type globalConfig struct {
 	Modules []*Config `config:"modules"`
 }

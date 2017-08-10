@@ -2,22 +2,18 @@
 package config
 
 import (
-	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
-	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
-
 	log "github.com/cihub/seelog"
 	"github.com/elastic/go-ucfg"
 	"github.com/elastic/go-ucfg/cfgutil"
 	cfgflag "github.com/elastic/go-ucfg/flag"
 	"github.com/elastic/go-ucfg/yaml"
-	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/core/util/file"
+	"os"
+	"path/filepath"
+	"runtime"
 )
 
 // IsStrictPerms returns true if strict permission checking on config files is
@@ -46,18 +42,6 @@ var configOpts = []ucfg.Option{
 	ucfg.ResolveEnv,
 	ucfg.VarExp,
 }
-
-var debugBlacklist = util.MakeStringSet(
-	"password",
-	"passphrase",
-	"key_passphrase",
-	"pass",
-	"proxy_url",
-	"url",
-	"urls",
-	"host",
-	"hosts",
-)
 
 // NewConfig create a pretty new config
 func NewConfig() *Config {
@@ -366,62 +350,6 @@ func (ns *Namespace) Config() *Config {
 // IsSet returns true if a sub-configuration section has been set.
 func (ns *Namespace) IsSet() bool {
 	return len(ns.C) != 0
-}
-
-func configDebugString(c *Config, filterPrivate bool) string {
-	var bufs []string
-
-	if c.IsDict() {
-		var content map[string]interface{}
-		if err := c.Unpack(&content); err != nil {
-			return fmt.Sprintf("<config error> %v", err)
-		}
-		if filterPrivate {
-			filterDebugObject(content)
-		}
-		j, _ := json.MarshalIndent(content, "", "  ")
-		bufs = append(bufs, string(j))
-	}
-	if c.IsArray() {
-		var content []interface{}
-		if err := c.Unpack(&content); err != nil {
-			return fmt.Sprintf("<config error> %v", err)
-		}
-		if filterPrivate {
-			filterDebugObject(content)
-		}
-		j, _ := json.MarshalIndent(content, "", "  ")
-		bufs = append(bufs, string(j))
-	}
-
-	if len(bufs) == 0 {
-		return ""
-	}
-	return strings.Join(bufs, "\n")
-}
-
-func filterDebugObject(c interface{}) {
-	switch cfg := c.(type) {
-	case map[string]interface{}:
-		for k, v := range cfg {
-			if debugBlacklist.Has(k) {
-				if arr, ok := v.([]interface{}); ok {
-					for i := range arr {
-						arr[i] = "xxxxx"
-					}
-				} else {
-					cfg[k] = "xxxxx"
-				}
-			} else {
-				filterDebugObject(v)
-			}
-		}
-
-	case []interface{}:
-		for _, elem := range cfg {
-			filterDebugObject(elem)
-		}
-	}
 }
 
 // ownerHasExclusiveWritePerms asserts that the current user or root is the

@@ -7,10 +7,12 @@ import (
 	"net/http"
 )
 
+// UserUI is the user namespace, public web
 type UserUI struct {
 	api.Handler
 }
 
+// IndexPageAction index page
 func (h UserUI) IndexPageAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	search.Search(w)
 }
