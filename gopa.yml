@@ -22,7 +22,7 @@ cluster.seeds:
 
 modules:
 - module: crawler
-  enabled: false
+  enabled: true
   max_go_routine: 1
   fetch_threshold_ms: 0
   default_pipeline_config:

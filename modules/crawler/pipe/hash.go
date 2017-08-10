@@ -63,11 +63,12 @@ var loaded = false
 var lock sync.Mutex
 
 func (joint HashJoint) loadDict() {
-	lock.Lock()
-	defer lock.Unlock()
 	if loaded {
 		return
 	}
+
+	lock.Lock()
+	defer lock.Unlock()
 
 	log.Debug("loading jieba dict files")
 	mainDict := "config/dict/main.dict.txt"

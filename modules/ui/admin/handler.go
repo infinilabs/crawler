@@ -78,7 +78,7 @@ func (h AdminUI) TasksPageAction(w http.ResponseWriter, r *http.Request) {
 	count1, task, _ = model.GetTaskList(from, size, host)
 
 	var domains []model.Domain
-	count2, domains, _ = model.GetDomainList(0, 50, "")
+	count2, domains, _ = model.GetDomainList(0, 35, "")
 	tasks.Index(w, r, host, from, size, count1, task, count2, domains)
 }
 

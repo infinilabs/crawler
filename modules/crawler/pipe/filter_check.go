@@ -35,6 +35,7 @@ type FilterCheckJoint struct {
 // filter_key is the filter name used to check and filter
 var filterKey api.ParaKey = "filter_key"
 
+// Name return: filter_check
 func (joint FilterCheckJoint) Name() string {
 	return "filter_check"
 }
