@@ -92,6 +92,12 @@ func CreateSnapshot(snapshot *Snapshot) error {
 	return err
 }
 
+//DeleteSnapshot delete the snapshot
+func DeleteSnapshot(snapshot *Snapshot) error {
+	err := store.Delete(snapshot)
+	return err
+}
+
 func GetSnapshotList(from, size int, taskId string) (int, []Snapshot, error) {
 	var snapshots []Snapshot
 	queryO := store.Query{Sort: "create_time desc", From: from, Size: size}
