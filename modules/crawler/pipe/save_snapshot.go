@@ -24,8 +24,8 @@ import (
 	"github.com/infinitbyte/gopa/core/stats"
 	"github.com/infinitbyte/gopa/core/store"
 	"github.com/infinitbyte/gopa/modules/config"
-	"time"
 	"strings"
+	"time"
 )
 
 const SaveSnapshotToDB JointKey = "save_snapshot_db"
@@ -49,9 +49,9 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 
 	//init decelerateSteps
-	arrDecelerateSteps = initGrabVelocityArr(this.MustGetString(decelerateSteps))
+	arrDecelerateSteps = initFetchRateArr(this.MustGetString(decelerateSteps))
 	//init accelerateSteps
-	arrAccelerateSteps = initGrabVelocityArr(this.MustGetString(accelerateSteps))
+	arrAccelerateSteps = initFetchRateArr(this.MustGetString(accelerateSteps))
 
 	//update task's snapshot, detect duplicated snapshot
 	if snapshot != nil {
@@ -64,13 +64,15 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 			c.Break(fmt.Sprintf("same hash: %s, %s", snapshot.Hash, task.Url))
 
 			//extend the nextchecktime
-			setSnapNextCheckTime(task,tNow,m,false)
+			setSnapNextCheckTime(task, tNow, m, false)
+
+			deleteRedundantSnapShot(int(this.MustGetInt64(maxRevision)), this.MustGetString(bucket), task.ID)
 
 			return nil
 		}
 
 		//shorten the nextchecktime
-		setSnapNextCheckTime(task,tNow,m,true)
+		setSnapNextCheckTime(task, tNow, m, true)
 
 		task.SnapshotVersion = task.SnapshotVersion + 1
 		task.SnapshotID = snapshot.ID
@@ -101,7 +103,7 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 
 	model.CreateSnapshot(snapshot)
 
-	deleteRedundantSnapShot(int(this.MustGetInt64(maxRevision)),this.MustGetString(bucket),task.ID)
+	deleteRedundantSnapShot(int(this.MustGetInt64(maxRevision)), this.MustGetString(bucket), task.ID)
 
 	stats.IncrementBy("domain.stats", domain+"."+config.STATS_STORAGE_FILE_SIZE, int64(len(snapshot.Payload)))
 	stats.Increment("domain.stats", domain+"."+config.STATS_STORAGE_FILE_COUNT)
@@ -114,11 +116,11 @@ var arrDecelerateSteps []int
 var arrAccelerateSteps []int
 
 //init the fetch rate array by cfg parameters
-func initGrabVelocityArr(velocityStr string) []int {
-	arrVelocityStr := strings.Split(velocityStr,",")
-	var velocityArr = make([]int,len(arrVelocityStr),len(arrVelocityStr))
+func initFetchRateArr(velocityStr string) []int {
+	arrVelocityStr := strings.Split(velocityStr, ",")
+	var velocityArr = make([]int, len(arrVelocityStr), len(arrVelocityStr))
 	for i := 0; i < len(arrVelocityStr); i++ {
-		m,err := time.ParseDuration(arrVelocityStr[i])
+		m, err := time.ParseDuration(arrVelocityStr[i])
 		if err == nil {
 			velocityArr[i] = int(m.Seconds())
 		}
@@ -127,7 +129,7 @@ func initGrabVelocityArr(velocityStr string) []int {
 }
 
 //set snapshot nextchecktime
-func setSnapNextCheckTime(task *model.Task,timeNow time.Time,timeDuration time.Duration,fetchSuccess bool){
+func setSnapNextCheckTime(task *model.Task, timeNow time.Time, timeDuration time.Duration, fetchSuccess bool) {
 	task.LastCheckTime = &timeNow
 	if task.SnapshotCreateTime == nil {
 		defaultTime := timeNow.Add(-timeDuration * 1)
@@ -196,20 +198,20 @@ func getTimeInterval(timeStart time.Time, timeEnd time.Time) int {
 }
 
 //TODO optimization algorithm
-func deleteRedundantSnapShot(maxRevisionNum int,bucketStr string,taskId string){
+func deleteRedundantSnapShot(maxRevisionNum int, bucketStr string, taskId string) {
 	//get current snapshot list and total num
-	snapshotTotal, _, err := model.GetSnapshotList(0,1,taskId)
+	snapshotTotal, _, err := model.GetSnapshotList(0, 1, taskId)
 	if err == nil {
 		//get max snapshot num
 		maxSnapshotNum := maxRevisionNum
 		//if more than max snapshot num,delete old snapshot
 		if snapshotTotal > maxSnapshotNum {
 			mustDeleteNum := snapshotTotal - maxSnapshotNum
-			_, snapshotsList, errReadList := model.GetSnapshotList(1,mustDeleteNum,taskId)
+			_, snapshotsList, errReadList := model.GetSnapshotList(1, mustDeleteNum, taskId)
 			if errReadList == nil {
-				for i := 0; i < len(snapshotsList); i++  {
+				for i := 0; i < len(snapshotsList); i++ {
 					model.DeleteSnapshot(&snapshotsList[i])
-					store.DeleteValue(bucketStr,[]byte(snapshotsList[i].ID),snapshotsList[i].Payload)
+					store.DeleteValue(bucketStr, []byte(snapshotsList[i].ID), snapshotsList[i].Payload)
 				}
 			}
 		}
