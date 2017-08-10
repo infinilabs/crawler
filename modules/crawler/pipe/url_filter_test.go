@@ -43,7 +43,7 @@ func TestUrlFilter(t *testing.T) {
 	context.Set(CONTEXT_CRAWLER_TASK, &task)
 	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
 
-	parse := UrlExtFilterJoint{}
+	parse := UrlFilterJoint{}
 	parse.Process(context)
 	assert.Equal(t, false, context.IsEnd())
 
