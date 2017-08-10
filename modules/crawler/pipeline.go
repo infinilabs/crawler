@@ -22,11 +22,19 @@ import (
 	"github.com/infinitbyte/gopa/modules/crawler/pipe"
 )
 
+var inited bool = false
+
 // InitJoints register crawler joint types in order to create pipeline with these joints on the fly
 func InitJoints() {
+
+	if inited {
+		return
+	}
+	inited = true
+
 	log.Debug("start register joints")
 	pipeline.Register(pipe.EmptyJoint{})
-	pipeline.Register(pipe.UrlCheckFilterJoint{})
+	pipeline.Register(pipe.FilterCheckJoint{})
 	pipeline.Register(pipe.FetchJoint{})
 	pipeline.Register(pipe.UrlNormalizationJoint{})
 	pipeline.Register(pipe.SaveTaskJoint{})

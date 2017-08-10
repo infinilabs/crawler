@@ -88,6 +88,9 @@ func (module CheckerModule) Start(cfg *Config) {
 		log.Error("url checker is already checkerStarted, please stop it first.")
 		return
 	}
+
+	InitJoints()
+
 	config := getDefaultCheckerTaskConfig()
 	cfg.Unpack(&config)
 	module.config = &config

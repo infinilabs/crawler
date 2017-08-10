@@ -202,3 +202,7 @@ cover:
 	go get github.com/mattn/goveralls
 	go test -v -cover -race -coverprofile=data/coverage.out
 	goveralls -coverprofile=data/coverage.out -service=travis-ci -repotoken=$COVERALLS_TOKEN
+
+cyclo:
+	go get -u github.com/fzipp/gocyclo
+	gocyclo -top 10 -over 12 $$(ls -d */ | grep -v vendor)

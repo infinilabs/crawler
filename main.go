@@ -125,11 +125,13 @@ func main() {
 
 	//cleanup
 	defer func() {
+		util.ClearInstanceLock()
+
 		if r := recover(); r != nil {
 			if e, ok := r.(runtime.Error); ok {
-				log.Error("main: ", util.GetRuntimeErrorMessage(e), e)
+				log.Error("main: ", e)
 			}
-			log.Error("main", util.ToJson(r, true))
+			log.Error("main: ", r)
 		}
 		util.SnapshotPersistID()
 		log.Flush()
@@ -137,7 +139,6 @@ func main() {
 
 		//print goodbye message
 		onShutdown()
-		util.ClearInstanceLock()
 	}()
 
 	//profile options
@@ -162,7 +163,7 @@ func main() {
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
 		if err != nil {
-			log.Error(err)
+			panic(err)
 		}
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
@@ -172,10 +173,10 @@ func main() {
 		if *memprofile != "" {
 			f, err := os.Create(*memprofile)
 			if err != nil {
-				log.Error(err)
+				panic(err)
 			}
 			pprof.WriteHeapProfile(f)
-			defer f.Close()
+			f.Close()
 		}
 	}
 

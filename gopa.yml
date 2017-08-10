@@ -22,7 +22,7 @@ cluster.seeds:
 
 modules:
 - module: crawler
-  enabled: true
+  enabled: false
   max_go_routine: 1
   fetch_threshold_ms: 0
   default_pipeline_config:
@@ -109,8 +109,10 @@ modules:
           follow_sub_domain: true
       - joint: url_ext_filter
         enabled: true
-      - joint: url_check_filter
+      - joint: filter_check
         enabled: true
+        parameters:
+          filter_key: check_filter
     end:
       joint: save_task
       enabled: true
