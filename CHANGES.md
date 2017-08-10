@@ -33,7 +33,6 @@
 12. detect dead process, re-place lock file
 13. persist auto-incremented id sequence to disk
 14. simplified joint register
-15. persist auto-incremented id sequence to disk
 
 ##### bugfix
 1. disable simhash due to poor performance and memory leak
