@@ -173,31 +173,39 @@ func (joint ParsePageJoint) Process(context *Context) error {
 		}
 	}
 
+	log.Trace("depth:", depth, ", breath:", breadth, ",", joint.GetIntOrDefault(maxDepth, 10), ",", joint.GetIntOrDefault(maxBreadth, 10), ",url:", task.Url)
+
 	//if reach max depth, skip for future fetch
 	if depth > joint.GetIntOrDefault(maxDepth, 10) {
-		log.Trace("skip while reach max depth, ", depth, ", ", refUrl)
+		log.Debug("skip while reach max depth, ", depth, ", ", refUrl)
 		context.End(fmt.Sprintf("skip while reach max depth: %v", depth))
 		return nil
 	}
 	//if reach max breadth, skip for future fetch
 	if breadth > joint.GetIntOrDefault(maxBreadth, 10) {
-		log.Trace("skip while reach max breadth, ", breadth, ", ", refUrl)
+		log.Debug("skip while reach max breadth, ", breadth, ", ", refUrl)
 		context.End(fmt.Sprintf("skip while reach max breadth: %v", breadth))
 		return nil
 	}
 
 	//dispatch links
-	for url := range links {
-		if joint.GetBool(dispatchLinks, false) {
+	if joint.GetBool(dispatchLinks, false) && len(links) > 0 {
+
+		for url := range links {
 			if !filter.Exists(config.CheckFilter, []byte(url)) {
 				host := util.GetHost(url)
 				b := breadth
+				d := depth
 				if host != "" && refHost != host {
 					b++
+					d++
 					log.Trace("auto incre breadth, ", b, ", ", refUrl, "->", url)
+				} else {
+					d++
 				}
-				queue.Push(config.CheckChannel, model.NewTaskSeed(url, refUrl, depth+1, b).MustGetBytes())
+				queue.Push(config.CheckChannel, model.NewTaskSeed(url, refUrl, d, b).MustGetBytes())
 			}
+
 		}
 	}
 
