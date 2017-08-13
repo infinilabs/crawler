@@ -14,57 +14,71 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package database
+package persist
 
 import (
 	. "github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/errors"
+	"github.com/infinitbyte/gopa/core/index"
 	"github.com/infinitbyte/gopa/core/model"
-	"github.com/infinitbyte/gopa/core/store"
-	"github.com/infinitbyte/gopa/modules/database/mysql"
-	"github.com/infinitbyte/gopa/modules/database/sqlite"
+	"github.com/infinitbyte/gopa/core/persist"
+	"github.com/infinitbyte/gopa/modules/persist/elastic"
+	"github.com/infinitbyte/gopa/modules/persist/mysql"
+	"github.com/infinitbyte/gopa/modules/persist/sqlite"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 func (module DatabaseModule) Name() string {
-	return "Database"
+	return "Persist"
 }
 
 var (
-	defaultConfig = DatabaseConfig{
-		Dialect: "sqlite",
-		SQLite:  &sqlite.SQLiteConfig{},
-		MySQL:   &mysql.MySQLConfig{},
+	defaultConfig = PersistConfig{
+		Driver: "sqlite",
+		SQLite: &sqlite.SQLiteConfig{},
+		MySQL:  &mysql.MySQLConfig{},
 	}
 )
 
-func GetDefaultConfig() DatabaseConfig {
+func getDefaultConfig() PersistConfig {
 	return defaultConfig
 }
 
 var db *gorm.DB
 
-type DatabaseConfig struct {
-	Dialect string               `config:"dialect"` //only `mysql` and `sqlite` are available
-	SQLite  *sqlite.SQLiteConfig `config:"sqlite"`
-	MySQL   *mysql.MySQLConfig   `config:"mysql"`
+type PersistConfig struct {
+	//Dialect only `mysql` and `sqlite` are available
+	Driver  string                    `config:"driver"`
+	SQLite  *sqlite.SQLiteConfig      `config:"sqlite"`
+	MySQL   *mysql.MySQLConfig        `config:"mysql"`
+	Elastic index.ElasticsearchConfig `config:"elasticsearch"`
 }
 
 func (module DatabaseModule) Start(cfg *Config) {
 
 	//init config
-	config := GetDefaultConfig()
+	config := getDefaultConfig()
 	cfg.Unpack(&config)
 	module.config = &config
 
-	if config.Dialect == "sqlite" {
+	if config.Driver == "elasticsearch" {
+		client := index.ElasticsearchClient{Config: config.Elastic}
+		handler := elastic.ElasticORM{&client}
+		persist.Register(handler)
+		return
+	}
+
+	//whether use lock, only sqlite need lock
+	userLock := false
+	if config.Driver == "sqlite" {
 		db = sqlite.GetInstance(config.SQLite)
-	} else if config.Dialect == "mysql" {
+		userLock = true
+	} else if config.Driver == "mysql" {
 		db = mysql.GetInstance(config.MySQL)
 	} else {
-		panic(errors.New("database is not successful started, invalid type"))
+		panic(errors.Errorf("invalid driver, %s", config.Driver))
 	}
 
 	// Migrate the schema
@@ -72,15 +86,19 @@ func (module DatabaseModule) Start(cfg *Config) {
 	db.AutoMigrate(&model.Task{})
 	db.AutoMigrate(&model.Snapshot{})
 
-	store.RegisterDBConnection(db)
+	handler := SQLORM{conn: db, useLock: userLock}
+
+	persist.Register(handler)
 }
 
 func (module DatabaseModule) Stop() error {
-	db.Close()
+	if db != nil {
+		db.Close()
+	}
 	return nil
 
 }
 
 type DatabaseModule struct {
-	config *DatabaseConfig
+	config *PersistConfig
 }

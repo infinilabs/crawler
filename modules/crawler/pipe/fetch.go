@@ -67,7 +67,7 @@ func (joint FetchJoint) Process(context *Context) error {
 	}
 
 	t1 := time.Now().UTC()
-	task.LastFetchTime = &t1
+	task.LastFetch = &t1
 
 	log.Debug("start fetch url,", requestUrl)
 	flg := make(chan signal, 1)

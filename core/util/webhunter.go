@@ -270,7 +270,7 @@ func get(url string, cookie string, proxyStr string) (*Result, error) {
 // HttpPostJSON send a http request with json body
 func HttpPostJSON(url string, cookie string, postStr string) []byte {
 
-	log.Debug("let's post: " + url)
+	log.Debug("let's post: "+url, ",", postStr)
 
 	client := &http.Client{
 		CheckRedirect: nil,
@@ -346,16 +346,45 @@ func HttpGetWithCookie(resource string, cookie string, proxy string) (*Result, e
 	return out, err
 }
 
-// HttpGet issue simple http request
+// HttpGet issue a simple http get request
 func HttpGet(resource string) ([]byte, error) {
+
+	req, err := http.NewRequest("GET", resource, nil)
+
+	if err != nil {
+		log.Error(resource, err)
+		return nil, err
+	}
+
+	return execute(req)
+}
+
+// HttpDelete issue a simple http delete request
+func HttpDelete(resource string) ([]byte, error) {
+
+	req, err := http.NewRequest("DELETE", resource, nil)
+
+	if err != nil {
+		log.Error(resource, err)
+		return nil, err
+	}
+
+	return execute(req)
+}
+
+func execute(req *http.Request) ([]byte, error) {
+
+	//support gzip
+	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; gopa/0.1; +http://github.com/infinitbyte/gopa)") //TODO align gopa version
+	req.Header.Set("Accept-Encoding", "gzip")
 
 	client := &http.Client{
 		Transport: &http.Transport{
 			Dial: func(netw, addr string) (net.Conn, error) {
 				deadline := time.Now().Add(10 * time.Second)
-				c, err := net.DialTimeout(netw, addr, 5*time.Second) //连接超时时间
+				c, err := net.DialTimeout(netw, addr, 5*time.Second)
 				if err != nil {
-					log.Error(resource, err)
+					log.Error(req, err)
 					return nil, err
 				}
 
@@ -365,20 +394,9 @@ func HttpGet(resource string) ([]byte, error) {
 		},
 	}
 
-	req, err := http.NewRequest("GET", resource, nil)
-
-	if err != nil {
-		log.Error(resource, err)
-		return nil, err
-	}
-
-	//support gzip
-	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; gopa/0.1; +http://infinitbyte.com/gopa)")
-	req.Header.Set("Accept-Encoding", "gzip")
-
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Error(resource, err)
+		log.Error(req, err)
 		return nil, err
 	}
 
@@ -389,7 +407,7 @@ func HttpGet(resource string) ([]byte, error) {
 	case "gzip":
 		reader, err = gzip.NewReader(resp.Body)
 		if err != nil {
-			log.Error(resource, err)
+			log.Error(req, err)
 			return nil, err
 		}
 		defer reader.Close()
@@ -399,39 +417,10 @@ func HttpGet(resource string) ([]byte, error) {
 	if reader != nil {
 		body, err := ioutil.ReadAll(reader)
 		if err != nil {
-			log.Error(resource, err)
+			log.Error(req, err)
 			return nil, err
 		}
 		return body, nil
 	}
 	return nil, http.ErrNotSupported
-}
-
-func sendHTTPRequest(method, url string, body io.Reader) ([]byte, error) {
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, body)
-	if err != nil {
-		return nil, err
-	}
-
-	if method == "POST" || method == "PUT" {
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	}
-
-	newReq, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	defer newReq.Body.Close()
-	response, err := ioutil.ReadAll(newReq.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	if newReq.StatusCode > http.StatusCreated && newReq.StatusCode < http.StatusNotFound {
-		return nil, errors.New(string(response))
-	}
-
-	return response, nil
 }

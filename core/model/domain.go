@@ -1,18 +1,19 @@
 package model
 
 import (
-	"github.com/infinitbyte/gopa/core/store"
+	"github.com/infinitbyte/gopa/core/persist"
+	"github.com/infinitbyte/gopa/core/util"
 	"time"
 )
 
 // Domain is domain host struct
 type Domain struct {
-	Host       string         `storm:"id,unique" json:"host,omitempty" gorm:"not null;unique;primary_key"`
+	Host       string         `storm:"id,unique" json:"host,omitempty" gorm:"not null;unique;primary_key" index:"id"`
 	LinksCount int64          `json:"links_count,omitempty"`
 	Favicon    string         `json:"favicon,omitempty"`
 	Settings   *DomainSetting `storm:"inline" json:"settings,omitempty"`
-	CreateTime *time.Time     `storm:"index" json:"created,omitempty"`
-	UpdateTime *time.Time     `storm:"index" json:"updated,omitempty"`
+	Created    *time.Time     `storm:"index" json:"created,omitempty"`
+	Updated    *time.Time     `storm:"index" json:"updated,omitempty"`
 }
 
 // DomainSetting is a settings for specific domain
@@ -24,9 +25,9 @@ func CreateDomain(host string) Domain {
 	domain := Domain{}
 	domain.Host = host
 	time := time.Now().UTC()
-	domain.CreateTime = &time
-	domain.UpdateTime = &time
-	store.Create(&domain)
+	domain.Created = &time
+	domain.Updated = &time
+	persist.Save(&domain)
 	return domain
 }
 
@@ -35,14 +36,14 @@ func IncrementDomainLinkCount(host string) error {
 	domain := Domain{}
 	domain.Host = host
 
-	store.Get(&domain)
+	persist.Get(&domain)
 
-	if domain.CreateTime == nil {
+	if domain.Created == nil {
 		domain = CreateDomain(host)
 	}
 
 	domain.LinksCount++
-	store.Update(domain)
+	persist.Update(domain)
 
 	return nil
 }
@@ -51,12 +52,22 @@ func IncrementDomainLinkCount(host string) error {
 func GetDomainList(from, size int, domain string) (int, []Domain, error) {
 	var domains []Domain
 
-	query := store.Query{From: from, Size: size}
+	query := persist.Query{From: from, Size: size}
 	if len(domain) > 0 {
-		query.Conds = store.And(store.Eq("host", domain))
+		query.Conds = persist.And(persist.Eq("host", domain))
 	}
 
-	err, r := store.Search(&domains, &query)
+	err, r := persist.Search(Domain{}, &domains, &query)
+
+	if domains == nil {
+		t := r.Result.([]interface{})
+		for _, i := range t {
+			js := util.ToJson(i, false)
+			t := Domain{}
+			util.FromJson(js, &t)
+			domains = append(domains, t)
+		}
+	}
 
 	return r.Total, domains, err
 }
@@ -64,6 +75,6 @@ func GetDomainList(from, size int, domain string) (int, []Domain, error) {
 // GetDomain return a single domain
 func GetDomain(domain string) (Domain, error) {
 	var d = Domain{Host: domain}
-	err := store.Get(&d)
+	err := persist.Get(&d)
 	return d, err
 }

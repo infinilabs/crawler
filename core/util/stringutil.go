@@ -116,6 +116,10 @@ func ToJson(in interface{}, indent bool) string {
 	return string(b)
 }
 
+func FromJson(str string, to interface{}) error {
+	return json.Unmarshal([]byte(str), to)
+}
+
 func IntToString(num int) string {
 	return strconv.Itoa(num)
 }

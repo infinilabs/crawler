@@ -8,6 +8,14 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/infinitbyte/gopa)](https://goreportcard.com/report/github.com/infinitbyte/gopa)
 [![Coverage Status](https://coveralls.io/repos/github/infinitbyte/gopa/badge.svg?branch=master)](https://coveralls.io/github/infinitbyte/gopa?branch=master)
 
+
+## Goals of this project
+
+* Light weight, low footprint, memory requirement should < 100MB
+* Easy to deploy, no runtime or dependency required
+* Easy to use, no programming or scripts ability needed, out of box features
+
+
 ## Build Gopa ##
 
 Mac/Linux: Run `make build` to build the Gopa

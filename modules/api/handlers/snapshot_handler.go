@@ -20,7 +20,7 @@ import (
 	log "github.com/cihub/seelog"
 	. "github.com/infinitbyte/gopa/core/http"
 	"github.com/infinitbyte/gopa/core/model"
-	"github.com/infinitbyte/gopa/core/store"
+	"github.com/infinitbyte/gopa/core/persist"
 	"github.com/infinitbyte/gopa/modules/config"
 	_ "github.com/jmoiron/jsonq"
 	"github.com/julienschmidt/httprouter"
@@ -37,9 +37,9 @@ func (this API) SnapshotAction(w http.ResponseWriter, req *http.Request) {
 		compressed := this.GetParameterOrDefault(req, "compressed", "true")
 		var bytes []byte
 		if compressed == "true" {
-			bytes = store.GetCompressedValue(config.SnapshotBucketKey, []byte(url))
+			bytes = persist.GetCompressedValue(config.SnapshotBucketKey, []byte(url))
 		} else {
-			bytes = store.GetValue(config.SnapshotBucketKey, []byte(url))
+			bytes = persist.GetValue(config.SnapshotBucketKey, []byte(url))
 		}
 
 		if len(bytes) > 0 {
@@ -102,9 +102,9 @@ func (this API) SnapshotGetPayloadAction(w http.ResponseWriter, req *http.Reques
 	compressed := this.GetParameterOrDefault(req, "compressed", "true")
 	var bytes []byte
 	if compressed == "true" {
-		bytes = store.GetCompressedValue(config.SnapshotBucketKey, []byte(id))
+		bytes = persist.GetCompressedValue(config.SnapshotBucketKey, []byte(id))
 	} else {
-		bytes = store.GetValue(config.SnapshotBucketKey, []byte(id))
+		bytes = persist.GetValue(config.SnapshotBucketKey, []byte(id))
 	}
 
 	if len(bytes) > 0 {

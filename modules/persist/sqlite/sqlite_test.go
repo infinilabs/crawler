@@ -77,8 +77,8 @@ func Test1(t *testing.T) {
 	domain := model.Domain{}
 	domain.Host = "baidu.com"
 	time := time.Now().UTC()
-	domain.CreateTime = &time
-	domain.UpdateTime = &time
+	domain.Created = &time
+	domain.Updated = &time
 
 	db.Create(&domain)
 	domain = model.Domain{}

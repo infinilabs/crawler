@@ -127,7 +127,7 @@ func (handler API) DomainDeleteAction(w http.ResponseWriter, req *http.Request, 
 //curl -XGET http://127.0.0.1:8001/domain/1
 func (handler API) DomainGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
-	task, err := model.GetTask(id)
+	task, err := model.GetDomain(id)
 	if err != nil {
 		handler.Error(w, err)
 	} else {

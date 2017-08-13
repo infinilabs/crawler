@@ -65,8 +65,8 @@ func (joint InitTaskJoint) Process(context *api.Context) error {
 
 	//init snapshot
 	var snapshot = &model.Snapshot{
-		ID:         util.GetUUID(),
-		CreateTime: &t1,
+		ID:      util.GetUUID(),
+		Created: &t1,
 	}
 	context.Set(CONTEXT_CRAWLER_SNAPSHOT, snapshot)
 
