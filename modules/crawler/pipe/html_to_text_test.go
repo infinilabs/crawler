@@ -46,7 +46,6 @@ func TestProcessText(t *testing.T) {
 	parse.Process(&context)
 
 	text := snapshot.Text
-	fmt.Println(text)
 	assert.Equal(t, "\nElastic中文社区\nmyLink\nbaidu\n/wiki/Marking/Users\n", text)
 
 	//load file
@@ -60,7 +59,6 @@ func TestProcessText(t *testing.T) {
 	parse.Process(&context)
 
 	text = snapshot.Text
-	fmt.Println(text)
 	assert.Equal(t, "\nElastic中文社区\nlink\nHidden text, should not displayed!\nH1 title\nH2 title\n", text)
 
 	b, e = ioutil.ReadFile("../../../test/samples/csdn.html")
@@ -73,7 +71,6 @@ func TestProcessText(t *testing.T) {
 	parse.Process(&context)
 
 	text = snapshot.Text
-	fmt.Println(text)
 	//	assert.Equal(t, "  ", text)
 
 }
