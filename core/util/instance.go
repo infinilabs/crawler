@@ -4,7 +4,6 @@ import (
 	log "github.com/cihub/seelog"
 	"os"
 	"path"
-	"syscall"
 )
 
 var locked bool
