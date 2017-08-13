@@ -61,7 +61,3 @@ func TestSetSnapNextCheckTime(t *testing.T) {
 	fmt.Println("----timeInterval           ", timeInterval)
 	assert.Equal(t, 70, timeInterval)
 }
-
-func TestDeleteRedundantSnapShot(t *testing.T) {
-	deleteRedundantSnapShot(10, "", "")
-}

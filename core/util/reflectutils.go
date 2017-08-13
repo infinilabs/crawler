@@ -39,8 +39,8 @@ func GetFieldValueByTagName(any interface{}, tagName string, tagValue string) st
 		se := reflect.TypeOf(any).Elem()
 
 		for i := 0; i < se.NumField(); i++ {
-			v, ok := se.Field(i).Tag.Lookup(tagName)
-			if ok {
+			v := se.Field(i).Tag.Get(tagName)
+			if v != "" {
 				if v == tagValue {
 					return reflect.Indirect(reflect.ValueOf(any)).FieldByName(se.Field(i).Name).String()
 				}
@@ -50,8 +50,8 @@ func GetFieldValueByTagName(any interface{}, tagName string, tagValue string) st
 	}
 
 	for i := 0; i < t.NumField(); i++ {
-		v, ok := t.Field(i).Tag.Lookup(tagName)
-		if ok {
+		v := t.Field(i).Tag.Get(tagName)
+		if v != "" {
 			if v == tagValue {
 				return reflect.Indirect(reflect.ValueOf(any)).FieldByName(t.Field(i).Name).String()
 			}
