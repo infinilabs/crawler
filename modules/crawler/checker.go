@@ -62,17 +62,17 @@ func getDefaultCheckerTaskConfig() TaskConfig {
 		"follow_sub_domain": true,
 	}
 
-	url_ext_filter := JointConfig{}
-	url_ext_filter.Enabled = true
-	url_ext_filter.JointName = "url_ext_filter"
+	url_filter := JointConfig{}
+	url_filter.Enabled = true
+	url_filter.JointName = "url_filter"
 
 	url_check_filter := JointConfig{}
 	url_check_filter.Enabled = true
-	url_check_filter.JointName = "url_check_filter"
+	url_check_filter.JointName = "filter_check"
 
 	config.EndJoint = &save
 	config.ProcessJoints = []*JointConfig{
-		&url_normalization, &url_ext_filter, &url_check_filter,
+		&url_normalization, &url_filter, &url_check_filter,
 	}
 
 	defaultCheckerConfig := TaskConfig{
