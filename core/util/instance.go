@@ -4,7 +4,6 @@ import (
 	log "github.com/cihub/seelog"
 	"os"
 	"path"
-	"syscall"
 )
 
 var locked bool
@@ -29,10 +28,4 @@ func ClearInstanceLock() {
 	if locked {
 		os.Remove(path.Join(file))
 	}
-}
-
-// CheckProcessExists check if the pid is running
-func CheckProcessExists(pid int) bool {
-	err := syscall.Kill(pid, syscall.Signal(0))
-	return err == nil || err == syscall.EPERM
 }

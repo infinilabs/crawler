@@ -42,26 +42,22 @@ func TestSetSnapNextCheckTime(t *testing.T) {
 	theTime, _ := time.ParseInLocation(timeLayout, toBeCharge, loc)
 
 	task := new(model.Task)
-	task.SnapshotCreateTime = &theTime
-	fmt.Println("----task.SnapshotCreateTime", task.SnapshotCreateTime)
+	task.SnapshotCreated = &theTime
+	fmt.Println("----task.SnapshotCreateTime", task.SnapshotCreated)
 	m, _ := time.ParseDuration("1s")
 	tNow := theTime.Add(1 * m)
 	setSnapNextCheckTime(task, tNow, m, false)
-	fmt.Println("    task.LastCheckTime     ", task.LastCheckTime)
-	fmt.Println("    task.NextCheckTime     ", task.NextCheckTime)
-	timeInterval := getTimeInterval(*task.LastCheckTime, *task.NextCheckTime)
+	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
+	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
+	timeInterval := getTimeInterval(*task.LastCheck, *task.NextCheck)
 	fmt.Println("----timeInterval           ", timeInterval)
 	assert.Equal(t, 3, timeInterval)
 
 	tNow = theTime.Add(71 * m)
 	setSnapNextCheckTime(task, tNow, m, true)
-	fmt.Println("    task.LastCheckTime     ", task.LastCheckTime)
-	fmt.Println("    task.NextCheckTime     ", task.NextCheckTime)
-	timeInterval = getTimeInterval(*task.LastCheckTime, *task.NextCheckTime)
+	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
+	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
+	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
 	fmt.Println("----timeInterval           ", timeInterval)
 	assert.Equal(t, 70, timeInterval)
-}
-
-func TestDeleteRedundantSnapShot(t *testing.T) {
-	deleteRedundantSnapShot(10, "", "")
 }

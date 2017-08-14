@@ -17,9 +17,9 @@ limitations under the License.
 package model
 
 import (
-	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
-	"github.com/infinitbyte/gopa/core/store"
+	"github.com/infinitbyte/gopa/core/persist"
+	"github.com/infinitbyte/gopa/core/util"
 	"time"
 )
 
@@ -34,7 +34,7 @@ type LinkGroup struct {
 }
 
 type Snapshot struct {
-	ID      string `json:"id,omitempty" gorm:"not null;unique;primary_key"`
+	ID      string `json:"id,omitempty" gorm:"not null;unique;primary_key" index:"id"`
 	Version int    `json:"version,omitempty"`
 	Url     string `json:"url,omitempty"`
 	TaskID  string `json:"task_id,omitempty"`
@@ -79,7 +79,7 @@ type Snapshot struct {
 	Hash    string `json:"hash,omitempty"`
 	SimHash string `json:"sim_hash,omitempty"`
 
-	CreateTime *time.Time `json:"created,omitempty"`
+	Created *time.Time `json:"created,omitempty"`
 }
 
 type PageLink struct {
@@ -88,36 +88,46 @@ type PageLink struct {
 }
 
 func CreateSnapshot(snapshot *Snapshot) error {
-	err := store.Save(snapshot)
-	return err
+	return persist.Save(snapshot)
 }
 
-//DeleteSnapshot delete the snapshot
 func DeleteSnapshot(snapshot *Snapshot) error {
-	err := store.Delete(snapshot)
-	return err
+	return persist.Delete(snapshot)
 }
 
 func GetSnapshotList(from, size int, taskId string) (int, []Snapshot, error) {
 	var snapshots []Snapshot
-	queryO := store.Query{Sort: "create_time desc", From: from, Size: size}
+	sort := []persist.Sort{}
+	sort = append(sort, persist.Sort{Field: "created", SortType: persist.DESC})
+	query := persist.Query{Sort: &sort, From: from, Size: size}
 	if len(taskId) > 0 {
-		queryO.Conds = store.And(store.Eq("task_id", taskId))
+		query.Conds = persist.And(persist.Eq("task_id", taskId))
 	}
-	err, result := store.Search(&snapshots, &queryO)
+	err, result := persist.Search(Snapshot{}, &snapshots, &query)
 	if err != nil {
-		log.Error(err)
+		panic(err)
 	}
+	if snapshots == nil {
+		t := result.Result.([]interface{})
+		for _, i := range t {
+			js := util.ToJson(i, false)
+			t := Snapshot{}
+			util.FromJson(js, &t)
+			snapshots = append(snapshots, t)
+		}
+	}
+
 	return result.Total, snapshots, err
 }
 
 func GetSnapshot(id string) (Snapshot, error) {
 	snapshot := Snapshot{}
-	err := store.GetBy("id", id, &snapshot)
+	snapshot.ID = id
+	err := persist.Get(&snapshot)
 	if err != nil {
-		log.Error(id, ", ", err)
+		panic(err)
 	}
-	if len(snapshot.ID) == 0 || snapshot.CreateTime == nil {
+	if len(snapshot.ID) == 0 || snapshot.Created == nil {
 		panic(errors.New("not found," + id))
 	}
 

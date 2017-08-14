@@ -16,7 +16,11 @@ limitations under the License.
 
 package util
 
-import "reflect"
+import (
+	"errors"
+	"reflect"
+	"strings"
+)
 
 // Invoke dynamic execute function via function name and parameters
 func Invoke(any interface{}, name string, args ...interface{}) {
@@ -25,4 +29,43 @@ func Invoke(any interface{}, name string, args ...interface{}) {
 		inputs[i] = reflect.ValueOf(args[i])
 	}
 	reflect.ValueOf(any).MethodByName(name).Call(inputs)
+}
+
+// GetFieldValueByTagName return the field value which field was tagged with this tagName, only support string field
+func GetFieldValueByTagName(any interface{}, tagName string, tagValue string) string {
+
+	t := reflect.TypeOf(any)
+	if PrefixStr(t.String(), "*") {
+		se := reflect.TypeOf(any).Elem()
+
+		for i := 0; i < se.NumField(); i++ {
+			v := se.Field(i).Tag.Get(tagName)
+			if v != "" {
+				if v == tagValue {
+					return reflect.Indirect(reflect.ValueOf(any)).FieldByName(se.Field(i).Name).String()
+				}
+			}
+
+		}
+	}
+
+	for i := 0; i < t.NumField(); i++ {
+		v := t.Field(i).Tag.Get(tagName)
+		if v != "" {
+			if v == tagValue {
+				return reflect.Indirect(reflect.ValueOf(any)).FieldByName(t.Field(i).Name).String()
+			}
+		}
+
+	}
+
+	panic(errors.New("tag was not found"))
+}
+
+func GetTypeName(any interface{}, lowercase bool) string {
+	name := reflect.Indirect(reflect.ValueOf(any)).Type().Name()
+	if lowercase {
+		name = strings.ToLower(name)
+	}
+	return name
 }

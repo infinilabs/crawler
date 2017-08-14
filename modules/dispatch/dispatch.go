@@ -67,11 +67,14 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 						}
 
 						//update offset
-						if v.CreateTime.After(*offset) && isUpdate {
-							offset = v.CreateTime
+						if v.Created.After(*offset) && isUpdate {
+							offset = v.Created
 						}
 
 						queue.Push(config.FetchChannel, []byte(v.ID))
+						if isUpdate {
+							stats.Increment("dispatch", "update.enqueue")
+						}
 					}
 				}
 			}

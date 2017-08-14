@@ -19,7 +19,7 @@ package storage
 import (
 	"github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/global"
-	"github.com/infinitbyte/gopa/core/store"
+	"github.com/infinitbyte/gopa/core/persist"
 	"github.com/infinitbyte/gopa/modules/storage/boltdb"
 	"os"
 	"path"
@@ -40,7 +40,7 @@ func (module StorageModule) Start(cfg *config.Config) {
 	if err != nil {
 		panic(err)
 	}
-	store.RegisterKVStoreHandler(impl)
+	persist.RegisterKVHandler(impl)
 	//store.RegisterORMHandler(impl)
 }
 

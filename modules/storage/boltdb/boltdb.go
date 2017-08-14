@@ -17,6 +17,7 @@ limitations under the License.
 package boltdb
 
 import (
+	"fmt"
 	"github.com/asdine/storm"
 	"github.com/asdine/storm/codec/protobuf"
 	"github.com/asdine/storm/q"
@@ -24,7 +25,7 @@ import (
 	"github.com/boltdb/bolt"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/global"
-	"github.com/infinitbyte/gopa/core/store"
+	"github.com/infinitbyte/gopa/core/persist"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
 	"time"
@@ -163,8 +164,8 @@ func (store BoltdbStore) Count(o interface{}) (int, error) {
 	return db.Count(o)
 }
 
-func (s BoltdbStore) Search(t1, t2 interface{}, q1 *store.Query) (error, store.Result) {
-	result := store.Result{}
+func (s BoltdbStore) Search(t1, t2 interface{}, q1 *persist.Query) (error, persist.Result) {
+	result := persist.Result{}
 	total, err := s.Count(t1)
 	if err != nil {
 		log.Debug(err)
@@ -190,8 +191,10 @@ func (s BoltdbStore) Search(t1, t2 interface{}, q1 *store.Query) (error, store.R
 		q2 = db.Select(q.True()).Limit(q1.Size).Skip(q1.From)
 	}
 
-	if q1.Sort != "" {
-		q2 = q2.OrderBy(q1.Sort).Reverse()
+	if q1.Sort != nil && len(*q1.Sort) > 0 {
+		for _, i := range *q1.Sort {
+			q2 = q2.OrderBy(fmt.Sprintf("%s %s", i.Field, i.SortType)).Reverse()
+		}
 	}
 
 	//t, _ := time.Parse(layout, skipDate)

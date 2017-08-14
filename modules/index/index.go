@@ -4,13 +4,17 @@ import (
 	"encoding/json"
 	log "github.com/cihub/seelog"
 	. "github.com/infinitbyte/gopa/core/config"
+	core "github.com/infinitbyte/gopa/core/index"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/queue"
 	"github.com/infinitbyte/gopa/modules/config"
-	. "github.com/infinitbyte/gopa/modules/index/elasticsearch"
 )
 
 type IndexModule struct {
+}
+
+type IndexConfig struct {
+	Elasticsearch core.ElasticsearchConfig `config:"elasticsearch"`
 }
 
 func (this IndexModule) Name() string {
@@ -20,19 +24,21 @@ func (this IndexModule) Name() string {
 var signalChannel chan bool
 
 var (
-	defaultESConfig = ElasticsearchConfig{
-		Endpoint: "http://localhost:9200",
-		Index:    "gopa",
+	defaultConfig = IndexConfig{
+		Elasticsearch: core.ElasticsearchConfig{
+			Endpoint:    "http://localhost:9200",
+			IndexPrefix: "gopa-",
+		},
 	}
 )
 
 func (module IndexModule) Start(cfg *Config) {
 
-	elasticsearchConfig := defaultESConfig
-	cfg.Unpack(&elasticsearchConfig)
+	indexConfig := defaultConfig
+	cfg.Unpack(&indexConfig)
 
 	signalChannel = make(chan bool, 1)
-	client := ElasticsearchClient{Endpoint: elasticsearchConfig.Endpoint, Index: elasticsearchConfig.Index}
+	client := core.ElasticsearchClient{Config: indexConfig.Elasticsearch}
 	go func() {
 		for {
 			select {
@@ -54,7 +60,7 @@ func (module IndexModule) Start(cfg *Config) {
 					panic(err)
 				}
 
-				client.IndexDoc(doc.Type, doc.Id, doc.Source)
+				client.Index(doc.Index, doc.Id, doc.Source)
 			}
 
 		}

@@ -21,10 +21,10 @@ import (
 	"github.com/infinitbyte/gopa/modules/api"
 	"github.com/infinitbyte/gopa/modules/cluster"
 	"github.com/infinitbyte/gopa/modules/crawler"
-	"github.com/infinitbyte/gopa/modules/database"
 	"github.com/infinitbyte/gopa/modules/dispatch"
 	"github.com/infinitbyte/gopa/modules/filter"
 	"github.com/infinitbyte/gopa/modules/index"
+	"github.com/infinitbyte/gopa/modules/persist"
 	"github.com/infinitbyte/gopa/modules/queue"
 	"github.com/infinitbyte/gopa/modules/stats"
 	"github.com/infinitbyte/gopa/modules/storage"
@@ -33,7 +33,7 @@ import (
 
 // Register is where modules are registered
 func Register() {
-	module.Register(database.DatabaseModule{})
+	module.Register(persist.DatabaseModule{})
 	module.Register(filter.FilterModule{})
 	module.Register(storage.StorageModule{})
 	module.Register(stats.StatsStoreModule{})

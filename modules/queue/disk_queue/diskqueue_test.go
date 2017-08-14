@@ -43,12 +43,12 @@ func TestDiskQueue(t *testing.T) {
 	dq := NewDiskQueue(dqName, tmpDir, 1024, 4, 1<<10, 2500, 2*time.Second)
 	defer dq.Close()
 	assert.NotEqual(t, nil, dq)
-	assert.Equal(t, dq.Depth(), int64(0))
+	assert.Equal(t, int64(0), dq.Depth())
 
 	msg := []byte("test")
 	err = dq.Put(msg)
-	assert.Equal(t, err, nil)
-	assert.Equal(t, dq.Depth(), int64(1))
+	assert.Equal(t, nil, err)
+	assert.Equal(t, int64(1), dq.Depth())
 
 	msgOut := <-dq.ReadChan()
 	assert.Equal(t, msgOut, msg)

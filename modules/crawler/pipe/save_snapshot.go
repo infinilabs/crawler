@@ -20,9 +20,9 @@ import (
 	"fmt"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/model"
+	"github.com/infinitbyte/gopa/core/persist"
 	. "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/stats"
-	"github.com/infinitbyte/gopa/core/store"
 	"github.com/infinitbyte/gopa/modules/config"
 	"strings"
 	"time"
@@ -76,7 +76,7 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 		task.SnapshotID = snapshot.ID
 		task.SnapshotHash = snapshot.Hash
 		task.SnapshotSimHash = snapshot.SimHash
-		task.SnapshotCreateTime = snapshot.CreateTime
+		task.SnapshotCreated = snapshot.Created
 
 		snapshot.Version = task.SnapshotVersion
 		snapshot.Url = task.Url
@@ -94,9 +94,9 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 	log.Debug("save url to db, url:", url, ",domain:", task.Host, ",path:", savePath, ",file:", saveFile, ",saveKey:", string(saveKey))
 
 	if this.GetBool(compressEnabled, true) {
-		store.AddValueCompress(this.MustGetString(bucket), saveKey, snapshot.Payload)
+		persist.AddValueCompress(this.MustGetString(bucket), saveKey, snapshot.Payload)
 	} else {
-		store.AddValue(this.MustGetString(bucket), saveKey, snapshot.Payload)
+		persist.AddValue(this.MustGetString(bucket), saveKey, snapshot.Payload)
 	}
 
 	model.CreateSnapshot(snapshot)
@@ -128,14 +128,14 @@ func initFetchRateArr(velocityStr string) []int {
 
 //set snapshot nextchecktime
 func setSnapNextCheckTime(task *model.Task, timeNow time.Time, timeDuration time.Duration, fetchSuccess bool) {
-	task.LastCheckTime = &timeNow
-	if task.SnapshotCreateTime == nil {
+	task.LastCheck = &timeNow
+	if task.SnapshotCreated == nil {
 		defaultTime := timeNow.Add(-timeDuration * 1)
-		task.SnapshotCreateTime = &defaultTime
+		task.SnapshotCreated = &defaultTime
 	}
-	timeInterval := getNextCheckTimeSeconds(fetchSuccess, *task.SnapshotCreateTime, timeNow)
+	timeInterval := getNextCheckTimeSeconds(fetchSuccess, *task.SnapshotCreated, timeNow)
 	nextT := timeNow.Add(timeDuration * time.Duration(timeInterval))
-	task.NextCheckTime = &nextT
+	task.NextCheck = &nextT
 }
 
 func getNextCheckTimeSeconds(fetchSuccess bool, tSnapshotCreateTime time.Time, tTimeNow time.Time) int {
@@ -209,7 +209,7 @@ func deleteRedundantSnapShot(maxRevisionNum int, bucketStr string, taskId string
 			if errReadList == nil {
 				for i := 0; i < len(snapshotsList); i++ {
 					model.DeleteSnapshot(&snapshotsList[i])
-					store.DeleteValue(bucketStr, []byte(snapshotsList[i].ID), snapshotsList[i].Payload)
+					persist.DeleteValue(bucketStr, []byte(snapshotsList[i].ID), snapshotsList[i].Payload)
 				}
 			}
 		}

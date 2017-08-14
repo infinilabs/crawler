@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	log "github.com/cihub/seelog"
 	. "github.com/infinitbyte/gopa/core/config"
+	"github.com/infinitbyte/gopa/core/persist"
 	"github.com/infinitbyte/gopa/core/stats"
-	"github.com/infinitbyte/gopa/core/store"
 	"github.com/infinitbyte/gopa/modules/config"
 	"runtime"
 	"sync"
@@ -23,7 +23,7 @@ func (module StatsStoreModule) Start(cfg *Config) {
 func (module StatsStoreModule) Stop() error {
 	v, _ := json.Marshal(s.Data)
 	s.ID = "statsd"
-	err := store.AddValue(string(config.KVBucketKey), []byte(s.ID), v)
+	err := persist.AddValue(string(config.KVBucketKey), []byte(s.ID), v)
 	if err != nil {
 		log.Error(err)
 	}
@@ -111,7 +111,7 @@ func initStats() {
 	if s == nil {
 		s = &stats.Stats{}
 		s.ID = "statsd"
-		v := store.GetValue(string(config.KVBucketKey), []byte(s.ID))
+		v := persist.GetValue(string(config.KVBucketKey), []byte(s.ID))
 		d := map[string]map[string]int64{}
 		err := json.Unmarshal(v, &d)
 		if err != nil {

@@ -23,7 +23,7 @@ cluster.seeds:
 modules:
 - module: crawler
   enabled: true
-  max_go_routine: 1
+  max_go_routine: 100
   fetch_threshold_ms: 0
   default_pipeline_config:
     name: my_crawler
@@ -78,20 +78,20 @@ modules:
         enabled: true
       - joint: ignore_timeout
         parameters:
-          ignore_timeout_after_count: 5
+          ignore_timeout_after_count: 500
         enabled: true
       - joint: fetch
         enabled: true
         parameters:
-          timeout_in_seconds: 10
+          timeout_in_seconds: 100
 #          proxy: "socks5://127.0.0.1:1080"
 #          cookie: ""
       - joint: parse
         enabled: true
         parameters:
           dispatch_links: true
-          max_depth: 5
-          max_breadth: 2
+          max_depth: 20
+          max_breadth: 1
       - joint: html2text
         parameters:
           merge_whitespace: false
@@ -223,15 +223,18 @@ modules:
   enabled: true
   elasticsearch:
     endpoint: http://127.0.0.1:9200
-    index: gopa
 
 - module: dispatch
   enabled: true
 
-- module: database
+- module: persist
   enabled: true
-  dialect: sqlite
-#  dialect: mysql
+#  driver: elasticsearch
+#  elasticsearch:
+#    index_prefix: gopa-
+#    endpoint: http://127.0.0.1:9200
+  driver: sqlite
+#  driver: mysql
 #  mysql:
 #    connection: root:password@tcp(127.0.0.1:3306)/gopa?charset=utf8&parseTime=true&loc=Local
 

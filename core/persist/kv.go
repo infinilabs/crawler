@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package store
+package persist
 
 import "errors"
 
@@ -36,38 +36,40 @@ type KVStore interface {
 	DeleteBucket(bucket string, key []byte, value []byte) error
 }
 
-var handler KVStore
+var kvHandler KVStore
 
-func getHandler() KVStore {
-	if handler == nil {
-		panic(errors.New("store handler is not registered"))
+func getKVHandler() KVStore {
+
+	if kvHandler == nil {
+		panic(errors.New("kv store handler is not registered"))
 	}
-	return handler
+	return kvHandler
 }
+
 func GetValue(bucket string, key []byte) []byte {
-	return getHandler().GetValue(bucket, key)
+	return getKVHandler().GetValue(bucket, key)
 }
 
 func GetCompressedValue(bucket string, key []byte) []byte {
-	return getHandler().GetCompressedValue(bucket, key)
+	return getKVHandler().GetCompressedValue(bucket, key)
 }
 
 func AddValueCompress(bucket string, key []byte, value []byte) error {
-	return getHandler().AddValueCompress(bucket, key, value)
+	return getKVHandler().AddValueCompress(bucket, key, value)
 }
 
 func AddValue(bucket string, key []byte, value []byte) error {
-	return getHandler().AddValue(bucket, key, value)
+	return getKVHandler().AddValue(bucket, key, value)
 }
 
 func DeleteValue(bucket string, key []byte, value []byte) error {
-	return getHandler().DeleteValue(bucket, key, value)
+	return getKVHandler().DeleteValue(bucket, key, value)
 }
 
 func DeleteBucket(bucket string, key []byte, value []byte) error {
-	return getHandler().DeleteBucket(bucket, key, value)
+	return getKVHandler().DeleteBucket(bucket, key, value)
 }
 
-func RegisterKVStoreHandler(h KVStore) {
-	handler = h
+func RegisterKVHandler(h KVStore) {
+	kvHandler = h
 }
