@@ -2,9 +2,6 @@ package util
 
 import (
 	log "github.com/cihub/seelog"
-	"os"
-	"path"
-	"syscall"
 )
 
 // CheckProcessExists check if the pid is running
