@@ -224,7 +224,7 @@ modules:
 - module: index
   enabled: true
   elasticsearch:
-    endpoint: http://dev:9200
+    endpoint: http://localhost:9200
     index_prefix: gopa-
 
 - module: dispatch
@@ -234,7 +234,7 @@ modules:
   enabled: true
   driver: elasticsearch
   elasticsearch:
-    endpoint: http://dev:9200
+    endpoint: http://localhost:9200
     index_prefix: gopa-
 #  driver: sqlite
 
