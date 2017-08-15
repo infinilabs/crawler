@@ -111,7 +111,7 @@ modules:
           accelerate_steps: "24h,12h,6h,3h,1h30m,45m,20m,10m,1m"
           max_revision: 10
       - joint: index
-        enabled: false
+        enabled: true
     end:
       joint: save_task
       enabled: true
@@ -224,7 +224,7 @@ modules:
 - module: index
   enabled: true
   elasticsearch:
-    endpoint: http://127.0.0.1:9200
+    endpoint: http://dev:9200
     index_prefix: gopa-
 
 - module: dispatch
@@ -234,7 +234,7 @@ modules:
   enabled: true
   driver: elasticsearch
   elasticsearch:
-    endpoint: http://127.0.0.1:9200
+    endpoint: http://dev:9200
     index_prefix: gopa-
 #  driver: sqlite
 #  driver: mysql

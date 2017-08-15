@@ -56,7 +56,7 @@ func (joint IndexJoint) Process(c *api.Context) error {
 	data["snapshot"] = snapshot
 
 	docs := model.IndexDocument{
-		Index:  "gopa",
+		Index:  "index",
 		Id:     id,
 		Source: data,
 	}
