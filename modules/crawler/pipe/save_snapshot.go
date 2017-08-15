@@ -129,11 +129,16 @@ func initFetchRateArr(velocityStr string) []int {
 //set snapshot nextchecktime
 func setSnapNextCheckTime(task *model.Task, timeNow time.Time, timeDuration time.Duration, fetchSuccess bool) {
 	task.LastCheck = &timeNow
+	var timeInterval int
 	if task.SnapshotCreated == nil {
-		defaultTime := timeNow.Add(-timeDuration * 1)
-		task.SnapshotCreated = &defaultTime
+		if fetchSuccess {
+			timeInterval = arrAccelerateSteps[0]
+		}else{
+			timeInterval = arrDecelerateSteps[0]
+		}
+	}else{
+		timeInterval = getNextCheckTimeSeconds(fetchSuccess, *task.SnapshotCreated, timeNow)
 	}
-	timeInterval := getNextCheckTimeSeconds(fetchSuccess, *task.SnapshotCreated, timeNow)
 	nextT := timeNow.Add(timeDuration * time.Duration(timeInterval))
 	task.NextCheck = &nextT
 }
