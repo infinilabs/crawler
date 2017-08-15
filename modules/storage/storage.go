@@ -41,7 +41,6 @@ func (module StorageModule) Start(cfg *config.Config) {
 		panic(err)
 	}
 	persist.RegisterKVHandler(impl)
-	//store.RegisterORMHandler(impl)
 }
 
 func (module StorageModule) Stop() error {
