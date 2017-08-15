@@ -271,11 +271,13 @@ func convertTask(result persist.Result, tasks *[]Task) {
 		return
 	}
 
-	t := result.Result.([]interface{})
-	for _, i := range t {
-		js := util.ToJson(i, false)
-		t := Task{}
-		util.FromJson(js, &t)
-		*tasks = append(*tasks, t)
+	t, ok := result.Result.([]interface{})
+	if ok {
+		for _, i := range t {
+			js := util.ToJson(i, false)
+			t := Task{}
+			util.FromJson(js, &t)
+			*tasks = append(*tasks, t)
+		}
 	}
 }
