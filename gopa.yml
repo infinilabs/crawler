@@ -237,6 +237,10 @@ modules:
     endpoint: http://dev:9200
     index_prefix: gopa-
 #  driver: sqlite
+
+#  // before use MySQL, you should create database first:
+#  // DROP DATABASE gopa;
+#  // CREATE DATABASE IF NOT EXISTS gopa DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
 #  driver: mysql
 #  mysql:
 #    connection: root:password@tcp(127.0.0.1:3306)/gopa?charset=utf8&parseTime=true&loc=Local
