@@ -60,12 +60,14 @@ func GetDomainList(from, size int, domain string) (int, []Domain, error) {
 	err, r := persist.Search(Domain{}, &domains, &query)
 
 	if domains == nil && r.Result != nil {
-		t := r.Result.([]interface{})
-		for _, i := range t {
-			js := util.ToJson(i, false)
-			t := Domain{}
-			util.FromJson(js, &t)
-			domains = append(domains, t)
+		t, ok := r.Result.([]interface{})
+		if ok {
+			for _, i := range t {
+				js := util.ToJson(i, false)
+				t := Domain{}
+				util.FromJson(js, &t)
+				domains = append(domains, t)
+			}
 		}
 	}
 
