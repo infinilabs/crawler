@@ -267,6 +267,10 @@ func GetPendingUpdateFetchTasks(offset *time.Time) (int, []Task, error) {
 }
 
 func convertTask(result persist.Result, tasks *[]Task) {
+	if result.Result == nil {
+		return
+	}
+
 	t := result.Result.([]interface{})
 	for _, i := range t {
 		js := util.ToJson(i, false)

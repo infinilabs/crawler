@@ -105,48 +105,6 @@ curl -XGET http://127.0.0.1:8001/_cluster/health
 }
 ```
 
-* Get joints
-```
-curl -XGET http://127.0.0.1:8001/joint/
-```
-```
-{
- "fetch": {},
- "html2text": {
-  "MergeWhitespace": false
- },
- "ignore_timeout": {
-  "IgnoreTimeoutAfterCount": 0
- },
- "init_task": {
-  "data": null,
-  "Task": null
- },
- "load_metadata": {},
- "parse": {
-  "DispatchLinks": false,
-  "MaxDepth": 0
- },
- "save2db": {
-  "CompressBody": false
- },
- "save2fs": {},
- "save_task": {
-  "IsCreate": false
- },
- "url_checked_filter": {
-  "data": null,
-  "SkipPageParsePattern": null
- },
- "url_ext_filter": {
-  "SkipPageParsePattern": null
- },
- "url_normalization": {
-  "FollowSubDomain": false
- }
-}
-```
-
 * Create pipeline
 ```
 curl -XPOST http://127.0.0.1:8001/joint/ -d'

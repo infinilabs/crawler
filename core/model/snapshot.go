@@ -17,6 +17,7 @@ limitations under the License.
 package model
 
 import (
+	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/persist"
 	"github.com/infinitbyte/gopa/core/util"
@@ -105,9 +106,10 @@ func GetSnapshotList(from, size int, taskId string) (int, []Snapshot, error) {
 	}
 	err, result := persist.Search(Snapshot{}, &snapshots, &query)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		return 0, snapshots, err
 	}
-	if snapshots == nil {
+	if snapshots == nil && result.Result != nil {
 		t := result.Result.([]interface{})
 		for _, i := range t {
 			js := util.ToJson(i, false)
@@ -125,7 +127,8 @@ func GetSnapshot(id string) (Snapshot, error) {
 	snapshot.ID = id
 	err := persist.Get(&snapshot)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		return snapshot, err
 	}
 	if len(snapshot.ID) == 0 || snapshot.Created == nil {
 		panic(errors.New("not found," + id))
