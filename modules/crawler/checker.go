@@ -70,9 +70,16 @@ func getDefaultCheckerTaskConfig() TaskConfig {
 	url_check_filter.Enabled = true
 	url_check_filter.JointName = "filter_check"
 
+	task_deduplication := JointConfig{}
+	task_deduplication.Enabled = true
+	task_deduplication.JointName = "task_deduplication"
+
 	config.EndJoint = &save
 	config.ProcessJoints = []*JointConfig{
-		&url_normalization, &url_filter, &url_check_filter,
+		&url_normalization,
+		&url_filter,
+		&url_check_filter,
+		&task_deduplication,
 	}
 
 	defaultCheckerConfig := TaskConfig{

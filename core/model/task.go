@@ -41,7 +41,8 @@ func GetTaskStatusText(status TaskStatus) string {
 }
 
 type Seed struct {
-	Url       string `storm:"index" json:"url,omitempty" gorm:"type:varchar(500)"` // the seed url may not cleaned, may miss the domain part, need reference to provide the complete url information
+	// the seed url may not cleaned, may miss the domain part, need reference to provide the complete url information
+	Url       string `storm:"index" json:"url,omitempty" gorm:"type:varchar(500)"`
 	Reference string `json:"reference_url,omitempty"`
 	Depth     int    `storm:"index" json:"depth"`
 	Breadth   int    `storm:"index" json:"breadth"`
@@ -129,16 +130,16 @@ type Task struct {
 	NextCheck   *time.Time      `gorm:"index" json:"next_check"`
 
 	SnapshotVersion int        `json:"snapshot_version"`
-	SnapshotID      string     `json:"snapshot_id"`      //Last Snapshot's ID
-	SnapshotHash    string     `json:"snapshot_hash"`    //Last Snapshot's Hash
-	SnapshotSimHash string     `json:"snapshot_simhash"` //Last Snapshot's Simhash
-	SnapshotCreated *time.Time `json:"snapshot_created"` //Last Snapshot's Simhash
+	SnapshotID      string     `json:"snapshot_id"`
+	SnapshotHash    string     `json:"snapshot_hash"`
+	SnapshotSimHash string     `json:"snapshot_simhash"`
+	SnapshotCreated *time.Time `json:"snapshot_created"`
 }
 
 func CreateTask(task *Task) error {
 	log.Trace("start create crawler task, ", task.Url)
 	time := time.Now().UTC()
-	task.ID = util.GetIncrementID("task")
+	task.ID = util.GetUUID()
 	task.Status = TaskCreated
 	task.Created = &time
 	task.Updated = &time
@@ -184,14 +185,21 @@ func GetTask(id string) (Task, error) {
 	return task, err
 }
 
-func GetTaskByField(k, v string) (Task, error) {
+func GetTaskByField(k, v string) ([]Task, error) {
 	log.Trace("start get seed: ", k, ", ", v)
 	task := Task{}
-	err := persist.GetBy(k, v, &task)
+	tasks := []Task{}
+	err, result := persist.GetBy(k, v, task, &tasks)
+
 	if err != nil {
 		log.Error(k, ", ", err)
+		return tasks, err
 	}
-	return task, err
+	if tasks == nil || len(tasks) == 0 {
+		convertTask(result, &tasks)
+	}
+
+	return tasks, err
 }
 
 func GetTaskList(from, size int, domain string) (int, []Task, error) {
@@ -205,9 +213,10 @@ func GetTaskList(from, size int, domain string) (int, []Task, error) {
 	}
 	err, result := persist.Search(Task{}, &tasks, &queryO)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		return 0, tasks, err
 	}
-	if tasks == nil {
+	if tasks == nil || len(tasks) == 0 {
 		convertTask(result, &tasks)
 	}
 
@@ -225,7 +234,7 @@ func GetPendingNewFetchTasks() (int, []Task, error) {
 		log.Error(err)
 	}
 
-	if tasks == nil {
+	if tasks == nil || len(tasks) == 0 {
 		convertTask(result, &tasks)
 	}
 
@@ -250,7 +259,7 @@ func GetPendingUpdateFetchTasks(offset *time.Time) (int, []Task, error) {
 		log.Error(err)
 	}
 
-	if tasks == nil {
+	if tasks == nil || len(tasks) == 0 {
 		convertTask(result, &tasks)
 	}
 

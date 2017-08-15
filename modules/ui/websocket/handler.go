@@ -99,12 +99,12 @@ func (command Command) GetTask(c *WebsocketConnection, a []string) {
 	if len(a) == 3 {
 		para1 := a[1]
 		para2 := a[2]
-		task, err := model.GetTaskByField(para1, para2)
+		tasks, err := model.GetTaskByField(para1, para2)
 		if err != nil {
 			c.WritePrivateMessage(err.Error())
 		}
 
-		b, _ := json.MarshalIndent(task, "", " ")
+		b, _ := json.MarshalIndent(tasks, "", " ")
 
 		c.WritePrivateMessage(string(b))
 

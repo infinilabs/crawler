@@ -18,6 +18,7 @@
 5. filter url before push to checker
 6. add rules config to url filter 
 7. support elasticsearch as database store
+8. add task_deduplication in the check phrase
 
 ##### improvement
 1. multi instance support on local machine

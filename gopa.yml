@@ -211,6 +211,8 @@ modules:
         enabled: true
         parameters:
           filter_key: check_filter
+      - joint: task_deduplication
+        enabled: true
     end:
       joint: save_task
       enabled: true
@@ -223,17 +225,18 @@ modules:
   enabled: true
   elasticsearch:
     endpoint: http://127.0.0.1:9200
+    index_prefix: gopa-
 
 - module: dispatch
   enabled: true
 
 - module: persist
   enabled: true
-#  driver: elasticsearch
-#  elasticsearch:
-#    index_prefix: gopa-
-#    endpoint: http://127.0.0.1:9200
-  driver: sqlite
+  driver: elasticsearch
+  elasticsearch:
+    endpoint: http://127.0.0.1:9200
+    index_prefix: gopa-
+#  driver: sqlite
 #  driver: mysql
 #  mysql:
 #    connection: root:password@tcp(127.0.0.1:3306)/gopa?charset=utf8&parseTime=true&loc=Local
