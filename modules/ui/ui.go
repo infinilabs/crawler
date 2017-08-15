@@ -28,7 +28,6 @@ import (
 	"errors"
 	log "github.com/cihub/seelog"
 	"github.com/gorilla/context"
-	m "github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	. "github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/global"
@@ -41,7 +40,7 @@ import (
 )
 
 var router *httprouter.Router
-var mux *m.Router
+var mux *http.ServeMux
 
 var store = sessions.NewCookieStore([]byte("1c6f2afbccef959ac5c8b81f690c1be7"))
 
@@ -61,7 +60,7 @@ func (module UIModule) internalStart(cfg *Config) {
 	}
 
 	router = httprouter.New()
-	mux = m.NewRouter()
+	mux = http.NewServeMux()
 	websocket.InitWebSocket(global.Env())
 
 	mux.HandleFunc("/ws", websocket.ServeWs)
