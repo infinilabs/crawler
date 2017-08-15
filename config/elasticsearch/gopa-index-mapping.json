@@ -1,5 +1,7 @@
-curl -XPOST "http://localhost:9200/gopa/doc/_mapping" -H 'Content-Type: application/json' -d'
+curl -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json' -d'
 {
+"mappings": {
+"doc": {
 "properties": {
 "domain": {
 "properties": {
@@ -158,6 +160,8 @@ curl -XPOST "http://localhost:9200/gopa/doc/_mapping" -H 'Content-Type: applicat
 "url": {
 "type": "keyword",
 "ignore_above": 256
+}
+}
 }
 }
 }

@@ -23,13 +23,13 @@ func (handler SQLORM) Get(o interface{}) error {
 	return handler.conn.First(o).Error
 }
 
-func (handler SQLORM) GetBy(field string, value interface{}, to interface{}) error {
+func (handler SQLORM) GetBy(field string, value interface{}, t interface{}, to interface{}) (error, api.Result) {
 	if handler.useLock {
 		dbLock.Lock()
 		defer dbLock.Unlock()
 	}
 
-	return handler.conn.Where(field+" = ?", value).First(to).Error
+	return handler.conn.Where(field+" = ?", value).First(to).Error, api.Result{}
 }
 
 func (handler SQLORM) Save(o interface{}) error {

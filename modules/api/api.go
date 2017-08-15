@@ -23,6 +23,7 @@ import (
 	"errors"
 	log "github.com/cihub/seelog"
 	"github.com/gorilla/context"
+	m "github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/env"
@@ -36,7 +37,7 @@ import (
 )
 
 var router *httprouter.Router
-var mux *http.ServeMux
+var mux *m.Router
 
 var store = sessions.NewCookieStore([]byte("1c6f2afbccef959ac5c8b81f690c1be7"))
 
@@ -51,7 +52,7 @@ func (module APIModule) internalStart(env *env.Env) {
 	}
 
 	router = httprouter.New()
-	mux = http.NewServeMux()
+	mux = m.NewRouter()
 
 	mux.Handle("/", router)
 

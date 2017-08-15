@@ -30,9 +30,11 @@ func (handler ElasticORM) Get(o interface{}) error {
 	return util.FromJson(str, o)
 }
 
-func (handler ElasticORM) GetBy(field string, value interface{}, to interface{}) error {
+func (handler ElasticORM) GetBy(field string, value interface{}, t interface{}, to interface{}) (error, api.Result) {
 
-	return nil
+	query := api.Query{}
+	query.Conds = api.And(api.Eq(field, value))
+	return handler.Search(t, to, &query)
 }
 
 func (handler ElasticORM) Save(o interface{}) error {

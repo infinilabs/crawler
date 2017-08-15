@@ -29,7 +29,7 @@ type ORM interface {
 
 	Get(o interface{}) error
 
-	GetBy(field string, value interface{}, to interface{}) error
+	GetBy(field string, value interface{}, t interface{}, to interface{}) (error, Result)
 
 	Count(o interface{}) (int, error)
 }
@@ -146,9 +146,9 @@ type Result struct {
 	Result interface{}
 }
 
-func GetBy(field string, value interface{}, to interface{}) error {
+func GetBy(field string, value interface{}, t interface{}, to interface{}) (error, Result) {
 
-	return getHandler().GetBy(field, value, to)
+	return getHandler().GetBy(field, value, t, to)
 }
 
 func Get(o interface{}) error {

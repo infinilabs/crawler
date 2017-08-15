@@ -59,7 +59,7 @@ func GetDomainList(from, size int, domain string) (int, []Domain, error) {
 
 	err, r := persist.Search(Domain{}, &domains, &query)
 
-	if domains == nil {
+	if domains == nil && r.Result != nil {
 		t := r.Result.([]interface{})
 		for _, i := range t {
 			js := util.ToJson(i, false)
