@@ -195,7 +195,7 @@ func GetTaskByField(k, v string) ([]Task, error) {
 		log.Error(k, ", ", err)
 		return tasks, err
 	}
-	if tasks == nil || len(tasks) == 0 {
+	if result.Result != nil && tasks == nil || len(tasks) == 0 {
 		convertTask(result, &tasks)
 	}
 
@@ -216,7 +216,7 @@ func GetTaskList(from, size int, domain string) (int, []Task, error) {
 		log.Error(err)
 		return 0, tasks, err
 	}
-	if tasks == nil || len(tasks) == 0 {
+	if result.Result != nil && tasks == nil || len(tasks) == 0 {
 		convertTask(result, &tasks)
 	}
 
@@ -234,7 +234,7 @@ func GetPendingNewFetchTasks() (int, []Task, error) {
 		log.Error(err)
 	}
 
-	if tasks == nil || len(tasks) == 0 {
+	if result.Result != nil && tasks == nil || len(tasks) == 0 {
 		convertTask(result, &tasks)
 	}
 
@@ -259,7 +259,7 @@ func GetPendingUpdateFetchTasks(offset *time.Time) (int, []Task, error) {
 		log.Error(err)
 	}
 
-	if tasks == nil || len(tasks) == 0 {
+	if result.Result != nil && tasks == nil || len(tasks) == 0 {
 		convertTask(result, &tasks)
 	}
 
