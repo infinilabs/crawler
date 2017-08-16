@@ -28,7 +28,7 @@ import (
 
 func TestPipelineConfig(t *testing.T) {
 
-	util.SetIDPersistencePath("/tmp")
+	util.RestorePersistID("/tmp")
 
 	global.RegisterEnv(env.EmptyEnv())
 	global.Env().IsDebug = true
