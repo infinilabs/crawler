@@ -60,16 +60,4 @@ func TestProcessText(t *testing.T) {
 	text = snapshot.Text
 	assert.Equal(t, "\nElastic中文社区\nlink\nHidden text, should not displayed!\nH1 title\nH2 title\n", text)
 
-	b, e = ioutil.ReadFile("../../../test/samples/csdn.html")
-	if e != nil {
-		panic(e)
-	}
-	snapshot = model.Snapshot{}
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
-	snapshot.Payload = b
-	parse.Process(&context)
-
-	text = snapshot.Text
-	//	assert.Equal(t, "  ", text)
-
 }
