@@ -20,11 +20,11 @@ func GetUUID() string {
 }
 
 type incrementCounter struct {
-	l  sync.RWMutex
+	l  *sync.RWMutex
 	ID map[string]*atomicID
 }
 
-var count = incrementCounter{ID: make(map[string]*atomicID)}
+var count = incrementCounter{l: &sync.RWMutex{}, ID: make(map[string]*atomicID)}
 
 type atomicID struct {
 	Sequence int64
