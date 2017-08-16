@@ -18,11 +18,6 @@ package stats
 
 import "sync"
 
-type Stats struct {
-	ID   string                       `storm:"id,unique" json:"id" gorm:"not null;unique;primary_key"`
-	Data *map[string]map[string]int64 `storm:"inline" json:"data,omitempty"`
-}
-
 type StatsInterface interface {
 	Increment(category, key string)
 

@@ -122,7 +122,7 @@ func main() {
 	util.CheckInstanceLock(environment.SystemConfig.GetWorkingDir())
 
 	//set path to persist id
-	util.SetIDPersistencePath(environment.SystemConfig.GetWorkingDir())
+	util.RestorePersistID(environment.SystemConfig.GetWorkingDir())
 
 	//cleanup
 	defer func() {

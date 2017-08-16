@@ -111,7 +111,6 @@ func noRedirect(*http.Request, []*http.Request) error {
 func getUrl(url string) (string, error) {
 	if !strings.HasPrefix(url, "http") {
 		return url, errors.New("invalid url, " + url)
-		//url="http://"+url
 	}
 	return url, nil
 }
@@ -125,6 +124,9 @@ type Result struct {
 	StatusCode int
 	Size       uint64
 }
+
+//TODO align gopa version
+const userAgent = "Mozilla/5.0 (compatible; gopa/1.0; +http://github.com/infinitbyte/gopa)"
 
 /**
 proxyStr, eg: "socks5://127.0.0.1:9150"
@@ -178,7 +180,7 @@ func get(url string, cookie string, proxyStr string) (*Result, error) {
 
 	//req.SetBasicAuth("user", "password")
 
-	reqest.Header.Set("User-Agent", " Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36")
+	reqest.Header.Set("User-Agent", userAgent)
 	reqest.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 	reqest.Header.Set("Accept-Charset", "GBK,utf-8;q=0.7,*;q=0.3")
 	reqest.Header.Set("Accept-Encoding", "gzip,deflate,sdch")
@@ -279,7 +281,7 @@ func HttpPostJSON(url string, cookie string, postStr string) []byte {
 	postBytesReader := bytes.NewReader([]byte(postStr))
 	reqest, _ := http.NewRequest("POST", url, postBytesReader)
 
-	reqest.Header.Set("User-Agent", " Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36")
+	reqest.Header.Set("User-Agent", userAgent)
 	reqest.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 	reqest.Header.Set("Accept-Charset", "GBK,utf-8;q=0.7,*;q=0.3")
 	reqest.Header.Set("Accept-Encoding", "gzip,deflate,sdch")
@@ -375,7 +377,7 @@ func HttpDelete(resource string) ([]byte, error) {
 func execute(req *http.Request) ([]byte, error) {
 
 	//support gzip
-	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; gopa/0.1; +http://github.com/infinitbyte/gopa)") //TODO align gopa version
+	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Accept-Encoding", "gzip")
 
 	client := &http.Client{

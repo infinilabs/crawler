@@ -24,7 +24,6 @@ import (
 )
 
 func TestIDGenerator(t *testing.T) {
-	SetIDPersistencePath("/tmp/")
 	for j := 0; j < 5; j++ {
 		go func() {
 			for i := 0; i < 5; i++ {
@@ -41,7 +40,6 @@ func TestIDGenerator(t *testing.T) {
 	}
 
 	time.Sleep(1 * time.Second)
-
 }
 func TestIDGenerator1(t *testing.T) {
 	var set = map[string]interface{}{}
@@ -50,9 +48,8 @@ func TestIDGenerator1(t *testing.T) {
 		go func() {
 			for i := 0; i < 5; i++ {
 				id := GetUUID()
-				fmt.Println(id)
 				s.Lock()
-				if _, ok := idseed[id]; ok {
+				if _, ok := set[id]; ok {
 					panic(id)
 				} else {
 					set[id] = true
@@ -61,7 +58,6 @@ func TestIDGenerator1(t *testing.T) {
 			}
 		}()
 	}
-
 	time.Sleep(1 * time.Second)
 
 }
