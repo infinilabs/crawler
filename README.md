@@ -9,26 +9,26 @@
 [![Coverage Status](https://coveralls.io/repos/github/infinitbyte/gopa/badge.svg?branch=master)](https://coveralls.io/github/infinitbyte/gopa?branch=master)
 
 
-## Goals of this project
+## Goal
 
 * Light weight, low footprint, memory requirement should < 100MB
 * Easy to deploy, no runtime or dependency required
 * Easy to use, no programming or scripts ability needed, out of box features
 
 
-## Build Gopa ##
+## Build
 
 Mac/Linux: Run `make build` to build the Gopa
 
 Windows:  Checkout this wiki page - [How to build GOPA on windows](https://github.com/infinitbyte/gopa/wiki/How-to-build-GOPA-on-windows)
 
 
-## Download ##
+## Download
 
 [Release](https://github.com/infinitbyte/gopa/releases)
 
 
-## Start Gopa ##
+## Start
 
 After download/build the binary file, run `./gopa` to start the Gopa 
 
@@ -41,7 +41,7 @@ Run `./gopa -h` to get the full list of command line options
 * -memprofile option : write memory profile to this file
 
 
-## Stop Gopa ##
+## Stop
 
 It's safety to press `ctrl+c` stop the current running Gopa, Gopa will handle the rest,saving the checkpoint,
 you may restore the job later,the world is still in your hand.
