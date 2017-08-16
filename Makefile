@@ -110,7 +110,6 @@ config: update-commit-log
 fetch-depends:
 	@echo "get Dependencies"
 	$(GO) get github.com/cihub/seelog
-	$(GO) get github.com/robfig/config
 	$(GO) get github.com/PuerkitoBio/purell
 	$(GO) get github.com/clarkduvall/hyperloglog
 	$(GO) get github.com/PuerkitoBio/goquery
