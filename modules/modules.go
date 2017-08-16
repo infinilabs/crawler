@@ -36,7 +36,7 @@ func Register() {
 	module.Register(persist.DatabaseModule{})
 	module.Register(filter.FilterModule{})
 	module.Register(storage.StorageModule{})
-	module.Register(stats.StatsStoreModule{})
+	module.Register(stats.SimpleStatsModule{})
 	module.Register(stats.StatsDModule{})
 	module.Register(queue.DiskQueue{})
 	module.Register(crawler.CheckerModule{})
