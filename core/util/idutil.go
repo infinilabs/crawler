@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
-	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/rs/xid"
 	"io/ioutil"
 	"sync"
+	"sync/atomic"
 )
 
 var lock sync.Mutex
@@ -19,31 +19,36 @@ func GetUUID() string {
 	return xid.New().String()
 }
 
-var idseed map[string]int64
+type incrementCounter struct {
+	l  sync.RWMutex
+	ID map[string]*atomicID
+}
+
+var count = incrementCounter{ID: make(map[string]*atomicID)}
+
+type atomicID struct {
+	Sequence int64
+}
+
+func (id *atomicID) Increment() int64 {
+	return atomic.AddInt64(&id.Sequence, 1)
+}
 
 var lock1 sync.Mutex
 var persistedPath string
 
 // GetIncrementID return incremented id in specify bucket
 func GetIncrementID(bucket string) string {
-	lock1.Lock()
-	defer lock1.Unlock()
-	if idseed == nil {
-		if persistedPath == "" {
-			panic(errors.New("persistence path is not set"))
-		}
-		restorePersistID()
-	}
 
-	if _, ok := idseed[bucket]; !ok {
-		idseed[bucket] = int64(0)
+	count.l.Lock()
+	o := count.ID[bucket]
+	if o == nil {
+		o = &atomicID{}
+		count.ID[bucket] = o
 	}
-
-	v := idseed[bucket]
-	v++
-	idseed[bucket] = v
-	id := fmt.Sprintf("%d", v)
-	return id
+	v := o.Increment()
+	count.l.Unlock()
+	return fmt.Sprintf("%d", v)
 }
 
 // SnapshotPersistID will make a snapshot and persist id stats to disk
@@ -52,7 +57,7 @@ func SnapshotPersistID() {
 	defer lock1.Unlock()
 
 	var buf bytes.Buffer
-	err := gob.NewEncoder(&buf).Encode(idseed)
+	err := gob.NewEncoder(&buf).Encode(count)
 	if err != nil {
 		panic(err)
 	}
@@ -63,8 +68,11 @@ func SnapshotPersistID() {
 }
 
 // RestorePersistID will take the snapshot and restore to id seeds
-func restorePersistID() {
-	idseed = map[string]int64{}
+func RestorePersistID(path string) {
+	lock1.Lock()
+	defer lock1.Unlock()
+
+	persistedPath = JoinPath(path, ".sequence")
 
 	if !FileExists(persistedPath) {
 		return
@@ -76,13 +84,8 @@ func restorePersistID() {
 	}
 
 	buf := bytes.NewReader(n)
-	err = gob.NewDecoder(buf).Decode(&idseed)
+	err = gob.NewDecoder(buf).Decode(&count)
 	if err != nil {
 		panic(err)
 	}
-}
-
-// SetIDPersistencePath set the persist path
-func SetIDPersistencePath(path string) {
-	persistedPath = JoinPath(path, ".sequence")
 }
