@@ -64,8 +64,8 @@ func Stop() {
 		if cfg.Enabled() {
 			log.Trace("stopping module: ", v.Name())
 			v.Stop()
-			log.Debug("stoped module: ", v.Name())
+			log.Debug("stopped module: ", v.Name())
 		}
 	}
-	log.Debug("all modules stopeed")
+	log.Debug("all modules stopped")
 }
