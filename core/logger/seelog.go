@@ -50,10 +50,7 @@ func SetLogging(env *env.Env, logLevel string, logFile string) {
 	if env != nil {
 		envLevel := strings.ToLower(env.LoggingLevel)
 		if env.SystemConfig != nil {
-			envLogFile := env.SystemConfig.PathConfig.Log + "/gopa.log"
-			if len(envLogFile) > 0 {
-				file = envLogFile
-			}
+			file = env.SystemConfig.PathConfig.Log + "/gopa.log"
 		}
 		if len(envLevel) > 0 {
 			loggingConfig.LogLevel = envLevel
@@ -70,20 +67,20 @@ func SetLogging(env *env.Env, logLevel string, logFile string) {
 	}
 
 	//finally check filename
-	if len(file) <= 0 {
+	if file == "" {
 		file = "./log/gopa.log"
 	}
 
-	if len(loggingConfig.FuncFilterPattern) <= 0 {
+	if loggingConfig.FuncFilterPattern == "" {
 		loggingConfig.FuncFilterPattern = "*"
 	}
-	if len(loggingConfig.FileFilterPattern) <= 0 {
+	if loggingConfig.FileFilterPattern == "" {
 		loggingConfig.FileFilterPattern = "*"
 	}
-	if len(loggingConfig.LogLevel) <= 0 {
+	if loggingConfig.LogLevel == "" {
 		loggingConfig.LogLevel = "info"
 	}
-	if len(loggingConfig.PushLogLevel) <= 0 {
+	if loggingConfig.PushLogLevel == "" {
 		loggingConfig.PushLogLevel = "info"
 	}
 
