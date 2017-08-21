@@ -33,31 +33,36 @@ func TestInitGrabVelocityArr(t *testing.T) {
 }
 
 func TestSetSnapNextCheckTime(t *testing.T) {
-	arrDecelerateSteps = initFetchRateArr("3s,6s,10s,20s,30s,40s,50s,60s,70s")
-	arrAccelerateSteps = initFetchRateArr("70s,60s,50s,40s,30s,20s,10s,6s,3s")
+	arrDecelerateSteps = initFetchRateArr("1m,2m,5m,10m")
+	arrAccelerateSteps = initFetchRateArr("10m,5m,2m,1m")
 
 	toBeCharge := "2017-01-01 00:00:00.0000000 +0000 UTC"
 	timeLayout := "2006-01-02 15:04:05"
 	loc, _ := time.LoadLocation("Local")
 	theTime, _ := time.ParseInLocation(timeLayout, toBeCharge, loc)
+	m, _ := time.ParseDuration("1s")
 
 	task := new(model.Task)
-	task.SnapshotCreated = &theTime
-	fmt.Println("----task.SnapshotCreateTime", task.SnapshotCreated)
-	m, _ := time.ParseDuration("1s")
 	tNow := theTime.Add(1 * m)
+	task.LastCheck = &theTime
+	task.NextCheck = &tNow
+	fmt.Println("----task.SnapshotCreateTime", task.SnapshotCreated)
+	task.SnapshotVersion = 2
 	setSnapNextCheckTime(task, tNow, m, false)
 	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
 	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
 	timeInterval := getTimeInterval(*task.LastCheck, *task.NextCheck)
 	fmt.Println("----timeInterval           ", timeInterval)
-	assert.Equal(t, 3, timeInterval)
+	assert.Equal(t, 60, timeInterval)
 
-	tNow = theTime.Add(71 * m)
-	setSnapNextCheckTime(task, tNow, m, true)
+	tNow = theTime.Add(120 * m)
+	task.LastCheck = &theTime
+	task.NextCheck = &tNow
+	task.SnapshotVersion = 2
+	setSnapNextCheckTime(task, tNow, m,true)
 	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
 	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
 	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
 	fmt.Println("----timeInterval           ", timeInterval)
-	assert.Equal(t, 70, timeInterval)
+	assert.Equal(t, 60, timeInterval)
 }
