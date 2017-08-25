@@ -22,6 +22,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unsafe"
 )
 
 // BytesToUint64 convert bytes to type uint64
@@ -175,3 +176,7 @@ func ToBytes(s string) (uint64, error) {
 }
 
 /** https://github.com/cloudfoundry/bytefmt/blob/master/bytes.go end **/
+
+func BytesToString(bs []byte) string {
+	return *(*string)(unsafe.Pointer(&bs))
+}
