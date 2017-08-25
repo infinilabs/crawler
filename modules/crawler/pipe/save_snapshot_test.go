@@ -59,7 +59,7 @@ func TestSetSnapNextCheckTime(t *testing.T) {
 	task.LastCheck = &theTime
 	task.NextCheck = &tNow
 	task.SnapshotVersion = 2
-	setSnapNextCheckTime(task, tNow, m,true)
+	setSnapNextCheckTime(task, tNow, m, true)
 	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
 	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
 	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
