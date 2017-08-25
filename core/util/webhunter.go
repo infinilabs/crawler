@@ -246,11 +246,11 @@ func get(url string, cookie string, proxyStr string) (*Result, error) {
 	switch resp.Header.Get("Content-Encoding") {
 	case "gzip":
 		reader, err = gzip.NewReader(resp.Body)
+		defer reader.Close()
 		if err != nil {
 			log.Error(url, ", ", err)
 			return nil, err
 		}
-		defer reader.Close()
 	default:
 		reader = resp.Body
 	}
@@ -310,23 +310,22 @@ func HttpPostJSON(url string, cookie string, postStr string) []byte {
 	}
 
 	resp, err := client.Do(reqest)
+	defer resp.Body.Close()
 
 	if err != nil {
 		log.Error(url, ", ", err)
 		return nil
 	}
 
-	defer resp.Body.Close()
-
 	var reader io.ReadCloser
 	switch resp.Header.Get("Content-Encoding") {
 	case "gzip":
 		reader, err = gzip.NewReader(resp.Body)
+		defer reader.Close()
 		if err != nil {
 			log.Error(url, err)
 			return nil
 		}
-		defer reader.Close()
 	default:
 		reader = resp.Body
 	}
@@ -352,7 +351,6 @@ func HttpGetWithCookie(resource string, cookie string, proxy string) (*Result, e
 func HttpGet(resource string) ([]byte, error) {
 
 	req, err := http.NewRequest("GET", resource, nil)
-
 	if err != nil {
 		log.Error(resource, err)
 		return nil, err
@@ -397,6 +395,7 @@ func execute(req *http.Request) ([]byte, error) {
 	}
 
 	resp, err := client.Do(req)
+
 	if err != nil {
 		log.Error(req, err)
 		return nil, err
@@ -408,11 +407,11 @@ func execute(req *http.Request) ([]byte, error) {
 	switch resp.Header.Get("Content-Encoding") {
 	case "gzip":
 		reader, err = gzip.NewReader(resp.Body)
+		defer reader.Close()
 		if err != nil {
 			log.Error(req, err)
 			return nil, err
 		}
-		defer reader.Close()
 	default:
 		reader = resp.Body
 	}
