@@ -27,10 +27,13 @@ type incrementCounter struct {
 var count = incrementCounter{l: &sync.RWMutex{}, ID: make(map[string]*atomicID)}
 
 type atomicID struct {
+	l        sync.Mutex
 	Sequence int64
 }
 
 func (id *atomicID) Increment() int64 {
+	id.l.Lock()
+	defer id.l.Unlock()
 	return atomic.AddInt64(&id.Sequence, 1)
 }
 
