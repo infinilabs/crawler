@@ -25,8 +25,8 @@ import (
 	"github.com/infinitbyte/gopa/core/stats"
 	"github.com/infinitbyte/gopa/modules/config"
 	"strings"
-	"time"
 	"sync"
+	"time"
 )
 
 type SaveSnapshotToDBJoint struct {
@@ -62,7 +62,7 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 			c.End(fmt.Sprintf("same hash: %s, %s", snapshot.Hash, task.Url))
 
 			//extend the nextchecktime
-			setSnapNextCheckTime(task, tNow, m,false)
+			setSnapNextCheckTime(task, tNow, m, false)
 
 			deleteRedundantSnapShot(int(this.MustGetInt64(maxRevision)), this.MustGetString(bucket), task.ID)
 
@@ -99,7 +99,7 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 	model.CreateSnapshot(snapshot)
 
 	//shorten the nextchecktime
-	setSnapNextCheckTime(task, tNow, m,true)
+	setSnapNextCheckTime(task, tNow, m, true)
 
 	deleteRedundantSnapShot(int(this.MustGetInt64(maxRevision)), this.MustGetString(bucket), task.ID)
 
@@ -125,7 +125,7 @@ func initFetchRateArr(velocityStr string) []int {
 		m, err := time.ParseDuration(arrVelocityStr[i])
 		if err == nil {
 			velocityArr[i] = int(m.Seconds())
-		} else{
+		} else {
 			panic(fmt.Errorf("%s invalid config,only supports h, m, s", velocityStr))
 		}
 	}
@@ -136,7 +136,7 @@ func initFetchRateArr(velocityStr string) []int {
 func setSnapNextCheckTime(task *model.Task, timeNow time.Time, timeDuration time.Duration, fetchSuccess bool) {
 	var timeInterval int
 
-	if task.SnapshotVersion <= 1 && task.LastCheck == nil && task.NextCheck == nil{
+	if task.SnapshotVersion <= 1 && task.LastCheck == nil && task.NextCheck == nil {
 		if fetchSuccess {
 			timeInterval = arrAccelerateSteps[0]
 		} else {
