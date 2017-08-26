@@ -60,7 +60,7 @@ func initRules() {
 		return
 	}
 
-	log.Error("init rule")
+	log.Trace("init html2text rule")
 
 	//remove STYLE
 	rules.replaceRules = append(rules.replaceRules, getRule(`<style[\S\s]+?\</style\>`))
