@@ -73,3 +73,11 @@ func TestGetHost(t *testing.T) {
 	fmt.Println("logo.com", host)
 	assert.Equal(t, host, "logo.com")
 }
+
+func BenchmarkGet(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		get("http://es-guide-preview.elasticsearch.cn", "", "")
+	}
+
+}

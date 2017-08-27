@@ -274,10 +274,6 @@ func HttpPostJSON(url string, cookie string, postStr string) []byte {
 
 	log.Debug("let's post: "+url, ",", postStr)
 
-	client := &http.Client{
-		CheckRedirect: nil,
-	}
-
 	postBytesReader := bytes.NewReader([]byte(postStr))
 	reqest, _ := http.NewRequest("POST", url, postBytesReader)
 
@@ -309,36 +305,12 @@ func HttpPostJSON(url string, cookie string, postStr string) []byte {
 		}
 	}
 
-	resp, err := client.Do(reqest)
-	defer resp.Body.Close()
-
+	body, err := execute(reqest)
 	if err != nil {
-		log.Error(url, ", ", err)
-		return nil
+		panic(err)
 	}
+	return body
 
-	var reader io.ReadCloser
-	switch resp.Header.Get("Content-Encoding") {
-	case "gzip":
-		reader, err = gzip.NewReader(resp.Body)
-		defer reader.Close()
-		if err != nil {
-			log.Error(url, err)
-			return nil
-		}
-	default:
-		reader = resp.Body
-	}
-
-	if reader != nil {
-		body, err := ioutil.ReadAll(reader)
-		if err != nil {
-			log.Error(url, err)
-			return nil
-		}
-		return body
-	}
-	return nil
 }
 
 // HttpGetWithCookie issue http request with cookie
@@ -377,22 +349,33 @@ func execute(req *http.Request) ([]byte, error) {
 	//support gzip
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Accept-Encoding", "gzip")
+	timeout := 3 * time.Second
+
+	t := &http.Transport{
+		Dial: func(netw, addr string) (net.Conn, error) {
+			deadline := time.Now().Add(10 * time.Second)
+			c, err := net.DialTimeout(netw, addr, 5*time.Second)
+			if err != nil {
+				log.Error(req, err)
+				return nil, err
+			}
+
+			c.SetDeadline(deadline)
+			return c, nil
+		},
+		ResponseHeaderTimeout: timeout,
+		IdleConnTimeout:       timeout,
+		TLSHandshakeTimeout:   timeout,
+		ExpectContinueTimeout: timeout,
+		DisableKeepAlives:     true,
+	}
 
 	client := &http.Client{
-		Transport: &http.Transport{
-			Dial: func(netw, addr string) (net.Conn, error) {
-				deadline := time.Now().Add(10 * time.Second)
-				c, err := net.DialTimeout(netw, addr, 5*time.Second)
-				if err != nil {
-					log.Error(req, err)
-					return nil, err
-				}
-
-				c.SetDeadline(deadline)
-				return c, nil
-			},
-		},
+		Transport: t,
+		Timeout:   timeout,
 	}
+
+	defer t.CloseIdleConnections()
 
 	resp, err := client.Do(req)
 
