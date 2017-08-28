@@ -12,10 +12,10 @@ import (
 )
 
 func (module SimpleStatsModule) Name() string {
-	return "StatsStore"
+	return "Stats"
 }
 
-const id = "simple-stats"
+const id = "stats"
 
 var data *Stats
 
