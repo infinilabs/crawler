@@ -125,6 +125,7 @@ func (para *Parameters) GetIntOrDefault(key ParaKey, defaultV int) int {
 	}
 	return defaultV
 }
+
 func (para *Parameters) GetInt(key ParaKey, defaultV int) (int, bool) {
 	v, ok := para.GetInt64(key, 0)
 	if ok {
@@ -389,6 +390,7 @@ func (pipe *Pipeline) Run() *Context {
 
 	return pipe.context
 }
+
 func (pipe *Pipeline) endPipeline() {
 	if pipe.context.IsExit() {
 		log.Debug("exit pipeline, ", pipe.name, ", ", pipe.context.Payload)
@@ -403,7 +405,9 @@ func (pipe *Pipeline) endPipeline() {
 }
 
 func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
-	log.Tracef("pipeline config: %v", util.ToJson(config, true))
+	if global.Env().IsDebug {
+		log.Debugf("pipeline config: %v", util.ToJson(config, true))
+	}
 
 	pipe := &Pipeline{}
 	pipe.id = util.GetIncrementID("pipe")
@@ -428,7 +432,9 @@ func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
 		pipe.End(output)
 	}
 
-	log.Tracef("get pipeline: %v", util.ToJson(pipe, true))
+	if global.Env().IsDebug {
+		log.Debugf("get pipeline: %v", util.ToJson(pipe, true))
+	}
 
 	return pipe
 }

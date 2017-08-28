@@ -20,6 +20,7 @@ import (
 	"fmt"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
+	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/model"
 	. "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/queue"
@@ -134,7 +135,9 @@ func (joint FetchJoint) Process(context *Context) error {
 			code, payload := errors.CodeWithPayload(err)
 
 			if code == errors.URLRedirected {
-				log.Trace(util.ToJson(context, true))
+				if global.Env().IsDebug {
+					log.Debug(util.ToJson(context, true))
+				}
 				task := model.NewTaskSeed(payload.(string), requestUrl, task.Depth, task.Breadth)
 				log.Trace(err)
 				queue.Push(config.CheckChannel, task.MustGetBytes())
