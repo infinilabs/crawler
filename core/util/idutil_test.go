@@ -17,36 +17,24 @@ limitations under the License.
 package util
 
 import (
-	"fmt"
 	"sync"
 	"testing"
 	"time"
 )
 
-func TestIDGenerator(t *testing.T) {
-	for j := 0; j < 5; j++ {
-		go func() {
-			for i := 0; i < 5; i++ {
-				id := GetIncrementID("a")
-				fmt.Println(id)
-			}
-		}()
-		go func() {
-			for i := 0; i < 5; i++ {
-				id := GetIncrementID("b")
-				fmt.Println(id)
-			}
-		}()
-	}
+func BenchmarkGetIncrementID(b *testing.B) {
 
-	time.Sleep(1 * time.Second)
+	for i := 0; i < b.N; i++ {
+		GetIncrementID("a")
+	}
 }
-func TestIDGenerator1(t *testing.T) {
+
+func TestIDGenerator(t *testing.T) {
 	var set = map[string]interface{}{}
 	var s = sync.RWMutex{}
-	for j := 0; j < 5; j++ {
+	for j := 0; j < 50; j++ {
 		go func() {
-			for i := 0; i < 5; i++ {
+			for i := 0; i < 5000000; i++ {
 				id := GetUUID()
 				s.Lock()
 				if _, ok := set[id]; ok {
@@ -58,6 +46,13 @@ func TestIDGenerator1(t *testing.T) {
 			}
 		}()
 	}
-	time.Sleep(1 * time.Second)
+	time.Sleep(3 * time.Second)
 
+}
+
+func BenchmarkGetUUID(t *testing.B) {
+
+	for i := 0; i < t.N; i++ {
+		GetUUID()
+	}
 }

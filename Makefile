@@ -35,8 +35,8 @@ build-cluster-test: build
 	cd bin && mkdir node1 node2 node3 && cp gopa node1 && cp gopa node2 && cp gopa node3
 
 # used to build the binary for gdb debugging
-build-grace: clean config update-ui
-	$(GOBUILD) -gcflags "-N -l" -race -o bin/gopa
+build-race: clean config update-ui
+	$(GOBUILD) -gcflags "-m -N -l" -race -o bin/gopa
 
 update-ui:
 	$(GO) get github.com/infinitbyte/esc
@@ -180,6 +180,7 @@ test:
 	govendor test +local
 	#$(GO) test -timeout 60s ./... --ignore ./vendor
 	#GORACE="halt_on_error=1" go test ./... -race -timeout 120s  --ignore ./vendor
+	#go test -bench=. -benchmem
 
 check:
 	$(GO)  get github.com/golang/lint/golint
@@ -206,3 +207,7 @@ cover:
 cyclo:
 	go get -u github.com/fzipp/gocyclo
 	gocyclo -top 10 -over 12 $$(ls -d */ | grep -v vendor)
+
+benchmarks:
+	go test github.com/infinitbyte/gopa/core/util -benchtime=1s -bench ^Benchmark -run ^$
+	go test github.com/infinitbyte/gopa//modules/crawler/pipe -benchtime=1s -bench  ^Benchmark -run ^$

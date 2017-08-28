@@ -61,3 +61,14 @@ func TestProcessText(t *testing.T) {
 	assert.Equal(t, "\nElastic中文社区\nlink\nHidden text, should not displayed!\nH1 title\nH2 title\n", text)
 
 }
+
+func BenchmarkReplaceAll(t *testing.B) {
+	b, e := ioutil.ReadFile("../../../test/samples/default.html")
+	if e != nil {
+		panic(e)
+	}
+	for i := 0; i < t.N; i++ {
+
+		replaceAll(b)
+	}
+}
