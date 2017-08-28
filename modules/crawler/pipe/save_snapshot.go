@@ -25,6 +25,7 @@ import (
 	"github.com/infinitbyte/gopa/core/stats"
 	"github.com/infinitbyte/gopa/modules/config"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -51,12 +52,11 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 	//init accelerateSteps
 	arrAccelerateSteps = initFetchRateArr(this.MustGetString(accelerateSteps))
 
+	tNow := time.Now().UTC()
+	m, _ := time.ParseDuration("1s")
+
 	//update task's snapshot, detect duplicated snapshot
 	if snapshot != nil {
-
-		tNow := time.Now().UTC()
-		m, _ := time.ParseDuration("1s")
-
 		if snapshot.Hash == task.SnapshotHash {
 			log.Debug(fmt.Sprintf("break by same hash: %s, %s", snapshot.Hash, task.Url))
 			c.End(fmt.Sprintf("same hash: %s, %s", snapshot.Hash, task.Url))
@@ -68,9 +68,6 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 
 			return nil
 		}
-
-		//shorten the nextchecktime
-		setSnapNextCheckTime(task, tNow, m, true)
 
 		task.SnapshotVersion = task.SnapshotVersion + 1
 		task.SnapshotID = snapshot.ID
@@ -101,6 +98,9 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 
 	model.CreateSnapshot(snapshot)
 
+	//shorten the nextchecktime
+	setSnapNextCheckTime(task, tNow, m, true)
+
 	deleteRedundantSnapShot(int(this.MustGetInt64(maxRevision)), this.MustGetString(bucket), task.ID)
 
 	stats.IncrementBy("domain.stats", domain+"."+config.STATS_STORAGE_FILE_SIZE, int64(len(snapshot.Payload)))
@@ -112,15 +112,21 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 //unit is the second
 var arrDecelerateSteps []int
 var arrAccelerateSteps []int
+var initFetchRateArrLock sync.RWMutex
 
 //init the fetch rate array by cfg parameters
 func initFetchRateArr(velocityStr string) []int {
+	initFetchRateArrLock.Lock()
+	defer initFetchRateArrLock.Unlock()
+
 	arrVelocityStr := strings.Split(velocityStr, ",")
 	var velocityArr = make([]int, len(arrVelocityStr), len(arrVelocityStr))
 	for i := 0; i < len(arrVelocityStr); i++ {
 		m, err := time.ParseDuration(arrVelocityStr[i])
 		if err == nil {
 			velocityArr[i] = int(m.Seconds())
+		} else {
+			panic(fmt.Errorf("%s invalid config,only supports h, m, s", velocityStr))
 		}
 	}
 	return velocityArr
@@ -128,24 +134,34 @@ func initFetchRateArr(velocityStr string) []int {
 
 //set snapshot nextchecktime
 func setSnapNextCheckTime(task *model.Task, timeNow time.Time, timeDuration time.Duration, fetchSuccess bool) {
-	task.LastCheck = &timeNow
-	if task.SnapshotCreated == nil {
-		defaultTime := timeNow.Add(-timeDuration * 1)
-		task.SnapshotCreated = &defaultTime
+	var timeInterval int
+
+	if task.SnapshotVersion <= 1 && task.LastCheck == nil && task.NextCheck == nil {
+		if fetchSuccess {
+			timeInterval = arrAccelerateSteps[0]
+		} else {
+			timeInterval = arrDecelerateSteps[0]
+		}
+	} else {
+		timeInterval = getNextCheckTimeSeconds(fetchSuccess, *task.LastCheck, *task.NextCheck)
 	}
-	timeInterval := getNextCheckTimeSeconds(fetchSuccess, *task.SnapshotCreated, timeNow)
+
+	task.LastCheck = &timeNow
 	nextT := timeNow.Add(timeDuration * time.Duration(timeInterval))
 	task.NextCheck = &nextT
 }
 
 func getNextCheckTimeSeconds(fetchSuccess bool, tSnapshotCreateTime time.Time, tTimeNow time.Time) int {
+	initFetchRateArrLock.RLock()
+	defer initFetchRateArrLock.RUnlock()
+
 	timeIntervalLast := getTimeInterval(tSnapshotCreateTime, tTimeNow)
 	//set one day as default time,unit is the second
 	timeIntervalNext := 24 * 60 * 60
 	if fetchSuccess {
 		arrTimeLength := len(arrAccelerateSteps)
 		for i := 1; i < arrTimeLength; i++ {
-			if timeIntervalLast >= arrAccelerateSteps[0] {
+			if timeIntervalLast > arrAccelerateSteps[0] {
 				timeIntervalNext = arrAccelerateSteps[0]
 				break
 			}
@@ -166,7 +182,7 @@ func getNextCheckTimeSeconds(fetchSuccess bool, tSnapshotCreateTime time.Time, t
 	} else {
 		arrTimeLength := len(arrDecelerateSteps)
 		for i := 1; i < arrTimeLength; i++ {
-			if timeIntervalLast <= arrDecelerateSteps[0] {
+			if timeIntervalLast < arrDecelerateSteps[0] {
 				timeIntervalNext = arrDecelerateSteps[0]
 				break
 			}
