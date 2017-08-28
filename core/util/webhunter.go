@@ -349,7 +349,8 @@ func execute(req *http.Request) ([]byte, error) {
 	//support gzip
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Accept-Encoding", "gzip")
-	timeout := 3 * time.Second
+	timeout := 10 * time.Second
+	clientTimeout := 30 * time.Second
 
 	t := &http.Transport{
 		Dial: func(netw, addr string) (net.Conn, error) {
@@ -372,7 +373,7 @@ func execute(req *http.Request) ([]byte, error) {
 
 	client := &http.Client{
 		Transport: t,
-		Timeout:   timeout,
+		Timeout:   clientTimeout,
 	}
 
 	defer t.CloseIdleConnections()
