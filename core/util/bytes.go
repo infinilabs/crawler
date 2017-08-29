@@ -180,3 +180,23 @@ func ToBytes(s string) (uint64, error) {
 func BytesToString(bs []byte) string {
 	return *(*string)(unsafe.Pointer(&bs))
 }
+
+// ToLowercase convert string bytes to lowercase
+func ToLowercase(str []byte) []byte {
+	for i, s := range str {
+		if s > 64 && s < 91 {
+			str[i] = s + 32
+		}
+	}
+	return str
+}
+
+// ToUppercase convert string bytes to uppercase
+func ToUppercase(str []byte) []byte {
+	for i, s := range str {
+		if s > 96 && s < 123 {
+			str[i] = s - 32
+		}
+	}
+	return str
+}
