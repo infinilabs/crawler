@@ -1,5 +1,7 @@
 # Gopa #
 
+[![Join the chat at https://gitter.im/infinitbyte/gopa](https://badges.gitter.im/infinitbyte/gopa.svg)](https://gitter.im/infinitbyte/gopa?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ![https://github.com/infinitbyte/gopa](https://raw.githubusercontent.com/infinitbyte/gopa/master/static/assets/img/logo.png)
 
 [狗爬], A Spider Written in Go.
