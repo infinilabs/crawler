@@ -140,8 +140,6 @@ fetch-depends:
 	$(GO) get github.com/elastic/go-ucfg
 	$(GO) get github.com/jasonlvhit/gocron
 	$(GO) get github.com/blevesearch/bleve
-	$(GO) get github.com/gensmusic/simhash
-	$(GO) get github.com/gensmusic/jiebago/...
 	$(GO) get github.com/quipo/statsd
 	$(GO) get github.com/go-sql-driver/mysql
 
