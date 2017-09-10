@@ -205,7 +205,9 @@ func (para *Parameters) Get(key ParaKey) interface{} {
 	s := string(key)
 	v := para.Data[s]
 	para.l.RUnlock()
-	log.Debug("get context: ", key, ",", v, ",", reflect.TypeOf(v))
+	if global.Env().IsDebug {
+		log.Debug("get context: ", key, ",", v, ",", reflect.TypeOf(v))
+	}
 	return v
 }
 

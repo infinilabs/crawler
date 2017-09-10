@@ -11,6 +11,8 @@ import (
 type ElasticsearchConfig struct {
 	Endpoint    string `config:"endpoint"`
 	IndexPrefix string `config:"index_prefix"`
+	Username    string `config:"username"`
+	Password    string `config:"password"`
 }
 
 // ElasticsearchClient elasticsearch client api
@@ -151,7 +153,9 @@ func (c *ElasticsearchClient) Index(indexName, id string, data interface{}) (*In
 	if err != nil {
 		return nil, err
 	}
-	response := util.HttpPostJSON(url, "", string(js))
+	req := util.NewRequest(url, js)
+	req.SetBasicAuth(c.Config.Username, c.Config.Password)
+	response := util.HttpPostJSON(req)
 	if err != nil {
 		return nil, err
 	}
@@ -181,10 +185,10 @@ func (c *ElasticsearchClient) Get(indexName, id string) (*GetResponse, error) {
 		return nil, err
 	}
 
-	log.Trace("get response: ", string(response))
+	log.Trace("get response: ", string(response.Body))
 
 	esResp := &GetResponse{}
-	err = json.Unmarshal(response, esResp)
+	err = json.Unmarshal(response.Body, esResp)
 	if err != nil {
 		return &GetResponse{}, err
 	}
@@ -206,10 +210,10 @@ func (c *ElasticsearchClient) Delete(indexName, id string) (*DeleteResponse, err
 		return nil, err
 	}
 
-	log.Trace("delete response: ", string(response))
+	log.Trace("delete response: ", string(response.Body))
 
 	esResp := &DeleteResponse{}
-	err = json.Unmarshal(response, esResp)
+	err = json.Unmarshal(response.Body, esResp)
 	if err != nil {
 		return &DeleteResponse{}, err
 	}
@@ -233,10 +237,10 @@ func (c *ElasticsearchClient) Count(indexName string) (*CountResponse, error) {
 		return nil, err
 	}
 
-	log.Trace("count response: ", string(response))
+	log.Trace("count response: ", string(response.Body))
 
 	esResp := &CountResponse{}
-	err = json.Unmarshal(response, esResp)
+	err = json.Unmarshal(response.Body, esResp)
 	if err != nil {
 		return &CountResponse{}, err
 	}
@@ -264,7 +268,9 @@ func (c *ElasticsearchClient) Search(indexName string, query *SearchRequest) (*S
 
 	js, err := json.Marshal(query)
 
-	response := util.HttpPostJSON(url, "", string(js))
+	req := util.NewRequest(url, js)
+	req.SetBasicAuth(c.Config.Username, c.Config.Password)
+	response := util.HttpPostJSON(req)
 
 	log.Trace("search response: ", string(js), ",", string(response))
 
