@@ -18,6 +18,18 @@
 
     `go tool pprof --web http://localhost:6060/debug/pprof/heap`
 
+
+* Diff two heap profiles
+
+    `curl -s http://localhost:6060/debug/pprof/heap >1.heap`
+    
+    `curl -s http://localhost:6060/debug/pprof/heap >2.heap`
+    
+    `go tool pprof -inuse_objects  --base 1.heap ~/go/src/github.com/infinitbyte/gopa/bin/gopa  2.heap`
+    
+    use `top` to find top functions, and then use `list func_name` to view the source code.
+
+
 * GC
 
     `go get -u -v github.com/davecheney/gcvis`
@@ -54,4 +66,6 @@
 * Reference
 
     https://software.intel.com/en-us/blogs/2014/05/10/debugging-performance-issues-in-go-programs
+    http://goog-perftools.sourceforge.net/doc/heap_profiler.html
+    
 
