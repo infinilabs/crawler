@@ -116,7 +116,7 @@ func (module CrawlerModule) execute(taskId string) {
 				if e, ok := r.(runtime.Error); ok {
 					log.Error("pipeline: ", pipeline.GetID(), ", taskId: ", taskId, ", ", util.GetRuntimeErrorMessage(e))
 				}
-				log.Debug("error in crawler,", util.ToJson(r, true), util.ToJson(pipeline.GetContext(), true))
+				log.Error("error in crawler,", util.ToJson(r, true), util.ToJson(pipeline.GetContext(), true))
 			}
 		}
 	}()

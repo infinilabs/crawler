@@ -115,7 +115,7 @@ func (module CheckerModule) runCheckerGo() {
 				if e, ok := r.(runtime.Error); ok {
 					log.Error("checker: ", util.GetRuntimeErrorMessage(e))
 				}
-				log.Debug("error in checker,", util.ToJson(r, true))
+				log.Error("error in checker,", util.ToJson(r, true))
 			}
 		}
 	}()

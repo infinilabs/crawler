@@ -116,6 +116,7 @@ func getUrl(url string) (string, error) {
 }
 
 type Request struct {
+	Method            string
 	Url               string
 	basicAuthUsername string
 	basicAuthPassword string
@@ -124,13 +125,41 @@ type Request struct {
 	Body              []byte
 }
 
-func NewRequest(url string, body []byte) *Request {
+// NewPostRequest issue a simple http post request
+func NewPostRequest(url string, body []byte) *Request {
 	req := Request{}
 	req.Url = url
+	req.Method = "POST"
 	req.Body = body
 	return &req
 }
 
+// NewPutRequest issue a simple http put request
+func NewPutRequest(url string, body []byte) *Request {
+	req := Request{}
+	req.Url = url
+	req.Method = "PUT"
+	req.Body = body
+	return &req
+}
+
+// NewGetRequest issue a simple http get request
+func NewGetRequest(url string) *Request {
+	req := Request{}
+	req.Url = url
+	req.Method = "GET"
+	return &req
+}
+
+// NewDeleteRequest issue a simple http delete request
+func NewDeleteRequest(url string) *Request {
+	req := Request{}
+	req.Url = url
+	req.Method = "DELETE"
+	return &req
+}
+
+// SetBasicAuth set user and password for request
 func (r *Request) SetBasicAuth(username, password string) {
 	r.basicAuthUsername = username
 	r.basicAuthPassword = password
@@ -220,13 +249,18 @@ func get(url string, cookie string, proxyStr string) (*Result, error) {
 	return execute(reqest)
 }
 
-// HttpPostJSON send a http request with json body
-func HttpPostJSON(req *Request) []byte {
+// ExecuteRequest issue a request
+func ExecuteRequest(req *Request) (*Result, error) {
 
-	log.Debug("let's post: " + req.Url)
+	log.Debug("let's: " + req.Method + ", " + req.Url)
 
-	postBytesReader := bytes.NewReader(req.Body)
-	request, _ := http.NewRequest("POST", req.Url, postBytesReader)
+	var request *http.Request
+	if len(req.Body) > 0 {
+		postBytesReader := bytes.NewReader(req.Body)
+		request, _ = http.NewRequest(string(req.Method), req.Url, postBytesReader)
+	} else {
+		request, _ = http.NewRequest(string(req.Method), req.Url, nil)
+	}
 
 	request.Header.Set("User-Agent", userAgent)
 	request.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
@@ -260,12 +294,7 @@ func HttpPostJSON(req *Request) []byte {
 		request.SetBasicAuth(req.basicAuthUsername, req.basicAuthPassword)
 	}
 
-	body, err := execute(request)
-	if err != nil {
-		panic(err)
-	}
-	return body.Body
-
+	return execute(request)
 }
 
 // HttpGetWithCookie issue http request with cookie

@@ -153,17 +153,17 @@ func (c *ElasticsearchClient) Index(indexName, id string, data interface{}) (*In
 	if err != nil {
 		return nil, err
 	}
-	req := util.NewRequest(url, js)
+	req := util.NewPostRequest(url, js)
 	req.SetBasicAuth(c.Config.Username, c.Config.Password)
-	response := util.HttpPostJSON(req)
+	response, err := util.ExecuteRequest(req)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Trace("indexing response: ", string(response))
+	log.Trace("indexing response: ", string(response.Body))
 
 	esResp := &InsertResponse{}
-	err = json.Unmarshal(response, esResp)
+	err = json.Unmarshal(response.Body, esResp)
 	if err != nil {
 		return &InsertResponse{}, err
 	}
@@ -180,7 +180,10 @@ func (c *ElasticsearchClient) Get(indexName, id string) (*GetResponse, error) {
 
 	log.Debug("get doc: ", url)
 
-	response, err := util.HttpGet(url)
+	req := util.NewGetRequest(url)
+	req.SetBasicAuth(c.Config.Username, c.Config.Password)
+	response, err := util.ExecuteRequest(req)
+
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +208,9 @@ func (c *ElasticsearchClient) Delete(indexName, id string) (*DeleteResponse, err
 
 	log.Debug("delete doc: ", url)
 
-	response, err := util.HttpDelete(url)
+	req := util.NewDeleteRequest(url)
+	req.SetBasicAuth(c.Config.Username, c.Config.Password)
+	response, err := util.ExecuteRequest(req)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +237,10 @@ func (c *ElasticsearchClient) Count(indexName string) (*CountResponse, error) {
 
 	log.Debug("doc count: ", url)
 
-	response, err := util.HttpGet(url)
+	req := util.NewGetRequest(url)
+	req.SetBasicAuth(c.Config.Username, c.Config.Password)
+	response, err := util.ExecuteRequest(req)
+
 	if err != nil {
 		return nil, err
 	}
@@ -267,15 +275,21 @@ func (c *ElasticsearchClient) Search(indexName string, query *SearchRequest) (*S
 	}
 
 	js, err := json.Marshal(query)
+	if err != nil {
+		return nil, err
+	}
 
-	req := util.NewRequest(url, js)
+	req := util.NewPostRequest(url, js)
 	req.SetBasicAuth(c.Config.Username, c.Config.Password)
-	response := util.HttpPostJSON(req)
+	response, err := util.ExecuteRequest(req)
+	if err != nil {
+		return nil, err
+	}
 
-	log.Trace("search response: ", string(js), ",", string(response))
+	log.Trace("search response: ", string(js), ",", string(response.Body))
 
 	esResp := &SearchResponse{}
-	err = json.Unmarshal(response, esResp)
+	err = json.Unmarshal(response.Body, esResp)
 	if err != nil {
 		return &SearchResponse{}, err
 	}
