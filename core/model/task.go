@@ -18,9 +18,10 @@ type TaskStatus int
 const TaskCreated TaskStatus = 0
 const TaskFetchFailed TaskStatus = 2
 const TaskFetchSuccess TaskStatus = 3
-const Task404Ignore TaskStatus = 4
+const Task404 TaskStatus = 4
 const TaskRedirectedIgnore TaskStatus = 5
 const TaskFetchTimeout TaskStatus = 6
+const TaskDuplicated TaskStatus = 7
 
 func GetTaskStatusText(status TaskStatus) string {
 	switch status {
@@ -28,7 +29,7 @@ func GetTaskStatusText(status TaskStatus) string {
 		return "created"
 	case TaskFetchFailed:
 		return "failed"
-	case Task404Ignore:
+	case Task404:
 		return "404"
 	case TaskFetchSuccess:
 		return "success"
@@ -36,6 +37,8 @@ func GetTaskStatusText(status TaskStatus) string {
 		return "redirected"
 	case TaskFetchTimeout:
 		return "timeout"
+	case TaskDuplicated:
+		return "duplicated"
 	}
 	return "unknow"
 }

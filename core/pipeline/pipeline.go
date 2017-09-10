@@ -348,7 +348,7 @@ func (pipe *Pipeline) Run() *Context {
 				if e, ok := r.(runtime.Error); ok {
 					pipe.context.End(util.GetRuntimeErrorMessage(e))
 				}
-				log.Error("error in pipeline, ", pipe.name, " ", r)
+				log.Error("error in pipeline, ", pipe.name, ", ", pipe.id, ", ", r)
 				stats.Increment(pipe.name+".pipeline", "error")
 			}
 		}

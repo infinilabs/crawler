@@ -98,7 +98,7 @@ func (joint FetchJoint) Process(context *Context) error {
 				if snapshot.StatusCode == 404 {
 					log.Debug("skip while 404, ", requestUrl, " , ", snapshot.StatusCode)
 					context.End("fetch 404")
-					flg <- signal{flag: false, err: errors.New("404 NOT FOUND"), status: model.Task404Ignore}
+					flg <- signal{flag: false, err: errors.New("404 NOT FOUND"), status: model.Task404}
 					return
 				}
 

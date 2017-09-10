@@ -68,6 +68,7 @@ func (module FilterModule) Start(cfg *Config) {
 	initFilter(config.DispatchFilter)
 	initFilter(config.FetchFilter)
 	initFilter(config.CheckFilter)
+	initFilter(config.ContentHashFilter)
 
 	filter.Register(module)
 }

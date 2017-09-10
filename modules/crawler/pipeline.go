@@ -49,6 +49,7 @@ func InitJoints() {
 	pipeline.Register(pipe.HashJoint{})
 	pipeline.Register(pipe.IndexJoint{})
 	pipeline.Register(pipe.TaskDeduplicationJoint{})
+	pipeline.Register(pipe.ContentDeduplicationJoint{})
 	log.Debug("end register joints")
 
 }

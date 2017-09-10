@@ -34,7 +34,7 @@ modules:
       - joint: url_normalization
         enabled: true
         parameters:
-          follow_all_domain: true
+          follow_all_domain: false
           follow_sub_domain: true
       - joint: load_metadata
         enabled: true
@@ -59,6 +59,8 @@ modules:
           merge_whitespace: false
         enabled: true
       - joint: hash
+        enabled: true
+      - joint: content_deduplication
         enabled: true
       - joint : save_snapshot_fs
         enabled: false

@@ -46,6 +46,7 @@ func (joint TaskDeduplicationJoint) Process(c *api.Context) error {
 	}
 	if len(items) > 0 {
 		msg := fmt.Sprintf("task already exists, %s, %s", task.ID, task.Url)
+		task.Status = model.TaskDuplicated
 		c.Exit(msg)
 		return errors.New(msg)
 	}
