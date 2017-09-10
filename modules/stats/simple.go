@@ -51,6 +51,7 @@ type Stats struct {
 func (s *Stats) initData(category, key string) {
 
 	s.l.Lock()
+	defer s.l.Unlock()
 	_, ok := (*s.Data)[category]
 	if !ok {
 		(*s.Data)[category] = make(map[string]int64)
@@ -59,7 +60,6 @@ func (s *Stats) initData(category, key string) {
 	if !ok1 {
 		(*s.Data)[category][key] = 0
 	}
-	s.l.Unlock()
 	runtime.Gosched()
 }
 
@@ -70,7 +70,7 @@ func (s *Stats) Increment(category, key string) {
 func (s *Stats) IncrementBy(category, key string, value int64) {
 	s.initData(category, key)
 	s.l.Lock()
-	(*data.Data)[category][key] += value
+	(*s.Data)[category][key] += value
 	s.l.Unlock()
 	runtime.Gosched()
 }
@@ -82,7 +82,7 @@ func (s *Stats) Decrement(category, key string) {
 func (s *Stats) DecrementBy(category, key string, value int64) {
 	s.initData(category, key)
 	s.l.Lock()
-	(*data.Data)[category][key] -= value
+	(*s.Data)[category][key] -= value
 	s.l.Unlock()
 	runtime.Gosched()
 }
@@ -98,20 +98,22 @@ func (s *Stats) Gauge(category, key string, v int64) {
 func (s *Stats) Stat(category, key string) int64 {
 	s.initData(category, key)
 	s.l.RLock()
-	v := ((*data.Data)[category][key])
+	v := ((*s.Data)[category][key])
 	s.l.RUnlock()
 	return v
 }
 
 func (s *Stats) StatsAll() *[]byte {
-	s.initStats()
 	s.l.RLock()
 	defer s.l.RUnlock()
-	b, _ := json.MarshalIndent((*data.Data), "", " ")
+	b, _ := json.MarshalIndent((*s.Data), "", " ")
 	return &b
 }
 
 func (s *Stats) initStats() {
+	s.l.Lock()
+	defer s.l.Unlock()
+
 	s.ID = id
 	v := persist.GetValue(string(config.KVBucketKey), []byte(s.ID))
 	d := map[string]map[string]int64{}
