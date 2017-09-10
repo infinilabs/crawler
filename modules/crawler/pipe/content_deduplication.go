@@ -1,9 +1,9 @@
 package pipe
 
 import (
+	"errors"
 	"fmt"
 	log "github.com/cihub/seelog"
-	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/filter"
 	"github.com/infinitbyte/gopa/core/model"
 	api "github.com/infinitbyte/gopa/core/pipeline"

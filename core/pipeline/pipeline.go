@@ -384,8 +384,7 @@ func (pipe *Pipeline) Run() *Context {
 		if err != nil {
 			stats.Increment(pipe.name+".pipeline", "error")
 			log.Debug("%s-%s: %v", pipe.name, v.Name(), err)
-			pipe.context.End(err)
-			panic(err)
+			break
 		}
 		log.Trace(pipe.name, ", end joint,", v.Name())
 	}

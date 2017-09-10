@@ -108,7 +108,7 @@ modules:
       - joint: url_normalization
         enabled: true
         parameters:
-          follow_all_domain: true
+          follow_all_domain: false
           follow_sub_domain: true
       - joint: url_filter
         enabled: true

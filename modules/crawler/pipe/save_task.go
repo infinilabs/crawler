@@ -53,8 +53,7 @@ func (joint SaveTaskJoint) Process(context *Context) error {
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	task.Phrase = context.Phrase
 
-	if context.IsEnd() {
-		log.Trace("broken pipeline,", context.Payload)
+	if context.IsEnd() || context.IsExit() {
 		task.Message = util.ToJson(context.Payload, false)
 	}
 

@@ -16,29 +16,32 @@ import (
 type TaskStatus int
 
 const TaskCreated TaskStatus = 0
-const TaskFetchFailed TaskStatus = 2
-const TaskFetchSuccess TaskStatus = 3
+const TaskFailed TaskStatus = 2
+const TaskSuccess TaskStatus = 3
 const Task404 TaskStatus = 4
-const TaskRedirectedIgnore TaskStatus = 5
-const TaskFetchTimeout TaskStatus = 6
+const TaskRedirected TaskStatus = 5
+const TaskTimeout TaskStatus = 6
 const TaskDuplicated TaskStatus = 7
+const TaskInterrupted TaskStatus = 8
 
 func GetTaskStatusText(status TaskStatus) string {
 	switch status {
 	case TaskCreated:
 		return "created"
-	case TaskFetchFailed:
+	case TaskFailed:
 		return "failed"
 	case Task404:
 		return "404"
-	case TaskFetchSuccess:
+	case TaskSuccess:
 		return "success"
-	case TaskRedirectedIgnore:
+	case TaskRedirected:
 		return "redirected"
-	case TaskFetchTimeout:
+	case TaskTimeout:
 		return "timeout"
 	case TaskDuplicated:
 		return "duplicated"
+	case TaskInterrupted:
+		return "interrupted"
 	}
 	return "unknow"
 }
@@ -125,7 +128,7 @@ type Task struct {
 	OriginalUrl string          `json:"original_url,omitempty"`
 	Phrase      pipeline.Phrase `gorm:"index" json:"phrase"`
 	Status      TaskStatus      `gorm:"index" json:"status"`
-	Message     string          `json:"-"`
+	Message     string          `json:"message"`
 	Created     *time.Time      `gorm:"index" json:"created,omitempty"`
 	Updated     *time.Time      `gorm:"index" json:"updated,omitempty"`
 	LastFetch   *time.Time      `gorm:"index" json:"last_fetch"`
@@ -254,7 +257,7 @@ func GetPendingUpdateFetchTasks(offset *time.Time) (int, []Task, error) {
 		Conds: persist.And(
 			persist.Lt("next_check", t),
 			persist.Gt("created", offset),
-			persist.Eq("status", TaskFetchSuccess)),
+			persist.Eq("status", TaskSuccess)),
 		From: 0, Size: 100,
 	}
 	err, result := persist.Search(Task{}, &tasks, &queryO)
