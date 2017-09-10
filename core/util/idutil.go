@@ -56,8 +56,8 @@ func GetIncrementID(bucket string) string {
 
 // SnapshotPersistID will make a snapshot and persist id stats to disk
 func SnapshotPersistID() {
-	lock1.Lock()
-	defer lock1.Unlock()
+	count.l.Lock()
+	defer count.l.Unlock()
 
 	var buf bytes.Buffer
 	err := gob.NewEncoder(&buf).Encode(count)
