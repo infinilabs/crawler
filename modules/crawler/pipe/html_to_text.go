@@ -18,6 +18,7 @@ package pipe
 
 import (
 	log "github.com/cihub/seelog"
+	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/model"
 	. "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/util"
@@ -41,9 +42,9 @@ type cleanRule struct {
 	l                sync.RWMutex
 	replaceRules     []*regexp.Regexp
 	inited           bool
-	lowerCaseRule    *regexp.Regexp
 	removeTagsRule   *regexp.Regexp
 	removeBreaksRule *regexp.Regexp
+	lowercase        bool
 }
 
 var rules = cleanRule{replaceRules: []*regexp.Regexp{}}
@@ -92,27 +93,58 @@ func initRules() {
 	rules.replaceRules = append(rules.replaceRules, getRule(`\<pre[\S\s]+?\</pre\>`))
 	rules.replaceRules = append(rules.replaceRules, getRule(`\<code[\S\s]+?\</code\>`))
 
-	//lowercase html tags
-	rules.lowerCaseRule, _ = regexp.Compile("\\<[\\S\\s]+?\\>")
-
 	//remove all HTML tags and replaced with \n
 	rules.removeTagsRule, _ = regexp.Compile("\\<[\\S\\s]+?\\>")
 
 	//remove continued break lines
 	rules.removeBreaksRule, _ = regexp.Compile("\\s{2,}")
 
+	//lowercase all the text
+	rules.lowercase = true
+
 	rules.inited = true
 
 }
 
+// should equal to regex("\\<[\\S\\s]+?\\>").ReplaceAllStringFunc(str, strings.ToLower)
+func lowercaseTag(str []byte) {
+
+	startLowercase := false
+	startLowercaseIndex := -1
+	endLowercase := false
+	endLowercaseIndex := -1
+
+	for i, s := range str {
+		if s == 60 {
+			startLowercase = true
+			startLowercaseIndex = i
+		}
+		if s == 62 {
+			endLowercase = true
+			endLowercaseIndex = i
+		}
+		if startLowercase && endLowercase {
+			for j := startLowercaseIndex; j < endLowercaseIndex; j++ {
+				x := str[j]
+				if x > 64 && x < 91 {
+					str[j] = x + 32
+				}
+			}
+			startLowercase = false
+			endLowercase = false
+			startLowercaseIndex = -1
+			endLowercaseIndex = -1
+		}
+	}
+}
+
+var empty = []byte(" ")
+
 func replaceAll(src []byte) []byte {
 	initRules()
-	empty := []byte(" ")
 
-	str := string(src)
-	if rules.lowerCaseRule != nil {
-		str = rules.lowerCaseRule.ReplaceAllStringFunc(str, strings.ToLower)
-		src = []byte(src)
+	if rules.lowercase {
+		lowercaseTag(src)
 	}
 
 	if rules.replaceRules != nil {
@@ -156,8 +188,11 @@ func (joint HtmlToTextJoint) Process(context *Context) error {
 	src = strings.Replace(src, "&amp; ", "& ", -1)
 	src = strings.Replace(src, "&amp;amp; ", "& ", -1)
 
-	log.Trace("get text: ", src)
-
 	snapshot.Text = util.XSSHandle(src)
+
+	if global.Env().IsDebug {
+		log.Trace("get text: ", src)
+	}
+
 	return nil
 }

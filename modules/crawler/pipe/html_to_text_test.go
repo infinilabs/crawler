@@ -17,6 +17,7 @@ limitations under the License.
 package pipe
 
 import (
+	"fmt"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/stretchr/testify/assert"
@@ -70,5 +71,22 @@ func BenchmarkReplaceAll(t *testing.B) {
 	for i := 0; i < t.N; i++ {
 
 		replaceAll(b)
+	}
+}
+
+func TestToLowercase(t *testing.T) {
+	str := []byte("<AZ class=123>azUPPERcase<Az />")
+
+	printStr(str)
+	lowercaseTag(str)
+	fmt.Println("lowercased:")
+	assert.Equal(t, "<az class=123>azUPPERcase<az />", string(str))
+	printStr(str)
+	print(string(str))
+}
+
+func printStr(str []byte) {
+	for i, s := range str {
+		fmt.Println(i, "-", s, "-", string(s))
 	}
 }
