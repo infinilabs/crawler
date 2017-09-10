@@ -109,6 +109,16 @@ func (module CheckerModule) Start(cfg *Config) {
 }
 
 func (module CheckerModule) runCheckerGo() {
+	defer func() {
+		if !global.Env().IsDebug {
+			if r := recover(); r != nil {
+				if e, ok := r.(runtime.Error); ok {
+					log.Error("checker: ", util.GetRuntimeErrorMessage(e))
+				}
+				log.Debug("error in checker,", util.ToJson(r, true))
+			}
+		}
+	}()
 
 	var data []byte
 	for {
@@ -135,6 +145,11 @@ func (module CheckerModule) execute(data []byte) {
 	task.Breadth = seed.Breadth
 
 	pipeline := module.runPipe(global.Env().IsDebug, task)
+
+	if pipeline == nil {
+		log.Error("pipeline is nil, ", seed.Url)
+		return
+	}
 
 	//send to disk queue
 	if len(task.Host) > 0 && !pipeline.GetContext().IsExit() && !pipeline.GetContext().IsEnd() {

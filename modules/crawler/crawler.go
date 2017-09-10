@@ -19,7 +19,6 @@ package crawler
 import (
 	log "github.com/cihub/seelog"
 	. "github.com/infinitbyte/gopa/core/config"
-	. "github.com/infinitbyte/gopa/core/env"
 	"github.com/infinitbyte/gopa/core/global"
 	. "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/queue"
@@ -45,7 +44,6 @@ func (module CrawlerModule) Start(cfg *Config) {
 	config := GetDefaultTaskConfig()
 	cfg.Unpack(&config)
 	module.config = &config
-	module.rawConfig = cfg
 
 	//TODO
 	InitJoints()
@@ -63,7 +61,7 @@ func (module CrawlerModule) Start(cfg *Config) {
 			log.Trace("start crawler:", i)
 			signalC := make(chan bool, 1)
 			signalChannels[i] = &signalC
-			go module.runPipeline(global.Env(), &signalC, i)
+			go module.runPipeline(&signalC, i)
 
 		}
 	} else {
@@ -92,7 +90,7 @@ func (module CrawlerModule) Stop() error {
 	return nil
 }
 
-func (module CrawlerModule) runPipeline(env *Env, signalC *chan bool, shard int) {
+func (module CrawlerModule) runPipeline(signalC *chan bool, shard int) {
 
 	var taskID []byte
 	for {
@@ -104,16 +102,16 @@ func (module CrawlerModule) runPipeline(env *Env, signalC *chan bool, shard int)
 			stats.Increment("queue."+string(config.FetchChannel), "pop")
 			id := string(taskID)
 			log.Trace("shard:", shard, ",task received:", id)
-			module.execute(id, env)
+			module.execute(id)
 			log.Trace("shard:", shard, ",task finished:", id)
 		}
 	}
 }
 
-func (module CrawlerModule) execute(taskId string, env *Env) {
+func (module CrawlerModule) execute(taskId string) {
 	var pipeline *Pipeline
 	defer func() {
-		if !env.IsDebug {
+		if !global.Env().IsDebug {
 			if r := recover(); r != nil {
 				if e, ok := r.(runtime.Error); ok {
 					log.Error("pipeline: ", pipeline.GetID(), ", taskId: ", taskId, ", ", util.GetRuntimeErrorMessage(e))
@@ -144,6 +142,5 @@ func (module CrawlerModule) execute(taskId string, env *Env) {
 }
 
 type CrawlerModule struct {
-	config    *TaskConfig
-	rawConfig *Config
+	config *TaskConfig
 }
