@@ -19,72 +19,27 @@ package pipe
 import (
 	"crypto/sha1"
 	"fmt"
-	log "github.com/cihub/seelog"
-	. "github.com/gensmusic/simhash"
 	"github.com/infinitbyte/gopa/core/model"
-	. "github.com/infinitbyte/gopa/core/pipeline"
-	"path"
-	"sync"
+	api "github.com/infinitbyte/gopa/core/pipeline"
 )
 
 type HashJoint struct {
-	Parameters
+	api.Parameters
 }
-
-const simHashEnabled ParaKey = "simhash_enabled"
-const simHashDictFolder ParaKey = "simhash_dict_folder"
 
 func (joint HashJoint) Name() string {
 	return "hash"
 }
 
-func (joint HashJoint) Process(context *Context) error {
+func (joint HashJoint) Process(context *api.Context) error {
 
 	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 
-	body := string(snapshot.Payload)
-
 	h := sha1.New()
-	h.Write([]byte(body))
+	h.Write(snapshot.Payload)
 	bs := h.Sum(nil)
 
 	snapshot.Hash = fmt.Sprintf("%x", bs)
 
-	if joint.GetBool(simHashEnabled, false) {
-		joint.loadDict()
-		hash1 := Simhash(&body, 200)
-		snapshot.SimHash = fmt.Sprintf("%x", hash1)
-	}
-
 	return nil
-}
-
-var loaded = false
-var lock sync.Mutex
-
-func (joint HashJoint) loadDict() {
-	if loaded {
-		return
-	}
-
-	lock.Lock()
-	defer lock.Unlock()
-
-	log.Debug("loading jieba dict files")
-	mainDict := "config/dict/main.dict.txt"
-	idfDict := "config/dict/idf.txt"
-	stopwordsDict := "config/dict/stop_words.txt"
-	if joint.Has(simHashDictFolder) {
-		dictRoot := joint.MustGetString(simHashDictFolder)
-		if len(dictRoot) > 0 {
-			mainDict = path.Join(dictRoot, mainDict)
-			idfDict = path.Join(dictRoot, idfDict)
-			stopwordsDict = path.Join(dictRoot, stopwordsDict)
-		}
-	}
-	if err := LoadDictionary(mainDict, idfDict, stopwordsDict); err != nil {
-		log.Error("Failed to load dictionary:", err)
-		panic(err)
-	}
-	loaded = true
 }
