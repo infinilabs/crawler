@@ -84,8 +84,8 @@ type Snapshot struct {
 }
 
 type PageLink struct {
-	Url   string `json:"url"`
-	Label string `json:"label"`
+	Url   string `json:"url,omitempty"`
+	Label string `json:"label,omitempty"`
 }
 
 func CreateSnapshot(snapshot *Snapshot) error {

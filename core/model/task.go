@@ -128,18 +128,18 @@ type Task struct {
 	OriginalUrl string          `json:"original_url,omitempty"`
 	Phrase      pipeline.Phrase `gorm:"index" json:"phrase"`
 	Status      TaskStatus      `gorm:"index" json:"status"`
-	Message     string          `json:"message"`
+	Message     string          `json:"message,omitempty"`
 	Created     *time.Time      `gorm:"index" json:"created,omitempty"`
 	Updated     *time.Time      `gorm:"index" json:"updated,omitempty"`
-	LastFetch   *time.Time      `gorm:"index" json:"last_fetch"`
-	LastCheck   *time.Time      `gorm:"index" json:"last_check"`
-	NextCheck   *time.Time      `gorm:"index" json:"next_check"`
+	LastFetch   *time.Time      `gorm:"index" json:"last_fetch,omitempty"`
+	LastCheck   *time.Time      `gorm:"index" json:"last_check,omitempty"`
+	NextCheck   *time.Time      `gorm:"index" json:"next_check,omitempty"`
 
-	SnapshotVersion int        `json:"snapshot_version"`
-	SnapshotID      string     `json:"snapshot_id"`
-	SnapshotHash    string     `json:"snapshot_hash"`
-	SnapshotSimHash string     `json:"snapshot_simhash"`
-	SnapshotCreated *time.Time `json:"snapshot_created"`
+	SnapshotVersion int        `json:"snapshot_version,omitempty"`
+	SnapshotID      string     `json:"snapshot_id,omitempty"`
+	SnapshotHash    string     `json:"snapshot_hash,omitempty"`
+	SnapshotSimHash string     `json:"snapshot_simhash,omitempty"`
+	SnapshotCreated *time.Time `json:"snapshot_created,omitempty"`
 }
 
 func CreateTask(task *Task) error {

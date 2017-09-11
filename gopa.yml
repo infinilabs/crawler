@@ -60,6 +60,11 @@ modules:
         enabled: true
       - joint: hash
         enabled: true
+      - joint: update_check_time
+        enabled: true
+        parameters:
+          decelerate_steps: "24h,48h,72h,168h,360h,720h"
+          accelerate_steps: "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
       - joint: content_deduplication
         enabled: true
       - joint : save_snapshot_fs
@@ -69,8 +74,6 @@ modules:
         parameters:
           compress_enabled: true
           bucket: "Snapshot"
-          decelerate_steps: "24h,48h,72h,168h,360h,720h"
-          accelerate_steps: "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
           max_revision: 5
       - joint: index
         enabled: true

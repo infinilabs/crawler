@@ -30,7 +30,7 @@ func (joint ContentDeduplicationJoint) Process(c *api.Context) error {
 		log.Trace("check content deduplication, ", task.Url)
 		msg := fmt.Sprintf("same content hash found, %s, %s, %s", task.ID, task.Url, snapshot.Hash)
 
-		exist := checkByHash(snapshot.Hash)
+		exist := checkByHash(snapshot)
 
 		if exist {
 			task.Status = model.TaskDuplicated
@@ -43,7 +43,9 @@ func (joint ContentDeduplicationJoint) Process(c *api.Context) error {
 	return nil
 }
 
-func checkByHash(hash string) bool {
+func checkByHash(snapshot *model.Snapshot) bool {
+
+	hash := snapshot.Hash
 
 	//Check local hash first
 	exist, _ := filter.CheckThenAdd(config.ContentHashFilter, []byte(hash))
@@ -59,7 +61,12 @@ func checkByHash(hash string) bool {
 	}
 
 	if len(items) > 0 {
-		return true
+		for _, v := range items {
+			log.Errorf("%s vs  %s", v.Url, snapshot.Url)
+			if v.Url != snapshot.Url {
+				return true
+			}
+		}
 	}
 
 	return false
