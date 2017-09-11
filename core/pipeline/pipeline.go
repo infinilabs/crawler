@@ -294,6 +294,8 @@ type Pipeline struct {
 	joints   []Joint
 	context  *Context
 	endJoint Joint
+
+	currentJointName string
 }
 
 func NewPipeline(name string) *Pipeline {
@@ -337,6 +339,11 @@ func (pipe *Pipeline) End(s Joint) *Pipeline {
 	return pipe
 }
 
+// setCurrentJoint set current joint's name, used for debugging
+func (context *Pipeline) setCurrentJoint(name string) {
+	context.currentJointName = name
+}
+
 func (pipe *Pipeline) Run() *Context {
 
 	stats.Increment(pipe.name+".pipeline", "total")
@@ -348,7 +355,7 @@ func (pipe *Pipeline) Run() *Context {
 				if e, ok := r.(runtime.Error); ok {
 					pipe.context.End(util.GetRuntimeErrorMessage(e))
 				}
-				log.Error("error in pipeline, ", pipe.name, ", ", pipe.id, ", ", r)
+				log.Error("error in pipeline, ", pipe.name, ", ", pipe.id, ", ", pipe.currentJointName, ", ", r)
 				stats.Increment(pipe.name+".pipeline", "error")
 			}
 		}
@@ -377,6 +384,7 @@ func (pipe *Pipeline) Run() *Context {
 			stats.Increment(pipe.name+".pipeline", "exit")
 			break
 		}
+		pipe.setCurrentJoint(v.Name())
 		startTime := time.Now()
 		err = v.Process(pipe.context)
 		elapsedTime := time.Now().Sub(startTime)
@@ -400,6 +408,7 @@ func (pipe *Pipeline) endPipeline() {
 
 	log.Trace("start finish pipeline, ", pipe.name)
 	if pipe.endJoint != nil {
+		pipe.setCurrentJoint(pipe.endJoint.Name())
 		pipe.endJoint.Process(pipe.context)
 	}
 	log.Trace("end finish pipeline, ", pipe.name)

@@ -313,7 +313,7 @@ func (joint UrlNormalizationJoint) Process(context *api.Context) error {
 
 	//verify filename
 	if len(filename) > joint.maxFileNameLength {
-		panic(errors.New("file name too long"))
+		panic(errors.Errorf("file name too long, %s , %s", filename, url))
 	}
 
 	snapshot.Path = filePath
