@@ -25,44 +25,129 @@ import (
 )
 
 func TestInitGrabVelocityArr(t *testing.T) {
-	arrDecelerateSteps = initFetchRateArr("1m,10m,20m,30m,60m,1h30m,3h,6h,12h,24h,48h,168h,360h")
+	arrDecelerateSteps := initFetchRateArr("1m,10m,20m,30m,60m,1h30m,3h,6h,12h,24h,48h,168h,360h")
 	fmt.Println(arrDecelerateSteps)
 
-	arrAccelerateSteps = initFetchRateArr("24h,12h,6h,3h,1h30m,45m,20m,10m,1m")
+	arrAccelerateSteps := initFetchRateArr("24h,12h,6h,3h,1h30m,45m,20m,10m,1m")
 	fmt.Println(arrAccelerateSteps)
 }
 
 func TestSetSnapNextCheckTime(t *testing.T) {
-	arrDecelerateSteps = initFetchRateArr("1m,2m,5m,10m")
-	arrAccelerateSteps = initFetchRateArr("10m,5m,2m,1m")
+	decelerateSteps := initFetchRateArr("1m,2m,5m,10m")
+	accelerateSteps := initFetchRateArr("10m,5m,2m,1m")
+
+	fmt.Println("decelerate,", decelerateSteps)
+	fmt.Println("accelerate,", accelerateSteps)
 
 	toBeCharge := "2017-01-01 00:00:00.0000000 +0000 UTC"
 	timeLayout := "2006-01-02 15:04:05"
 	loc, _ := time.LoadLocation("Local")
 	theTime, _ := time.ParseInLocation(timeLayout, toBeCharge, loc)
-	m, _ := time.ParseDuration("1s")
+	oneSecond, _ := time.ParseDuration("1s")
+	oneMinute, _ := time.ParseDuration("1m")
 
+	fmt.Println("update 1s with no change")
 	task := new(model.Task)
-	tNow := theTime.Add(1 * m)
+	tNow := theTime.Add(1 * oneSecond)
 	task.LastCheck = &theTime
 	task.NextCheck = &tNow
-	fmt.Println("----task.SnapshotCreateTime", task.SnapshotCreated)
 	task.SnapshotVersion = 2
-	setSnapNextCheckTime(task, tNow, m, false)
+	updateNextCheckTime(task, tNow, decelerateSteps, false)
 	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
 	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
 	timeInterval := getTimeInterval(*task.LastCheck, *task.NextCheck)
-	fmt.Println("----timeInterval           ", timeInterval)
+	fmt.Println("---- next check time          ", timeInterval)
 	assert.Equal(t, 60, timeInterval)
 
-	tNow = theTime.Add(120 * m)
+	fmt.Println()
+
+	fmt.Println("update 10m with no change")
+	task = new(model.Task)
+	tNow = theTime.Add(10 * oneMinute)
 	task.LastCheck = &theTime
 	task.NextCheck = &tNow
 	task.SnapshotVersion = 2
-	setSnapNextCheckTime(task, tNow, m, true)
+	updateNextCheckTime(task, tNow, decelerateSteps, false)
+	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
+	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
+	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
+	fmt.Println("---- next check time          ", timeInterval)
+	assert.Equal(t, 600, timeInterval)
+
+	fmt.Println()
+
+	fmt.Println("update 20m with no change")
+	task = new(model.Task)
+	tNow = theTime.Add(10 * oneMinute)
+	task.LastCheck = &theTime
+	task.NextCheck = &tNow
+	task.SnapshotVersion = 2
+	updateNextCheckTime(task, tNow, decelerateSteps, false)
+	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
+	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
+	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
+	fmt.Println("---- next check time          ", timeInterval)
+	assert.Equal(t, 600, timeInterval)
+
+	fmt.Println()
+
+	fmt.Println("update 2m with change")
+	tNow = theTime.Add(120 * oneSecond)
+	task.LastCheck = &theTime
+	task.NextCheck = &tNow
+	task.SnapshotVersion = 2
+	updateNextCheckTime(task, tNow, accelerateSteps, true)
 	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
 	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
 	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
 	fmt.Println("----timeInterval           ", timeInterval)
 	assert.Equal(t, 60, timeInterval)
+
+	fmt.Println("update 10s with change")
+	tNow = theTime.Add(10 * oneSecond)
+	task.LastCheck = &theTime
+	task.NextCheck = &tNow
+	task.SnapshotVersion = 2
+	updateNextCheckTime(task, tNow, accelerateSteps, true)
+	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
+	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
+	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
+	fmt.Println("----timeInterval           ", timeInterval)
+	assert.Equal(t, 60, timeInterval)
+
+	fmt.Println("update 1000s with change")
+	tNow = theTime.Add(1000 * oneSecond)
+	task.LastCheck = &theTime
+	task.NextCheck = &tNow
+	task.SnapshotVersion = 2
+	updateNextCheckTime(task, tNow, accelerateSteps, true)
+	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
+	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
+	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
+	fmt.Println("----timeInterval           ", timeInterval)
+	assert.Equal(t, 600, timeInterval)
+
+	fmt.Println("update 500s with change")
+	tNow = theTime.Add(500 * oneSecond)
+	task.LastCheck = &theTime
+	task.NextCheck = &tNow
+	task.SnapshotVersion = 2
+	updateNextCheckTime(task, tNow, accelerateSteps, true)
+	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
+	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
+	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
+	fmt.Println("----timeInterval           ", timeInterval)
+	assert.Equal(t, 300, timeInterval)
+
+	fmt.Println("update 600s with change")
+	tNow = theTime.Add(600 * oneSecond)
+	task.LastCheck = &theTime
+	task.NextCheck = &tNow
+	task.SnapshotVersion = 2
+	updateNextCheckTime(task, tNow, accelerateSteps, true)
+	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
+	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
+	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
+	fmt.Println("----timeInterval           ", timeInterval)
+	assert.Equal(t, 300, timeInterval)
 }

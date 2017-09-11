@@ -19,13 +19,13 @@ package pipe
 import (
 	"fmt"
 	log "github.com/cihub/seelog"
+	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/persist"
 	. "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/stats"
 	"github.com/infinitbyte/gopa/modules/config"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -43,82 +43,77 @@ func (this SaveSnapshotToDBJoint) Name() string {
 	return "save_snapshot_db"
 }
 
+var oneSecond, _ = time.ParseDuration("1s")
+
 func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 
-	//init decelerateSteps
-	arrDecelerateSteps = initFetchRateArr(this.MustGetString(decelerateSteps))
-	//init accelerateSteps
-	arrAccelerateSteps = initFetchRateArr(this.MustGetString(accelerateSteps))
-
-	tNow := time.Now().UTC()
-	m, _ := time.ParseDuration("1s")
-
-	//update task's snapshot, detect duplicated snapshot
-	if snapshot != nil {
-		if snapshot.Hash == task.SnapshotHash {
-			log.Debug(fmt.Sprintf("break by same hash: %s, %s", snapshot.Hash, task.Url))
-			c.End(fmt.Sprintf("same hash: %s, %s", snapshot.Hash, task.Url))
-
-			//extend the nextchecktime
-			setSnapNextCheckTime(task, tNow, m, false)
-
-			deleteRedundantSnapShot(int(this.MustGetInt64(maxRevision)), this.MustGetString(bucket), task.ID)
-
-			return nil
-		}
-
-		task.SnapshotVersion = task.SnapshotVersion + 1
-		task.SnapshotID = snapshot.ID
-		task.SnapshotHash = snapshot.Hash
-		task.SnapshotSimHash = snapshot.SimHash
-		task.SnapshotCreated = snapshot.Created
-
-		snapshot.Version = task.SnapshotVersion
-		snapshot.Url = task.Url
-		snapshot.TaskID = task.ID
+	if snapshot == nil {
+		return errors.Errorf("snapshot is nil, %s , %s", task.ID, task.Url)
 	}
 
-	url := task.Url
+	//init decelerate steps, unit is the second
+	decelerateSteps := initFetchRateArr(this.GetStringOrDefault(decelerateSteps, "24h,48h,72h,168h,360h,720h"))
+	//init accelerate steps, unit is the second
+	accelerateSteps := initFetchRateArr(this.GetStringOrDefault(accelerateSteps, "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"))
+
+	current := time.Now().UTC()
+
+	//update task's snapshot, detect duplicated snapshot
+	if snapshot.Hash == task.SnapshotHash {
+
+		//increase next check time
+		updateNextCheckTime(task, current, decelerateSteps, false)
+
+		msg := fmt.Sprintf("content unchanged, snapshot with same hash: %s, %s", snapshot.Hash, task.Url)
+
+		c.End(msg)
+
+		return errors.New(msg)
+	}
+
+	task.SnapshotVersion = task.SnapshotVersion + 1
+	task.SnapshotID = snapshot.ID
+	task.SnapshotHash = snapshot.Hash
+	task.SnapshotSimHash = snapshot.SimHash
+	task.SnapshotCreated = snapshot.Created
+
+	snapshot.Version = task.SnapshotVersion
+	snapshot.Url = task.Url
+	snapshot.TaskID = task.ID
 
 	savePath := snapshot.Path
 	saveFile := snapshot.File
-	domain := task.Host
 
 	saveKey := []byte(snapshot.ID)
 
-	log.Debug("save url to db, url:", url, ",domain:", task.Host, ",path:", savePath, ",file:", saveFile, ",saveKey:", string(saveKey))
+	log.Debug("save snapshot to db, url:", task.Url, ",domain:", task.Host, ",path:", savePath, ",file:", saveFile, ",saveKey:", string(saveKey))
 
+	var err error
 	if this.GetBool(compressEnabled, true) {
-		persist.AddValueCompress(this.MustGetString(bucket), saveKey, snapshot.Payload)
+		err = persist.AddValueCompress(this.MustGetString(bucket), saveKey, snapshot.Payload)
 	} else {
-		persist.AddValue(this.MustGetString(bucket), saveKey, snapshot.Payload)
+		err = persist.AddValue(this.MustGetString(bucket), saveKey, snapshot.Payload)
+	}
+	if err != nil {
+		return err
 	}
 
 	model.CreateSnapshot(snapshot)
 
-	//shorten the nextchecktime
-	setSnapNextCheckTime(task, tNow, m, true)
+	updateNextCheckTime(task, current, accelerateSteps, true)
 
 	deleteRedundantSnapShot(int(this.MustGetInt64(maxRevision)), this.MustGetString(bucket), task.ID)
 
-	stats.IncrementBy("domain.stats", domain+"."+config.STATS_STORAGE_FILE_SIZE, int64(len(snapshot.Payload)))
-	stats.Increment("domain.stats", domain+"."+config.STATS_STORAGE_FILE_COUNT)
+	stats.IncrementBy("domain.stats", task.Host+"."+config.STATS_STORAGE_FILE_SIZE, int64(len(snapshot.Payload)))
+	stats.Increment("domain.stats", task.Host+"."+config.STATS_STORAGE_FILE_COUNT)
 
 	return nil
 }
 
-//unit is the second
-var arrDecelerateSteps []int
-var arrAccelerateSteps []int
-var initFetchRateArrLock sync.RWMutex
-
 //init the fetch rate array by cfg parameters
 func initFetchRateArr(velocityStr string) []int {
-	initFetchRateArrLock.Lock()
-	defer initFetchRateArrLock.Unlock()
-
 	arrVelocityStr := strings.Split(velocityStr, ",")
 	var velocityArr = make([]int, len(arrVelocityStr), len(arrVelocityStr))
 	for i := 0; i < len(arrVelocityStr); i++ {
@@ -132,78 +127,70 @@ func initFetchRateArr(velocityStr string) []int {
 	return velocityArr
 }
 
-//set snapshot nextchecktime
-func setSnapNextCheckTime(task *model.Task, timeNow time.Time, timeDuration time.Duration, fetchSuccess bool) {
-	initFetchRateArrLock.Lock()
-	defer initFetchRateArrLock.Unlock()
+//update the snapshot's next check time
+func updateNextCheckTime(task *model.Task, current time.Time, steps []int, changed bool) {
 
-	var timeInterval int
+	if len(steps) < 1 {
+		panic(errors.New("invalid steps"))
+	}
+
+	//set one day as default next check time, unit is the second
+	var timeIntervalNext = 24 * 60 * 60
 
 	if task.SnapshotVersion <= 1 && task.LastCheck == nil && task.NextCheck == nil {
-		if fetchSuccess {
-			timeInterval = arrAccelerateSteps[0]
+
+		timeIntervalNext = steps[0]
+
+	} else {
+		timeIntervalLast := getTimeInterval(*task.LastCheck, *task.NextCheck)
+
+		if changed {
+			arrTimeLength := len(steps)
+			for i := 1; i < arrTimeLength; i++ {
+				if timeIntervalLast > steps[0] {
+					timeIntervalNext = steps[0]
+					break
+				}
+				if timeIntervalLast < steps[arrTimeLength-2] {
+					timeIntervalNext = steps[arrTimeLength-1]
+					break
+				}
+				if i+1 >= arrTimeLength {
+					timeIntervalNext = steps[arrTimeLength-1]
+					break
+				}
+				if timeIntervalLast <= steps[i-1] && timeIntervalLast > steps[i] {
+					timeIntervalNext = steps[i]
+					break
+				}
+			}
+
 		} else {
-			timeInterval = arrDecelerateSteps[0]
+			arrTimeLength := len(steps)
+			for i := 1; i < arrTimeLength; i++ {
+				if timeIntervalLast < steps[0] {
+					timeIntervalNext = steps[0]
+					break
+				}
+				if timeIntervalLast > steps[arrTimeLength-2] {
+					timeIntervalNext = steps[arrTimeLength-1]
+					break
+				}
+				if i+1 >= arrTimeLength {
+					timeIntervalNext = steps[arrTimeLength-1]
+					break
+				}
+				if timeIntervalLast >= steps[i-1] && timeIntervalLast < steps[i] {
+					timeIntervalNext = steps[i]
+					break
+				}
+			}
 		}
-	} else {
-		timeInterval = getNextCheckTimeSeconds(fetchSuccess, *task.LastCheck, *task.NextCheck)
 	}
 
-	task.LastCheck = &timeNow
-	nextT := timeNow.Add(timeDuration * time.Duration(timeInterval))
+	task.LastCheck = &current
+	nextT := current.Add(oneSecond * time.Duration(timeIntervalNext))
 	task.NextCheck = &nextT
-}
-
-func getNextCheckTimeSeconds(fetchSuccess bool, tSnapshotCreateTime time.Time, tTimeNow time.Time) int {
-	initFetchRateArrLock.Lock()
-	defer initFetchRateArrLock.Unlock()
-
-	timeIntervalLast := getTimeInterval(tSnapshotCreateTime, tTimeNow)
-	//set one day as default time,unit is the second
-	timeIntervalNext := 24 * 60 * 60
-	if fetchSuccess {
-		arrTimeLength := len(arrAccelerateSteps)
-		for i := 1; i < arrTimeLength; i++ {
-			if timeIntervalLast > arrAccelerateSteps[0] {
-				timeIntervalNext = arrAccelerateSteps[0]
-				break
-			}
-			if timeIntervalLast < arrAccelerateSteps[arrTimeLength-2] {
-				timeIntervalNext = arrAccelerateSteps[arrTimeLength-1]
-				break
-			}
-			if i+1 >= arrTimeLength {
-				timeIntervalNext = arrAccelerateSteps[arrTimeLength-1]
-				break
-			}
-			if timeIntervalLast <= arrAccelerateSteps[i-1] && timeIntervalLast > arrAccelerateSteps[i] {
-				timeIntervalNext = arrAccelerateSteps[i]
-				break
-			}
-		}
-
-	} else {
-		arrTimeLength := len(arrDecelerateSteps)
-		for i := 1; i < arrTimeLength; i++ {
-			if timeIntervalLast < arrDecelerateSteps[0] {
-				timeIntervalNext = arrDecelerateSteps[0]
-				break
-			}
-			if timeIntervalLast > arrDecelerateSteps[arrTimeLength-2] {
-				timeIntervalNext = arrDecelerateSteps[arrTimeLength-1]
-				break
-			}
-			if i+1 >= arrTimeLength {
-				timeIntervalNext = arrDecelerateSteps[arrTimeLength-1]
-				break
-			}
-			if timeIntervalLast >= arrDecelerateSteps[i-1] && timeIntervalLast < arrDecelerateSteps[i] {
-				timeIntervalNext = arrDecelerateSteps[i]
-				break
-			}
-		}
-	}
-	return timeIntervalNext
 }
 
 func getTimeInterval(timeStart time.Time, timeEnd time.Time) int {
