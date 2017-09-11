@@ -21,7 +21,7 @@ PKGS=$(go list ./... | grep -v /vendor/)
 
 .PHONY: all build update test clean
 
-default: clean build
+default: build
 
 build: config update-ui update-template-ui
 	@echo $(GOPATH)
