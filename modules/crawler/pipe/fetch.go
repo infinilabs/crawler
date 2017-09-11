@@ -52,7 +52,7 @@ type signal struct {
 
 func (joint FetchJoint) Process(context *Context) error {
 
-	joint.timeout = time.Duration(joint.MustGetInt64(timeoutInSeconds)) * time.Second
+	joint.timeout = time.Duration(joint.GetInt64OrDefault(timeoutInSeconds, 60)) * time.Second
 	timer := time.NewTimer(joint.timeout)
 	defer timer.Stop()
 

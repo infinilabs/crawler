@@ -58,7 +58,7 @@ func getDefaultCheckerTaskConfig() TaskConfig {
 	url_normalization.Enabled = true
 	url_normalization.JointName = "url_normalization"
 	url_normalization.Parameters = util.MapStr{
-		"follow_all_domain": true,
+		"follow_all_domain": false,
 		"follow_sub_domain": true,
 	}
 
@@ -83,7 +83,7 @@ func getDefaultCheckerTaskConfig() TaskConfig {
 	}
 
 	defaultCheckerConfig := TaskConfig{
-		MaxGoRoutine:          1,
+		MaxGoRoutine:          10,
 		FetchThresholdInMs:    0,
 		DefaultPipelineConfig: &config,
 	}

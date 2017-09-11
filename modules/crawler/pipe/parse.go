@@ -189,7 +189,7 @@ func (joint ParsePageJoint) Process(context *Context) error {
 	}
 
 	//dispatch links
-	if joint.GetBool(dispatchLinks, false) && len(links) > 0 {
+	if joint.GetBool(dispatchLinks, true) && len(links) > 0 {
 
 		for url := range links {
 			if !filter.Exists(config.CheckFilter, []byte(url)) {

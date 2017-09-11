@@ -47,7 +47,7 @@ func (joint FilterCheckJoint) Process(context *api.Context) error {
 
 	url := task.Url
 
-	key := joint.MustGetString(filterKey)
+	key := joint.GetStringOrDefault(filterKey, "check_filter")
 	v := filter.Key(key)
 
 	//the url input here should not be a relative path

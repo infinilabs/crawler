@@ -28,9 +28,13 @@ func (joint ContentDeduplicationJoint) Process(c *api.Context) error {
 	if snapshot.Hash != "" {
 
 		log.Trace("check content deduplication, ", task.Url)
-		msg := fmt.Sprintf("same content hash found, %s, %s, %s", task.ID, task.Url, snapshot.Hash)
 
-		exist := checkByHash(snapshot)
+		snapshot.Url = task.Url
+		snapshot.TaskID = task.ID
+
+		exist, snapshotId, url := checkByHash(snapshot, c)
+
+		msg := fmt.Sprintf("same content hash found, %s, %s, %s, duplicated with snapshotId: %s , url: %s", task.ID, task.Url, snapshot.Hash, snapshotId, url)
 
 		if exist {
 			task.Status = model.TaskDuplicated
@@ -44,14 +48,16 @@ func (joint ContentDeduplicationJoint) Process(c *api.Context) error {
 	return nil
 }
 
-func checkByHash(snapshot *model.Snapshot) bool {
+func checkByHash(snapshot *model.Snapshot, c *api.Context) (bool, string, string) {
 
 	hash := snapshot.Hash
 
 	//Check local hash first
-	exist, _ := filter.CheckThenAdd(config.ContentHashFilter, []byte(hash))
-	if exist {
-		return true
+	if c.GetBool("check_filter", false) {
+		exist, _ := filter.CheckThenAdd(config.ContentHashFilter, []byte(hash))
+		if exist {
+			return true, "local_filter_cache", ""
+		}
 	}
 
 	//Check hash from db
@@ -63,12 +69,12 @@ func checkByHash(snapshot *model.Snapshot) bool {
 
 	if len(items) > 0 {
 		for _, v := range items {
-			log.Errorf("%s vs  %s", v.Url, snapshot.Url)
-			if v.Url != snapshot.Url {
-				return true
+			log.Tracef("%s vs  %s , %s vs %s", v.Url, snapshot.Url, snapshot.TaskID, v.TaskID)
+			if v.Url != snapshot.Url && v.TaskID != snapshot.TaskID {
+				return true, v.ID, v.Url
 			}
 		}
 	}
 
-	return false
+	return false, "", ""
 }

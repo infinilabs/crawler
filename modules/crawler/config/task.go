@@ -10,15 +10,3 @@ type TaskConfig struct {
 
 	DefaultPipelineConfig *pipeline.PipelineConfig `config:"default_pipeline_config"`
 }
-
-var (
-	defaultCrawlerConfig = TaskConfig{
-		MaxGoRoutine:       1,
-		FetchThresholdInMs: 0,
-	}
-)
-
-// GetDefaultTaskConfig return a default TaskConfig
-func GetDefaultTaskConfig() TaskConfig {
-	return defaultCrawlerConfig
-}

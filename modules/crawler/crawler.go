@@ -35,6 +35,80 @@ var signalChannels []*chan bool
 
 var crawlerStarted bool
 
+// GetDefaultTaskConfig return a default TaskConfig
+func GetDefaultTaskConfig() TaskConfig {
+	config := PipelineConfig{}
+	config.Name = "crawler"
+	start := JointConfig{}
+	start.Enabled = true
+	start.JointName = "init_task"
+	config.StartJoint = &start
+	save := JointConfig{}
+	save.Enabled = true
+	save.JointName = "save_task"
+
+	urlNormalization := JointConfig{}
+	urlNormalization.Enabled = true
+	urlNormalization.JointName = "url_normalization"
+	urlNormalization.Parameters = util.MapStr{
+		"follow_all_domain": false,
+		"follow_sub_domain": true,
+	}
+
+	fetchJoint := JointConfig{}
+	fetchJoint.Enabled = true
+	fetchJoint.JointName = "fetch"
+
+	parse := JointConfig{}
+	parse.Enabled = true
+	parse.JointName = "parse"
+
+	html2text := JointConfig{}
+	html2text.Enabled = true
+	html2text.JointName = "html2text"
+
+	hash := JointConfig{}
+	hash.Enabled = true
+	hash.JointName = "hash"
+
+	updateCheckTime := JointConfig{}
+	updateCheckTime.Enabled = true
+	updateCheckTime.JointName = "update_check_time"
+
+	contentDeduplication := JointConfig{}
+	contentDeduplication.Enabled = true
+	contentDeduplication.JointName = "content_deduplication"
+
+	saveSnapshot := JointConfig{}
+	saveSnapshot.Enabled = true
+	saveSnapshot.JointName = "save_snapshot_db"
+
+	task_deduplication := JointConfig{}
+	task_deduplication.Enabled = true
+	task_deduplication.JointName = "task_deduplication"
+
+	config.EndJoint = &save
+	config.ProcessJoints = []*JointConfig{
+		&urlNormalization,
+		&fetchJoint,
+		&parse,
+		&html2text,
+		&hash,
+		&updateCheckTime,
+		&contentDeduplication,
+		&saveSnapshot,
+		&task_deduplication,
+	}
+
+	defaultCrawlerConfig := TaskConfig{
+		MaxGoRoutine:          10,
+		FetchThresholdInMs:    0,
+		DefaultPipelineConfig: &config,
+	}
+
+	return defaultCrawlerConfig
+}
+
 func (module CrawlerModule) Name() string {
 	return "Crawler"
 }

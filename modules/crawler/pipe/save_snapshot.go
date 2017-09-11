@@ -71,11 +71,13 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 
 	log.Debug("save snapshot to db, url:", task.Url, ",domain:", task.Host, ",path:", savePath, ",file:", saveFile, ",saveKey:", string(saveKey))
 
+	bucketName := this.GetStringOrDefault(bucket, "Snapshot")
+
 	var err error
 	if this.GetBool(compressEnabled, true) {
-		err = persist.AddValueCompress(this.MustGetString(bucket), saveKey, snapshot.Payload)
+		err = persist.AddValueCompress(bucketName, saveKey, snapshot.Payload)
 	} else {
-		err = persist.AddValue(this.MustGetString(bucket), saveKey, snapshot.Payload)
+		err = persist.AddValue(bucketName, saveKey, snapshot.Payload)
 	}
 	if err != nil {
 		return err
@@ -83,7 +85,7 @@ func (this SaveSnapshotToDBJoint) Process(c *Context) error {
 
 	model.CreateSnapshot(snapshot)
 
-	deleteRedundantSnapShot(int(this.MustGetInt64(maxRevision)), this.MustGetString(bucket), task.ID)
+	deleteRedundantSnapShot(int(this.GetInt64OrDefault(maxRevision, 5)), bucketName, task.ID)
 
 	stats.IncrementBy("domain.stats", task.Host+"."+config.STATS_STORAGE_FILE_SIZE, int64(len(snapshot.Payload)))
 	stats.Increment("domain.stats", task.Host+"."+config.STATS_STORAGE_FILE_COUNT)
