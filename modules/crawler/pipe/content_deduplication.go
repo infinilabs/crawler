@@ -34,6 +34,7 @@ func (joint ContentDeduplicationJoint) Process(c *api.Context) error {
 
 		if exist {
 			task.Status = model.TaskDuplicated
+			task.NextCheck = nil
 			c.End(msg)
 			return errors.New(msg)
 		}
