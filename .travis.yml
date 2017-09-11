@@ -20,7 +20,6 @@ script:
 #  - golint -set_exit_status $PKGS     # one last linter
 
 go:
-- 1.7
 - 1.8
 - 1.9
 - master
