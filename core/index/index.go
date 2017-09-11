@@ -83,12 +83,14 @@ func (query *RangeQuery) Gte(field string, value interface{}) {
 	v["gte"] = value
 	query.Range[field] = v
 }
+
 func (query *RangeQuery) Lt(field string, value interface{}) {
 	query.Range = map[string]map[string]interface{}{}
 	v := map[string]interface{}{}
 	v["lt"] = value
 	query.Range[field] = v
 }
+
 func (query *RangeQuery) Lte(field string, value interface{}) {
 	query.Range = map[string]map[string]interface{}{}
 	v := map[string]interface{}{}
