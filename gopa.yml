@@ -93,6 +93,13 @@ modules:
 
 - module: storage
   enabled: true
+#  driver: elasticsearch
+#  elasticsearch:
+#    endpoint: http://dev:9200
+#    index_prefix: gopa-
+#    username: elastic
+#    password: changeme
+  driver: boltdb
 
 - module: filter
   enabled: true
@@ -199,13 +206,13 @@ modules:
 
 - module: persist
   enabled: true
-  driver: elasticsearch
-  elasticsearch:
-    endpoint: http://dev:9200
-    index_prefix: gopa-
-    username: elastic
-    password: changeme
-#  driver: sqlite
+#  driver: elasticsearch
+#  elasticsearch:
+#    endpoint: http://dev:9200
+#    index_prefix: gopa-
+#    username: elastic
+#    password: changeme
+  driver: sqlite
 
 #  // before use MySQL, you should create database first:
 #  // DROP DATABASE gopa;

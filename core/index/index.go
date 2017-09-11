@@ -17,7 +17,7 @@ type ElasticsearchConfig struct {
 
 // ElasticsearchClient elasticsearch client api
 type ElasticsearchClient struct {
-	Config ElasticsearchConfig
+	Config *ElasticsearchConfig
 }
 
 // InsertResponse is a index response object

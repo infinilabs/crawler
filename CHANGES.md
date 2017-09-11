@@ -10,6 +10,7 @@
 2. separate API and UI, listen on different port
 3. add mysql as database option
 3. add elasticsearch as database option
+4. add elasticsearch as blob(snapshot) datastore
 
 ##### features
 1. task fetch and update with stepped delay

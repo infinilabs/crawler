@@ -17,7 +17,7 @@ type IndexModule struct {
 }
 
 type IndexConfig struct {
-	Elasticsearch core.ElasticsearchConfig `config:"elasticsearch"`
+	Elasticsearch *core.ElasticsearchConfig `config:"elasticsearch"`
 }
 
 func (this IndexModule) Name() string {
@@ -28,7 +28,7 @@ var signalChannel chan bool
 
 var (
 	defaultConfig = IndexConfig{
-		Elasticsearch: core.ElasticsearchConfig{
+		Elasticsearch: &core.ElasticsearchConfig{
 			Endpoint:    "http://localhost:9200",
 			IndexPrefix: "gopa-",
 		},

@@ -115,13 +115,16 @@ func (s *Stats) initStats() {
 	defer s.l.Unlock()
 
 	s.ID = id
-	v := persist.GetValue(string(config.KVBucketKey), []byte(s.ID))
-	d := map[string]map[string]int64{}
-	err := json.Unmarshal(v, &d)
-	if err != nil {
-		log.Debug(err)
+	v, err := persist.GetValue(string(config.KVBucketKey), []byte(s.ID))
+
+	if err == nil {
+		d := map[string]map[string]int64{}
+		err = json.Unmarshal(v, &d)
+		if err != nil {
+			log.Error(err)
+		}
+		s.Data = &d
 	}
-	s.Data = &d
 
 	if s.Data == nil {
 		s.Data = &map[string]map[string]int64{}
