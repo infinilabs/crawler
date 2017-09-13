@@ -24,6 +24,7 @@ import (
 	"github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"testing"
 )
 
@@ -54,6 +55,8 @@ func TestProcessLinks(t *testing.T) {
 	parse := ParsePageJoint{}
 	parse.Set(dispatchLinks, false)
 	snapshot := model.Snapshot{}
+	snapshot.ContentType = "text/html"
+
 	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
 	snapshot.Payload = []byte(body)
 	parse.Process(&context)
@@ -65,4 +68,59 @@ func TestProcessLinks(t *testing.T) {
 	assert.Equal(t, "/wiki/Marking/Users", links["/wiki/Marking/Users"])
 	assert.Equal(t, "myLink", links["google.com"])
 	fmt.Println(util.ToJson(snapshot, true))
+
+	//load file
+	b, e := ioutil.ReadFile("../../../test/samples/discuss.html")
+	if e != nil {
+		panic(e)
+	}
+	task = model.Task{}
+	task.Url = "http://discuss.elastic.co/"
+	task.Host = "discuss.elastic.co"
+
+	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	snapshot = model.Snapshot{}
+	snapshot.ContentType = "text/html"
+
+	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	snapshot.Payload = []byte(b)
+	parse.Process(&context)
+
+	o = context.MustGet(CONTEXT_PAGE_LINKS)
+	fmt.Println("links in discuss:")
+	fmt.Println(util.ToJson(o, true))
+
+}
+func TestProcessDiscussLinks(t *testing.T) {
+	global.RegisterEnv(env.EmptyEnv())
+
+	body, e := ioutil.ReadFile("../../../test/samples/discuss.html")
+	if e != nil {
+		panic(e)
+	}
+
+	context := pipeline.Context{}
+	context.Init()
+	task := model.Task{}
+	task.Url = "http://discuss.elastic.co/"
+	task.Host = "discuss.elastic.co"
+
+	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	parse := ParsePageJoint{}
+	parse.Set(dispatchLinks, false)
+	snapshot := model.Snapshot{}
+	snapshot.ContentType = "text/html"
+
+	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	snapshot.Payload = []byte(body)
+	parse.Process(&context)
+
+	o := context.MustGet(CONTEXT_PAGE_LINKS)
+	links := o.(map[string]string)
+	//println(links["google.com"])
+	//assert.Equal(t, "baidu", links["//baidu.com"])
+	//assert.Equal(t, "/wiki/Marking/Users", links["/wiki/Marking/Users"])
+	//assert.Equal(t, "myLink", links["google.com"])
+	fmt.Println(util.ToJson(links, true))
+
 }

@@ -200,3 +200,9 @@ func ToUppercase(str []byte) []byte {
 	}
 	return str
 }
+
+//TODO optimize performance
+//ReplaceByte simply replace old bytes to new bytes, the two bytes should have same length
+func ReplaceByte(str []byte, old, new []byte) []byte {
+	return []byte(strings.Replace(string(str), string(old), string(new), -1))
+}

@@ -39,6 +39,7 @@ type ParsePageJoint struct {
 const dispatchLinks ParaKey = "dispatch_links"
 const maxDepth ParaKey = "max_depth"
 const maxBreadth ParaKey = "max_breadth"
+const replaceNoscript ParaKey = "replace_noscript"
 
 func (joint ParsePageJoint) Name() string {
 	return "parse"
@@ -49,11 +50,22 @@ func (joint ParsePageJoint) Process(context *Context) error {
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 
+	if !util.PrefixStr(snapshot.ContentType, "text/html") {
+		log.Debugf("snapshot is not html, %s, %s , %s", snapshot.ID, snapshot.Url, snapshot.ContentType)
+		return nil
+	}
+
 	refUrl := task.Url
 	refHost := task.Host
 	depth := task.Depth
 	breadth := task.Breadth
 	fileContent := snapshot.Payload
+
+	//replace noscript to div
+	if context.GetBool(replaceNoscript, true) {
+		fileContent = util.ReplaceByte(snapshot.Payload, []byte("noscript"), []byte("div     "))
+	}
+
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(fileContent))
 	if err != nil {
 		panic(err)

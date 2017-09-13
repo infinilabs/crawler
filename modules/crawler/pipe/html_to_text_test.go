@@ -46,6 +46,7 @@ func TestProcessText(t *testing.T) {
 	snapshot := model.Snapshot{}
 	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
 	snapshot.Payload = []byte(body)
+	snapshot.ContentType = "text/html"
 
 	parse := HtmlToTextJoint{}
 	parse.Process(&context)
@@ -61,10 +62,27 @@ func TestProcessText(t *testing.T) {
 	snapshot = model.Snapshot{}
 	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
 	snapshot.Payload = b
+	snapshot.ContentType = "text/html"
+
 	parse.Process(&context)
 
 	text = snapshot.Text
 	assert.Equal(t, "\nElastic中文社区\nlink\nHidden text, should not displayed!\nH1 title\nH2 title\n", text)
+
+	//load file
+	b, e = ioutil.ReadFile("../../../test/samples/discuss.html")
+	if e != nil {
+		panic(e)
+	}
+	snapshot = model.Snapshot{}
+	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	snapshot.Payload = b
+	snapshot.ContentType = "text/html"
+
+	parse.Process(&context)
+
+	text = snapshot.Text
+	fmt.Println(text)
 
 }
 

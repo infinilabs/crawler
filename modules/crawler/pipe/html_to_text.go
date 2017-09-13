@@ -74,7 +74,9 @@ func initRules() {
 
 	//remove SCRIPT,NOSCRIPT
 	rules.replaceRules = append(rules.replaceRules, getRule(`\<script[\S\s]+?.*?\</script\>`))
-	rules.replaceRules = append(rules.replaceRules, getRule(`\<noscript[\S\s]+?\</noscript\>`))
+
+	//TODO configurable
+	//rules.replaceRules = append(rules.replaceRules, getRule(`\<noscript[\S\s]+?\</noscript\>`))
 
 	//remove iframe,frame
 	rules.replaceRules = append(rules.replaceRules, getRule(`\<iframe[\S\s]+?\</iframe\>`))
@@ -167,6 +169,11 @@ func replaceAll(src []byte) []byte {
 func (joint HtmlToTextJoint) Process(context *Context) error {
 
 	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+
+	if !util.PrefixStr(snapshot.ContentType, "text/") {
+		log.Debugf("snapshot is not text, %s, %s , %s", snapshot.ID, snapshot.Url, snapshot.ContentType)
+		return nil
+	}
 
 	body := replaceAll(snapshot.Payload)
 
