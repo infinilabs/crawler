@@ -51,7 +51,12 @@ curl -XPUT "http://localhost:9200/gopa-snapshot" -H 'Content-Type: application/j
 "type": "text"
 },
 "title": {
-"type": "text"
+"type": "text",
+"fields": {
+"keyword": {
+"type": "keyword"
+}
+}
 },
 "url": {
 "type": "keyword"
