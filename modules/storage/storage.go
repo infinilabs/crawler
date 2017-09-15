@@ -36,7 +36,7 @@ func (this StorageModule) Name() string {
 
 var storeConfig *StorageConfig
 
-type BlotdbConfig struct {
+type BoltdbConfig struct {
 }
 type LeveldbConfig struct {
 }
@@ -44,15 +44,15 @@ type LeveldbConfig struct {
 type StorageConfig struct {
 	//Driver only `boltdb` and `elasticsearch` are available
 	Driver  string                     `config:"driver"`
-	Blotdb  *BlotdbConfig              `config:"blotdb"`
+	Boltdb  *BoltdbConfig              `config:"boltdb"`
 	Leveldb *LeveldbConfig             `config:"leveldb"`
 	Elastic *index.ElasticsearchConfig `config:"elasticsearch"`
 }
 
 var (
 	defaultConfig = StorageConfig{
-		Driver:  "blotdb",
-		Blotdb:  &BlotdbConfig{},
+		Driver:  "boltdb",
+		Boltdb:  &BoltdbConfig{},
 		Leveldb: &LeveldbConfig{},
 		Elastic: &index.ElasticsearchConfig{
 			Endpoint:    "http://localhost:9200",
@@ -92,7 +92,7 @@ func (module StorageModule) Start(cfg *config.Config) {
 }
 
 func (module StorageModule) Stop() error {
-	if storeConfig.Driver == "blotdb" {
+	if storeConfig.Driver == "boltdb" {
 		return impl.Close()
 	}
 	return nil
