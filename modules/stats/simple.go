@@ -117,7 +117,7 @@ func (s *Stats) initStats() {
 	s.ID = id
 	v, err := persist.GetValue(string(config.KVBucketKey), []byte(s.ID))
 
-	if err == nil {
+	if err == nil && v != nil {
 		d := map[string]map[string]int64{}
 		err = json.Unmarshal(v, &d)
 		if err != nil {
