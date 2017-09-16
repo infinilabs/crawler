@@ -134,8 +134,17 @@ func (module CheckerModule) runCheckerGo() {
 }
 
 func (module CheckerModule) execute(data []byte) {
+	if len(data) <= 0 {
+		log.Error("empty data in checker")
+		return
+	}
+
 	startTime := time.Now()
 	seed := model.TaskSeedFromBytes(data)
+
+	if seed.Url == "" {
+		return
+	}
 
 	task := &model.Task{}
 	task.OriginalUrl = seed.Url
