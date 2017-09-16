@@ -39,10 +39,6 @@ var (
 		Driver: "sqlite",
 		SQLite: &sqlite.SQLiteConfig{},
 		MySQL:  &mysql.MySQLConfig{},
-		Elastic: &index.ElasticsearchConfig{
-			Endpoint:    "http://localhost:9200",
-			IndexPrefix: "gopa-",
-		},
 	}
 )
 
@@ -53,11 +49,11 @@ func getDefaultConfig() PersistConfig {
 var db *gorm.DB
 
 type PersistConfig struct {
-	//Driver only `mysql` and `sqlite` are available
-	Driver  string                     `config:"driver"`
-	SQLite  *sqlite.SQLiteConfig       `config:"sqlite"`
-	MySQL   *mysql.MySQLConfig         `config:"mysql"`
-	Elastic *index.ElasticsearchConfig `config:"elasticsearch"`
+	//Dialect only `mysql` and `sqlite` are available
+	Driver  string                    `config:"driver"`
+	SQLite  *sqlite.SQLiteConfig      `config:"sqlite"`
+	MySQL   *mysql.MySQLConfig        `config:"mysql"`
+	Elastic index.ElasticsearchConfig `config:"elasticsearch"`
 }
 
 func (module DatabaseModule) Start(cfg *Config) {

@@ -107,9 +107,6 @@ func MergeSpace(in string) (out string) {
 }
 
 func ToJson(in interface{}, indent bool) string {
-	if in == nil {
-		return ""
-	}
 	var b []byte
 	if indent {
 		b, _ = json.MarshalIndent(in, " ", " ")

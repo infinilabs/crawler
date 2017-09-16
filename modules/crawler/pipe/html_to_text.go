@@ -18,166 +18,87 @@ package pipe
 
 import (
 	log "github.com/cihub/seelog"
-	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/model"
 	. "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/util"
 	"regexp"
 	"strings"
-	"sync"
 )
 
 type HtmlToTextJoint struct {
 	Parameters
 }
 
-//merge whitespace and \n
-const mergeWhitespace ParaKey = "merge_whitespace"
+const mergeWhitespace ParaKey = "merge_whitespace" //merge whitespace and \n
 
 func (joint HtmlToTextJoint) Name() string {
 	return "html2text"
 }
 
-type cleanRule struct {
-	l                sync.RWMutex
-	replaceRules     []*regexp.Regexp
-	inited           bool
-	removeTagsRule   *regexp.Regexp
-	removeBreaksRule *regexp.Regexp
-	lowercase        bool
-}
-
-var rules = cleanRule{replaceRules: []*regexp.Regexp{}}
-
-func getRule(str string) *regexp.Regexp {
-	re, _ := regexp.Compile(str)
-	return re
-}
-
-func initRules() {
-	rules.l.Lock()
-	defer rules.l.Unlock()
-	if rules.inited {
-		return
-	}
-
-	log.Trace("init html2text rule")
-
-	//remove STYLE
-	rules.replaceRules = append(rules.replaceRules, getRule(`<style[\S\s]+?\</style\>`))
-
-	//remove META
-	rules.replaceRules = append(rules.replaceRules, getRule(`\<meta[\S\s]+?\</meta\>`))
-
-	//remove comments
-	rules.replaceRules = append(rules.replaceRules, getRule(`<!--[\S\s]*?-->`))
-
-	//remove SCRIPT,NOSCRIPT
-	rules.replaceRules = append(rules.replaceRules, getRule(`\<script[\S\s]+?.*?\</script\>`))
-
-	//TODO configurable
-	//rules.replaceRules = append(rules.replaceRules, getRule(`\<noscript[\S\s]+?\</noscript\>`))
-
-	//remove iframe,frame
-	rules.replaceRules = append(rules.replaceRules, getRule(`\<iframe[\S\s]+?\</iframe\>`))
-	rules.replaceRules = append(rules.replaceRules, getRule(`\<frame[\S\s]+?\</frame\>`))
-	rules.replaceRules = append(rules.replaceRules, getRule(`\<frameset[\S\s]+?\</frameset\>`))
-	rules.replaceRules = append(rules.replaceRules, getRule(`\<noframes[\S\s]+?\</noframes\>`))
-
-	//remove embed objects
-	rules.replaceRules = append(rules.replaceRules, getRule(`\<noembed[\S\s]+?\</noembed\>`))
-	rules.replaceRules = append(rules.replaceRules, getRule(`\<embed[\S\s]+?\</embed\>`))
-	rules.replaceRules = append(rules.replaceRules, getRule(`\<applet[\S\s]+?\</applet\>`))
-	rules.replaceRules = append(rules.replaceRules, getRule(`\<object[\S\s]+?\</object\>`))
-	rules.replaceRules = append(rules.replaceRules, getRule(`\<base[\S\s]+?\</base\>`))
-
-	//remove code blocks
-	rules.replaceRules = append(rules.replaceRules, getRule(`\<pre[\S\s]+?\</pre\>`))
-	rules.replaceRules = append(rules.replaceRules, getRule(`\<code[\S\s]+?\</code\>`))
-
-	//remove all HTML tags and replaced with \n
-	rules.removeTagsRule, _ = regexp.Compile("\\<[\\S\\s]+?\\>")
-
-	//remove continued break lines
-	rules.removeBreaksRule, _ = regexp.Compile("\\s{2,}")
-
-	//lowercase all the text
-	rules.lowercase = true
-
-	rules.inited = true
-
-}
-
-// should equal to regex("\\<[\\S\\s]+?\\>").ReplaceAllStringFunc(str, strings.ToLower)
-func lowercaseTag(str []byte) {
-
-	startLowercase := false
-	startLowercaseIndex := -1
-	endLowercase := false
-	endLowercaseIndex := -1
-
-	for i, s := range str {
-		if s == 60 {
-			startLowercase = true
-			startLowercaseIndex = i
-		}
-		if s == 62 {
-			endLowercase = true
-			endLowercaseIndex = i
-		}
-		if startLowercase && endLowercase {
-			for j := startLowercaseIndex; j < endLowercaseIndex; j++ {
-				x := str[j]
-				if x > 64 && x < 91 {
-					str[j] = x + 32
-				}
-			}
-			startLowercase = false
-			endLowercase = false
-			startLowercaseIndex = -1
-			endLowercaseIndex = -1
-		}
-	}
-}
-
-var empty = []byte(" ")
-
-func replaceAll(src []byte) []byte {
-	initRules()
-
-	if rules.lowercase {
-		lowercaseTag(src)
-	}
-
-	if rules.replaceRules != nil {
-		for _, rule := range rules.replaceRules {
-			src = rule.ReplaceAll(src, empty)
-		}
-	}
-
-	if rules.removeTagsRule != nil {
-		src = rules.removeTagsRule.ReplaceAll(src, []byte("\n"))
-	}
-
-	if rules.removeBreaksRule != nil {
-		src = rules.removeBreaksRule.ReplaceAll(src, []byte("\n"))
-	}
-
-	return src
-}
-
 func (joint HtmlToTextJoint) Process(context *Context) error {
 
+	//TODO all configable
 	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 
-	if !util.PrefixStr(snapshot.ContentType, "text/") {
-		log.Debugf("snapshot is not text, %s, %s , %s", snapshot.ID, snapshot.Url, snapshot.ContentType)
-		return nil
-	}
-
-	body := replaceAll(snapshot.Payload)
-
+	body := snapshot.Payload
 	src := string(body)
+	//lowercase html tags
+	re, _ := regexp.Compile("\\<[\\S\\s]+?\\>")
+	src = re.ReplaceAllStringFunc(src, strings.ToLower)
+
+	//remove STYLE
+	re, _ = regexp.Compile("\\<style[\\S\\s]+?\\</style\\>")
+	src = re.ReplaceAllString(src, "")
+
+	//remove META
+	re, _ = regexp.Compile("\\<meta[\\S\\s]+?\\</meta\\>")
+	src = re.ReplaceAllString(src, "")
+
+	//remove comments
+	re, _ = regexp.Compile("<!--[\\S\\s]*?-->")
+	src = re.ReplaceAllString(src, "")
+
+	//remove SCRIPT,NOSCRIPT
+	re, _ = regexp.Compile("\\<script[\\S\\s]+?\\</script\\>")
+	src = re.ReplaceAllString(src, "")
+	re, _ = regexp.Compile("\\<noscript[\\S\\s]+?\\</noscript\\>")
+	src = re.ReplaceAllString(src, "")
+
+	//remove iframe,frame
+	re, _ = regexp.Compile("\\<iframe[\\S\\s]+?\\</iframe\\>")
+	src = re.ReplaceAllString(src, "")
+	re, _ = regexp.Compile("\\<frame[\\S\\s]+?\\</frame\\>")
+	src = re.ReplaceAllString(src, "")
+	re, _ = regexp.Compile("\\<frameset[\\S\\s]+?\\</frameset\\>")
+	src = re.ReplaceAllString(src, "")
+	re, _ = regexp.Compile("\\<noframes[\\S\\s]+?\\</noframes\\>")
+	src = re.ReplaceAllString(src, "")
+
+	//remove embed objects
+	re, _ = regexp.Compile("\\<noembed[\\S\\s]+?\\</noembed\\>")
+	src = re.ReplaceAllString(src, "")
+	re, _ = regexp.Compile("\\<embed[\\S\\s]+?\\</embed\\>")
+	src = re.ReplaceAllString(src, "")
+	re, _ = regexp.Compile("\\<applet[\\S\\s]+?\\</applet\\>")
+	src = re.ReplaceAllString(src, "")
+	re, _ = regexp.Compile("\\<object[\\S\\s]+?\\</object\\>")
+	src = re.ReplaceAllString(src, "")
+	re, _ = regexp.Compile("\\<base[\\S\\s]+?\\</base\\>")
+	src = re.ReplaceAllString(src, "")
+
+	//remove code blocks
+	re, _ = regexp.Compile("\\<pre[\\S\\s]+?\\</pre\\>")
+	src = re.ReplaceAllString(src, "")
+	re, _ = regexp.Compile("\\<code[\\S\\s]+?\\</code\\>")
+	src = re.ReplaceAllString(src, "")
+
+	//remove all HTML tags and replaced with \n
+	re, _ = regexp.Compile("\\<[\\S\\s]+?\\>")
+	src = re.ReplaceAllString(src, "\n")
+
+	//remove continued break lines
+	re, _ = regexp.Compile("\\s{2,}")
+	src = re.ReplaceAllString(src, "\n")
 
 	if joint.GetBool(mergeWhitespace, false) {
 		src = util.MergeSpace(src)
@@ -195,11 +116,8 @@ func (joint HtmlToTextJoint) Process(context *Context) error {
 	src = strings.Replace(src, "&amp; ", "& ", -1)
 	src = strings.Replace(src, "&amp;amp; ", "& ", -1)
 
+	log.Trace("get text: ", src)
+
 	snapshot.Text = util.XSSHandle(src)
-
-	if global.Env().IsDebug {
-		log.Trace("get text: ", src)
-	}
-
 	return nil
 }

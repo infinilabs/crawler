@@ -58,7 +58,7 @@ func getDefaultCheckerTaskConfig() TaskConfig {
 	url_normalization.Enabled = true
 	url_normalization.JointName = "url_normalization"
 	url_normalization.Parameters = util.MapStr{
-		"follow_all_domain": false,
+		"follow_all_domain": true,
 		"follow_sub_domain": true,
 	}
 
@@ -83,7 +83,7 @@ func getDefaultCheckerTaskConfig() TaskConfig {
 	}
 
 	defaultCheckerConfig := TaskConfig{
-		MaxGoRoutine:          10,
+		MaxGoRoutine:          1,
 		FetchThresholdInMs:    0,
 		DefaultPipelineConfig: &config,
 	}
@@ -109,16 +109,6 @@ func (module CheckerModule) Start(cfg *Config) {
 }
 
 func (module CheckerModule) runCheckerGo() {
-	defer func() {
-		if !global.Env().IsDebug {
-			if r := recover(); r != nil {
-				if e, ok := r.(runtime.Error); ok {
-					log.Error("checker: ", util.GetRuntimeErrorMessage(e))
-				}
-				log.Error("error in checker,", util.ToJson(r, true))
-			}
-		}
-	}()
 
 	var data []byte
 	for {
@@ -134,17 +124,8 @@ func (module CheckerModule) runCheckerGo() {
 }
 
 func (module CheckerModule) execute(data []byte) {
-	if len(data) <= 0 {
-		log.Error("empty data in checker")
-		return
-	}
-
 	startTime := time.Now()
 	seed := model.TaskSeedFromBytes(data)
-
-	if seed.Url == "" {
-		return
-	}
 
 	task := &model.Task{}
 	task.OriginalUrl = seed.Url
@@ -154,11 +135,6 @@ func (module CheckerModule) execute(data []byte) {
 	task.Breadth = seed.Breadth
 
 	pipeline := module.runPipe(global.Env().IsDebug, task)
-
-	if pipeline == nil {
-		log.Error("pipeline is nil, ", seed.Url)
-		return
-	}
 
 	//send to disk queue
 	if len(task.Host) > 0 && !pipeline.GetContext().IsExit() && !pipeline.GetContext().IsEnd() {

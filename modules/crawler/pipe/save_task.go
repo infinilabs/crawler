@@ -52,7 +52,11 @@ func (joint SaveTaskJoint) Process(context *Context) error {
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	task.Phrase = context.Phrase
-	task.Message = util.ToJson(context.Payload, false)
+
+	if context.IsEnd() {
+		log.Trace("broken pipeline,", context.Payload)
+		task.Message = util.ToJson(context.Payload, false)
+	}
 
 	if joint.GetBool(isCreate, false) {
 		log.Trace("create task, url:", task.Url)

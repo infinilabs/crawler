@@ -84,8 +84,8 @@ type Snapshot struct {
 }
 
 type PageLink struct {
-	Url   string `json:"url,omitempty"`
-	Label string `json:"label,omitempty"`
+	Url   string `json:"url"`
+	Label string `json:"label"`
 }
 
 func CreateSnapshot(snapshot *Snapshot) error {
@@ -124,23 +124,6 @@ func GetSnapshotList(from, size int, taskId string) (int, []Snapshot, error) {
 	return result.Total, snapshots, err
 }
 
-func GetSnapshotByField(k, v string) ([]Snapshot, error) {
-	log.Trace("start get snapshot: ", k, ", ", v)
-	snapshot := Snapshot{}
-	snapshots := []Snapshot{}
-	err, result := persist.GetBy(k, v, snapshot, &snapshots)
-
-	if err != nil {
-		log.Error(k, ", ", err)
-		return snapshots, err
-	}
-	if result.Result != nil && snapshots == nil || len(snapshots) == 0 {
-		convertSnapshot(result, &snapshots)
-	}
-
-	return snapshots, err
-}
-
 func GetSnapshot(id string) (Snapshot, error) {
 	snapshot := Snapshot{}
 	snapshot.ID = id
@@ -154,20 +137,4 @@ func GetSnapshot(id string) (Snapshot, error) {
 	}
 
 	return snapshot, err
-}
-
-func convertSnapshot(result persist.Result, snapshots *[]Snapshot) {
-	if result.Result == nil {
-		return
-	}
-
-	t, ok := result.Result.([]interface{})
-	if ok {
-		for _, i := range t {
-			js := util.ToJson(i, false)
-			t := Snapshot{}
-			util.FromJson(js, &t)
-			*snapshots = append(*snapshots, t)
-		}
-	}
 }

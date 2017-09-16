@@ -46,10 +46,6 @@ func RegisterNav(name, displayName string, url string) {
 // GetPagination return a pagination html code snippet
 func GetPagination(domain string, from, size, total int, url string) string {
 
-	if total > 10000 {
-		total = 10000
-	}
-
 	var cur = from / size
 
 	var buffer bytes.Buffer

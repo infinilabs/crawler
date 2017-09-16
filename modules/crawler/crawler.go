@@ -19,6 +19,7 @@ package crawler
 import (
 	log "github.com/cihub/seelog"
 	. "github.com/infinitbyte/gopa/core/config"
+	. "github.com/infinitbyte/gopa/core/env"
 	"github.com/infinitbyte/gopa/core/global"
 	. "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/queue"
@@ -35,80 +36,6 @@ var signalChannels []*chan bool
 
 var crawlerStarted bool
 
-// GetDefaultTaskConfig return a default TaskConfig
-func GetDefaultTaskConfig() TaskConfig {
-	config := PipelineConfig{}
-	config.Name = "crawler"
-	start := JointConfig{}
-	start.Enabled = true
-	start.JointName = "init_task"
-	config.StartJoint = &start
-	save := JointConfig{}
-	save.Enabled = true
-	save.JointName = "save_task"
-
-	urlNormalization := JointConfig{}
-	urlNormalization.Enabled = true
-	urlNormalization.JointName = "url_normalization"
-	urlNormalization.Parameters = util.MapStr{
-		"follow_all_domain": false,
-		"follow_sub_domain": true,
-	}
-
-	fetchJoint := JointConfig{}
-	fetchJoint.Enabled = true
-	fetchJoint.JointName = "fetch"
-
-	parse := JointConfig{}
-	parse.Enabled = true
-	parse.JointName = "parse"
-
-	html2text := JointConfig{}
-	html2text.Enabled = true
-	html2text.JointName = "html2text"
-
-	hash := JointConfig{}
-	hash.Enabled = true
-	hash.JointName = "hash"
-
-	updateCheckTime := JointConfig{}
-	updateCheckTime.Enabled = true
-	updateCheckTime.JointName = "update_check_time"
-
-	contentDeduplication := JointConfig{}
-	contentDeduplication.Enabled = true
-	contentDeduplication.JointName = "content_deduplication"
-
-	saveSnapshot := JointConfig{}
-	saveSnapshot.Enabled = true
-	saveSnapshot.JointName = "save_snapshot_db"
-
-	task_deduplication := JointConfig{}
-	task_deduplication.Enabled = true
-	task_deduplication.JointName = "task_deduplication"
-
-	config.EndJoint = &save
-	config.ProcessJoints = []*JointConfig{
-		&urlNormalization,
-		&fetchJoint,
-		&parse,
-		&html2text,
-		&hash,
-		&updateCheckTime,
-		&contentDeduplication,
-		&saveSnapshot,
-		&task_deduplication,
-	}
-
-	defaultCrawlerConfig := TaskConfig{
-		MaxGoRoutine:          10,
-		FetchThresholdInMs:    0,
-		DefaultPipelineConfig: &config,
-	}
-
-	return defaultCrawlerConfig
-}
-
 func (module CrawlerModule) Name() string {
 	return "Crawler"
 }
@@ -118,6 +45,7 @@ func (module CrawlerModule) Start(cfg *Config) {
 	config := GetDefaultTaskConfig()
 	cfg.Unpack(&config)
 	module.config = &config
+	module.rawConfig = cfg
 
 	//TODO
 	InitJoints()
@@ -135,7 +63,7 @@ func (module CrawlerModule) Start(cfg *Config) {
 			log.Trace("start crawler:", i)
 			signalC := make(chan bool, 1)
 			signalChannels[i] = &signalC
-			go module.runPipeline(&signalC, i)
+			go module.runPipeline(global.Env(), &signalC, i)
 
 		}
 	} else {
@@ -164,7 +92,7 @@ func (module CrawlerModule) Stop() error {
 	return nil
 }
 
-func (module CrawlerModule) runPipeline(signalC *chan bool, shard int) {
+func (module CrawlerModule) runPipeline(env *Env, signalC *chan bool, shard int) {
 
 	var taskID []byte
 	for {
@@ -176,21 +104,21 @@ func (module CrawlerModule) runPipeline(signalC *chan bool, shard int) {
 			stats.Increment("queue."+string(config.FetchChannel), "pop")
 			id := string(taskID)
 			log.Trace("shard:", shard, ",task received:", id)
-			module.execute(id)
+			module.execute(id, env)
 			log.Trace("shard:", shard, ",task finished:", id)
 		}
 	}
 }
 
-func (module CrawlerModule) execute(taskId string) {
+func (module CrawlerModule) execute(taskId string, env *Env) {
 	var pipeline *Pipeline
 	defer func() {
-		if !global.Env().IsDebug {
+		if !env.IsDebug {
 			if r := recover(); r != nil {
 				if e, ok := r.(runtime.Error); ok {
 					log.Error("pipeline: ", pipeline.GetID(), ", taskId: ", taskId, ", ", util.GetRuntimeErrorMessage(e))
 				}
-				log.Error("error in crawler,", util.ToJson(r, true), util.ToJson(pipeline.GetContext(), true))
+				log.Debug("error in crawler,", util.ToJson(r, true), util.ToJson(pipeline.GetContext(), true))
 			}
 		}
 	}()
@@ -216,5 +144,6 @@ func (module CrawlerModule) execute(taskId string) {
 }
 
 type CrawlerModule struct {
-	config *TaskConfig
+	config    *TaskConfig
+	rawConfig *Config
 }

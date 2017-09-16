@@ -16,32 +16,26 @@ import (
 type TaskStatus int
 
 const TaskCreated TaskStatus = 0
-const TaskFailed TaskStatus = 2
-const TaskSuccess TaskStatus = 3
-const Task404 TaskStatus = 4
-const TaskRedirected TaskStatus = 5
-const TaskTimeout TaskStatus = 6
-const TaskDuplicated TaskStatus = 7
-const TaskInterrupted TaskStatus = 8
+const TaskFetchFailed TaskStatus = 2
+const TaskFetchSuccess TaskStatus = 3
+const Task404Ignore TaskStatus = 4
+const TaskRedirectedIgnore TaskStatus = 5
+const TaskFetchTimeout TaskStatus = 6
 
 func GetTaskStatusText(status TaskStatus) string {
 	switch status {
 	case TaskCreated:
 		return "created"
-	case TaskFailed:
+	case TaskFetchFailed:
 		return "failed"
-	case Task404:
+	case Task404Ignore:
 		return "404"
-	case TaskSuccess:
+	case TaskFetchSuccess:
 		return "success"
-	case TaskRedirected:
+	case TaskRedirectedIgnore:
 		return "redirected"
-	case TaskTimeout:
+	case TaskFetchTimeout:
 		return "timeout"
-	case TaskDuplicated:
-		return "duplicated"
-	case TaskInterrupted:
-		return "interrupted"
 	}
 	return "unknow"
 }
@@ -128,18 +122,18 @@ type Task struct {
 	OriginalUrl string          `json:"original_url,omitempty"`
 	Phrase      pipeline.Phrase `gorm:"index" json:"phrase"`
 	Status      TaskStatus      `gorm:"index" json:"status"`
-	Message     string          `json:"message,omitempty"`
+	Message     string          `json:"-"`
 	Created     *time.Time      `gorm:"index" json:"created,omitempty"`
 	Updated     *time.Time      `gorm:"index" json:"updated,omitempty"`
-	LastFetch   *time.Time      `gorm:"index" json:"last_fetch,omitempty"`
-	LastCheck   *time.Time      `gorm:"index" json:"last_check,omitempty"`
-	NextCheck   *time.Time      `gorm:"index" json:"next_check,omitempty"`
+	LastFetch   *time.Time      `gorm:"index" json:"last_fetch"`
+	LastCheck   *time.Time      `gorm:"index" json:"last_check"`
+	NextCheck   *time.Time      `gorm:"index" json:"next_check"`
 
-	SnapshotVersion int        `json:"snapshot_version,omitempty"`
-	SnapshotID      string     `json:"snapshot_id,omitempty"`
-	SnapshotHash    string     `json:"snapshot_hash,omitempty"`
-	SnapshotSimHash string     `json:"snapshot_simhash,omitempty"`
-	SnapshotCreated *time.Time `json:"snapshot_created,omitempty"`
+	SnapshotVersion int        `json:"snapshot_version"`
+	SnapshotID      string     `json:"snapshot_id"`
+	SnapshotHash    string     `json:"snapshot_hash"`
+	SnapshotSimHash string     `json:"snapshot_simhash"`
+	SnapshotCreated *time.Time `json:"snapshot_created"`
 }
 
 func CreateTask(task *Task) error {
@@ -257,7 +251,7 @@ func GetPendingUpdateFetchTasks(offset *time.Time) (int, []Task, error) {
 		Conds: persist.And(
 			persist.Lt("next_check", t),
 			persist.Gt("created", offset),
-			persist.Eq("status", TaskSuccess)),
+			persist.Eq("status", TaskFetchSuccess)),
 		From: 0, Size: 100,
 	}
 	err, result := persist.Search(Task{}, &tasks, &queryO)

@@ -17,9 +17,6 @@ limitations under the License.
 package pipe
 
 import (
-	"fmt"
-	"github.com/infinitbyte/gopa/core/env"
-	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/stretchr/testify/assert"
@@ -28,9 +25,6 @@ import (
 )
 
 func TestProcessText(t *testing.T) {
-
-	global.RegisterEnv(env.EmptyEnv())
-
 	body := "<!DOCTYPE html> <html> <head> <meta content=\"text/html;charset=utf-8\" http-equiv=\"Content-Type\" /> <meta content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no\" name=\"viewport\" /> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,Chrome=1\" /> <meta name=\"renderer\" content=\"webkit\" /> <title>Elastic中文社区</title> <meta name=\"keywords\" content=\"Elasticsearch中文社区，实时数据分析，实时数据检索, Elastic Stack，ELK，elasticsearch、logstash、kibana、beats等相关技术交流探讨\" /> <meta name=\"description\" content=\"Elasticsearch中文社区，elasticsearch、logstash、kibana,beats等相关技术交流探讨\" /> <base href=\"http://elasticsearch.cn/\" /><!--[if IE]></base><![endif]--> <link href=\"http://elasticsearch.cn/static/css/default/img/favicon.ico?v=20151125\" rel=\"shortcut icon\" type=\"image/x-icon\" /> <link rel=\"stylesheet\" type=\"text/css\" href=\"http://elasticsearch.cn/static/css/bootstrap.css\" /> <link rel=\"stylesheet\" type=\"text/css\" href=\"http://elasticsearch.cn/static/css/icon.css\" /> <link href=\"http://elasticsearch.cn/static/css/default/common.css?v=20151125\" rel=\"stylesheet\" type=\"text/css\" /> <link href=\"http://elasticsearch.cn/static/css/default/link.css?v=20151125\" rel=\"stylesheet\" type=\"text/css\" /> <link href=\"http://elasticsearch.cn/static/js/plug_module/style.css?v=20151125\" rel=\"stylesheet\" type=\"text/css\" /> </head> <body> <div style=\"display:none;\" id=\"__crond\"><a href=\"google.com\">myLink</a>" +
 		"<a href=\"//baidu.com\">baidu</a>" +
 		"<a href=\"/wiki/Marking/Users\">/wiki/Marking/Users</a>" +
@@ -46,7 +40,6 @@ func TestProcessText(t *testing.T) {
 	snapshot := model.Snapshot{}
 	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
 	snapshot.Payload = []byte(body)
-	snapshot.ContentType = "text/html"
 
 	parse := HtmlToTextJoint{}
 	parse.Process(&context)
@@ -62,54 +55,21 @@ func TestProcessText(t *testing.T) {
 	snapshot = model.Snapshot{}
 	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
 	snapshot.Payload = b
-	snapshot.ContentType = "text/html"
-
 	parse.Process(&context)
 
 	text = snapshot.Text
 	assert.Equal(t, "\nElastic中文社区\nlink\nHidden text, should not displayed!\nH1 title\nH2 title\n", text)
 
-	//load file
-	b, e = ioutil.ReadFile("../../../test/samples/discuss.html")
+	b, e = ioutil.ReadFile("../../../test/samples/csdn.html")
 	if e != nil {
 		panic(e)
 	}
 	snapshot = model.Snapshot{}
 	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
 	snapshot.Payload = b
-	snapshot.ContentType = "text/html"
-
 	parse.Process(&context)
 
 	text = snapshot.Text
-	fmt.Println(text)
+	//	assert.Equal(t, "  ", text)
 
-}
-
-func BenchmarkReplaceAll(t *testing.B) {
-	b, e := ioutil.ReadFile("../../../test/samples/default.html")
-	if e != nil {
-		panic(e)
-	}
-	for i := 0; i < t.N; i++ {
-
-		replaceAll(b)
-	}
-}
-
-func TestToLowercase(t *testing.T) {
-	str := []byte("<AZ class=123>azUPPERcase<Az />")
-
-	printStr(str)
-	lowercaseTag(str)
-	fmt.Println("lowercased:")
-	assert.Equal(t, "<az class=123>azUPPERcase<az />", string(str))
-	printStr(str)
-	print(string(str))
-}
-
-func printStr(str []byte) {
-	for i, s := range str {
-		fmt.Println(i, "-", s, "-", string(s))
-	}
 }

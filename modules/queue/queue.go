@@ -25,20 +25,15 @@ func (module DiskQueue) Start(cfg *Config) {
 	queues = make(map[QueueKey]*BackendQueue)
 	path := global.Env().SystemConfig.GetWorkingDir() + "/queue"
 	os.Mkdir(path, 0777)
-
-	readBuffSize := 0
-	syncTimeout := 5 * time.Second
-	var syncEvery int64 = 2500
-
-	pendingFetchDiskQueue := NewDiskQueue("pending_fetch", path, 100*1024*1024, 1, 1<<10, syncEvery, syncTimeout, readBuffSize)
-	pendingCheckDiskQueue := NewDiskQueue("pending_check", path, 100*1024*1024, 1, 1<<10, syncEvery, syncTimeout, readBuffSize)
-	pendingDispatchDiskQueue := NewDiskQueue("pending_dispatch", path, 100*1024*1024, 1, 1<<10, syncEvery, syncTimeout, readBuffSize)
-	pendingIndexDiskQueue := NewDiskQueue("pending_index", path, 100*1024*1024, 1, 1<<20, syncEvery, syncTimeout, readBuffSize)
+	pendingFetchDiskQueue := NewDiskQueue("pending_fetch", path, 100*1024*1024, 1, 1<<10, 2500, 5*time.Second, 10)
+	pendingCheckDiskQueue := NewDiskQueue("pending_check", path, 100*1024*1024, 1, 1<<10, 2500, 5*time.Second, 10)
+	pendingDispatchDiskQueue := NewDiskQueue("pending_dispatch", path, 100*1024*1024, 1, 1<<10, 2500, 5*time.Second, 10)
+	pendingIndexDiskQueue := NewDiskQueue("pending_index", path, 100*1024*1024, 1, 1<<20, 2500, 5*time.Second, 10)
 	queues[config.FetchChannel] = &pendingFetchDiskQueue
 	queues[config.CheckChannel] = &pendingCheckDiskQueue
 	queues[config.DispatcherChannel] = &pendingDispatchDiskQueue
 	queues[config.IndexChannel] = &pendingIndexDiskQueue
-	//TODO configurable
+	//TODO configable
 	Register(module)
 }
 

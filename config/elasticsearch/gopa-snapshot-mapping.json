@@ -18,9 +18,6 @@ curl -XPUT "http://localhost:9200/gopa-snapshot" -H 'Content-Type: application/j
 "hash": {
 "type": "keyword"
 },
-"lang": {
-"type": "keyword"
-},
 "id": {
 "type": "keyword"
 },
@@ -54,12 +51,7 @@ curl -XPUT "http://localhost:9200/gopa-snapshot" -H 'Content-Type: application/j
 "type": "text"
 },
 "title": {
-"type": "text",
-"fields": {
-"keyword": {
-"type": "keyword"
-}
-}
+"type": "text"
 },
 "url": {
 "type": "keyword"

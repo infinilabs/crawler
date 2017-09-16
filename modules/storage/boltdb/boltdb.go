@@ -84,20 +84,18 @@ func (store BoltdbStore) Close() error {
 	return err
 }
 
-func (store BoltdbStore) GetCompressedValue(bucket string, key []byte) ([]byte, error) {
+func (store BoltdbStore) GetCompressedValue(bucket string, key []byte) []byte {
 
-	data, err := store.GetValue(bucket, key)
+	data := store.GetValue(bucket, key)
+	data, err := lz4.Decode(nil, data)
 	if err != nil {
-		return nil, err
+		log.Error("Failed to decode:", err)
+		return nil
 	}
-	data, err = lz4.Decode(nil, data)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
+	return data
 }
 
-func (store BoltdbStore) GetValue(bucket string, key []byte) ([]byte, error) {
+func (store BoltdbStore) GetValue(bucket string, key []byte) []byte {
 	var ret []byte = nil
 	db.Bolt.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
@@ -107,7 +105,7 @@ func (store BoltdbStore) GetValue(bucket string, key []byte) ([]byte, error) {
 		}
 		return nil
 	})
-	return ret, nil
+	return ret
 }
 
 func (store BoltdbStore) AddValueCompress(bucket string, key []byte, value []byte) error {
@@ -137,7 +135,7 @@ func (store BoltdbStore) DeleteValue(bucket string, key []byte, value []byte) er
 	return nil
 }
 
-func (store BoltdbStore) DeleteBucket(bucket string, key []byte) error {
+func (store BoltdbStore) DeleteBucket(bucket string, key []byte, value []byte) error {
 	db.Bolt.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		err := b.DeleteBucket(key)

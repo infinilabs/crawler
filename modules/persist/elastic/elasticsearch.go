@@ -14,7 +14,6 @@ type ElasticORM struct {
 func getIndex(any interface{}) string {
 	return util.GetTypeName(any, true)
 }
-
 func getID(any interface{}) string {
 	return util.GetFieldValueByTagName(any, "index", "id")
 }

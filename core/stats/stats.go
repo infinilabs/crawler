@@ -16,6 +16,8 @@ limitations under the License.
 
 package stats
 
+import "sync"
+
 type StatsInterface interface {
 	Increment(category, key string)
 
@@ -34,7 +36,7 @@ type StatsInterface interface {
 	StatsAll() *[]byte
 }
 
-var handlers = []StatsInterface{}
+var handlers []StatsInterface
 
 func Increment(category, key string) {
 	IncrementBy(category, key, 1)
@@ -88,6 +90,20 @@ func StatsAll() *[]byte {
 	return &[]byte{}
 }
 
+var inited bool
+var l sync.RWMutex
+
+func Init() {
+	if inited {
+		return
+	}
+	l.Lock()
+	handlers = []StatsInterface{}
+	inited = true
+	l.Unlock()
+}
+
 func Register(h StatsInterface) {
+	Init()
 	handlers = append(handlers, h)
 }

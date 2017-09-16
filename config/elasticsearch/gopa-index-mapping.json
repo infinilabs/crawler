@@ -16,10 +16,6 @@ curl -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json
 "bold": {
 "type": "text"
 },
-"url": {
-"type": "keyword",
-"ignore_above": 256
-},
 "content_type": {
 "type": "keyword",
 "ignore_above": 256
@@ -111,10 +107,6 @@ curl -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json
 "type": "keyword",
 "ignore_above": 256
 },
-"lang": {
-"type": "keyword",
-"ignore_above": 256
-},
 "size": {
 "type": "long"
 },
@@ -122,12 +114,7 @@ curl -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json
 "type": "text"
 },
 "title": {
-"type": "text",
-"fields": {
-"keyword": {
-"type": "keyword"
-}
-}
+"type": "text"
 },
 "version": {
 "type": "long"

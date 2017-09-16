@@ -37,9 +37,8 @@ func InitAPI() {
 	api.HandleAPIMethod(api.GET, "/", apis.IndexAction)
 	api.HandleAPIMethod(api.GET, "/favicon.ico", apis.IndexAction)
 
-	//Stats APIs
+	//APIs
 	api.HandleAPIFunc("/stats", apis.StatsAction)
-	api.HandleAPIFunc("/queue/stats", apis.QueueStatsAction)
 
 	//Task API
 	api.HandleAPIMethod(api.GET, "/tasks/", apis.TaskAction)

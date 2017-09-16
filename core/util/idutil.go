@@ -27,13 +27,10 @@ type incrementCounter struct {
 var count = incrementCounter{l: &sync.RWMutex{}, ID: make(map[string]*atomicID)}
 
 type atomicID struct {
-	l        sync.Mutex
 	Sequence int64
 }
 
 func (id *atomicID) Increment() int64 {
-	id.l.Lock()
-	defer id.l.Unlock()
 	return atomic.AddInt64(&id.Sequence, 1)
 }
 
@@ -56,8 +53,8 @@ func GetIncrementID(bucket string) string {
 
 // SnapshotPersistID will make a snapshot and persist id stats to disk
 func SnapshotPersistID() {
-	count.l.Lock()
-	defer count.l.Unlock()
+	lock1.Lock()
+	defer lock1.Unlock()
 
 	var buf bytes.Buffer
 	err := gob.NewEncoder(&buf).Encode(count)

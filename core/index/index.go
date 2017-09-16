@@ -11,13 +11,11 @@ import (
 type ElasticsearchConfig struct {
 	Endpoint    string `config:"endpoint"`
 	IndexPrefix string `config:"index_prefix"`
-	Username    string `config:"username"`
-	Password    string `config:"password"`
 }
 
 // ElasticsearchClient elasticsearch client api
 type ElasticsearchClient struct {
-	Config *ElasticsearchConfig
+	Config ElasticsearchConfig
 }
 
 // InsertResponse is a index response object
@@ -83,14 +81,12 @@ func (query *RangeQuery) Gte(field string, value interface{}) {
 	v["gte"] = value
 	query.Range[field] = v
 }
-
 func (query *RangeQuery) Lt(field string, value interface{}) {
 	query.Range = map[string]map[string]interface{}{}
 	v := map[string]interface{}{}
 	v["lt"] = value
 	query.Range[field] = v
 }
-
 func (query *RangeQuery) Lte(field string, value interface{}) {
 	query.Range = map[string]map[string]interface{}{}
 	v := map[string]interface{}{}
@@ -155,17 +151,15 @@ func (c *ElasticsearchClient) Index(indexName, id string, data interface{}) (*In
 	if err != nil {
 		return nil, err
 	}
-	req := util.NewPostRequest(url, js)
-	req.SetBasicAuth(c.Config.Username, c.Config.Password)
-	response, err := util.ExecuteRequest(req)
+	response := util.HttpPostJSON(url, "", string(js))
 	if err != nil {
 		return nil, err
 	}
 
-	log.Trace("indexing response: ", string(response.Body))
+	log.Trace("indexing response: ", string(response))
 
 	esResp := &InsertResponse{}
-	err = json.Unmarshal(response.Body, esResp)
+	err = json.Unmarshal(response, esResp)
 	if err != nil {
 		return &InsertResponse{}, err
 	}
@@ -182,18 +176,15 @@ func (c *ElasticsearchClient) Get(indexName, id string) (*GetResponse, error) {
 
 	log.Debug("get doc: ", url)
 
-	req := util.NewGetRequest(url)
-	req.SetBasicAuth(c.Config.Username, c.Config.Password)
-	response, err := util.ExecuteRequest(req)
-
+	response, err := util.HttpGet(url)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Trace("get response: ", string(response.Body))
+	log.Trace("get response: ", string(response))
 
 	esResp := &GetResponse{}
-	err = json.Unmarshal(response.Body, esResp)
+	err = json.Unmarshal(response, esResp)
 	if err != nil {
 		return &GetResponse{}, err
 	}
@@ -210,17 +201,15 @@ func (c *ElasticsearchClient) Delete(indexName, id string) (*DeleteResponse, err
 
 	log.Debug("delete doc: ", url)
 
-	req := util.NewDeleteRequest(url)
-	req.SetBasicAuth(c.Config.Username, c.Config.Password)
-	response, err := util.ExecuteRequest(req)
+	response, err := util.HttpDelete(url)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Trace("delete response: ", string(response.Body))
+	log.Trace("delete response: ", string(response))
 
 	esResp := &DeleteResponse{}
-	err = json.Unmarshal(response.Body, esResp)
+	err = json.Unmarshal(response, esResp)
 	if err != nil {
 		return &DeleteResponse{}, err
 	}
@@ -239,18 +228,15 @@ func (c *ElasticsearchClient) Count(indexName string) (*CountResponse, error) {
 
 	log.Debug("doc count: ", url)
 
-	req := util.NewGetRequest(url)
-	req.SetBasicAuth(c.Config.Username, c.Config.Password)
-	response, err := util.ExecuteRequest(req)
-
+	response, err := util.HttpGet(url)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Trace("count response: ", string(response.Body))
+	log.Trace("count response: ", string(response))
 
 	esResp := &CountResponse{}
-	err = json.Unmarshal(response.Body, esResp)
+	err = json.Unmarshal(response, esResp)
 	if err != nil {
 		return &CountResponse{}, err
 	}
@@ -277,21 +263,13 @@ func (c *ElasticsearchClient) Search(indexName string, query *SearchRequest) (*S
 	}
 
 	js, err := json.Marshal(query)
-	if err != nil {
-		return nil, err
-	}
 
-	req := util.NewPostRequest(url, js)
-	req.SetBasicAuth(c.Config.Username, c.Config.Password)
-	response, err := util.ExecuteRequest(req)
-	if err != nil {
-		return nil, err
-	}
+	response := util.HttpPostJSON(url, "", string(js))
 
-	log.Trace("search response: ", string(js), ",", string(response.Body))
+	log.Trace("search response: ", string(js), ",", string(response))
 
 	esResp := &SearchResponse{}
-	err = json.Unmarshal(response.Body, esResp)
+	err = json.Unmarshal(response, esResp)
 	if err != nil {
 		return &SearchResponse{}, err
 	}

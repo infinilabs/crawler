@@ -19,6 +19,7 @@ package util
 import (
 	"bytes"
 	"compress/gzip"
+	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -26,7 +27,6 @@ import (
 	"strings"
 	"time"
 
-	"crypto/tls"
 	"fmt"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
@@ -115,56 +115,6 @@ func getUrl(url string) (string, error) {
 	return url, nil
 }
 
-type Request struct {
-	Method            string
-	Url               string
-	basicAuthUsername string
-	basicAuthPassword string
-	Cookie            string
-	Proxy             string
-	Body              []byte
-}
-
-// NewPostRequest issue a simple http post request
-func NewPostRequest(url string, body []byte) *Request {
-	req := Request{}
-	req.Url = url
-	req.Method = "POST"
-	req.Body = body
-	return &req
-}
-
-// NewPutRequest issue a simple http put request
-func NewPutRequest(url string, body []byte) *Request {
-	req := Request{}
-	req.Url = url
-	req.Method = "PUT"
-	req.Body = body
-	return &req
-}
-
-// NewGetRequest issue a simple http get request
-func NewGetRequest(url string) *Request {
-	req := Request{}
-	req.Url = url
-	req.Method = "GET"
-	return &req
-}
-
-// NewDeleteRequest issue a simple http delete request
-func NewDeleteRequest(url string) *Request {
-	req := Request{}
-	req.Url = url
-	req.Method = "DELETE"
-	return &req
-}
-
-// SetBasicAuth set user and password for request
-func (r *Request) SetBasicAuth(username, password string) {
-	r.basicAuthUsername = username
-	r.basicAuthPassword = password
-}
-
 // Result is the http request result
 type Result struct {
 	Host       string
@@ -183,10 +133,19 @@ proxyStr, eg: "socks5://127.0.0.1:9150"
 */
 func get(url string, cookie string, proxyStr string) (*Result, error) {
 
+	var page *Result
+
+	log.Debug("let's get :" + url)
+
 	var err error
 	url, err = getUrl(url)
 	if err != nil {
 		return nil, errors.New("invalid url: " + url)
+	}
+
+	client := &http.Client{
+		CheckRedirect: noRedirect,
+		//CheckRedirect: nil,
 	}
 
 	if proxyStr != "" {
@@ -246,55 +205,141 @@ func get(url string, cookie string, proxyStr string) (*Result, error) {
 		}
 	}
 
-	return execute(reqest)
-}
+	resp, err := client.Do(reqest)
 
-// ExecuteRequest issue a request
-func ExecuteRequest(req *Request) (*Result, error) {
+	log.Trace("response: ", err, ", ", resp)
 
-	log.Debug("let's: " + req.Method + ", " + req.Url)
-
-	var request *http.Request
-	if len(req.Body) > 0 {
-		postBytesReader := bytes.NewReader(req.Body)
-		request, _ = http.NewRequest(string(req.Method), req.Url, postBytesReader)
-	} else {
-		request, _ = http.NewRequest(string(req.Method), req.Url, nil)
+	if resp != nil && (resp.StatusCode == 301 || resp.StatusCode == 302) {
+		log.Debug("got redirect: ", url, " => ", resp.Header.Get("Location"))
+		location := resp.Header.Get("Location")
+		if len(location) > 0 && location != url {
+			return nil, errors.NewWithPayload(err, errors.URLRedirected, location, fmt.Sprint("got redirect: ", url, " => ", location))
+		}
 	}
 
-	request.Header.Set("User-Agent", userAgent)
-	request.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-	request.Header.Set("Accept-Charset", "GBK,utf-8;q=0.7,*;q=0.3")
-	request.Header.Set("Accept-Encoding", "gzip,deflate,sdch")
+	if err != nil {
+		log.Error(url, ", ", err)
+		return nil, err
+	}
+
+	log.Trace("status code,", resp.StatusCode, ",size,", resp.ContentLength)
+
+	log.Trace("host: ", resp.Request.Host, " url: ", resp.Request.URL.String())
+
+	page = &Result{}
+	//update host, redirects may change the host
+	page.Host = resp.Request.Host
+	page.Url = resp.Request.URL.String()
+
+	page.StatusCode = resp.StatusCode
+	if resp.Header != nil {
+		page.Headers = map[string][]string{}
+		for k, v := range resp.Header {
+			page.Headers[strings.ToLower(k)] = v
+		}
+
+	}
+
+	defer resp.Body.Close()
+
+	var reader io.ReadCloser
+	switch resp.Header.Get("Content-Encoding") {
+	case "gzip":
+		reader, err = gzip.NewReader(resp.Body)
+		if err != nil {
+			log.Error(url, ", ", err)
+			return nil, err
+		}
+		defer reader.Close()
+	default:
+		reader = resp.Body
+	}
+
+	if reader != nil {
+		body, err := ioutil.ReadAll(reader)
+		if err != nil {
+			log.Error(url, ", ", err)
+			return nil, err
+		}
+		page.Body = body
+		page.Size = uint64(len(body))
+		return page, nil
+
+	}
+	return nil, nil
+}
+
+// HttpPostJSON send a http request with json body
+func HttpPostJSON(url string, cookie string, postStr string) []byte {
+
+	log.Debug("let's post: "+url, ",", postStr)
+
+	client := &http.Client{
+		CheckRedirect: nil,
+	}
+
+	postBytesReader := bytes.NewReader([]byte(postStr))
+	reqest, _ := http.NewRequest("POST", url, postBytesReader)
+
+	reqest.Header.Set("User-Agent", userAgent)
+	reqest.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+	reqest.Header.Set("Accept-Charset", "GBK,utf-8;q=0.7,*;q=0.3")
+	reqest.Header.Set("Accept-Encoding", "gzip,deflate,sdch")
 	//	reqest.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	//reqest.Header.Add("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-	request.Header.Add("Content-Type", "application/json;charset=utf-8")
-	request.Header.Set("Accept-Language", "zh-CN,zh;q=0.8")
-	request.Header.Set("Cache-Control", "max-age=0")
-	request.Header.Set("Connection", "keep-alive")
-	request.Header.Set("Referer", req.Url)
+	reqest.Header.Add("Content-Type", "application/json;charset=utf-8")
+	reqest.Header.Set("Accept-Language", "zh-CN,zh;q=0.8")
+	reqest.Header.Set("Cache-Control", "max-age=0")
+	reqest.Header.Set("Connection", "keep-alive")
+	reqest.Header.Set("Referer", url)
 
-	if req.Cookie != "" {
-		log.Debug("dealing with cookie:" + req.Cookie)
-		array := strings.Split(req.Cookie, ";")
+	if len(cookie) > 0 {
+		log.Debug("dealing with cookie:" + cookie)
+		array := strings.Split(cookie, ";")
 		for item := range array {
 			array2 := strings.Split(array[item], "=")
 			if len(array2) == 2 {
 				cookieObj := http.Cookie{}
 				cookieObj.Name = array2[0]
 				cookieObj.Value = array2[1]
-				request.AddCookie(&cookieObj)
+				reqest.AddCookie(&cookieObj)
 			} else {
 				log.Info("error,index out of range:" + array[item])
 			}
 		}
 	}
 
-	if req.basicAuthUsername != "" && req.basicAuthPassword != "" {
-		request.SetBasicAuth(req.basicAuthUsername, req.basicAuthPassword)
+	resp, err := client.Do(reqest)
+
+	if err != nil {
+		log.Error(url, ", ", err)
+		return nil
 	}
 
-	return execute(request)
+	defer resp.Body.Close()
+
+	var reader io.ReadCloser
+	switch resp.Header.Get("Content-Encoding") {
+	case "gzip":
+		reader, err = gzip.NewReader(resp.Body)
+		if err != nil {
+			log.Error(url, err)
+			return nil
+		}
+		defer reader.Close()
+	default:
+		reader = resp.Body
+	}
+
+	if reader != nil {
+		body, err := ioutil.ReadAll(reader)
+		if err != nil {
+			log.Error(url, err)
+			return nil
+		}
+		return body
+	}
+	return nil
 }
 
 // HttpGetWithCookie issue http request with cookie
@@ -304,10 +349,12 @@ func HttpGetWithCookie(resource string, cookie string, proxy string) (*Result, e
 }
 
 // HttpGet issue a simple http get request
-func HttpGet(resource string) (*Result, error) {
+func HttpGet(resource string) ([]byte, error) {
 
 	req, err := http.NewRequest("GET", resource, nil)
+
 	if err != nil {
+		log.Error(resource, err)
 		return nil, err
 	}
 
@@ -315,102 +362,67 @@ func HttpGet(resource string) (*Result, error) {
 }
 
 // HttpDelete issue a simple http delete request
-func HttpDelete(resource string) (*Result, error) {
+func HttpDelete(resource string) ([]byte, error) {
 
 	req, err := http.NewRequest("DELETE", resource, nil)
 
 	if err != nil {
+		log.Error(resource, err)
 		return nil, err
 	}
 
 	return execute(req)
 }
 
-var timeout = 10 * time.Second
-var clientTimeout = 30 * time.Second
-var t = &http.Transport{
-	Dial: func(netw, addr string) (net.Conn, error) {
-		deadline := time.Now().Add(10 * time.Second)
-		c, err := net.DialTimeout(netw, addr, 5*time.Second)
-		if err != nil {
-			return nil, err
-		}
-
-		c.SetDeadline(deadline)
-		return c, nil
-	},
-	ResponseHeaderTimeout: timeout,
-	IdleConnTimeout:       timeout,
-	TLSHandshakeTimeout:   timeout,
-	ExpectContinueTimeout: timeout,
-	DisableKeepAlives:     true,
-	MaxIdleConnsPerHost:   10,
-	TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
-}
-
-var client = &http.Client{
-	Transport:     t,
-	Timeout:       clientTimeout,
-	CheckRedirect: noRedirect,
-	//CheckRedirect: nil,
-}
-
-func execute(req *http.Request) (*Result, error) {
-	result := &Result{}
+func execute(req *http.Request) ([]byte, error) {
 
 	//support gzip
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Accept-Encoding", "gzip")
 
-	//defer t.CloseIdleConnections()
+	client := &http.Client{
+		Transport: &http.Transport{
+			Dial: func(netw, addr string) (net.Conn, error) {
+				deadline := time.Now().Add(10 * time.Second)
+				c, err := net.DialTimeout(netw, addr, 5*time.Second)
+				if err != nil {
+					log.Error(req, err)
+					return nil, err
+				}
+
+				c.SetDeadline(deadline)
+				return c, nil
+			},
+		},
+	}
 
 	resp, err := client.Do(req)
-
-	if resp != nil {
-		statusCode := resp.StatusCode
-		result.StatusCode = statusCode
-		if statusCode == 301 || statusCode == 302 {
-			log.Debug("got redirect: ", req.URL, " => ", resp.Header.Get("Location"))
-			location := resp.Header.Get("Location")
-			if len(location) > 0 && location != req.URL.String() {
-				return result, errors.NewWithPayload(err, errors.URLRedirected, location, fmt.Sprint("got redirect: ", req.URL, " => ", location))
-			}
-		}
-	}
-
 	if err != nil {
-		return result, err
+		log.Error(req, err)
+		return nil, err
 	}
 
-	// update host, redirects may change the host
-	result.Host = resp.Request.Host
-	result.Url = resp.Request.URL.String()
+	defer resp.Body.Close()
 
-	if resp.Header != nil {
-		result.Headers = map[string][]string{}
-		for k, v := range resp.Header {
-			result.Headers[strings.ToLower(k)] = v
-		}
-	}
-
-	reader := resp.Body
-	defer reader.Close()
-	if resp.Header.Get("Content-Encoding") == "gzip" {
+	var reader io.ReadCloser
+	switch resp.Header.Get("Content-Encoding") {
+	case "gzip":
 		reader, err = gzip.NewReader(resp.Body)
 		if err != nil {
-			return result, err
+			log.Error(req, err)
+			return nil, err
 		}
+		defer reader.Close()
+	default:
+		reader = resp.Body
 	}
-
 	if reader != nil {
 		body, err := ioutil.ReadAll(reader)
 		if err != nil {
-			return result, err
+			log.Error(req, err)
+			return nil, err
 		}
-		result.Body = body
-		result.Size = uint64(len(body))
-		return result, nil
+		return body, nil
 	}
-
 	return nil, http.ErrNotSupported
 }
