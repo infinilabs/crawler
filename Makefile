@@ -141,6 +141,7 @@ fetch-depends:
 	$(GO) get github.com/jasonlvhit/gocron
 	$(GO) get github.com/quipo/statsd
 	$(GO) get github.com/go-sql-driver/mysql
+	$(GO) get github.com/jbowles/cld2_nlpt
 
 
 dist: cross-build package
