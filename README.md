@@ -7,6 +7,7 @@
 [![Travis](https://travis-ci.org/infinitbyte/gopa.svg?branch=master)](https://travis-ci.org/infinitbyte/gopa)
 [![Go Report Card](https://goreportcard.com/badge/github.com/infinitbyte/gopa)](https://goreportcard.com/report/github.com/infinitbyte/gopa)
 [![Coverage Status](https://coveralls.io/repos/github/infinitbyte/gopa/badge.svg?branch=master)](https://coveralls.io/github/infinitbyte/gopa?branch=master)
+[![Join the chat at https://gitter.im/infinitbyte/gopa](https://badges.gitter.im/infinitbyte/gopa.svg)](https://gitter.im/infinitbyte/gopa?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 
 ## Goal
