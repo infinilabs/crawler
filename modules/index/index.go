@@ -4,17 +4,20 @@ import (
 	"encoding/json"
 	log "github.com/cihub/seelog"
 	. "github.com/infinitbyte/gopa/core/config"
+	"github.com/infinitbyte/gopa/core/global"
 	core "github.com/infinitbyte/gopa/core/index"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/queue"
+	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
+	"runtime"
 )
 
 type IndexModule struct {
 }
 
 type IndexConfig struct {
-	Elasticsearch core.ElasticsearchConfig `config:"elasticsearch"`
+	Elasticsearch *core.ElasticsearchConfig `config:"elasticsearch"`
 }
 
 func (this IndexModule) Name() string {
@@ -25,7 +28,7 @@ var signalChannel chan bool
 
 var (
 	defaultConfig = IndexConfig{
-		Elasticsearch: core.ElasticsearchConfig{
+		Elasticsearch: &core.ElasticsearchConfig{
 			Endpoint:    "http://localhost:9200",
 			IndexPrefix: "gopa-",
 		},
@@ -40,6 +43,18 @@ func (module IndexModule) Start(cfg *Config) {
 	signalChannel = make(chan bool, 1)
 	client := core.ElasticsearchClient{Config: indexConfig.Elasticsearch}
 	go func() {
+		defer func() {
+
+			if !global.Env().IsDebug {
+				if r := recover(); r != nil {
+					if e, ok := r.(runtime.Error); ok {
+						log.Error("index: ", util.GetRuntimeErrorMessage(e))
+					}
+					log.Error("error in indexer")
+				}
+			}
+		}()
+
 		for {
 			select {
 			case <-signalChannel:

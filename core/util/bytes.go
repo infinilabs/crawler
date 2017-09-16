@@ -22,6 +22,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unsafe"
 )
 
 // BytesToUint64 convert bytes to type uint64
@@ -175,3 +176,33 @@ func ToBytes(s string) (uint64, error) {
 }
 
 /** https://github.com/cloudfoundry/bytefmt/blob/master/bytes.go end **/
+
+func BytesToString(bs []byte) string {
+	return *(*string)(unsafe.Pointer(&bs))
+}
+
+// ToLowercase convert string bytes to lowercase
+func ToLowercase(str []byte) []byte {
+	for i, s := range str {
+		if s > 64 && s < 91 {
+			str[i] = s + 32
+		}
+	}
+	return str
+}
+
+// ToUppercase convert string bytes to uppercase
+func ToUppercase(str []byte) []byte {
+	for i, s := range str {
+		if s > 96 && s < 123 {
+			str[i] = s - 32
+		}
+	}
+	return str
+}
+
+//TODO optimize performance
+//ReplaceByte simply replace old bytes to new bytes, the two bytes should have same length
+func ReplaceByte(str []byte, old, new []byte) []byte {
+	return []byte(strings.Replace(string(str), string(old), string(new), -1))
+}

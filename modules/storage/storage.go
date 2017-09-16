@@ -18,9 +18,12 @@ package storage
 
 import (
 	"github.com/infinitbyte/gopa/core/config"
+	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/global"
+	"github.com/infinitbyte/gopa/core/index"
 	"github.com/infinitbyte/gopa/core/persist"
 	"github.com/infinitbyte/gopa/modules/storage/boltdb"
+	"github.com/infinitbyte/gopa/modules/storage/elastic"
 	"os"
 	"path"
 )
@@ -31,22 +34,68 @@ func (this StorageModule) Name() string {
 	return "Storage"
 }
 
+var storeConfig *StorageConfig
+
+type BoltdbConfig struct {
+}
+type LeveldbConfig struct {
+}
+
+type StorageConfig struct {
+	//Driver only `boltdb` and `elasticsearch` are available
+	Driver  string                     `config:"driver"`
+	Boltdb  *BoltdbConfig              `config:"boltdb"`
+	Leveldb *LeveldbConfig             `config:"leveldb"`
+	Elastic *index.ElasticsearchConfig `config:"elasticsearch"`
+}
+
+var (
+	defaultConfig = StorageConfig{
+		Driver:  "boltdb",
+		Boltdb:  &BoltdbConfig{},
+		Leveldb: &LeveldbConfig{},
+		Elastic: &index.ElasticsearchConfig{
+			Endpoint:    "http://localhost:9200",
+			IndexPrefix: "gopa-",
+		},
+	}
+)
+
+func getDefaultConfig() StorageConfig {
+	return defaultConfig
+}
+
 func (module StorageModule) Start(cfg *config.Config) {
 
-	folder := path.Join(global.Env().SystemConfig.GetWorkingDir(), "blob")
-	os.MkdirAll(folder, 0777)
-	impl = boltdb.BoltdbStore{FileName: path.Join(folder, "/bolt.db")}
-	err := impl.Open()
-	if err != nil {
-		panic(err)
+	//init config
+	config := getDefaultConfig()
+	cfg.Unpack(&config)
+	storeConfig = &config
+
+	if config.Driver == "elasticsearch" {
+		client := index.ElasticsearchClient{Config: config.Elastic}
+		handler := elastic.ElasticsearchStore{&client}
+		persist.RegisterKVHandler(handler)
+	} else if config.Driver == "boltdb" {
+
+		folder := path.Join(global.Env().SystemConfig.GetWorkingDir(), "blob")
+		os.MkdirAll(folder, 0777)
+		impl = boltdb.BoltdbStore{FileName: path.Join(folder, "/bolt.db")}
+		err := impl.Open()
+		if err != nil {
+			panic(err)
+		}
+		persist.RegisterKVHandler(impl)
+	} else {
+		panic(errors.Errorf("invalid driver, %s", config.Driver))
 	}
-	persist.RegisterKVHandler(impl)
 }
 
 func (module StorageModule) Stop() error {
-	err := impl.Close()
-	return err
-
+	if storeConfig.Driver == "boltdb" {
+		return impl.Close()
+	}
+	return nil
 }
 
 type StorageModule struct {

@@ -20,9 +20,8 @@ script:
 #  - golint -set_exit_status $PKGS     # one last linter
 
 go:
-- 1.x
-- 1.6
-- 1.7.x
+- 1.8
+- 1.9
 - master
 
 deploy:

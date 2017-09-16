@@ -20,6 +20,7 @@ import (
 	"fmt"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
+	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/model"
 	. "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/queue"
@@ -51,7 +52,7 @@ type signal struct {
 
 func (joint FetchJoint) Process(context *Context) error {
 
-	joint.timeout = time.Duration(joint.MustGetInt64(timeoutInSeconds)) * time.Second
+	joint.timeout = time.Duration(joint.GetInt64OrDefault(timeoutInSeconds, 60)) * time.Second
 	timer := time.NewTimer(joint.timeout)
 	defer timer.Stop()
 
@@ -76,9 +77,6 @@ func (joint FetchJoint) Process(context *Context) error {
 		cookie, _ := joint.GetString(cookie)
 		proxy, _ := joint.GetString(proxy)
 
-		//先全局,再domain,再task,再pipeline,层层覆盖
-		log.Trace("proxy:", proxy)
-
 		//start to fetch remote content
 		result, err := util.HttpGetWithCookie(requestUrl, cookie, proxy)
 
@@ -95,9 +93,9 @@ func (joint FetchJoint) Process(context *Context) error {
 			if result.Body != nil {
 
 				if snapshot.StatusCode == 404 {
-					log.Info("skip while 404, ", requestUrl, " , ", snapshot.StatusCode)
+					log.Debug("skip while 404, ", requestUrl, " , ", snapshot.StatusCode)
 					context.End("fetch 404")
-					flg <- signal{flag: false, err: errors.New("404 NOT FOUND"), status: model.Task404Ignore}
+					flg <- signal{flag: false, err: errors.New("404 NOT FOUND"), status: model.Task404}
 					return
 				}
 
@@ -127,31 +125,33 @@ func (joint FetchJoint) Process(context *Context) error {
 
 			}
 			log.Debug("exit fetchUrl method:", requestUrl)
-			flg <- signal{flag: true, status: model.TaskFetchSuccess}
+			flg <- signal{flag: true, status: model.TaskSuccess}
 
 		} else {
 
 			code, payload := errors.CodeWithPayload(err)
 
 			if code == errors.URLRedirected {
-				log.Trace(util.ToJson(context, true))
+				if global.Env().IsDebug {
+					log.Debug(util.ToJson(context, true))
+				}
 				task := model.NewTaskSeed(payload.(string), requestUrl, task.Depth, task.Breadth)
 				log.Trace(err)
 				queue.Push(config.CheckChannel, task.MustGetBytes())
-				flg <- signal{flag: false, err: err, status: model.TaskRedirectedIgnore}
+				flg <- signal{flag: false, err: err, status: model.TaskRedirected}
 				return
 			}
 
-			flg <- signal{flag: false, err: err, status: model.TaskFetchFailed}
+			flg <- signal{flag: false, err: err, status: model.TaskFailed}
 		}
 	}()
 
-	//监听通道，由于设有超时，不可能泄露
+	//check timeout
 	select {
 	case <-timer.C:
 		log.Error("fetching url time out, ", requestUrl, ", ", joint.timeout)
 		stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
-		task.Status = model.TaskFetchTimeout
+		task.Status = model.TaskTimeout
 		context.End(fmt.Sprintf("fetching url time out, %s, %s", requestUrl, joint.timeout))
 		return errors.New("fetch url time out")
 	case value := <-flg:

@@ -36,10 +36,16 @@ func (this API) SnapshotAction(w http.ResponseWriter, req *http.Request) {
 
 		compressed := this.GetParameterOrDefault(req, "compressed", "true")
 		var bytes []byte
+		var err error
 		if compressed == "true" {
-			bytes = persist.GetCompressedValue(config.SnapshotBucketKey, []byte(url))
+			bytes, err = persist.GetCompressedValue(config.SnapshotBucketKey, []byte(url))
 		} else {
-			bytes = persist.GetValue(config.SnapshotBucketKey, []byte(url))
+			bytes, err = persist.GetValue(config.SnapshotBucketKey, []byte(url))
+		}
+
+		if err != nil {
+			this.Error(w, err)
+			return
 		}
 
 		if len(bytes) > 0 {
@@ -102,9 +108,14 @@ func (this API) SnapshotGetPayloadAction(w http.ResponseWriter, req *http.Reques
 	compressed := this.GetParameterOrDefault(req, "compressed", "true")
 	var bytes []byte
 	if compressed == "true" {
-		bytes = persist.GetCompressedValue(config.SnapshotBucketKey, []byte(id))
+		bytes, err = persist.GetCompressedValue(config.SnapshotBucketKey, []byte(id))
 	} else {
-		bytes = persist.GetValue(config.SnapshotBucketKey, []byte(id))
+		bytes, err = persist.GetValue(config.SnapshotBucketKey, []byte(id))
+	}
+
+	if err != nil {
+		this.Error(w, err)
+		return
 	}
 
 	if len(bytes) > 0 {

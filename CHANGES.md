@@ -9,6 +9,8 @@
 1. move repo to infinitbyte/gopa, for better collaboration, namespace changed as well  
 2. separate API and UI, listen on different port
 3. add mysql as database option
+3. add elasticsearch as database option
+4. add elasticsearch as blob(snapshot) datastore
 
 ##### features
 1. task fetch and update with stepped delay
@@ -19,6 +21,9 @@
 6. add rules config to url filter 
 7. support elasticsearch as database store
 8. add task_deduplication in the check phrase
+9. add content hash check to detect duplication
+10. refactor webhunter, support basic auth
+11. add pipeline joint to detect the language of webpage
 
 ##### improvement
 1. multi instance support on local machine
@@ -35,12 +40,15 @@
 12. detect dead process, re-place lock file
 13. persist auto-incremented id sequence to disk
 14. simplified joint register
+15. add high performance tolowercase and touppercase func
+16. add queue stats api
 
 ##### bugfix
-1. disable simhash due to poor performance and memory leak
+1. remove simhash due to poor performance and memory leak
 2. fix wrong relative url by using unicode index
 3. fix statsd no data was send out
 4. fix poor string merge performance
+5. fix http goroutine leak
 
 
 #### v0.8

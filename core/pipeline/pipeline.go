@@ -125,6 +125,7 @@ func (para *Parameters) GetIntOrDefault(key ParaKey, defaultV int) int {
 	}
 	return defaultV
 }
+
 func (para *Parameters) GetInt(key ParaKey, defaultV int) (int, bool) {
 	v, ok := para.GetInt64(key, 0)
 	if ok {
@@ -204,7 +205,9 @@ func (para *Parameters) Get(key ParaKey) interface{} {
 	s := string(key)
 	v := para.Data[s]
 	para.l.RUnlock()
-	log.Debug("get context: ", key, ",", v, ",", reflect.TypeOf(v))
+	if global.Env().IsDebug {
+		log.Debug("get context: ", key, ",", v, ",", reflect.TypeOf(v))
+	}
 	return v
 }
 
@@ -291,6 +294,8 @@ type Pipeline struct {
 	joints   []Joint
 	context  *Context
 	endJoint Joint
+
+	currentJointName string
 }
 
 func NewPipeline(name string) *Pipeline {
@@ -334,6 +339,11 @@ func (pipe *Pipeline) End(s Joint) *Pipeline {
 	return pipe
 }
 
+// setCurrentJoint set current joint's name, used for debugging
+func (context *Pipeline) setCurrentJoint(name string) {
+	context.currentJointName = name
+}
+
 func (pipe *Pipeline) Run() *Context {
 
 	stats.Increment(pipe.name+".pipeline", "total")
@@ -345,7 +355,7 @@ func (pipe *Pipeline) Run() *Context {
 				if e, ok := r.(runtime.Error); ok {
 					pipe.context.End(util.GetRuntimeErrorMessage(e))
 				}
-				log.Debug("error in pipeline, ", pipe.name, " ", r)
+				log.Error("error in pipeline, ", pipe.name, ", ", pipe.id, ", ", pipe.currentJointName, ", ", r)
 				stats.Increment(pipe.name+".pipeline", "error")
 			}
 		}
@@ -374,6 +384,7 @@ func (pipe *Pipeline) Run() *Context {
 			stats.Increment(pipe.name+".pipeline", "exit")
 			break
 		}
+		pipe.setCurrentJoint(v.Name())
 		startTime := time.Now()
 		err = v.Process(pipe.context)
 		elapsedTime := time.Now().Sub(startTime)
@@ -381,14 +392,14 @@ func (pipe *Pipeline) Run() *Context {
 		if err != nil {
 			stats.Increment(pipe.name+".pipeline", "error")
 			log.Debug("%s-%s: %v", pipe.name, v.Name(), err)
-			pipe.context.End(err)
-			panic(err)
+			break
 		}
 		log.Trace(pipe.name, ", end joint,", v.Name())
 	}
 
 	return pipe.context
 }
+
 func (pipe *Pipeline) endPipeline() {
 	if pipe.context.IsExit() {
 		log.Debug("exit pipeline, ", pipe.name, ", ", pipe.context.Payload)
@@ -397,13 +408,16 @@ func (pipe *Pipeline) endPipeline() {
 
 	log.Trace("start finish pipeline, ", pipe.name)
 	if pipe.endJoint != nil {
+		pipe.setCurrentJoint(pipe.endJoint.Name())
 		pipe.endJoint.Process(pipe.context)
 	}
 	log.Trace("end finish pipeline, ", pipe.name)
 }
 
 func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
-	log.Tracef("pipeline config: %v", util.ToJson(config, true))
+	if global.Env().IsDebug {
+		log.Debugf("pipeline config: %v", util.ToJson(config, true))
+	}
 
 	pipe := &Pipeline{}
 	pipe.id = util.GetIncrementID("pipe")
@@ -428,7 +442,9 @@ func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
 		pipe.End(output)
 	}
 
-	log.Tracef("get pipeline: %v", util.ToJson(pipe, true))
+	if global.Env().IsDebug {
+		log.Debugf("get pipeline: %v", util.ToJson(pipe, true))
+	}
 
 	return pipe
 }
