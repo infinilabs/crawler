@@ -24,11 +24,18 @@ func (module GeneratorModule) Start(cfg *Config) {
 
 	cfg.Unpack(&generatorConfig)
 
-	for {
-		queue.Push(config.CheckChannel, model.NewTaskSeed(generatorConfig.TaskURL, generatorConfig.TaskURL, 0, 0).MustGetBytes())
-		queue.Push(config.FetchChannel, []byte(generatorConfig.TaskID))
-		time.Sleep(100 * time.Millisecond)
-	}
+	go func() {
+		for {
+			if generatorConfig.TaskURL != "" {
+				queue.Push(config.CheckChannel, model.NewTaskSeed(generatorConfig.TaskURL, generatorConfig.TaskURL, 0, 0).MustGetBytes())
+			}
+
+			if generatorConfig.TaskID != "" {
+				queue.Push(config.FetchChannel, []byte(generatorConfig.TaskID))
+			}
+			time.Sleep(100 * time.Millisecond)
+		}
+	}()
 }
 
 func (module GeneratorModule) Stop() error {
