@@ -56,25 +56,22 @@ cross-build: clean config update-ui
 	GOOS=linux  GOARCH=amd64 $(GOBUILD) -o bin/linux64/gopa
 
 build-win: clean config update-ui
-	GOOS=windows GOARCH=amd64     $(GOBUILD) -o bin/windows64/gopa.exe
-	GOOS=windows GOARCH=386       $(GOBUILD) -o bin/windows32/gopa.exe
+	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64     $(GOBUILD) -o bin/windows64/gopa.exe
+	CC=i686-w64-mingw32-gcc   CXX=i686-w64-mingw32-g++ GOOS=windows GOARCH=386         $(GOBUILD) -o bin/windows32/gopa.exe
 
 build-linux: clean config update-ui
-	GOOS=linux  GOARCH=amd64 CGO_ENABLED=1  go build -o bin/linux64/gopa
-	GOOS=linux  GOARCH=386   CGO_ENABLED=1  go build -o bin/linux32/gopa
+	GOOS=linux  GOARCH=amd64  $(GOBUILD) -o bin/linux64/gopa
+	GOOS=linux  GOARCH=386    $(GOBUILD) -o bin/linux32/gopa
+
+build-darwin: clean config update-ui
+	GOOS=darwin  GOARCH=amd64     $(GOBUILD) -o bin/darwin64/gopa
+	GOOS=darwin  GOARCH=386       $(GOBUILD) -o bin/darwin32/gopa
 
 all: clean config update-ui cross-build
 
 all-platform: clean config update-ui cross-build-all-platform
 
-cross-build-all-platform: clean config build-bsd
-	GOOS=windows GOARCH=amd64     $(GOBUILD) -o bin/windows64/gopa.exe
-	GOOS=windows GOARCH=386       $(GOBUILD) -o bin/windows32/gopa.exe
-	GOOS=darwin  GOARCH=amd64     $(GOBUILD) -o bin/darwin64/gopa
-	GOOS=darwin  GOARCH=386       $(GOBUILD) -o bin/darwin32/gopa
-	GOOS=linux  GOARCH=amd64      $(GOBUILD) -o bin/linux64/gopa
-	GOOS=linux  GOARCH=386        $(GOBUILD) -o bin/linux32/gopa
-	GOOS=linux  GOARCH=arm        $(GOBUILD) -o bin/linux_arm/gopa
+cross-build-all-platform: clean config build-bsd build-linux build-darwin build-win
 
 build-bsd:
 	GOOS=freebsd  GOARCH=amd64    $(GOBUILD) -o bin/freebsd64/gopa
@@ -164,7 +161,6 @@ package-all-platform:
 	cd bin && tar cfz ../bin/darwin32.tar.gz      darwin32/gopa
 	cd bin && tar cfz ../bin/linux64.tar.gz     linux64/gopa
 	cd bin && tar cfz ../bin/linux32.tar.gz     linux32/gopa
-	cd bin && tar cfz ../bin/linux_arm.tar.gz     linux_arm/gopa
 	cd bin && tar cfz ../bin/freebsd64.tar.gz    freebsd64/gopa
 	cd bin && tar cfz ../bin/freebsd32.tar.gz    freebsd32/gopa
 	cd bin && tar cfz ../bin/netbsd64.tar.gz    netbsd64/gopa
