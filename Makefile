@@ -23,13 +23,10 @@ PKGS=$(go list ./... | grep -v /vendor/)
 
 default: build
 
-build: config update-ui update-template-ui
+build: config
 	@echo $(GOPATH)
 	@echo $(NEWGOPATH)
 	$(GOBUILD) -o bin/gopa
-	cp gopa.yml bin/gopa.yml
-	cp -r config bin
-
 
 build-cluster-test: build
 	cd bin && mkdir node1 node2 node3 && cp gopa node1 && cp gopa node2 && cp gopa node3
@@ -51,21 +48,21 @@ tar: build
 
 cross-build: clean config update-ui
 	$(GO) test
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -o bin/windows64/gopa.exe
-	GOOS=darwin  GOARCH=amd64 $(GOBUILD) -o bin/darwin64/gopa
-	GOOS=linux  GOARCH=amd64 $(GOBUILD) -o bin/linux64/gopa
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -o bin/gopa-windows64.exe
+	GOOS=darwin  GOARCH=amd64 $(GOBUILD) -o bin/gopa-darwin64
+	GOOS=linux  GOARCH=amd64 $(GOBUILD) -o bin/gopa-linux64
 
-build-win: clean config update-ui
-	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64     $(GOBUILD) -o bin/windows64/gopa.exe
-	CC=i686-w64-mingw32-gcc   CXX=i686-w64-mingw32-g++ GOOS=windows GOARCH=386         $(GOBUILD) -o bin/windows32/gopa.exe
+build-win:
+	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64     $(GOBUILD) -o bin/gopa-windows64.exe
+	CC=i686-w64-mingw32-gcc   CXX=i686-w64-mingw32-g++ GOOS=windows GOARCH=386         $(GOBUILD) -o bin/gopa-windows32.exe
 
-build-linux: clean config update-ui
-	GOOS=linux  GOARCH=amd64  $(GOBUILD) -o bin/linux64/gopa
-	GOOS=linux  GOARCH=386    $(GOBUILD) -o bin/linux32/gopa
+build-linux:
+	GOOS=linux  GOARCH=amd64  $(GOBUILD) -o bin/gopa-linux64
+	GOOS=linux  GOARCH=386    $(GOBUILD) -o bin/gopa-linux32
 
-build-darwin: clean config update-ui
-	GOOS=darwin  GOARCH=amd64     $(GOBUILD) -o bin/darwin64/gopa
-	GOOS=darwin  GOARCH=386       $(GOBUILD) -o bin/darwin32/gopa
+build-darwin:
+	GOOS=darwin  GOARCH=amd64     $(GOBUILD) -o bin/gopa-darwin64
+	GOOS=darwin  GOARCH=386       $(GOBUILD) -o bin/gopa-darwin32
 
 all: clean config update-ui cross-build
 
@@ -74,12 +71,12 @@ all-platform: clean config update-ui cross-build-all-platform
 cross-build-all-platform: clean config build-bsd build-linux build-darwin build-win
 
 build-bsd:
-	GOOS=freebsd  GOARCH=amd64    $(GOBUILD) -o bin/freebsd64/gopa
-	GOOS=freebsd  GOARCH=386      $(GOBUILD) -o bin/freebsd32/gopa
-	GOOS=netbsd  GOARCH=amd64     $(GOBUILD) -o bin/netbsd64/gopa
-	GOOS=netbsd  GOARCH=386       $(GOBUILD) -o bin/netbsd32/gopa
-	GOOS=openbsd  GOARCH=amd64    $(GOBUILD) -o bin/openbsd64/gopa
-	GOOS=openbsd  GOARCH=386      $(GOBUILD) -o bin/openbsd32/gopa
+	GOOS=freebsd  GOARCH=amd64    $(GOBUILD) -o bin/gopa-freebsd64
+	GOOS=freebsd  GOARCH=386      $(GOBUILD) -o bin/gopa-freebsd32
+	GOOS=netbsd  GOARCH=amd64     $(GOBUILD) -o bin/gopa-netbsd64
+	GOOS=netbsd  GOARCH=386       $(GOBUILD) -o bin/gopa-netbsd32
+	GOOS=openbsd  GOARCH=amd64    $(GOBUILD) -o bin/gopa-openbsd64
+	GOOS=openbsd  GOARCH=386      $(GOBUILD) -o bin/gopa-openbsd32
 
 format:
 	gofmt -l -s -w .
@@ -92,17 +89,17 @@ clean_data:
 clean: clean_data
 	rm -rif bin
 	mkdir bin
-	mkdir bin/windows64
-	mkdir bin/linux64
-	mkdir bin/darwin64
 
 
 update-commit-log:
 	echo -e "package env\nconst lastCommitLog  =\""`git log -1 --pretty=format:"%h, %ad, %an, %s"` "\"\nconst buildDate  =\"`date`\"" > core/env/commit_log.go
 
-config: update-commit-log
+config: update-commit-log update-ui update-template-ui
 	@echo "init config"
 	$(GO) env
+	cp gopa.yml bin/gopa.yml
+	cp -r config bin
+
 
 fetch-depends:
 	@echo "get Dependencies"
@@ -149,24 +146,34 @@ dist-all-platform: all-platform package-all-platform
 
 package:
 	@echo "Packaging"
-	cd bin && tar cfz ../bin/darwin64.tar.gz darwin64
-	cd bin && tar cfz ../bin/linux64.tar.gz linux64
-	cd bin && tar cfz ../bin/windows64.tar.gz windows64
+	cd bin && tar cfz ../bin/darwin64.tar.gz darwin64 config gopa.yml
+	cd bin && tar cfz ../bin/linux64.tar.gz linux64 config gopa.yml
+	cd bin && tar cfz ../bin/windows64.tar.gz windows64 config gopa.yml
 
-package-all-platform:
-	@echo "Packaging"
-	cd bin && tar cfz ../bin/windows64.tar.gz   windows64/gopa.exe
-	cd bin && tar cfz ../bin/windows32.tar.gz   windows32/gopa.exe
-	cd bin && tar cfz ../bin/darwin64.tar.gz      darwin64/gopa
-	cd bin && tar cfz ../bin/darwin32.tar.gz      darwin32/gopa
-	cd bin && tar cfz ../bin/linux64.tar.gz     linux64/gopa
-	cd bin && tar cfz ../bin/linux32.tar.gz     linux32/gopa
-	cd bin && tar cfz ../bin/freebsd64.tar.gz    freebsd64/gopa
-	cd bin && tar cfz ../bin/freebsd32.tar.gz    freebsd32/gopa
-	cd bin && tar cfz ../bin/netbsd64.tar.gz    netbsd64/gopa
-	cd bin && tar cfz ../bin/netbsd32.tar.gz     netbsd32/gopa
-	cd bin && tar cfz ../bin/openbsd64.tar.gz     openbsd64/gopa
-	cd bin && tar cfz ../bin/openbsd32.tar.gz     openbsd32/gopa
+package-all-platform: package-darwin-platform package-linux-platform package-windows-platform
+	@echo "Packaging all"
+	cd bin && tar cfz ../bin/freebsd64.tar.gz     gopa-freebsd64 config gopa.yml
+	cd bin && tar cfz ../bin/freebsd32.tar.gz     gopa-freebsd32 config gopa.yml
+	cd bin && tar cfz ../bin/netbsd64.tar.gz      gopa-netbsd64 config gopa.yml
+	cd bin && tar cfz ../bin/netbsd32.tar.gz      gopa-netbsd32 config gopa.yml
+	cd bin && tar cfz ../bin/openbsd64.tar.gz     gopa-openbsd64 config gopa.yml
+	cd bin && tar cfz ../bin/openbsd32.tar.gz     gopa-openbsd32 config gopa.yml
+
+
+package-darwin-platform:
+	@echo "Packaging Darwin"
+	cd bin && tar cfz ../bin/darwin64.tar.gz      gopa-darwin64 config gopa.yml
+	cd bin && tar cfz ../bin/darwin32.tar.gz      gopa-darwin32 config gopa.yml
+
+package-linux-platform:
+	@echo "Packaging Linux"
+	cd bin && tar cfz ../bin/linux64.tar.gz     gopa-linux64 config gopa.yml
+	cd bin && tar cfz ../bin/linux32.tar.gz     gopa-linux32 config gopa.yml
+
+package-windows-platform:
+	@echo "Packaging Windows"
+	cd bin && tar cfz ../bin/windows64.tar.gz   gopa-windows64.exe config gopa.yml
+	cd bin && tar cfz ../bin/windows32.tar.gz   gopa-windows32.exe config gopa.yml
 
 test:
 	go get -u github.com/kardianos/govendor
