@@ -60,8 +60,8 @@ build-win: clean config update-ui
 	GOOS=windows GOARCH=386       $(GOBUILD) -o bin/windows32/gopa.exe
 
 build-linux: clean config update-ui
-	GOOS=linux  GOARCH=amd64 CGO_ENABLED=1  go build -o bin/linux64/gopa --tags "libsqlite3 linux"
-	GOOS=linux  GOARCH=386   CGO_ENABLED=1  go build -o bin/linux32/gopa --tags "libsqlite3 linux"
+	GOOS=linux  GOARCH=amd64 CGO_ENABLED=1  go build -o bin/linux64/gopa
+	GOOS=linux  GOARCH=386   CGO_ENABLED=1  go build -o bin/linux32/gopa
 
 all: clean config update-ui cross-build
 
