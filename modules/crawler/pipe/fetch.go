@@ -19,6 +19,7 @@ package pipe
 import (
 	"fmt"
 	log "github.com/cihub/seelog"
+	"strings"
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/model"
@@ -82,7 +83,8 @@ func (joint FetchJoint) Process(context *Context) error {
 
 		if err == nil && result != nil {
 
-			task.Url = result.Url //update url, in case catch redirects
+			//update url, in case catch redirects
+			task.Url = result.Url
 			task.Host = result.Host
 
 			snapshot.Payload = result.Body
@@ -108,15 +110,19 @@ func (joint FetchJoint) Process(context *Context) error {
 							if s != "" {
 								snapshot.ContentType = s
 							} else {
-								n := 512 // Only the first 512 bytes are used to sniff the content type.
+								// only use the first 512 bytes to detect the content type.
+								n := 512
 								buffer := make([]byte, n)
 								if len(snapshot.Payload) < n {
 									n = len(snapshot.Payload)
 								}
-								// Always returns a valid content-type and "application/octet-stream" if no others seemed to match.
+								// always returns a valid content-type and "application/octet-stream" if no others seemed to match.
 								contentType := http.DetectContentType(buffer[:n])
 								snapshot.ContentType = contentType
 							}
+							//normalize content-type
+							snapshot.ContentType = strings.ToLower(snapshot.ContentType)
+							snapshot.ContentType = strings.TrimSpace(snapshot.ContentType)
 						}
 
 					}
