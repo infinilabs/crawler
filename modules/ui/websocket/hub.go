@@ -6,7 +6,6 @@ package websocket
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/infinitbyte/gopa/core/env"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/logger"
@@ -125,6 +124,5 @@ func BroadcastMessage(msg string) {
 		stats.Increment("websocket", "sended")
 	default:
 		stats.Increment("websocket", "dropped")
-		fmt.Println("websocket broadcast too busy, msg dropped")
 	}
 }
