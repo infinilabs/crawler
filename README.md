@@ -35,11 +35,27 @@ After download/build the binary file, run `./gopa` to start the Gopa
 
 Run `./gopa -h` to get the full list of command line options
 
-* -log option : logging level,can be set to `trace`,`debug`,`info`,`warn`,`error` ,default is `info`
-* -daemon option : run in background as daemon
-* -pprof option : enable and setup pprof/expvar service, eg: localhost:6060 , the endpoint will be: http://localhost:6060/debug/pprof/ and http://localhost:6060/debug/vars
-* -cpuprofile option : write cpu profile to this file
-* -memprofile option : write memory profile to this file
+```
+Usage of ./bin/gopa:
+  -config string
+        the location of config file, default: gopa.yml (default "gopa.yml")
+  -cpuprofile string
+        write cpu profile to this file
+  -daemon
+        run in background as daemon
+  -debug
+        enable debug
+  -log string
+        the log level,options:trace,debug,info,warn,error, default: info (default "info")
+  -log_path string
+        the log path, default: log (default "log")
+  -memprofile string
+        write memory profile to this file
+  -pidfile string
+        pidfile path (only for daemon)
+  -pprof string
+        enable and setup pprof/expvar service, eg: localhost:6060 , the endpoint will be: http://localhost:6060/debug/pprof/ and http://localhost:6060/debug/vars
+```
 
 
 ## Stop
@@ -55,7 +71,19 @@ If you are running `Gopa` as daemon, you may stop it like this:
 
 ## UI
 
-Visit `http://127.0.0.1:9001/` for more details.
+* Search Console `http://127.0.0.1:9001/`
+* Admin Console  `http://127.0.0.1:9001/admin/`
+
+## API
+
+* TBD
+
+## Contribution
+
+You are sincerely and warmly welcomed to play with this project,
+from UI style to core features,
+or just a piece of document,
+welcome! let's make it better.
 
 
 License
