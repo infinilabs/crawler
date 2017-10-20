@@ -14,7 +14,7 @@ func Index(w io.Writer) error {
 	_, _ = io.WriteString(w, "\n\n")
 	_, _ = io.WriteString(w, "\n\n")
 	common.Head(w, "Dashboard", "")
-	_, _ = io.WriteString(w, "\n<link rel=\"stylesheet\" href=\"/static/assets/css/tasks.css\" />\n<script src=\"/static/assets/js/jquery.sparkline.min.js\"></script>\n<script src=\"/static/assets/js/jquery.timeago.js\"></script>\n<script src=\"/static/assets/js/page/tasks.js\"></script>\n\n")
+	_, _ = io.WriteString(w, "\n<link rel=\"stylesheet\" href=\"/static/assets/css/tasks.css\" />\n<script src=\"/static/assets/js/jquery.sparkline.min.js\"></script>\n<script src=\"/static/assets/js/jquery.timeago.js\"></script>\n<script src=\"/static/assets/js/page/tasks.js\"></script>\n\n<META HTTP-EQUIV=\"refresh\" CONTENT=\"0;URL=/admin/console/\">\n\n")
 	common.Body(w)
 	_, _ = io.WriteString(w, "\n")
 	common.Nav(w, "Dashboard")

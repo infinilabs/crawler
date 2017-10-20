@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"net/url"
 	"runtime"
 	"strconv"
 	. "strings"
@@ -172,4 +173,16 @@ func XSSHandle(src string) string {
 	src = Replace(src, ">", "&lt; ", -1)
 	src = Replace(src, ">", "&gt; ", -1)
 	return src
+}
+
+func UrlEncode(str string) string {
+	return url.QueryEscape(str)
+}
+
+func UrlDecode(str string) string {
+	out, err := url.QueryUnescape(str)
+	if err != nil {
+		panic(err)
+	}
+	return out
 }

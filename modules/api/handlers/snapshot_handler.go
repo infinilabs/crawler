@@ -99,12 +99,7 @@ func (this API) SnapshotGetAction(w http.ResponseWriter, req *http.Request, ps h
 func (this API) SnapshotGetPayloadAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
 
-	snapshot, err := model.GetSnapshot(id)
-	if err != nil {
-		this.Error(w, err)
-		return
-	}
-
+	var err error
 	compressed := this.GetParameterOrDefault(req, "compressed", "true")
 	var bytes []byte
 	if compressed == "true" {
@@ -120,13 +115,6 @@ func (this API) SnapshotGetPayloadAction(w http.ResponseWriter, req *http.Reques
 
 	if len(bytes) > 0 {
 		this.Write(w, bytes)
-
-		//add link rewrite
-		if snapshot.ContentType == "text/html" {
-			this.Write(w, []byte("<script src=\"/static/assets/js/snapshot_footprint.js?v=1\"></script> "))
-
-		}
-		return
 	}
 
 	this.Error404(w)

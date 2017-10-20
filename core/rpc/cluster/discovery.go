@@ -14,21 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package model
+package cluster
 
-// IndexDocument used to construct indexing document
-type IndexDocument struct {
-	Index     string                   `json:"_index,omitempty"`
-	Id        string                   `json:"_id,omitempty"`
-	Source    map[string]interface{}   `json:"_source,omitempty"`
-	Highlight map[string][]interface{} `json:"highlight,omitempty"`
+func Join() {
+
 }
 
-type Bucket struct {
-	Key      string `json:"key,omitempty"`
-	DocCount int    `json:"doc_count,omitempty"`
-}
+func Discovery() {
 
-type Aggregation struct {
-	Buckets []Bucket `json:"buckets,omitempty"`
 }

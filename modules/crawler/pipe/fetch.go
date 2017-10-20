@@ -19,7 +19,6 @@ package pipe
 import (
 	"fmt"
 	log "github.com/cihub/seelog"
-	"strings"
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/model"
@@ -29,6 +28,7 @@ import (
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
 	"net/http"
+	"strings"
 	"time"
 )
 

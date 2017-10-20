@@ -37,21 +37,7 @@ function formatBytes(bytes,decimals) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
-function loadDomain(){
-    $("#domain-alert").text("Loading");
-    //load domain data
-    $.ajax({
-        url: '/domain?from=0&size=40',
-        type: "get",
-        dataType: "json",
-        success: function(data, textStatus, jqXHR) {
-            $("#domain-alert").text("Total: "+data.total);
-            drawDomainTable(data.result);
-        }
-    });
-}
 
-loadDomain();
 
 $('[data-uk-pagination]').on('select.uk.pagination', function(e, pageIndex){
     alert('You have selected page: ' + (pageIndex+1));

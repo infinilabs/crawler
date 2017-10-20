@@ -33,18 +33,20 @@ type HtmlToTextJoint struct {
 
 //merge whitespace and \n
 const mergeWhitespace ParaKey = "merge_whitespace"
+const removeNonScript ParaKey = "remove_nonscript"
 
 func (joint HtmlToTextJoint) Name() string {
 	return "html2text"
 }
 
 type cleanRule struct {
-	l                sync.RWMutex
-	replaceRules     []*regexp.Regexp
-	inited           bool
-	removeTagsRule   *regexp.Regexp
-	removeBreaksRule *regexp.Regexp
-	lowercase        bool
+	l                   sync.RWMutex
+	replaceRules        []*regexp.Regexp
+	inited              bool
+	removeTagsRule      *regexp.Regexp
+	removeBreaksRule    *regexp.Regexp
+	removeNonScriptRule *regexp.Regexp
+	lowercase           bool
 }
 
 var rules = cleanRule{replaceRules: []*regexp.Regexp{}}
@@ -72,11 +74,11 @@ func initRules() {
 	//remove comments
 	rules.replaceRules = append(rules.replaceRules, getRule(`<!--[\S\s]*?-->`))
 
-	//remove SCRIPT,NOSCRIPT
+	//remove SCRIPT
 	rules.replaceRules = append(rules.replaceRules, getRule(`\<script[\S\s]+?.*?\</script\>`))
 
-	//TODO configurable
-	//rules.replaceRules = append(rules.replaceRules, getRule(`\<noscript[\S\s]+?\</noscript\>`))
+	//remove NOSCRIPT
+	rules.removeNonScriptRule = getRule(`\<noscript[\S\s]+?\</noscript\>`)
 
 	//remove iframe,frame
 	rules.replaceRules = append(rules.replaceRules, getRule(`\<iframe[\S\s]+?\</iframe\>`))
@@ -176,6 +178,10 @@ func (joint HtmlToTextJoint) Process(context *Context) error {
 	}
 
 	body := replaceAll(snapshot.Payload)
+
+	if joint.GetBool(replaceNoscript, false) {
+		body = rules.removeNonScriptRule.ReplaceAll(body, []byte(""))
+	}
 
 	src := string(body)
 

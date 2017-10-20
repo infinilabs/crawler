@@ -24,6 +24,7 @@
 9. add content hash check to detect duplication
 10. refactor webhunter, support basic auth
 11. add pipeline joint to detect the language of webpage
+12. add search ui
 
 ##### improvement
 1. multi instance support on local machine

@@ -63,6 +63,7 @@ type SearchResponse struct {
 		MaxScore float32               `json:"max_score"`
 		Hits     []model.IndexDocument `json:"hits,omitempty"`
 	} `json:"hits"`
+	Aggregations map[string]model.Aggregation `json:"aggregations,omitempty"`
 }
 
 // RangeQuery is used to find value in range
@@ -100,6 +101,28 @@ func (query *RangeQuery) Lte(field string, value interface{}) {
 
 type MatchQuery struct {
 	Match map[string]interface{} `json:"match,omitempty"`
+}
+
+type QueryStringQuery struct {
+	Query map[string]interface{} `json:"query_string,omitempty"`
+}
+
+func NewQueryString(q string) *QueryStringQuery {
+	query := QueryStringQuery{}
+	query.Query = map[string]interface{}{}
+	return &query
+}
+
+func (query *QueryStringQuery) QueryString(q string) {
+	query.Query["query"] = q
+}
+
+func (query *QueryStringQuery) DefaultOperator(op string) {
+	query.Query["default_operator"] = op
+}
+
+func (query *QueryStringQuery) Fields(fields ...string) {
+	query.Query["default_operator"] = fields
 }
 
 // Init match query's condition
@@ -281,14 +304,27 @@ func (c *ElasticsearchClient) Search(indexName string, query *SearchRequest) (*S
 		return nil, err
 	}
 
-	req := util.NewPostRequest(url, js)
+	return c.SearchWithRawQueryDSL(indexName, js)
+}
+
+func (c *ElasticsearchClient) SearchWithRawQueryDSL(indexName string, queryDSL []byte) (*SearchResponse, error) {
+
+	if c.Config.IndexPrefix != "" {
+		indexName = c.Config.IndexPrefix + indexName
+	}
+
+	url := c.Config.Endpoint + "/" + indexName + "/_search"
+
+	log.Debug("search: ", url)
+
+	req := util.NewPostRequest(url, queryDSL)
 	req.SetBasicAuth(c.Config.Username, c.Config.Password)
 	response, err := util.ExecuteRequest(req)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Trace("search response: ", string(js), ",", string(response.Body))
+	log.Trace("search response: ", string(queryDSL), ",", string(response.Body))
 
 	esResp := &SearchResponse{}
 	err = json.Unmarshal(response.Body, esResp)

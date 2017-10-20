@@ -2,6 +2,7 @@
 
 <%% import "github.com/infinitbyte/gopa/modules/ui/admin/common" %%>
 <%% import "github.com/infinitbyte/gopa/core/model" %%>
+<%% import api "github.com/infinitbyte/gopa/core/http" %%>
 <%% import "net/http" %%>
 
 <% common.Head(w, "Tasks","") %>
@@ -13,7 +14,10 @@
 <% common.Body(w) %>
 <% common.Nav(w,"Tasks") %>
 
-
+<%
+paras:=map[string]interface{}{}
+paras["domain"]=domain
+%>
 
 <div class="tm-middle">
 
@@ -81,7 +85,7 @@
                     </tbody>
                 </table>
 
-                    <%== common.GetPagination(domain,from,size, taskCount, "") %>
+                    <%== api.GetPagination(from,size, taskCount, "", paras) %>
 
                 </div>
             </div>

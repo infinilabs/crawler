@@ -19,7 +19,6 @@ package ui
 import (
 	uis "github.com/infinitbyte/gopa/core/http"
 	"github.com/infinitbyte/gopa/modules/ui/admin"
-	"github.com/infinitbyte/gopa/modules/ui/user"
 	"github.com/infinitbyte/gopa/modules/ui/websocket"
 	"github.com/infinitbyte/gopa/static"
 	"net/http"
@@ -167,10 +166,6 @@ func (module UIModule) Start(cfg *Config) {
 
 	//init admin ui //TODO ui module enable/disable config
 	admin.InitUI()
-
-	//init search ui
-	user.InitUI()
-
 	//register websocket logger
 	logger.RegisterWebsocketHandler(LoggerReceiver)
 
