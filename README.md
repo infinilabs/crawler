@@ -15,6 +15,12 @@ GOPA, A Spider Written in Go.
 * Easy to use, no programming or scripts ability needed, out of box features
 
 
+## Screenshoot
+
+<img width="800" alt="What a Spider! GOPA Spider!" src="https://raw.githubusercontent.com/infinitbyte/gopa/master/docs/assets/img/screenshot/2017.10.20_v0.9.gif">
+
+
+
 ## Build
 
 Mac/Linux: Run `make build` to build the Gopa
