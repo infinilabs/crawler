@@ -17,7 +17,7 @@ limitations under the License.
 package env
 
 // VERSION is the version of this gopa
-const VERSION = "0.9.0_SNAPSHOT"
+const VERSION = "0.10.0_SNAPSHOT"
 
 // GetWelcomeMessage print welcome message
 func GetWelcomeMessage() string {
