@@ -36,10 +36,10 @@ func TestPipelineConfig(t *testing.T) {
 	config := PipelineConfig{}
 	config.Name = "test_pipe_line"
 
-	config.Context = &Context{}
-	config.Context.Init()
-	config.Context.Data["url"] = "gogol.com"
-	config.Context.Data["webpage"] = "hello world gogo "
+	context := &Context{}
+	context.Init()
+	context.Data["url"] = "gogol.com"
+	context.Data["webpage"] = "hello world gogo "
 
 	Register(crawlerJoint{})
 	Register(parserJoint{})
@@ -56,12 +56,11 @@ func TestPipelineConfig(t *testing.T) {
 
 	//fmt.Println(util.ToJson(config,true))
 
-	pipe := NewPipelineFromConfig(&config)
-	context := pipe.Run()
+	pipe := NewPipelineFromConfig(&config, context)
+	context = pipe.Run()
 
 	fmt.Println("pipeline context")
 	fmt.Println(context)
-	fmt.Println(config.Context)
 	fmt.Println(context.Data["received_url"])
 
 	assert.Equal(t, "http://baidu12.com", context.Data["received_url"])

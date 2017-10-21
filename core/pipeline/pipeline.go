@@ -414,7 +414,7 @@ func (pipe *Pipeline) endPipeline() {
 	log.Trace("end finish pipeline, ", pipe.name)
 }
 
-func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
+func NewPipelineFromConfig(config *PipelineConfig, context *Context) *Pipeline {
 	if global.Env().IsDebug {
 		log.Debugf("pipeline config: %v", util.ToJson(config, true))
 	}
@@ -423,7 +423,7 @@ func NewPipelineFromConfig(config *PipelineConfig) *Pipeline {
 	pipe.id = util.GetIncrementID("pipe")
 	pipe.name = strings.TrimSpace(config.Name)
 
-	pipe.Context(config.Context)
+	pipe.Context(context)
 
 	if config.StartJoint != nil && config.StartJoint.Enabled {
 		input := GetJointInstance(config.StartJoint)

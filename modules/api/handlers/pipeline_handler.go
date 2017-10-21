@@ -49,7 +49,9 @@ func (this API) handlePostPipelineJointsRequest(w http.ResponseWriter, req *http
 		return
 	}
 	//TODO save for later use
-	pipe := NewPipelineFromConfig(&config)
+	context := &Context{}
+	context.Init()
+	pipe := NewPipelineFromConfig(&config, context)
 	pipe.Run()
 
 	this.WriteJSON(w, config, http.StatusOK)

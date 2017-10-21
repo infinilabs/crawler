@@ -206,8 +206,7 @@ func (module CheckerModule) runPipe(debug bool, task *model.Task) *Pipeline {
 		panic("default pipeline config can't be null")
 	}
 
-	pipeline = NewPipelineFromConfig(module.config.DefaultPipelineConfig)
-	pipeline.Context(context)
+	pipeline = NewPipelineFromConfig(module.config.DefaultPipelineConfig, context)
 	pipeline.Run()
 
 	return pipeline

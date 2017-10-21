@@ -26,7 +26,6 @@ type JointConfig struct {
 // PipelineConfig config for each pipeline, a pipeline may have more than one joints
 type PipelineConfig struct {
 	Name          string         `json:"name" config:"name"`
-	Context       *Context       `json:"context" config:"context"`
 	StartJoint    *JointConfig   `json:"start" config:"start"`
 	ProcessJoints []*JointConfig `json:"process" config:"process"`
 	EndJoint      *JointConfig   `json:"end" config:"end"`

@@ -202,8 +202,7 @@ func (module CrawlerModule) execute(taskId string) {
 		panic("default pipeline config can't be null")
 	}
 
-	pipeline = NewPipelineFromConfig(module.config.DefaultPipelineConfig)
-	pipeline.Context(context)
+	pipeline = NewPipelineFromConfig(module.config.DefaultPipelineConfig, context)
 	pipeline.Run()
 
 	if module.config.FetchThresholdInMs > 0 {
