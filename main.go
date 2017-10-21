@@ -50,7 +50,7 @@ func onStart() {
 	startTime = time.Now()
 }
 
-func onShutdown() {
+func onShutdown(isDaemon bool) {
 	if environment.IsDebug {
 		fmt.Println(string(*stats.StatsAll()))
 	}
@@ -58,6 +58,10 @@ func onShutdown() {
 	//force flush all logs
 	log.Flush()
 
+	if isDaemon {
+		fmt.Println("[gopa] started.")
+		return
+	}
 	fmt.Println("                         |    |                ")
 	fmt.Println("   _` |   _ \\   _ \\   _` |     _ \\  |  |   -_) ")
 	fmt.Println(" \\__, | \\___/ \\___/ \\__,_|   _.__/ \\_, | \\___| ")
@@ -96,17 +100,17 @@ func main() {
 
 	onStart()
 
-	var logLevel = flag.String("log", "info", "the log level,options:trace,debug,info,warn,error, default: info")
-	var configFile = flag.String("config", "gopa.yml", "the location of config file, default: gopa.yml")
+	var logLevel = flag.String("log", "info", "the log level,options:trace,debug,info,warn,error")
+	var configFile = flag.String("config", "gopa.yml", "the location of config file")
 	var isDaemon = flag.Bool("daemon", false, "run in background as daemon")
 	var pidfile = flag.String("pidfile", "", "pidfile path (only for daemon)")
 
 	var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to this file")
 	var memprofile = flag.String("memprofile", "", "write memory profile to this file")
 	var httpprof = flag.String("pprof", "", "enable and setup pprof/expvar service, eg: localhost:6060 , the endpoint will be: http://localhost:6060/debug/pprof/ and http://localhost:6060/debug/vars")
-	var isDebug = flag.Bool("debug", false, "enable debug")
+	var isDebug = flag.Bool("debug", false, "run in debug mode, wi")
 
-	var logDir = flag.String("log_path", "log", "the log path, default: log")
+	var logDir = flag.String("log_path", "log", "the log path")
 
 	flag.Parse()
 	logger.SetLogging(env.EmptyEnv(), *logLevel, *logDir)
@@ -139,7 +143,7 @@ func main() {
 		logger.Flush()
 
 		//print goodbye message
-		onShutdown()
+		onShutdown(*isDaemon)
 	}()
 
 	//profile options
@@ -225,7 +229,7 @@ func main() {
 		s := <-sigc
 		if s == os.Interrupt || s.(os.Signal) == syscall.SIGINT || s.(os.Signal) == syscall.SIGTERM ||
 			s.(os.Signal) == syscall.SIGKILL || s.(os.Signal) == syscall.SIGQUIT {
-			fmt.Printf("\n[gopa] got signal:%s ,start shutting down\n", s.String())
+			fmt.Printf("\n[gopa] got signal:%s, start shutting down\n", s.String())
 			//wait workers to exit
 			module.Stop()
 			finalQuitSignal <- true
