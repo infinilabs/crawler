@@ -284,14 +284,6 @@ func (c *ElasticsearchClient) Count(indexName string) (*CountResponse, error) {
 // Search used to execute a search query
 func (c *ElasticsearchClient) Search(indexName string, query *SearchRequest) (*SearchResponse, error) {
 
-	if c.Config.IndexPrefix != "" {
-		indexName = c.Config.IndexPrefix + indexName
-	}
-
-	url := c.Config.Endpoint + "/" + indexName + "/_search"
-
-	log.Debug("search: ", url)
-
 	if query.From < 0 {
 		query.From = 0
 	}
