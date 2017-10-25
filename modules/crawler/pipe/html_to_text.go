@@ -179,7 +179,7 @@ func (joint HtmlToTextJoint) Process(context *Context) error {
 
 	body := replaceAll(snapshot.Payload)
 
-	if joint.GetBool(replaceNoscript, false) {
+	if joint.GetBool(removeNonScript, true) {
 		body = rules.removeNonScriptRule.ReplaceAll(body, []byte(""))
 	}
 
