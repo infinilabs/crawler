@@ -46,7 +46,7 @@ First of all, get it, two opinions: download the pre-built package or compile it
 
 #### Download Pre Built Package
 
-Go to [Release](https://github.com/infinitbyte/gopa/releases) page, and choose the right package for your platform.
+Go to [Release](https://github.com/infinitbyte/gopa/releases) or [Snapshot](https://github.com/infinitbyte/gopa-snapshot/releases) page, download the right package for your platform.
 
 _Note: Darwin is for Mac_
 
