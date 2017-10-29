@@ -89,7 +89,7 @@ func (module IndexModule) Start(cfg *Config) {
 					panic(err)
 				}
 
-				client.Index(doc.Index, doc.Id, doc.Source)
+				client.Index(doc.Index, doc.ID, doc.Source)
 			}
 
 		}

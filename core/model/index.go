@@ -19,7 +19,7 @@ package model
 // IndexDocument used to construct indexing document
 type IndexDocument struct {
 	Index     string                   `json:"_index,omitempty"`
-	Id        string                   `json:"_id,omitempty"`
+	ID        string                   `json:"_id,omitempty"`
 	Source    map[string]interface{}   `json:"_source,omitempty"`
 	Highlight map[string][]interface{} `json:"highlight,omitempty"`
 }

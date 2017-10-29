@@ -57,7 +57,7 @@ func (joint IndexJoint) Process(c *api.Context) error {
 
 	docs := model.IndexDocument{
 		Index:  "index",
-		Id:     id,
+		ID:     id,
 		Source: data,
 	}
 
