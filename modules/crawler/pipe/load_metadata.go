@@ -16,9 +16,7 @@ limitations under the License.
 
 package pipe
 
-import (
-	api "github.com/infinitbyte/gopa/core/pipeline"
-)
+import "github.com/infinitbyte/gopa/core/model"
 
 //LoadMetadataJoint load metadata from db
 type LoadMetadataJoint struct {
@@ -30,7 +28,7 @@ func (joint LoadMetadataJoint) Name() string {
 }
 
 // Process load metadata
-func (joint LoadMetadataJoint) Process(context *api.Context) error {
+func (joint LoadMetadataJoint) Process(context *model.Context) error {
 
 	return nil
 }

@@ -21,7 +21,6 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/model"
-	api "github.com/infinitbyte/gopa/core/pipeline"
 )
 
 // TaskDeduplicationJoint is used to find whether the task already in the database
@@ -34,7 +33,7 @@ func (joint TaskDeduplicationJoint) Name() string {
 }
 
 // Process deduplication
-func (joint TaskDeduplicationJoint) Process(c *api.Context) error {
+func (joint TaskDeduplicationJoint) Process(c *model.Context) error {
 	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 
 	log.Trace("check duplication, ", task.Url)

@@ -22,24 +22,23 @@ import (
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/persist"
-	. "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/stats"
 	"github.com/infinitbyte/gopa/modules/config"
 )
 
 type SaveSnapshotToDBJoint struct {
-	Parameters
+	model.Parameters
 }
 
-const compressEnabled ParaKey = "compress_enabled"
-const bucket ParaKey = "bucket"
-const maxRevision ParaKey = "max_revision"
+const compressEnabled model.ParaKey = "compress_enabled"
+const bucket model.ParaKey = "bucket"
+const maxRevision model.ParaKey = "max_revision"
 
 func (this SaveSnapshotToDBJoint) Name() string {
 	return "save_snapshot_db"
 }
 
-func (this SaveSnapshotToDBJoint) Process(c *Context) error {
+func (this SaveSnapshotToDBJoint) Process(c *model.Context) error {
 	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 

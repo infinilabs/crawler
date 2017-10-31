@@ -20,17 +20,16 @@ import (
 	"fmt"
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/model"
-	. "github.com/infinitbyte/gopa/core/pipeline"
 	"strings"
 	"time"
 )
 
 type UpdateCheckTimeJoint struct {
-	Parameters
+	model.Parameters
 }
 
-const decelerateSteps ParaKey = "decelerate_steps"
-const accelerateSteps ParaKey = "accelerate_steps"
+const decelerateSteps model.ParaKey = "decelerate_steps"
+const accelerateSteps model.ParaKey = "accelerate_steps"
 
 func (this UpdateCheckTimeJoint) Name() string {
 	return "update_check_time"
@@ -38,7 +37,7 @@ func (this UpdateCheckTimeJoint) Name() string {
 
 var oneSecond, _ = time.ParseDuration("1s")
 
-func (this UpdateCheckTimeJoint) Process(c *Context) error {
+func (this UpdateCheckTimeJoint) Process(c *model.Context) error {
 	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 

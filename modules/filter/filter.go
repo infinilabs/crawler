@@ -5,10 +5,8 @@ import (
 	. "github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/filter"
 	. "github.com/infinitbyte/gopa/core/filter"
-	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/modules/config"
 	"github.com/infinitbyte/gopa/modules/filter/impl"
-	"path"
 	"sync"
 )
 
@@ -48,21 +46,15 @@ func (module FilterModule) CheckThenAdd(bucket Key, key []byte) (b bool, err err
 }
 
 func initFilter(key Key) {
-	f := impl.CuckooFilterImpl{}
-	file := path.Join(global.Env().SystemConfig.GetWorkingDir(), "filters", string(key))
-	err := f.Open(file)
-	if err != nil {
-		panic(err)
-	}
-
+	f := impl.BoltdbImpl{FilterBucket: string(key)}
 	filters[key] = &f
 }
 
-var filters map[Key]*impl.CuckooFilterImpl
+var filters map[Key]*impl.BoltdbImpl
 
 func (module FilterModule) Start(cfg *Config) {
 
-	filters = map[Key]*impl.CuckooFilterImpl{}
+	filters = map[Key]*impl.BoltdbImpl{}
 
 	//TODO dynamic config
 	initFilter(config.DispatchFilter)

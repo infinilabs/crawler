@@ -20,7 +20,7 @@ import (
 	log "github.com/cihub/seelog"
 	. "github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/global"
-	. "github.com/infinitbyte/gopa/core/pipeline"
+	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/queue"
 	"github.com/infinitbyte/gopa/core/stats"
 	"github.com/infinitbyte/gopa/core/util"
@@ -37,17 +37,17 @@ var crawlerStarted bool
 
 // GetDefaultTaskConfig return a default TaskConfig
 func GetDefaultTaskConfig() TaskConfig {
-	config := PipelineConfig{}
+	config := model.PipelineConfig{}
 	config.Name = "crawler"
-	start := JointConfig{}
+	start := model.JointConfig{}
 	start.Enabled = true
 	start.JointName = "init_task"
 	config.StartJoint = &start
-	save := JointConfig{}
+	save := model.JointConfig{}
 	save.Enabled = true
 	save.JointName = "save_task"
 
-	urlNormalization := JointConfig{}
+	urlNormalization := model.JointConfig{}
 	urlNormalization.Enabled = true
 	urlNormalization.JointName = "url_normalization"
 	urlNormalization.Parameters = util.MapStr{
@@ -55,40 +55,40 @@ func GetDefaultTaskConfig() TaskConfig {
 		"follow_sub_domain": true,
 	}
 
-	fetchJoint := JointConfig{}
+	fetchJoint := model.JointConfig{}
 	fetchJoint.Enabled = true
 	fetchJoint.JointName = "fetch"
 
-	parse := JointConfig{}
+	parse := model.JointConfig{}
 	parse.Enabled = true
 	parse.JointName = "parse"
 
-	html2text := JointConfig{}
+	html2text := model.JointConfig{}
 	html2text.Enabled = true
 	html2text.JointName = "html2text"
 
-	hash := JointConfig{}
+	hash := model.JointConfig{}
 	hash.Enabled = true
 	hash.JointName = "hash"
 
-	updateCheckTime := JointConfig{}
+	updateCheckTime := model.JointConfig{}
 	updateCheckTime.Enabled = true
 	updateCheckTime.JointName = "update_check_time"
 
-	contentDeduplication := JointConfig{}
+	contentDeduplication := model.JointConfig{}
 	contentDeduplication.Enabled = true
 	contentDeduplication.JointName = "content_deduplication"
 
-	saveSnapshot := JointConfig{}
+	saveSnapshot := model.JointConfig{}
 	saveSnapshot.Enabled = true
 	saveSnapshot.JointName = "save_snapshot_db"
 
-	task_deduplication := JointConfig{}
+	task_deduplication := model.JointConfig{}
 	task_deduplication.Enabled = true
 	task_deduplication.JointName = "task_deduplication"
 
 	config.EndJoint = &save
-	config.ProcessJoints = []*JointConfig{
+	config.ProcessJoints = []*model.JointConfig{
 		&urlNormalization,
 		&fetchJoint,
 		&parse,
@@ -125,6 +125,10 @@ func (module CrawlerModule) Start(cfg *Config) {
 	if crawlerStarted {
 		log.Error("crawler already started, please stop it first.")
 		return
+	}
+
+	if module.config.DefaultPipelineConfig == nil {
+		panic("default pipeline config can't be null")
 	}
 
 	numGoRoutine := config.MaxGoRoutine
@@ -166,24 +170,35 @@ func (module CrawlerModule) Stop() error {
 
 func (module CrawlerModule) runPipeline(signalC *chan bool, shard int) {
 
-	var taskID []byte
+	var taskInfo []byte
 	for {
 		select {
 		case <-*signalC:
 			log.Trace("crawler exit, shard:", shard)
 			return
-		case taskID = <-queue.ReadChan(config.FetchChannel):
+		case taskInfo = <-queue.ReadChan(config.FetchChannel):
 			stats.Increment("queue."+string(config.FetchChannel), "pop")
-			id := string(taskID)
-			log.Trace("shard:", shard, ",task received:", id)
-			module.execute(id)
-			log.Trace("shard:", shard, ",task finished:", id)
+
+			taskId, host, url := model.DecodeFetchTask(taskInfo)
+
+			pipelineConfig, err := model.GetPipelineConfig(taskId, host, url)
+			if err != nil {
+				panic(err)
+			}
+
+			if pipelineConfig == nil {
+				pipelineConfig = module.config.DefaultPipelineConfig
+			}
+
+			log.Trace("shard:", shard, ",task received:", taskId)
+			module.execute(taskId, pipelineConfig)
+			log.Trace("shard:", shard, ",task finished:", taskId)
 		}
 	}
 }
 
-func (module CrawlerModule) execute(taskId string) {
-	var pipeline *Pipeline
+func (module CrawlerModule) execute(taskId string, pipelineConfig *model.PipelineConfig) {
+	var pipeline *model.Pipeline
 	defer func() {
 		if !global.Env().IsDebug {
 			if r := recover(); r != nil {
@@ -195,14 +210,10 @@ func (module CrawlerModule) execute(taskId string) {
 		}
 	}()
 
-	context := &Context{Phrase: config.PhraseCrawler}
+	context := &model.Context{Phrase: config.PhraseCrawler}
 	context.Set(CONTEXT_TASK_ID, taskId)
 
-	if module.config.DefaultPipelineConfig == nil {
-		panic("default pipeline config can't be null")
-	}
-
-	pipeline = NewPipelineFromConfig(module.config.DefaultPipelineConfig, context)
+	pipeline = model.NewPipelineFromConfig(pipelineConfig, context)
 	pipeline.Run()
 
 	if module.config.FetchThresholdInMs > 0 {

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package pipeline
+package model
 
 // JointConfig configs for each joint
 type JointConfig struct {
@@ -25,8 +25,14 @@ type JointConfig struct {
 
 // PipelineConfig config for each pipeline, a pipeline may have more than one joints
 type PipelineConfig struct {
+	ID            string         `gorm:"not null;unique;primary_key" json:"id" index:"id"`
 	Name          string         `json:"name" config:"name"`
 	StartJoint    *JointConfig   `json:"start" config:"start"`
 	ProcessJoints []*JointConfig `json:"process" config:"process"`
 	EndJoint      *JointConfig   `json:"end" config:"end"`
+}
+
+func GetPipelineConfig(taskId, host, url string) (*PipelineConfig, error) {
+
+	return nil, nil
 }

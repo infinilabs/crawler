@@ -14,23 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package pipe
+package model
 
 import (
-	"github.com/infinitbyte/gopa/core/model"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
-// EmptyJoint is a place holder
-type EmptyJoint struct {
-}
+func TestFetchTaskEncode(t *testing.T) {
+	taskID := "taskID123123"
+	b := EncodeFetchTask(taskID, "", "")
+	t1, p1, u1 := DecodeFetchTask(b)
+	assert.Equal(t, taskID, t1)
+	assert.Equal(t, "", p1)
+	assert.Equal(t, "", u1)
 
-// Name return empty
-func (joint EmptyJoint) Name() string {
-	return "empty"
-}
-
-// Process do nothing
-func (joint EmptyJoint) Process(s *model.Context) error {
-
-	return nil
+	p2 := "pipline2"
+	u2 := "url2"
+	b = EncodeFetchTask(taskID, p2, u2)
+	t1, p1, u1 = DecodeFetchTask(b)
+	assert.Equal(t, taskID, t1)
+	assert.Equal(t, p2, p1)
 }

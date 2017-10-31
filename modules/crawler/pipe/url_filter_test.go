@@ -19,14 +19,13 @@ package pipe
 import (
 	"github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/model"
-	"github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestUrlFilter(t *testing.T) {
 
-	context := &pipeline.Context{}
+	context := &model.Context{}
 	context.Init()
 
 	task := model.Task{}

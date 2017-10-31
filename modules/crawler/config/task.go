@@ -1,6 +1,8 @@
 package config
 
-import "github.com/infinitbyte/gopa/core/pipeline"
+import (
+	"github.com/infinitbyte/gopa/core/model"
+)
 
 // TaskConfig defines crawler related configs
 type TaskConfig struct {
@@ -8,5 +10,5 @@ type TaskConfig struct {
 	//Fetch Speed Control
 	FetchThresholdInMs int `config:"fetch_threshold_ms"`
 
-	DefaultPipelineConfig *pipeline.PipelineConfig `config:"default_pipeline_config"`
+	DefaultPipelineConfig *model.PipelineConfig `config:"default_pipeline_config"`
 }

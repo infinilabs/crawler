@@ -21,7 +21,6 @@ import (
 	"github.com/infinitbyte/gopa/core/env"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/model"
-	"github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
@@ -36,7 +35,7 @@ func TestProcessText(t *testing.T) {
 		"<a href=\"/wiki/Marking/Users\">/wiki/Marking/Users</a>" +
 		" </div> </body> </html>"
 
-	context := pipeline.Context{}
+	context := model.Context{}
 	context.Init()
 	task := model.Task{}
 	task.Url = "http://elasticsearch.cn/"

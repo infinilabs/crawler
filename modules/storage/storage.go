@@ -38,22 +38,18 @@ var storeConfig *StorageConfig
 
 type BoltdbConfig struct {
 }
-type LeveldbConfig struct {
-}
 
 type StorageConfig struct {
 	//Driver only `boltdb` and `elasticsearch` are available
 	Driver  string                     `config:"driver"`
 	Boltdb  *BoltdbConfig              `config:"boltdb"`
-	Leveldb *LeveldbConfig             `config:"leveldb"`
 	Elastic *index.ElasticsearchConfig `config:"elasticsearch"`
 }
 
 var (
 	defaultConfig = StorageConfig{
-		Driver:  "boltdb",
-		Boltdb:  &BoltdbConfig{},
-		Leveldb: &LeveldbConfig{},
+		Driver: "boltdb",
+		Boltdb: &BoltdbConfig{},
 		Elastic: &index.ElasticsearchConfig{
 			Endpoint:    "http://localhost:9200",
 			IndexPrefix: "gopa-",

@@ -20,18 +20,17 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"github.com/infinitbyte/gopa/core/model"
-	api "github.com/infinitbyte/gopa/core/pipeline"
 )
 
 type HashJoint struct {
-	api.Parameters
+	model.Parameters
 }
 
 func (joint HashJoint) Name() string {
 	return "hash"
 }
 
-func (joint HashJoint) Process(context *api.Context) error {
+func (joint HashJoint) Process(context *model.Context) error {
 
 	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 

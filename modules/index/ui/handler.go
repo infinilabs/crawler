@@ -154,8 +154,8 @@ func (h *UserUI) GetSnapshotPayloadAction(w http.ResponseWriter, req *http.Reque
 		//add link rewrite
 		if util.ContainStr(snapshot.ContentType, "text/html") {
 			h.Write(w, []byte("<script language='JavaScript' type='text/javascript'>"))
-			h.Write(w, []byte(	      `var dom=document.createElement("div");dom.innerHTML='<div style="overflow: hidden;z-index: 99999999999999999;width:100%;height:18px;position: absolute top:1px;background:#ebebeb;font-size: 12px;text-align:center;">`))
-			h.Write(w, []byte(fmt.Sprintf(`<img border=0 style="float:left;height:18px" src="%s"><span style="font-size: 12px;">Saved by Gopa, %v, <a href="%v">%v</a></span></div>';var first=document.body.firstChild; var last=document.body.lastChild; document.body.insertBefore(dom,first);document.body.insertAfter(dom,last);`, h.Config.SiteLogo, snapshot.Created, snapshot.Url, snapshot.Url)))
+			h.Write(w, []byte(`var dom=document.createElement("div");dom.innerHTML='<div style="overflow: hidden;z-index: 99999999999999999;width:100%;height:18px;position: absolute top:1px;background:#ebebeb;font-size: 12px;text-align:center;">`))
+			h.Write(w, []byte(fmt.Sprintf(`<img border=0 style="float:left;height:18px" src="%s"><span style="font-size: 12px;">Saved by Gopa, %v, <a href="%v">%v</a></span></div>';var first=document.body.firstChild;  document.body.insertBefore(dom,first);`, h.Config.SiteLogo, snapshot.Created, snapshot.Url, snapshot.Url)))
 			h.Write(w, []byte("</script>"))
 			h.Write(w, []byte("<script src=\"/static/assets/js/snapshot_footprint.js?v=1\"></script> "))
 		}

@@ -14,7 +14,7 @@ type CuckooFilterImpl struct {
 
 func (filter *CuckooFilterImpl) Open(fileName string) error {
 
-	filter.cf = f.NewDefaultCuckooFilter()
+	filter.cf = f.NewCuckooFilter(10000000)
 	return nil
 }
 

@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/model"
-	api "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/queue"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
@@ -38,7 +37,7 @@ func (joint IndexJoint) Name() string {
 }
 
 // Process wrapper index document and send to queue
-func (joint IndexJoint) Process(c *api.Context) error {
+func (joint IndexJoint) Process(c *model.Context) error {
 
 	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)

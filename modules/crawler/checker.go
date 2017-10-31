@@ -21,7 +21,6 @@ import (
 	. "github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/model"
-	. "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/queue"
 	"github.com/infinitbyte/gopa/core/stats"
 	"github.com/infinitbyte/gopa/core/util"
@@ -41,20 +40,20 @@ func (module CheckerModule) Name() string {
 }
 
 func getDefaultCheckerTaskConfig() TaskConfig {
-	config := PipelineConfig{}
+	config := model.PipelineConfig{}
 	config.Name = "checker"
-	start := JointConfig{}
+	start := model.JointConfig{}
 	start.Enabled = true
 	start.JointName = "init_task"
 	config.StartJoint = &start
-	save := JointConfig{}
+	save := model.JointConfig{}
 	save.Enabled = true
 	save.JointName = "save_task"
 	save.Parameters = util.MapStr{
 		"is_create": true,
 	}
 
-	url_normalization := JointConfig{}
+	url_normalization := model.JointConfig{}
 	url_normalization.Enabled = true
 	url_normalization.JointName = "url_normalization"
 	url_normalization.Parameters = util.MapStr{
@@ -62,20 +61,20 @@ func getDefaultCheckerTaskConfig() TaskConfig {
 		"follow_sub_domain": true,
 	}
 
-	url_filter := JointConfig{}
+	url_filter := model.JointConfig{}
 	url_filter.Enabled = true
 	url_filter.JointName = "url_filter"
 
-	url_check_filter := JointConfig{}
+	url_check_filter := model.JointConfig{}
 	url_check_filter.Enabled = true
 	url_check_filter.JointName = "filter_check"
 
-	task_deduplication := JointConfig{}
+	task_deduplication := model.JointConfig{}
 	task_deduplication.Enabled = true
 	task_deduplication.JointName = "task_deduplication"
 
 	config.EndJoint = &save
-	config.ProcessJoints = []*JointConfig{
+	config.ProcessJoints = []*model.JointConfig{
 		&url_normalization,
 		&url_filter,
 		&url_check_filter,
@@ -170,7 +169,7 @@ func (module CheckerModule) execute(data []byte) {
 		}
 		log.Trace("load host settings, ", task.Host)
 
-		queue.Push(config.FetchChannel, []byte(task.ID))
+		queue.Push(config.FetchChannel, model.EncodeFetchTask(task.ID, task.Host, task.Url))
 
 		stats.Increment("checker.url", "valid_seed")
 
@@ -185,8 +184,8 @@ func (module CheckerModule) execute(data []byte) {
 
 }
 
-func (module CheckerModule) runPipe(debug bool, task *model.Task) *Pipeline {
-	var pipeline *Pipeline
+func (module CheckerModule) runPipe(debug bool, task *model.Task) *model.Pipeline {
+	var pipeline *model.Pipeline
 	defer func() {
 
 		if !debug {
@@ -199,14 +198,14 @@ func (module CheckerModule) runPipe(debug bool, task *model.Task) *Pipeline {
 		}
 	}()
 
-	context := &Context{Phrase: config.PhraseChecker, IgnoreBroken: true}
+	context := &model.Context{Phrase: config.PhraseChecker, IgnoreBroken: true}
 	context.Set(CONTEXT_CRAWLER_TASK, task)
 
 	if module.config.DefaultPipelineConfig == nil {
 		panic("default pipeline config can't be null")
 	}
 
-	pipeline = NewPipelineFromConfig(module.config.DefaultPipelineConfig, context)
+	pipeline = model.NewPipelineFromConfig(module.config.DefaultPipelineConfig, context)
 	pipeline.Run()
 
 	return pipeline

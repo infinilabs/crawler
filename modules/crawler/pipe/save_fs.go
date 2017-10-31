@@ -20,7 +20,6 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/model"
-	. "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/util"
 	"net/url"
 	"os"
@@ -36,7 +35,7 @@ func (joint SaveSnapshotToFileSystemJoint) Name() string {
 	return "save_snapshot_fs"
 }
 
-func (joint SaveSnapshotToFileSystemJoint) Process(c *Context) error {
+func (joint SaveSnapshotToFileSystemJoint) Process(c *model.Context) error {
 
 	if len(joint.baseDir) == 0 {
 		joint.baseDir = global.Env().SystemConfig.GetWorkingDir() + "/web"

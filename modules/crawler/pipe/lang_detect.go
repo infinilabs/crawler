@@ -19,7 +19,6 @@ package pipe
 import (
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/model"
-	api "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/jbowles/nlpt-detect"
 )
 
@@ -33,7 +32,7 @@ func (joint LanguageDetectJoint) Name() string {
 }
 
 // Process language detect
-func (joint LanguageDetectJoint) Process(c *api.Context) error {
+func (joint LanguageDetectJoint) Process(c *model.Context) error {
 	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 
 	if snapshot == nil {

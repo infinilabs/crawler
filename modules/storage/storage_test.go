@@ -14,15 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package filter
+package storage
 
 import (
 	"fmt"
 	. "github.com/infinitbyte/gopa/core/env"
 	"github.com/infinitbyte/gopa/core/global"
+	"github.com/infinitbyte/gopa/core/persist"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
-	"github.com/infinitbyte/gopa/modules/storage"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
@@ -30,41 +30,35 @@ import (
 )
 
 func Test(t *testing.T) {
-	var storage storage.StorageModule
+	var storage StorageModule
 	env1 := EmptyEnv()
 	env1.SystemConfig.PathConfig.Data = "/tmp/filter_" + util.PickRandomName()
 	os.RemoveAll(env1.SystemConfig.PathConfig.Data)
 	env1.IsDebug = true
 	global.RegisterEnv(env1)
 
-	storage = storage.StorageModule{}
+	storage = StorageModule{}
 	storage.Start(GetModuleConfig(storage.Name()))
 
-	var filter FilterModule
-	filter = FilterModule{}
-	filter.Start(GetModuleConfig(filter.Name()))
-	b, _ := filter.CheckThenAdd(config.CheckFilter, []byte("key"))
-	assert.Equal(t, false, b)
-
 	for i := 0; i < 1; i++ {
-		go run(&filter, i, t)
+		go run(i, t)
 	}
 
 	time.Sleep(10 * time.Minute)
 
 }
 
-func run(filter *FilterModule, seed int, t *testing.T) {
-	for i := 0; i < 100000000; i++ {
-		fmt.Println(i)
+func run(seed int, t *testing.T) {
+	for i := 0; i < 10000000; i++ {
+		//fmt.Println(i)
 		k := fmt.Sprintf("key-%v-%v", seed, i)
-		b := filter.Exists(config.CheckFilter, []byte(k))
-		assert.Equal(t, false, b)
-		b, _ = filter.CheckThenAdd(config.CheckFilter, []byte(k))
-		assert.Equal(t, true, b)
-		b = filter.Exists(config.CheckFilter, []byte(k))
-		assert.Equal(t, true, b)
-		if !b {
+		v := []byte("A")
+		b, _ := persist.GetValue(config.KVBucketKey, []byte(k))
+		assert.Equal(t, false, b != nil)
+		persist.AddValue(config.KVBucketKey, []byte(k), v)
+		b, _ = persist.GetValue(config.KVBucketKey, []byte(k))
+		assert.Equal(t, true, b != nil)
+		if b == nil {
 			fmt.Print("not exists")
 		}
 	}

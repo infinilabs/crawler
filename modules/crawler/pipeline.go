@@ -18,7 +18,7 @@ package crawler
 
 import (
 	log "github.com/cihub/seelog"
-	"github.com/infinitbyte/gopa/core/pipeline"
+	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/modules/crawler/pipe"
 )
 
@@ -33,25 +33,25 @@ func InitJoints() {
 	inited = true
 
 	log.Debug("start register joints")
-	pipeline.Register(pipe.EmptyJoint{})
-	pipeline.Register(pipe.FilterCheckJoint{})
-	pipeline.Register(pipe.FetchJoint{})
-	pipeline.Register(pipe.UrlNormalizationJoint{})
-	pipeline.Register(pipe.SaveTaskJoint{})
-	pipeline.Register(pipe.HtmlToTextJoint{})
-	pipeline.Register(pipe.IgnoreTimeoutJoint{})
-	pipeline.Register(pipe.LoadMetadataJoint{})
-	pipeline.Register(pipe.ParsePageJoint{})
-	pipeline.Register(pipe.SaveSnapshotToDBJoint{})
-	pipeline.Register(pipe.SaveSnapshotToFileSystemJoint{})
-	pipeline.Register(pipe.InitTaskJoint{})
-	pipeline.Register(pipe.UrlFilterJoint{})
-	pipeline.Register(pipe.HashJoint{})
-	pipeline.Register(pipe.IndexJoint{})
-	pipeline.Register(pipe.TaskDeduplicationJoint{})
-	pipeline.Register(pipe.ContentDeduplicationJoint{})
-	pipeline.Register(pipe.UpdateCheckTimeJoint{})
-	pipeline.Register(pipe.LanguageDetectJoint{})
+	model.RegisterPipeJoint(pipe.EmptyJoint{})
+	model.RegisterPipeJoint(pipe.FilterCheckJoint{})
+	model.RegisterPipeJoint(pipe.FetchJoint{})
+	model.RegisterPipeJoint(pipe.UrlNormalizationJoint{})
+	model.RegisterPipeJoint(pipe.SaveTaskJoint{})
+	model.RegisterPipeJoint(pipe.HtmlToTextJoint{})
+	model.RegisterPipeJoint(pipe.IgnoreTimeoutJoint{})
+	model.RegisterPipeJoint(pipe.LoadMetadataJoint{})
+	model.RegisterPipeJoint(pipe.ParsePageJoint{})
+	model.RegisterPipeJoint(pipe.SaveSnapshotToDBJoint{})
+	model.RegisterPipeJoint(pipe.SaveSnapshotToFileSystemJoint{})
+	model.RegisterPipeJoint(pipe.InitTaskJoint{})
+	model.RegisterPipeJoint(pipe.UrlFilterJoint{})
+	model.RegisterPipeJoint(pipe.HashJoint{})
+	model.RegisterPipeJoint(pipe.IndexJoint{})
+	model.RegisterPipeJoint(pipe.TaskDeduplicationJoint{})
+	model.RegisterPipeJoint(pipe.ContentDeduplicationJoint{})
+	model.RegisterPipeJoint(pipe.UpdateCheckTimeJoint{})
+	model.RegisterPipeJoint(pipe.LanguageDetectJoint{})
 	log.Debug("end register joints")
 
 }

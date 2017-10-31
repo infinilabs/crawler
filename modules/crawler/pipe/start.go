@@ -19,14 +19,13 @@ package pipe
 import (
 	"errors"
 	"github.com/infinitbyte/gopa/core/model"
-	api "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/util"
 	"time"
 )
 
 // InitTaskJoint basically start the pipeline process, construct a model.Task, may loaded from db with CONTEXT_TASK_ID or manually passed in with CONTEXT_CRAWLER_TASK
 type InitTaskJoint struct {
-	api.Parameters
+	model.Parameters
 }
 
 // Name return: init_task
@@ -35,7 +34,7 @@ func (joint InitTaskJoint) Name() string {
 }
 
 // Process task load, init a new snapshot instance
-func (joint InitTaskJoint) Process(context *api.Context) error {
+func (joint InitTaskJoint) Process(context *model.Context) error {
 
 	var task *model.Task
 

@@ -19,19 +19,19 @@ func (module GeneratorModule) Start(cfg *Config) {
 
 	generatorConfig := struct {
 		TaskID  string `config:"task_id"`
-		TaskURL string `config:"task_url"`
+		TaskUrl string `config:"task_url"`
 	}{}
 
 	cfg.Unpack(&generatorConfig)
 
 	go func() {
 		for {
-			if generatorConfig.TaskURL != "" {
-				queue.Push(config.CheckChannel, model.NewTaskSeed(generatorConfig.TaskURL, generatorConfig.TaskURL, 0, 0).MustGetBytes())
+			if generatorConfig.TaskUrl != "" {
+				queue.Push(config.CheckChannel, model.NewTaskSeed(generatorConfig.TaskUrl, generatorConfig.TaskUrl, 0, 0).MustGetBytes())
 			}
 
 			if generatorConfig.TaskID != "" {
-				queue.Push(config.FetchChannel, []byte(generatorConfig.TaskID))
+				queue.Push(config.FetchChannel, model.EncodeFetchTask(generatorConfig.TaskID, "", ""))
 			}
 			time.Sleep(100 * time.Millisecond)
 		}

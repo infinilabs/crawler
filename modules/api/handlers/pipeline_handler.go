@@ -18,7 +18,7 @@ package http
 
 import (
 	log "github.com/cihub/seelog"
-	. "github.com/infinitbyte/gopa/core/pipeline"
+	"github.com/infinitbyte/gopa/core/model"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 
@@ -27,7 +27,7 @@ import (
 
 func (this API) handleGetPipelineJointsRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	log.Debug("get joints")
-	joints := GetAllRegisteredJoints()
+	joints := model.GetAllRegisteredJoints()
 	this.WriteJSON(w, joints, http.StatusOK)
 
 	return
@@ -35,7 +35,7 @@ func (this API) handleGetPipelineJointsRequest(w http.ResponseWriter, req *http.
 
 func (this API) handlePostPipelineJointsRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	log.Debug("post joints")
-	config := PipelineConfig{}
+	config := model.PipelineConfig{}
 
 	data, err := this.GetRawBody(req)
 	if err != nil {
@@ -49,9 +49,9 @@ func (this API) handlePostPipelineJointsRequest(w http.ResponseWriter, req *http
 		return
 	}
 	//TODO save for later use
-	context := &Context{}
+	context := &model.Context{}
 	context.Init()
-	pipe := NewPipelineFromConfig(&config, context)
+	pipe := model.NewPipelineFromConfig(&config, context)
 	pipe.Run()
 
 	this.WriteJSON(w, config, http.StatusOK)

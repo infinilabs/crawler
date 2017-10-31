@@ -21,7 +21,6 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/model"
-	api "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/util"
 	u "net/url"
 	"path"
@@ -31,13 +30,13 @@ import (
 
 // UrlNormalizationJoint used to cleanup url and do normalization
 type UrlNormalizationJoint struct {
-	api.Parameters
+	model.Parameters
 	splitByUrlParameter []string
 	maxFileNameLength   int
 }
 
-const followAllDomain api.ParaKey = "follow_all_domain"
-const followSubDomain api.ParaKey = "follow_sub_domain"
+const followAllDomain model.ParaKey = "follow_all_domain"
+const followSubDomain model.ParaKey = "follow_sub_domain"
 
 var defaultFileName = "default.html"
 
@@ -47,7 +46,7 @@ func (joint UrlNormalizationJoint) Name() string {
 }
 
 // Process will handle relative url and cleanup url
-func (joint UrlNormalizationJoint) Process(context *api.Context) error {
+func (joint UrlNormalizationJoint) Process(context *model.Context) error {
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)

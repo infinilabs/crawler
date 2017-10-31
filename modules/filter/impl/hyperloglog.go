@@ -23,6 +23,7 @@ import (
 
 	log "github.com/cihub/seelog"
 	"github.com/clarkduvall/hyperloglog"
+	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/util"
 	"sync"
 )
@@ -128,5 +129,10 @@ func (filter *HyperLogLogFilter) Add(key []byte) error {
 	defer filter.l.Unlock()
 
 	filter.filter.Add(hash64(key))
+	return nil
+}
+
+func (filter *HyperLogLogFilter) Delete(key []byte) error {
+	panic(errors.New("delete not supported"))
 	return nil
 }

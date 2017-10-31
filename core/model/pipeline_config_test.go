@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package pipeline
+package model
 
 import (
 	"fmt"
@@ -41,10 +41,10 @@ func TestPipelineConfig(t *testing.T) {
 	context.Data["url"] = "gogol.com"
 	context.Data["webpage"] = "hello world gogo "
 
-	Register(crawlerJoint{})
-	Register(parserJoint{})
-	Register(saveJoint{})
-	Register(publishJoint{})
+	RegisterPipeJoint(crawlerJoint{})
+	RegisterPipeJoint(parserJoint{})
+	RegisterPipeJoint(saveJoint{})
+	RegisterPipeJoint(publishJoint{})
 
 	config.StartJoint = &JointConfig{Enabled: true, JointName: "crawler", Parameters: map[string]interface{}{"url": "http://baidu12.com"}}
 	joints := []*JointConfig{}

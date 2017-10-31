@@ -19,13 +19,12 @@ package pipe
 import (
 	"github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/model"
-	api "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/util"
 )
 
 // UrlFilterJoint used to validate urls, include host,path,file and file extension
 type UrlFilterJoint struct {
-	api.Parameters
+	model.Parameters
 }
 
 // Name is url_filter
@@ -33,14 +32,14 @@ func (joint UrlFilterJoint) Name() string {
 	return "url_filter"
 }
 
-var urlMatchRule api.ParaKey = "url_match_rule"
-var hostMatchRule api.ParaKey = "host_match_rule"
-var pathMatchRule api.ParaKey = "path_match_rule"
-var fileMatchRule api.ParaKey = "file_match_rule"
-var fileExtensionMatchRule api.ParaKey = "file_ext_match_rule"
+var urlMatchRule model.ParaKey = "url_match_rule"
+var hostMatchRule model.ParaKey = "host_match_rule"
+var pathMatchRule model.ParaKey = "path_match_rule"
+var fileMatchRule model.ParaKey = "file_match_rule"
+var fileExtensionMatchRule model.ParaKey = "file_ext_match_rule"
 
 // Process check all the url match rules
-func (joint UrlFilterJoint) Process(context *api.Context) error {
+func (joint UrlFilterJoint) Process(context *model.Context) error {
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
@@ -94,7 +93,7 @@ func getDefaultUrlMatchConfig() config.Rules {
 }
 
 // validRule check if the url are satisfy the rule, default is true
-func (joint UrlFilterJoint) validRule(key api.ParaKey, target string) bool {
+func (joint UrlFilterJoint) validRule(key model.ParaKey, target string) bool {
 
 	if target == "" {
 		return true

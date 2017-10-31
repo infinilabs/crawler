@@ -23,7 +23,6 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/filter"
 	"github.com/infinitbyte/gopa/core/model"
-	. "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/queue"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
@@ -31,21 +30,21 @@ import (
 )
 
 type ParsePageJoint struct {
-	Parameters
+	model.Parameters
 	MaxPageOfBreadth map[int]int //max page to fetch in each level's breadth, eg: 1:100;2:50;3:5;4:1
 	//TODO support save link,script
 }
 
-const dispatchLinks ParaKey = "dispatch_links"
-const maxDepth ParaKey = "max_depth"
-const maxBreadth ParaKey = "max_breadth"
-const replaceNoscript ParaKey = "replace_noscript"
+const dispatchLinks model.ParaKey = "dispatch_links"
+const maxDepth model.ParaKey = "max_depth"
+const maxBreadth model.ParaKey = "max_breadth"
+const replaceNoscript model.ParaKey = "replace_noscript"
 
 func (joint ParsePageJoint) Name() string {
 	return "parse"
 }
 
-func (joint ParsePageJoint) Process(context *Context) error {
+func (joint ParsePageJoint) Process(context *model.Context) error {
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
@@ -97,14 +96,16 @@ func (joint ParsePageJoint) Process(context *Context) error {
 			content, exist := s.Attr("content")
 			if exist {
 				//0; url=/2016/beijing.html
-				arr := strings.Split(content, "=")
+				arr := strings.Split(strings.ToLower(content), "url=")
 				if len(arr) == 2 {
 					url := arr[1]
 					links[url] = "http-equiv-refresh"
 				} else {
-					log.Error("unexpected http-equiv", content)
+					log.Error("unexpected http-equiv, ", content)
 				}
+				task.Status = model.TaskRedirected
 
+				context.End(fmt.Sprintf("redirected to: %v", content))
 			}
 		}
 

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package pipeline
+package model
 
 import (
 	"fmt"
@@ -165,7 +165,6 @@ func (para *Parameters) GetInt64(key ParaKey, defaultV int64) (int64, bool) {
 		return int64(s3), ok
 	}
 
-	log.Debug(key, ",", s, ",", ok)
 	return defaultV, ok
 }
 
@@ -179,7 +178,6 @@ func (para *Parameters) MustGet(key ParaKey) interface{} {
 	para.l.RUnlock()
 
 	if !ok {
-		log.Debug(util.ToJson(para.Data, true))
 		panic(fmt.Errorf("%s not found in context", key))
 	}
 
@@ -205,9 +203,6 @@ func (para *Parameters) Get(key ParaKey) interface{} {
 	s := string(key)
 	v := para.Data[s]
 	para.l.RUnlock()
-	if global.Env().IsDebug {
-		log.Debug("get context: ", key, ",", v, ",", reflect.TypeOf(v))
-	}
 	return v
 }
 
@@ -234,7 +229,6 @@ func (para *Parameters) Set(key ParaKey, value interface{}) {
 func (para *Parameters) MustGetString(key ParaKey) string {
 	s, ok := para.GetString(key)
 	if !ok {
-		log.Debug(util.ToJson(para.Data, true))
 		panic(fmt.Errorf("%s not found in context", key))
 	}
 	return s
@@ -251,7 +245,6 @@ func (para *Parameters) GetStringOrDefault(key ParaKey, val string) string {
 func (para *Parameters) MustGetBytes(key ParaKey) []byte {
 	s, ok := para.Get(key).([]byte)
 	if !ok {
-		log.Debug(util.ToJson(para.Data, true))
 		panic(fmt.Errorf("%s not found in context", key))
 	}
 	return s
@@ -277,7 +270,6 @@ func (para *Parameters) MustGetInt64(key ParaKey) int64 {
 func (para *Parameters) MustGetMap(key ParaKey) map[string]interface{} {
 	s, ok := para.GetMap(key)
 	if !ok {
-		log.Debug(util.ToJson(para.Data, true))
 		panic(fmt.Errorf("%s not found in context", key))
 	}
 	return s
@@ -471,12 +463,12 @@ func GetJointInstance(cfg *JointConfig) Joint {
 	panic(errors.New(cfg.JointName + " not found"))
 }
 
-func Register(joint Joint) {
+func RegisterPipeJoint(joint Joint) {
 	k := string(joint.Name())
-	RegisterByName(k, joint)
+	RegisterPipeJointWithName(k, joint)
 }
 
-func RegisterByName(jointName string, joint Joint) {
+func RegisterPipeJointWithName(jointName string, joint Joint) {
 	if typeRegistry[jointName] != nil {
 		panic(errors.Errorf("joint with same name already registered, %s", jointName))
 	}

@@ -19,7 +19,6 @@ package pipe
 import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/model"
-	api "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/stats"
 	"github.com/infinitbyte/gopa/modules/config"
 )
@@ -28,13 +27,13 @@ func (joint IgnoreTimeoutJoint) Name() string {
 	return "ignore_timeout"
 }
 
-const ignoreTimeoutAfterCount api.ParaKey = "ignore_timeout_after_count"
+const ignoreTimeoutAfterCount model.ParaKey = "ignore_timeout_after_count"
 
 type IgnoreTimeoutJoint struct {
-	api.Parameters
+	model.Parameters
 }
 
-func (joint IgnoreTimeoutJoint) Process(context *api.Context) error {
+func (joint IgnoreTimeoutJoint) Process(context *model.Context) error {
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 

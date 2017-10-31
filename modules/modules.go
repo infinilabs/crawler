@@ -35,8 +35,8 @@ import (
 // Register is where modules are registered
 func Register() {
 	module.Register(persist.DatabaseModule{})
-	module.Register(filter.FilterModule{})
 	module.Register(storage.StorageModule{})
+	module.Register(filter.FilterModule{})
 	module.Register(stats.SimpleStatsModule{})
 	module.Register(stats.StatsDModule{})
 	module.Register(queue.DiskQueue{})

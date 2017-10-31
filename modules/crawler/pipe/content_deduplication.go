@@ -6,13 +6,12 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/filter"
 	"github.com/infinitbyte/gopa/core/model"
-	api "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/modules/config"
 )
 
 // ContentDeduplicationJoint used to check the hash of page body, if duplicated hash already exists, will break the pipeline
 type ContentDeduplicationJoint struct {
-	api.Parameters
+	model.Parameters
 }
 
 // Name return: content_deduplication
@@ -21,7 +20,7 @@ func (joint ContentDeduplicationJoint) Name() string {
 }
 
 // Process the content hash Deduplication
-func (joint ContentDeduplicationJoint) Process(c *api.Context) error {
+func (joint ContentDeduplicationJoint) Process(c *model.Context) error {
 	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 
@@ -48,7 +47,7 @@ func (joint ContentDeduplicationJoint) Process(c *api.Context) error {
 	return nil
 }
 
-func checkByHash(snapshot *model.Snapshot, c *api.Context) (bool, string, string) {
+func checkByHash(snapshot *model.Snapshot, c *model.Context) (bool, string, string) {
 
 	hash := snapshot.Hash
 

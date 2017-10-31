@@ -20,7 +20,6 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/model"
-	. "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/util"
 	"regexp"
 	"strings"
@@ -28,12 +27,12 @@ import (
 )
 
 type HtmlToTextJoint struct {
-	Parameters
+	model.Parameters
 }
 
 //merge whitespace and \n
-const mergeWhitespace ParaKey = "merge_whitespace"
-const removeNonScript ParaKey = "remove_nonscript"
+const mergeWhitespace model.ParaKey = "merge_whitespace"
+const removeNonScript model.ParaKey = "remove_nonscript"
 
 func (joint HtmlToTextJoint) Name() string {
 	return "html2text"
@@ -168,7 +167,7 @@ func replaceAll(src []byte) []byte {
 	return src
 }
 
-func (joint HtmlToTextJoint) Process(context *Context) error {
+func (joint HtmlToTextJoint) Process(context *model.Context) error {
 
 	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
 

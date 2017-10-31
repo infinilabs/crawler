@@ -20,20 +20,19 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/filter"
 	"github.com/infinitbyte/gopa/core/model"
-	api "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/stats"
 	"regexp"
 )
 
 // FilterCheckJointused to check the task url if it is already in the filter, if not in the filter, then add it to task filter, and make sure won't add it next time
 type FilterCheckJoint struct {
-	api.Parameters
+	model.Parameters
 	//ignore files end with js,css,apk,zip
 	SkipPageParsePattern *regexp.Regexp
 }
 
 // filter_key is the filter name used to check and filter
-var filterKey api.ParaKey = "filter_key"
+var filterKey model.ParaKey = "filter_key"
 
 // Name return: filter_check
 func (joint FilterCheckJoint) Name() string {
@@ -41,7 +40,7 @@ func (joint FilterCheckJoint) Name() string {
 }
 
 // Process the filtering and add it to the filter
-func (joint FilterCheckJoint) Process(context *api.Context) error {
+func (joint FilterCheckJoint) Process(context *model.Context) error {
 
 	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
 

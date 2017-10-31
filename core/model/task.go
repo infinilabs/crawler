@@ -6,7 +6,6 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/persist"
-	"github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/util"
 	"strconv"
 	"strings"
@@ -120,20 +119,30 @@ func NewTaskSeed(url, ref string, depth int, breadth int) Seed {
 	return task
 }
 
+func EncodeFetchTask(taskId, host, url string) []byte {
+	return []byte(fmt.Sprintf("%s%s%s%s%s", taskId, delimiter, host, delimiter, url))
+}
+
+func DecodeFetchTask(str []byte) (taskId, host, url string) {
+	mix := string(str)
+	arr := strings.Split(mix, delimiter)
+	return arr[0], arr[1], arr[2]
+}
+
 type Task struct {
 	Seed
-	ID          string          `gorm:"not null;unique;primary_key" json:"id" index:"id"`
-	Host        string          `gorm:"index" json:"host"`
-	Schema      string          `json:"schema,omitempty"`
-	OriginalUrl string          `json:"original_url,omitempty"`
-	Phrase      pipeline.Phrase `gorm:"index" json:"phrase"`
-	Status      TaskStatus      `gorm:"index" json:"status"`
-	Message     string          `json:"message,omitempty"`
-	Created     *time.Time      `gorm:"index" json:"created,omitempty"`
-	Updated     *time.Time      `gorm:"index" json:"updated,omitempty"`
-	LastFetch   *time.Time      `gorm:"index" json:"last_fetch,omitempty"`
-	LastCheck   *time.Time      `gorm:"index" json:"last_check,omitempty"`
-	NextCheck   *time.Time      `gorm:"index" json:"next_check,omitempty"`
+	ID          string     `gorm:"not null;unique;primary_key" json:"id" index:"id"`
+	Host        string     `gorm:"index" json:"host"`
+	Schema      string     `json:"schema,omitempty"`
+	OriginalUrl string     `json:"original_url,omitempty"`
+	Phrase      Phrase     `gorm:"index" json:"phrase"`
+	Status      TaskStatus `gorm:"index" json:"status"`
+	Message     string     `json:"message,omitempty"`
+	Created     *time.Time `gorm:"index" json:"created,omitempty"`
+	Updated     *time.Time `gorm:"index" json:"updated,omitempty"`
+	LastFetch   *time.Time `gorm:"index" json:"last_fetch,omitempty"`
+	LastCheck   *time.Time `gorm:"index" json:"last_check,omitempty"`
+	NextCheck   *time.Time `gorm:"index" json:"next_check,omitempty"`
 
 	SnapshotVersion int        `json:"snapshot_version,omitempty"`
 	SnapshotID      string     `json:"snapshot_id,omitempty"`

@@ -6072,13 +6072,13 @@ dW2d3B1d4YsquXzz/ZWE5HIvHf9XAAAA//8udyNEcgQAAA==
 
 	"/static/assets/js/snapshot_footprint.js": {
 		local:   "../static/assets/js/snapshot_footprint.js",
-		size:    234,
-		modtime: 1508482547,
+		size:    254,
+		modtime: 1509258526,
 		compressed: `
-H4sIAAAAAAAA/1yNQUvEMBBG7/kVHzklFFLvNQiCV0/exENokyaQzkiSWkX636Val2XnNPDem9kSTbwZ
-psxugkVYaWyJSWl8CwEAH67A0Ri5VFhMPK6Lp2Zm356yP9b6+PXi5me3eCWd1MNfFrhAHW2Cxd2AhPv/
-MyZ7mlsckLrueINzUlDqVF7Tm2n+s2l9oVckFh9gIftK7r1Gbv3DWrKV6G6t33oXuxDiJwAA///tz2Jt
-6gAAAA==
+H4sIAAAAAAAA/1yNMUvEQBBG+/0VH6k2BHL2cREUCxsL0Uoslt1JMrCZkb2Jp8j9dwl3itxUA2/emwNL
+1kOvUjRmBIyrJGMV3+LbOQD4iBVR0qx1j4CsaV1IrJ/I7gtt6/726zlOj3Eh38SmHU7aqBV+cxkBVwMY
+17+ZvpBMNg/grtve4Dw8en8+eeW33ujT2vaP/iNzpREBza5S5krJdjdrLaFBB5KkmV6eHu50eVchMX8h
+nopHd3TO/QQAAP//nDYkC/4AAAA=
 `,
 	},
 

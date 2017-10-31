@@ -18,8 +18,7 @@ package pipe
 
 import (
 	"fmt"
-	. "github.com/infinitbyte/gopa/core/model"
-	"github.com/infinitbyte/gopa/core/pipeline"
+	"github.com/infinitbyte/gopa/core/model"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -27,16 +26,16 @@ import (
 func TestProcessHash(t *testing.T) {
 	body := "Just some test content,你好"
 
-	context := pipeline.Context{}
+	context := model.Context{}
 	context.Init()
-	task := Task{}
+	task := model.Task{}
 	task.Url = "http://elasticsearch.cn/"
 	task.Depth = 1
 
 	context.Set(CONTEXT_CRAWLER_TASK, &task)
 	parse := HashJoint{}
 
-	snapshot := Snapshot{}
+	snapshot := model.Snapshot{}
 	snapshot.Payload = []byte(body)
 	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
 
@@ -50,16 +49,16 @@ func TestProcessHash(t *testing.T) {
 
 	body = "Just some test content,你好啊,!!"
 
-	task1 := Task{}
+	task1 := model.Task{}
 	task.Url = "http://elasticsearch.cn/"
 	task.Depth = 1
 
-	context = pipeline.Context{}
+	context = model.Context{}
 	context.Init()
 	context.Set(CONTEXT_CRAWLER_TASK, &task1)
 	parse = HashJoint{}
 
-	snapshot = Snapshot{}
+	snapshot = model.Snapshot{}
 	snapshot.Payload = []byte(body)
 	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
 

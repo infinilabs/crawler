@@ -18,14 +18,13 @@ package pipe
 
 import (
 	"github.com/infinitbyte/gopa/core/model"
-	"github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestNormailzeLinks(t *testing.T) {
 
-	context := &pipeline.Context{}
+	context := &model.Context{}
 	context.Init()
 	task := model.Task{}
 	task.Url = "http://elasticsearch.cn/"
@@ -72,7 +71,7 @@ func TestNormailzeLinks(t *testing.T) {
 
 func TestNormailzeLinks1(t *testing.T) {
 
-	context := &pipeline.Context{}
+	context := &model.Context{}
 	context.Init()
 	task := model.Task{}
 	task.Url = "http://localhost/"
@@ -128,7 +127,7 @@ func TestNormailzeLinks1(t *testing.T) {
 
 func TestNormailzeLinks2(t *testing.T) {
 
-	context := &pipeline.Context{}
+	context := &model.Context{}
 	context.Init()
 
 	task := model.Task{}
@@ -163,7 +162,7 @@ func TestNormailzeLinks2(t *testing.T) {
 
 func TestNormailzeLinks3(t *testing.T) {
 
-	context := &pipeline.Context{}
+	context := &model.Context{}
 	context.Init()
 	parse := UrlNormalizationJoint{}
 	task := model.Task{}
@@ -184,7 +183,7 @@ func TestNormailzeLinks3(t *testing.T) {
 
 func TestNormailzeLinks4(t *testing.T) {
 
-	context := &pipeline.Context{}
+	context := &model.Context{}
 	context.Init()
 	parse := UrlNormalizationJoint{}
 
@@ -207,7 +206,7 @@ func TestNormailzeLinks4(t *testing.T) {
 
 func TestNormailzeLinks5(t *testing.T) {
 
-	context := &pipeline.Context{}
+	context := &model.Context{}
 	context.Init()
 	parse := UrlNormalizationJoint{}
 

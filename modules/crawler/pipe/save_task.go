@@ -20,7 +20,6 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/model"
-	. "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
 )
@@ -28,10 +27,10 @@ import (
 const name string = "save_task"
 
 type SaveTaskJoint struct {
-	Parameters
+	model.Parameters
 }
 
-const isCreate ParaKey = "is_create"
+const isCreate model.ParaKey = "is_create"
 
 func (joint SaveTaskJoint) IsCreate(v bool) SaveTaskJoint {
 	joint.Init()
@@ -43,7 +42,7 @@ func (joint SaveTaskJoint) Name() string {
 	return name
 }
 
-func (joint SaveTaskJoint) Process(context *Context) error {
+func (joint SaveTaskJoint) Process(context *model.Context) error {
 
 	log.Trace("end process")
 	if context.IsExit() {

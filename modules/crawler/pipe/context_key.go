@@ -16,14 +16,14 @@ limitations under the License.
 
 package pipe
 
-import api "github.com/infinitbyte/gopa/core/pipeline"
+import "github.com/infinitbyte/gopa/core/model"
 
 // Crawler common pipeline context keys
 const (
-	CONTEXT_TASK_ID          api.ParaKey = "CRAWLER_TASK_ID"
-	CONTEXT_CRAWLER_DOMAIN   api.ParaKey = "CRAWLER_DOMAIN"
-	CONTEXT_CRAWLER_TASK     api.ParaKey = "CRAWLER_TASK"
-	CONTEXT_CRAWLER_SNAPSHOT api.ParaKey = "CRAWLER_SNAPSHOT"
+	CONTEXT_TASK_ID          model.ParaKey = "CRAWLER_TASK_ID"
+	CONTEXT_CRAWLER_DOMAIN   model.ParaKey = "CRAWLER_DOMAIN"
+	CONTEXT_CRAWLER_TASK     model.ParaKey = "CRAWLER_TASK"
+	CONTEXT_CRAWLER_SNAPSHOT model.ParaKey = "CRAWLER_SNAPSHOT"
 
-	CONTEXT_PAGE_LINKS api.ParaKey = "PAGE_LINKS"
+	CONTEXT_PAGE_LINKS model.ParaKey = "PAGE_LINKS"
 )

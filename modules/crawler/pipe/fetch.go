@@ -22,7 +22,6 @@ import (
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/model"
-	. "github.com/infinitbyte/gopa/core/pipeline"
 	"github.com/infinitbyte/gopa/core/queue"
 	"github.com/infinitbyte/gopa/core/stats"
 	"github.com/infinitbyte/gopa/core/util"
@@ -32,12 +31,12 @@ import (
 	"time"
 )
 
-const proxy ParaKey = "proxy"
-const cookie ParaKey = "cookie"
-const timeoutInSeconds ParaKey = "timeout_in_seconds"
+const proxy model.ParaKey = "proxy"
+const cookie model.ParaKey = "cookie"
+const timeoutInSeconds model.ParaKey = "timeout_in_seconds"
 
 type FetchJoint struct {
-	Parameters
+	model.Parameters
 	timeout time.Duration
 }
 
@@ -51,7 +50,7 @@ type signal struct {
 	status model.TaskStatus
 }
 
-func (joint FetchJoint) Process(context *Context) error {
+func (joint FetchJoint) Process(context *model.Context) error {
 
 	joint.timeout = time.Duration(joint.GetInt64OrDefault(timeoutInSeconds, 60)) * time.Second
 	timer := time.NewTimer(joint.timeout)
