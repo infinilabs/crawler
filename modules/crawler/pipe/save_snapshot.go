@@ -68,7 +68,7 @@ func (this SaveSnapshotToDBJoint) Process(c *model.Context) error {
 
 	saveKey := []byte(snapshot.ID)
 
-	log.Debug("save snapshot to db, url:", task.Url, ",domain:", task.Host, ",path:", savePath, ",file:", saveFile, ",saveKey:", string(saveKey))
+	log.Debug("save snapshot to db, url:", task.Url, ",host:", task.Host, ",path:", savePath, ",file:", saveFile, ",saveKey:", string(saveKey))
 
 	bucketName := this.GetStringOrDefault(bucket, "Snapshot")
 
@@ -86,8 +86,8 @@ func (this SaveSnapshotToDBJoint) Process(c *model.Context) error {
 
 	deleteRedundantSnapShot(int(this.GetInt64OrDefault(maxRevision, 5)), bucketName, task.ID)
 
-	stats.IncrementBy("domain.stats", task.Host+"."+config.STATS_STORAGE_FILE_SIZE, int64(len(snapshot.Payload)))
-	stats.Increment("domain.stats", task.Host+"."+config.STATS_STORAGE_FILE_COUNT)
+	stats.IncrementBy("host.stats", task.Host+"."+config.STATS_STORAGE_FILE_SIZE, int64(len(snapshot.Payload)))
+	stats.Increment("host.stats", task.Host+"."+config.STATS_STORAGE_FILE_COUNT)
 
 	return nil
 }
@@ -106,7 +106,7 @@ func deleteRedundantSnapShot(maxRevisionNum int, bucketStr string, taskId string
 			if errReadList == nil {
 				for i := 0; i < len(snapshotsList); i++ {
 					model.DeleteSnapshot(&snapshotsList[i])
-					persist.DeleteValue(bucketStr, []byte(snapshotsList[i].ID), snapshotsList[i].Payload)
+					persist.DeleteKey(bucketStr, []byte(snapshotsList[i].ID))
 				}
 			}
 		}

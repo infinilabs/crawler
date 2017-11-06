@@ -31,9 +31,9 @@ type KVStore interface {
 
 	AddValue(bucket string, key []byte, value []byte) error
 
-	DeleteValue(bucket string, key []byte, value []byte) error
+	DeleteKey(bucket string, key []byte) error
 
-	DeleteBucket(bucket string, key []byte) error
+	DeleteBucket(bucket string) error
 }
 
 var kvHandler KVStore
@@ -62,12 +62,12 @@ func AddValue(bucket string, key []byte, value []byte) error {
 	return getKVHandler().AddValue(bucket, key, value)
 }
 
-func DeleteValue(bucket string, key []byte, value []byte) error {
-	return getKVHandler().DeleteValue(bucket, key, value)
+func DeleteKey(bucket string, key []byte) error {
+	return getKVHandler().DeleteKey(bucket, key)
 }
 
-func DeleteBucket(bucket string, key []byte) error {
-	return getKVHandler().DeleteBucket(bucket, key)
+func DeleteBucket(bucket string) error {
+	return getKVHandler().DeleteBucket(bucket)
 }
 
 func RegisterKVHandler(h KVStore) {

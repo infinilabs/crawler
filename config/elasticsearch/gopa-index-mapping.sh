@@ -3,13 +3,9 @@ curl -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json
 "mappings": {
 "doc": {
 "properties": {
-"domain": {
-"properties": {
 "host": {
 "type": "keyword",
 "ignore_above": 256
-}
-}
 },
 "snapshot": {
 "properties": {

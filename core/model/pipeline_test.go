@@ -50,7 +50,7 @@ func (joint parserJoint) Name() string {
 
 func (joint parserJoint) Process(s *Context) error {
 	s.Data[("urls")] = "gogo"
-	s.Data[("domain")] = "http://gogo.com"
+	s.Data[("host")] = "http://gogo.com"
 	//pub urls to channel
 	fmt.Println("start to parse web content")
 	return nil
@@ -107,7 +107,7 @@ func TestPipeline(t *testing.T) {
 	assert.Equal(t, "true", context.Parameters.Data["published"])
 	assert.Equal(t, "true", context.Parameters.Data["saved"])
 	assert.Equal(t, true, context.Parameters.Data["status"])
-	assert.Equal(t, "http://gogo.com", context.Parameters.Data["domain"])
+	assert.Equal(t, "http://gogo.com", context.Parameters.Data["host"])
 }
 
 const key1 ParaKey = "DEPTH"

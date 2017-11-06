@@ -48,11 +48,10 @@ func InitAPI() {
 	api.HandleAPIMethod(api.GET, "/task/:id", apis.TaskGetAction)
 	api.HandleAPIMethod(api.DELETE, "/task/:id", api.BasicAuth(apis.TaskDeleteAction, user, pass))
 
-	//Domain API
-	api.HandleAPIMethod(api.GET, "/domains/", apis.DomainAction)
-	api.HandleAPIMethod(api.GET, "/domain/", apis.DomainAction)
-	api.HandleAPIMethod(api.GET, "/domain/:id", apis.DomainGetAction)
-	api.HandleAPIMethod(api.DELETE, "/domain/:id", api.BasicAuth(apis.DomainDeleteAction, user, pass))
+	//Host API
+	api.HandleAPIMethod(api.GET, "/host/", apis.GetHostsAction)
+	api.HandleAPIMethod(api.GET, "/host/:id", apis.GetHostAction)
+	api.HandleAPIMethod(api.DELETE, "/host/:id", api.BasicAuth(apis.DeleteHostAction, user, pass))
 
 	//Snapshot API
 	api.HandleAPIMethod(api.GET, "/snapshots/", apis.SnapshotListAction)
@@ -61,13 +60,16 @@ func InitAPI() {
 	api.HandleAPIMethod(api.GET, "/snapshot/:id/payload", apis.SnapshotGetPayloadAction)
 
 	//Pipeline API
-	api.HandleAPIMethod(api.GET, "/joints/", apis.handleGetPipelineJointsRequest)
-	api.HandleAPIMethod(api.GET, "/joint/", apis.handleGetPipelineJointsRequest)
-	api.HandleAPIMethod(api.POST, "/joint/", apis.handlePostPipelineJointsRequest)
+	api.HandleAPIMethod(api.GET, "/pipeline/joints/", apis.handleGetPipelineJointsRequest)
+	api.HandleAPIMethod(api.GET, "/pipeline/joint/", apis.handleGetPipelineJointsRequest)
 
-	api.HandleAPIMethod(api.GET, "/pipelines/", apis.handleGetPipelinesRequest)
-	api.HandleAPIMethod(api.GET, "/pipeline/", apis.handleGetPipelinesRequest)
-	api.HandleAPIMethod(api.POST, "/pipeline/:id", apis.handlePostPipelinesRequest)
+	//api.HandleAPIMethod(api.GET, "/pipeline/configs/", apis.handleGetPipelineConfigsRequest)
+	//api.HandleAPIMethod(api.GET, "/pipeline/config/", apis.handleGetPipelineConfigsRequest)
+	api.HandleAPIMethod(api.POST, "/pipeline/config/", apis.handleCreatePipelineConfigRequest)
+
+	api.HandleAPIMethod(api.GET, "/pipeline/config/:id", apis.handleGetPipelineConfigRequest)
+	api.HandleAPIMethod(api.POST, "/pipeline/config/:id", apis.handleUpdatePipelineConfigRequest)
+	api.HandleAPIMethod(api.DELETE, "/pipeline/config/:id", apis.handleDeletePipelineConfigRequest)
 
 	//User API
 	api.HandleAPIMethod(api.GET, "/user/", apis.handleUserLoginRequest)

@@ -46,8 +46,8 @@ func GetPagination(from, size, total int, url string, param map[string]interface
 	moreArgs.WriteString("var args='")
 	if len(param) > 0 {
 		for k, v := range param {
-			domainStr := fmt.Sprintf("&%s=%v", k, v)
-			moreArgs.WriteString(domainStr)
+			hostStr := fmt.Sprintf("&%s=%v", k, v)
+			moreArgs.WriteString(hostStr)
 		}
 	}
 

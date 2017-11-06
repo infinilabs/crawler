@@ -73,18 +73,18 @@ func Test1(t *testing.T) {
 		fmt.Println(g)
 	}
 
-	db.AutoMigrate(model.Domain{})
-	domain := model.Domain{}
-	domain.Host = "baidu.com"
+	db.AutoMigrate(model.Host{})
+	host := model.Host{}
+	host.Host = "baidu.com"
 	time := time.Now().UTC()
-	domain.Created = &time
-	domain.Updated = &time
+	host.Created = &time
+	host.Updated = &time
 
-	db.Create(&domain)
-	domain = model.Domain{}
-	domain.Host = "baidu.com"
-	db.Find(&domain)
-	fmt.Println(util.ToJson(domain, true))
+	db.Create(&host)
+	host = model.Host{}
+	host.Host = "baidu.com"
+	db.Find(&host)
+	fmt.Println(util.ToJson(host, true))
 
 	var us []UserInfo
 	db.Model(&u).Where("depart_name=?", "dev").Find(&us)

@@ -72,14 +72,14 @@ func (h AdminUI) TasksPageAction(w http.ResponseWriter, r *http.Request) {
 
 	var task []model.Task
 	var count1, count2 int
-	var host = h.GetParameterOrDefault(r, "domain", "")
+	var host = h.GetParameterOrDefault(r, "host", "")
 	var from = h.GetIntOrDefault(r, "from", 0)
 	var size = h.GetIntOrDefault(r, "size", 20)
 	count1, task, _ = model.GetTaskList(from, size, host)
 
-	var domains []model.Domain
-	count2, domains, _ = model.GetDomainList(0, 35, "")
-	tasks.Index(w, r, host, from, size, count1, task, count2, domains)
+	var hosts []model.Host
+	count2, hosts, _ = model.GetHostList(0, 35, "")
+	tasks.Index(w, r, host, from, size, count1, task, count2, hosts)
 }
 
 func (h AdminUI) ConsolePageAction(w http.ResponseWriter, r *http.Request) {
@@ -95,7 +95,6 @@ func (h AdminUI) ExplorePageAction(w http.ResponseWriter, r *http.Request) {
 func (h AdminUI) SettingPageAction(w http.ResponseWriter, r *http.Request) {
 
 	o, _ := yaml.Marshal(global.Env().RuntimeConfig)
-
 	setting.Setting(w, string(o))
 }
 

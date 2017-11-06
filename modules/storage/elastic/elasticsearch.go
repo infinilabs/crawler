@@ -89,12 +89,11 @@ func (store ElasticsearchStore) AddValue(bucket string, key []byte, value []byte
 	return err
 }
 
-func (store ElasticsearchStore) DeleteValue(bucket string, key []byte, value []byte) error {
+func (store ElasticsearchStore) DeleteKey(bucket string, key []byte) error {
 	_, err := store.Client.Delete(indexName, string(key))
 	return err
 }
 
-func (store ElasticsearchStore) DeleteBucket(bucket string, key []byte) error {
-	_, err := store.Client.Delete(indexName, string(key))
-	return err
+func (store ElasticsearchStore) DeleteBucket(bucket string) error {
+	panic(errors.New("not implemented yet"))
 }

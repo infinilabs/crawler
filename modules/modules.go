@@ -23,7 +23,6 @@ import (
 	"github.com/infinitbyte/gopa/modules/crawler"
 	"github.com/infinitbyte/gopa/modules/dispatch"
 	"github.com/infinitbyte/gopa/modules/filter"
-	"github.com/infinitbyte/gopa/modules/generator"
 	"github.com/infinitbyte/gopa/modules/index"
 	"github.com/infinitbyte/gopa/modules/persist"
 	"github.com/infinitbyte/gopa/modules/queue"
@@ -47,5 +46,4 @@ func Register() {
 	module.Register(cluster.ClusterModule{})
 	module.Register(ui.UIModule{})
 	module.Register(api.APIModule{})
-	module.Register(generator.GeneratorModule{})
 }

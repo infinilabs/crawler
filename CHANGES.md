@@ -3,6 +3,21 @@
 
 ## CHANGES
 
+
+
+#### v0.10
+
+##### breaking changes
+1. refactor domain to host, api and mapping has changed
+
+##### features
+
+##### improvement
+1. remove goleveldb due to memory leak
+
+##### bugfix
+
+
 #### v0.9
 
 ##### breaking changes

@@ -161,15 +161,15 @@ func (module CheckerModule) execute(data []byte) {
 
 	//send to disk queue
 	if len(task.Host) > 0 && !pipeline.GetContext().IsExit() && !pipeline.GetContext().IsEnd() {
-		stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_TOTAL_COUNT)
+		stats.Increment("host.stats", task.Host+"."+config.STATS_FETCH_TOTAL_COUNT)
 
-		err := model.IncrementDomainLinkCount(task.Host)
+		err := model.IncrementHostLinkCount(task.Host)
 		if err != nil {
 			log.Error(err)
 		}
 		log.Trace("load host settings, ", task.Host)
 
-		queue.Push(config.FetchChannel, model.EncodeFetchTask(task.ID, task.Host, task.Url))
+		queue.Push(config.FetchChannel, model.EncodePipelineTask(task.ID, task.PipelineConfigId))
 
 		stats.Increment("checker.url", "valid_seed")
 

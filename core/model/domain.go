@@ -6,77 +6,82 @@ import (
 	"time"
 )
 
-// Domain is domain host struct
-type Domain struct {
-	Host       string         `storm:"id,unique" json:"host,omitempty" gorm:"not null;unique;primary_key" index:"id"`
-	LinksCount int64          `json:"links_count,omitempty"`
-	Favicon    string         `json:"favicon,omitempty"`
-	Settings   *DomainSetting `storm:"inline" json:"settings,omitempty"`
-	Created    *time.Time     `storm:"index" json:"created,omitempty"`
-	Updated    *time.Time     `storm:"index" json:"updated,omitempty"`
+// Host is host struct
+type Host struct {
+	Host              string          `storm:"id,unique" json:"host,omitempty" gorm:"not null;unique;primary_key" index:"id"`
+	LinksCount        int64           `json:"links_count,omitempty"`
+	Favicon           string          `json:"favicon,omitempty"`
+	CrawlerPipelineID string          `json:"crawler_pipeline_id,omitempty"`
+	CrawlerPipeline   *PipelineConfig `json:"crawler_pipeline,omitempty"`
+	Created           *time.Time      `storm:"index" json:"created,omitempty"`
+	Updated           *time.Time      `storm:"index" json:"updated,omitempty"`
 }
 
-// DomainSetting is a settings for specific domain
-type DomainSetting struct {
-}
-
-// CreateDomain create a domain
-func CreateDomain(host string) Domain {
-	domain := Domain{}
-	domain.Host = host
+// CreateHost create a domain host
+func CreateHost(host string) Host {
+	h := Host{}
+	h.Host = host
 	time := time.Now().UTC()
-	domain.Created = &time
-	domain.Updated = &time
-	persist.Save(&domain)
-	return domain
+	h.Created = &time
+	h.Updated = &time
+	err := persist.Save(&h)
+	if err != nil {
+		panic(err)
+	}
+	return h
 }
 
-// IncrementDomainLinkCount update domain's link count
-func IncrementDomainLinkCount(host string) error {
-	domain := Domain{}
-	domain.Host = host
+// IncrementHostLinkCount update host's link count
+func IncrementHostLinkCount(hostName string) error {
+	host := Host{}
+	host.Host = hostName
 
-	persist.Get(&domain)
+	persist.Get(&host)
 
-	if domain.Created == nil {
-		domain = CreateDomain(host)
+	if host.Created == nil {
+		host = CreateHost(hostName)
 	}
 
-	domain.LinksCount++
-	persist.Update(domain)
-
-	return nil
+	host.LinksCount++
+	return persist.Update(host)
 }
 
-// GetDomainList return domain list
-func GetDomainList(from, size int, domain string) (int, []Domain, error) {
-	var domains []Domain
+// GetHostList return host list
+func GetHostList(from, size int, host string) (int, []Host, error) {
+	var hosts []Host
 
 	query := persist.Query{From: from, Size: size}
-	if len(domain) > 0 {
-		query.Conds = persist.And(persist.Eq("host", domain))
+	if len(host) > 0 {
+		query.Conds = persist.And(persist.Eq("host", host))
 	}
 
-	err, r := persist.Search(Domain{}, &domains, &query)
+	err, r := persist.Search(Host{}, &hosts, &query)
 
-	if domains == nil && r.Result != nil {
+	if hosts == nil && r.Result != nil {
 		t, ok := r.Result.([]interface{})
 		if ok {
 			for _, i := range t {
 				js := util.ToJson(i, false)
-				t := Domain{}
+				t := Host{}
 				util.FromJson(js, &t)
-				domains = append(domains, t)
+				hosts = append(hosts, t)
 			}
 		}
 	}
 
-	return r.Total, domains, err
+	return r.Total, hosts, err
 }
 
-// GetDomain return a single domain
-func GetDomain(domain string) (Domain, error) {
-	var d = Domain{Host: domain}
+// GetHost return a single host
+func GetHost(host string) (Host, error) {
+	var d = Host{Host: host}
 	err := persist.Get(&d)
+	if d.CrawlerPipelineID != "" {
+		c, err := GetPipelineConfig(d.CrawlerPipelineID)
+		if err != nil {
+			panic(err)
+		}
+		d.CrawlerPipeline = c
+	}
 	return d, err
 }

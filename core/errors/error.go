@@ -29,7 +29,8 @@ type ErrorPayload interface{}
 
 var (
 	// Default unknow error
-	Default ErrorCode = 1
+	Default          ErrorCode = 1
+	InvalidParameter ErrorCode = 2
 	// JSONIsEmpty error when json is empty
 	JSONIsEmpty ErrorCode = 100
 	// BodyEmpty error when body is empty

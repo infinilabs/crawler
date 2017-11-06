@@ -86,7 +86,7 @@ func (module DatabaseModule) Start(cfg *Config) {
 	}
 
 	// Migrate the schema
-	db.AutoMigrate(&model.Domain{})
+	db.AutoMigrate(&model.Host{})
 	db.AutoMigrate(&model.Task{})
 	db.AutoMigrate(&model.Snapshot{})
 

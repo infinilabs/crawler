@@ -39,10 +39,10 @@ func (joint IgnoreTimeoutJoint) Process(context *model.Context) error {
 
 	//TODO ignore within time period, rather than total count
 	host := task.Host
-	timeoutCount := stats.Stat("domain.stats", host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
+	timeoutCount := stats.Stat("host.stats", host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
 	if timeoutCount > joint.MustGetInt64(ignoreTimeoutAfterCount) {
-		stats.Increment("domain.stats", host+"."+config.STATS_FETCH_TIMEOUT_IGNORE_COUNT)
-		context.End("too much timeout on this domain, ignored " + host)
+		stats.Increment("host.stats", host+"."+config.STATS_FETCH_TIMEOUT_IGNORE_COUNT)
+		context.End("too much timeout on this host, ignored " + host)
 		log.Warnf("hit timeout host, %s , ignore after,%d ", host, timeoutCount)
 	}
 	return nil

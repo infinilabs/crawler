@@ -17,7 +17,6 @@ limitations under the License.
 package http
 
 import (
-	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -25,46 +24,79 @@ import (
 	"encoding/json"
 )
 
-func (this API) handleGetPipelineJointsRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	log.Debug("get joints")
+func (api API) handleGetPipelineJointsRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	joints := model.GetAllRegisteredJoints()
-	this.WriteJSON(w, joints, http.StatusOK)
-
-	return
+	api.WriteJSON(w, joints, http.StatusOK)
 }
 
-func (this API) handlePostPipelineJointsRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	log.Debug("post joints")
+func (api API) handleCreatePipelineConfigRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	config := model.PipelineConfig{}
 
-	data, err := this.GetRawBody(req)
+	data, err := api.GetRawBody(req)
 	if err != nil {
-		this.Error(w, err)
+		api.Error(w, err)
 		return
 	}
 
 	err = json.Unmarshal(data, &config)
 	if err != nil {
-		this.Error(w, err)
+		api.Error(w, err)
 		return
 	}
-	//TODO save for later use
-	context := &model.Context{}
-	context.Init()
-	pipe := model.NewPipelineFromConfig(&config, context)
-	pipe.Run()
 
-	this.WriteJSON(w, config, http.StatusOK)
+	err = model.CreatePipelineConfig(&config)
+	if err != nil {
+		api.Error(w, err)
+		return
+	}
 
-	return
+	api.WriteJSON(w, config, http.StatusOK)
 }
 
-func (this API) handleGetPipelinesRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (api API) handleGetPipelineConfigRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
-	return
+	id := ps.ByName("id")
+	cfg, err := model.GetPipelineConfig(id)
+	if err != nil {
+		api.Error(w, err)
+	} else {
+		api.WriteJSON(w, cfg, http.StatusOK)
+	}
 }
 
-func (this API) handlePostPipelinesRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (api API) handleUpdatePipelineConfigRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	config := model.PipelineConfig{}
+	id := ps.ByName("id")
 
-	return
+	data, err := api.GetRawBody(req)
+	if err != nil {
+		api.Error(w, err)
+		return
+	}
+
+	err = json.Unmarshal(data, &config)
+	if err != nil {
+		api.Error(w, err)
+		return
+	}
+
+	err = model.UpdatePipelineConfig(id, &config)
+	if err != nil {
+		api.Error(w, err)
+		return
+	}
+
+	api.WriteJSON(w, config, http.StatusOK)
+}
+
+func (api API) handleDeletePipelineConfigRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	id := ps.ByName("id")
+
+	err := model.DeletePipelineConfig(id)
+	if err != nil {
+		api.Error(w, err)
+		return
+	}
+
+	api.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
 }

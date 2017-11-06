@@ -71,7 +71,7 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 							offset = v.Created
 						}
 
-						queue.Push(config.FetchChannel, model.EncodeFetchTask(v.ID, v.Host, v.Url))
+						queue.Push(config.FetchChannel, model.EncodePipelineTask(v.ID, v.PipelineConfigId))
 						if isUpdate {
 							stats.Increment("dispatch", "update.enqueue")
 						}

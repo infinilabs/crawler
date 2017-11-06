@@ -16,6 +16,14 @@ limitations under the License.
 
 package model
 
+import (
+	"encoding/json"
+	"github.com/infinitbyte/gopa/core/errors"
+	"github.com/infinitbyte/gopa/core/persist"
+	"github.com/infinitbyte/gopa/core/util"
+	"time"
+)
+
 // JointConfig configs for each joint
 type JointConfig struct {
 	JointName  string                 `json:"joint" config:"joint"`           //the joint name
@@ -25,14 +33,58 @@ type JointConfig struct {
 
 // PipelineConfig config for each pipeline, a pipeline may have more than one joints
 type PipelineConfig struct {
-	ID            string         `gorm:"not null;unique;primary_key" json:"id" index:"id"`
-	Name          string         `json:"name" config:"name"`
-	StartJoint    *JointConfig   `json:"start" config:"start"`
-	ProcessJoints []*JointConfig `json:"process" config:"process"`
-	EndJoint      *JointConfig   `json:"end" config:"end"`
+	ID            string         `json:"id,omitempty" index:"id"`
+	Phrase        Phrase         `json:"phrase,omitempty" config:"phrase"`
+	Name          string         `json:"name,omitempty" config:"name"`
+	StartJoint    *JointConfig   `json:"start,omitempty" config:"start"`
+	ProcessJoints []*JointConfig `json:"process,omitempty" config:"process"`
+	EndJoint      *JointConfig   `json:"end,omitempty" config:"end"`
+	Created       *time.Time     `json:"created,omitempty"`
+	Updated       *time.Time     `json:"updated,omitempty"`
+	Tags          []string       `json:"tags,omitempty" config:"tags"`
 }
 
-func GetPipelineConfig(taskId, host, url string) (*PipelineConfig, error) {
+const PipelineConfigBucket = "PipelineConfig"
 
-	return nil, nil
+func GetPipelineConfig(id string) (*PipelineConfig, error) {
+	if id == "" {
+		return nil, errors.New("empty id")
+	}
+	b, err := persist.GetValue(PipelineConfigBucket, []byte(id))
+	if err != nil {
+		panic(err)
+	}
+	if len(b) > 0 {
+		v := PipelineConfig{}
+		err = json.Unmarshal(b, &v)
+		return &v, err
+	}
+	return nil, errors.Errorf("not found, %s", id)
+}
+
+func CreatePipelineConfig(cfg *PipelineConfig) error {
+	time := time.Now().UTC()
+	cfg.ID = util.GetUUID()
+	cfg.Created = &time
+	cfg.Updated = &time
+	b, err := json.Marshal(cfg)
+	if err != nil {
+		panic(err)
+	}
+	return persist.AddValue(PipelineConfigBucket, []byte(cfg.ID), b)
+}
+
+func UpdatePipelineConfig(id string, cfg *PipelineConfig) error {
+	time := time.Now().UTC()
+	cfg.ID = id
+	cfg.Updated = &time
+	b, err := json.Marshal(cfg)
+	if err != nil {
+		panic(err)
+	}
+	return persist.AddValue(PipelineConfigBucket, []byte(cfg.ID), b)
+}
+
+func DeletePipelineConfig(id string) error {
+	return persist.DeleteKey(PipelineConfigBucket, []byte(id))
 }

@@ -8,9 +8,9 @@ import (
 )
 
 // GetDomainRow return html blocks to display a domain info
-func GetDomainRow(domain model.Domain) string {
+func GetDomainRow(host model.Host) string {
 	var buffer bytes.Buffer
-	link := fmt.Sprintf("<a href=\"?domain=%v\">%v(%v)</a>", domain.Host, domain.Host, domain.LinksCount)
+	link := fmt.Sprintf("<a href=\"?host=%v\">%v(%v)</a>", host.Host, host.Host, host.LinksCount)
 	writeTag(&buffer, "span", link)
 	return buffer.String()
 }

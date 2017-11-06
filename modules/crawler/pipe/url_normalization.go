@@ -174,9 +174,9 @@ func (joint UrlNormalizationJoint) Process(context *model.Context) error {
 		log.Trace("purell parsed url,", url)
 	}
 
-	////resolve domain specific filter
+	////resolve host specific filter
 	if !joint.GetBool(followAllDomain, false) && joint.GetBool(followSubDomain, true) && currentURI != nil && referenceURI != nil {
-		log.Tracef("try to check domain rule, %s vs %s", referenceURI.Host, currentURI.Host)
+		log.Tracef("try to check host rule, %s vs %s", referenceURI.Host, currentURI.Host)
 		if strings.Contains(currentURI.Host, ".") && strings.Contains(referenceURI.Host, ".") {
 			ref := strings.Split(referenceURI.Host, ".")
 			cur := strings.Split(currentURI.Host, ".")
@@ -184,13 +184,13 @@ func (joint UrlNormalizationJoint) Process(context *model.Context) error {
 			log.Tracef("%s vs %s , %s vs %s ", ref[len(ref)-1], cur[len(cur)-1], ref[len(ref)-2], cur[len(cur)-2])
 
 			if !(ref[len(ref)-1] == cur[len(cur)-1] && ref[len(ref)-2] == cur[len(cur)-2]) {
-				log.Debug("domain mismatch,", referenceURI.Host, " vs ", currentURI.Host)
-				context.End("domain missmatch," + referenceURI.Host + " vs " + currentURI.Host)
+				log.Debug("host mismatch,", referenceURI.Host, " vs ", currentURI.Host)
+				context.End("host missmatch," + referenceURI.Host + " vs " + currentURI.Host)
 				return nil //known exception, not error
 			}
 		} else {
 			if referenceURI.Host != currentURI.Host {
-				context.End("domain missmatch," + referenceURI.Host + " vs " + currentURI.Host)
+				context.End("host missmatch," + referenceURI.Host + " vs " + currentURI.Host)
 				return nil //known exception, not error
 			}
 		}

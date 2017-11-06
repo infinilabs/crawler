@@ -155,20 +155,20 @@ func (joint FetchJoint) Process(context *model.Context) error {
 	select {
 	case <-timer.C:
 		log.Error("fetching url time out, ", requestUrl, ", ", joint.timeout)
-		stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
+		stats.Increment("host.stats", task.Host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
 		task.Status = model.TaskTimeout
 		context.End(fmt.Sprintf("fetching url time out, %s, %s", requestUrl, joint.timeout))
 		return errors.New("fetch url time out")
 	case value := <-flg:
 		if value.flag {
 			log.Debug("fetching url normal exit, ", requestUrl)
-			stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_SUCCESS_COUNT)
+			stats.Increment("host.stats", task.Host+"."+config.STATS_FETCH_SUCCESS_COUNT)
 		} else {
 			log.Debug("fetching url error exit, ", requestUrl)
 			if value.err != nil {
 				context.End(value.err.Error())
 			}
-			stats.Increment("domain.stats", task.Host+"."+config.STATS_FETCH_FAIL_COUNT)
+			stats.Increment("host.stats", task.Host+"."+config.STATS_FETCH_FAIL_COUNT)
 		}
 		task.Status = value.status
 		return nil

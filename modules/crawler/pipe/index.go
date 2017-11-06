@@ -23,7 +23,6 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/queue"
-	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
 )
 
@@ -47,10 +46,7 @@ func (joint IndexJoint) Process(c *model.Context) error {
 
 	data := map[string]interface{}{}
 
-	data["domain"] = util.MapStr{
-		"host": task.Host,
-	}
-
+	data["host"] = task.Host
 	data["task"] = task
 	data["snapshot"] = snapshot
 

@@ -73,10 +73,12 @@ type Handler struct {
 
 // WriteHeader write status code to http header
 func (handler Handler) WriteHeader(w http.ResponseWriter, code int) {
-	w.WriteHeader(code)
+
 	if len(global.Env().SystemConfig.PathConfig.Cert) > 0 {
 		w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 	}
+
+	w.WriteHeader(code)
 	handler.wroteHeader = true
 }
 
@@ -108,8 +110,8 @@ func (handler Handler) EncodeJSON(v interface{}) (b []byte, err error) {
 
 // WriteJSONHeader will write standard json header
 func (handler Handler) WriteJSONHeader(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	//w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	//w.Header().Set("Access-Control-Allow-Origin", "*")
 	handler.wroteHeader = true
 }
 
@@ -208,9 +210,6 @@ func (handler Handler) GetRawBody(r *http.Request) ([]byte, error) {
 
 // Write response to client
 func (handler Handler) Write(w http.ResponseWriter, b []byte) (int, error) {
-	if !handler.wroteHeader {
-		handler.WriteHeader(w, http.StatusOK)
-	}
 	return w.Write(b)
 }
 
@@ -231,9 +230,6 @@ func (handler Handler) Error(w http.ResponseWriter, err error) {
 
 // Flush flush response message
 func (handler Handler) Flush(w http.ResponseWriter) {
-	if !handler.wroteHeader {
-		w.WriteHeader(http.StatusOK)
-	}
 	flusher := w.(http.Flusher)
 	flusher.Flush()
 }

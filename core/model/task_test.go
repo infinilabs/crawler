@@ -23,16 +23,14 @@ import (
 
 func TestFetchTaskEncode(t *testing.T) {
 	taskID := "taskID123123"
-	b := EncodeFetchTask(taskID, "", "")
-	t1, p1, u1 := DecodeFetchTask(b)
+	b := EncodePipelineTask(taskID, "")
+	t1, p1 := DecodePipelineTask(b)
 	assert.Equal(t, taskID, t1)
 	assert.Equal(t, "", p1)
-	assert.Equal(t, "", u1)
 
 	p2 := "pipline2"
-	u2 := "url2"
-	b = EncodeFetchTask(taskID, p2, u2)
-	t1, p1, u1 = DecodeFetchTask(b)
+	b = EncodePipelineTask(taskID, p2)
+	t1, p1 = DecodePipelineTask(b)
 	assert.Equal(t, taskID, t1)
 	assert.Equal(t, p2, p1)
 }

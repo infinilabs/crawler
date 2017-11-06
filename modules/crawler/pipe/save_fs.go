@@ -46,10 +46,10 @@ func (joint SaveSnapshotToFileSystemJoint) Process(c *model.Context) error {
 
 	url := task.Url
 
-	domain := task.Host
+	host := task.Host
 	dir := snapshot.Path
 	file := snapshot.File
-	folder := path.Join(joint.baseDir, domain, dir)
+	folder := path.Join(joint.baseDir, host, dir)
 
 	fullPath := path.Join(folder, file)
 
@@ -58,7 +58,7 @@ func (joint SaveSnapshotToFileSystemJoint) Process(c *model.Context) error {
 		return nil
 	}
 
-	log.Trace("save url,", url, ",domain,", task.Host, ",folder,", folder, ",file:", file, ",fullpath,", fullPath)
+	log.Trace("save url,", url, ",host,", task.Host, ",folder,", folder, ",file:", file, ",fullpath,", fullPath)
 
 	err := os.MkdirAll(folder, 0777)
 	if err != nil {

@@ -179,15 +179,15 @@ func (module CrawlerModule) runPipeline(signalC *chan bool, shard int) {
 		case taskInfo = <-queue.ReadChan(config.FetchChannel):
 			stats.Increment("queue."+string(config.FetchChannel), "pop")
 
-			taskId, host, url := model.DecodeFetchTask(taskInfo)
+			taskId, pipelineConfigId := model.DecodePipelineTask(taskInfo)
 
-			pipelineConfig, err := model.GetPipelineConfig(taskId, host, url)
-			if err != nil {
-				panic(err)
-			}
-
-			if pipelineConfig == nil {
-				pipelineConfig = module.config.DefaultPipelineConfig
+			pipelineConfig := module.config.DefaultPipelineConfig
+			if pipelineConfigId != "" {
+				var err error
+				pipelineConfig, err = model.GetPipelineConfig(pipelineConfigId)
+				if err != nil {
+					panic(err)
+				}
 			}
 
 			log.Trace("shard:", shard, ",task received:", taskId)

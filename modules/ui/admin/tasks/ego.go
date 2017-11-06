@@ -14,7 +14,7 @@ import (
 )
 
 var _ = fmt.Sprint("") // just so that we can keep the fmt import for now
-func Index(w io.Writer, r *http.Request, domain string, from, size, taskCount int, tasks []model.Task, domainsCount int, domains []model.Domain) error {
+func Index(w io.Writer, r *http.Request, domain string, from, size, taskCount int, tasks []model.Task, domainsCount int, domains []model.Host) error {
 	_, _ = io.WriteString(w, "\n\n")
 	_, _ = io.WriteString(w, "\n")
 	_, _ = io.WriteString(w, "\n")
@@ -28,7 +28,7 @@ func Index(w io.Writer, r *http.Request, domain string, from, size, taskCount in
 	_, _ = io.WriteString(w, "\n\n")
 
 	paras := map[string]interface{}{}
-	paras["domain"] = domain
+	paras["host"] = domain
 
 	_, _ = io.WriteString(w, "\n\n<div class=\"tm-middle\">\n\n    <div class=\"uk-container uk-container-center\">\n\n        <div class=\"uk-grid\" data-uk-grid-margin=\"\">\n            <div class=\"tm-sidebar uk-width-medium-1-4 uk-hidden-small uk-row-first\">\n\n                <ul class=\"tm-nav uk-nav\" data-uk-nav=\"\">\n\n                    <!--<li class=\"uk-nav-header\">Tasks</li>-->\n                    <!--<li class=\"uk-active\"><a href=\"#create-task-modal\" data-uk-modal>Create a task</a></li>-->\n                </ul>\n\n            </div>\n            <div class=\"tm-main uk-width-medium-3-4\">\n\n                <article class=\"uk-article\">\n\n\n                </article>\n\n            </div>\n        </div>\n\n        <div class=\"uk-grid\" data-uk-grid-margin>\n\n\n            <div class=\"uk-width-2-10\">\n                <div class=\"uk-alert\" ><span id=\"domain-alert\">Total ")
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(domainsCount)))

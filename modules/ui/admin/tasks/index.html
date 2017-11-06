@@ -1,4 +1,4 @@
-<%! func Index(w io.Writer,r *http.Request,domain string,from,size,taskCount int,tasks []model.Task,domainsCount int,domains []model.Domain) error %>
+<%! func Index(w io.Writer,r *http.Request,domain string,from,size,taskCount int,tasks []model.Task,domainsCount int,domains []model.Host) error %>
 
 <%% import "github.com/infinitbyte/gopa/modules/ui/admin/common" %%>
 <%% import "github.com/infinitbyte/gopa/core/model" %%>
@@ -16,7 +16,7 @@
 
 <%
 paras:=map[string]interface{}{}
-paras["domain"]=domain
+paras["host"]=domain
 %>
 
 <div class="tm-middle">

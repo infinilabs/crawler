@@ -25,6 +25,7 @@ import (
 	"github.com/boltdb/bolt"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/global"
+	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/persist"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
@@ -63,6 +64,7 @@ func (store BoltdbStore) Open() error {
 		config.StatsBucketKey,
 		config.SnapshotBucketKey,
 		config.SnapshotMappingBucketKey,
+		model.PipelineConfigBucket,
 		string(config.CheckFilter),
 		string(config.FetchFilter),
 		string(config.ContentHashFilter),
@@ -138,7 +140,7 @@ func (store BoltdbStore) AddValue(bucket string, key []byte, value []byte) error
 	return nil
 }
 
-func (store BoltdbStore) DeleteValue(bucket string, key []byte, value []byte) error {
+func (store BoltdbStore) DeleteKey(bucket string, key []byte) error {
 	db.Bolt.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
 		err := b.Delete(key)
@@ -147,10 +149,9 @@ func (store BoltdbStore) DeleteValue(bucket string, key []byte, value []byte) er
 	return nil
 }
 
-func (store BoltdbStore) DeleteBucket(bucket string, key []byte) error {
+func (store BoltdbStore) DeleteBucket(bucket string) error {
 	db.Bolt.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(bucket))
-		err := b.DeleteBucket(key)
+		err := tx.DeleteBucket([]byte(bucket))
 		return err
 	})
 	return nil

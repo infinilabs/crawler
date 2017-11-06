@@ -28,5 +28,5 @@ func (filter *BoltdbImpl) Add(key []byte) error {
 }
 
 func (filter *BoltdbImpl) Delete(key []byte) error {
-	return persist.DeleteBucket(filter.FilterBucket, key)
+	return persist.DeleteKey(filter.FilterBucket, key)
 }

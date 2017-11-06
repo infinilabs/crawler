@@ -26,18 +26,16 @@ import (
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
-	"time"
 )
 
 func Test(t *testing.T) {
-	var storage storage.StorageModule
 	env1 := EmptyEnv()
 	env1.SystemConfig.PathConfig.Data = "/tmp/filter_" + util.PickRandomName()
 	os.RemoveAll(env1.SystemConfig.PathConfig.Data)
 	env1.IsDebug = true
 	global.RegisterEnv(env1)
 
-	storage = storage.StorageModule{}
+	storage := storage.StorageModule{}
 	storage.Start(GetModuleConfig(storage.Name()))
 
 	var filter FilterModule
@@ -46,12 +44,11 @@ func Test(t *testing.T) {
 	b, _ := filter.CheckThenAdd(config.CheckFilter, []byte("key"))
 	assert.Equal(t, false, b)
 
-	for i := 0; i < 1; i++ {
-		go run(&filter, i, t)
-	}
-
-	time.Sleep(10 * time.Minute)
-
+	//for i := 0; i < 1; i++ {
+	//	go run(&filter, i, t)
+	//}
+	//
+	//time.Sleep(1 * time.Minute)
 }
 
 func run(filter *FilterModule, seed int, t *testing.T) {

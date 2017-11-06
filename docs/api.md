@@ -22,17 +22,17 @@ curl -XPOST "http://localhost:8001/task/" -d '{
 }' 
 ```
 
-* Get domains
+* Get hosts
 
 ```
-curl -XGET http://127.0.0.1:8001/domain
+curl -XGET http://127.0.0.1:8001/host
 ```
 
 
 * Get tasks
 
 ```
-curl -XGET http://127.0.0.1:8001/task?from=100&size=10&domain=elasticsearch.cn
+curl -XGET http://127.0.0.1:8001/task?from=100&size=10&host=elasticsearch.cn
 
 ```
 

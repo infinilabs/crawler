@@ -67,7 +67,7 @@ func TestPipelineConfig(t *testing.T) {
 	assert.Equal(t, "true", context.Data["published"])
 	assert.Equal(t, "true", context.Data["saved"])
 	assert.Equal(t, true, context.Data["status"])
-	assert.Equal(t, "http://gogo.com", context.Data["domain"])
+	assert.Equal(t, "http://gogo.com", context.Data["host"])
 
 }
 

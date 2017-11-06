@@ -46,7 +46,7 @@ func GetTaskStatusText(status TaskStatus) string {
 }
 
 type Seed struct {
-	// the seed url may not cleaned, may miss the domain part, need reference to provide the complete url information
+	// the seed url may not cleaned, may miss the host part, need reference to provide the complete url information
 	Url       string `storm:"index" json:"url,omitempty" gorm:"type:varchar(500)"`
 	Reference string `json:"reference_url,omitempty"`
 	Depth     int    `storm:"index" json:"depth"`
@@ -119,14 +119,14 @@ func NewTaskSeed(url, ref string, depth int, breadth int) Seed {
 	return task
 }
 
-func EncodeFetchTask(taskId, host, url string) []byte {
-	return []byte(fmt.Sprintf("%s%s%s%s%s", taskId, delimiter, host, delimiter, url))
+func EncodePipelineTask(taskId, pipelineConfigId string) []byte {
+	return []byte(fmt.Sprintf("%s%s%s", taskId, delimiter, pipelineConfigId))
 }
 
-func DecodeFetchTask(str []byte) (taskId, host, url string) {
+func DecodePipelineTask(str []byte) (taskId, pipelineConfigId string) {
 	mix := string(str)
 	arr := strings.Split(mix, delimiter)
-	return arr[0], arr[1], arr[2]
+	return arr[0], arr[1]
 }
 
 type Task struct {
@@ -149,6 +149,8 @@ type Task struct {
 	SnapshotHash    string     `json:"snapshot_hash,omitempty"`
 	SnapshotSimHash string     `json:"snapshot_simhash,omitempty"`
 	SnapshotCreated *time.Time `json:"snapshot_created,omitempty"`
+
+	PipelineConfigId string `json:"pipline_config_id,omitempty"`
 }
 
 func CreateTask(task *Task) error {
@@ -217,14 +219,14 @@ func GetTaskByField(k, v string) ([]Task, error) {
 	return tasks, err
 }
 
-func GetTaskList(from, size int, domain string) (int, []Task, error) {
-	log.Tracef("start get crawler tasks, %v-%v, %v", from, size, domain)
+func GetTaskList(from, size int, host string) (int, []Task, error) {
+	log.Tracef("start get crawler tasks, %v-%v, %v", from, size, host)
 	var tasks []Task
 	sort := []persist.Sort{}
 	sort = append(sort, persist.Sort{Field: "created", SortType: persist.DESC})
 	queryO := persist.Query{Sort: &sort, From: from, Size: size}
-	if len(domain) > 0 {
-		queryO.Conds = persist.And(persist.Eq("host", domain))
+	if len(host) > 0 {
+		queryO.Conds = persist.And(persist.Eq("host", host))
 	}
 	err, result := persist.Search(Task{}, &tasks, &queryO)
 	if err != nil {

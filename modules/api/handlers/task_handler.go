@@ -58,11 +58,11 @@ func (handler API) TaskGetAction(w http.ResponseWriter, req *http.Request, ps ht
 
 }
 
-// TaskAction handle task creation and return task list which support parameter: `from`, `size` and `domain`, eg:
+// TaskAction handle task creation and return task list which support parameter: `from`, `size` and `host`, eg:
 // curl -XPOST "http://localhost:8001/task/" -d '{
 //"seed":"http://elasticsearch.cn"
 //}'
-//curl -XGET http://127.0.0.1:8001/task?from=100&size=10&domain=elasticsearch.cn
+//curl -XGET http://127.0.0.1:8001/task?from=100&size=10&host=elasticsearch.cn
 func (handler API) TaskAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
 	if req.Method == api.POST.String() {
@@ -87,7 +87,7 @@ func (handler API) TaskAction(w http.ResponseWriter, req *http.Request, ps httpr
 
 		fr := handler.GetParameter(req, "from")
 		si := handler.GetParameter(req, "size")
-		domain := handler.GetParameter(req, "domain")
+		host := handler.GetParameter(req, "host")
 
 		from, err := strconv.Atoi(fr)
 		if err != nil {
@@ -98,7 +98,7 @@ func (handler API) TaskAction(w http.ResponseWriter, req *http.Request, ps httpr
 			size = 10
 		}
 
-		total, tasks, err := model.GetTaskList(from, size, domain)
+		total, tasks, err := model.GetTaskList(from, size, host)
 		if err != nil {
 			handler.Error(w, err)
 		} else {
@@ -107,9 +107,9 @@ func (handler API) TaskAction(w http.ResponseWriter, req *http.Request, ps httpr
 	}
 }
 
-// DomainDeleteAction handle domain deletion, only support delete by id, eg:
-//curl -XDELETE http://127.0.0.1:8001/domain/1
-func (handler API) DomainDeleteAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+// DeleteHostAction handle host deletion, only support delete by id, eg:
+//curl -XDELETE http://127.0.0.1:8001/host/1
+func (handler API) DeleteHostAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	if req.Method == api.DELETE.String() {
 		id := ps.ByName("id")
 		err := model.DeleteTask(id)
@@ -123,11 +123,11 @@ func (handler API) DomainDeleteAction(w http.ResponseWriter, req *http.Request, 
 	}
 }
 
-// DomainGetAction return domain by domain id, eg:
-//curl -XGET http://127.0.0.1:8001/domain/1
-func (handler API) DomainGetAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+// GetHostAction return host by id, eg:
+//curl -XGET http://127.0.0.1:8001/host/1
+func (handler API) GetHostAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
-	task, err := model.GetDomain(id)
+	task, err := model.GetHost(id)
 	if err != nil {
 		handler.Error(w, err)
 	} else {
@@ -137,17 +137,15 @@ func (handler API) DomainGetAction(w http.ResponseWriter, req *http.Request, ps 
 
 }
 
-// DomainAction return domain list, support parameter: `from`, `size` and `domain`, eg:
-//curl -XGET http://127.0.0.1:8001/domain?from=0&size=10
-func (handler API) DomainAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+// GetHostsAction return host list, support parameter: `from`, `size` and `host`, eg:
+//curl -XGET http://127.0.0.1:8001/host?from=0&size=10
+func (handler API) GetHostsAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
 	if req.Method == api.GET.String() {
 
-		logger.Trace("get all domain settings")
-
 		fr := handler.GetParameter(req, "from")
 		si := handler.GetParameter(req, "size")
-		domain := handler.GetParameter(req, "domain")
+		host := handler.GetParameter(req, "host")
 
 		from, err := strconv.Atoi(fr)
 		if err != nil {
@@ -158,12 +156,12 @@ func (handler API) DomainAction(w http.ResponseWriter, req *http.Request, ps htt
 			size = 10
 		}
 
-		total, domains, err := model.GetDomainList(from, size, domain)
+		total, hosts, err := model.GetHostList(from, size, host)
 
-		newDomains := []model.Domain{}
-		for _, v := range domains {
+		newDomains := []model.Host{}
+		for _, v := range hosts {
 
-			total := stats.Stat("domain.stats", v.Host+"."+config.STATS_FETCH_TOTAL_COUNT)
+			total := stats.Stat("host.stats", v.Host+"."+config.STATS_FETCH_TOTAL_COUNT)
 			v.LinksCount = total
 			newDomains = append(newDomains, v)
 		}

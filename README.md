@@ -74,13 +74,9 @@ By default, Gopa works well except indexing, if you want to use elasticsearch as
   "mappings": {
     "doc": {
       "properties": {
-        "domain": {
-          "properties": {
-            "host": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
+        "host": {
+            "type": "keyword",
+            "ignore_above": 256
         },
         "snapshot": {
           "properties": {

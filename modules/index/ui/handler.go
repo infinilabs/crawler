@@ -85,9 +85,9 @@ func (h *UserUI) IndexPageAction(w http.ResponseWriter, req *http.Request, ps ht
         }
     },
     "aggs": {
-        "domain.host|Domain": {
+        "host|Host": {
             "terms": {
-                "field": "domain.host",
+                "field": "host",
                 "size": 10
             }
         },
