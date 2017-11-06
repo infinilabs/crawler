@@ -31,7 +31,7 @@ func (module GeneratorModule) Start(cfg *Config) {
 			}
 
 			if generatorConfig.TaskID != "" {
-				queue.Push(config.FetchChannel, model.EncodeFetchTask(generatorConfig.TaskID, "", ""))
+				queue.Push(config.FetchChannel, model.EncodePipelineTask(generatorConfig.TaskID, "", ""))
 			}
 			time.Sleep(100 * time.Millisecond)
 		}

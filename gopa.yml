@@ -244,7 +244,8 @@ modules:
   interval_in_seconds: 1
 
 
-- module: generator
+plugins:
+- plugin: generator
   enabled: false
   task_id: ""
   task_url: "http://localhost:8081"
