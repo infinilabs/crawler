@@ -220,9 +220,6 @@ By default, Gopa works well except indexing, if you want to use elasticsearch as
               "type": "keyword",
               "ignore_above": 256
             },
-            "phrase": {
-              "type": "integer"
-            },
             "reference_url": {
               "type": "keyword",
               "ignore_above": 256

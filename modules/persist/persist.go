@@ -65,7 +65,6 @@ func (module DatabaseModule) Start(cfg *Config) {
 	//init config
 	config := getDefaultConfig()
 	cfg.Unpack(&config)
-	module.config = &config
 
 	if config.Driver == "elasticsearch" {
 		client := index.ElasticsearchClient{Config: config.Elastic}
@@ -104,5 +103,4 @@ func (module DatabaseModule) Stop() error {
 }
 
 type DatabaseModule struct {
-	config *PersistConfig
 }

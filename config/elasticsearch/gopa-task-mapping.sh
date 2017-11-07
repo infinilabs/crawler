@@ -30,9 +30,6 @@ curl -XPUT "http://localhost:9200/gopa-task" -H 'Content-Type: application/json'
 "original_url": {
 "type": "keyword"
 },
-"phrase": {
-"type": "long"
-},
 "reference_url": {
 "type": "keyword"
 },

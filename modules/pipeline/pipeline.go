@@ -34,22 +34,28 @@ import (
 )
 
 var frameworkStarted bool
+var pipes map[string]*Pipe
 
 type PipelineFrameworkModule struct {
-	Pipes map[string]*Pipe `config:"pipes"`
 }
 
 type Pipe struct {
-	config         *PipeConfig
+	Config         PipeConfig
 	l              sync.Mutex
 	signalChannels []*chan bool
 }
 
-func (pipe *Pipe) Start(config *PipeConfig) {
+func (pipe *Pipe) Start(config PipeConfig) {
+	if !pipe.Config.Enabled {
+		log.Debugf("pipeline: %s was disabled", pipe.Config.Name)
+		return
+	}
+
 	pipe.l.Lock()
 	defer pipe.l.Unlock()
+	pipe.Config = config
 
-	numGoRoutine := pipe.config.MaxGoRoutine
+	numGoRoutine := pipe.Config.MaxGoRoutine
 
 	pipe.signalChannels = make([]*chan bool, numGoRoutine)
 	//start fetcher
@@ -60,14 +66,18 @@ func (pipe *Pipe) Start(config *PipeConfig) {
 		go pipe.runPipeline(&signalC, i)
 
 	}
+	log.Infof("pipeline: %s was started with %v instances", pipe.Config.Name, numGoRoutine)
 }
 
-func (pipe *Pipe) Update(config *PipeConfig) {
+func (pipe *Pipe) Update(config PipeConfig) {
 	pipe.Stop()
 	pipe.Start(config)
 }
 
 func (pipe *Pipe) Stop() {
+	if !pipe.Config.Enabled {
+		return
+	}
 	pipe.l.Lock()
 	defer pipe.l.Unlock()
 
@@ -92,7 +102,7 @@ func (pipe *Pipe) runPipeline(singal *chan bool, shard int) {
 
 			taskId, pipelineConfigId := model.DecodePipelineTask(taskInfo)
 
-			pipelineConfig := pipe.config.DefaultConfig
+			pipelineConfig := pipe.Config.DefaultConfig
 			if pipelineConfigId != "" {
 				var err error
 				pipelineConfig, err = model.GetPipelineConfig(pipelineConfigId)
@@ -121,100 +131,19 @@ func (pipe *Pipe) execute(taskId string, pipelineConfig *model.PipelineConfig) {
 		}
 	}()
 
-	context := &model.Context{Phrase: config.PhraseCrawler}
+	context := &model.Context{}
 	context.Set(CONTEXT_TASK_ID, taskId)
 
-	pipeline = model.NewPipelineFromConfig(pipelineConfig, context)
+	pipeline = model.NewPipelineFromConfig(pipe.Config.Name, pipelineConfig, context)
 	pipeline.Run()
 
-	if pipe.config.ThresholdInMs > 0 {
-		log.Debug("sleep ", pipe.config.ThresholdInMs, "ms to control crawling speed")
-		time.Sleep(time.Duration(pipe.config.ThresholdInMs) * time.Millisecond)
+	if pipe.Config.ThresholdInMs > 0 {
+		log.Debug("sleep ", pipe.Config.ThresholdInMs, "ms to control crawling speed")
+		time.Sleep(time.Duration(pipe.Config.ThresholdInMs) * time.Millisecond)
 		log.Debug("wake up now,continue crawing")
 	}
 
 	log.Trace("end pipeline")
-}
-
-// getDefaultCrawlerConfig return a default PipeConfig
-func getDefaultCrawlerConfig() PipeConfig {
-
-	config := model.PipelineConfig{}
-	start := model.JointConfig{}
-	start.Enabled = true
-	start.JointName = "init_task"
-	config.StartJoint = &start
-	save := model.JointConfig{}
-	save.Enabled = true
-	save.JointName = "save_task"
-
-	urlNormalization := model.JointConfig{}
-	urlNormalization.Enabled = true
-	urlNormalization.JointName = "url_normalization"
-	urlNormalization.Parameters = util.MapStr{
-		"follow_all_domain": false,
-		"follow_sub_domain": true,
-	}
-
-	fetchJoint := model.JointConfig{}
-	fetchJoint.Enabled = true
-	fetchJoint.JointName = "fetch"
-
-	parse := model.JointConfig{}
-	parse.Enabled = true
-	parse.JointName = "parse"
-
-	html2text := model.JointConfig{}
-	html2text.Enabled = true
-	html2text.JointName = "html2text"
-
-	hash := model.JointConfig{}
-	hash.Enabled = true
-	hash.JointName = "hash"
-
-	updateCheckTime := model.JointConfig{}
-	updateCheckTime.Enabled = true
-	updateCheckTime.JointName = "update_check_time"
-
-	contentDeduplication := model.JointConfig{}
-	contentDeduplication.Enabled = true
-	contentDeduplication.JointName = "content_deduplication"
-
-	langDetect := model.JointConfig{}
-	langDetect.Enabled = true
-	langDetect.JointName = "lang_detect"
-
-	index := model.JointConfig{}
-	index.Enabled = true
-	index.JointName = "index"
-
-	saveSnapshot := model.JointConfig{}
-	saveSnapshot.Enabled = true
-	saveSnapshot.JointName = "save_snapshot_db"
-
-	config.EndJoint = &save
-	config.ProcessJoints = []*model.JointConfig{
-		&urlNormalization,
-		&fetchJoint,
-		&parse,
-		&html2text,
-		&hash,
-		&updateCheckTime,
-		&contentDeduplication,
-		&langDetect,
-		&saveSnapshot,
-		&index,
-	}
-
-	defaultCrawlerConfig := PipeConfig{
-		Name:          "crawler",
-		MaxGoRoutine:  10,
-		TimeoutInMs:   60000,
-		ThresholdInMs: 0,
-		DefaultConfig: &config,
-	}
-
-	return defaultCrawlerConfig
 }
 
 func (module PipelineFrameworkModule) Name() string {
@@ -230,24 +159,24 @@ func (module PipelineFrameworkModule) Start(cfg *Config) {
 
 	//init joints
 	InitJoints()
+	var config = struct {
+		Pipes []PipeConfig `config:"pipes"`
+	}{GetDefaultPipeConfig()}
 
-	//config := GetDefaultTaskConfig()
-	//cfg.Unpack(&config)
-	//module.config = &config
+	cfg.Unpack(&config)
 
-	module.Pipes = map[string]*Pipe{}
-	c := getDefaultCrawlerConfig()
-
-	if c.DefaultConfig == nil {
-		panic(errors.Errorf("default pipeline config can't be null, %v", c))
+	pipes = map[string]*Pipe{}
+	for i, v := range config.Pipes {
+		if v.DefaultConfig == nil {
+			panic(errors.Errorf("default pipeline config can't be null, %v, %v", i, v))
+		}
+		p := &Pipe{Config: v}
+		pipes[v.Name] = p
 	}
 
-	module.Pipes[c.Name] = &Pipe{config: &c}
-
-	for k, v := range module.Pipes {
-		log.Debugf("startting pipeline: %s", k)
-		v.Start(v.config)
-		log.Infof("pipeline: %s started", k)
+	log.Debug("starting up pipeline framework")
+	for _, v := range pipes {
+		v.Start(v.Config)
 	}
 
 	frameworkStarted = true
@@ -256,11 +185,9 @@ func (module PipelineFrameworkModule) Start(cfg *Config) {
 func (module PipelineFrameworkModule) Stop() error {
 	if frameworkStarted {
 		frameworkStarted = false
-		log.Debug("start shutting down pipeline framework")
-		for k, v := range module.Pipes {
-			log.Infof("stopping pipeline: %s", k)
+		log.Debug("shutting down pipeline framework")
+		for _, v := range pipes {
 			v.Stop()
-			log.Infof("pipeline: %s stopped", k)
 		}
 	} else {
 		log.Error("pipeline framework is not started")

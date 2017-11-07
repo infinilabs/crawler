@@ -149,9 +149,6 @@ curl -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json
 "type": "keyword",
 "ignore_above": 256
 },
-"phrase": {
-"type": "integer"
-},
 "reference_url": {
 "type": "keyword",
 "ignore_above": 256

@@ -39,7 +39,7 @@ func Register() {
 	module.Register(stats.SimpleStatsModule{})
 	module.Register(stats.StatsDModule{})
 	module.Register(queue.DiskQueue{})
-	module.Register(pipeline.CheckerModule{})
+	//module.Register(pipeline.CheckerModule{})
 	module.Register(pipeline.PipelineFrameworkModule{})
 	module.Register(dispatch.DispatchModule{})
 	module.Register(index.IndexModule{})

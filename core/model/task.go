@@ -135,7 +135,6 @@ type Task struct {
 	Host        string     `gorm:"index" json:"host"`
 	Schema      string     `json:"schema,omitempty"`
 	OriginalUrl string     `json:"original_url,omitempty"`
-	Phrase      Phrase     `gorm:"index" json:"phrase"`
 	Status      TaskStatus `gorm:"index" json:"status"`
 	Message     string     `json:"message,omitempty"`
 	Created     *time.Time `gorm:"index" json:"created,omitempty"`
@@ -245,7 +244,7 @@ func GetPendingNewFetchTasks() (int, []Task, error) {
 	var tasks []Task
 	sort := []persist.Sort{}
 	sort = append(sort, persist.Sort{Field: "created", SortType: persist.DESC})
-	queryO := persist.Query{Sort: &sort, Conds: persist.And(persist.Eq("phrase", 1))}
+	queryO := persist.Query{Sort: &sort, Conds: persist.And(persist.Eq("status", TaskCreated))}
 	err, result := persist.Search(Task{}, &tasks, &queryO)
 	if err != nil {
 		log.Error(err)

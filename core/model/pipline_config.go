@@ -34,7 +34,6 @@ type JointConfig struct {
 // PipelineConfig config for each pipeline, a pipeline may have more than one joints
 type PipelineConfig struct {
 	ID            string         `json:"id,omitempty" index:"id"`
-	Phrase        Phrase         `json:"phrase,omitempty" config:"phrase"`
 	Name          string         `json:"name,omitempty" config:"name"`
 	StartJoint    *JointConfig   `json:"start,omitempty" config:"start"`
 	ProcessJoints []*JointConfig `json:"process,omitempty" config:"process"`

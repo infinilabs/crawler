@@ -28,12 +28,12 @@ modules:
   enabled: true
   pipes:
     - name: crawler
-      max_go_routine: 100
+      enabled: true
+      max_go_routine: 10
       threshold_in_ms: 0
       # default timeout is 60s
-      timeout_in_ms: 60000
+      timeout_in_ms: 30000
       default_config:
-        name: my_crawler
         start:
           joint: init_task
           enabled: true
@@ -91,12 +91,12 @@ modules:
           joint: save_task
           enabled: true
     - name: checker
-      max_go_routine: 100
+      enabled: true
+      max_go_routine: 10
       threshold_in_ms: 0
       # default timeout is 60s
-      timeout_in_ms: 60000
+      timeout_in_ms: 5000
       default_config:
-          name: my_checker
           start:
             joint: init_task
             enabled: true

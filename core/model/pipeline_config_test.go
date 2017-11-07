@@ -34,8 +34,6 @@ func TestPipelineConfig(t *testing.T) {
 	global.Env().IsDebug = true
 
 	config := PipelineConfig{}
-	config.Name = "test_pipe_line"
-
 	context := &Context{}
 	context.Init()
 	context.Data["url"] = "gogol.com"

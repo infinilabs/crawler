@@ -79,10 +79,10 @@ func (module APIModule) internalStart(env *env.Env) {
 
 	address := util.AutoGetAddress(env.SystemConfig.APIBinding)
 
-	if module.env.SystemConfig.TLSEnabled {
+	if global.Env().SystemConfig.TLSEnabled {
 		log.Debug("start ssl endpoint")
 
-		certFile := path.Join(module.env.SystemConfig.PathConfig.Cert, "*c*rt*")
+		certFile := path.Join(global.Env().SystemConfig.PathConfig.Cert, "*c*rt*")
 		match, err := filepath.Glob(certFile)
 		if err != nil {
 			panic(err)
@@ -92,7 +92,7 @@ func (module APIModule) internalStart(env *env.Env) {
 		}
 		certFile = match[0]
 
-		keyFile := path.Join(module.env.SystemConfig.PathConfig.Cert, "*key*")
+		keyFile := path.Join(global.Env().SystemConfig.PathConfig.Cert, "*key*")
 		match, err = filepath.Glob(keyFile)
 		if err != nil {
 			panic(err)
@@ -147,7 +147,6 @@ func (module APIModule) Name() string {
 // Start api server
 func (module APIModule) Start(cfg *config.Config) {
 
-	module.env = global.Env()
 	//API server
 	go func() {
 		handlers.InitAPI()
@@ -163,5 +162,4 @@ func (module APIModule) Stop() error {
 
 // APIModule is used to start API server
 type APIModule struct {
-	env *env.Env
 }

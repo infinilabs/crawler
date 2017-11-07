@@ -4,7 +4,6 @@ import (
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/filter"
 	"github.com/infinitbyte/gopa/core/global"
-	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/queue"
 )
 
@@ -25,11 +24,6 @@ const TaskBucketKey string = "Task"
 const StatsBucketKey string = "Stats"
 const SnapshotBucketKey string = "Snapshot"
 const SnapshotMappingBucketKey string = "SnapshotMapping"
-
-const PhraseChecker model.Phrase = 1 //check url validation
-const PhraseCrawler model.Phrase = 2 //going to fetch
-const PhraseParse model.Phrase = 3   //parse content
-const PhraseUpdate model.Phrase = 4  //scheduled update
 
 const REGISTER_BOLTDB global.RegisterKey = "REGISTER_BOLTDB"
 

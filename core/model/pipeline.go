@@ -32,13 +32,10 @@ import (
 
 type ParaKey string
 
-type Phrase int
-
 type Context struct {
 	Parameters
 
 	Simulate     bool        `json:"simulate"`
-	Phrase       Phrase      `json:"phrase"`
 	IgnoreBroken bool        `json:"ignore_broken"`
 	Payload      interface{} `json:"-"`
 
@@ -62,7 +59,7 @@ func (context *Context) IsEnd() bool {
 	return context.breakFlag
 }
 
-// IsExit means all pipelines will be breaked and jump to outside, even the end phrase will not be executed as well
+// IsExit means all pipelines will be broke and jump to outside, even the end phrase will not be executed as well
 func (context *Context) IsExit() bool {
 	return context.exitFlag
 }
@@ -412,14 +409,14 @@ func (pipe *Pipeline) endPipeline() {
 	log.Trace("end finish pipeline, ", pipe.name)
 }
 
-func NewPipelineFromConfig(config *PipelineConfig, context *Context) *Pipeline {
+func NewPipelineFromConfig(name string, config *PipelineConfig, context *Context) *Pipeline {
 	if global.Env().IsDebug {
 		log.Debugf("pipeline config: %v", util.ToJson(config, true))
 	}
 
 	pipe := &Pipeline{}
 	pipe.id = util.GetIncrementID("pipe")
-	pipe.name = strings.TrimSpace(config.Name)
+	pipe.name = strings.TrimSpace(name)
 
 	pipe.Context(context)
 
