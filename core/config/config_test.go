@@ -107,7 +107,7 @@ func newConfig(t testing.TB, cfgs []*Config) []*Config {
 	for _, cfg := range cfgs {
 		//set map for modules and module config
 		fmt.Println(getModuleName(cfg))
-		fmt.Println(cfg.Enabled())
+		fmt.Println(cfg.Enabled(true))
 		config, err := NewConfigFrom(cfg)
 		if err != nil {
 			t.Fatal(err)

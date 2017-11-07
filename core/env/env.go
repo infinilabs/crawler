@@ -157,7 +157,7 @@ func parseModuleConfig(cfgs []*config.Config) []*config.Config {
 	results := []*config.Config{}
 	for _, cfg := range cfgs {
 		//set map for modules and module config
-		log.Trace(getModuleName(cfg), ",", cfg.Enabled())
+		log.Trace(getModuleName(cfg), ",", cfg.Enabled(true))
 		config, err := config.NewConfigFrom(cfg)
 		if err != nil {
 			panic(err)

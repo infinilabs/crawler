@@ -44,7 +44,7 @@ func InitAPI() {
 	//Task API
 	api.HandleAPIMethod(api.GET, "/tasks/", apis.TaskAction)
 	api.HandleAPIMethod(api.GET, "/task/", apis.TaskAction)
-	api.HandleAPIMethod(api.POST, "/task/", apis.TaskAction)
+	api.HandleAPIMethod(api.POST, "/task/", apis.CreateTaskAction)
 	api.HandleAPIMethod(api.GET, "/task/:id", apis.TaskGetAction)
 	api.HandleAPIMethod(api.DELETE, "/task/:id", api.BasicAuth(apis.TaskDeleteAction, user, pass))
 

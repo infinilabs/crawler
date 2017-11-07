@@ -271,17 +271,17 @@ func (c *Config) IsArray() bool {
 }
 
 // Enabled was a predefined config, enabled by default if no config was found
-func (c *Config) Enabled() bool {
+func (c *Config) Enabled(defaultV bool) bool {
 	testEnabled := struct {
 		Enabled bool `config:"enabled"`
-	}{true}
+	}{defaultV}
 
 	if c == nil {
-		return true
+		return defaultV
 	}
 	if err := c.Unpack(&testEnabled); err != nil {
 		// if unpacking fails, expect 'enabled' being set to default value
-		return true
+		return defaultV
 	}
 	return testEnabled.Enabled
 }

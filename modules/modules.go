@@ -20,11 +20,11 @@ import (
 	"github.com/infinitbyte/gopa/core/module"
 	"github.com/infinitbyte/gopa/modules/api"
 	"github.com/infinitbyte/gopa/modules/cluster"
-	"github.com/infinitbyte/gopa/modules/crawler"
 	"github.com/infinitbyte/gopa/modules/dispatch"
 	"github.com/infinitbyte/gopa/modules/filter"
 	"github.com/infinitbyte/gopa/modules/index"
 	"github.com/infinitbyte/gopa/modules/persist"
+	"github.com/infinitbyte/gopa/modules/pipeline"
 	"github.com/infinitbyte/gopa/modules/queue"
 	"github.com/infinitbyte/gopa/modules/stats"
 	"github.com/infinitbyte/gopa/modules/storage"
@@ -39,8 +39,9 @@ func Register() {
 	module.Register(stats.SimpleStatsModule{})
 	module.Register(stats.StatsDModule{})
 	module.Register(queue.DiskQueue{})
-	module.Register(crawler.CheckerModule{})
-	module.Register(crawler.CrawlerModule{})
+	module.Register(pipeline.CheckerModule{})
+	//module.Register(pipeline.CrawlerModule{})
+	module.Register(pipeline.PipelineFrameworkModule{})
 	module.Register(dispatch.DispatchModule{})
 	module.Register(index.IndexModule{})
 	module.Register(cluster.ClusterModule{})

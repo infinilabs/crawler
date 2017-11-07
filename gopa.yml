@@ -24,68 +24,163 @@ cluster.seeds:
 
 
 modules:
-- module: crawler
+- module: pipeline
   enabled: true
-  max_go_routine: 100
-  fetch_threshold_ms: 0
-  default_pipeline_config:
-    name: my_crawler
-    start:
-      joint: init_task
-      enabled: true
-    process:
-      - joint: url_normalization
-        enabled: true
-        parameters:
-          follow_all_domain: false
-          follow_sub_domain: true
-      - joint: load_metadata
-        enabled: true
-      - joint: ignore_timeout
-        parameters:
-          ignore_timeout_after_count: 500
-        enabled: true
-      - joint: fetch
-        enabled: true
-        parameters:
-          timeout_in_seconds: 100
-#          proxy: "socks5://127.0.0.1:1080"
-#          cookie: ""
-      - joint: parse
-        enabled: true
-        parameters:
-          dispatch_links: true
-          max_depth: 100
-          max_breadth: 1
-      - joint: html2text
-        parameters:
-          remove_nonscript: true
-          merge_whitespace: false
-        enabled: true
-      - joint: hash
-        enabled: true
-      - joint: update_check_time
-        enabled: true
-        parameters:
-          decelerate_steps: "24h,48h,72h,168h,360h,720h"
-          accelerate_steps: "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
-      - joint: content_deduplication
-        enabled: true
-      - joint: lang_detect
-        enabled: true
-      - joint : save_snapshot_fs
-        enabled: false
-      - joint : save_snapshot_db
-        enabled: true
-        parameters:
-          compress_enabled: true
-          bucket: "Snapshot"
-          max_revision: 5
-      - joint: index
-        enabled: true
-    end:
-      joint: save_task
-      enabled: true
+  tasks:
+    - name: crawler
+      max_go_routine: 100
+      threshold_in_ms: 0
+      # default timeout is 60s
+      timeout_in_ms: 60000
+      default_config:
+        name: my_crawler
+        start:
+          joint: init_task
+          enabled: true
+        process:
+          - joint: url_normalization
+            enabled: true
+            parameters:
+              follow_all_domain: false
+              follow_sub_domain: true
+          - joint: load_metadata
+            enabled: true
+          - joint: ignore_timeout
+            parameters:
+              ignore_timeout_after_count: 500
+            enabled: true
+          - joint: fetch
+            enabled: true
+            parameters:
+              timeout_in_seconds: 100
+    #          proxy: "socks5://127.0.0.1:1080"
+    #          cookie: ""
+          - joint: parse
+            enabled: true
+            parameters:
+              dispatch_links: true
+              max_depth: 100
+              max_breadth: 1
+          - joint: html2text
+            parameters:
+              remove_nonscript: true
+              merge_whitespace: false
+            enabled: true
+          - joint: hash
+            enabled: true
+          - joint: update_check_time
+            enabled: true
+            parameters:
+              decelerate_steps: "24h,48h,72h,168h,360h,720h"
+              accelerate_steps: "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
+          - joint: content_deduplication
+            enabled: true
+          - joint: lang_detect
+            enabled: true
+          - joint : save_snapshot_fs
+            enabled: false
+          - joint : save_snapshot_db
+            enabled: true
+            parameters:
+              compress_enabled: true
+              bucket: "Snapshot"
+              max_revision: 5
+          - joint: index
+            enabled: true
+        end:
+          joint: save_task
+          enabled: true
+    - name: checker
+      max_go_routine: 100
+      threshold_in_ms: 0
+      # default timeout is 60s
+      timeout_in_ms: 60000
+      default_config:
+          name: my_checker
+          start:
+            joint: init_task
+            enabled: true
+          process:
+            - joint: url_normalization
+              enabled: true
+              parameters:
+                follow_all_domain: false
+                follow_sub_domain: true
+            - joint: url_filter
+              enabled: true
+              parameters:
+                url_match_rule:
+                  must_not:
+                    prefix:
+                    - "mailto:"
+                    - "data:image/"
+                    - "#"
+                    - "javascript:"
+                    contain: []
+                    suffix: []
+                  must:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                  should:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                host_match_rule:
+                  must:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                  should:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                  must_not:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                file_match_rule:
+                  must:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                  should:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                  must_not:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                file_ext_match_rule:
+                  should:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                  must:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                  must_not:
+                    contain: [zip, exe, jar, js, css, rar, gz, zip, bmp, jpeg, gif, png, jpg, apk]
+                    prefix: []
+                    suffix: []
+            - joint: filter_check
+              enabled: true
+              parameters:
+                filter_key: check_filter
+            - joint: task_deduplication
+              enabled: true
+          end:
+            joint: save_task
+            enabled: true
+            parameters:
+              is_create: true
+
+
+
+
+
 
 
 - module: cluster
@@ -106,91 +201,6 @@ modules:
 
 - module: queue
   enabled: true
-
-- module: checker
-  enabled: true
-  default_pipeline_config:
-    name: my_checker
-    start:
-      joint: init_task
-      enabled: true
-    process:
-      - joint: url_normalization
-        enabled: true
-        parameters:
-          follow_all_domain: false
-          follow_sub_domain: true
-      - joint: url_filter
-        enabled: true
-        parameters:
-          url_match_rule:
-            must_not:
-              prefix:
-              - "mailto:"
-              - "data:image/"
-              - "#"
-              - "javascript:"
-              contain: []
-              suffix: []
-            must:
-              prefix: []
-              contain: []
-              suffix: []
-            should:
-              prefix: []
-              contain: []
-              suffix: []
-          host_match_rule:
-            must:
-              prefix: []
-              contain: []
-              suffix: []
-            should:
-              prefix: []
-              contain: []
-              suffix: []
-            must_not:
-              prefix: []
-              contain: []
-              suffix: []
-          file_match_rule:
-            must:
-              prefix: []
-              contain: []
-              suffix: []
-            should:
-              prefix: []
-              contain: []
-              suffix: []
-            must_not:
-              prefix: []
-              contain: []
-              suffix: []
-          file_ext_match_rule:
-            should:
-              prefix: []
-              contain: []
-              suffix: []
-            must:
-              prefix: []
-              contain: []
-              suffix: []
-            must_not:
-              contain: [zip, exe, jar, js, css, rar, gz, zip, bmp, jpeg, gif, png, jpg, apk]
-              prefix: []
-              suffix: []
-      - joint: filter_check
-        enabled: true
-        parameters:
-          filter_key: check_filter
-      - joint: task_deduplication
-        enabled: true
-    end:
-      joint: save_task
-      enabled: true
-      parameters:
-        is_create: true
-
 
 
 - module: storage

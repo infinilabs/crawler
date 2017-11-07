@@ -26,7 +26,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
-	"time"
 )
 
 func Test(t *testing.T) {
@@ -40,12 +39,12 @@ func Test(t *testing.T) {
 	storage = StorageModule{}
 	storage.Start(GetModuleConfig(storage.Name()))
 
-	for i := 0; i < 1; i++ {
-		go run(i, t)
-	}
-
-	time.Sleep(10 * time.Minute)
-
+	//Memory pressure test
+	//for i := 0; i < 1; i++ {
+	//	go run(i, t)
+	//}
+	//
+	//time.Sleep(10 * time.Minute)
 }
 
 func run(seed int, t *testing.T) {

@@ -59,52 +59,65 @@ func (handler API) TaskGetAction(w http.ResponseWriter, req *http.Request, ps ht
 }
 
 // TaskAction handle task creation and return task list which support parameter: `from`, `size` and `host`, eg:
-// curl -XPOST "http://localhost:8001/task/" -d '{
-//"seed":"http://elasticsearch.cn"
-//}'
+
 //curl -XGET http://127.0.0.1:8001/task?from=100&size=10&host=elasticsearch.cn
 func (handler API) TaskAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
-	if req.Method == api.POST.String() {
-		jsonq, err := handler.GetJSON(req)
-		if err != nil {
-			logger.Error(err)
-		}
+	logger.Trace("get all tasks")
 
-		seed, err := jsonq.String("seed")
-		if err != nil {
-			logger.Error(err)
-		}
-		logger.Trace("receive new seed:", seed)
+	fr := handler.GetParameter(req, "from")
+	si := handler.GetParameter(req, "size")
+	host := handler.GetParameter(req, "host")
 
-		task := model.NewTaskSeed(seed, "", 0, 0)
-
-		queue.Push(config.CheckChannel, task.MustGetBytes())
-
-		handler.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
-	} else {
-		logger.Trace("get all tasks")
-
-		fr := handler.GetParameter(req, "from")
-		si := handler.GetParameter(req, "size")
-		host := handler.GetParameter(req, "host")
-
-		from, err := strconv.Atoi(fr)
-		if err != nil {
-			from = 0
-		}
-		size, err := strconv.Atoi(si)
-		if err != nil {
-			size = 10
-		}
-
-		total, tasks, err := model.GetTaskList(from, size, host)
-		if err != nil {
-			handler.Error(w, err)
-		} else {
-			handler.WriteJSONListResult(w, total, tasks, http.StatusOK)
-		}
+	from, err := strconv.Atoi(fr)
+	if err != nil {
+		from = 0
 	}
+	size, err := strconv.Atoi(si)
+	if err != nil {
+		size = 10
+	}
+
+	total, tasks, err := model.GetTaskList(from, size, host)
+	if err != nil {
+		handler.Error(w, err)
+	} else {
+		handler.WriteJSONListResult(w, total, tasks, http.StatusOK)
+	}
+}
+
+// curl -XPOST "http://localhost:8001/task/" -d '{
+//"url":"http://elasticsearch.cn",
+//"pipeline_id":"1231231212312"
+//}'
+func (handler API) CreateTaskAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+
+	jsonq, err := handler.GetJSON(req)
+	if err != nil {
+		logger.Error(err)
+	}
+
+	url, err := jsonq.String("url")
+	if err != nil {
+		logger.Error(err)
+	}
+	//get or create task
+
+	//tasks:=model.GetTaskByField("url",url)
+
+	model.NewTaskSeed(url, url, 0, 0)
+
+	//pipelineID, err := jsonq.String("pipeline_id")
+	//if err == nil {
+	//	logger.Error(err)
+	//}
+
+	task := model.NewTaskSeed(url, "", 0, 0)
+
+	queue.Push(config.CheckChannel, task.MustGetBytes())
+
+	handler.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
+
 }
 
 // DeleteHostAction handle host deletion, only support delete by id, eg:

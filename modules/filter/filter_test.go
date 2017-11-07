@@ -44,6 +44,7 @@ func Test(t *testing.T) {
 	b, _ := filter.CheckThenAdd(config.CheckFilter, []byte("key"))
 	assert.Equal(t, false, b)
 
+	//Memory pressure test
 	//for i := 0; i < 1; i++ {
 	//	go run(&filter, i, t)
 	//}
