@@ -54,7 +54,7 @@ func TestPipelineConfig(t *testing.T) {
 
 	//fmt.Println(util.ToJson(config,true))
 
-	pipe := NewPipelineFromConfig(&config, context)
+	pipe := NewPipelineFromConfig("test", &config, context)
 	context = pipe.Run()
 
 	fmt.Println("pipeline context")
