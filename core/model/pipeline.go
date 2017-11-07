@@ -331,6 +331,12 @@ func (pipe *Pipeline) End(s Joint) *Pipeline {
 	return pipe
 }
 
+func (pipe *Pipeline) OnFail(s Joint) *Pipeline {
+	//TODO implement start from here
+	panic(errors.New("TBD"))
+	return pipe
+}
+
 // setCurrentJoint set current joint's name, used for debugging
 func (context *Pipeline) setCurrentJoint(name string) {
 	context.currentJointName = name

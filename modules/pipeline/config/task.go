@@ -4,8 +4,8 @@ import (
 	"github.com/infinitbyte/gopa/core/model"
 )
 
-// TaskConfig defines crawler related configs
-type TaskConfig struct {
+// PipeConfig defines crawler related configs
+type PipeConfig struct {
 	Name string `json:"name,omitempty" config:"name"`
 
 	MaxGoRoutine int `config:"max_go_routine"`
@@ -16,5 +16,5 @@ type TaskConfig struct {
 	//Timeout Control
 	TimeoutInMs int `config:"timeout_in_ms"`
 
-	DefaultPipelineConfig *model.PipelineConfig `config:"default_config"`
+	DefaultConfig *model.PipelineConfig `config:"default_config"`
 }

@@ -36,42 +36,42 @@ import (
 var frameworkStarted bool
 
 type PipelineFrameworkModule struct {
-	Tasks map[string]*Task `config:"tasks"`
+	Pipes map[string]*Pipe `config:"pipes"`
 }
 
-type Task struct {
-	config         *TaskConfig
+type Pipe struct {
+	config         *PipeConfig
 	l              sync.Mutex
 	signalChannels []*chan bool
 }
 
-func (task *Task) Start(config *TaskConfig) {
-	task.l.Lock()
-	defer task.l.Unlock()
+func (pipe *Pipe) Start(config *PipeConfig) {
+	pipe.l.Lock()
+	defer pipe.l.Unlock()
 
-	numGoRoutine := task.config.MaxGoRoutine
+	numGoRoutine := pipe.config.MaxGoRoutine
 
-	task.signalChannels = make([]*chan bool, numGoRoutine)
+	pipe.signalChannels = make([]*chan bool, numGoRoutine)
 	//start fetcher
 	for i := 0; i < numGoRoutine; i++ {
 		log.Trace("start pipeline instance:", i)
 		signalC := make(chan bool, 1)
-		task.signalChannels[i] = &signalC
-		go task.runPipeline(&signalC, i)
+		pipe.signalChannels[i] = &signalC
+		go pipe.runPipeline(&signalC, i)
 
 	}
 }
 
-func (task *Task) Update(config *TaskConfig) {
-	task.Stop()
-	task.Start(config)
+func (pipe *Pipe) Update(config *PipeConfig) {
+	pipe.Stop()
+	pipe.Start(config)
 }
 
-func (task *Task) Stop() {
-	task.l.Lock()
-	defer task.l.Unlock()
+func (pipe *Pipe) Stop() {
+	pipe.l.Lock()
+	defer pipe.l.Unlock()
 
-	for i, item := range task.signalChannels {
+	for i, item := range pipe.signalChannels {
 		if item != nil {
 			*item <- true
 		}
@@ -79,7 +79,7 @@ func (task *Task) Stop() {
 	}
 }
 
-func (task *Task) runPipeline(singal *chan bool, shard int) {
+func (pipe *Pipe) runPipeline(singal *chan bool, shard int) {
 
 	var taskInfo []byte
 	for {
@@ -92,7 +92,7 @@ func (task *Task) runPipeline(singal *chan bool, shard int) {
 
 			taskId, pipelineConfigId := model.DecodePipelineTask(taskInfo)
 
-			pipelineConfig := task.config.DefaultPipelineConfig
+			pipelineConfig := pipe.config.DefaultConfig
 			if pipelineConfigId != "" {
 				var err error
 				pipelineConfig, err = model.GetPipelineConfig(pipelineConfigId)
@@ -102,13 +102,13 @@ func (task *Task) runPipeline(singal *chan bool, shard int) {
 			}
 
 			log.Trace("shard:", shard, ",task received:", taskId)
-			task.execute(taskId, pipelineConfig)
+			pipe.execute(taskId, pipelineConfig)
 			log.Trace("shard:", shard, ",task finished:", taskId)
 		}
 	}
 }
 
-func (task *Task) execute(taskId string, pipelineConfig *model.PipelineConfig) {
+func (pipe *Pipe) execute(taskId string, pipelineConfig *model.PipelineConfig) {
 	var pipeline *model.Pipeline
 	defer func() {
 		if !global.Env().IsDebug {
@@ -127,17 +127,17 @@ func (task *Task) execute(taskId string, pipelineConfig *model.PipelineConfig) {
 	pipeline = model.NewPipelineFromConfig(pipelineConfig, context)
 	pipeline.Run()
 
-	if task.config.ThresholdInMs > 0 {
-		log.Debug("sleep ", task.config.ThresholdInMs, "ms to control crawling speed")
-		time.Sleep(time.Duration(task.config.ThresholdInMs) * time.Millisecond)
+	if pipe.config.ThresholdInMs > 0 {
+		log.Debug("sleep ", pipe.config.ThresholdInMs, "ms to control crawling speed")
+		time.Sleep(time.Duration(pipe.config.ThresholdInMs) * time.Millisecond)
 		log.Debug("wake up now,continue crawing")
 	}
 
 	log.Trace("end pipeline")
 }
 
-// getDefaultTaskConfig return a default TaskConfig
-func getDefaultCrawlerTaskConfig() TaskConfig {
+// getDefaultCrawlerConfig return a default PipeConfig
+func getDefaultCrawlerConfig() PipeConfig {
 
 	config := model.PipelineConfig{}
 	start := model.JointConfig{}
@@ -206,12 +206,12 @@ func getDefaultCrawlerTaskConfig() TaskConfig {
 		&index,
 	}
 
-	defaultCrawlerConfig := TaskConfig{
-		Name:                  "crawler",
-		MaxGoRoutine:          10,
-		TimeoutInMs:           60000,
-		ThresholdInMs:         0,
-		DefaultPipelineConfig: &config,
+	defaultCrawlerConfig := PipeConfig{
+		Name:          "crawler",
+		MaxGoRoutine:  10,
+		TimeoutInMs:   60000,
+		ThresholdInMs: 0,
+		DefaultConfig: &config,
 	}
 
 	return defaultCrawlerConfig
@@ -235,16 +235,16 @@ func (module PipelineFrameworkModule) Start(cfg *Config) {
 	//cfg.Unpack(&config)
 	//module.config = &config
 
-	module.Tasks = map[string]*Task{}
-	c := getDefaultCrawlerTaskConfig()
+	module.Pipes = map[string]*Pipe{}
+	c := getDefaultCrawlerConfig()
 
-	if c.DefaultPipelineConfig == nil {
+	if c.DefaultConfig == nil {
 		panic(errors.Errorf("default pipeline config can't be null, %v", c))
 	}
 
-	module.Tasks[c.Name] = &Task{config: &c}
+	module.Pipes[c.Name] = &Pipe{config: &c}
 
-	for k, v := range module.Tasks {
+	for k, v := range module.Pipes {
 		log.Debugf("startting pipeline: %s", k)
 		v.Start(v.config)
 		log.Infof("pipeline: %s started", k)
@@ -257,7 +257,7 @@ func (module PipelineFrameworkModule) Stop() error {
 	if frameworkStarted {
 		frameworkStarted = false
 		log.Debug("start shutting down pipeline framework")
-		for k, v := range module.Tasks {
+		for k, v := range module.Pipes {
 			log.Infof("stopping pipeline: %s", k)
 			v.Stop()
 			log.Infof("pipeline: %s stopped", k)

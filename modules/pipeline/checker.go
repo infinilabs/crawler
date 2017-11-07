@@ -39,7 +39,7 @@ func (module CheckerModule) Name() string {
 	return "Checker"
 }
 
-func getDefaultCheckerTaskConfig() TaskConfig {
+func getDefaultCheckerTaskConfig() PipeConfig {
 	config := model.PipelineConfig{}
 	config.Name = "checker"
 	start := model.JointConfig{}
@@ -81,10 +81,10 @@ func getDefaultCheckerTaskConfig() TaskConfig {
 		&task_deduplication,
 	}
 
-	defaultCheckerConfig := TaskConfig{
-		MaxGoRoutine:          10,
-		ThresholdInMs:         0,
-		DefaultPipelineConfig: &config,
+	defaultCheckerConfig := PipeConfig{
+		MaxGoRoutine:  10,
+		ThresholdInMs: 0,
+		DefaultConfig: &config,
 	}
 	return defaultCheckerConfig
 }
@@ -201,11 +201,11 @@ func (module CheckerModule) runPipe(debug bool, task *model.Task) *model.Pipelin
 	context := &model.Context{Phrase: config.PhraseChecker, IgnoreBroken: true}
 	context.Set(CONTEXT_CRAWLER_TASK, task)
 
-	if module.config.DefaultPipelineConfig == nil {
+	if module.config.DefaultConfig == nil {
 		panic("default pipeline config can't be null")
 	}
 
-	pipeline = model.NewPipelineFromConfig(module.config.DefaultPipelineConfig, context)
+	pipeline = model.NewPipelineFromConfig(module.config.DefaultConfig, context)
 	pipeline.Run()
 
 	return pipeline
@@ -230,5 +230,5 @@ func (module CheckerModule) Stop() error {
 }
 
 type CheckerModule struct {
-	config *TaskConfig
+	config *PipeConfig
 }

@@ -26,7 +26,7 @@ cluster.seeds:
 modules:
 - module: pipeline
   enabled: true
-  tasks:
+  pipes:
     - name: crawler
       max_go_routine: 100
       threshold_in_ms: 0
