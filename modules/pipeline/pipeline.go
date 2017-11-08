@@ -76,6 +76,7 @@ func (pipe *Pipe) Update(config PipeConfig) {
 
 func (pipe *Pipe) Stop() {
 	if !pipe.Config.Enabled {
+		log.Debugf("pipeline: %s was disabled", pipe.Config.Name)
 		return
 	}
 	pipe.l.Lock()
