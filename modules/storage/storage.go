@@ -70,7 +70,7 @@ func (module StorageModule) Start(cfg *config.Config) {
 
 	if config.Driver == "elasticsearch" {
 		client := index.ElasticsearchClient{Config: config.Elastic}
-		handler := elastic.ElasticsearchStore{&client}
+		handler := elastic.ElasticsearchStore{Client: &client}
 		persist.RegisterKVHandler(handler)
 	} else if config.Driver == "boltdb" {
 

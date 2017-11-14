@@ -68,7 +68,7 @@ func (module DatabaseModule) Start(cfg *Config) {
 
 	if config.Driver == "elasticsearch" {
 		client := index.ElasticsearchClient{Config: config.Elastic}
-		handler := elastic.ElasticORM{&client}
+		handler := elastic.ElasticORM{Client: &client}
 		persist.Register(handler)
 		return
 	}
