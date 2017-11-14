@@ -29,6 +29,7 @@ modules:
   pipes:
     - name: crawler
       enabled: true
+      input_queue: fetch
       max_go_routine: 10
       threshold_in_ms: 0
       # default timeout is 60s
@@ -92,6 +93,7 @@ modules:
           enabled: true
     - name: checker
       enabled: true
+      input_queue: check
       max_go_routine: 10
       threshold_in_ms: 0
       # default timeout is 60s
@@ -176,9 +178,6 @@ modules:
             enabled: true
             parameters:
               is_create: true
-
-
-
 
 
 

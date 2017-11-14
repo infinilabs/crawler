@@ -21,7 +21,7 @@ import (
 	api "github.com/infinitbyte/gopa/core/http"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/queue"
-	"github.com/infinitbyte/gopa/core/stats"
+	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -101,20 +101,16 @@ func (handler API) CreateTaskAction(w http.ResponseWriter, req *http.Request, ps
 	if err != nil {
 		logger.Error(err)
 	}
-	//get or create task
+	pipelineID, err := jsonq.String("pipeline_id")
+	if err == nil {
+		logger.Error(err)
+	}
 
-	//tasks:=model.GetTaskByField("url",url)
+	context := model.Context{IgnoreBroken: true}
+	context.Set(model.CONTEXT_TASK_URL, url)
+	context.PipelineConfigID = pipelineID
 
-	model.NewTaskSeed(url, url, 0, 0)
-
-	//pipelineID, err := jsonq.String("pipeline_id")
-	//if err == nil {
-	//	logger.Error(err)
-	//}
-
-	task := model.NewTaskSeed(url, "", 0, 0)
-
-	queue.Push(config.CheckChannel, task.MustGetBytes())
+	queue.Push(config.CheckChannel, util.ToJSONBytes(context))
 
 	handler.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
 
@@ -174,8 +170,7 @@ func (handler API) GetHostsAction(w http.ResponseWriter, req *http.Request, ps h
 		newDomains := []model.Host{}
 		for _, v := range hosts {
 
-			total := stats.Stat("host.stats", v.Host+"."+config.STATS_FETCH_TOTAL_COUNT)
-			v.LinksCount = total
+			//total := stats.Stat("host.stats", v.Host+"."+config.STATS_FETCH_TOTAL_COUNT)
 			newDomains = append(newDomains, v)
 		}
 

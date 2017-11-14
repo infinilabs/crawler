@@ -4,6 +4,7 @@ import (
 	. "github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/queue"
+	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
 	"time"
 )
@@ -27,11 +28,16 @@ func (module GeneratorModule) Start(cfg *Config) {
 	go func() {
 		for {
 			if generatorConfig.TaskUrl != "" {
-				queue.Push(config.CheckChannel, model.NewTaskSeed(generatorConfig.TaskUrl, generatorConfig.TaskUrl, 0, 0).MustGetBytes())
+				context := model.Context{IgnoreBroken: true}
+				context.Set(model.CONTEXT_TASK_URL, generatorConfig.TaskUrl)
+				queue.Push(config.CheckChannel, util.ToJSONBytes(context))
 			}
 
 			if generatorConfig.TaskID != "" {
-				queue.Push(config.FetchChannel, model.EncodePipelineTask(generatorConfig.TaskID, ""))
+
+				context := model.Context{}
+				context.Set(model.CONTEXT_TASK_ID, generatorConfig.TaskID)
+				queue.Push(config.FetchChannel, util.ToJSONBytes(context))
 			}
 			time.Sleep(100 * time.Millisecond)
 		}

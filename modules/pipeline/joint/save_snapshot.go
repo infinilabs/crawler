@@ -39,36 +39,38 @@ func (this SaveSnapshotToDBJoint) Name() string {
 }
 
 func (this SaveSnapshotToDBJoint) Process(c *model.Context) error {
-	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
-	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+
+	taskID := c.MustGetString(model.CONTEXT_TASK_ID)
+	taskUrl := c.MustGetString(model.CONTEXT_TASK_URL)
+	taskHost := c.MustGetString(model.CONTEXT_TASK_Host)
+	taskSnapshotHash := c.MustGetString(model.CONTEXT_TASK_SnapshotHash)
+	taskSnapshotVersion := c.GetIntOrDefault(model.CONTEXT_TASK_SnapshotVersion, 0)
+
+	snapshot := c.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
 
 	if snapshot == nil {
-		return errors.Errorf("snapshot is nil, %s , %s", task.ID, task.Url)
+		return errors.Errorf("snapshot is nil, %s , %s", taskID, taskUrl)
 	}
 
 	//update task's snapshot, detect duplicated snapshot
-	if snapshot.Hash == task.SnapshotHash {
-		msg := fmt.Sprintf("content unchanged, snapshot with same hash: %s, %s", snapshot.Hash, task.Url)
+	if snapshot.Hash == taskSnapshotHash {
+		msg := fmt.Sprintf("content unchanged, snapshot with same hash: %s, %s", snapshot.Hash, taskUrl)
 		c.End(msg)
 		return errors.New(msg)
 	}
 
-	task.SnapshotVersion = task.SnapshotVersion + 1
-	task.SnapshotID = snapshot.ID
-	task.SnapshotHash = snapshot.Hash
-	task.SnapshotSimHash = snapshot.SimHash
-	task.SnapshotCreated = snapshot.Created
+	taskSnapshotVersion = taskSnapshotVersion + 1
 
-	snapshot.Version = task.SnapshotVersion
-	snapshot.Url = task.Url
-	snapshot.TaskID = task.ID
+	snapshot.Version = taskSnapshotVersion
+	snapshot.Url = taskUrl
+	snapshot.TaskID = taskID
 
 	savePath := snapshot.Path
 	saveFile := snapshot.File
 
 	saveKey := []byte(snapshot.ID)
 
-	log.Debug("save snapshot to db, url:", task.Url, ",host:", task.Host, ",path:", savePath, ",file:", saveFile, ",saveKey:", string(saveKey))
+	log.Debug("save snapshot to db, url:", taskUrl, ",path:", savePath, ",file:", saveFile, ",saveKey:", string(saveKey))
 
 	bucketName := this.GetStringOrDefault(bucket, "Snapshot")
 
@@ -84,10 +86,15 @@ func (this SaveSnapshotToDBJoint) Process(c *model.Context) error {
 
 	model.CreateSnapshot(snapshot)
 
-	deleteRedundantSnapShot(int(this.GetInt64OrDefault(maxRevision, 5)), bucketName, task.ID)
+	c.Set(model.CONTEXT_TASK_SnapshotID, snapshot.ID)
+	c.Set(model.CONTEXT_TASK_SnapshotHash, snapshot.Hash)
+	c.Set(model.CONTEXT_TASK_SnapshotSimHash, snapshot.SimHash)
+	c.Set(model.CONTEXT_TASK_SnapshotCreated, snapshot.Created)
 
-	stats.IncrementBy("host.stats", task.Host+"."+config.STATS_STORAGE_FILE_SIZE, int64(len(snapshot.Payload)))
-	stats.Increment("host.stats", task.Host+"."+config.STATS_STORAGE_FILE_COUNT)
+	deleteRedundantSnapShot(int(this.GetInt64OrDefault(maxRevision, 5)), bucketName, taskID)
+
+	stats.IncrementBy("host.stats", taskHost+"."+config.STATS_STORAGE_FILE_SIZE, int64(len(snapshot.Payload)))
+	stats.Increment("host.stats", taskHost+"."+config.STATS_STORAGE_FILE_COUNT)
 
 	return nil
 }

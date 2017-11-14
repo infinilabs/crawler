@@ -138,11 +138,11 @@ func ToInt(str string) (int, error) {
 
 }
 
-func FormatTime(date *time.Time) string {
+func FormatTime(date time.Time) string {
 	return date.Format("2006-01-02 15:04:05")
 }
 
-func FormatTimeWithLocalTZ(date *time.Time) string {
+func FormatTimeWithLocalTZ(date time.Time) string {
 	localLoc, err := time.LoadLocation("Local")
 	if err != nil {
 		panic(errors.New(`Failed to load location "Local"`))
@@ -152,7 +152,7 @@ func FormatTimeWithLocalTZ(date *time.Time) string {
 	return localDateTime.Format("2006-01-02 15:04:05")
 }
 
-func FormatTimeWithTZ(date *time.Time) string {
+func FormatTimeWithTZ(date time.Time) string {
 	return date.Format("2016-10-24 09:34:19 +0000 UTC")
 }
 

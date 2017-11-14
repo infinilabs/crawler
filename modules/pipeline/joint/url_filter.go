@@ -41,26 +41,30 @@ var fileExtensionMatchRule model.ParaKey = "file_ext_match_rule"
 // Process check all the url match rules
 func (joint UrlFilterJoint) Process(context *model.Context) error {
 
-	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
-	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+	snapshot := context.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
 
-	if task.Url == "" {
+	originalUrl := context.GetStringOrDefault(model.CONTEXT_TASK_OriginalUrl, "")
+	url := context.MustGetString(model.CONTEXT_TASK_URL)
+	host := context.MustGetString(model.CONTEXT_TASK_Host)
+	if url == "" {
 		context.Exit("nil url")
 		return nil
 	}
 
-	if !joint.validRule(urlMatchRule, task.OriginalUrl) {
-		context.Exit("invalid url (original), " + task.OriginalUrl)
+	if originalUrl != "" {
+		if !joint.validRule(urlMatchRule, originalUrl) {
+			context.Exit("invalid url (original), " + originalUrl)
+			return nil
+		}
+	}
+
+	if !joint.validRule(urlMatchRule, url) {
+		context.Exit("invalid url, " + url)
 		return nil
 	}
 
-	if !joint.validRule(urlMatchRule, task.Url) {
-		context.Exit("invalid url, " + task.Url)
-		return nil
-	}
-
-	if !joint.validRule(hostMatchRule, task.Host) {
-		context.Exit("invalid host, " + task.Host)
+	if !joint.validRule(hostMatchRule, host) {
+		context.Exit("invalid host, " + host)
 		return nil
 	}
 

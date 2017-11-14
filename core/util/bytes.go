@@ -17,6 +17,7 @@ limitations under the License.
 package util
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -205,4 +206,21 @@ func ToUppercase(str []byte) []byte {
 //ReplaceByte simply replace old bytes to new bytes, the two bytes should have same length
 func ReplaceByte(str []byte, old, new []byte) []byte {
 	return []byte(strings.Replace(string(str), string(old), string(new), -1))
+}
+
+//ToJSONBytes convert interface to json with byte array
+func ToJSONBytes(v interface{}) []byte {
+	b, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
+//FromJSONBytes simply do json unmarshal
+func FromJSONBytes(b []byte, v interface{}) {
+	err := json.Unmarshal(b, v)
+	if err != nil {
+		panic(err)
+	}
 }

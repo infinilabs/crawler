@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-var queues map[QueueKey]*BackendQueue
+var queues map[string]*BackendQueue
 
 type DiskQueue struct {
 }
@@ -22,7 +22,7 @@ func (module DiskQueue) Name() string {
 }
 
 func (module DiskQueue) Start(cfg *Config) {
-	queues = make(map[QueueKey]*BackendQueue)
+	queues = make(map[string]*BackendQueue)
 	path := global.Env().SystemConfig.GetWorkingDir() + "/queue"
 	os.Mkdir(path, 0777)
 
@@ -42,16 +42,16 @@ func (module DiskQueue) Start(cfg *Config) {
 	Register(module)
 }
 
-func (module DiskQueue) Push(k QueueKey, v []byte) error {
+func (module DiskQueue) Push(k string, v []byte) error {
 	return (*queues[k]).Put(v)
 }
 
-func (module DiskQueue) ReadChan(k QueueKey) chan []byte {
+func (module DiskQueue) ReadChan(k string) chan []byte {
 
 	return (*queues[k]).ReadChan()
 }
 
-func (module DiskQueue) Pop(k QueueKey, timeoutInSeconds time.Duration) (error, []byte) {
+func (module DiskQueue) Pop(k string, timeoutInSeconds time.Duration) (error, []byte) {
 
 	if timeoutInSeconds > 0 {
 		timeout := make(chan bool, 1)
@@ -71,12 +71,12 @@ func (module DiskQueue) Pop(k QueueKey, timeoutInSeconds time.Duration) (error, 
 	}
 }
 
-func (module DiskQueue) Close(k QueueKey) error {
+func (module DiskQueue) Close(k string) error {
 	b := (*queues[k]).Close()
 	return b
 }
 
-func (module DiskQueue) Depth(k QueueKey) int64 {
+func (module DiskQueue) Depth(k string) int64 {
 	b := (*queues[k]).Depth()
 	return b
 }

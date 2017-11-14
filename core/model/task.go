@@ -1,29 +1,23 @@
 package model
 
 import (
-	"bytes"
-	"fmt"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/persist"
 	"github.com/infinitbyte/gopa/core/util"
-	"strconv"
-	"strings"
 	"time"
 )
 
-type TaskStatus int
+const TaskCreated int = 0
+const TaskFailed int = 2
+const TaskSuccess int = 3
+const Task404 int = 4
+const TaskRedirected int = 5
+const TaskTimeout int = 6
+const TaskDuplicated int = 7
+const TaskInterrupted int = 8
 
-const TaskCreated TaskStatus = 0
-const TaskFailed TaskStatus = 2
-const TaskSuccess TaskStatus = 3
-const Task404 TaskStatus = 4
-const TaskRedirected TaskStatus = 5
-const TaskTimeout TaskStatus = 6
-const TaskDuplicated TaskStatus = 7
-const TaskInterrupted TaskStatus = 8
-
-func GetTaskStatusText(status TaskStatus) string {
+func GetTaskStatusText(status int) string {
 	switch status {
 	case TaskCreated:
 		return "created"
@@ -45,123 +39,78 @@ func GetTaskStatusText(status TaskStatus) string {
 	return "unknow"
 }
 
-type Seed struct {
-	// the seed url may not cleaned, may miss the host part, need reference to provide the complete url information
-	Url       string `storm:"index" json:"url,omitempty" gorm:"type:varchar(500)"`
-	Reference string `json:"reference_url,omitempty"`
-	Depth     int    `storm:"index" json:"depth"`
-	Breadth   int    `storm:"index" json:"breadth"`
-}
-
-func (this Seed) Get(url string) Seed {
-	task := Seed{}
-	task.Url = url
-	task.Reference = ""
-	task.Depth = 0
-	task.Breadth = 0
-	return task
-}
-
-func (this Seed) MustGetBytes() []byte {
-
-	bytes, err := this.GetBytes()
-	if err != nil {
-		panic(err)
-	}
-	return bytes
-}
-
-var delimiter = "|#|"
-
-func (this Seed) GetBytes() ([]byte, error) {
-	var buf bytes.Buffer
-
-	buf.WriteString(fmt.Sprint(this.Breadth))
-	buf.WriteString(delimiter)
-	buf.WriteString(fmt.Sprint(this.Depth))
-	buf.WriteString(delimiter)
-	buf.WriteString(this.Reference)
-	buf.WriteString(delimiter)
-	buf.WriteString(this.Url)
-
-	return buf.Bytes(), nil
-}
-
-func TaskSeedFromBytes(b []byte) Seed {
-	task, err := fromBytes(b)
-	if err != nil {
-		panic(err)
-	}
-	return task
-}
-
-func fromBytes(b []byte) (Seed, error) {
-
-	str := string(b)
-	array := strings.Split(str, delimiter)
-	task := Seed{}
-	i, _ := strconv.Atoi(array[0])
-	task.Breadth = i
-	i, _ = strconv.Atoi(array[1])
-	task.Depth = i
-	task.Reference = array[2]
-	task.Url = array[3]
-
-	return task, nil
-}
-
-func NewTaskSeed(url, ref string, depth int, breadth int) Seed {
-	task := Seed{}
+func NewTask(url, ref string, depth int, breadth int) *Task {
+	task := Task{}
 	task.Url = url
 	task.Reference = ref
 	task.Depth = depth
 	task.Breadth = breadth
-	return task
-}
-
-func EncodePipelineTask(taskId, pipelineConfigId string) []byte {
-	return []byte(fmt.Sprintf("%s%s%s", taskId, delimiter, pipelineConfigId))
-}
-
-func DecodePipelineTask(str []byte) (taskId, pipelineConfigId string) {
-	mix := string(str)
-	arr := strings.Split(mix, delimiter)
-	return arr[0], arr[1]
+	return &task
 }
 
 type Task struct {
-	Seed
-	ID          string     `gorm:"not null;unique;primary_key" json:"id" index:"id"`
-	Host        string     `gorm:"index" json:"host"`
-	Schema      string     `json:"schema,omitempty"`
-	OriginalUrl string     `json:"original_url,omitempty"`
-	Status      TaskStatus `gorm:"index" json:"status"`
-	Message     string     `json:"message,omitempty"`
-	Created     *time.Time `gorm:"index" json:"created,omitempty"`
-	Updated     *time.Time `gorm:"index" json:"updated,omitempty"`
-	LastFetch   *time.Time `gorm:"index" json:"last_fetch,omitempty"`
-	LastCheck   *time.Time `gorm:"index" json:"last_check,omitempty"`
-	NextCheck   *time.Time `gorm:"index" json:"next_check,omitempty"`
+	ID string `gorm:"not null;unique;primary_key" json:"id" index:"id"`
+	// the url may not cleaned, may miss the host part, need reference to provide the complete url information
+	Url         string    `storm:"index" json:"url,omitempty" gorm:"type:varchar(500)"`
+	Reference   string    `json:"reference_url,omitempty"`
+	Depth       int       `storm:"index" json:"depth"`
+	Breadth     int       `storm:"index" json:"breadth"`
+	Host        string    `gorm:"index" json:"host"`
+	Schema      string    `json:"schema,omitempty"`
+	OriginalUrl string    `json:"original_url,omitempty"`
+	Status      int       `gorm:"index" json:"status"`
+	Message     string    `json:"message,omitempty"`
+	Created     time.Time `gorm:"index" json:"created,omitempty"`
+	Updated     time.Time `gorm:"index" json:"updated,omitempty"`
+	LastFetch   time.Time `gorm:"index" json:"last_fetch,omitempty"`
+	LastCheck   time.Time `gorm:"index" json:"last_check,omitempty"`
+	NextCheck   time.Time `gorm:"index" json:"next_check,omitempty"`
 
-	SnapshotVersion int        `json:"snapshot_version,omitempty"`
-	SnapshotID      string     `json:"snapshot_id,omitempty"`
-	SnapshotHash    string     `json:"snapshot_hash,omitempty"`
-	SnapshotSimHash string     `json:"snapshot_simhash,omitempty"`
-	SnapshotCreated *time.Time `json:"snapshot_created,omitempty"`
+	SnapshotVersion int       `json:"snapshot_version,omitempty"`
+	SnapshotID      string    `json:"snapshot_id,omitempty"`
+	SnapshotHash    string    `json:"snapshot_hash,omitempty"`
+	SnapshotSimHash string    `json:"snapshot_simhash,omitempty"`
+	SnapshotCreated time.Time `json:"snapshot_created,omitempty"`
 
-	PipelineConfigId string `json:"pipline_config_id,omitempty"`
+	PipelineConfigID string `json:"pipline_config_id,omitempty"`
 }
+
+const (
+	CONTEXT_TASK_ID               ParaKey = "TASK_ID"
+	CONTEXT_TASK_URL              ParaKey = "TASK_URL"
+	CONTEXT_TASK_Reference        ParaKey = "TASK_Reference"
+	CONTEXT_TASK_Depth            ParaKey = "TASK_Depth"
+	CONTEXT_TASK_Breadth          ParaKey = "TASK_Breadth"
+	CONTEXT_TASK_Host             ParaKey = "TASK_Host"
+	CONTEXT_TASK_Schema           ParaKey = "TASK_Schema"
+	CONTEXT_TASK_OriginalUrl      ParaKey = "TASK_OriginalUrl"
+	CONTEXT_TASK_Status           ParaKey = "TASK_Status"
+	CONTEXT_TASK_Message          ParaKey = "TASK_Message"
+	CONTEXT_TASK_Created          ParaKey = "TASK_Created"
+	CONTEXT_TASK_Updated          ParaKey = "TASK_Updated"
+	CONTEXT_TASK_LastFetch        ParaKey = "TASK_LastFetch"
+	CONTEXT_TASK_LastCheck        ParaKey = "TASK_LastCheck"
+	CONTEXT_TASK_NextCheck        ParaKey = "TASK_NextCheck"
+	CONTEXT_TASK_SnapshotID       ParaKey = "TASK_SnapshotID"
+	CONTEXT_TASK_SnapshotSimHash  ParaKey = "TASK_SnapshotSimHash"
+	CONTEXT_TASK_SnapshotHash     ParaKey = "TASK_SnapshotHash"
+	CONTEXT_TASK_SnapshotCreated  ParaKey = "TASK_SnapshotCreated"
+	CONTEXT_TASK_SnapshotVersion  ParaKey = "TASK_SnapshotVersion"
+	CONTEXT_TASK_PipelineConfigID ParaKey = "TASK_PipelineConfigID"
+)
 
 func CreateTask(task *Task) error {
 	log.Trace("start create crawler task, ", task.Url)
 	time := time.Now().UTC()
 	task.ID = util.GetUUID()
 	task.Status = TaskCreated
-	task.Created = &time
-	task.Updated = &time
+	task.Created = time
+	task.Updated = time
 	err := persist.Save(task)
 	if err != nil {
 		log.Error(task.ID, ", ", err)
+	} else {
+		IncrementHostLinkCount(task.Host)
 	}
 	return err
 }
@@ -169,7 +118,7 @@ func CreateTask(task *Task) error {
 func UpdateTask(task *Task) {
 	log.Trace("start update crawler task, ", task.Url)
 	time := time.Now().UTC()
-	task.Updated = &time
+	task.Updated = time
 	err := persist.Update(task)
 	if err != nil {
 		panic(err)
@@ -182,6 +131,8 @@ func DeleteTask(id string) error {
 	err := persist.Delete(&task)
 	if err != nil {
 		log.Error(id, ", ", err)
+	} else {
+		//TODO fix here DecrementHostLinkCount(task.Host)
 	}
 	return err
 }
@@ -194,7 +145,7 @@ func GetTask(id string) (Task, error) {
 	if err != nil {
 		log.Error(id, ", ", err)
 	}
-	if len(task.ID) == 0 || task.Created == nil {
+	if len(task.ID) == 0 || task.Created.IsZero() {
 		panic(errors.New("not found," + id))
 	}
 
@@ -257,7 +208,7 @@ func GetPendingNewFetchTasks() (int, []Task, error) {
 	return result.Total, tasks, err
 }
 
-func GetPendingUpdateFetchTasks(offset *time.Time) (int, []Task, error) {
+func GetPendingUpdateFetchTasks(offset time.Time) (int, []Task, error) {
 	t := time.Now().UTC()
 	log.Tracef("start get all crawler tasks,last offset: %s,", offset.String())
 	var tasks []Task

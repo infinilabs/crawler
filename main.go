@@ -133,10 +133,19 @@ func main() {
 		util.ClearInstanceLock()
 
 		if r := recover(); r != nil {
-			if e, ok := r.(runtime.Error); ok {
-				log.Error("main: ", e)
+			if r == nil {
+				return
 			}
-			log.Error("main: ", r)
+			var v string
+			switch r.(type) {
+			case error:
+				v = r.(error).Error()
+			case runtime.Error:
+				v = r.(runtime.Error).Error()
+			case string:
+				v = r.(string)
+			}
+			log.Error("main: ", v)
 		}
 		util.SnapshotPersistID()
 		log.Flush()

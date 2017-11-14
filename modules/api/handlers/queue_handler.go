@@ -18,6 +18,7 @@ package http
 
 import (
 	"github.com/infinitbyte/gopa/core/queue"
+	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
 	"net/http"
 )
@@ -30,5 +31,7 @@ func (handler API) QueueStatsAction(w http.ResponseWriter, req *http.Request) {
 	data["fetch"] = queue.Depth(config.FetchChannel)
 	data["dispatch"] = queue.Depth(config.DispatcherChannel)
 	data["index"] = queue.Depth(config.IndexChannel)
-	handler.WriteJSON(w, data, 200)
+	handler.WriteJSON(w, util.MapStr{
+		"depth": data,
+	}, 200)
 }

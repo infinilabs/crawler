@@ -21,23 +21,23 @@ func (joint ContentDeduplicationJoint) Name() string {
 
 // Process the content hash Deduplication
 func (joint ContentDeduplicationJoint) Process(c *model.Context) error {
-	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
-	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
-
+	//task := c.MustGet(model.CONTEXT_TASK).(*model.Task)
+	snapshot := c.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
+	url := c.MustGetString(model.CONTEXT_TASK_URL)
 	if snapshot.Hash != "" {
 
-		log.Trace("check content deduplication, ", task.Url)
+		log.Trace("check content deduplication, ", url)
 
-		snapshot.Url = task.Url
-		snapshot.TaskID = task.ID
+		snapshot.Url = url
+		taskID := c.MustGetString(model.CONTEXT_TASK_ID)
+		snapshot.TaskID = taskID
 
 		exist, snapshotId, url := checkByHash(snapshot, c)
 
-		msg := fmt.Sprintf("same content hash found, %s, %s, %s, duplicated with snapshotId: %s , url: %s", task.ID, task.Url, snapshot.Hash, snapshotId, url)
+		msg := fmt.Sprintf("same content hash found, %s, %s, %s, duplicated with snapshotId: %s , url: %s", taskID, url, snapshot.Hash, snapshotId, url)
 
 		if exist {
-			task.Status = model.TaskDuplicated
-			task.NextCheck = nil
+			c.Set(model.CONTEXT_TASK_Status, model.TaskDuplicated)
 			c.End(msg)
 			return errors.New(msg)
 		}

@@ -17,6 +17,7 @@ limitations under the License.
 package pipeline
 
 import (
+	"encoding/json"
 	log "github.com/cihub/seelog"
 	. "github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/errors"
@@ -25,9 +26,7 @@ import (
 	"github.com/infinitbyte/gopa/core/queue"
 	"github.com/infinitbyte/gopa/core/stats"
 	"github.com/infinitbyte/gopa/core/util"
-	"github.com/infinitbyte/gopa/modules/config"
 	. "github.com/infinitbyte/gopa/modules/pipeline/config"
-	. "github.com/infinitbyte/gopa/modules/pipeline/joint"
 	"runtime"
 	"sync"
 	"time"
@@ -40,33 +39,33 @@ type PipelineFrameworkModule struct {
 }
 
 type Pipe struct {
-	Config         PipeConfig
+	config         PipeConfig
 	l              sync.Mutex
 	signalChannels []*chan bool
 }
 
 func (pipe *Pipe) Start(config PipeConfig) {
-	if !pipe.Config.Enabled {
-		log.Debugf("pipeline: %s was disabled", pipe.Config.Name)
+	if !pipe.config.Enabled {
+		log.Debugf("pipeline: %s was disabled", pipe.config.Name)
 		return
 	}
 
 	pipe.l.Lock()
 	defer pipe.l.Unlock()
-	pipe.Config = config
+	pipe.config = config
 
-	numGoRoutine := pipe.Config.MaxGoRoutine
+	numGoRoutine := pipe.config.MaxGoRoutine
 
 	pipe.signalChannels = make([]*chan bool, numGoRoutine)
 	//start fetcher
 	for i := 0; i < numGoRoutine; i++ {
-		log.Trace("start pipeline instance:", i)
+		log.Trace("start pipeline, shard:", i)
 		signalC := make(chan bool, 1)
 		pipe.signalChannels[i] = &signalC
 		go pipe.runPipeline(&signalC, i)
 
 	}
-	log.Infof("pipeline: %s was started with %v instances", pipe.Config.Name, numGoRoutine)
+	log.Infof("pipeline: %s started with %v shards", pipe.config.Name, numGoRoutine)
 }
 
 func (pipe *Pipe) Update(config PipeConfig) {
@@ -75,8 +74,8 @@ func (pipe *Pipe) Update(config PipeConfig) {
 }
 
 func (pipe *Pipe) Stop() {
-	if !pipe.Config.Enabled {
-		log.Debugf("pipeline: %s was disabled", pipe.Config.Name)
+	if !pipe.config.Enabled {
+		log.Debugf("pipeline: %s was disabled", pipe.config.Name)
 		return
 	}
 	pipe.l.Lock()
@@ -86,65 +85,82 @@ func (pipe *Pipe) Stop() {
 		if item != nil {
 			*item <- true
 		}
-		log.Debug("send exit signal to fetch channel: ", i)
+		log.Debug("send exit signal to fetch channel, shard:", i)
 	}
 }
 
-func (pipe *Pipe) runPipeline(singal *chan bool, shard int) {
+func (pipe *Pipe) decodeMessage(message []byte) model.Context {
+	v := model.Context{}
+	err := json.Unmarshal(message, &v)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
 
-	var taskInfo []byte
+func (pipe *Pipe) runPipeline(signal *chan bool, shard int) {
+
+	var inputMessage []byte
 	for {
 		select {
-		case <-*singal:
-			log.Trace("pipeline exit, shard:", shard)
+		case <-*signal:
+			log.Trace("pipeline:", pipe.config.Name, " exit, shard:", shard)
 			return
-		case taskInfo = <-queue.ReadChan(config.FetchChannel):
-			stats.Increment("queue."+string(config.FetchChannel), "pop")
+		case inputMessage = <-queue.ReadChan(pipe.config.InputQueue):
+			stats.Increment("queue."+string(pipe.config.InputQueue), "pop")
 
-			taskId, pipelineConfigId := model.DecodePipelineTask(taskInfo)
+			context := pipe.decodeMessage(inputMessage)
 
-			pipelineConfig := pipe.Config.DefaultConfig
-			if pipelineConfigId != "" {
+			if global.Env().IsDebug {
+				log.Trace("pipeline:", pipe.config.Name, ", shard:", shard, " , message received:", util.ToJson(context, true))
+			}
+
+			pipelineConfig := pipe.config.DefaultConfig
+			if context.PipelineConfigID != "" {
 				var err error
-				pipelineConfig, err = model.GetPipelineConfig(pipelineConfigId)
+				pipelineConfig, err = model.GetPipelineConfig(context.PipelineConfigID)
 				if err != nil {
 					panic(err)
 				}
 			}
 
-			log.Trace("shard:", shard, ",task received:", taskId)
-			pipe.execute(taskId, pipelineConfig)
-			log.Trace("shard:", shard, ",task finished:", taskId)
+			pipe.execute(shard, context, pipelineConfig)
+			log.Trace("pipeline:", pipe.config.Name, ", shard:", shard, " , message ", context.SequenceID, " process finished")
 		}
 	}
 }
 
-func (pipe *Pipe) execute(taskId string, pipelineConfig *model.PipelineConfig) {
+func (pipe *Pipe) execute(shard int, context model.Context, pipelineConfig *model.PipelineConfig) {
 	var pipeline *model.Pipeline
 	defer func() {
 		if !global.Env().IsDebug {
 			if r := recover(); r != nil {
-				if e, ok := r.(runtime.Error); ok {
-					log.Error("pipeline: ", pipeline.GetID(), ", taskId: ", taskId, ", ", util.GetRuntimeErrorMessage(e))
+				if r == nil {
+					return
 				}
-				log.Error("error in pipeline,", util.ToJson(r, true), util.ToJson(pipeline.GetContext(), true))
+				var v string
+				switch r.(type) {
+				case error:
+					v = r.(error).Error()
+				case runtime.Error:
+					v = r.(runtime.Error).Error()
+				case string:
+					v = r.(string)
+				}
+
+				log.Error("pipeline:", pipe.config.Name, ", shard:", shard, ", instance:", pipeline.GetID(), " ,joint:", pipeline.GetCurrentJoint(), ", err: ", v, ", sequence:", context.SequenceID, ", ", util.ToJson(pipeline.GetContext(), true))
 			}
 		}
 	}()
 
-	context := &model.Context{}
-	context.Set(CONTEXT_TASK_ID, taskId)
-
-	pipeline = model.NewPipelineFromConfig(pipe.Config.Name, pipelineConfig, context)
+	pipeline = model.NewPipelineFromConfig(pipe.config.Name, pipelineConfig, &context)
 	pipeline.Run()
 
-	if pipe.Config.ThresholdInMs > 0 {
-		log.Debug("sleep ", pipe.Config.ThresholdInMs, "ms to control crawling speed")
-		time.Sleep(time.Duration(pipe.Config.ThresholdInMs) * time.Millisecond)
-		log.Debug("wake up now,continue crawing")
+	if pipe.config.ThresholdInMs > 0 {
+		log.Debug("pipeline:", pipe.config.Name, ", shard:", shard, ", instance:", pipeline.GetID(), ", sleep ", pipe.config.ThresholdInMs, "ms to control speed")
+		time.Sleep(time.Duration(pipe.config.ThresholdInMs) * time.Millisecond)
+		log.Debug("pipeline:", pipe.config.Name, ", shard:", shard, ", instance:", pipeline.GetID(), ", wake up now,continue crawing")
 	}
-
-	log.Trace("end pipeline")
 }
 
 func (module PipelineFrameworkModule) Name() string {
@@ -171,13 +187,17 @@ func (module PipelineFrameworkModule) Start(cfg *Config) {
 		if v.DefaultConfig == nil {
 			panic(errors.Errorf("default pipeline config can't be null, %v, %v", i, v))
 		}
-		p := &Pipe{Config: v}
+		if (v.InputQueue) == "" {
+			panic(errors.Errorf("input queue can't be null, %v, %v", i, v))
+		}
+
+		p := &Pipe{config: v}
 		pipes[v.Name] = p
 	}
 
 	log.Debug("starting up pipeline framework")
 	for _, v := range pipes {
-		v.Start(v.Config)
+		v.Start(v.config)
 	}
 
 	frameworkStarted = true

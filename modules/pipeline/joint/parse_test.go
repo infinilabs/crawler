@@ -46,21 +46,20 @@ func TestProcessLinks(t *testing.T) {
 
 	context := model.Context{}
 	context.Init()
-	task := model.Task{}
-	task.Url = "http://elasticsearch.cn/"
-	task.Host = "elasticsearch.cn"
-
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_Depth, 0)
+	context.Set(model.CONTEXT_TASK_Breadth, 0)
+	context.Set(model.CONTEXT_TASK_URL, "http://elasticsearch.cn/")
+	context.Set(model.CONTEXT_TASK_Host, "elasticsearch.cn")
 	parse := ParsePageJoint{}
 	parse.Set(dispatchLinks, false)
 	snapshot := model.Snapshot{}
 	snapshot.ContentType = "text/html"
 
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 	snapshot.Payload = []byte(body)
 	parse.Process(&context)
 
-	o := context.MustGet(CONTEXT_PAGE_LINKS)
+	o := context.MustGet(model.CONTEXT_PAGE_LINKS)
 	links := o.(map[string]string)
 	println(links["google.com"])
 	assert.Equal(t, "baidu", links["//baidu.com"])
@@ -73,19 +72,17 @@ func TestProcessLinks(t *testing.T) {
 	if e != nil {
 		panic(e)
 	}
-	task = model.Task{}
-	task.Url = "http://discuss.elastic.co/"
-	task.Host = "discuss.elastic.co"
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_URL, "http://discuss.elastic.co/")
+	context.Set(model.CONTEXT_TASK_Host, "discuss.elastic.co")
 	snapshot = model.Snapshot{}
 	snapshot.ContentType = "text/html"
 
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 	snapshot.Payload = []byte(b)
 	parse.Process(&context)
 
-	o = context.MustGet(CONTEXT_PAGE_LINKS)
+	o = context.MustGet(model.CONTEXT_PAGE_LINKS)
 	fmt.Println("links in discuss:")
 	fmt.Println(util.ToJson(o, true))
 
@@ -100,21 +97,20 @@ func TestProcessDiscussLinks(t *testing.T) {
 
 	context := model.Context{}
 	context.Init()
-	task := model.Task{}
-	task.Url = "http://discuss.elastic.co/"
-	task.Host = "discuss.elastic.co"
-
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_Depth, 0)
+	context.Set(model.CONTEXT_TASK_Breadth, 0)
+	context.Set(model.CONTEXT_TASK_URL, "http://discuss.elastic.co/")
+	context.Set(model.CONTEXT_TASK_Host, "discuss.elastic.co")
 	parse := ParsePageJoint{}
 	parse.Set(dispatchLinks, false)
 	snapshot := model.Snapshot{}
 	snapshot.ContentType = "text/html"
 
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 	snapshot.Payload = []byte(body)
 	parse.Process(&context)
 
-	o := context.MustGet(CONTEXT_PAGE_LINKS)
+	o := context.MustGet(model.CONTEXT_PAGE_LINKS)
 	links := o.(map[string]string)
 	//println(links["google.com"])
 	//assert.Equal(t, "baidu", links["//baidu.com"])

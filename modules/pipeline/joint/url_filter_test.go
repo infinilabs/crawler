@@ -39,8 +39,11 @@ func TestUrlFilter(t *testing.T) {
 	snapshot.Path = "/"
 	snapshot.File = "default.html"
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
+	context.Set(model.CONTEXT_TASK_OriginalUrl, task.OriginalUrl)
+	context.Set(model.CONTEXT_TASK_Depth, task.Depth)
+	context.Set(model.CONTEXT_TASK_Host, task.Host)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 
 	parse := UrlFilterJoint{}
 	parse.Process(context)
@@ -51,7 +54,7 @@ func TestUrlFilter(t *testing.T) {
 	task.Depth = 1
 	task.Breadth = 1
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
 	parse.Process(context)
 	assert.Equal(t, true, context.IsExit())
 
@@ -60,7 +63,7 @@ func TestUrlFilter(t *testing.T) {
 	task.Depth = 1
 	task.Breadth = 1
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
 	parse.Process(context)
 	assert.Equal(t, true, context.IsExit())
 

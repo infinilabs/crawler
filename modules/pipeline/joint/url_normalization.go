@@ -48,10 +48,11 @@ func (joint UrlNormalizationJoint) Name() string {
 // Process will handle relative url and cleanup url
 func (joint UrlNormalizationJoint) Process(context *model.Context) error {
 
-	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
-	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+	snapshot := context.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
 
-	url := task.Url
+	url := context.MustGetString(model.CONTEXT_TASK_URL)
+	reference := context.GetStringOrDefault(model.CONTEXT_TASK_Reference, "")
+	host := context.GetStringOrDefault(model.CONTEXT_TASK_Host, "")
 	var currentURI, referenceURI *u.URL
 	var err error
 
@@ -75,7 +76,7 @@ func (joint UrlNormalizationJoint) Process(context *model.Context) error {
 	}
 
 	log.Tracef("currentURI,schema:%s, host:%s", currentURI.Scheme, currentURI.Host)
-	refUrlStr := task.Reference
+	refUrlStr := reference
 	var refExists bool
 	if refUrlStr != "" {
 		log.Trace("ref url exists, ", refUrlStr)
@@ -83,7 +84,7 @@ func (joint UrlNormalizationJoint) Process(context *model.Context) error {
 		if err == nil {
 			refExists = true
 		} else {
-			log.Warn("ref url parsed failed, ", err)
+			log.Warn("ref url parsed failed, ", refUrlStr, ", ", err)
 		}
 	}
 
@@ -139,11 +140,11 @@ func (joint UrlNormalizationJoint) Process(context *model.Context) error {
 		}
 
 		//try to fix link with host
-		if task.Host != "" {
+		if host != "" {
 			if strings.HasPrefix(url, "/") {
-				url = "http://" + task.Host + url
+				url = "http://" + host + url
 			} else {
-				url = "http://" + task.Host + "/" + url
+				url = "http://" + host + "/" + url
 			}
 			log.Trace("new relatived url with host,", url)
 		}
@@ -197,9 +198,9 @@ func (joint UrlNormalizationJoint) Process(context *model.Context) error {
 
 	}
 
-	task.Url = url
-	task.Host = currentURI.Host
-	task.Schema = currentURI.Scheme
+	context.Set(model.CONTEXT_TASK_URL, url)
+	context.Set(model.CONTEXT_TASK_Host, currentURI.Host)
+	context.Set(model.CONTEXT_TASK_Schema, currentURI.Scheme)
 
 	filePath := ""
 	filename := ""
@@ -315,7 +316,7 @@ func (joint UrlNormalizationJoint) Process(context *model.Context) error {
 
 	snapshot.Path = filePath
 	snapshot.File = filename
-	log.Debugf("finished normalization,%s, %s, %s, %s ", task.ID, url, filePath, filename)
+	log.Debugf("finished normalization,%s, %s, %s", url, filePath, filename)
 
 	return nil
 }

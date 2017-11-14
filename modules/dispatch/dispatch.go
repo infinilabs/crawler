@@ -6,6 +6,7 @@ import (
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/queue"
 	"github.com/infinitbyte/gopa/core/stats"
+	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
 	"time"
 )
@@ -28,7 +29,7 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 		now := time.Now().UTC()
 		dd, _ := time.ParseDuration("-240h")
 		defaultOffset := now.Add(dd)
-		offset := &defaultOffset
+		offset := defaultOffset
 
 		for {
 			select {
@@ -53,8 +54,10 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 					isUpdate = true
 					if total == 0 {
 						log.Trace("reset offset, ", defaultOffset)
-						offset = &defaultOffset
+						offset = defaultOffset
 					}
+				} else {
+					log.Debugf("get %v new task", total)
 				}
 
 				if tasks != nil && total > 0 {
@@ -67,11 +70,16 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 						}
 
 						//update offset
-						if v.Created.After(*offset) && isUpdate {
+						if v.Created.After(offset) && isUpdate {
 							offset = v.Created
 						}
 
-						queue.Push(config.FetchChannel, model.EncodePipelineTask(v.ID, v.PipelineConfigId))
+						context := model.Context{}
+						context.Init()
+						context.Set(model.CONTEXT_TASK_ID, v.ID)
+						context.PipelineConfigID = v.PipelineConfigID
+
+						queue.Push(config.FetchChannel, util.ToJSONBytes(context))
 						if isUpdate {
 							stats.Increment("dispatch", "update.enqueue")
 						}
@@ -92,7 +100,7 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				pop := stats.Stat("queue.fetch", "pop")
 				push := stats.Stat("queue.fetch", "push")
 
-				time.Sleep(10 * time.Second)
+				time.Sleep(5 * time.Second)
 
 				pop2 := stats.Stat("queue.fetch", "pop")
 				push2 := stats.Stat("queue.fetch", "push")
@@ -103,7 +111,7 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 						log.Error(err)
 					}
 				} else {
-					time.Sleep(10 * time.Second)
+					time.Sleep(5 * time.Second)
 					continue
 				}
 			}

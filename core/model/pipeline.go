@@ -32,12 +32,20 @@ import (
 
 type ParaKey string
 
+//  Common pipeline context keys
+const (
+	CONTEXT_SNAPSHOT   ParaKey = "SNAPSHOT"
+	CONTEXT_PAGE_LINKS ParaKey = "PAGE_LINKS"
+)
+
 type Context struct {
 	Parameters
 
-	Simulate     bool        `json:"simulate"`
-	IgnoreBroken bool        `json:"ignore_broken"`
-	Payload      interface{} `json:"-"`
+	SequenceID       int64       `json:"sequence"`
+	PipelineConfigID string      `json:"pipeline_config_id"`
+	Simulate         bool        `json:"simulate"`
+	IgnoreBroken     bool        `json:"ignore_broken"`
+	Payload          interface{} `json:"-"`
 
 	//private parameters
 	breakFlag bool
@@ -89,6 +97,23 @@ func (para *Parameters) Init() {
 	}
 	para.inited = true
 	para.l.Unlock()
+}
+
+func (para *Parameters) MustGetTime(key ParaKey) time.Time {
+	v, ok := para.GetTime(key)
+	if !ok {
+		panic(fmt.Errorf("%s not found in context", key))
+	}
+	return v
+}
+
+func (para *Parameters) GetTime(key ParaKey) (time.Time, bool) {
+	v := para.Get(key)
+	s, ok := v.(time.Time)
+	if ok {
+		return s, ok
+	}
+	return s, ok
 }
 
 func (para *Parameters) GetString(key ParaKey) (string, bool) {
@@ -338,6 +363,9 @@ func (pipe *Pipeline) OnFail(s Joint) *Pipeline {
 func (context *Pipeline) setCurrentJoint(name string) {
 	context.currentJointName = name
 }
+func (pipe *Pipeline) GetCurrentJoint() string {
+	return pipe.currentJointName
+}
 
 func (pipe *Pipeline) Run() *Context {
 
@@ -347,10 +375,20 @@ func (pipe *Pipeline) Run() *Context {
 	defer func() {
 		if !global.Env().IsDebug {
 			if r := recover(); r != nil {
-				if e, ok := r.(runtime.Error); ok {
-					pipe.context.End(util.GetRuntimeErrorMessage(e))
+
+				if r == nil {
+					return
 				}
-				log.Error("error in pipeline, ", pipe.name, ", ", pipe.id, ", ", pipe.currentJointName, ", ", r)
+				var v string
+				switch r.(type) {
+				case error:
+					v = r.(error).Error()
+				case runtime.Error:
+					v = r.(runtime.Error).Error()
+				case string:
+					v = r.(string)
+				}
+				log.Error("error in pipeline, ", pipe.name, ", ", pipe.id, ", ", pipe.currentJointName, ", ", v)
 				stats.Increment(pipe.name+".pipeline", "error")
 			}
 		}
@@ -382,6 +420,7 @@ func (pipe *Pipeline) Run() *Context {
 		pipe.setCurrentJoint(v.Name())
 		startTime := time.Now()
 		err = v.Process(pipe.context)
+
 		elapsedTime := time.Now().Sub(startTime)
 		stats.Timing(pipe.name+".pipeline", v.Name(), elapsedTime.Nanoseconds())
 		if err != nil {

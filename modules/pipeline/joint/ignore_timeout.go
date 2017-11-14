@@ -35,10 +35,10 @@ type IgnoreTimeoutJoint struct {
 
 func (joint IgnoreTimeoutJoint) Process(context *model.Context) error {
 
-	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
+	//task := context.MustGet(model.CONTEXT_TASK).(*model.Task)
 
 	//TODO ignore within time period, rather than total count
-	host := task.Host
+	host := context.MustGetString(model.CONTEXT_TASK_Host)
 	timeoutCount := stats.Stat("host.stats", host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
 	if timeoutCount > joint.MustGetInt64(ignoreTimeoutAfterCount) {
 		stats.Increment("host.stats", host+"."+config.STATS_FETCH_TIMEOUT_IGNORE_COUNT)

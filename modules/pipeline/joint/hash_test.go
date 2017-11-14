@@ -32,12 +32,13 @@ func TestProcessHash(t *testing.T) {
 	task.Url = "http://elasticsearch.cn/"
 	task.Depth = 1
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_URL, "http://elasticsearch.cn/")
+	context.Set(model.CONTEXT_TASK_Depth, 1)
 	parse := HashJoint{}
 
 	snapshot := model.Snapshot{}
 	snapshot.Payload = []byte(body)
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 
 	parse.Process(&context)
 
@@ -49,18 +50,14 @@ func TestProcessHash(t *testing.T) {
 
 	body = "Just some test content,你好啊,!!"
 
-	task1 := model.Task{}
-	task.Url = "http://elasticsearch.cn/"
-	task.Depth = 1
-
 	context = model.Context{}
-	context.Init()
-	context.Set(CONTEXT_CRAWLER_TASK, &task1)
+	context.Set(model.CONTEXT_TASK_URL, "http://elasticsearch.cn/")
+	context.Set(model.CONTEXT_TASK_Depth, 1)
 	parse = HashJoint{}
 
 	snapshot = model.Snapshot{}
 	snapshot.Payload = []byte(body)
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 
 	parse.Process(&context)
 	hash2 := snapshot.SimHash

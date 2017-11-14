@@ -34,19 +34,17 @@ func (joint TaskDeduplicationJoint) Name() string {
 
 // Process deduplication
 func (joint TaskDeduplicationJoint) Process(c *model.Context) error {
-	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
+	url := c.MustGetString(model.CONTEXT_TASK_URL)
+	log.Trace("check duplication, ", url)
 
-	log.Trace("check duplication, ", task.Url)
-
-	items, err := model.GetTaskByField("url", task.Url)
+	items, err := model.GetTaskByField("url", url)
 
 	if err != nil {
 		panic(err)
 	}
 	if len(items) > 0 {
-		msg := fmt.Sprintf("task already exists, %s, %s", task.ID, task.Url)
-		task.NextCheck = nil
-		task.Status = model.TaskDuplicated
+		msg := fmt.Sprintf("task already exists, %s", url)
+		c.Set(model.CONTEXT_TASK_Status, model.TaskDuplicated)
 		c.Exit(msg)
 		return errors.New(msg)
 	}

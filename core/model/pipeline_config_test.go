@@ -39,6 +39,8 @@ func TestPipelineConfig(t *testing.T) {
 	context.Data["url"] = "gogol.com"
 	context.Data["webpage"] = "hello world gogo "
 
+	fmt.Println(util.ToJson(context, true))
+
 	RegisterPipeJoint(crawlerJoint{})
 	RegisterPipeJoint(parserJoint{})
 	RegisterPipeJoint(saveJoint{})
@@ -51,8 +53,6 @@ func TestPipelineConfig(t *testing.T) {
 	joints = append(joints, &JointConfig{Enabled: true, JointName: "publish", Parameters: map[string]interface{}{}})
 
 	config.ProcessJoints = joints
-
-	//fmt.Println(util.ToJson(config,true))
 
 	pipe := NewPipelineFromConfig("test", &config, context)
 	context = pipe.Run()

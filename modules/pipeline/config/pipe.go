@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/util"
+	"github.com/infinitbyte/gopa/modules/config"
 )
 
 // PipeConfig defines crawler related configs
@@ -20,6 +21,8 @@ type PipeConfig struct {
 	TimeoutInMs int `config:"timeout_in_ms"`
 
 	DefaultConfig *model.PipelineConfig `config:"default_config"`
+
+	InputQueue string `config:"input_queue"`
 }
 
 // getDefaultCrawlerConfig return a default PipeConfig
@@ -97,6 +100,7 @@ func GetDefaultPipeConfig() []PipeConfig {
 		Enabled:       true,
 		MaxGoRoutine:  10,
 		TimeoutInMs:   30000,
+		InputQueue:    config.FetchChannel,
 		ThresholdInMs: 0,
 		DefaultConfig: &crawler,
 	}
@@ -133,6 +137,7 @@ func GetDefaultPipeConfig() []PipeConfig {
 	defaultCheckerConfig := PipeConfig{
 		Name:          "checker",
 		Enabled:       true,
+		InputQueue:    config.CheckChannel,
 		MaxGoRoutine:  10,
 		ThresholdInMs: 0,
 		TimeoutInMs:   5000,

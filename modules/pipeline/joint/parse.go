@@ -46,18 +46,18 @@ func (joint ParsePageJoint) Name() string {
 
 func (joint ParsePageJoint) Process(context *model.Context) error {
 
-	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
-	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+	//task := context.MustGet(model.CONTEXT_TASK).(*model.Task)
+	snapshot := context.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
 
 	if !util.PrefixStr(snapshot.ContentType, "text/html") {
 		log.Debugf("snapshot is not html, %s, %s , %s", snapshot.ID, snapshot.Url, snapshot.ContentType)
 		return nil
 	}
 
-	refUrl := task.Url
-	refHost := task.Host
-	depth := task.Depth
-	breadth := task.Breadth
+	refUrl := context.MustGetString(model.CONTEXT_TASK_URL)
+	refHost := context.MustGetString(model.CONTEXT_TASK_Host)
+	depth := context.MustGetInt(model.CONTEXT_TASK_Depth)
+	breadth := context.MustGetInt(model.CONTEXT_TASK_Breadth)
 	fileContent := snapshot.Payload
 
 	//replace noscript to div
@@ -103,8 +103,7 @@ func (joint ParsePageJoint) Process(context *model.Context) error {
 				} else {
 					log.Error("unexpected http-equiv, ", content)
 				}
-				task.Status = model.TaskRedirected
-
+				context.Set(model.CONTEXT_TASK_Status, model.TaskRedirected)
 				context.End(fmt.Sprintf("redirected to: %v", content))
 			}
 		}
@@ -131,7 +130,7 @@ func (joint ParsePageJoint) Process(context *model.Context) error {
 	})
 
 	if len(links) > 0 {
-		context.Set(CONTEXT_PAGE_LINKS, links)
+		context.Set(model.CONTEXT_PAGE_LINKS, links)
 		snapshot.Links = model.LinkGroup{
 			Internal: []model.PageLink{},
 			External: []model.PageLink{},
@@ -143,7 +142,7 @@ func (joint ParsePageJoint) Process(context *model.Context) error {
 				Label: util.XSSHandle(label),
 				Url:   link,
 			}
-			if host != "" && host != task.Host {
+			if host != "" && host != refHost {
 				snapshot.Links.External = append(snapshot.Links.External, l)
 			} else {
 				snapshot.Links.Internal = append(snapshot.Links.Internal, l)
@@ -179,14 +178,14 @@ func (joint ParsePageJoint) Process(context *model.Context) error {
 			Label: util.XSSHandle(label),
 			Url:   link,
 		}
-		if host != "" && host != task.Host {
+		if host != "" && host != refHost {
 			snapshot.Images.External = append(snapshot.Images.External, l)
 		} else {
 			snapshot.Images.Internal = append(snapshot.Images.Internal, l)
 		}
 	}
 
-	log.Trace("depth:", depth, ", breath:", breadth, ",", joint.GetIntOrDefault(maxDepth, 10), ",", joint.GetIntOrDefault(maxBreadth, 10), ",url:", task.Url)
+	log.Trace("depth:", depth, ", breath:", breadth, ",", joint.GetIntOrDefault(maxDepth, 10), ",", joint.GetIntOrDefault(maxBreadth, 10), ",url:", refUrl)
 
 	//if reach max depth, skip for future fetch
 	if depth > joint.GetIntOrDefault(maxDepth, 10) {
@@ -216,7 +215,13 @@ func (joint ParsePageJoint) Process(context *model.Context) error {
 				} else {
 					d++
 				}
-				queue.Push(config.CheckChannel, model.NewTaskSeed(url, refUrl, d, b).MustGetBytes())
+
+				context := model.Context{IgnoreBroken: true}
+				context.Set(model.CONTEXT_TASK_URL, url)
+				context.Set(model.CONTEXT_TASK_Reference, refUrl)
+				context.Set(model.CONTEXT_TASK_Depth, d)
+				context.Set(model.CONTEXT_TASK_Breadth, b)
+				queue.Push(config.CheckChannel, util.ToJSONBytes(context))
 			}
 
 		}

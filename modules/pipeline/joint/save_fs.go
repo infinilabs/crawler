@@ -41,12 +41,10 @@ func (joint SaveSnapshotToFileSystemJoint) Process(c *model.Context) error {
 		joint.baseDir = global.Env().SystemConfig.GetWorkingDir() + "/web"
 	}
 
-	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
-	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+	snapshot := c.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
 
-	url := task.Url
-
-	host := task.Host
+	url := c.MustGetString(model.CONTEXT_TASK_URL)
+	host := c.MustGetString(model.CONTEXT_TASK_Host)
 	dir := snapshot.Path
 	file := snapshot.File
 	folder := path.Join(joint.baseDir, host, dir)
@@ -58,7 +56,7 @@ func (joint SaveSnapshotToFileSystemJoint) Process(c *model.Context) error {
 		return nil
 	}
 
-	log.Trace("save url,", url, ",host,", task.Host, ",folder,", folder, ",file:", file, ",fullpath,", fullPath)
+	log.Trace("save url,", url, ",host,", host, ",folder,", folder, ",file:", file, ",fullpath,", fullPath)
 
 	err := os.MkdirAll(folder, 0777)
 	if err != nil {

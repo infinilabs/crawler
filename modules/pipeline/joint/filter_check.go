@@ -42,9 +42,7 @@ func (joint FilterCheckJoint) Name() string {
 // Process the filtering and add it to the filter
 func (joint FilterCheckJoint) Process(context *model.Context) error {
 
-	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
-
-	url := task.Url
+	url := context.MustGetString(model.CONTEXT_TASK_URL)
 
 	key := joint.GetStringOrDefault(filterKey, "check_filter")
 	v := filter.Key(key)

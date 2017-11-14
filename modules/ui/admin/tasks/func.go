@@ -10,7 +10,7 @@ import (
 // GetDomainRow return html blocks to display a domain info
 func GetDomainRow(host model.Host) string {
 	var buffer bytes.Buffer
-	link := fmt.Sprintf("<a href=\"?host=%v\">%v(%v)</a>", host.Host, host.Host, host.LinksCount)
+	link := fmt.Sprintf("<a href=\"?host=%v\">%v</a>", host.Host, host.Host)
 	writeTag(&buffer, "span", link)
 	return buffer.String()
 }
@@ -20,16 +20,16 @@ func GetTaskRow(task model.Task) string {
 	var buffer bytes.Buffer
 	buffer.WriteString("<tr>")
 
-	writeTag(&buffer, "td", util.SubStringWithSuffix(task.Url, 60, "..."))
+	writeTag(&buffer, "td", util.SubStringWithSuffix(task.Url, 50, "..."))
 
-	if task.SnapshotCreated != nil {
+	if !task.SnapshotCreated.IsZero() {
 		date1 := util.FormatTimeWithLocalTZ(task.SnapshotCreated)
 		buffer.WriteString("<td class='timeago' title='" + date1 + "' >" + date1 + "</td>")
 	} else {
 		buffer.WriteString("<td >N/A</td>")
 	}
 
-	if task.NextCheck != nil {
+	if !task.NextCheck.IsZero() {
 		date2 := util.FormatTimeWithLocalTZ(task.NextCheck)
 		buffer.WriteString("<td class='timeago' title='" + date2 + "' >" + date2 + "</td>")
 

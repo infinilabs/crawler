@@ -37,13 +37,10 @@ func TestProcessText(t *testing.T) {
 
 	context := model.Context{}
 	context.Init()
-	task := model.Task{}
-	task.Url = "http://elasticsearch.cn/"
-	task.Depth = 1
-
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_URL, "http://elasticsearch.cn/")
+	context.Set(model.CONTEXT_TASK_Depth, 1)
 	snapshot := model.Snapshot{}
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 	snapshot.Payload = []byte(body)
 	snapshot.ContentType = "text/html"
 
@@ -59,7 +56,7 @@ func TestProcessText(t *testing.T) {
 		panic(e)
 	}
 	snapshot = model.Snapshot{}
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 	snapshot.Payload = b
 	snapshot.ContentType = "text/html"
 
@@ -74,7 +71,7 @@ func TestProcessText(t *testing.T) {
 		panic(e)
 	}
 	snapshot = model.Snapshot{}
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 	snapshot.Payload = b
 	snapshot.ContentType = "text/html"
 

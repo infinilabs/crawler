@@ -47,7 +47,7 @@ func (joint FetchJoint) Name() string {
 type signal struct {
 	flag   bool
 	err    error
-	status model.TaskStatus
+	status int
 }
 
 func (joint FetchJoint) Process(context *model.Context) error {
@@ -56,10 +56,9 @@ func (joint FetchJoint) Process(context *model.Context) error {
 	timer := time.NewTimer(joint.timeout)
 	defer timer.Stop()
 
-	task := context.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
-	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+	snapshot := context.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
 
-	requestUrl := task.Url
+	requestUrl := context.MustGetString(model.CONTEXT_TASK_URL)
 
 	if len(requestUrl) == 0 {
 		log.Error("invalid fetchUrl,", requestUrl)
@@ -68,7 +67,7 @@ func (joint FetchJoint) Process(context *model.Context) error {
 	}
 
 	t1 := time.Now().UTC()
-	task.LastFetch = &t1
+	context.Set(model.CONTEXT_TASK_LastFetch, t1)
 
 	log.Debug("start fetch url,", requestUrl)
 	flg := make(chan signal, 1)
@@ -83,8 +82,8 @@ func (joint FetchJoint) Process(context *model.Context) error {
 		if err == nil && result != nil {
 
 			//update url, in case catch redirects
-			task.Url = result.Url
-			task.Host = result.Host
+			context.Set(model.CONTEXT_TASK_URL, result.Url)
+			context.Set(model.CONTEXT_TASK_Host, result.Host)
 
 			snapshot.Payload = result.Body
 			snapshot.StatusCode = result.StatusCode
@@ -140,9 +139,17 @@ func (joint FetchJoint) Process(context *model.Context) error {
 				if global.Env().IsDebug {
 					log.Debug(util.ToJson(context, true))
 				}
-				task := model.NewTaskSeed(payload.(string), requestUrl, task.Depth, task.Breadth)
-				log.Trace(err)
-				queue.Push(config.CheckChannel, task.MustGetBytes())
+
+				depth := context.GetOrDefault(model.CONTEXT_TASK_Depth, 0)
+				breadth := context.GetOrDefault(model.CONTEXT_TASK_Breadth, 0)
+
+				context := model.Context{IgnoreBroken: true}
+				context.Set(model.CONTEXT_TASK_URL, payload.(string))
+				context.Set(model.CONTEXT_TASK_Reference, requestUrl)
+				context.Set(model.CONTEXT_TASK_Depth, depth)
+				context.Set(model.CONTEXT_TASK_Breadth, breadth)
+				queue.Push(config.CheckChannel, util.ToJSONBytes(context))
+
 				flg <- signal{flag: false, err: err, status: model.TaskRedirected}
 				return
 			}
@@ -154,23 +161,28 @@ func (joint FetchJoint) Process(context *model.Context) error {
 	//check timeout
 	select {
 	case <-timer.C:
+		host := context.MustGetString(model.CONTEXT_TASK_Host)
+
 		log.Error("fetching url time out, ", requestUrl, ", ", joint.timeout)
-		stats.Increment("host.stats", task.Host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
-		task.Status = model.TaskTimeout
+		stats.Increment("host.stats", host+"."+config.STATS_FETCH_TIMEOUT_COUNT)
+
+		context.Set(model.CONTEXT_TASK_Status, model.TaskTimeout)
+
 		context.End(fmt.Sprintf("fetching url time out, %s, %s", requestUrl, joint.timeout))
 		return errors.New("fetch url time out")
 	case value := <-flg:
+		host := context.MustGetString(model.CONTEXT_TASK_Host)
 		if value.flag {
 			log.Debug("fetching url normal exit, ", requestUrl)
-			stats.Increment("host.stats", task.Host+"."+config.STATS_FETCH_SUCCESS_COUNT)
+			stats.Increment("host.stats", host+"."+config.STATS_FETCH_SUCCESS_COUNT)
 		} else {
 			log.Debug("fetching url error exit, ", requestUrl)
 			if value.err != nil {
 				context.End(value.err.Error())
 			}
-			stats.Increment("host.stats", task.Host+"."+config.STATS_FETCH_FAIL_COUNT)
+			stats.Increment("host.stats", host+"."+config.STATS_FETCH_FAIL_COUNT)
 		}
-		task.Status = value.status
+		context.Set(model.CONTEXT_TASK_Status, value.status)
 		return nil
 	}
 }

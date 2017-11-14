@@ -22,51 +22,49 @@ import (
 	"time"
 )
 
-type QueueKey string
-
 type Queue interface {
-	Push(QueueKey, []byte) error
-	Pop(QueueKey, time.Duration) (error, []byte)
-	ReadChan(k QueueKey) chan []byte
-	Close(QueueKey) error
-	Depth(QueueKey) int64
+	Push(string, []byte) error
+	Pop(string, time.Duration) (error, []byte)
+	ReadChan(k string) chan []byte
+	Close(string) error
+	Depth(string) int64
 }
 
 var handler Queue
 
-func Push(k QueueKey, v []byte) error {
+func Push(k string, v []byte) error {
 	if handler != nil {
 		o := handler.Push(k, v)
 		if o == nil {
-			stats.Increment("queue."+string(k), "push")
+			stats.Increment("queue."+k, "push")
 		}
 		return o
 	}
-	stats.Increment("queue."+string(k), "push_error")
+	stats.Increment("queue."+k, "push_error")
 	panic(errors.New("channel is not registered"))
 }
 
-func ReadChan(k QueueKey) chan []byte {
+func ReadChan(k string) chan []byte {
 	if handler != nil {
 		return handler.ReadChan(k)
 	}
-	stats.Increment("queue."+string(k), "read_chan_error")
+	stats.Increment("queue."+k, "read_chan_error")
 	panic(errors.New("channel is not registered"))
 }
 
-func Pop(k QueueKey) (error, []byte) {
+func Pop(k string) (error, []byte) {
 	if handler != nil {
 		er, o := handler.Pop(k, -1)
 		if er == nil {
-			stats.Increment("queue."+string(k), "pop")
+			stats.Increment("queue."+k, "pop")
 		}
 		return er, o
 	}
-	stats.Increment("queue."+string(k), "pop_error")
+	stats.Increment("queue."+k, "pop_error")
 	panic(errors.New("channel is not registered"))
 }
 
-func PopTimeout(k QueueKey, timeoutInSeconds time.Duration) (error, []byte) {
+func PopTimeout(k string, timeoutInSeconds time.Duration) (error, []byte) {
 	if timeoutInSeconds < 1 {
 		timeoutInSeconds = 5
 	}
@@ -74,28 +72,28 @@ func PopTimeout(k QueueKey, timeoutInSeconds time.Duration) (error, []byte) {
 	if handler != nil {
 		er, o := handler.Pop(k, timeoutInSeconds)
 		if er == nil {
-			stats.Increment("queue."+string(k), "pop")
+			stats.Increment("queue."+k, "pop")
 		}
 		return er, o
 	}
-	stats.Increment("queue."+string(k), "pop_error")
+	stats.Increment("queue."+k, "pop_error")
 	panic(errors.New("channel is not registered"))
 }
 
-func Close(k QueueKey) error {
+func Close(k string) error {
 	if handler != nil {
 		o := handler.Close(k)
-		stats.Increment("queue."+string(k), "close")
+		stats.Increment("queue."+k, "close")
 		return o
 	}
-	stats.Increment("queue."+string(k), "close_error")
+	stats.Increment("queue."+k, "close_error")
 	panic(errors.New("channel is not closed"))
 }
 
-func Depth(k QueueKey) int64 {
+func Depth(k string) int64 {
 	if handler != nil {
 		o := handler.Depth(k)
-		stats.Increment("queue."+string(k), "depth")
+		stats.Increment("queue."+k, "depth")
 		return o
 	}
 	panic(errors.New("channel is not registered"))

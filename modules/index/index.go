@@ -9,7 +9,6 @@ import (
 	core "github.com/infinitbyte/gopa/core/index"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/queue"
-	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
 	"github.com/infinitbyte/gopa/modules/index/ui"
 	cfg "github.com/infinitbyte/gopa/modules/index/ui/config"
@@ -61,10 +60,20 @@ func (module IndexModule) Start(cfg *Config) {
 
 			if !global.Env().IsDebug {
 				if r := recover(); r != nil {
-					if e, ok := r.(runtime.Error); ok {
-						log.Error("index: ", util.GetRuntimeErrorMessage(e))
+
+					if r == nil {
+						return
 					}
-					log.Error("error in indexer")
+					var v string
+					switch r.(type) {
+					case error:
+						v = r.(error).Error()
+					case runtime.Error:
+						v = r.(runtime.Error).Error()
+					case string:
+						v = r.(string)
+					}
+					log.Error("error in indexer,", v)
 				}
 			}
 		}()

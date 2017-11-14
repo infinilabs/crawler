@@ -47,45 +47,45 @@ func TestSetSnapNextCheckTime(t *testing.T) {
 	oneMinute, _ := time.ParseDuration("1m")
 
 	fmt.Println("update 1s with no change")
-	task := new(model.Task)
+	context := model.Context{}
 	tNow := theTime.Add(1 * oneSecond)
-	task.LastCheck = &theTime
-	task.NextCheck = &tNow
-	task.SnapshotVersion = 2
-	updateNextCheckTime(task, tNow, decelerateSteps, false)
-	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
-	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
-	timeInterval := getTimeInterval(*task.LastCheck, *task.NextCheck)
+	context.Set(model.CONTEXT_TASK_LastCheck, theTime)
+	context.Set(model.CONTEXT_TASK_NextCheck, tNow)
+	context.Set(model.CONTEXT_TASK_SnapshotVersion, 2)
+
+	updateNextCheckTime(&context, tNow, decelerateSteps, false)
+	new1 := context.MustGetTime(model.CONTEXT_TASK_LastCheck)
+	new2 := context.MustGetTime(model.CONTEXT_TASK_NextCheck)
+	timeInterval := getTimeInterval(new1, new2)
 	fmt.Println("---- next check time          ", timeInterval)
 	assert.Equal(t, 60, timeInterval)
 
 	fmt.Println()
 
 	fmt.Println("update 10m with no change")
-	task = new(model.Task)
 	tNow = theTime.Add(10 * oneMinute)
-	task.LastCheck = &theTime
-	task.NextCheck = &tNow
-	task.SnapshotVersion = 2
-	updateNextCheckTime(task, tNow, decelerateSteps, false)
-	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
-	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
-	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
+	context.Set(model.CONTEXT_TASK_LastCheck, theTime)
+	context.Set(model.CONTEXT_TASK_NextCheck, tNow)
+	context.Set(model.CONTEXT_TASK_SnapshotVersion, 2)
+	updateNextCheckTime(&context, tNow, decelerateSteps, false)
+	new1 = context.MustGetTime(model.CONTEXT_TASK_LastCheck)
+	new2 = context.MustGetTime(model.CONTEXT_TASK_NextCheck)
+	timeInterval = getTimeInterval(new1, new2)
 	fmt.Println("---- next check time          ", timeInterval)
 	assert.Equal(t, 600, timeInterval)
 
 	fmt.Println()
 
 	fmt.Println("update 20m with no change")
-	task = new(model.Task)
+	context = model.Context{}
 	tNow = theTime.Add(10 * oneMinute)
-	task.LastCheck = &theTime
-	task.NextCheck = &tNow
-	task.SnapshotVersion = 2
-	updateNextCheckTime(task, tNow, decelerateSteps, false)
-	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
-	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
-	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
+	context.Set(model.CONTEXT_TASK_LastCheck, theTime)
+	context.Set(model.CONTEXT_TASK_NextCheck, tNow)
+	context.Set(model.CONTEXT_TASK_SnapshotVersion, 2)
+	updateNextCheckTime(&context, tNow, decelerateSteps, false)
+	new1 = context.MustGetTime(model.CONTEXT_TASK_LastCheck)
+	new2 = context.MustGetTime(model.CONTEXT_TASK_NextCheck)
+	timeInterval = getTimeInterval(new1, new2)
 	fmt.Println("---- next check time          ", timeInterval)
 	assert.Equal(t, 600, timeInterval)
 
@@ -93,61 +93,61 @@ func TestSetSnapNextCheckTime(t *testing.T) {
 
 	fmt.Println("update 2m with change")
 	tNow = theTime.Add(120 * oneSecond)
-	task.LastCheck = &theTime
-	task.NextCheck = &tNow
-	task.SnapshotVersion = 2
-	updateNextCheckTime(task, tNow, accelerateSteps, true)
-	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
-	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
-	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
+	context.Set(model.CONTEXT_TASK_LastCheck, theTime)
+	context.Set(model.CONTEXT_TASK_NextCheck, tNow)
+	context.Set(model.CONTEXT_TASK_SnapshotVersion, 2)
+	updateNextCheckTime(&context, tNow, accelerateSteps, true)
+	new1 = context.MustGetTime(model.CONTEXT_TASK_LastCheck)
+	new2 = context.MustGetTime(model.CONTEXT_TASK_NextCheck)
+	timeInterval = getTimeInterval(new1, new2)
 	fmt.Println("----timeInterval           ", timeInterval)
 	assert.Equal(t, 60, timeInterval)
 
 	fmt.Println("update 10s with change")
 	tNow = theTime.Add(10 * oneSecond)
-	task.LastCheck = &theTime
-	task.NextCheck = &tNow
-	task.SnapshotVersion = 2
-	updateNextCheckTime(task, tNow, accelerateSteps, true)
-	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
-	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
-	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
+	context.Set(model.CONTEXT_TASK_LastCheck, theTime)
+	context.Set(model.CONTEXT_TASK_NextCheck, tNow)
+	context.Set(model.CONTEXT_TASK_SnapshotVersion, 2)
+	updateNextCheckTime(&context, tNow, accelerateSteps, true)
+	new1 = context.MustGetTime(model.CONTEXT_TASK_LastCheck)
+	new2 = context.MustGetTime(model.CONTEXT_TASK_NextCheck)
+	timeInterval = getTimeInterval(new1, new2)
 	fmt.Println("----timeInterval           ", timeInterval)
 	assert.Equal(t, 60, timeInterval)
 
 	fmt.Println("update 1000s with change")
 	tNow = theTime.Add(1000 * oneSecond)
-	task.LastCheck = &theTime
-	task.NextCheck = &tNow
-	task.SnapshotVersion = 2
-	updateNextCheckTime(task, tNow, accelerateSteps, true)
-	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
-	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
-	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
+	context.Set(model.CONTEXT_TASK_LastCheck, theTime)
+	context.Set(model.CONTEXT_TASK_NextCheck, tNow)
+	context.Set(model.CONTEXT_TASK_SnapshotVersion, 2)
+	updateNextCheckTime(&context, tNow, accelerateSteps, true)
+	new1 = context.MustGetTime(model.CONTEXT_TASK_LastCheck)
+	new2 = context.MustGetTime(model.CONTEXT_TASK_NextCheck)
+	timeInterval = getTimeInterval(new1, new2)
 	fmt.Println("----timeInterval           ", timeInterval)
 	assert.Equal(t, 600, timeInterval)
 
 	fmt.Println("update 500s with change")
 	tNow = theTime.Add(500 * oneSecond)
-	task.LastCheck = &theTime
-	task.NextCheck = &tNow
-	task.SnapshotVersion = 2
-	updateNextCheckTime(task, tNow, accelerateSteps, true)
-	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
-	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
-	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
+	context.Set(model.CONTEXT_TASK_LastCheck, theTime)
+	context.Set(model.CONTEXT_TASK_NextCheck, tNow)
+	context.Set(model.CONTEXT_TASK_SnapshotVersion, 2)
+	updateNextCheckTime(&context, tNow, accelerateSteps, true)
+	new1 = context.MustGetTime(model.CONTEXT_TASK_LastCheck)
+	new2 = context.MustGetTime(model.CONTEXT_TASK_NextCheck)
+	timeInterval = getTimeInterval(new1, new2)
 	fmt.Println("----timeInterval           ", timeInterval)
 	assert.Equal(t, 300, timeInterval)
 
 	fmt.Println("update 600s with change")
 	tNow = theTime.Add(600 * oneSecond)
-	task.LastCheck = &theTime
-	task.NextCheck = &tNow
-	task.SnapshotVersion = 2
-	updateNextCheckTime(task, tNow, accelerateSteps, true)
-	fmt.Println("    task.LastCheckTime     ", task.LastCheck)
-	fmt.Println("    task.NextCheckTime     ", task.NextCheck)
-	timeInterval = getTimeInterval(*task.LastCheck, *task.NextCheck)
+	context.Set(model.CONTEXT_TASK_LastCheck, theTime)
+	context.Set(model.CONTEXT_TASK_NextCheck, tNow)
+	context.Set(model.CONTEXT_TASK_SnapshotVersion, 2)
+	updateNextCheckTime(&context, tNow, accelerateSteps, true)
+	new1 = context.MustGetTime(model.CONTEXT_TASK_LastCheck)
+	new2 = context.MustGetTime(model.CONTEXT_TASK_NextCheck)
+	timeInterval = getTimeInterval(new1, new2)
 	fmt.Println("----timeInterval           ", timeInterval)
 	assert.Equal(t, 300, timeInterval)
 }

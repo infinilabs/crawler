@@ -123,5 +123,17 @@ func TestContext(t *testing.T) {
 	assert.Equal(t, 23, v)
 	v, _ = context.GetInt(key2, 0)
 	assert.Equal(t, 0, v)
+}
 
+func TestContextMarshal(t *testing.T) {
+	url := "http://google.com"
+	context := Context{IgnoreBroken: true}
+	context.Set("URL", url)
+
+	b := util.ToJSONBytes(context)
+
+	fmt.Println(string(b))
+	c := Context{}
+	util.FromJSONBytes(b, &c)
+	assert.Equal(t, url, c.Get("URL"))
 }

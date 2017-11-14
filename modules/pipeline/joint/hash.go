@@ -32,7 +32,7 @@ func (joint HashJoint) Name() string {
 
 func (joint HashJoint) Process(context *model.Context) error {
 
-	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+	snapshot := context.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
 
 	h := sha1.New()
 	h.Write(snapshot.Payload)

@@ -4,14 +4,13 @@ import (
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/filter"
 	"github.com/infinitbyte/gopa/core/global"
-	"github.com/infinitbyte/gopa/core/queue"
 )
 
 const (
-	FetchChannel      queue.QueueKey = "fetch"
-	CheckChannel      queue.QueueKey = "check"
-	DispatcherChannel queue.QueueKey = "dispatch"
-	IndexChannel      queue.QueueKey = "index"
+	FetchChannel      string = "fetch"
+	CheckChannel      string = "check"
+	DispatcherChannel string = "dispatch"
+	IndexChannel      string = "index"
 
 	DispatchFilter    filter.Key = "dispatch_filter"
 	CheckFilter       filter.Key = "check_filter"

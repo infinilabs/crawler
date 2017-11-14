@@ -33,7 +33,7 @@ func (joint LanguageDetectJoint) Name() string {
 
 // Process language detect
 func (joint LanguageDetectJoint) Process(c *model.Context) error {
-	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+	snapshot := c.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
 
 	if snapshot == nil {
 		return errors.Errorf("snapshot is nil, %s , %s", snapshot.ID, snapshot.Url)

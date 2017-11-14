@@ -22,6 +22,7 @@ import (
 	logging "github.com/infinitbyte/gopa/core/logger"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/queue"
+	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
 	"strings"
 )
@@ -47,7 +48,10 @@ func (command Command) Help(c *WebsocketConnection, a []string) {
 func (command Command) AddSeed(c *WebsocketConnection, a []string) {
 	url := a[1]
 	if len(url) > 0 {
-		queue.Push(config.CheckChannel, model.NewTaskSeed(url, "", 0, 0).MustGetBytes())
+		context := model.Context{IgnoreBroken: true}
+		context.Set(model.CONTEXT_TASK_URL, url)
+		queue.Push(config.CheckChannel, util.ToJSONBytes(context))
+
 		c.WritePrivateMessage("url " + url + " success added to pending fetch queue")
 		return
 	}

@@ -169,7 +169,7 @@ func replaceAll(src []byte) []byte {
 
 func (joint HtmlToTextJoint) Process(context *model.Context) error {
 
-	snapshot := context.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+	snapshot := context.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
 
 	if !util.PrefixStr(snapshot.ContentType, "text/") {
 		log.Debugf("snapshot is not text, %s, %s , %s", snapshot.ID, snapshot.Url, snapshot.ContentType)

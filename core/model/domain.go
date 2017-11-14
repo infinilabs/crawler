@@ -9,7 +9,6 @@ import (
 // Host is host struct
 type Host struct {
 	Host              string          `storm:"id,unique" json:"host,omitempty" gorm:"not null;unique;primary_key" index:"id"`
-	LinksCount        int64           `json:"links_count,omitempty"`
 	Favicon           string          `json:"favicon,omitempty"`
 	CrawlerPipelineID string          `json:"crawler_pipeline_id,omitempty"`
 	CrawlerPipeline   *PipelineConfig `json:"crawler_pipeline,omitempty"`
@@ -31,7 +30,7 @@ func CreateHost(host string) Host {
 	return h
 }
 
-// IncrementHostLinkCount update host's link count
+// IncrementHostLinkCount update host's link count //TODO fix stats
 func IncrementHostLinkCount(hostName string) error {
 	host := Host{}
 	host.Host = hostName
@@ -41,9 +40,7 @@ func IncrementHostLinkCount(hostName string) error {
 	if host.Created == nil {
 		host = CreateHost(hostName)
 	}
-
-	host.LinksCount++
-	return persist.Update(host)
+	return nil
 }
 
 // GetHostList return host list

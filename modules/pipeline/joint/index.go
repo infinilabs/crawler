@@ -38,16 +38,17 @@ func (joint IndexJoint) Name() string {
 // Process wrapper index document and send to queue
 func (joint IndexJoint) Process(c *model.Context) error {
 
-	task := c.MustGet(CONTEXT_CRAWLER_TASK).(*model.Task)
-	snapshot := c.MustGet(CONTEXT_CRAWLER_SNAPSHOT).(*model.Snapshot)
+	snapshot := c.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
 
-	m := md5.Sum([]byte(task.Url))
+	url := c.MustGetString(model.CONTEXT_TASK_URL)
+	host := c.MustGetString(model.CONTEXT_TASK_Host)
+	m := md5.Sum([]byte(url))
 	id := hex.EncodeToString(m[:])
 
 	data := map[string]interface{}{}
 
-	data["host"] = task.Host
-	data["task"] = task
+	data["host"] = host
+	data["task"] = getTask(c)
 	data["snapshot"] = snapshot
 
 	docs := model.IndexDocument{

@@ -80,7 +80,7 @@ type Snapshot struct {
 	Hash    string `json:"hash,omitempty"`
 	SimHash string `json:"sim_hash,omitempty"`
 
-	Created *time.Time `json:"created,omitempty"`
+	Created time.Time `json:"created,omitempty"`
 }
 
 type PageLink struct {
@@ -149,7 +149,7 @@ func GetSnapshot(id string) (Snapshot, error) {
 		log.Error(err)
 		return snapshot, err
 	}
-	if len(snapshot.ID) == 0 || snapshot.Created == nil {
+	if len(snapshot.ID) == 0 || snapshot.Created.IsZero() {
 		panic(errors.New("not found," + id))
 	}
 

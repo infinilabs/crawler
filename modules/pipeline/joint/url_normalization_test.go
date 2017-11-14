@@ -33,14 +33,16 @@ func TestNormailzeLinks(t *testing.T) {
 	task.Breadth = 1
 	task.Host = "elasticsearch.cn"
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
+	context.Set(model.CONTEXT_TASK_Host, task.Host)
+	context.Set(model.CONTEXT_TASK_OriginalUrl, task.OriginalUrl)
 
 	snapshot := model.Snapshot{}
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 
 	parse := UrlNormalizationJoint{}
 	parse.Process(context)
-	assert.Equal(t, "http://elasticsearch.cn/", task.Url)
+	assert.Equal(t, "http://elasticsearch.cn/", context.MustGetString(model.CONTEXT_TASK_URL))
 
 	task = model.Task{}
 	task.Url = "index.html"
@@ -48,12 +50,14 @@ func TestNormailzeLinks(t *testing.T) {
 	task.Breadth = 1
 	task.Host = "elasticsearch.cn"
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context = &model.Context{}
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
+	context.Set(model.CONTEXT_TASK_Host, task.Host)
 	snapshot = model.Snapshot{}
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 
 	parse.Process(context)
-	assert.Equal(t, "http://elasticsearch.cn/index.html", task.Url)
+	assert.Equal(t, "http://elasticsearch.cn/index.html", context.MustGetString(model.CONTEXT_TASK_URL))
 
 	task = model.Task{}
 	task.Url = "/index.html"
@@ -61,12 +65,14 @@ func TestNormailzeLinks(t *testing.T) {
 	task.Breadth = 1
 	task.Host = "elasticsearch.cn"
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context = &model.Context{}
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
+	context.Set(model.CONTEXT_TASK_Host, task.Host)
 	snapshot = model.Snapshot{}
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 
 	parse.Process(context)
-	assert.Equal(t, "http://elasticsearch.cn/index.html", task.Url)
+	assert.Equal(t, "http://elasticsearch.cn/index.html", context.MustGetString(model.CONTEXT_TASK_URL))
 }
 
 func TestNormailzeLinks1(t *testing.T) {
@@ -78,37 +84,40 @@ func TestNormailzeLinks1(t *testing.T) {
 	task.Depth = 1
 	task.Breadth = 1
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
+	context.Set(model.CONTEXT_TASK_Host, task.Host)
 	snapshot := model.Snapshot{}
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 
 	parse := UrlNormalizationJoint{}
 	parse.Process(context)
-	assert.Equal(t, "http://localhost/", task.Url)
+	assert.Equal(t, "http://localhost/", context.MustGetString(model.CONTEXT_TASK_URL))
 
 	task = model.Task{}
 	task.Url = "http://localhost/index.html"
 	task.Depth = 1
 	task.Breadth = 1
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
+	context.Set(model.CONTEXT_TASK_Host, task.Host)
 	snapshot = model.Snapshot{}
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 
 	parse.Process(context)
-	assert.Equal(t, "http://localhost/index.html", task.Url)
+	assert.Equal(t, "http://localhost/index.html", context.MustGetString(model.CONTEXT_TASK_URL))
 
 	task = model.Task{}
 	task.Url = "http://localhost:8080/index.html"
 	task.Depth = 1
 	task.Breadth = 1
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
+	context.Set(model.CONTEXT_TASK_Host, task.Host)
 	snapshot = model.Snapshot{}
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 
 	parse.Process(context)
-	assert.Equal(t, "http://localhost:8080/index.html", task.Url)
+	assert.Equal(t, "http://localhost:8080/index.html", context.MustGetString(model.CONTEXT_TASK_URL))
 
 	task = model.Task{}
 	task.Url = "phpliteadmin.php?table=groupes&action=row_editordelete&pk=3&type=edit"
@@ -116,12 +125,14 @@ func TestNormailzeLinks1(t *testing.T) {
 	task.Depth = 1
 	task.Breadth = 1
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
+	context.Set(model.CONTEXT_TASK_Reference, task.Reference)
+	context.Set(model.CONTEXT_TASK_Host, task.Host)
 	snapshot = model.Snapshot{}
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 
 	parse.Process(context)
-	assert.Equal(t, "http://localhost:8080/phpliteadmin.php?table=groupes&action=row_editordelete&pk=3&type=edit", task.Url)
+	assert.Equal(t, "http://localhost:8080/phpliteadmin.php?table=groupes&action=row_editordelete&pk=3&type=edit", context.MustGetString(model.CONTEXT_TASK_URL))
 
 }
 
@@ -135,14 +146,15 @@ func TestNormailzeLinks2(t *testing.T) {
 	task.Depth = 1
 	task.Breadth = 1
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
+	context.Set(model.CONTEXT_TASK_Host, task.Host)
 	snapshot := model.Snapshot{}
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 
 	parse := UrlNormalizationJoint{}
 	parse.Process(context)
 
-	assert.Equal(t, "http://127.0.0.1:8080/modeling-your-data.html", task.Url)
+	assert.Equal(t, "http://127.0.0.1:8080/modeling-your-data.html", context.MustGetString(model.CONTEXT_TASK_URL))
 	assert.Equal(t, "", snapshot.Path)
 	assert.Equal(t, "/modeling-your-data.html", snapshot.File)
 
@@ -151,9 +163,10 @@ func TestNormailzeLinks2(t *testing.T) {
 	task.Depth = 1
 	task.Breadth = 1
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
+	context.Set(model.CONTEXT_TASK_Host, task.Host)
 	snapshot = model.Snapshot{}
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 
 	parse.Process(context)
 	assert.Equal(t, "/video", snapshot.Path)
@@ -170,13 +183,14 @@ func TestNormailzeLinks3(t *testing.T) {
 	task.Depth = 1
 	task.Breadth = 1
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
+	context.Set(model.CONTEXT_TASK_Host, task.Host)
 	snapshot := model.Snapshot{}
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 
 	parse.Process(context)
 
-	assert.Equal(t, "http://conf.elasticsearch.cn/2015/beijing.html?c=3&a=1&b=9&c=0", task.Url)
+	assert.Equal(t, "http://conf.elasticsearch.cn/2015/beijing.html?c=3&a=1&b=9&c=0", context.MustGetString(model.CONTEXT_TASK_URL))
 	assert.Equal(t, "/2015", snapshot.Path)
 	assert.Equal(t, "/beijing_a_1_b_9_c_3_0.html", snapshot.File)
 }
@@ -193,13 +207,15 @@ func TestNormailzeLinks4(t *testing.T) {
 	task.Depth = 1
 	task.Breadth = 1
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
+	context.Set(model.CONTEXT_TASK_Reference, task.Reference)
+	context.Set(model.CONTEXT_TASK_Host, task.Host)
 	snapshot := model.Snapshot{}
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 
 	parse.Process(context)
 
-	assert.Equal(t, "http://conf.elasticsearch.cn/2015/chengdu.html", task.Url)
+	assert.Equal(t, "http://conf.elasticsearch.cn/2015/chengdu.html", context.MustGetString(model.CONTEXT_TASK_URL))
 	assert.Equal(t, "/2015", snapshot.Path)
 	assert.Equal(t, "/chengdu.html", snapshot.File)
 }
@@ -216,11 +232,13 @@ func TestNormailzeLinks5(t *testing.T) {
 	task.Depth = 1
 	task.Breadth = 1
 
-	context.Set(CONTEXT_CRAWLER_TASK, &task)
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
+	context.Set(model.CONTEXT_TASK_Reference, task.Reference)
+	context.Set(model.CONTEXT_TASK_Host, task.Host)
 	snapshot := model.Snapshot{}
-	context.Set(CONTEXT_CRAWLER_SNAPSHOT, &snapshot)
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
 
 	parse.Process(context)
 
-	assert.Equal(t, "http://wiki.example.org/articles/%E4%BF%A1/%E4%B9%89/%E5%AE%97/%E4%BF%A1%E4%B9%89%E5%AE%97.html", task.Url)
+	assert.Equal(t, "http://wiki.example.org/articles/%E4%BF%A1/%E4%B9%89/%E5%AE%97/%E4%BF%A1%E4%B9%89%E5%AE%97.html", context.MustGetString(model.CONTEXT_TASK_URL))
 }
