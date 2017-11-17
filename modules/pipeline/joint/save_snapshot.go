@@ -56,7 +56,7 @@ func (this SaveSnapshotToDBJoint) Process(c *model.Context) error {
 	if snapshot.Hash == taskSnapshotHash {
 		msg := fmt.Sprintf("content unchanged, snapshot with same hash: %s, %s", snapshot.Hash, taskUrl)
 		c.End(msg)
-		return errors.New(msg)
+		return nil
 	}
 
 	taskSnapshotVersion = taskSnapshotVersion + 1

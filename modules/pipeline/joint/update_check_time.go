@@ -71,7 +71,7 @@ func (this UpdateCheckTimeJoint) Process(c *model.Context) error {
 
 		c.End(msg)
 
-		return errors.New(msg)
+		return nil
 	}
 
 	updateNextCheckTime(c, current, accelerateSteps, true)

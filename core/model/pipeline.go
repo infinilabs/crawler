@@ -382,6 +382,7 @@ func (pipe *Pipeline) Run() *Context {
 				case string:
 					v = r.(string)
 				}
+				pipe.context.Set(CONTEXT_TASK_Status, TaskInterrupted)
 				log.Error("error in pipeline, ", pipe.name, ", ", pipe.id, ", ", pipe.currentJointName, ", ", v)
 				stats.Increment(pipe.name+".pipeline", "error")
 			}
