@@ -148,7 +148,7 @@ func (pipe *Pipe) execute(shard int, context model.Context, pipelineConfig *mode
 					v = r.(string)
 				}
 
-				log.Error("pipeline:", pipe.config.Name, ", shard:", shard, ", instance:", pipeline.GetID(), " ,joint:", pipeline.GetCurrentJoint(), ", err: ", v, ", sequence:", context.SequenceID, ", ", util.ToJson(pipeline.GetContext(), true))
+				log.Error("module, pipeline:", pipe.config.Name, ", shard:", shard, ", instance:", pipeline.GetID(), " ,joint:", pipeline.GetCurrentJoint(), ", err: ", v, ", sequence:", context.SequenceID, ", ", util.ToJson(pipeline.GetContext(), true))
 			}
 		}
 	}()

@@ -50,6 +50,10 @@ modules:
             parameters:
               ignore_timeout_after_count: 500
             enabled: true
+          - joint: chrome_fetch
+            enabled: false
+            parameters:
+              command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
           - joint: fetch
             enabled: true
             parameters:

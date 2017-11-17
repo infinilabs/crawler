@@ -11,6 +11,8 @@
 1. refactor domain to host, api and mapping has changed
 
 ##### features
+1. dynamic create pipelines
+2. add chrome headless fetch joint
 
 ##### improvement
 1. remove goleveldb due to memory leak
