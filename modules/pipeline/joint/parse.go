@@ -36,6 +36,7 @@ type ParsePageJoint struct {
 }
 
 const dispatchLinks model.ParaKey = "dispatch_links"
+const saveImages model.ParaKey = "save_images"
 const maxDepth model.ParaKey = "max_depth"
 const maxBreadth model.ParaKey = "max_breadth"
 const replaceNoscript model.ParaKey = "replace_noscript"
@@ -46,7 +47,6 @@ func (joint ParsePageJoint) Name() string {
 
 func (joint ParsePageJoint) Process(context *model.Context) error {
 
-	//task := context.MustGet(model.CONTEXT_TASK).(*model.Task)
 	snapshot := context.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
 
 	if !util.PrefixStr(snapshot.ContentType, "text/html") {
@@ -150,12 +150,12 @@ func (joint ParsePageJoint) Process(context *model.Context) error {
 		}
 	}
 
-	snapshot.H1 = parseTag(doc, "h1")
-	snapshot.H2 = parseTag(doc, "h2")
-	snapshot.H3 = parseTag(doc, "h3")
-	snapshot.H4 = parseTag(doc, "h4")
-	snapshot.Bold = parseTag(doc, "b")
-	snapshot.Italic = parseTag(doc, "i")
+	snapshot.H1 = parseTagText(doc, "h1")
+	snapshot.H2 = parseTagText(doc, "h2")
+	snapshot.H3 = parseTagText(doc, "h3")
+	snapshot.H4 = parseTagText(doc, "h4")
+	snapshot.Bold = parseTagText(doc, "b")
+	snapshot.Italic = parseTagText(doc, "i")
 
 	images := map[string]string{}
 	doc.Find("img").Each(func(i int, s *goquery.Selection) {
@@ -166,6 +166,17 @@ func (joint ParsePageJoint) Process(context *model.Context) error {
 			alt = strings.TrimSpace(alt)
 			images[src] = util.XSSHandle(alt)
 		}
+
+		if joint.GetBool(saveImages, false) {
+			// save images
+			context := model.Context{IgnoreBroken: true}
+			context.Set(model.CONTEXT_TASK_URL, src)
+			context.Set(model.CONTEXT_TASK_Reference, src)
+			context.Set(model.CONTEXT_TASK_Depth, 0)
+			context.Set(model.CONTEXT_TASK_Breadth, 0)
+			queue.Push(config.CheckChannel, util.ToJSONBytes(context))
+		}
+
 	})
 
 	snapshot.Images = model.LinkGroup{
@@ -230,7 +241,7 @@ func (joint ParsePageJoint) Process(context *model.Context) error {
 	return nil
 }
 
-func parseTag(doc *goquery.Document, tag string) []string {
+func parseTagText(doc *goquery.Document, tag string) []string {
 	result := []string{}
 	doc.Find(tag).Each(func(i int, s *goquery.Selection) {
 		if len(s.Text()) > 0 {

@@ -21,6 +21,7 @@ import (
 	"github.com/infinitbyte/gopa/core/filter"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/stats"
+	"github.com/infinitbyte/gopa/modules/config"
 	"regexp"
 )
 
@@ -44,8 +45,10 @@ func (joint FilterCheckJoint) Process(context *model.Context) error {
 
 	url := context.MustGetString(model.CONTEXT_TASK_URL)
 
-	key := joint.GetStringOrDefault(filterKey, "check_filter")
-	v := filter.Key(key)
+	//key := joint.GetStringOrDefault(filterKey, "check_filter")
+	//v := filter.Key(key)
+
+	v := config.CheckFilter
 
 	//the url input here should not be a relative path
 	b, err := filter.CheckThenAdd(v, []byte(url))

@@ -87,6 +87,7 @@ func TestProcessLinks(t *testing.T) {
 	fmt.Println(util.ToJson(o, true))
 
 }
+
 func TestProcessDiscussLinks(t *testing.T) {
 	global.RegisterEnv(env.EmptyEnv())
 

@@ -87,6 +87,7 @@ func (joint ChromeFetchJoint) Process(context *model.Context) error {
 		snapshot.Payload = content
 		snapshot.StatusCode = 200
 		snapshot.Size = uint64(len(content))
+
 		snapshot.ContentType = "text/html"
 		log.Debug("exit fetchUrl method:", requestUrl)
 		flg <- signal{flag: true, status: model.TaskSuccess}
