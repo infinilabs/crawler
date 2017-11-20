@@ -53,6 +53,7 @@ func InitJoints() {
 	model.RegisterPipeJoint(joint.UpdateCheckTimeJoint{})
 	model.RegisterPipeJoint(joint.LanguageDetectJoint{})
 	model.RegisterPipeJoint(joint.ChromeFetchJoint{})
+	model.RegisterPipeJoint(joint.ExtractJoint{})
 	log.Debug("end register joints")
 
 }

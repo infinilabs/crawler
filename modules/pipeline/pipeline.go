@@ -33,18 +33,18 @@ import (
 )
 
 var frameworkStarted bool
-var pipes map[string]*Pipe
+var runners map[string]*PipeRunner
 
 type PipelineFrameworkModule struct {
 }
 
-type Pipe struct {
+type PipeRunner struct {
 	config         PipeConfig
 	l              sync.Mutex
 	signalChannels []*chan bool
 }
 
-func (pipe *Pipe) Start(config PipeConfig) {
+func (pipe *PipeRunner) Start(config PipeConfig) {
 	if !pipe.config.Enabled {
 		log.Debugf("pipeline: %s was disabled", pipe.config.Name)
 		return
@@ -68,12 +68,12 @@ func (pipe *Pipe) Start(config PipeConfig) {
 	log.Infof("pipeline: %s started with %v shards", pipe.config.Name, numGoRoutine)
 }
 
-func (pipe *Pipe) Update(config PipeConfig) {
+func (pipe *PipeRunner) Update(config PipeConfig) {
 	pipe.Stop()
 	pipe.Start(config)
 }
 
-func (pipe *Pipe) Stop() {
+func (pipe *PipeRunner) Stop() {
 	if !pipe.config.Enabled {
 		log.Debugf("pipeline: %s was disabled", pipe.config.Name)
 		return
@@ -89,7 +89,7 @@ func (pipe *Pipe) Stop() {
 	}
 }
 
-func (pipe *Pipe) decodeMessage(message []byte) model.Context {
+func (pipe *PipeRunner) decodeMessage(message []byte) model.Context {
 	v := model.Context{}
 	err := json.Unmarshal(message, &v)
 	if err != nil {
@@ -98,7 +98,7 @@ func (pipe *Pipe) decodeMessage(message []byte) model.Context {
 	return v
 }
 
-func (pipe *Pipe) runPipeline(signal *chan bool, shard int) {
+func (pipe *PipeRunner) runPipeline(signal *chan bool, shard int) {
 
 	var inputMessage []byte
 	for {
@@ -116,9 +116,11 @@ func (pipe *Pipe) runPipeline(signal *chan bool, shard int) {
 			}
 
 			pipelineConfig := pipe.config.DefaultConfig
+			url := context.GetStringOrDefault(model.CONTEXT_TASK_URL, "")
 			if context.PipelineConfigID != "" {
 				var err error
 				pipelineConfig, err = model.GetPipelineConfig(context.PipelineConfigID)
+				log.Debug("get pipeline config,", pipelineConfig.Name, ",", url, ",", context.PipelineConfigID)
 				if err != nil {
 					panic(err)
 				}
@@ -130,7 +132,7 @@ func (pipe *Pipe) runPipeline(signal *chan bool, shard int) {
 	}
 }
 
-func (pipe *Pipe) execute(shard int, context model.Context, pipelineConfig *model.PipelineConfig) {
+func (pipe *PipeRunner) execute(shard int, context model.Context, pipelineConfig *model.PipelineConfig) {
 	var pipeline *model.Pipeline
 	defer func() {
 		if !global.Env().IsDebug {
@@ -177,13 +179,13 @@ func (module PipelineFrameworkModule) Start(cfg *Config) {
 	//init joints
 	InitJoints()
 	var config = struct {
-		Pipes []PipeConfig `config:"pipes"`
+		Runners []PipeConfig `config:"runners"`
 	}{GetDefaultPipeConfig()}
 
 	cfg.Unpack(&config)
 
-	pipes = map[string]*Pipe{}
-	for i, v := range config.Pipes {
+	runners = map[string]*PipeRunner{}
+	for i, v := range config.Runners {
 		if v.DefaultConfig == nil {
 			panic(errors.Errorf("default pipeline config can't be null, %v, %v", i, v))
 		}
@@ -191,12 +193,12 @@ func (module PipelineFrameworkModule) Start(cfg *Config) {
 			panic(errors.Errorf("input queue can't be null, %v, %v", i, v))
 		}
 
-		p := &Pipe{config: v}
-		pipes[v.Name] = p
+		p := &PipeRunner{config: v}
+		runners[v.Name] = p
 	}
 
 	log.Debug("starting up pipeline framework")
-	for _, v := range pipes {
+	for _, v := range runners {
 		v.Start(v.config)
 	}
 
@@ -207,7 +209,7 @@ func (module PipelineFrameworkModule) Stop() error {
 	if frameworkStarted {
 		frameworkStarted = false
 		log.Debug("shutting down pipeline framework")
-		for _, v := range pipes {
+		for _, v := range runners {
 			v.Stop()
 		}
 	} else {
