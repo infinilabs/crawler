@@ -1,9 +1,8 @@
 
 * Create pipeline
 ```
-curl -XPOST http://127.0.0.1:8001/pipeline/ -d'
+curl -XPOST http://127.0.0.1:8001/pipeline/config/ -d'
 {
- "host": "localhost:9001",
  "name": "test_pipe_line",
  "start": {
   "joint": "init_task","enabled": true
@@ -27,6 +26,7 @@ curl -XPOST http://127.0.0.1:8001/pipeline/ -d'
 
 
 * Get Pipeline tasks
+```
 curl -XGET http://127.0.0.1:8001/pipeline/tasks/
 {
 "tasks":[
@@ -35,4 +35,18 @@ curl -XGET http://127.0.0.1:8001/pipeline/tasks/
 }
 ]
 }
+```
+
+* Assign a pipeline to host
+```
+curl -XPOST http://127.0.0.1:8001/host/pipeline_config/
+{
+ "host":"baidu.com",
+ "url_pattern":".*",
+ "sort_order":1,
+ "runner":"fetch"
+ "pipeline_id":"123123123"
+}
+```
+
 

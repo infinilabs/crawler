@@ -29,6 +29,30 @@ func (api API) handleGetPipelineJointsRequest(w http.ResponseWriter, req *http.R
 	api.WriteJSON(w, joints, http.StatusOK)
 }
 
+func (api API) CreateHostConfigAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	config := model.HostConfig{}
+
+	data, err := api.GetRawBody(req)
+	if err != nil {
+		api.Error(w, err)
+		return
+	}
+
+	err = json.Unmarshal(data, &config)
+	if err != nil {
+		api.Error(w, err)
+		return
+	}
+
+	err = model.CreateHostConfig(&config)
+	if err != nil {
+		api.Error(w, err)
+		return
+	}
+
+	api.WriteJSON(w, config, http.StatusOK)
+}
+
 func (api API) handleCreatePipelineConfigRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	config := model.PipelineConfig{}
 

@@ -37,6 +37,11 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				log.Trace("dispatcher exited")
 				return
 			case data := <-queue.ReadChan(config.DispatcherChannel):
+
+				if queue.Depth(config.FetchChannel) > 100 {
+					return
+				}
+
 				stats.Increment("queue."+string(config.DispatcherChannel), "pop")
 				log.Trace("got dispatcher signal, ", string(data))
 
@@ -72,6 +77,15 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 						//update offset
 						if v.Created.After(offset) && isUpdate {
 							offset = v.Created
+						}
+
+						runner := "fetch"
+						if v.PipelineConfigID == "" {
+							//assign pipeline config
+							configID := model.GetPipelineIDByUrl(runner, v.Host, v.Url)
+							if configID != "" {
+								v.PipelineConfigID = configID
+							}
 						}
 
 						context := model.Context{}

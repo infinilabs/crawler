@@ -18,9 +18,11 @@ package model
 
 import (
 	"encoding/json"
+	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/persist"
 	"github.com/infinitbyte/gopa/core/util"
+	"regexp"
 	"time"
 )
 
@@ -86,4 +88,104 @@ func UpdatePipelineConfig(id string, cfg *PipelineConfig) error {
 
 func DeletePipelineConfig(id string) error {
 	return persist.DeleteKey(PipelineConfigBucket, []byte(id))
+}
+
+type HostConfig struct {
+	ID         string    `json:"id,omitempty" gorm:"not null;unique;primary_key" index:"id"`
+	Host       string    `gorm:"index" json:"host"`
+	UrlPattern string    `gorm:"index" json:"url_pattern"`
+	PipelineID string    `gorm:"index" json:"pipeline_id"`
+	Runner     string    `gorm:"index" json:"runner"`
+	SortOrder  int       `gorm:"index" json:"sort_order"`
+	Created    time.Time `gorm:"index" json:"created,omitempty"`
+	Updated    time.Time `gorm:"index" json:"updated,omitempty"`
+}
+
+func CreateHostConfig(config *HostConfig) error {
+	time := time.Now().UTC()
+	config.ID = util.GetUUID()
+	config.Created = time
+	config.Updated = time
+	err := persist.Save(config)
+	if err != nil {
+		panic(err)
+	}
+
+	return err
+}
+
+func UpdateHostConfig(config *HostConfig) {
+	time := time.Now().UTC()
+	config.Updated = time
+	err := persist.Update(config)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func DeleteHostConfig(id string) error {
+	config := HostConfig{ID: id}
+	err := persist.Delete(&config)
+	if err != nil {
+		panic(err)
+	}
+	return err
+}
+
+func GetHostConfig(runner, host string) []HostConfig {
+	var configs []HostConfig
+	sort := []persist.Sort{}
+	sort = append(sort, persist.Sort{Field: "sort_order", SortType: persist.DESC})
+	queryO := persist.Query{Sort: &sort, From: 0, Size: 100}
+	if len(host) > 0 {
+		if runner != "" {
+			queryO.Conds = persist.And(persist.Eq("host", host), persist.Eq("runner", runner))
+		} else {
+			queryO.Conds = persist.And(persist.Eq("host", host))
+		}
+	}
+	err, result := persist.Search(HostConfig{}, &configs, &queryO)
+	if err != nil {
+		panic(err)
+	}
+
+	if result.Result != nil && configs == nil || len(configs) == 0 {
+		convertHostConfig(result, &configs)
+	}
+
+	return configs
+}
+
+func GetPipelineIDByUrl(runner, host, url string) string {
+	configs := GetHostConfig(runner, host)
+	if len(configs) > 0 {
+		for _, c := range configs {
+			ok, err := regexp.Match(c.UrlPattern, []byte(url))
+			if err != nil {
+				panic(err)
+			}
+			log.Debugf("match url:%v %v %v %v", host, url, c.UrlPattern, ok)
+			if ok {
+				return c.PipelineID
+			}
+
+		}
+	}
+	return ""
+}
+
+func convertHostConfig(result persist.Result, configs *[]HostConfig) {
+	if result.Result == nil {
+		return
+	}
+
+	t, ok := result.Result.([]interface{})
+	if ok {
+		for _, i := range t {
+			js := util.ToJson(i, false)
+			t := HostConfig{}
+			util.FromJson(js, &t)
+			*configs = append(*configs, t)
+		}
+	}
 }

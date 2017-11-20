@@ -88,6 +88,7 @@ func (module DatabaseModule) Start(cfg *Config) {
 	db.AutoMigrate(&model.Host{})
 	db.AutoMigrate(&model.Task{})
 	db.AutoMigrate(&model.Snapshot{})
+	db.AutoMigrate(&model.HostConfig{})
 
 	handler := SQLORM{conn: db, useLock: userLock}
 

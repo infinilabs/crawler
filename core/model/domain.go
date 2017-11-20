@@ -8,12 +8,11 @@ import (
 
 // Host is host struct
 type Host struct {
-	Host              string          `storm:"id,unique" json:"host,omitempty" gorm:"not null;unique;primary_key" index:"id"`
-	Favicon           string          `json:"favicon,omitempty"`
-	CrawlerPipelineID string          `json:"crawler_pipeline_id,omitempty"`
-	CrawlerPipeline   *PipelineConfig `json:"crawler_pipeline,omitempty"`
-	Created           *time.Time      `storm:"index" json:"created,omitempty"`
-	Updated           *time.Time      `storm:"index" json:"updated,omitempty"`
+	Host        string        `storm:"id,unique" json:"host,omitempty" gorm:"not null;unique;primary_key" index:"id"`
+	Favicon     string        `json:"favicon,omitempty"`
+	HostConfigs *[]HostConfig `json:"host_configs,omitempty"`
+	Created     *time.Time    `storm:"index" json:"created,omitempty"`
+	Updated     *time.Time    `storm:"index" json:"updated,omitempty"`
 }
 
 // CreateHost create a domain host
@@ -61,6 +60,10 @@ func GetHostList(from, size int, host string) (int, []Host, error) {
 				js := util.ToJson(i, false)
 				t := Host{}
 				util.FromJson(js, &t)
+				hs := GetHostConfig("", t.Host)
+				if len(hosts) > 0 {
+					t.HostConfigs = &hs
+				}
 				hosts = append(hosts, t)
 			}
 		}
@@ -73,12 +76,9 @@ func GetHostList(from, size int, host string) (int, []Host, error) {
 func GetHost(host string) (Host, error) {
 	var d = Host{Host: host}
 	err := persist.Get(&d)
-	if d.CrawlerPipelineID != "" {
-		c, err := GetPipelineConfig(d.CrawlerPipelineID)
-		if err != nil {
-			panic(err)
-		}
-		d.CrawlerPipeline = c
+	hosts := GetHostConfig("", host)
+	if len(hosts) > 0 {
+		d.HostConfigs = &hosts
 	}
 	return d, err
 }

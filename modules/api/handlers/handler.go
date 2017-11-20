@@ -53,6 +53,9 @@ func InitAPI() {
 	api.HandleAPIMethod(api.GET, "/host/:id", apis.GetHostAction)
 	api.HandleAPIMethod(api.DELETE, "/host/:id", api.BasicAuth(apis.DeleteHostAction, user, pass))
 
+	//Host Config API
+	api.HandleAPIMethod(api.POST, "/host/pipeline_config/", apis.CreateHostConfigAction)
+
 	//Snapshot API
 	api.HandleAPIMethod(api.GET, "/snapshots/", apis.SnapshotListAction)
 	api.HandleAPIMethod(api.GET, "/snapshot/", apis.SnapshotListAction)
