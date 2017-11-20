@@ -41,6 +41,7 @@ type Snapshot struct {
 	TaskID  string `json:"task_id,omitempty"`
 	Path    string `json:"path,omitempty"  gorm:"-"` //path of this file
 	File    string `json:"file,omitempty"  gorm:"-"` //filename of this page
+	Ext     string `json:"ext,omitempty"  gorm:"-"`  //extension of filename
 
 	StatusCode int    `json:"-" gorm:"-"`
 	Payload    []byte `json:"-" gorm:"-"`

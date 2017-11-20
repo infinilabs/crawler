@@ -32,11 +32,11 @@ import (
 type UrlNormalizationJoint struct {
 	model.Parameters
 	splitByUrlParameter []string
-	maxFileNameLength   int
 }
 
 const followAllDomain model.ParaKey = "follow_all_domain"
 const followSubDomain model.ParaKey = "follow_sub_domain"
+const maxFileNameLength model.ParaKey = "max_filename_length"
 
 var defaultFileName = "default.html"
 
@@ -304,18 +304,15 @@ func (joint UrlNormalizationJoint) Process(context *model.Context) error {
 		filename = defaultFileName
 	}
 
-	//set default filename limit
-	if joint.maxFileNameLength <= 0 {
-		joint.maxFileNameLength = 200
-	}
-
 	//verify filename
-	if len(filename) > joint.maxFileNameLength {
+	if len(filename) > joint.GetIntOrDefault(maxFileNameLength, 200) {
 		panic(errors.Errorf("file name too long, %s , %s", filename, url))
 	}
 
 	snapshot.Path = filePath
 	snapshot.File = filename
+	snapshot.Ext = util.FileExtension(filename)
+
 	log.Debugf("finished normalization,%s, %s, %s", url, filePath, filename)
 
 	return nil

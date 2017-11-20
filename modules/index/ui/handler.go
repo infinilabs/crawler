@@ -108,6 +108,12 @@ func (h *UserUI) IndexPageAction(w http.ResponseWriter, req *http.Request, ps ht
                 "field": "snapshot.content_type",
                 "size": 10
             }
+        },
+        "snapshot.ext|File Ext": {
+            "terms": {
+                "field": "snapshot.ext",
+                "size": 10
+            }
         }
     },
     "from": %v,
