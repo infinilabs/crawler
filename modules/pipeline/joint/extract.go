@@ -20,9 +20,9 @@ import (
 	"bytes"
 	"github.com/PuerkitoBio/goquery"
 	log "github.com/cihub/seelog"
+	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/util"
-	"github.com/infinitbyte/gopa/core/errors"
 	"strings"
 )
 

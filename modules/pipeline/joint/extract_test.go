@@ -21,6 +21,7 @@ import (
 	"github.com/infinitbyte/gopa/core/env"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/model"
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
 )
@@ -28,7 +29,7 @@ import (
 func TestExtractBlock(t *testing.T) {
 	global.RegisterEnv(env.EmptyEnv())
 
-	body, e := ioutil.ReadFile("../../../test/samples/shiti.html")
+	body, e := ioutil.ReadFile("../../../test/samples/default.html")
 	if e != nil {
 		panic(e)
 	}
@@ -37,13 +38,13 @@ func TestExtractBlock(t *testing.T) {
 	context.Init()
 	context.Set(model.CONTEXT_TASK_Depth, 0)
 	context.Set(model.CONTEXT_TASK_Breadth, 0)
-	context.Set(model.CONTEXT_TASK_URL, "http://zujuan.21cnjy.com/question/detail/5492219")
-	context.Set(model.CONTEXT_TASK_Host, "zujuan.21cnjy.com")
+	context.Set(model.CONTEXT_TASK_URL, "http://elasticsearch.cn/")
+	context.Set(model.CONTEXT_TASK_Host, "elasticsearch.cn/")
 	parse := ExtractJoint{}
 	m := map[string]interface{}{}
-	m["question_header"] = ".exam-head"
-	m["question_con"] = ".exam-con"
-	m["question_brick"] = ".analyticbox-brick"
+	m["h1"] = "h1"
+	m["h2"] = "h2"
+	m["pre"] = "pre"
 	parse.Set(htmlBlock, m)
 	snapshot := model.Snapshot{}
 	snapshot.ContentType = "text/html"
@@ -52,5 +53,8 @@ func TestExtractBlock(t *testing.T) {
 	snapshot.Payload = []byte(body)
 	parse.Process(&context)
 	fmt.Println(snapshot.EnrichedFeatures)
+	assert.Equal(t, "H1 title", (*snapshot.EnrichedFeatures)["h1"].(string))
+	assert.Equal(t, "H2 title", (*snapshot.EnrichedFeatures)["h2"].(string))
+	assert.Equal(t, "code block", (*snapshot.EnrichedFeatures)["pre"].(string))
 
 }
