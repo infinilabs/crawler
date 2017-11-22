@@ -26,8 +26,8 @@ cluster.seeds:
 modules:
 - module: pipeline
   enabled: true
-  pipes:
-    - name: crawler
+  runners:
+    - name: fetch
       enabled: true
       input_queue: fetch
       max_go_routine: 10
@@ -44,6 +44,7 @@ modules:
             parameters:
               follow_all_domain: false
               follow_sub_domain: true
+              max_filename_length: 1000
           - joint: load_metadata
             enabled: true
           - joint: ignore_timeout
@@ -64,8 +65,15 @@ modules:
             enabled: true
             parameters:
               dispatch_links: true
+              save_images: true
               max_depth: 100
               max_breadth: 1
+          - joint: extract
+            enabled: false
+            parameters:
+              html_block:
+                your_tag_name1: ".tag_class"
+                your_tag_name2: "#tag_id"
           - joint: html2text
             parameters:
               remove_nonscript: true
@@ -112,6 +120,7 @@ modules:
               parameters:
                 follow_all_domain: false
                 follow_sub_domain: true
+                max_filename_length: 1000
             - joint: url_filter
               enabled: true
               parameters:
