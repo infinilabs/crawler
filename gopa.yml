@@ -103,6 +103,80 @@ modules:
         end:
           joint: save_task
           enabled: true
+    - name: update
+      enabled: true
+      input_queue: update
+      max_go_routine: 1
+      threshold_in_ms: 0
+      # default timeout is 60s
+      timeout_in_ms: 30000
+      default_config:
+        start:
+          joint: init_task
+          enabled: true
+        process:
+          - joint: url_normalization
+            enabled: true
+            parameters:
+              follow_all_domain: false
+              follow_sub_domain: true
+              max_filename_length: 1000
+          - joint: ignore_timeout
+            parameters:
+              ignore_timeout_after_count: 500
+            enabled: true
+          - joint: chrome_fetch
+            enabled: false
+            parameters:
+              command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+          - joint: fetch
+            enabled: true
+            parameters:
+              timeout_in_seconds: 100
+    #          proxy: "socks5://127.0.0.1:1080"
+    #          cookie: ""
+          - joint: parse
+            enabled: true
+            parameters:
+              dispatch_links: true
+              save_images: true
+              max_depth: 100
+              max_breadth: 1
+          - joint: extract
+            enabled: false
+            parameters:
+              html_block:
+                your_tag_name1: ".tag_class"
+                your_tag_name2: "#tag_id"
+          - joint: html2text
+            parameters:
+              remove_nonscript: true
+              merge_whitespace: false
+            enabled: true
+          - joint: hash
+            enabled: true
+          - joint: update_check_time
+            enabled: true
+            parameters:
+              decelerate_steps: "24h,48h,72h,168h,360h,720h"
+              accelerate_steps: "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
+          - joint: content_deduplication
+            enabled: true
+          - joint: lang_detect
+            enabled: true
+          - joint : save_snapshot_fs
+            enabled: false
+          - joint : save_snapshot_db
+            enabled: true
+            parameters:
+              compress_enabled: true
+              bucket: "Snapshot"
+              max_revision: 5
+          - joint: index
+            enabled: true
+        end:
+          joint: save_task
+          enabled: true
     - name: checker
       enabled: true
       input_queue: check
@@ -264,10 +338,3 @@ modules:
   port: 8125
   namespace: gopa.
   interval_in_seconds: 1
-
-
-plugins:
-- plugin: generator
-  enabled: false
-  task_id: ""
-  task_url: "http://localhost:8081"

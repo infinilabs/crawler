@@ -8,6 +8,7 @@ import (
 
 const (
 	FetchChannel      string = "fetch"
+	UpdateChannel     string = "update"
 	CheckChannel      string = "check"
 	DispatcherChannel string = "dispatch"
 	IndexChannel      string = "index"

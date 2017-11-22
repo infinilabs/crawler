@@ -31,10 +31,12 @@ func (module DiskQueue) Start(cfg *Config) {
 	var syncEvery int64 = 2500
 
 	pendingFetchDiskQueue := NewDiskQueue("pending_fetch", path, 100*1024*1024, 1, 1<<10, syncEvery, syncTimeout, readBuffSize)
+	pendingUpdateDiskQueue := NewDiskQueue("pending_update", path, 100*1024*1024, 1, 1<<10, syncEvery, syncTimeout, readBuffSize)
 	pendingCheckDiskQueue := NewDiskQueue("pending_check", path, 100*1024*1024, 1, 1<<10, syncEvery, syncTimeout, readBuffSize)
 	pendingDispatchDiskQueue := NewDiskQueue("pending_dispatch", path, 100*1024*1024, 1, 1<<10, syncEvery, syncTimeout, readBuffSize)
 	pendingIndexDiskQueue := NewDiskQueue("pending_index", path, 100*1024*1024, 1, 1<<20, syncEvery, syncTimeout, readBuffSize)
 	queues[config.FetchChannel] = &pendingFetchDiskQueue
+	queues[config.UpdateChannel] = &pendingUpdateDiskQueue
 	queues[config.CheckChannel] = &pendingCheckDiskQueue
 	queues[config.DispatcherChannel] = &pendingDispatchDiskQueue
 	queues[config.IndexChannel] = &pendingIndexDiskQueue
@@ -47,7 +49,6 @@ func (module DiskQueue) Push(k string, v []byte) error {
 }
 
 func (module DiskQueue) ReadChan(k string) chan []byte {
-
 	return (*queues[k]).ReadChan()
 }
 
