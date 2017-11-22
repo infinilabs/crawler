@@ -38,7 +38,11 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				return
 			case data := <-queue.ReadChan(config.DispatcherChannel):
 
-				if queue.Depth(config.FetchChannel) > 100 {
+				//slow down while too many task already in the queue
+				depth := queue.Depth(config.FetchChannel)
+				if depth > 100 { //TODO configable
+					log.Debugf("too many tasks already in the queue, depth: %v, wait 10s", depth)
+					time.Sleep(10 * time.Second)
 					return
 				}
 
@@ -50,6 +54,7 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				if err != nil {
 					log.Error(err)
 				}
+				log.Debugf("get %v new task", total)
 
 				isUpdate := false
 				//get update task
@@ -99,6 +104,9 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 						}
 					}
 				}
+
+				//minimum  wait time
+				time.Sleep(5 * time.Second)
 			}
 
 		}
@@ -106,26 +114,23 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 
 	go func() {
 		for {
+			var lastPop int64
 			select {
 			case <-signalChannel:
 				log.Trace("auto dispatcher exited")
 				return
 			default:
 				pop := stats.Stat("queue.fetch", "pop")
-				push := stats.Stat("queue.fetch", "push")
-
-				time.Sleep(5 * time.Second)
-
-				pop2 := stats.Stat("queue.fetch", "pop")
-				push2 := stats.Stat("queue.fetch", "push")
-				if push == push2 && pop == pop2 {
-					log.Trace("fetch tasks stalled after 5 seconds, try to dispatch some tasks from db")
+				if lastPop == pop {
+					lastPop = pop
+					log.Trace("fetch tasks stalled, try to dispatch some tasks from db")
 					err := queue.Push(config.DispatcherChannel, []byte("10s auto"))
 					if err != nil {
 						log.Error(err)
 					}
+					time.Sleep(10 * time.Second)
 				} else {
-					time.Sleep(5 * time.Second)
+					time.Sleep(20 * time.Second)
 					continue
 				}
 			}
