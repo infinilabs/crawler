@@ -63,23 +63,23 @@ func (joint ChromeFetchJoint) Process(context *model.Context) error {
 	go func() {
 
 		cmd := exec.Command(command, "--headless", "-disable-gpu", "--dump-dom", "--no-sandbox", requestUrl)
-
 		stdout, err := cmd.StdoutPipe()
-		if err != nil {
-			panic(err)
+		if err == nil {
+			err = cmd.Start()
 		}
 
-		err = cmd.Start()
-		if err != nil {
-			panic(err)
+		var content []byte
+
+		err = cmd.Wait()
+
+		if err == nil {
+			content, err = ioutil.ReadAll(stdout)
 		}
 
-		content, err := ioutil.ReadAll(stdout)
 		if err != nil {
-			panic(err)
-		}
-
-		if err != nil {
+			if !cmd.ProcessState.Exited() {
+				cmd.Process.Kill()
+			}
 			flg <- signal{flag: false, err: err, status: model.TaskFailed}
 			return
 		}
