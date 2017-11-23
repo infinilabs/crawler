@@ -100,7 +100,7 @@ const (
 )
 
 func CreateTask(task *Task) error {
-	log.Trace("start create crawler task, ", task.Url)
+	log.Trace("start create task, ", task.Url)
 	time := time.Now().UTC()
 	task.ID = util.GetUUID()
 	task.Status = TaskCreated
@@ -116,7 +116,7 @@ func CreateTask(task *Task) error {
 }
 
 func UpdateTask(task *Task) {
-	log.Trace("start update crawler task, ", task.Url)
+	log.Trace("start update task, ", task.Url)
 	time := time.Now().UTC()
 	task.Updated = time
 	err := persist.Update(task)
@@ -126,13 +126,11 @@ func UpdateTask(task *Task) {
 }
 
 func DeleteTask(id string) error {
-	log.Trace("start delete crawler task: ", id)
+	log.Trace("start delete task: ", id)
 	task := Task{ID: id}
 	err := persist.Delete(&task)
 	if err != nil {
 		log.Error(id, ", ", err)
-	} else {
-		//TODO fix here DecrementHostLinkCount(task.Host)
 	}
 	return err
 }
@@ -170,7 +168,7 @@ func GetTaskByField(k, v string) ([]Task, error) {
 }
 
 func GetTaskList(from, size int, host string) (int, []Task, error) {
-	log.Tracef("start get crawler tasks, %v-%v, %v", from, size, host)
+	log.Tracef("start get tasks, %v-%v, %v", from, size, host)
 	var tasks []Task
 	sort := []persist.Sort{}
 	sort = append(sort, persist.Sort{Field: "created", SortType: persist.DESC})
@@ -186,12 +184,12 @@ func GetTaskList(from, size int, host string) (int, []Task, error) {
 	if result.Result != nil && tasks == nil || len(tasks) == 0 {
 		convertTask(result, &tasks)
 	}
-
+	log.Tracef("get %v tasks", result.Total)
 	return result.Total, tasks, err
 }
 
 func GetPendingNewFetchTasks() (int, []Task, error) {
-	log.Trace("start get all crawler tasks")
+	log.Trace("start get all tasks")
 	var tasks []Task
 	sort := []persist.Sort{}
 	sort = append(sort, persist.Sort{Field: "created", SortType: persist.DESC})
@@ -208,9 +206,30 @@ func GetPendingNewFetchTasks() (int, []Task, error) {
 	return result.Total, tasks, err
 }
 
+func GetFailedTasks(offset time.Time) (int, []Task, error) {
+	log.Trace("start get all failed tasks")
+	var tasks []Task
+	sort := []persist.Sort{}
+	sort = append(sort, persist.Sort{Field: "created", SortType: persist.ASC})
+	queryO := persist.Query{Sort: &sort, Conds: persist.And(
+		persist.Gt("created", offset),
+		persist.Eq("status", TaskFailed)),
+	}
+	err, result := persist.Search(Task{}, &tasks, &queryO)
+	if err != nil {
+		log.Error(err)
+	}
+
+	if result.Result != nil && tasks == nil || len(tasks) == 0 {
+		convertTask(result, &tasks)
+	}
+
+	return result.Total, tasks, err
+}
+
 func GetPendingUpdateFetchTasks(offset time.Time) (int, []Task, error) {
 	t := time.Now().UTC()
-	log.Tracef("start get all crawler tasks,last offset: %s,", offset.String())
+	log.Tracef("start get all tasks,last offset: %s,", offset.String())
 	var tasks []Task
 	sort := []persist.Sort{}
 	sort = append(sort, persist.Sort{Field: "created", SortType: persist.ASC})

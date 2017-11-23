@@ -274,6 +274,9 @@ modules:
 
 - module: dispatch
   enabled: true
+  failed_retry: false
+  new_task: true
+  update_task: true
 
 - module: api
   enabled: true
