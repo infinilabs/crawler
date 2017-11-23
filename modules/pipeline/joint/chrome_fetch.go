@@ -68,13 +68,21 @@ func (joint ChromeFetchJoint) Process(context *model.Context) error {
 			err = cmd.Start()
 		}
 
-		var content []byte
+		if err != nil {
+			log.Error(err)
+		}
 
-		err = cmd.Wait()
+		var content []byte
 
 		if err == nil {
 			content, err = ioutil.ReadAll(stdout)
 		}
+
+		if err != nil {
+			log.Error(err)
+		}
+
+		err = cmd.Wait()
 
 		if err != nil {
 			if !cmd.ProcessState.Exited() {
