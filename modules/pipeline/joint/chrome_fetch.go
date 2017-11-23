@@ -111,7 +111,7 @@ func (joint ChromeFetchJoint) Process(context *model.Context) error {
 			log.Debug("fetching url normal exit, ", requestUrl)
 			stats.Increment("host.stats", host+"."+config.STATS_FETCH_SUCCESS_COUNT)
 		} else {
-			log.Debug("fetching url error exit, ", requestUrl)
+			log.Debugf("fetching url error exit, %s, %v ", requestUrl, value.err)
 			if value.err != nil {
 				context.End(value.err.Error())
 			}
