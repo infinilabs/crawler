@@ -7,7 +7,7 @@ endif
 
 CURDIR := $(shell pwd)
 OLDGOPATH:= $(GOPATH)
-NEWGOPATH:= $(GOPATH):$(CURDIR)/vendor
+NEWGOPATH:= $(CURDIR):$(CURDIR)/vendor:$(GOPATH)
 
 GO        := GO15VENDOREXPERIMENT="1" go
 GOBUILD  := GOPATH=$(NEWGOPATH) CGO_ENABLED=1  $(GO) build -ldflags -s
