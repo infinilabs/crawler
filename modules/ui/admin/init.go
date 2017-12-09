@@ -42,6 +42,7 @@ func InitUI() {
 	api.HandleUIFunc("/admin/", ui.DashboardAction)
 	api.HandleUIFunc("/admin/dashboard/", ui.DashboardAction)
 	api.HandleUIFunc("/admin/tasks/", ui.TasksPageAction)
+	api.HandleUIFunc("/admin/task/view/", ui.TaskViewPageAction)
 	api.HandleUIFunc("/admin/console/", ui.ConsolePageAction)
 	api.HandleUIFunc("/admin/explore/", ui.ExplorePageAction)
 	api.HandleUIFunc("/admin/boltdb/", ui.BoltDBStatusAction)

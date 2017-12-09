@@ -20,7 +20,10 @@ func GetTaskRow(task model.Task) string {
 	var buffer bytes.Buffer
 	buffer.WriteString("<tr>")
 
-	writeTag(&buffer, "td", util.SubStringWithSuffix(task.Url, 50, "..."))
+	linkUrl := fmt.Sprintf("/admin/task/view/?id=%s", task.ID)
+	title := fmt.Sprintf("<a title='%s' href='%s'>%s</a>", task.Url, linkUrl, util.SubStringWithSuffix(task.Url, 50, "..."))
+
+	writeTag(&buffer, "td", title)
 
 	if !task.SnapshotCreated.IsZero() {
 		date1 := util.FormatTimeWithLocalTZ(task.SnapshotCreated)

@@ -147,8 +147,8 @@ func Search(w io.Writer, r *http.Request, q string, filter string, from int, siz
 	}
 	_, _ = io.WriteString(w, "\n\n                    </div>\n\n                    <div class=\"copyright\">\n                        <br/>\n                        ")
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(config.SiteName)))
-	_, _ = io.WriteString(w, " ©2017, Powered by <a target=\"_blank\" href=\"https://github.com/elastic/elasticsearch\" >Elasticsearch</a> and <a target=\"_blank\" href=\"https://github.com/infinitbyte/gopa\" >Gopa</a>.\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n    </div>\n</div>\n<script src=\"/static/assets/uikit-2.27.1/js/components/pagination.min.js\"></script>\n\n    ")
+	_, _ = io.WriteString(w, " ©2017, Powered by <a target=\"_blank\" href=\"https://github.com/elastic/elasticsearch\" >Elasticsearch</a> and <a target=\"_blank\" href=\"https://github.com/infinitbyte/gopa\" >Gopa</a>.\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n    </div>\n</div>\n\n")
 	CommonFooter(w)
-	_, _ = io.WriteString(w, "\n\n</body>\n</html>\n")
+	_, _ = io.WriteString(w, "\n\n<script src=\"/static/assets/uikit-2.27.1/js/components/pagination.min.js\"></script>\n\n</body>\n</html>\n")
 	return nil
 }

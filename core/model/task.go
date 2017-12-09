@@ -73,6 +73,10 @@ type Task struct {
 	SnapshotCreated time.Time `json:"snapshot_created,omitempty"`
 
 	PipelineConfigID string `json:"pipline_config_id,omitempty"`
+
+	// transient properties
+	Snapshots     []Snapshot `json:"-"`
+	SnapshotCount int        `json:"-"`
 }
 
 const (

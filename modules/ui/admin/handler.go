@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"errors"
 	"github.com/asdine/storm"
 	"github.com/boltdb/bolt"
 	"github.com/infinitbyte/gopa/core/global"
@@ -80,6 +81,25 @@ func (h AdminUI) TasksPageAction(w http.ResponseWriter, r *http.Request) {
 	var hosts []model.Host
 	count2, hosts, _ = model.GetHostList(0, 35, "")
 	tasks.Index(w, r, host, from, size, count1, task, count2, hosts)
+}
+
+func (h AdminUI) TaskViewPageAction(w http.ResponseWriter, r *http.Request) {
+	id := h.Get(r, "id", "")
+
+	if id == "" {
+		panic(errors.New("id is nill"))
+	}
+
+	task, err := model.GetTask(id)
+	if err != nil {
+		panic(err)
+	}
+
+	total, snapshots, err := model.GetSnapshotList(0, 10, id)
+	task.Snapshots = snapshots
+	task.SnapshotCount = total
+
+	tasks.View(w, r, task)
 }
 
 func (h AdminUI) ConsolePageAction(w http.ResponseWriter, r *http.Request) {
