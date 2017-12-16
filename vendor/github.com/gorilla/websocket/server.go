@@ -28,8 +28,9 @@ type Upgrader struct {
 	HandshakeTimeout time.Duration
 
 	// ReadBufferSize and WriteBufferSize specify I/O buffer sizes. If a buffer
-	// size is zero, then a default value of 4096 is used. The I/O buffer sizes
-	// do not limit the size of the messages that can be sent or received.
+	// size is zero, then buffers allocated by the HTTP server are used. The
+	// I/O buffer sizes do not limit the size of the messages that can be sent
+	// or received.
 	ReadBufferSize, WriteBufferSize int
 
 	// Subprotocols specifies the server's supported protocols in order of
@@ -75,7 +76,7 @@ func checkSameOrigin(r *http.Request) bool {
 	if err != nil {
 		return false
 	}
-	return u.Host == r.Host
+	return equalASCIIFold(u.Host, r.Host)
 }
 
 func (u *Upgrader) selectSubprotocol(r *http.Request, responseHeader http.Header) string {
@@ -103,24 +104,26 @@ func (u *Upgrader) selectSubprotocol(r *http.Request, responseHeader http.Header
 // If the upgrade fails, then Upgrade replies to the client with an HTTP error
 // response.
 func (u *Upgrader) Upgrade(w http.ResponseWriter, r *http.Request, responseHeader http.Header) (*Conn, error) {
-	if r.Method != "GET" {
-		return u.returnError(w, r, http.StatusMethodNotAllowed, "websocket: method not GET")
-	}
-
-	if _, ok := responseHeader["Sec-Websocket-Extensions"]; ok {
-		return u.returnError(w, r, http.StatusInternalServerError, "websocket: application specific Sec-Websocket-Extensions headers are unsupported")
-	}
-
-	if !tokenListContainsValue(r.Header, "Sec-Websocket-Version", "13") {
-		return u.returnError(w, r, http.StatusBadRequest, "websocket: version != 13")
-	}
+	const badHandshake = "websocket: the client is not using the websocket protocol: "
 
 	if !tokenListContainsValue(r.Header, "Connection", "upgrade") {
-		return u.returnError(w, r, http.StatusBadRequest, "websocket: could not find connection header with token 'upgrade'")
+		return u.returnError(w, r, http.StatusBadRequest, badHandshake+"'upgrade' token not found in 'Connection' header")
 	}
 
 	if !tokenListContainsValue(r.Header, "Upgrade", "websocket") {
-		return u.returnError(w, r, http.StatusBadRequest, "websocket: could not find upgrade header with token 'websocket'")
+		return u.returnError(w, r, http.StatusBadRequest, badHandshake+"'websocket' token not found in 'Upgrade' header")
+	}
+
+	if r.Method != "GET" {
+		return u.returnError(w, r, http.StatusMethodNotAllowed, badHandshake+"request method is not GET")
+	}
+
+	if !tokenListContainsValue(r.Header, "Sec-Websocket-Version", "13") {
+		return u.returnError(w, r, http.StatusBadRequest, "websocket: unsupported version: 13 not found in 'Sec-Websocket-Version' header")
+	}
+
+	if _, ok := responseHeader["Sec-Websocket-Extensions"]; ok {
+		return u.returnError(w, r, http.StatusInternalServerError, "websocket: application specific 'Sec-Websocket-Extensions' headers are unsupported")
 	}
 
 	checkOrigin := u.CheckOrigin
@@ -128,12 +131,12 @@ func (u *Upgrader) Upgrade(w http.ResponseWriter, r *http.Request, responseHeade
 		checkOrigin = checkSameOrigin
 	}
 	if !checkOrigin(r) {
-		return u.returnError(w, r, http.StatusForbidden, "websocket: origin not allowed")
+		return u.returnError(w, r, http.StatusForbidden, "websocket: 'Origin' header value not allowed")
 	}
 
 	challengeKey := r.Header.Get("Sec-Websocket-Key")
 	if challengeKey == "" {
-		return u.returnError(w, r, http.StatusBadRequest, "websocket: key missing or blank")
+		return u.returnError(w, r, http.StatusBadRequest, "websocket: not a websocket handshake: `Sec-Websocket-Key' header is missing or blank")
 	}
 
 	subprotocol := u.selectSubprotocol(r, responseHeader)
@@ -152,7 +155,6 @@ func (u *Upgrader) Upgrade(w http.ResponseWriter, r *http.Request, responseHeade
 
 	var (
 		netConn net.Conn
-		br      *bufio.Reader
 		err     error
 	)
 
@@ -160,19 +162,18 @@ func (u *Upgrader) Upgrade(w http.ResponseWriter, r *http.Request, responseHeade
 	if !ok {
 		return u.returnError(w, r, http.StatusInternalServerError, "websocket: response does not implement http.Hijacker")
 	}
-	var rw *bufio.ReadWriter
-	netConn, rw, err = h.Hijack()
+	var brw *bufio.ReadWriter
+	netConn, brw, err = h.Hijack()
 	if err != nil {
 		return u.returnError(w, r, http.StatusInternalServerError, err.Error())
 	}
-	br = rw.Reader
 
-	if br.Buffered() > 0 {
+	if brw.Reader.Buffered() > 0 {
 		netConn.Close()
 		return nil, errors.New("websocket: client sent data before handshake is complete")
 	}
 
-	c := newConn(netConn, true, u.ReadBufferSize, u.WriteBufferSize)
+	c := newConnBRW(netConn, true, u.ReadBufferSize, u.WriteBufferSize, brw)
 	c.subprotocol = subprotocol
 
 	if compress {
@@ -231,10 +232,11 @@ func (u *Upgrader) Upgrade(w http.ResponseWriter, r *http.Request, responseHeade
 
 // Upgrade upgrades the HTTP server connection to the WebSocket protocol.
 //
-// This function is deprecated, use websocket.Upgrader instead.
+// Deprecated: Use websocket.Upgrader instead.
 //
-// The application is responsible for checking the request origin before
-// calling Upgrade. An example implementation of the same origin policy is:
+// Upgrade does not perform origin checking. The application is responsible for
+// checking the Origin header before calling Upgrade. An example implementation
+// of the same origin policy check is:
 //
 //	if req.Header.Get("Origin") != "http://"+req.Host {
 //		http.Error(w, "Origin not allowed", 403)
