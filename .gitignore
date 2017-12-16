@@ -8,7 +8,6 @@ out/**/*
 out/*
 build/**/*
 build/*
-target/**
 gen/*
 */bin/*
 *.class
@@ -20,7 +19,6 @@ gen/*
 */out/**
 */build/**
 */*.iml
-*/target/**
 */gen/*
 */bin/**
 */*.class
@@ -30,7 +28,6 @@ gen/*
 gen/
 classes/
 bin/
-target/
 *.log
 */*/proguard_logs/**
 /private_test
