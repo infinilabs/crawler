@@ -69,3 +69,6 @@
     http://goog-perftools.sourceforge.net/doc/heap_profiler.html
     
 
+* Chrome
+
+    chrome --headless --disable-gpu --remote-debugging-port=9223

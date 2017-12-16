@@ -58,20 +58,20 @@ func (module APIModule) internalStart(env *env.Env) {
 	//registered handlers
 	if apis.RegisteredAPIHandler != nil {
 		for k, v := range apis.RegisteredAPIHandler {
-			log.Debug("register custom http handler: ", k)
+			log.Debugf("register custom http handler: %v", k)
 			mux.Handle(k, v)
 		}
 	}
 	if apis.RegisteredAPIFuncHandler != nil {
 		for k, v := range apis.RegisteredAPIFuncHandler {
-			log.Debug("register custom http handler: ", k)
+			log.Debugf("register custom http handler: %v", k)
 			mux.HandleFunc(k, v)
 		}
 	}
 	if apis.RegisteredAPIMethodHandler != nil {
 		for k, v := range apis.RegisteredAPIMethodHandler {
 			for m, n := range v {
-				log.Debug("register custom http handler: ", k, " ", m)
+				log.Debugf("register custom http handler: %v %v", k, m)
 				router.Handle(k, m, n)
 			}
 		}

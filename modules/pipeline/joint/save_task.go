@@ -125,6 +125,9 @@ func getTask(context *model.Context) *model.Task {
 	if context.Has(model.CONTEXT_TASK_SnapshotVersion) {
 		task.SnapshotVersion = context.GetIntOrDefault(model.CONTEXT_TASK_SnapshotVersion, 0)
 	}
+	if context.Has(model.CONTEXT_TASK_LastScreenshotID) {
+		task.LastScreenshotID = context.GetStringOrDefault(model.CONTEXT_TASK_LastScreenshotID, "")
+	}
 	if context.Has(model.CONTEXT_TASK_PipelineConfigID) {
 		task.PipelineConfigID = context.GetStringOrDefault(model.CONTEXT_TASK_PipelineConfigID, "")
 	}

@@ -420,7 +420,7 @@ func (pipe *Pipeline) Run() *Context {
 		stats.Timing(pipe.name+".pipeline", v.Name(), elapsedTime.Nanoseconds())
 		if err != nil {
 			stats.Increment(pipe.name+".pipeline", "error")
-			log.Debug("%s-%s: %v", pipe.name, v.Name(), err)
+			log.Debugf("%s-%s: %v", pipe.name, v.Name(), err)
 			break
 		}
 		log.Trace(pipe.name, ", end joint,", v.Name())
@@ -485,7 +485,7 @@ func GetAllRegisteredJoints() map[string]interface{} {
 }
 
 func GetJointInstance(cfg *JointConfig) Joint {
-	log.Trace("get joint instances, ", cfg.JointName)
+	log.Tracef("get joint instances, %v", cfg.JointName)
 	if typeRegistry[cfg.JointName] != nil {
 		t := reflect.ValueOf(typeRegistry[cfg.JointName]).Type()
 		v := reflect.New(t).Elem()

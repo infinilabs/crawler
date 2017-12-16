@@ -66,11 +66,12 @@ type Task struct {
 	LastCheck   time.Time `gorm:"index" json:"last_check,omitempty"`
 	NextCheck   time.Time `gorm:"index" json:"next_check,omitempty"`
 
-	SnapshotVersion int       `json:"snapshot_version,omitempty"`
-	SnapshotID      string    `json:"snapshot_id,omitempty"`
-	SnapshotHash    string    `json:"snapshot_hash,omitempty"`
-	SnapshotSimHash string    `json:"snapshot_simhash,omitempty"`
-	SnapshotCreated time.Time `json:"snapshot_created,omitempty"`
+	SnapshotVersion  int       `json:"snapshot_version,omitempty"`
+	SnapshotID       string    `json:"snapshot_id,omitempty"`
+	SnapshotHash     string    `json:"snapshot_hash,omitempty"`
+	SnapshotSimHash  string    `json:"snapshot_simhash,omitempty"`
+	SnapshotCreated  time.Time `json:"snapshot_created,omitempty"`
+	LastScreenshotID string    `json:"last_screenshot_id,omitempty"`
 
 	PipelineConfigID string `json:"pipline_config_id,omitempty"`
 
@@ -100,6 +101,7 @@ const (
 	CONTEXT_TASK_SnapshotHash     ParaKey = "TASK_SnapshotHash"
 	CONTEXT_TASK_SnapshotCreated  ParaKey = "TASK_SnapshotCreated"
 	CONTEXT_TASK_SnapshotVersion  ParaKey = "TASK_SnapshotVersion"
+	CONTEXT_TASK_LastScreenshotID ParaKey = "TASK_LastScreenshotID"
 	CONTEXT_TASK_PipelineConfigID ParaKey = "TASK_PipelineConfigID"
 )
 

@@ -150,6 +150,12 @@ INPUT {
 	LINE-HEIGHT: 130%; max-WIDTH: 600px; min-height: 200px; width: 100%; WORD-WRAP: break-word; FONT-SIZE: 100%; WORD-BREAK: break-all
 }
 
+.screenshot {
+	max-width: 70px;
+	max-height: 70px;
+	float: right;
+}
+
 .h {
 	WIDTH: 100%; MARGIN-LEFT: 8px
 }

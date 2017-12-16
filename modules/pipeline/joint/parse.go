@@ -171,7 +171,7 @@ func (joint ParsePageJoint) Process(context *model.Context) error {
 			// save images
 			context := model.Context{IgnoreBroken: true}
 			context.Set(model.CONTEXT_TASK_URL, src)
-			context.Set(model.CONTEXT_TASK_Reference, src)
+			context.Set(model.CONTEXT_TASK_Reference, refUrl)
 			context.Set(model.CONTEXT_TASK_Depth, 0)
 			context.Set(model.CONTEXT_TASK_Breadth, 0)
 			queue.Push(config.CheckChannel, util.ToJSONBytes(context))

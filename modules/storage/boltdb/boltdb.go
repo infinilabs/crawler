@@ -65,6 +65,7 @@ func (store BoltdbStore) Open() error {
 		config.SnapshotBucketKey,
 		config.SnapshotMappingBucketKey,
 		model.PipelineConfigBucket,
+		config.ScreenshotBucketKey,
 		string(config.CheckFilter),
 		string(config.FetchFilter),
 		string(config.ContentHashFilter),

@@ -11,6 +11,7 @@ import (
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/http"
 	"github.com/infinitbyte/gopa/core/model"
+	"github.com/infinitbyte/gopa/core/persist"
 	"github.com/infinitbyte/gopa/modules/config"
 	"github.com/infinitbyte/gopa/modules/ui/admin/boltdb"
 	"github.com/infinitbyte/gopa/modules/ui/admin/console"
@@ -64,12 +65,12 @@ func indexes(r *http.Request) ([]int, error) {
 	return a, nil
 }
 
-func (h AdminUI) DashboardAction(w http.ResponseWriter, r *http.Request) {
+func (h AdminUI) DashboardAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	dashboard.Index(w)
 }
 
-func (h AdminUI) TasksPageAction(w http.ResponseWriter, r *http.Request) {
+func (h AdminUI) TasksPageAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	var task []model.Task
 	var count1, count2 int
@@ -83,8 +84,8 @@ func (h AdminUI) TasksPageAction(w http.ResponseWriter, r *http.Request) {
 	tasks.Index(w, r, host, from, size, count1, task, count2, hosts)
 }
 
-func (h AdminUI) TaskViewPageAction(w http.ResponseWriter, r *http.Request) {
-	id := h.Get(r, "id", "")
+func (h AdminUI) TaskViewPageAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	id := p.ByName("id")
 
 	if id == "" {
 		panic(errors.New("id is nill"))
@@ -102,7 +103,7 @@ func (h AdminUI) TaskViewPageAction(w http.ResponseWriter, r *http.Request) {
 	tasks.View(w, r, task)
 }
 
-func (h AdminUI) ConsolePageAction(w http.ResponseWriter, r *http.Request) {
+func (h AdminUI) ConsolePageAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	console.Index(w)
 }
@@ -110,6 +111,16 @@ func (h AdminUI) ConsolePageAction(w http.ResponseWriter, r *http.Request) {
 func (h AdminUI) ExplorePageAction(w http.ResponseWriter, r *http.Request) {
 
 	explore.Index(w)
+}
+
+func (h AdminUI) GetScreenshotAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	id := p.ByName("id")
+	bytes, err := persist.GetValue(config.ScreenshotBucketKey, []byte(id))
+	if err != nil {
+		h.Error(w, err)
+		return
+	}
+	w.Write(bytes)
 }
 
 func (h AdminUI) SettingPageAction(w http.ResponseWriter, r *http.Request) {

@@ -24,13 +24,13 @@ cluster.seeds:
 
 
 modules:
-- module: pipeline
+- name: pipeline
   enabled: true
   runners:
     - name: fetch
       enabled: true
       input_queue: fetch
-      max_go_routine: 10
+      max_go_routine: 1
       threshold_in_ms: 0
       # default timeout is 60s
       timeout_in_ms: 30000
@@ -55,8 +55,16 @@ modules:
             enabled: false
             parameters:
               command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-          - joint: fetch
+          - joint: chrome_fetch_v2
             enabled: true
+            parameters:
+              chrome_host: http://127.0.0.1:9223
+              save_screenshot: true
+              compress_enabled: true
+              timeout_in_seconds: 60
+              screenshot_quality: 50
+          - joint: fetch
+            enabled: false
             parameters:
               timeout_in_seconds: 100
     #          proxy: "socks5://127.0.0.1:1080"
@@ -106,7 +114,7 @@ modules:
     - name: update
       enabled: true
       input_queue: update
-      max_go_routine: 1
+      max_go_routine: 4
       threshold_in_ms: 0
       # default timeout is 60s
       timeout_in_ms: 30000
@@ -180,7 +188,7 @@ modules:
     - name: checker
       enabled: true
       input_queue: check
-      max_go_routine: 10
+      max_go_routine: 5
       threshold_in_ms: 0
       # default timeout is 60s
       timeout_in_ms: 5000
@@ -269,30 +277,30 @@ modules:
 
 
 
-- module: cluster
+- name: cluster
   enabled: true
 
-- module: dispatch
+- name: dispatch
   enabled: true
-  failed_retry: false
+  failed_retry: true
   new_task: true
   update_task: true
 
-- module: api
+- name: api
   enabled: true
 
-- module: web
-  enabled: true
-
-
-- module: filter
-  enabled: true
-
-- module: queue
+- name: web
   enabled: true
 
 
-- module: storage
+- name: filter
+  enabled: true
+
+- name: queue
+  enabled: true
+
+
+- name: storage
   enabled: true
 #  driver: elasticsearch
 #  elasticsearch:
@@ -302,7 +310,7 @@ modules:
 #    password: changeme
   driver: boltdb
 
-- module: index
+- name: index
   enabled: true
   ui:
     enabled: true
@@ -315,7 +323,7 @@ modules:
     username: elastic
     password: changeme
 
-- module: persist
+- name: persist
   enabled: true
 #  driver: elasticsearch
 #  elasticsearch:
@@ -332,12 +340,19 @@ modules:
 #  mysql:
 #    connection: root:password@tcp(dev:3306)/gopa?charset=utf8&parseTime=true&loc=Local
 
-- module: stats
+- name: stats
   enabled: true
 
-- module: statsd
+- name: statsd
   enabled: false
   host: 127.0.0.1
   port: 8125
   namespace: gopa.
   interval_in_seconds: 1
+
+
+plugins:
+- name: chrome
+  enabled: true
+  command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+  debug_port: 9223

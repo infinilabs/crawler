@@ -24,18 +24,13 @@
     <div class="uk-container uk-container-center">
 
         <div class="uk-grid" data-uk-grid-margin="">
-            <div class="tm-sidebar uk-width-medium-1-4 uk-hidden-small uk-row-first">
 
-                <ul class="tm-nav uk-nav" data-uk-nav="">
-                </ul>
-
-            </div>
             <div class="tm-main uk-width-medium-3-4">
                 <div class="uk-overflow-container">
                     <div class="tm-middle-header">
                         <div class="uk-grid " data-uk-grid-margin="">
                             <div class="uk-width-1-1">
-                                <h2>Task</h2>
+                                <h2><%=i18n.GetLocalizedText("Task")%></h2>
                             </div>
                         </div>
                         <div class="uk-grid grid-margin">
@@ -68,7 +63,7 @@
                     <div class="tm-middle-header">
                         <div class="uk-grid " data-uk-grid-margin="">
                             <div class="uk-width-1-1">
-                                <h2>Snapshot(<%= task.SnapshotCount%>)</h2>
+                                <h2><%=i18n.GetLocalizedText("Snapshot")%>(<%= task.SnapshotCount%>)</h2>
                             </div>
                         </div>
                         <div class="uk-grid grid-margin">
@@ -88,7 +83,9 @@
                                 <tr>
                                     <th class="uk-text-center"><%=i18n.GetLocalizedText("#")%></th>
                                     <th class="uk-text-center"><%=i18n.GetLocalizedText("Created")%></th>
+                                    <th class="uk-text-center"><%=i18n.GetLocalizedText("Size")%></th>
                                     <th class="uk-text-center"><%=i18n.GetLocalizedText("Version")%></th>
+                                    <th class="uk-text-center"><%=i18n.GetLocalizedText("Hash")%></th>
                                     <th class="uk-text-center"><%=i18n.GetLocalizedText("Action")%></th>
                                 </tr>
                                 </thead>
@@ -97,8 +94,10 @@
                                 <tr class="uk-text-center">
                                     <td><%= i%></td>
                                     <td><%= v.Created%></td>
+                                    <td><%= v.Size%></td>
                                     <td><%= v.Version%></td>
-                                    <td><a class="uk-button uk-button-small uk-button-primary" href="/snapshot/<%= v.ID%>">View</a></td>
+                                    <td><%= v.Hash%></td>
+                                    <td><a class="uk-button uk-button-small uk-button-primary" target="_blank" href="/snapshot/<%= v.ID%>">View</a></td>
                                 </tr>
                                 <%}%>
                                 </tbody>
@@ -106,12 +105,17 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="tm-sidebar uk-width-medium-1-4 uk-hidden-small uk-row-first">
+                <% if task.LastScreenshotID !="" { %>
+                    <ul class="tm-nav uk-nav" data-uk-nav="">
+                        <h2><%=i18n.GetLocalizedText("Screenshot")%></h2>
+                    </ul>
+                    <img style="max-width: 100%" src="/admin/screenshot/<%= task.LastScreenshotID %>" />
+                <% } %>
+            </div>
         </div>
         </div>
-        </div>
-
-
-
 
 </div>
 

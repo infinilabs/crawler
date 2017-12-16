@@ -210,5 +210,5 @@ func CreateFile(dir string, name string) (string, error) {
 // FileExtension extract file extension from file name
 func FileExtension(file string) string {
 	ext := filepath.Ext(file)
-	return strings.TrimSpace(ext)
+	return strings.ToLower(strings.TrimSpace(ext))
 }

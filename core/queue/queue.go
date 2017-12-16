@@ -93,7 +93,7 @@ func Close(k string) error {
 func Depth(k string) int64 {
 	if handler != nil {
 		o := handler.Depth(k)
-		stats.Increment("queue."+k, "depth")
+		stats.Increment("queue."+k, "call_depth")
 		return o
 	}
 	panic(errors.New("channel is not registered"))

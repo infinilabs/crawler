@@ -47,6 +47,8 @@ type Snapshot struct {
 	Payload    []byte `json:"-" gorm:"-"`
 	Size       uint64 `json:"size,omitempty"`
 
+	ScreenshotID string `json:"screenshot_id,omitempty"`
+
 	Headers    map[string][]string     `json:"-" gorm:"-"`
 	Metadata   *map[string]interface{} `json:"-" gorm:"-"`
 	Parameters []KV                    `json:"-" gorm:"-"`

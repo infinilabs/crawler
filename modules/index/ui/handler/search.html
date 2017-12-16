@@ -126,14 +126,18 @@
                         for seq,hit:=range response.Hits.Hits{
                             url:=safeGetField(hit.Source["snapshot"].(map[string]interface{})["url"],"N/A")
                             snapshotId:=safeGetField(hit.Source["snapshot"].(map[string]interface{})["id"],"")
+                            screenshot:=safeGetField(hit.Source["task"].(map[string]interface{})["last_screenshot_id"],"")
                             title:=smartGetField(hit.Highlight["snapshot.title"],hit.Source["snapshot"].(map[string]interface{})["title"],"N/A")
                             summary:=util.SubStringWithSuffix(smartGetField(hit.Highlight["snapshot.text"],hit.Source["snapshot"].(map[string]interface{})["text"],"N/A"),250,"...")
                         %>
                             <TABLE id=result_<%= seq %> class=result cellSpacing=0 cellPadding=0> <TBODY><TR>
                                 <TD class=f>
-                                    <H3 class=t><A  title="<%= hit.Source["snapshot"].(map[string]interface{})["title"] %>" href="<%= url %>"  target=_blank>
+                                    <H3 class=t><A  title='<%= hit.Source["snapshot"].(map[string]interface{})["title"] %>' href="<%= url %>"  target=_blank>
                                         <%== util.SubStringWithSuffix(title,100,"...") %></A> </H3>
-                                    <FONT size=-1><%== summary %> <BR>
+                                    <FONT size=-1><% if(screenshot!=""){ %>
+                                        <img class="screenshot" src="/admin/screenshot/<%== screenshot %>" class="uk-icon-hover uk-icon-history" />
+                                        <% } %>
+                                        <%== summary %> <BR>
                                         <div  class=g><a target=_blank href="<%= url %>"><%=util.SubStringWithSuffix(url,80,"...") %></a>
                                             <% if(snapshotId!=""){ %>
                                             <a target="_blank" href="/snapshot/<%== snapshotId %>" class="uk-icon-hover uk-icon-history"></a>

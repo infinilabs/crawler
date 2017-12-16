@@ -45,8 +45,8 @@ type PipeRunner struct {
 }
 
 func (pipe *PipeRunner) Start(config PipeConfig) {
-	if !pipe.config.Enabled {
-		log.Debugf("pipeline: %s was disabled", pipe.config.Name)
+	if !config.Enabled {
+		log.Debugf("pipeline: %s was disabled", config.Name)
 		return
 	}
 
@@ -54,18 +54,18 @@ func (pipe *PipeRunner) Start(config PipeConfig) {
 	defer pipe.l.Unlock()
 	pipe.config = config
 
-	numGoRoutine := pipe.config.MaxGoRoutine
+	numGoRoutine := config.MaxGoRoutine
 
 	pipe.signalChannels = make([]*chan bool, numGoRoutine)
 	//start fetcher
 	for i := 0; i < numGoRoutine; i++ {
-		log.Trace("start pipeline, shard:", i)
+		log.Tracef("start pipeline, %s, shard:", config.Name, i)
 		signalC := make(chan bool, 1)
 		pipe.signalChannels[i] = &signalC
 		go pipe.runPipeline(&signalC, i)
 
 	}
-	log.Infof("pipeline: %s started with %v shards", pipe.config.Name, numGoRoutine)
+	log.Infof("pipeline: %s started with %v shards", config.Name, numGoRoutine)
 }
 
 func (pipe *PipeRunner) Update(config PipeConfig) {

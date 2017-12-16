@@ -39,15 +39,18 @@ func InitUI() {
 
 	//UI pages init
 	ui := AdminUI{}
-	api.HandleUIFunc("/admin/", ui.DashboardAction)
-	api.HandleUIFunc("/admin/dashboard/", ui.DashboardAction)
-	api.HandleUIFunc("/admin/tasks/", ui.TasksPageAction)
-	api.HandleUIFunc("/admin/task/view/", ui.TaskViewPageAction)
-	api.HandleUIFunc("/admin/console/", ui.ConsolePageAction)
+
+	api.HandleUIMethod(api.GET, "/admin/", ui.DashboardAction)
+	api.HandleUIMethod(api.POST, "/admin/setting/", ui.UpdateSettingAction)
+	api.HandleUIMethod(api.GET, "/admin/screenshot/:id", ui.GetScreenshotAction)
+	api.HandleUIMethod(api.GET, "/admin/dashboard/", ui.DashboardAction)
+	api.HandleUIMethod(api.GET, "/admin/tasks/", ui.TasksPageAction)
+	api.HandleUIMethod(api.GET, "/admin/task/view/:id", ui.TaskViewPageAction)
+	api.HandleUIMethod(api.GET, "/admin/console/", ui.ConsolePageAction)
+
 	api.HandleUIFunc("/admin/explore/", ui.ExplorePageAction)
 	api.HandleUIFunc("/admin/boltdb/", ui.BoltDBStatusAction)
 	api.HandleUIFunc("/admin/setting/", ui.SettingPageAction)
-	api.HandleUIMethod(api.POST, "/admin/setting/", ui.UpdateSettingAction)
 
 	//Ajax
 	ajax := ajax.Ajax{}

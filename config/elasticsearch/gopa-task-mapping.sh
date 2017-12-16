@@ -45,6 +45,9 @@ curl -XPUT "http://localhost:9200/gopa-task" -H 'Content-Type: application/json'
 "snapshot_id": {
 "type": "keyword"
 },
+"last_screenshot_id": {
+"type": "keyword"
+},
 "snapshot_simhash": {
 "type": "keyword"
 },

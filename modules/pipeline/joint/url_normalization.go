@@ -75,7 +75,6 @@ func (joint UrlNormalizationJoint) Process(context *model.Context) error {
 		context.Exit(err.Error())
 	}
 
-	log.Tracef("currentURI,schema:%s, host:%s", currentURI.Scheme, currentURI.Host)
 	refUrlStr := reference
 	var refExists bool
 	if refUrlStr != "" {
@@ -166,6 +165,12 @@ func (joint UrlNormalizationJoint) Process(context *model.Context) error {
 	}
 
 	url = tempUrl
+
+	if currentURI == nil {
+		panic(errors.Errorf("invalid url, %v", url))
+	}
+
+	log.Tracef("currentURI,schema:%s, host:%s", currentURI.Scheme, currentURI.Host)
 
 	if strings.Contains(url, "..") {
 

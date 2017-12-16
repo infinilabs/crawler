@@ -144,7 +144,6 @@ func lowercaseTag(str []byte) {
 var empty = []byte(" ")
 
 func replaceAll(src []byte) []byte {
-	initRules()
 
 	if rules.lowercase {
 		lowercaseTag(src)
@@ -168,6 +167,7 @@ func replaceAll(src []byte) []byte {
 }
 
 func (joint HtmlToTextJoint) Process(context *model.Context) error {
+	initRules()
 
 	snapshot := context.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
 
@@ -176,11 +176,12 @@ func (joint HtmlToTextJoint) Process(context *model.Context) error {
 		return nil
 	}
 
-	body := replaceAll(snapshot.Payload)
-
+	body := snapshot.Payload
 	if joint.GetBool(removeNonScript, true) {
 		body = rules.removeNonScriptRule.ReplaceAll(body, []byte(""))
 	}
+
+	body = replaceAll(body)
 
 	src := string(body)
 

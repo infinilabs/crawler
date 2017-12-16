@@ -23,6 +23,7 @@ const KVBucketKey string = "Kv"
 const TaskBucketKey string = "Task"
 const StatsBucketKey string = "Stats"
 const SnapshotBucketKey string = "Snapshot"
+const ScreenshotBucketKey string = "Screenshot"
 const SnapshotMappingBucketKey string = "SnapshotMapping"
 
 const REGISTER_BOLTDB global.RegisterKey = "REGISTER_BOLTDB"
