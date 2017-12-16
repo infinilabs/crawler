@@ -177,6 +177,7 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 		panic(errors.New("empty body"))
 	}
 
+
 	snapshot.Payload = []byte(result.OuterHTML)
 	snapshot.Size = uint64(len(result.OuterHTML))
 
