@@ -21,8 +21,24 @@ import (
 	"github.com/infinitbyte/gopa/core/env"
 )
 
+const System = "system"
+const Service = "service"
+const Tools = "tools"
+const PipelineJoint = "joint"
+const Stats = "stats"
+const Filter = "filter"
+const Database = "database"
+const KVStore = "kv"
+const Queue = "queue"
+const Storage = "storage"
+const Index = "index"
+const Logger = "logger"
+const UI = "ui"
+const API = "api"
+
 type Modules struct {
 	modules []Module
+	plugins []Module
 	configs map[string]interface{}
 }
 
@@ -33,11 +49,44 @@ func New() {
 	m = &mod
 }
 
-func Register(mod Module) {
+func Register(moduleType string, mod Module) {
 	m.modules = append(m.modules, mod)
 }
 
+func RegisterPlugin(moduleType string, mod Module) {
+	m.plugins = append(m.plugins, mod)
+}
+
+//module.Register(persist.DatabaseModule{})
+//module.Register(storage.StorageModule{})
+//module.Register(filter.FilterModule{})
+//module.Register(stats.SimpleStatsModule{})
+//module.Register(stats.StatsDModule{})
+//module.Register(queue.DiskQueue{})
+//module.Register(pipeline.PipelineFrameworkModule{})
+//module.Register(dispatch.DispatchModule{})
+//module.Register(index.IndexModule{})
+//module.Register(cluster.ClusterModule{})
+//module.Register(ui.UIModule{})
+//module.Register(api.APIModule{})
+
 func Start() {
+
+	log.Trace("start to load plugins")
+	for _, v := range m.plugins {
+
+		cfg := env.GetPluginConfig(v.Name())
+
+		log.Trace("plugin: ", v.Name(), ", enabled: ", cfg.Enabled(true))
+
+		if cfg.Enabled(true) {
+			log.Trace("starting plugin: ", v.Name())
+			v.Start(cfg)
+			log.Debug("started plugin: ", v.Name())
+		}
+
+	}
+	log.Debug("all plugins loaded")
 
 	log.Trace("start to start modules")
 	for _, v := range m.modules {
@@ -68,4 +117,16 @@ func Stop() {
 		}
 	}
 	log.Debug("all modules stopped")
+
+	log.Trace("start to unload plugins")
+	for i := len(m.plugins) - 1; i >= 0; i-- {
+		v := m.plugins[i]
+		cfg := env.GetPluginConfig(v.Name())
+		if cfg.Enabled(true) {
+			log.Trace("stopping plugin: ", v.Name())
+			v.Stop()
+			log.Debug("stopped plugin: ", v.Name())
+		}
+	}
+	log.Debug("all plugins unloaded")
 }

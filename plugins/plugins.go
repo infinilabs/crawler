@@ -14,10 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package config
+package plugins
 
-// RuntimeConfig object means this config can be changed during runtime
-type RuntimeConfig struct {
-	Modules []*Config `config:"modules"`
-	Plugins []*Config `config:"plugins"`
+import (
+	"github.com/infinitbyte/gopa/core/module"
+	"github.com/infinitbyte/gopa/plugins/service_chrome"
+	"github.com/infinitbyte/gopa/plugins/tools_generator"
+)
+
+func Register() {
+	module.RegisterPlugin(module.Tools, tools_generator.GeneratorPlugin{})
+	module.RegisterPlugin(module.Tools, service_chrome.ChromePlugin{})
 }

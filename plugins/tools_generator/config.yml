@@ -1,0 +1,5 @@
+plugins:
+- plugin: generator
+  enabled: false
+  task_id: ""
+  task_url: "http://localhost:8081"

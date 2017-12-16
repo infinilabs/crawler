@@ -1,4 +1,4 @@
-package generator
+package tools_generator
 
 import (
 	. "github.com/infinitbyte/gopa/core/config"
@@ -9,14 +9,14 @@ import (
 	"time"
 )
 
-type GeneratorModule struct {
+type GeneratorPlugin struct {
 }
 
-func (module GeneratorModule) Name() string {
+func (plugin GeneratorPlugin) Name() string {
 	return "Generator"
 }
 
-func (module GeneratorModule) Start(cfg *Config) {
+func (plugin GeneratorPlugin) Start(cfg *Config) {
 
 	generatorConfig := struct {
 		TaskID  string `config:"task_id"`
@@ -44,8 +44,6 @@ func (module GeneratorModule) Start(cfg *Config) {
 	}()
 }
 
-func (module GeneratorModule) Stop() error {
-
+func (plugin GeneratorPlugin) Stop() error {
 	return nil
-
 }

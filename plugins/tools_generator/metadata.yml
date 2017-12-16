@@ -1,0 +1,7 @@
+package: tools_generator
+struct: GeneratorPlugin
+type: tools
+name: Generator
+description: Testdata generator
+version: 1.0.0
+author: medcl

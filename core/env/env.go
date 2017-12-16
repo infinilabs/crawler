@@ -64,6 +64,7 @@ func Environment(configFile string) *Env {
 }
 
 var moduleConfig map[string]*config.Config
+var pluginConfig map[string]*config.Config
 
 var (
 	defaultSystemConfig = config.SystemConfig{
@@ -118,8 +119,6 @@ var (
 
 func (env *Env) loadRuntimeConfig() (*config.RuntimeConfig, error) {
 
-	moduleConfig = map[string]*config.Config{}
-
 	var configFile = "./gopa.yml"
 	if env.SystemConfig != nil && len(env.SystemConfig.ConfigFile) > 0 {
 		configFile = env.SystemConfig.ConfigFile
@@ -142,7 +141,8 @@ func (env *Env) loadRuntimeConfig() (*config.RuntimeConfig, error) {
 			return nil, err
 		}
 
-		parseModuleConfig(config.Modules)
+		pluginConfig = parseModuleConfig(config.Plugins)
+		moduleConfig = parseModuleConfig(config.Modules)
 
 	} else {
 		log.Debug("no config file was found")
@@ -153,23 +153,16 @@ func (env *Env) loadRuntimeConfig() (*config.RuntimeConfig, error) {
 	return &cfg, nil
 }
 
-func parseModuleConfig(cfgs []*config.Config) []*config.Config {
-	results := []*config.Config{}
+func parseModuleConfig(cfgs []*config.Config) map[string]*config.Config {
+	result := map[string]*config.Config{}
+
 	for _, cfg := range cfgs {
-		//set map for modules and module config
 		log.Trace(getModuleName(cfg), ",", cfg.Enabled(true))
-		config, err := config.NewConfigFrom(cfg)
-		if err != nil {
-			panic(err)
-		}
-
 		name := getModuleName(cfg)
-		moduleConfig[name] = cfg
-
-		results = append(results, config)
+		result[name] = cfg
 	}
 
-	return results
+	return result
 }
 
 //GetModuleConfig return specify module's config
@@ -178,9 +171,15 @@ func GetModuleConfig(name string) *config.Config {
 	return cfg
 }
 
+//GetPluginConfig return specify plugin's config
+func GetPluginConfig(name string) *config.Config {
+	cfg := pluginConfig[strings.ToLower(name)]
+	return cfg
+}
+
 func getModuleName(c *config.Config) string {
 	cfgObj := struct {
-		Module string `config:"module"`
+		Module string `config:"name"`
 	}{}
 
 	if c == nil {
