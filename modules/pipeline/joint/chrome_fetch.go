@@ -85,8 +85,10 @@ func (joint ChromeFetchJoint) Process(context *model.Context) error {
 		err = cmd.Wait()
 
 		if err != nil {
-			if !cmd.ProcessState.Exited() {
-				cmd.Process.Kill()
+			if cmd.ProcessState != nil {
+				if !cmd.ProcessState.Exited() {
+					cmd.Process.Kill()
+				}
 			}
 			flg <- signal{flag: false, err: err, status: model.TaskFailed}
 			return

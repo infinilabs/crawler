@@ -18,6 +18,7 @@ package cdp
 
 import (
 	c "context"
+	"fmt"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/model"
@@ -27,6 +28,7 @@ import (
 	"github.com/mafredri/cdp/devtool"
 	"github.com/mafredri/cdp/protocol/dom"
 	"github.com/mafredri/cdp/protocol/page"
+	"github.com/mafredri/cdp/protocol/runtime"
 	"github.com/mafredri/cdp/rpcc"
 	"strings"
 	"time"
@@ -113,6 +115,38 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 		return err
 	}
 
+	// Enable console to evaluate scripts
+	if err = c.Console.Enable(ctx); err != nil {
+		context.Exit(err)
+		return err
+	}
+
+	console, err := c.Console.MessageAdded(ctx)
+	if err != nil {
+		context.Exit(err)
+		return err
+	}
+
+	go func(c *model.Context) {
+		defer console.Close()
+		for {
+			ev, err := console.Recv()
+			if err != nil {
+				return
+			}
+			txt := ev.Message.Text
+			log.Trace(requestUrl, ", console message:", txt)
+			if util.PrefixStr(txt, "GOPA_") {
+				if util.ContainStr(txt, ":") {
+					array := strings.Split(txt, ":")
+					if array[0] == string(model.CONTEXT_SNAPSHOT_ContentType) {
+						c.Set(model.CONTEXT_SNAPSHOT_ContentType, array[1])
+					}
+				}
+			}
+		}
+	}(context)
+
 	// Create the Navigate arguments with the optional Referrer field set.
 	navArgs := page.NewNavigateArgs(requestUrl).SetReferrer(reference)
 
@@ -131,6 +165,13 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 		context.Exit(err)
 		return err
 	}
+
+	// Get content-type
+	wait := true
+	args := runtime.EvaluateArgs{
+		Expression:   fmt.Sprintf("console.log('%s:'+document.contentType)", model.CONTEXT_SNAPSHOT_ContentType),
+		AwaitPromise: &wait}
+	c.Runtime.Evaluate(ctx, &args)
 
 	// Fetch the document root node. We can pass nil here
 	// since this method only takes optional arguments.
@@ -177,13 +218,16 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 		panic(errors.New("empty body"))
 	}
 
-
 	snapshot.Payload = []byte(result.OuterHTML)
 	snapshot.Size = uint64(len(result.OuterHTML))
 
-	//TODO evaluate js and get content-type
 	//snapshot.StatusCode = reply.Response.Status
-	snapshot.ContentType = "text/html"
+	if context.Has(model.CONTEXT_SNAPSHOT_ContentType) {
+		snapshot.ContentType = context.GetStringOrDefault(model.CONTEXT_SNAPSHOT_ContentType, "N/A")
+	} else {
+		log.Error(requestUrl, ", failed to get content-type")
+		snapshot.ContentType = "N/A"
+	}
 
 	log.Debug("exit chrome v2 fetch method:", requestUrl)
 

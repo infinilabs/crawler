@@ -3,18 +3,21 @@ package cdp
 import (
 	"context"
 	"fmt"
+	"github.com/infinitbyte/gopa/core/util"
 	"github.com/mafredri/cdp"
 	"github.com/mafredri/cdp/devtool"
 	"github.com/mafredri/cdp/protocol/network"
 	"github.com/mafredri/cdp/protocol/page"
+	"github.com/mafredri/cdp/protocol/runtime"
 	"github.com/mafredri/cdp/rpcc"
 	"io/ioutil"
 	"log"
+	"strings"
 	"testing"
 	"time"
 )
 
-func TestChromeFetchV2(t *testing.T) {
+func ChromeFetchV2(t *testing.T) {
 	err := run(30 * time.Second)
 	if err != nil {
 		log.Fatal(err)
@@ -62,6 +65,32 @@ func run(timeout time.Duration) error {
 	if err = c.Network.Enable(ctx, &args); err != nil {
 		return err
 	}
+
+	// Enable console to evaluate scripts
+	if err = c.Console.Enable(ctx); err != nil {
+		return err
+	}
+
+	console, err := c.Console.MessageAdded(ctx)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		defer console.Close()
+		for {
+			ev, err := console.Recv()
+			if err != nil {
+				return
+			}
+			fmt.Println("reply:", ev.Message.Text)
+			if util.PrefixStr(ev.Message.Text, "gopa-") {
+				array := strings.Split(ev.Message.Text, ":")
+				fmt.Println(array[0], array[1])
+				//c.Set(array[0],array[1])
+			}
+		}
+	}()
 
 	// Create the Navigate arguments with the optional Referrer field set.
 	navArgs := page.NewNavigateArgs("http://localhost:8081/")
@@ -132,6 +161,13 @@ func run(timeout time.Duration) error {
 	if err = ioutil.WriteFile(screenshotName, screenshot.Data, 0644); err != nil {
 		return err
 	}
+
+	wait := true
+	// get content-type
+	args1 := runtime.EvaluateArgs{
+		Expression:   "console.log('gopa-meta-content-type:'+document.contentType)",
+		AwaitPromise: &wait}
+	c.Runtime.Evaluate(ctx, &args1)
 
 	fmt.Printf("Saved screenshot: %s\n", screenshotName)
 
