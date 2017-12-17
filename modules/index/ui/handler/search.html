@@ -135,7 +135,7 @@
                                     <H3 class=t><A  title='<%= hit.Source["snapshot"].(map[string]interface{})["title"] %>' href="<%= url %>"  target=_blank>
                                         <%== util.SubStringWithSuffix(title,100,"...") %></A> </H3>
                                     <FONT size=-1><% if(screenshot!=""){ %>
-                                        <img class="screenshot" src="/admin/screenshot/<%== screenshot %>" class="uk-icon-hover uk-icon-history" />
+                                        <img class="screenshot" src="/screenshot/<%== screenshot %>" class="uk-icon-hover uk-icon-history" />
                                         <% } %>
                                         <%== summary %> <BR>
                                         <div  class=g><a target=_blank href="<%= url %>"><%=util.SubStringWithSuffix(url,80,"...") %></a>
