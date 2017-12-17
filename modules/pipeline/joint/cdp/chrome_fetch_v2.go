@@ -191,7 +191,7 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 	}
 
 	if strings.TrimSpace(result.OuterHTML) == "" || result.OuterHTML == "<html><head></head><body></body></html>" {
-		err := errors.New("the response is empty")
+		err := errors.Errorf("the response is empty, %s", requestUrl)
 		panic(err)
 	}
 
