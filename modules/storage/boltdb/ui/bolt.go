@@ -1,4 +1,4 @@
-package boltdb
+package ui
 
 // This file contains low-level bolt structs that are used for reading from
 // bolt database files.

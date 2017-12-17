@@ -117,7 +117,7 @@ func Search(w io.Writer, r *http.Request, q string, filter string, from int, siz
 			_, _ = fmt.Fprint(w, util.SubStringWithSuffix(title, 100, "..."))
 			_, _ = io.WriteString(w, "</A> </H3>\n                                    <FONT size=-1>")
 			if screenshot != "" {
-				_, _ = io.WriteString(w, "\n                                        <img class=\"screenshot\" src=\"/admin/screenshot/")
+				_, _ = io.WriteString(w, "\n                                        <img class=\"screenshot\" src=\"/screenshot/")
 				_, _ = fmt.Fprint(w, screenshot)
 				_, _ = io.WriteString(w, "\" class=\"uk-icon-hover uk-icon-history\" />\n                                        ")
 			}

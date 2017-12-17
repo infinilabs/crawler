@@ -17,7 +17,6 @@ limitations under the License.
 package admin
 
 import (
-	"github.com/infinitbyte/gopa/core/global"
 	api "github.com/infinitbyte/gopa/core/http"
 	"github.com/infinitbyte/gopa/modules/ui/admin/ajax"
 	"github.com/infinitbyte/gopa/modules/ui/admin/common"
@@ -31,10 +30,6 @@ func InitUI() {
 	common.RegisterNav("Tasks", "Tasks", "/admin/tasks/")
 	//common.RegisterNav("Explore","Explore","/ui/explore/")
 
-	if global.Env().IsDebug {
-		common.RegisterNav("BoltDB", "BoltDB", "/admin/boltdb/")
-	}
-
 	//common.RegisterNav("Setting", "Setting", "/admin/setting/")
 
 	//UI pages init
@@ -42,14 +37,13 @@ func InitUI() {
 
 	api.HandleUIMethod(api.GET, "/admin/", ui.DashboardAction)
 	api.HandleUIMethod(api.POST, "/admin/setting/", ui.UpdateSettingAction)
-	api.HandleUIMethod(api.GET, "/admin/screenshot/:id", ui.GetScreenshotAction)
+	api.HandleUIMethod(api.GET, "/screenshot/:id", ui.GetScreenshotAction)
 	api.HandleUIMethod(api.GET, "/admin/dashboard/", ui.DashboardAction)
 	api.HandleUIMethod(api.GET, "/admin/tasks/", ui.TasksPageAction)
 	api.HandleUIMethod(api.GET, "/admin/task/view/:id", ui.TaskViewPageAction)
 	api.HandleUIMethod(api.GET, "/admin/console/", ui.ConsolePageAction)
 
 	api.HandleUIFunc("/admin/explore/", ui.ExplorePageAction)
-	api.HandleUIFunc("/admin/boltdb/", ui.BoltDBStatusAction)
 	api.HandleUIFunc("/admin/setting/", ui.SettingPageAction)
 
 	//Ajax

@@ -383,10 +383,13 @@ func (pipe *Pipeline) Run() *Context {
 					v = r.(string)
 				}
 				pipe.context.Set(CONTEXT_TASK_Status, TaskInterrupted)
+				pipe.context.Set(CONTEXT_TASK_Message, util.ToJson(v, false))
+
 				log.Error("error in pipeline, ", pipe.name, ", ", pipe.id, ", ", pipe.currentJointName, ", ", v)
 				stats.Increment(pipe.name+".pipeline", "error")
 			}
 		}
+
 		if !pipe.context.IsExit() && (!(pipe.context.IgnoreBroken && pipe.context.IsEnd())) {
 			pipe.endPipeline()
 		}
@@ -400,8 +403,9 @@ func (pipe *Pipeline) Run() *Context {
 		if pipe.context.IsEnd() {
 			log.Trace("break joint,", v.Name())
 			stats.Increment(pipe.name+".pipeline", "break")
-			break
+			return pipe.context
 		}
+
 		if pipe.context.IsExit() {
 			if global.Env().IsDebug {
 				log.Debug(util.ToJson(pipe.id, true))
@@ -410,8 +414,9 @@ func (pipe *Pipeline) Run() *Context {
 			}
 			log.Trace("exit joint,", v.Name())
 			stats.Increment(pipe.name+".pipeline", "exit")
-			break
+			return pipe.context
 		}
+
 		pipe.setCurrentJoint(v.Name())
 		startTime := time.Now()
 		err = v.Process(pipe.context)
@@ -421,7 +426,7 @@ func (pipe *Pipeline) Run() *Context {
 		if err != nil {
 			stats.Increment(pipe.name+".pipeline", "error")
 			log.Debugf("%s-%s: %v", pipe.name, v.Name(), err)
-			break
+			return pipe.context
 		}
 		log.Trace(pipe.name, ", end joint,", v.Name())
 	}

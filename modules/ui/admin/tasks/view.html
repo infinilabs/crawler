@@ -33,27 +33,26 @@
                                 <h2><%=i18n.GetLocalizedText("Task")%></h2>
                             </div>
                         </div>
-                        <div class="uk-grid grid-margin">
-                            <div>
-                                <div class="p"><strong><%=i18n.GetLocalizedText("LastFetch")%>:</strong><%= task.LastFetch%></div>
-                                <div class="p"><strong><%=i18n.GetLocalizedText("LastCheck")%>:</strong><%= task.LastCheck%></div>
-                                <div class="p"><strong><%=i18n.GetLocalizedText("NextCheck")%>:</strong><%= task.NextCheck%></div>
-                            </div>
-                        </div>
                     </div>
+
                     <div class="p"><strong><%=i18n.GetLocalizedText("ID")%>:</strong><%= task.ID%></div>
+                    <div class="p"><strong><%=i18n.GetLocalizedText("Host")%>:</strong><%= task.Host%></div>
                     <div class="p"><strong><%=i18n.GetLocalizedText("Url")%>:</strong><%= task.Url%></div>
+                    <div class="p"><strong><%=i18n.GetLocalizedText("OriginalUrl")%>:</strong><%= task.OriginalUrl%></div>
                     <div class="p"><strong><%=i18n.GetLocalizedText("Reference")%>:</strong><%= task.Reference%></div>
-                    <div class="p"><strong><%=i18n.GetLocalizedText("Reference")%>:</strong><%= model.GetTaskStatusText(task.Status)%></div>
+                    <div class="p"><strong><%=i18n.GetLocalizedText("Status")%>:</strong><%= model.GetTaskStatusText(task.Status)%></div>
                     <div class="p"><strong><%=i18n.GetLocalizedText("Depth")%>:</strong><%= task.Depth%></div>
                     <div class="p"><strong><%=i18n.GetLocalizedText("Breadth")%>:</strong><%= task.Breadth%></div>
-                    <div class="p"><strong><%=i18n.GetLocalizedText("Host")%>:</strong><%= task.Host%></div>
-                    <div class="p"><strong><%=i18n.GetLocalizedText("OriginalUrl")%>:</strong><%= task.OriginalUrl%></div>
-                    <div class="p"><strong><%=i18n.GetLocalizedText("Message")%>:</strong><%= task.Message%></div>
                     <div class="p"><strong><%=i18n.GetLocalizedText("Created")%>:</strong><%= task.Created%></div>
                     <div class="p"><strong><%=i18n.GetLocalizedText("Updated")%>:</strong><%= task.Updated%></div>
+                    <div class="p"><strong><%=i18n.GetLocalizedText("LastFetch")%>:</strong><%= task.LastFetch%></div>
+                    <div class="p"><strong><%=i18n.GetLocalizedText("LastCheck")%>:</strong><%= task.LastCheck%></div>
+                    <div class="p"><strong><%=i18n.GetLocalizedText("NextCheck")%>:</strong><%= task.NextCheck%></div>
+
 
                     <div class="p"><strong><%=i18n.GetLocalizedText("PipelineConfigID")%>:</strong><%= task.PipelineConfigID%></div>
+
+                    <div class="p"><strong><%=i18n.GetLocalizedText("Message")%>:</strong><%= task.Message%></div>
 
                 </div>
 
@@ -86,6 +85,7 @@
                                     <th class="uk-text-center"><%=i18n.GetLocalizedText("Size")%></th>
                                     <th class="uk-text-center"><%=i18n.GetLocalizedText("Version")%></th>
                                     <th class="uk-text-center"><%=i18n.GetLocalizedText("Hash")%></th>
+                                    <th class="uk-text-center"><%=i18n.GetLocalizedText("Title")%></th>
                                     <th class="uk-text-center"><%=i18n.GetLocalizedText("Action")%></th>
                                 </tr>
                                 </thead>
@@ -97,6 +97,7 @@
                                     <td><%= v.Size%></td>
                                     <td><%= v.Version%></td>
                                     <td><%= v.Hash%></td>
+                                    <td><%= v.Title%></td>
                                     <td><a class="uk-button uk-button-small uk-button-primary" target="_blank" href="/snapshot/<%= v.ID%>">View</a></td>
                                 </tr>
                                 <%}%>
@@ -111,7 +112,7 @@
                     <ul class="tm-nav uk-nav" data-uk-nav="">
                         <h2><%=i18n.GetLocalizedText("Screenshot")%></h2>
                     </ul>
-                    <img style="max-width: 100%" src="/admin/screenshot/<%= task.LastScreenshotID %>" />
+                    <img style="max-width: 100%" src="/screenshot/<%= task.LastScreenshotID %>" />
                 <% } %>
             </div>
         </div>
