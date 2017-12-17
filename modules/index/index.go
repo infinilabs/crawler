@@ -31,6 +31,7 @@ var (
 			IndexPrefix: "gopa-",
 		},
 		UIConfig: &cfg.UIConfig{
+			Enabled:     true,
 			SiteName:    "Gopa",
 			SiteFavicon: "/static/assets/img/favicon.ico",
 			SiteLogo:    "/static/assets/img/logo.svg",
