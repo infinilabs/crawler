@@ -19,7 +19,8 @@ import (
 	"time"
 )
 
-func TestChromeFetchV2(t *testing.T) {
+func ChromeFetchV2(t *testing.T) {
+	//func TestChromeFetchV2(t *testing.T) {
 	err := run(30 * time.Second)
 	if err != nil {
 		log.Fatal(err)
