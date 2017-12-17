@@ -68,7 +68,7 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 
 	if len(requestUrl) == 0 {
 		log.Error("invalid fetchUrl,", requestUrl)
-		context.Exit("invalid fetch url")
+		context.End("invalid fetch url")
 		return errors.New("invalid fetchUrl")
 	}
 
@@ -93,7 +93,7 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 	// Initiate a new RPC connection to the Chrome Debugging Protocol target.
 	conn, err := rpcc.DialContext(ctx, pt.WebSocketDebuggerURL)
 	if err != nil {
-		context.Exit(err)
+		context.End(err)
 		return err
 	}
 	defer conn.Close() // Leaving connections open will leak memory.
@@ -103,7 +103,7 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 	// Open a DOMContentEventFired client to buffer this event.
 	domContent, err := c.Page.DOMContentEventFired(ctx)
 	if err != nil {
-		context.Exit(err)
+		context.End(err)
 		return err
 	}
 	defer domContent.Close()
@@ -111,19 +111,19 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 	// Enable events on the Page domain, it's often preferrable to create
 	// event clients before enabling events so that we don't miss any.
 	if err = c.Page.Enable(ctx); err != nil {
-		context.Exit(err)
+		context.End(err)
 		return err
 	}
 
 	// Enable console to evaluate scripts
 	if err = c.Console.Enable(ctx); err != nil {
-		context.Exit(err)
+		context.End(err)
 		return err
 	}
 
 	console, err := c.Console.MessageAdded(ctx)
 	if err != nil {
-		context.Exit(err)
+		context.End(err)
 		return err
 	}
 
@@ -152,7 +152,7 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 
 	nav, err := c.Page.Navigate(ctx, navArgs)
 	if err != nil {
-		context.Exit(err)
+		context.End(err)
 		return err
 	}
 
@@ -162,7 +162,7 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 
 	// Wait until we have a DOMContentEventFired event.
 	if _, err = domContent.Recv(); err != nil {
-		context.Exit(err)
+		context.End(err)
 		return err
 	}
 
@@ -186,8 +186,13 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 	})
 
 	if err != nil {
-		context.Exit(err)
+		context.End(err)
 		return err
+	}
+
+	if strings.TrimSpace(result.OuterHTML) == "" || result.OuterHTML == "<html><head></head><body></body></html>" {
+		err := errors.New("the response is empty")
+		panic(err)
 	}
 
 	if joint.GetBool(saveScreenshot, false) {
@@ -212,10 +217,6 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 		}
 		snapshot.ScreenshotID = string(uuid)
 		context.Set(model.CONTEXT_TASK_LastScreenshotID, snapshot.ScreenshotID)
-	}
-
-	if strings.TrimSpace(result.OuterHTML) == "" {
-		panic(errors.New("empty body"))
 	}
 
 	snapshot.Payload = []byte(result.OuterHTML)

@@ -27,6 +27,95 @@ modules:
 - name: pipeline
   enabled: true
   runners:
+    - name: checker
+      enabled: true
+      input_queue: check
+      max_go_routine: 5
+      threshold_in_ms: 0
+      # default timeout is 60s
+      timeout_in_ms: 5000
+      default_config:
+          start:
+            joint: init_task
+            enabled: true
+          process:
+            - joint: url_normalization
+              enabled: true
+              parameters:
+                follow_all_domain: false
+                follow_sub_domain: true
+                max_filename_length: 1000
+            - joint: url_filter
+              enabled: true
+              parameters:
+                url_match_rule:
+                  must_not:
+                    prefix:
+                    - "mailto:"
+                    - "data:image/"
+                    - "#"
+                    - "javascript:"
+                    contain:
+                    - "crond/run"
+                    suffix: []
+                  must:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                  should:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                host_match_rule:
+                  must:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                  should:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                  must_not:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                file_match_rule:
+                  must:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                  should:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                  must_not:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                file_ext_match_rule:
+                  should:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                  must:
+                    prefix: []
+                    contain: []
+                    suffix: []
+                  must_not:
+                    contain: [zip, exe, jar, js, css, rar, gz, zip, bmp, jpeg, gif, png, jpg, apk]
+                    prefix: []
+                    suffix: []
+            - joint: filter_check
+              enabled: true
+              parameters:
+                filter_key: check_filter
+            - joint: task_deduplication
+              enabled: true
+          end:
+            joint: save_task
+            enabled: true
+            parameters:
+              is_create: true
     - name: fetch
       enabled: true
       input_queue: fetch
@@ -89,13 +178,13 @@ modules:
             enabled: true
           - joint: hash
             enabled: true
+          - joint: content_deduplication
+            enabled: true
           - joint: update_check_time
             enabled: true
             parameters:
               decelerate_steps: "24h,48h,72h,168h,360h,720h"
               accelerate_steps: "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
-          - joint: content_deduplication
-            enabled: true
           - joint: lang_detect
             enabled: true
           - joint : save_snapshot_fs
@@ -163,13 +252,13 @@ modules:
             enabled: true
           - joint: hash
             enabled: true
+          - joint: content_deduplication
+            enabled: true
           - joint: update_check_time
             enabled: true
             parameters:
               decelerate_steps: "24h,48h,72h,168h,360h,720h"
               accelerate_steps: "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
-          - joint: content_deduplication
-            enabled: true
           - joint: lang_detect
             enabled: true
           - joint : save_snapshot_fs
@@ -185,98 +274,6 @@ modules:
         end:
           joint: save_task
           enabled: true
-    - name: checker
-      enabled: true
-      input_queue: check
-      max_go_routine: 5
-      threshold_in_ms: 0
-      # default timeout is 60s
-      timeout_in_ms: 5000
-      default_config:
-          start:
-            joint: init_task
-            enabled: true
-          process:
-            - joint: url_normalization
-              enabled: true
-              parameters:
-                follow_all_domain: false
-                follow_sub_domain: true
-                max_filename_length: 1000
-            - joint: url_filter
-              enabled: true
-              parameters:
-                url_match_rule:
-                  must_not:
-                    prefix:
-                    - "mailto:"
-                    - "data:image/"
-                    - "#"
-                    - "javascript:"
-                    contain: []
-                    suffix: []
-                  must:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                  should:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                host_match_rule:
-                  must:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                  should:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                  must_not:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                file_match_rule:
-                  must:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                  should:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                  must_not:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                file_ext_match_rule:
-                  should:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                  must:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                  must_not:
-                    contain: [zip, exe, jar, js, css, rar, gz, zip, bmp, jpeg, gif, png, jpg, apk]
-                    prefix: []
-                    suffix: []
-            - joint: filter_check
-              enabled: true
-              parameters:
-                filter_key: check_filter
-            - joint: task_deduplication
-              enabled: true
-          end:
-            joint: save_task
-            enabled: true
-            parameters:
-              is_create: true
-
-
-
-
 - name: cluster
   enabled: true
 
@@ -314,9 +311,9 @@ modules:
   enabled: true
   ui:
     enabled: true
-#    site_name: Elasticsearch
-#    logo: https://static-www.elastic.co/cn/assets/blt6050efb80ceabd47/elastic-logo (2).svg?q=294
-#    favicon: https://www.elastic.co/favicon.ico
+    site_name: Elasticsearch
+    logo: https://static-www.elastic.co/cn/assets/blt6050efb80ceabd47/elastic-logo (2).svg?q=294
+    favicon: https://www.elastic.co/favicon.ico
   elasticsearch:
     endpoint: http://dev:9200
     index_prefix: gopa-

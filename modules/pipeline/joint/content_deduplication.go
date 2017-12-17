@@ -1,9 +1,9 @@
 package joint
 
 import (
-	"errors"
 	"fmt"
 	log "github.com/cihub/seelog"
+	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/filter"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/modules/config"
@@ -32,9 +32,9 @@ func (joint ContentDeduplicationJoint) Process(c *model.Context) error {
 		taskID := c.MustGetString(model.CONTEXT_TASK_ID)
 		snapshot.TaskID = taskID
 
-		exist, snapshotId, url := checkByHash(snapshot, c)
+		exist, depTaskID, depSnapshotId, depUrl := checkByHash(snapshot, c)
 
-		msg := fmt.Sprintf("same content hash found, %s, %s, %s, duplicated with snapshotId: %s , url: %s", taskID, url, snapshot.Hash, snapshotId, url)
+		msg := fmt.Sprintf("same content hash found, %s, %s, %s, duplicated with task: %s, snapshotID: %s, url: %s", taskID, url, snapshot.Hash, depTaskID, depSnapshotId, depUrl)
 
 		if exist {
 			c.Set(model.CONTEXT_TASK_Status, model.TaskDuplicated)
@@ -47,7 +47,7 @@ func (joint ContentDeduplicationJoint) Process(c *model.Context) error {
 	return nil
 }
 
-func checkByHash(snapshot *model.Snapshot, c *model.Context) (bool, string, string) {
+func checkByHash(snapshot *model.Snapshot, c *model.Context) (bool, string, string, string) {
 
 	hash := snapshot.Hash
 
@@ -55,7 +55,7 @@ func checkByHash(snapshot *model.Snapshot, c *model.Context) (bool, string, stri
 	if c.GetBool("check_filter", false) {
 		exist, _ := filter.CheckThenAdd(config.ContentHashFilter, []byte(hash))
 		if exist {
-			return true, "local_filter_cache", ""
+			return true, "", "local_filter_cache", ""
 		}
 	}
 
@@ -70,10 +70,10 @@ func checkByHash(snapshot *model.Snapshot, c *model.Context) (bool, string, stri
 		for _, v := range items {
 			log.Tracef("%s vs  %s , %s vs %s", v.Url, snapshot.Url, snapshot.TaskID, v.TaskID)
 			if v.Url != snapshot.Url && v.TaskID != snapshot.TaskID {
-				return true, v.ID, v.Url
+				return true, v.TaskID, v.ID, v.Url
 			}
 		}
 	}
 
-	return false, "", ""
+	return false, "", "", ""
 }

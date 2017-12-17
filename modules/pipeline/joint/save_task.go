@@ -51,8 +51,6 @@ func (joint SaveTaskJoint) Process(context *model.Context) error {
 		return errors.NewWithCode(errors.New("error in process"), config.ErrorExitedPipeline, "pipeline exited")
 	}
 
-	context.Set(model.CONTEXT_TASK_Message, util.ToJson(context.Payload, false))
-
 	t := getTask(context)
 
 	if !context.GetBool(keepRedirected, false) && t.Status == model.TaskRedirected {
@@ -91,10 +89,16 @@ func getTask(context *model.Context) *model.Task {
 
 	if context.Has(model.CONTEXT_TASK_Status) {
 		task.Status = context.MustGetInt(model.CONTEXT_TASK_Status)
+	} else if context.IsEnd() {
+		task.Status = model.TaskInterrupted
 	}
+
 	if context.Has(model.CONTEXT_TASK_Message) {
 		task.Message = context.GetStringOrDefault(model.CONTEXT_TASK_Message, "")
+	} else {
+		task.Message = util.ToJson(context.Payload, false)
 	}
+
 	if context.Has(model.CONTEXT_TASK_Created) {
 		task.Created = context.MustGetTime(model.CONTEXT_TASK_Created)
 	}

@@ -2,10 +2,12 @@ package cdp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/mafredri/cdp"
 	"github.com/mafredri/cdp/devtool"
+	"github.com/mafredri/cdp/protocol/dom"
 	"github.com/mafredri/cdp/protocol/network"
 	"github.com/mafredri/cdp/protocol/page"
 	"github.com/mafredri/cdp/protocol/runtime"
@@ -17,7 +19,7 @@ import (
 	"time"
 )
 
-func ChromeFetchV2(t *testing.T) {
+func TestChromeFetchV2(t *testing.T) {
 	err := run(30 * time.Second)
 	if err != nil {
 		log.Fatal(err)
@@ -109,18 +111,24 @@ func run(timeout time.Duration) error {
 
 	// Fetch the document root node. We can pass nil here
 	// since this method only takes optional arguments.
-	//doc, err := c.DOM.GetDocument(ctx, nil)
-	//if err != nil {
-	//	return err
-	//}
+	doc, err := c.DOM.GetDocument(ctx, nil)
+	if err != nil {
+		return err
+	}
 
-	// Get the outer HTML for the page.
-	//result, err := c.DOM.GetOuterHTML(ctx, &dom.GetOuterHTMLArgs{
-	//	NodeID: &doc.Root.NodeID,
-	//})
-	//if err != nil {
-	//	return err
-	//}
+	//Get the outer HTML for the page.
+	result, err := c.DOM.GetOuterHTML(ctx, &dom.GetOuterHTMLArgs{
+		NodeID: &doc.Root.NodeID,
+	})
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(result.OuterHTML)
+
+	if strings.TrimSpace(result.OuterHTML) == "" || result.OuterHTML == "<html><head></head><body></body></html>" {
+		panic(errors.New("empty body"))
+	}
 
 	//args1:=network.GetResponseBodyArgs{RequestID:""}
 	//r1,_:=c.Network.GetResponseBody(ctx,args1)
