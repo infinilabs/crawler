@@ -37,7 +37,6 @@ func Register() {
 	module.Register(module.Storage, storage.StorageModule{})
 	module.Register(module.Filter, filter.FilterModule{})
 	module.Register(module.Stats, stats.SimpleStatsModule{})
-	module.Register(module.Stats, stats.StatsDModule{})
 	module.Register(module.Queue, queue.DiskQueue{})
 	module.Register(module.Index, index.IndexModule{})
 	module.Register(module.System, pipeline.PipelineFrameworkModule{})
