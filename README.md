@@ -32,6 +32,7 @@ GOPA, A Spider Written in Go.
 - [Configuration](#configuration)
 - [UI](#ui)
 - [API](#api)
+- [Architecture](#architecture)
 - [Contributing](#contributing)
 - [License](#license)
 

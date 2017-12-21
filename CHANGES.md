@@ -115,6 +115,7 @@
 1. crawling speed control
 2. cookie supported
 3. brief logging format
+
 ##### bugfix:
 1. shutdown nil exception
 2. wrong relative link in parse phrase
@@ -132,8 +133,10 @@
 2. disable pprof by default
 3. use local storage instead of kafka,kafka will be removed later
 5. check local file's exists first before fetch the remote page
+
 ##### bugfix:
 1. resolve memory leak caused by sbloom filter
+
 ##### feature:
 1. download by url template
 2. list page download
