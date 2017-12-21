@@ -99,6 +99,7 @@ update-commit-log:
 config: update-commit-log update-ui update-template-ui
 	@echo "init config"
 	$(GO) env
+	mkdir -p bin
 	cp stop.sh bin/stop.sh
 	cp gopa.yml bin/gopa.yml
 	cp -r config bin
