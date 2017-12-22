@@ -23,7 +23,7 @@ import (
 	"testing"
 )
 
-func TestChromeFetch1(t *testing.T) {
+func ChromeFetch1(t *testing.T) {
 
 	context := model.Context{}
 	context.Set(model.CONTEXT_TASK_Host, "elasticsearch.cn")

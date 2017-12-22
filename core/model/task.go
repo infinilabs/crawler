@@ -66,11 +66,12 @@ type Task struct {
 	LastCheck   time.Time `gorm:"index" json:"last_check,omitempty"`
 	NextCheck   time.Time `gorm:"index" json:"next_check,omitempty"`
 
-	SnapshotVersion int       `json:"snapshot_version,omitempty"`
-	SnapshotID      string    `json:"snapshot_id,omitempty"`
-	SnapshotHash    string    `json:"snapshot_hash,omitempty"`
-	SnapshotSimHash string    `json:"snapshot_simhash,omitempty"`
-	SnapshotCreated time.Time `json:"snapshot_created,omitempty"`
+	SnapshotVersion  int       `json:"snapshot_version,omitempty"`
+	SnapshotID       string    `json:"snapshot_id,omitempty"`
+	SnapshotHash     string    `json:"snapshot_hash,omitempty"`
+	SnapshotSimHash  string    `json:"snapshot_simhash,omitempty"`
+	SnapshotCreated  time.Time `json:"snapshot_created,omitempty"`
+	LastScreenshotID string    `json:"last_screenshot_id,omitempty"`
 
 	PipelineConfigID string `json:"pipline_config_id,omitempty"`
 
@@ -80,27 +81,30 @@ type Task struct {
 }
 
 const (
-	CONTEXT_TASK_ID               ParaKey = "TASK_ID"
-	CONTEXT_TASK_URL              ParaKey = "TASK_URL"
-	CONTEXT_TASK_Reference        ParaKey = "TASK_Reference"
-	CONTEXT_TASK_Depth            ParaKey = "TASK_Depth"
-	CONTEXT_TASK_Breadth          ParaKey = "TASK_Breadth"
-	CONTEXT_TASK_Host             ParaKey = "TASK_Host"
-	CONTEXT_TASK_Schema           ParaKey = "TASK_Schema"
-	CONTEXT_TASK_OriginalUrl      ParaKey = "TASK_OriginalUrl"
-	CONTEXT_TASK_Status           ParaKey = "TASK_Status"
-	CONTEXT_TASK_Message          ParaKey = "TASK_Message"
-	CONTEXT_TASK_Created          ParaKey = "TASK_Created"
-	CONTEXT_TASK_Updated          ParaKey = "TASK_Updated"
-	CONTEXT_TASK_LastFetch        ParaKey = "TASK_LastFetch"
-	CONTEXT_TASK_LastCheck        ParaKey = "TASK_LastCheck"
-	CONTEXT_TASK_NextCheck        ParaKey = "TASK_NextCheck"
-	CONTEXT_TASK_SnapshotID       ParaKey = "TASK_SnapshotID"
-	CONTEXT_TASK_SnapshotSimHash  ParaKey = "TASK_SnapshotSimHash"
-	CONTEXT_TASK_SnapshotHash     ParaKey = "TASK_SnapshotHash"
-	CONTEXT_TASK_SnapshotCreated  ParaKey = "TASK_SnapshotCreated"
-	CONTEXT_TASK_SnapshotVersion  ParaKey = "TASK_SnapshotVersion"
-	CONTEXT_TASK_PipelineConfigID ParaKey = "TASK_PipelineConfigID"
+	CONTEXT_TASK_ID               ParaKey = "GOPA_TASK_ID"
+	CONTEXT_TASK_URL              ParaKey = "GOPA_TASK_URL"
+	CONTEXT_TASK_Reference        ParaKey = "GOPA_TASK_Reference"
+	CONTEXT_TASK_Depth            ParaKey = "GOPA_TASK_Depth"
+	CONTEXT_TASK_Breadth          ParaKey = "GOPA_TASK_Breadth"
+	CONTEXT_TASK_Host             ParaKey = "GOPA_TASK_Host"
+	CONTEXT_TASK_Schema           ParaKey = "GOPA_TASK_Schema"
+	CONTEXT_TASK_OriginalUrl      ParaKey = "GOPA_TASK_OriginalUrl"
+	CONTEXT_TASK_Status           ParaKey = "GOPA_TASK_Status"
+	CONTEXT_TASK_Message          ParaKey = "GOPA_TASK_Message"
+	CONTEXT_TASK_Created          ParaKey = "GOPA_TASK_Created"
+	CONTEXT_TASK_Updated          ParaKey = "GOPA_TASK_Updated"
+	CONTEXT_TASK_LastFetch        ParaKey = "GOPA_TASK_LastFetch"
+	CONTEXT_TASK_LastCheck        ParaKey = "GOPA_TASK_LastCheck"
+	CONTEXT_TASK_NextCheck        ParaKey = "GOPA_TASK_NextCheck"
+	CONTEXT_TASK_SnapshotID       ParaKey = "GOPA_TASK_SnapshotID"
+	CONTEXT_TASK_SnapshotSimHash  ParaKey = "GOPA_TASK_SnapshotSimHash"
+	CONTEXT_TASK_SnapshotHash     ParaKey = "GOPA_TASK_SnapshotHash"
+	CONTEXT_TASK_SnapshotCreated  ParaKey = "GOPA_TASK_SnapshotCreated"
+	CONTEXT_TASK_SnapshotVersion  ParaKey = "GOPA_TASK_SnapshotVersion"
+	CONTEXT_TASK_LastScreenshotID ParaKey = "GOPA_TASK_LastScreenshotID"
+	CONTEXT_TASK_PipelineConfigID ParaKey = "GOPA_TASK_PipelineConfigID"
+
+	CONTEXT_SNAPSHOT_ContentType ParaKey = "GOPA_SNAPSHOT_ContentType"
 )
 
 func CreateTask(task *Task) error {

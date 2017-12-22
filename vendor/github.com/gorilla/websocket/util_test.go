@@ -10,6 +10,24 @@ import (
 	"testing"
 )
 
+var equalASCIIFoldTests = []struct {
+	t, s string
+	eq   bool
+}{
+	{"WebSocket", "websocket", true},
+	{"websocket", "WebSocket", true},
+	{"Öyster", "öyster", false},
+}
+
+func TestEqualASCIIFold(t *testing.T) {
+	for _, tt := range equalASCIIFoldTests {
+		eq := equalASCIIFold(tt.s, tt.t)
+		if eq != tt.eq {
+			t.Errorf("equalASCIIFold(%q, %q) = %v, want %v", tt.s, tt.t, eq, tt.eq)
+		}
+	}
+}
+
 var tokenListContainsValueTests = []struct {
 	value string
 	ok    bool
@@ -61,6 +79,9 @@ var parseExtensionTests = []struct {
 	{`permessage-deflate; client_max_window_bits; server_max_window_bits=10 , permessage-deflate; client_max_window_bits`, []map[string]string{
 		{"": "permessage-deflate", "client_max_window_bits": "", "server_max_window_bits": "10"},
 		{"": "permessage-deflate", "client_max_window_bits": ""}}},
+	{"permessage-deflate; server_no_context_takeover; client_max_window_bits=15", []map[string]string{
+		{"": "permessage-deflate", "server_no_context_takeover": "", "client_max_window_bits": "15"},
+	}},
 }
 
 func TestParseExtensions(t *testing.T) {

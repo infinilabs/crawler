@@ -36,6 +36,9 @@ curl -XPUT "http://localhost:9200/gopa-snapshot" -H 'Content-Type: application/j
 },
 "url": {
 "type": "keyword"
+},
+"screenshot_id": {
+"type": "keyword"
 }
 }
 }

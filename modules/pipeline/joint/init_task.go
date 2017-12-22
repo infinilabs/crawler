@@ -51,8 +51,6 @@ func (joint InitTaskJoint) Process(context *model.Context) error {
 		context.Set(model.CONTEXT_TASK_Host, t.Host)
 		context.Set(model.CONTEXT_TASK_Schema, t.Schema)
 		context.Set(model.CONTEXT_TASK_OriginalUrl, t.OriginalUrl)
-		context.Set(model.CONTEXT_TASK_Status, t.Status)
-		context.Set(model.CONTEXT_TASK_Message, t.Message)
 		context.Set(model.CONTEXT_TASK_Created, t.Created)
 		context.Set(model.CONTEXT_TASK_Updated, t.Updated)
 		context.Set(model.CONTEXT_TASK_LastFetch, t.LastFetch)

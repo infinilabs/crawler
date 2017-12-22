@@ -24,7 +24,7 @@ func CommonHeader(w io.Writer, config *config.UIConfig) error {
 	_, _ = io.WriteString(w, "\n")
 	_, _ = io.WriteString(w, "\n\n<meta content=IE=7 http-equiv=X-UA-Compatible>\n<meta content=text/html;charset=utf-8 http-equiv=content-type>\n\n<meta name=\"robots\" content=\"all\">\n<meta name=\"license\" content=\"keep-copyright-footprint,no-KPI-shit,respect-first\">\n<meta name=\"creator\" content=\"medcl\">\n<meta name=\"generator\" content=\"https://github.com/infinitbyte/gopa\">\n<meta name=\"copyright\" content=\"Apache License, Version 2.0\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<meta name=\"logo-credit\" content=\"Comic eyes was designed by Freepik(http://www.freepik.com)\">\n\n<link rel=\"icon\" href=\"")
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(config.SiteFavicon)))
-	_, _ = io.WriteString(w, "\" type=\"image/x-icon\" />\n\n<link rel=\"stylesheet\" href=\"/static/assets/uikit-2.27.1/css/uikit.min.css\" />\n<link rel=\"stylesheet\" href=\"/static/assets/css/style.css?v=3\" rel=\"stylesheet\" type=\"text/css\"/>\n<link rel=\"stylesheet\" href=\"/static/assets/css/search_style.css\" rel=\"stylesheet\" type=\"text/css\"/>\n<script type=\"text/javascript\"  src=\"/static/assets/js/jquery.min.js\"></script>\n")
+	_, _ = io.WriteString(w, "\" type=\"image/x-icon\" />\n\n<link rel=\"stylesheet\" href=\"/static/assets/uikit-2.27.1/css/uikit.min.css\" />\n<link rel=\"stylesheet\" href=\"/static/assets/css/style.css?v=4\" rel=\"stylesheet\" type=\"text/css\"/>\n<link rel=\"stylesheet\" href=\"/static/assets/css/search_style.css\" rel=\"stylesheet\" type=\"text/css\"/>\n<script type=\"text/javascript\"  src=\"/static/assets/js/jquery.min.js\"></script>\n")
 	return nil
 }
 func Index(w io.Writer, config *config.UIConfig) error {
@@ -103,18 +103,25 @@ func Search(w io.Writer, r *http.Request, q string, filter string, from int, siz
 		for seq, hit := range response.Hits.Hits {
 			url := safeGetField(hit.Source["snapshot"].(map[string]interface{})["url"], "N/A")
 			snapshotId := safeGetField(hit.Source["snapshot"].(map[string]interface{})["id"], "")
+			screenshot := safeGetField(hit.Source["task"].(map[string]interface{})["last_screenshot_id"], "")
 			title := smartGetField(hit.Highlight["snapshot.title"], hit.Source["snapshot"].(map[string]interface{})["title"], "N/A")
 			summary := util.SubStringWithSuffix(smartGetField(hit.Highlight["snapshot.text"], hit.Source["snapshot"].(map[string]interface{})["text"], "N/A"), 250, "...")
 
 			_, _ = io.WriteString(w, "\n                            <TABLE id=result_")
 			_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(seq)))
-			_, _ = io.WriteString(w, " class=result cellSpacing=0 cellPadding=0> <TBODY><TR>\n                                <TD class=f>\n                                    <H3 class=t><A  title=\"")
+			_, _ = io.WriteString(w, " class=result cellSpacing=0 cellPadding=0> <TBODY><TR>\n                                <TD class=f>\n                                    <H3 class=t><A  title='")
 			_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(hit.Source["snapshot"].(map[string]interface{})["title"])))
-			_, _ = io.WriteString(w, "\" href=\"")
+			_, _ = io.WriteString(w, "' href=\"")
 			_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(url)))
 			_, _ = io.WriteString(w, "\"  target=_blank>\n                                        ")
 			_, _ = fmt.Fprint(w, util.SubStringWithSuffix(title, 100, "..."))
 			_, _ = io.WriteString(w, "</A> </H3>\n                                    <FONT size=-1>")
+			if screenshot != "" {
+				_, _ = io.WriteString(w, "\n                                        <img class=\"screenshot\" src=\"/screenshot/")
+				_, _ = fmt.Fprint(w, screenshot)
+				_, _ = io.WriteString(w, "\" class=\"uk-icon-hover uk-icon-history\" />\n                                        ")
+			}
+			_, _ = io.WriteString(w, "\n                                        ")
 			_, _ = fmt.Fprint(w, summary)
 			_, _ = io.WriteString(w, " <BR>\n                                        <div  class=g><a target=_blank href=\"")
 			_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(url)))

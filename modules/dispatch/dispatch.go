@@ -74,10 +74,10 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				//get update task
 				if moduleConfig.UpdateTaskEnabled && (tasks == nil || total <= 0) {
 					total, tasks, err = model.GetPendingUpdateFetchTasks(offset)
-					log.Debugf("get %v update task", total)
+					log.Debugf("get %v update task, with offset, %v", total, offset)
 					isUpdate = true
 					if total == 0 {
-						log.Trace("reset offset, ", defaultOffset)
+						log.Tracef("%v hit 0 update task, reset offset to %v ", offset, defaultOffset)
 						offset = defaultOffset
 					}
 				}
@@ -85,9 +85,9 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				// get failed task
 				if moduleConfig.FailedTaskEnabled && (tasks == nil || total <= 0) {
 					total, tasks, err = model.GetFailedTasks(offset)
-					log.Debugf("get %v update task", total)
+					log.Debugf("get %v failed task, with offset, %v", total, offset)
 					if total == 0 {
-						log.Trace("reset offset, ", defaultOffset)
+						log.Tracef("%v hit 0 failed task, reset offset to %v ", offset, defaultOffset)
 						offset = defaultOffset
 					}
 				}
@@ -147,11 +147,11 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				if lastPop == pop || pop == push {
 					lastPop = pop
 					log.Trace("fetch tasks stalled/finished, try to dispatch some tasks from db")
-					err := queue.Push(config.DispatcherChannel, []byte("10s auto"))
+					err := queue.Push(config.DispatcherChannel, []byte("5s auto"))
 					if err != nil {
 						log.Error(err)
 					}
-					time.Sleep(10 * time.Second)
+					time.Sleep(5 * time.Second)
 				} else {
 					log.Trace("no new data in fetch queue, wait 20s")
 					time.Sleep(20 * time.Second)

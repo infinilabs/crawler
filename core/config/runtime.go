@@ -19,4 +19,5 @@ package config
 // RuntimeConfig object means this config can be changed during runtime
 type RuntimeConfig struct {
 	Modules []*Config `config:"modules"`
+	Plugins []*Config `config:"plugins"`
 }

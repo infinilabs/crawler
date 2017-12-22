@@ -49,7 +49,7 @@ func (joint ChromeFetchJoint) Process(context *model.Context) error {
 
 	if len(requestUrl) == 0 {
 		log.Error("invalid fetchUrl,", requestUrl)
-		context.Exit("invalid fetch url")
+		context.End("invalid fetch url")
 		return errors.New("invalid fetchUrl")
 	}
 
@@ -62,7 +62,7 @@ func (joint ChromeFetchJoint) Process(context *model.Context) error {
 	flg := make(chan signal, 1)
 	go func() {
 
-		cmd := exec.Command(command, "--headless", "-disable-gpu", "--dump-dom", "--no-sandbox", requestUrl)
+		cmd := exec.Command(command, "--headless", "-disable-gpu", "--dump-dom", "--remote-debugging-port=9223", "--no-sandbox", requestUrl)
 		stdout, err := cmd.StdoutPipe()
 		if err == nil {
 			err = cmd.Start()
@@ -85,8 +85,10 @@ func (joint ChromeFetchJoint) Process(context *model.Context) error {
 		err = cmd.Wait()
 
 		if err != nil {
-			if !cmd.ProcessState.Exited() {
-				cmd.Process.Kill()
+			if cmd.ProcessState != nil {
+				if !cmd.ProcessState.Exited() {
+					cmd.Process.Kill()
+				}
 			}
 			flg <- signal{flag: false, err: err, status: model.TaskFailed}
 			return

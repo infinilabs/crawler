@@ -62,7 +62,7 @@ func (joint FetchJoint) Process(context *model.Context) error {
 
 	if len(requestUrl) == 0 {
 		log.Error("invalid fetchUrl,", requestUrl)
-		context.Exit("invalid fetch url")
+		context.End("invalid fetch url")
 		return errors.New("invalid fetchUrl")
 	}
 

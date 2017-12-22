@@ -43,6 +43,7 @@ update-template-ui:
 	$(GO) get github.com/infinitbyte/ego/cmd/ego
 	cd modules/ui/ && ego
 	cd modules/index/ui/ && ego
+	cd plugins/ && ego
 
 tar: build
 	cd bin && tar cfz ../bin/gopa.tar.gz gopa config gopa.yml
@@ -98,6 +99,7 @@ update-commit-log:
 config: update-commit-log update-ui update-template-ui
 	@echo "init config"
 	$(GO) env
+	mkdir -p bin
 	cp stop.sh bin/stop.sh
 	cp gopa.yml bin/gopa.yml
 	cp -r config bin
@@ -137,6 +139,7 @@ fetch-depends:
 	$(GO) get github.com/quipo/statsd
 	$(GO) get github.com/go-sql-driver/mysql
 	$(GO) get github.com/jbowles/cld2_nlpt
+	$(GO) get github.com/mafredri/cdp
 
 
 dist: cross-build package

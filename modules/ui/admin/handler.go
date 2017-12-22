@@ -1,18 +1,12 @@
 package admin
 
 import (
-	"net/http"
-	"strconv"
-	"strings"
-
 	"errors"
-	"github.com/asdine/storm"
-	"github.com/boltdb/bolt"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/http"
 	"github.com/infinitbyte/gopa/core/model"
+	"github.com/infinitbyte/gopa/core/persist"
 	"github.com/infinitbyte/gopa/modules/config"
-	"github.com/infinitbyte/gopa/modules/ui/admin/boltdb"
 	"github.com/infinitbyte/gopa/modules/ui/admin/console"
 	"github.com/infinitbyte/gopa/modules/ui/admin/dashboard"
 	"github.com/infinitbyte/gopa/modules/ui/admin/explore"
@@ -20,56 +14,19 @@ import (
 	"github.com/infinitbyte/gopa/modules/ui/admin/tasks"
 	"github.com/julienschmidt/httprouter"
 	"gopkg.in/yaml.v2"
+	"net/http"
 )
 
 type AdminUI struct {
 	api.Handler
 }
 
-func (h AdminUI) BoltDBStatusAction(w http.ResponseWriter, r *http.Request) {
-	db := global.Lookup(config.REGISTER_BOLTDB).(*storm.DB)
-	err := db.Bolt.View(func(tx *bolt.Tx) error {
-		showUsage := (r.FormValue("usage") == "true")
-		// Use the direct page id, if available.
-		if r.FormValue("id") != "" {
-			id, _ := strconv.Atoi(r.FormValue("id"))
-			return boltdb.Page(w, r, tx, nil, id, showUsage)
-		}
-
-		// Otherwise extract the indexes and traverse.
-		indexes, err := indexes(r)
-		if err != nil {
-			return err
-		}
-
-		return boltdb.Page(w, r, tx, indexes, 0, showUsage)
-	})
-	if err != nil {
-		boltdb.Error(w, err)
-	}
-}
-
-// parses and returns all indexes from a request.
-func indexes(r *http.Request) ([]int, error) {
-	var a = []int{0}
-	if len(r.FormValue("index")) > 0 {
-		for _, s := range strings.Split(r.FormValue("index"), ":") {
-			i, err := strconv.Atoi(s)
-			if err != nil {
-				return nil, err
-			}
-			a = append(a, i)
-		}
-	}
-	return a, nil
-}
-
-func (h AdminUI) DashboardAction(w http.ResponseWriter, r *http.Request) {
+func (h AdminUI) DashboardAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	dashboard.Index(w)
 }
 
-func (h AdminUI) TasksPageAction(w http.ResponseWriter, r *http.Request) {
+func (h AdminUI) TasksPageAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	var task []model.Task
 	var count1, count2 int
@@ -83,8 +40,8 @@ func (h AdminUI) TasksPageAction(w http.ResponseWriter, r *http.Request) {
 	tasks.Index(w, r, host, from, size, count1, task, count2, hosts)
 }
 
-func (h AdminUI) TaskViewPageAction(w http.ResponseWriter, r *http.Request) {
-	id := h.Get(r, "id", "")
+func (h AdminUI) TaskViewPageAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	id := p.ByName("id")
 
 	if id == "" {
 		panic(errors.New("id is nill"))
@@ -102,7 +59,7 @@ func (h AdminUI) TaskViewPageAction(w http.ResponseWriter, r *http.Request) {
 	tasks.View(w, r, task)
 }
 
-func (h AdminUI) ConsolePageAction(w http.ResponseWriter, r *http.Request) {
+func (h AdminUI) ConsolePageAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	console.Index(w)
 }
@@ -110,6 +67,16 @@ func (h AdminUI) ConsolePageAction(w http.ResponseWriter, r *http.Request) {
 func (h AdminUI) ExplorePageAction(w http.ResponseWriter, r *http.Request) {
 
 	explore.Index(w)
+}
+
+func (h AdminUI) GetScreenshotAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	id := p.ByName("id")
+	bytes, err := persist.GetValue(config.ScreenshotBucketKey, []byte(id))
+	if err != nil {
+		h.Error(w, err)
+		return
+	}
+	w.Write(bytes)
 }
 
 func (h AdminUI) SettingPageAction(w http.ResponseWriter, r *http.Request) {

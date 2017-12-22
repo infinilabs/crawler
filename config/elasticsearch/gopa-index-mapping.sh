@@ -115,6 +115,10 @@ curl -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json
 "type": "keyword",
 "ignore_above": 256
 },
+"screenshot_id": {
+"type": "keyword",
+"ignore_above": 256
+},
 "size": {
 "type": "long"
 },
@@ -168,6 +172,10 @@ curl -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json
 "type": "date"
 },
 "url": {
+"type": "keyword",
+"ignore_above": 256
+},
+"last_screenshot_id": {
 "type": "keyword",
 "ignore_above": 256
 }

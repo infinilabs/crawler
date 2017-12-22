@@ -13,6 +13,8 @@
 ##### features
 1. dynamic create pipelines
 2. add chrome headless fetch joint
+3. init plugin architecture
+4. support extract tags by css path
 
 ##### improvement
 1. remove goleveldb due to memory leak

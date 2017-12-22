@@ -24,163 +24,13 @@ cluster.seeds:
 
 
 modules:
-- module: pipeline
+- name: pipeline
   enabled: true
   runners:
-    - name: fetch
-      enabled: true
-      input_queue: fetch
-      max_go_routine: 10
-      threshold_in_ms: 0
-      # default timeout is 60s
-      timeout_in_ms: 30000
-      default_config:
-        start:
-          joint: init_task
-          enabled: true
-        process:
-          - joint: url_normalization
-            enabled: true
-            parameters:
-              follow_all_domain: false
-              follow_sub_domain: true
-              max_filename_length: 1000
-          - joint: load_metadata
-            enabled: true
-          - joint: ignore_timeout
-            parameters:
-              ignore_timeout_after_count: 500
-            enabled: true
-          - joint: chrome_fetch
-            enabled: false
-            parameters:
-              command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-          - joint: fetch
-            enabled: true
-            parameters:
-              timeout_in_seconds: 100
-    #          proxy: "socks5://127.0.0.1:1080"
-    #          cookie: ""
-          - joint: parse
-            enabled: true
-            parameters:
-              dispatch_links: true
-              save_images: true
-              max_depth: 100
-              max_breadth: 1
-          - joint: extract
-            enabled: false
-            parameters:
-              html_block:
-                your_tag_name1: ".tag_class"
-                your_tag_name2: "#tag_id"
-          - joint: html2text
-            parameters:
-              remove_nonscript: true
-              merge_whitespace: false
-            enabled: true
-          - joint: hash
-            enabled: true
-          - joint: update_check_time
-            enabled: true
-            parameters:
-              decelerate_steps: "24h,48h,72h,168h,360h,720h"
-              accelerate_steps: "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
-          - joint: content_deduplication
-            enabled: true
-          - joint: lang_detect
-            enabled: true
-          - joint : save_snapshot_fs
-            enabled: false
-          - joint : save_snapshot_db
-            enabled: true
-            parameters:
-              compress_enabled: true
-              bucket: "Snapshot"
-              max_revision: 5
-          - joint: index
-            enabled: true
-        end:
-          joint: save_task
-          enabled: true
-    - name: update
-      enabled: true
-      input_queue: update
-      max_go_routine: 1
-      threshold_in_ms: 0
-      # default timeout is 60s
-      timeout_in_ms: 30000
-      default_config:
-        start:
-          joint: init_task
-          enabled: true
-        process:
-          - joint: url_normalization
-            enabled: true
-            parameters:
-              follow_all_domain: false
-              follow_sub_domain: true
-              max_filename_length: 1000
-          - joint: ignore_timeout
-            parameters:
-              ignore_timeout_after_count: 500
-            enabled: true
-          - joint: chrome_fetch
-            enabled: false
-            parameters:
-              command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-          - joint: fetch
-            enabled: true
-            parameters:
-              timeout_in_seconds: 100
-    #          proxy: "socks5://127.0.0.1:1080"
-    #          cookie: ""
-          - joint: parse
-            enabled: true
-            parameters:
-              dispatch_links: true
-              save_images: true
-              max_depth: 100
-              max_breadth: 1
-          - joint: extract
-            enabled: false
-            parameters:
-              html_block:
-                your_tag_name1: ".tag_class"
-                your_tag_name2: "#tag_id"
-          - joint: html2text
-            parameters:
-              remove_nonscript: true
-              merge_whitespace: false
-            enabled: true
-          - joint: hash
-            enabled: true
-          - joint: update_check_time
-            enabled: true
-            parameters:
-              decelerate_steps: "24h,48h,72h,168h,360h,720h"
-              accelerate_steps: "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
-          - joint: content_deduplication
-            enabled: true
-          - joint: lang_detect
-            enabled: true
-          - joint : save_snapshot_fs
-            enabled: false
-          - joint : save_snapshot_db
-            enabled: true
-            parameters:
-              compress_enabled: true
-              bucket: "Snapshot"
-              max_revision: 5
-          - joint: index
-            enabled: true
-        end:
-          joint: save_task
-          enabled: true
     - name: checker
       enabled: true
       input_queue: check
-      max_go_routine: 10
+      max_go_routine: 5
       threshold_in_ms: 0
       # default timeout is 60s
       timeout_in_ms: 5000
@@ -205,7 +55,8 @@ modules:
                     - "data:image/"
                     - "#"
                     - "javascript:"
-                    contain: []
+                    contain:
+                    - "crond/run"
                     suffix: []
                   must:
                     prefix: []
@@ -265,34 +116,188 @@ modules:
             enabled: true
             parameters:
               is_create: true
-
-
-
-
-- module: cluster
+    - name: fetch
+      enabled: true
+      input_queue: fetch
+      max_go_routine: 1
+      threshold_in_ms: 0
+      # default timeout is 60s
+      timeout_in_ms: 30000
+      default_config:
+        start:
+          joint: init_task
+          enabled: true
+        process:
+          - joint: url_normalization
+            enabled: true
+            parameters:
+              follow_all_domain: false
+              follow_sub_domain: true
+              max_filename_length: 1000
+          - joint: load_metadata
+            enabled: true
+          - joint: ignore_timeout
+            parameters:
+              ignore_timeout_after_count: 500
+            enabled: true
+          - joint: chrome_fetch
+            enabled: false
+            parameters:
+              command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+          - joint: chrome_fetch_v2
+            enabled: true
+            parameters:
+              chrome_host: http://127.0.0.1:9223
+              save_screenshot: true
+              compress_enabled: true
+              timeout_in_seconds: 60
+              screenshot_quality: 50
+          - joint: fetch
+            enabled: false
+            parameters:
+              timeout_in_seconds: 100
+    #          proxy: "socks5://127.0.0.1:1080"
+    #          cookie: ""
+          - joint: parse
+            enabled: true
+            parameters:
+              dispatch_links: true
+              save_images: true
+              max_depth: 100
+              max_breadth: 1
+          - joint: extract
+            enabled: false
+            parameters:
+              html_block:
+                your_tag_name1: ".tag_class"
+                your_tag_name2: "#tag_id"
+          - joint: html2text
+            parameters:
+              remove_nonscript: true
+              merge_whitespace: false
+            enabled: true
+          - joint: hash
+            enabled: true
+          - joint: content_deduplication
+            enabled: true
+          - joint: update_check_time
+            enabled: true
+            parameters:
+              decelerate_steps: "24h,48h,72h,168h,360h,720h"
+              accelerate_steps: "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
+          - joint: lang_detect
+            enabled: true
+          - joint : save_snapshot_fs
+            enabled: false
+          - joint : save_snapshot_db
+            enabled: true
+            parameters:
+              compress_enabled: true
+              bucket: "Snapshot"
+              max_revision: 5
+          - joint: index
+            enabled: true
+        end:
+          joint: save_task
+          enabled: true
+    - name: update
+      enabled: true
+      input_queue: update
+      max_go_routine: 4
+      threshold_in_ms: 0
+      # default timeout is 60s
+      timeout_in_ms: 30000
+      default_config:
+        start:
+          joint: init_task
+          enabled: true
+        process:
+          - joint: url_normalization
+            enabled: true
+            parameters:
+              follow_all_domain: false
+              follow_sub_domain: true
+              max_filename_length: 1000
+          - joint: ignore_timeout
+            parameters:
+              ignore_timeout_after_count: 500
+            enabled: true
+          - joint: chrome_fetch
+            enabled: false
+            parameters:
+              command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+          - joint: fetch
+            enabled: true
+            parameters:
+              timeout_in_seconds: 100
+    #          proxy: "socks5://127.0.0.1:1080"
+    #          cookie: ""
+          - joint: parse
+            enabled: true
+            parameters:
+              dispatch_links: true
+              save_images: true
+              max_depth: 100
+              max_breadth: 1
+          - joint: extract
+            enabled: false
+            parameters:
+              html_block:
+                your_tag_name1: ".tag_class"
+                your_tag_name2: "#tag_id"
+          - joint: html2text
+            parameters:
+              remove_nonscript: true
+              merge_whitespace: false
+            enabled: true
+          - joint: hash
+            enabled: true
+          - joint: content_deduplication
+            enabled: true
+          - joint: update_check_time
+            enabled: true
+            parameters:
+              decelerate_steps: "24h,48h,72h,168h,360h,720h"
+              accelerate_steps: "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
+          - joint: lang_detect
+            enabled: true
+          - joint : save_snapshot_fs
+            enabled: false
+          - joint : save_snapshot_db
+            enabled: true
+            parameters:
+              compress_enabled: true
+              bucket: "Snapshot"
+              max_revision: 5
+          - joint: index
+            enabled: true
+        end:
+          joint: save_task
+          enabled: true
+- name: cluster
   enabled: true
 
-- module: dispatch
+- name: dispatch
   enabled: true
-  failed_retry: false
+  failed_retry: true
   new_task: true
   update_task: true
 
-- module: api
+- name: api
   enabled: true
 
-- module: web
-  enabled: true
-
-
-- module: filter
-  enabled: true
-
-- module: queue
+- name: web
   enabled: true
 
 
-- module: storage
+- name: filter
+  enabled: true
+
+- name: queue
+  enabled: true
+
+
+- name: storage
   enabled: true
 #  driver: elasticsearch
 #  elasticsearch:
@@ -302,20 +307,20 @@ modules:
 #    password: changeme
   driver: boltdb
 
-- module: index
+- name: index
   enabled: true
   ui:
     enabled: true
-#    site_name: Elasticsearch
-#    logo: https://static-www.elastic.co/cn/assets/blt6050efb80ceabd47/elastic-logo (2).svg?q=294
-#    favicon: https://www.elastic.co/favicon.ico
+    site_name: Elasticsearch
+    logo: https://static-www.elastic.co/cn/assets/blt6050efb80ceabd47/elastic-logo (2).svg?q=294
+    favicon: https://www.elastic.co/favicon.ico
   elasticsearch:
     endpoint: http://dev:9200
     index_prefix: gopa-
     username: elastic
     password: changeme
 
-- module: persist
+- name: persist
   enabled: true
 #  driver: elasticsearch
 #  elasticsearch:
@@ -332,12 +337,19 @@ modules:
 #  mysql:
 #    connection: root:password@tcp(dev:3306)/gopa?charset=utf8&parseTime=true&loc=Local
 
-- module: stats
+- name: stats
   enabled: true
 
-- module: statsd
+- name: statsd
   enabled: false
   host: 127.0.0.1
   port: 8125
   namespace: gopa.
   interval_in_seconds: 1
+
+
+plugins:
+- name: chrome
+  enabled: true
+  command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+  debug_port: 9223

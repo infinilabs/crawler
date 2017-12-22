@@ -33,17 +33,15 @@ import (
 
 // Register is where modules are registered
 func Register() {
-	module.Register(persist.DatabaseModule{})
-	module.Register(storage.StorageModule{})
-	module.Register(filter.FilterModule{})
-	module.Register(stats.SimpleStatsModule{})
-	module.Register(stats.StatsDModule{})
-	module.Register(queue.DiskQueue{})
-	//module.Register(pipeline.CheckerModule{})
-	module.Register(pipeline.PipelineFrameworkModule{})
-	module.Register(dispatch.DispatchModule{})
-	module.Register(index.IndexModule{})
-	module.Register(cluster.ClusterModule{})
-	module.Register(ui.UIModule{})
-	module.Register(api.APIModule{})
+	module.Register(module.Database, persist.DatabaseModule{})
+	module.Register(module.Storage, storage.StorageModule{})
+	module.Register(module.Filter, filter.FilterModule{})
+	module.Register(module.Stats, stats.SimpleStatsModule{})
+	module.Register(module.Queue, queue.DiskQueue{})
+	module.Register(module.Index, index.IndexModule{})
+	module.Register(module.System, pipeline.PipelineFrameworkModule{})
+	module.Register(module.System, dispatch.DispatchModule{})
+	module.Register(module.System, cluster.ClusterModule{})
+	module.Register(module.System, ui.UIModule{})
+	module.Register(module.System, api.APIModule{})
 }

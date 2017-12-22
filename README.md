@@ -342,6 +342,11 @@ If you are running `Gopa` as daemon, you may stop it like this:
 
 * TBD
 
+## Architecture
+
+<img width="800" alt="What a Spider! GOPA Spider!" src="https://raw.githubusercontent.com/infinitbyte/gopa/master/docs/assets/img/architecture-v1.png">
+
+
 
 ## Contributing
 

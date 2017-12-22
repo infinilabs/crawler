@@ -1,0 +1,5 @@
+plugins:
+- plugin: chrome
+  enabled: true
+  command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+  debug_port: 9223

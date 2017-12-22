@@ -27,12 +27,11 @@ package seelog
 import (
 	"errors"
 	"fmt"
-	"os"
 	"sync"
 )
 
 func reportInternalError(err error) {
-	fmt.Fprintf(os.Stderr, "seelog internal error: %s\n", err)
+	//fmt.Fprintf(os.Stderr, "seelog internal error: %s\n", err)
 	//panic(err)
 }
 

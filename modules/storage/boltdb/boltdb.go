@@ -25,15 +25,22 @@ import (
 	"github.com/boltdb/bolt"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/global"
+	"github.com/infinitbyte/gopa/core/http"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/persist"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
+	"github.com/infinitbyte/gopa/modules/storage/boltdb/ui"
+	"github.com/infinitbyte/gopa/modules/ui/admin/common"
+	"net/http"
+	"strconv"
+	"strings"
 	"time"
 )
 
 type BoltdbStore struct {
 	FileName string
+	api.Handler
 }
 
 var db *storm.DB
@@ -65,6 +72,7 @@ func (store BoltdbStore) Open() error {
 		config.SnapshotBucketKey,
 		config.SnapshotMappingBucketKey,
 		model.PipelineConfigBucket,
+		config.ScreenshotBucketKey,
 		string(config.CheckFilter),
 		string(config.FetchFilter),
 		string(config.ContentHashFilter),
@@ -84,6 +92,12 @@ func (store BoltdbStore) Open() error {
 	global.Register(config.REGISTER_BOLTDB, db)
 
 	log.Debug("boltdb successfully started:", store.FileName)
+
+	if global.Env().IsDebug {
+		api.HandleUIFunc("/admin/boltdb/", boltDBStatusAction)
+
+		common.RegisterNav("BoltDB", "BoltDB", "/admin/boltdb/")
+	}
 
 	return nil
 }
@@ -217,4 +231,42 @@ func (s BoltdbStore) Search(t1, t2 interface{}, q1 *persist.Query) (error, persi
 		log.Trace(err)
 	}
 	return err, result
+}
+
+func boltDBStatusAction(w http.ResponseWriter, r *http.Request) {
+	db := global.Lookup(config.REGISTER_BOLTDB).(*storm.DB)
+	err := db.Bolt.View(func(tx *bolt.Tx) error {
+		showUsage := (r.FormValue("usage") == "true")
+		// Use the direct page id, if available.
+		if r.FormValue("id") != "" {
+			id, _ := strconv.Atoi(r.FormValue("id"))
+			return ui.Page(w, r, tx, nil, id, showUsage)
+		}
+
+		// Otherwise extract the indexes and traverse.
+		indexes, err := indexes(r)
+		if err != nil {
+			return err
+		}
+
+		return ui.Page(w, r, tx, indexes, 0, showUsage)
+	})
+	if err != nil {
+		ui.Error(w, err)
+	}
+}
+
+// parses and returns all indexes from a request.
+func indexes(r *http.Request) ([]int, error) {
+	var a = []int{0}
+	if len(r.FormValue("index")) > 0 {
+		for _, s := range strings.Split(r.FormValue("index"), ":") {
+			i, err := strconv.Atoi(s)
+			if err != nil {
+				return nil, err
+			}
+			a = append(a, i)
+		}
+	}
+	return a, nil
 }

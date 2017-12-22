@@ -30,6 +30,7 @@ import (
 	"github.com/infinitbyte/gopa/core/stats"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules"
+	"github.com/infinitbyte/gopa/plugins"
 	"net/http"
 	"os"
 	"os/signal"
@@ -222,6 +223,7 @@ func main() {
 	//modules
 	module.New()
 	modules.Register()
+	plugins.Register()
 	module.Start()
 
 	finalQuitSignal = make(chan bool)
