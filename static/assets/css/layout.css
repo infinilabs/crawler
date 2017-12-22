@@ -1,0 +1,161 @@
+/*
+ * Component:       Docs
+ * Description:     Defines styles for the UIkit documentation
+ ========================================================================== */
+
+
+/* Fonts
+ ========================================================================== */
+
+body, h1, h2, h3, h4, h5, h6,
+.uk-navbar-nav > li > a { font-family: "Proxima Nova", "Helvetica Neue", Helvetica,"PingFang SC","Microsoft YaHei","å¾®è½¯é›…é»‘", Arial, sans-serif; }
+
+
+/* Base
+ ========================================================================== */
+
+html {
+    overflow-y: scroll;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.uk-button {border-radius: 4px;}
+
+.uk-table td, .uk-table th {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+/* Layout
+ ========================================================================== */
+
+
+
+/*
+ * Middle
+ */
+
+.tm-middle { background: #fff; }
+.tm-middle .uk-container{ min-height: 600px;}
+.tm-middle .uk-container .tm-sidebar{
+    padding-left: 0;
+    min-height: 600px;
+}
+
+.tm-middle .uk-table.border{
+    border: 1px solid #E5E5E5;
+}
+
+.tm-middle-header {min-height: 30px;}
+.tm-middle-header .grid-margin{margin-top:15px;}
+.tm-middle-body {
+    min-height: 450px;
+    margin: 20px 0;
+}
+.tm-middle-footer {min-height: 30px;}
+
+/* Tablet and bigger */
+@media (min-width: 768px) {
+
+    .tm-sidebar {
+        border-right: 1px solid #E5E5E5;
+        border-left: 1px solid #E5E5E5;
+    }
+
+    .tm-sidebar .uk-panel { padding-right: 20px; }
+
+}
+
+/* UIkit component modifiers
+ ========================================================================== */
+
+/*
+ * Nav
+ */
+.tm-nav > li{
+    border-top: 1px solid #E5E5E5;
+    position: relative;
+}
+.tm-nav > li:last-child{
+    border-bottom: 1px solid #E5E5E5;
+}
+
+.tm-nav > li .li-count{
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    color: #ffffff;
+    background-color: #00a8e6;
+    padding:0 5px;
+}
+
+.tm-nav > li > a {color: #777;}
+.tm-nav > li > a {
+    text-align: center;
+    height: 30px;
+    line-height: 30px;
+    font-size: 16px;
+}
+
+/* Hover */
+.tm-nav > li > a:hover,
+.tm-nav > li > a:focus,
+.tm-nav > li.uk-active > a  {
+    background: #F5F5F5;
+    color: #444;
+}
+
+/* Sub-object: `nav-header` */
+.tm-nav .uk-nav-header {
+    color: #222;
+    font-weight: normal;
+}
+
+.tm-navbar .navbar-right{
+    float: right;
+}
+
+/*
+ * Nav
+ */
+
+.tm-subnav > li:nth-child(n+2) { margin-left: 20px; }
+
+/**
+* Form
+ */
+
+.uk-form .uk-form-controls .label-radio {padding-right: 10px;}
+.uk-form .uk-submit {width: 80px;margin: 10px 20px;}
+.uk-form .uk-cancel {width: 80px;}
+
+.uk-badge {
+    display: inline-block;
+    padding: 0 5px;
+    /*background: #009dd8;*/
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 14px;
+    color: #fff;
+    text-align: center;
+    vertical-align: middle;
+    text-transform: none;
+    border: 1px solid rgba(0,0,0,.2);
+    border-bottom-color: rgba(0,0,0,.3);
+    background-origin: border-box;
+    /*background-image: -webkit-linear-gradient(top,#00b4f5,#008dc5);*/
+    /*background-image: linear-gradient(to bottom,#00b4f5,#008dc5);*/
+    border-radius: 2px;
+    text-shadow: 0 -1px 0 rgba(0,0,0,.2);
+}
+
+@media (min-width:960px){
+    .uk-form-horizontal .uk-form-label{
+        width: 100px;
+        text-align:right;
+        font-weight: bold;
+    }
+    .uk-form-horizontal .uk-form-controls {
+        margin-left: 115px;
+    }
+}
