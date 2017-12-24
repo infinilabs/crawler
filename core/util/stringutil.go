@@ -186,3 +186,39 @@ func UrlDecode(str string) string {
 	}
 	return out
 }
+
+func FilterSpecialChar(keyword string) string {
+
+	keyword = Replace(keyword, "\"", " ", -1)
+	keyword = Replace(keyword, "+", " ", -1)
+	keyword = Replace(keyword, "-", " ", -1)
+	keyword = Replace(keyword, "/", " ", -1)
+	keyword = Replace(keyword, "\\", " ", -1)
+	keyword = Replace(keyword, ":", " ", -1)
+	keyword = Replace(keyword, "?", " ", -1)
+	keyword = Replace(keyword, "'", " ", -1)
+	keyword = Replace(keyword, "[", " ", -1)
+	keyword = Replace(keyword, "]", " ", -1)
+	keyword = Replace(keyword, "{", " ", -1)
+	keyword = Replace(keyword, "}", " ", -1)
+	keyword = Replace(keyword, ")", "\\\\)", -1)
+	keyword = Replace(keyword, "(", "\\\\(", -1)
+	keyword = Replace(keyword, "~", " ", -1)
+	keyword = Replace(keyword, "!", " ", -1)
+	keyword = Replace(keyword, "›", " ", -1)
+	keyword = Replace(keyword, ">", " ", -1)
+	keyword = Replace(keyword, "<", " ", -1)
+	keyword = Replace(keyword, "%", " ", -1)
+	keyword = Replace(keyword, ".", " ", -1)
+	keyword = Replace(keyword, ",", " ", -1)
+	keyword = Replace(keyword, "|", " ", -1)
+
+	keyword = Replace(keyword, " 	  	  ", " ", -1)
+	keyword = Replace(keyword, " 	  	", " ", -1)
+	keyword = Replace(keyword, " 	  ", " ", -1)
+	keyword = Replace(keyword, " 	 ", " ", -1)
+	keyword = Replace(keyword, " 	", " ", -1)
+
+	keyword = TrimSpace(keyword)
+	return keyword
+}

@@ -4,6 +4,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"fmt"
+	"github.com/emirpasic/gods/sets/hashset"
+	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/http"
 	core "github.com/infinitbyte/gopa/core/index"
 	"github.com/infinitbyte/gopa/core/model"
@@ -25,7 +27,8 @@ type UserUI struct {
 
 // IndexPageAction index page
 func (h *UserUI) IndexPageAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	query := h.GetParameter(req, "q")
+	rawQuery := h.GetParameter(req, "q")
+	query := util.FilterSpecialChar(rawQuery)
 	query = util.XSSHandle(query)
 	if strings.TrimSpace(query) == "" {
 		handler.Index(w, h.Config)
@@ -128,7 +131,89 @@ func (h *UserUI) IndexPageAction(w http.ResponseWriter, req *http.Request, ps ht
 			h.Error(w, err)
 			return
 		}
-		handler.Search(w, req, query, filter, from, size, h.Config, response)
+		handler.Search(w, req, rawQuery, filter, from, size, h.Config, response)
+	}
+}
+
+func (h *UserUI) SuggestAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	q := h.GetParameter(req, "query")
+	//t := h.GetParameter(req, "type")
+	//v := h.GetParameter(req, "version")
+
+	field := "snapshot.title"
+
+	q = util.FilterSpecialChar(q)
+	q = util.XSSHandle(q)
+	if strings.TrimSpace(q) == "" {
+		h.Error(w, errors.New("empty query"))
+	} else {
+
+		template := `
+		{
+    "from": 0,
+    "size": 10,
+    "query": {
+
+     "bool": {
+      "should": [
+        {
+          "query_string": {
+            "query":  "%s",
+            "default_operator": "OR",
+             "fields" : ["%s"],
+            "use_dis_max": true,
+            "allow_leading_wildcard": false,
+            "boost": 1
+          }
+        },
+        {
+          "query_string": {
+            "query":  "%s",
+            "default_operator": "AND",
+            "fields" : ["%s"],
+            "use_dis_max": true,
+            "allow_leading_wildcard": false,
+            "boost": 10
+          }
+        }
+      ]
+    }
+    }
+}
+		`
+
+		query := fmt.Sprintf(template, q, field, q, field)
+
+		response, err := h.SearchClient.SearchWithRawQueryDSL("index", []byte(query))
+		if err != nil {
+			h.Error(w, err)
+			return
+		}
+
+		if response.Hits.Total > 0 {
+			//{    "query": "sd",    "suggestions": [""  ],    "data": ["" ]}
+			terms := []string{}
+			docs := []interface{}{}
+			hash := hashset.New()
+			for _, hit := range response.Hits.Hits {
+				term := hit.Source["snapshot"].(map[string]interface{})["title"]
+				text, ok := term.(string)
+				if ok && text != "" {
+					if !hash.Contains(text) {
+						terms = append(terms, text)
+						docs = append(docs, hit.Source)
+						hash.Add(text)
+					}
+				}
+			}
+			result := map[string]interface{}{}
+			result["query"] = q
+			result["suggestions"] = terms
+			result["docs"] = docs
+			result["data"] = terms
+			h.WriteJSON(w, result, 200)
+		}
+
 	}
 }
 

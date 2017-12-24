@@ -54,6 +54,7 @@ func (module IndexModule) Start(cfg *Config) {
 		ui.SearchClient = &core.ElasticsearchClient{Config: indexConfig.Elasticsearch}
 		api.HandleUIMethod(api.GET, "/", ui.IndexPageAction)
 		api.HandleUIMethod(api.GET, "/snapshot/:id", ui.GetSnapshotPayloadAction)
+		api.HandleUIMethod(api.GET, "/suggest/", ui.SuggestAction)
 	}
 
 	go func() {
