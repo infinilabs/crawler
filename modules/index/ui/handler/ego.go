@@ -105,7 +105,7 @@ func Search(w io.Writer, r *http.Request, q string, filter string, from int, siz
 			snapshotId := safeGetField(hit.Source["snapshot"].(map[string]interface{})["id"], "")
 			screenshot := safeGetField(hit.Source["task"].(map[string]interface{})["last_screenshot_id"], "")
 			title := smartGetField(hit.Highlight["snapshot.title"], hit.Source["snapshot"].(map[string]interface{})["title"], "N/A")
-			summary := util.SubStringWithSuffix(smartGetField(hit.Highlight["snapshot.text"], hit.Source["snapshot"].(map[string]interface{})["text"], "N/A"), 250, "...")
+			summary := util.SubStringWithSuffix(smartGetField(hit.Highlight["snapshot.text"], hit.Source["snapshot"].(map[string]interface{})["text"], "N/A"), 500, "...")
 
 			_, _ = io.WriteString(w, "\n                            <TABLE id=result_")
 			_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(seq)))
@@ -114,7 +114,7 @@ func Search(w io.Writer, r *http.Request, q string, filter string, from int, siz
 			_, _ = io.WriteString(w, "' href=\"")
 			_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(url)))
 			_, _ = io.WriteString(w, "\"  target=_blank>\n                                        ")
-			_, _ = fmt.Fprint(w, util.SubStringWithSuffix(title, 100, "..."))
+			_, _ = fmt.Fprint(w, util.SubStringWithSuffix(title, 500, "..."))
 			_, _ = io.WriteString(w, "</A> </H3>\n                                    <FONT size=-1>")
 			if screenshot != "" {
 				_, _ = io.WriteString(w, "\n                                        <img class=\"screenshot\" src=\"/screenshot/")

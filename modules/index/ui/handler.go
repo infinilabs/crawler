@@ -191,7 +191,6 @@ func (h *UserUI) SuggestAction(w http.ResponseWriter, req *http.Request, ps http
 		}
 
 		if response.Hits.Total > 0 {
-			//{    "query": "sd",    "suggestions": [""  ],    "data": ["" ]}
 			terms := []string{}
 			docs := []interface{}{}
 			hash := hashset.New()
@@ -209,7 +208,7 @@ func (h *UserUI) SuggestAction(w http.ResponseWriter, req *http.Request, ps http
 			result := map[string]interface{}{}
 			result["query"] = q
 			result["suggestions"] = terms
-			result["docs"] = docs
+			//result["docs"] = docs
 			result["data"] = terms
 			h.WriteJSON(w, result, 200)
 		}

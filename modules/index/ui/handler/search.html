@@ -129,12 +129,12 @@
                             snapshotId:=safeGetField(hit.Source["snapshot"].(map[string]interface{})["id"],"")
                             screenshot:=safeGetField(hit.Source["task"].(map[string]interface{})["last_screenshot_id"],"")
                             title:=smartGetField(hit.Highlight["snapshot.title"],hit.Source["snapshot"].(map[string]interface{})["title"],"N/A")
-                            summary:=util.SubStringWithSuffix(smartGetField(hit.Highlight["snapshot.text"],hit.Source["snapshot"].(map[string]interface{})["text"],"N/A"),250,"...")
+                            summary:=util.SubStringWithSuffix(smartGetField(hit.Highlight["snapshot.text"],hit.Source["snapshot"].(map[string]interface{})["text"],"N/A"),500,"...")
                         %>
                             <TABLE id=result_<%= seq %> class=result cellSpacing=0 cellPadding=0> <TBODY><TR>
                                 <TD class=f>
                                     <H3 class=t><A  title='<%= hit.Source["snapshot"].(map[string]interface{})["title"] %>' href="<%= url %>"  target=_blank>
-                                        <%== util.SubStringWithSuffix(title,100,"...") %></A> </H3>
+                                        <%== util.SubStringWithSuffix(title,500,"...") %></A> </H3>
                                     <FONT size=-1><% if(screenshot!=""){ %>
                                         <img class="screenshot" src="/screenshot/<%== screenshot %>" class="uk-icon-hover uk-icon-history" />
                                         <% } %>

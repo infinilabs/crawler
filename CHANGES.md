@@ -9,12 +9,15 @@
 
 ##### breaking changes
 1. refactor domain to host, api and mapping has changed
+2. refactor module, update yml settings: module->name
 
 ##### features
 1. dynamic create pipelines
 2. add chrome headless fetch joint
 3. init plugin architecture
 4. support extract tags by css path
+5. add chrome fetch v2 joint, via chrome debug protocol
+6. add auto-completion to search ui
 
 ##### improvement
 1. remove goleveldb due to memory leak
