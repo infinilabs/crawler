@@ -178,11 +178,14 @@ func (h *UserUI) SuggestAction(w http.ResponseWriter, req *http.Request, ps http
         }
       ]
     }
-    }
+    },
+    "_source": [
+    "%s"
+    ]
 }
 		`
 
-		query := fmt.Sprintf(template, q, field, q, field)
+		query := fmt.Sprintf(template, q, field, q, field, field)
 
 		response, err := h.SearchClient.SearchWithRawQueryDSL("index", []byte(query))
 		if err != nil {
@@ -197,6 +200,7 @@ func (h *UserUI) SuggestAction(w http.ResponseWriter, req *http.Request, ps http
 			for _, hit := range response.Hits.Hits {
 				term := hit.Source["snapshot"].(map[string]interface{})["title"]
 				text, ok := term.(string)
+				text = strings.TrimSpace(text)
 				if ok && text != "" {
 					if !hash.Contains(text) {
 						terms = append(terms, text)
