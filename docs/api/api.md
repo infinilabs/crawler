@@ -18,7 +18,7 @@ curl -XGET http://localhost:8001/stats
 
 ```
 curl -XPOST "http://localhost:8001/task/" -d '{
-"seed":"http://elasticsearch.cn"
+"url":"http://elasticsearch.cn"
 }' 
 ```
 
