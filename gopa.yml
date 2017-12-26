@@ -145,7 +145,7 @@ modules:
             parameters:
               command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
           - joint: chrome_fetch_v2
-            enabled: true
+            enabled: false
             parameters:
               chrome_host: http://127.0.0.1:9223
               save_screenshot: true
@@ -153,7 +153,7 @@ modules:
               timeout_in_seconds: 60
               screenshot_quality: 50
           - joint: fetch
-            enabled: false
+            enabled: true
             parameters:
               timeout_in_seconds: 100
     #          proxy: "socks5://127.0.0.1:1080"
