@@ -152,7 +152,7 @@ func Search(w io.Writer, r *http.Request, q string, filter string, from int, siz
 		common.GetNavBlock(w, r)
 		_, _ = io.WriteString(w, "\n\n                        ")
 	} else {
-		_, _ = io.WriteString(w, "\n                        Nothing found.\n                        ")
+		_, _ = io.WriteString(w, "\n                        <div class=\"uk-alert uk-alert-warning\"> Nothing found.</div>\n                        ")
 	}
 	_, _ = io.WriteString(w, "\n\n                    </div>\n\n                    <div class=\"copyright\">\n                        <br/>\n                        ")
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(config.SiteName)))

@@ -25,11 +25,18 @@
 
     #out #head{
         width: 100%;
+        background: #f6f6f6;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #ebebeb;
     }
 
     #out .nv {
         height: auto;
         padding-left:10px;
+    }
+
+    #out .logo{
+        padding-right: 10px;
     }
 
     #out .logo>img{
@@ -79,13 +86,11 @@
     <div id="in">
         <div id="wrapper">
             <div id="head">
-                <div class="nv">
+
+                <div id="toolbar_wrapper" class="toolbar_wrapper-m" style="top: 0px; left: 0px; z-index: 999; padding-top: 10px; right: 0px;">
                     <a class="logo" href="/">
                         <img border="0" alt="<%= config.SiteName %>" title="" src="<%= config.SiteLogo %>">
                     </a>
-                </div>
-
-                <div id="toolbar_wrapper" class="toolbar_wrapper-m" style="top: 0px; left: 0px; z-index: 999; padding-top: 10px; right: 0px;">
                     <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
                         <symbol xmlns="http://www.w3.org/2000/svg" id="sbx-icon-search-6" viewBox="0 0 40 40">
                             <path d="M28.295 32.517c-2.93 2.086-6.51 3.312-10.38 3.312C8.02 35.83 0 27.81 0 17.914 0 8.02 8.02 0 17.915 0 27.81 0 35.83 8.02 35.83 17.915c0 3.87-1.227 7.45-3.313 10.38l6.61 6.61c1.166 1.165 1.163 3.057 0 4.22-1.167 1.167-3.057 1.167-4.226-.002l-6.605-6.606zm-10.38.326c8.245 0 14.928-6.683 14.928-14.928 0-8.245-6.683-14.93-14.928-14.93-8.245 0-14.93 6.685-14.93 14.93 0 8.245 6.685 14.928 14.93 14.928zm0-26.573c-6.43 0-11.645 5.214-11.645 11.645 0 .494.4.895.896.895.495 0 .896-.4.896-.895 0-5.442 4.41-9.853 9.853-9.853.494 0 .895-.4.895-.896 0-.495-.4-.896-.895-.896z" fill-rule="evenodd"></path>
@@ -122,30 +127,33 @@
                     <SPAN style="float: left;" class=nums>About <%= response.Hits.Total %> results (<span><%= response.Took %>ms</span>)</SPAN>
                 </div>
             </div>
-            <div style=" clear: both;height: 10px;border-bottom: 1px dotted #CCCCCC"></div>
-
             <div id="container">
 
                 <div style=" width: auto;clear: both;">
 
                     <!--filter begin-->
                     <div class="item-view">
-                        <% if len(response.Hits.Hits)>0 { %>
+                        <%
+                        hasResult:= len(response.Hits.Hits)>0
+                        if hasResult { %>
                         <% Block(w,r,q ,filter ,from ,size ,config , response ) %>
                         <%
                         }else{%>
-                        Nothing found.
+                        <div class="uk-alert uk-alert-warning"> Nothing found.</div>
                         <%}%>
 
                     </div>
                     <!--filter end-->
-
+                    <%
+                    if hasResult {
+                    %>
                     <div class="loadmore">
                         <div class="pnnext" data-total="<%= response.Hits.Total %>" data-from="<%= from %>" data-size="<%= size %>" data-load-text="Loading ...">
                             <span class="load-icon"></span><span class="load-text">Load More</span>
                         </div>
                         <p class="load-tips"></p>
                     </div>
+                    <%}%>
 
                     <div class="c-back">
                         <div class="back-top">

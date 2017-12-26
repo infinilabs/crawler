@@ -281,9 +281,7 @@ FONT[size='3'] A FONT {
 
 /*toolbar*/
 #toolbar_wrapper {
-    background: none repeat scroll 0 0 #ffffff;
     padding: 0px 0px 1px;
-
 	padding-left: 20px
 }
 .toolbar_baseline{

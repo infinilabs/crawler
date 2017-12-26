@@ -192,7 +192,7 @@ func GetTaskList(from, size int, host string) (int, []Task, error) {
 	if result.Result != nil && tasks == nil || len(tasks) == 0 {
 		convertTask(result, &tasks)
 	}
-	log.Tracef("get %v tasks", result.Total)
+	log.Tracef("get %v tasks,total: %v", len(tasks), result.Total)
 	return result.Total, tasks, err
 }
 
