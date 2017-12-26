@@ -262,6 +262,9 @@ func (h *UserUI) SuggestAction(w http.ResponseWriter, req *http.Request, ps http
 						terms = append(terms, text)
 						docs = append(docs, hit.Source)
 						hash.Add(text)
+						if hash.Size() >= 7 {
+							break
+						}
 					}
 				}
 			}

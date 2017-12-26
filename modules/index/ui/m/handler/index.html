@@ -32,15 +32,17 @@
         text-align:center;
         height: auto;
     }
-    .logo{
+    .logo-m{
         width: auto;
         padding-bottom: 20px;
         text-align: center;
         display: inline-block;
     }
-    .logo>img {
+    .logo-m>img {
         clear: both;
-        width: 80%;
+        max-width: 90%;
+        max-height: 100px;
+        height:100px
     }
 
     .toolbar_wrapper-m {
@@ -55,9 +57,9 @@
 </style>
 
 <div class="wrapper">
-    <div class="nv nv-m">
+    <div class="nv">
         <a class="logo-m" href="/m">
-            <img alt="<%= config.SiteName %>" border=0 style="max-height: 100px;height:100px"  src="<%= config.SiteLogo %>">
+            <img alt="<%= config.SiteName %>" border=0  src="<%= config.SiteLogo %>">
         </a>
     </div>
     <div id="toolbar_wrapper" class="toolbar_wrapper-m">
