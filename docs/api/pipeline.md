@@ -2,54 +2,95 @@
 * Create pipeline
 
 ```
-curl -XPOST http://127.0.0.1:8001/pipeline/config/ -d'
+curl -XPOST "http://localhost:8001/pipeline/config/" -H 'Content-Type: application/json' -d'
 {
- "name": "test_pipe_line",
- "start": {
-  "joint": "init_task","enabled": true
-
- },
- "process": [
-   {
-   "joint": "url_normalization","enabled": true
+  "name": "discuss.elastic.co",
+  "start": {
+    "joint": "init_task",
+    "enabled": true
   },
- {
-   "joint": "fetch","enabled": true
-  },{
-   "joint": "save_snapshot_fs","enabled": true
+  "process": [
+    {
+      "joint": "url_normalization",
+      "enabled": true,
+      "parameters": {
+        "follow_sub_domain": "true"
+      }
+    },
+    {
+      "joint": "chrome_fetch_v2",
+      "enabled": true,
+      "parameters": {
+        "command": "google-chrome"
+      }
+    },
+    {
+      "joint": "parse",
+      "parameters": {
+        "dispatch_links": true,
+        "max_depth": 100,
+        "max_breadth": 100,
+        "save_images": false
+      },
+      "enabled": true
+    },
+    {
+      "joint": "html2text",
+      "parameters": {},
+      "enabled": true
+    },
+    {
+      "joint": "content_deduplication",
+      "parameters": {},
+      "enabled": true
+    },
+    {
+      "joint": "update_check_time",
+      "parameters": {
+        "decelerate_steps": "24h,48h,72h,168h,360h,720h",
+        "accelerate_steps": "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
+      },
+      "enabled": true
+    },
+    {
+      "joint": "lang_detect",
+      "parameters": {},
+      "enabled": true
+    },
+    {
+      "joint": "save_snapshot_db",
+      "parameters": {
+        "max_revision": 5,
+        "compress_enabled": true,
+        "bucket": "Snapshot"
+      },
+      "enabled": true
+    },
+    {
+      "joint": "index",
+      "parameters": {},
+      "enabled": true
+    }
+  ],
+  "end": {
+    "joint": "save_task",
+    "enabled": true
   }
- ],
- "end": {
-  "joint": "save_task","enabled": true
- }
 }'
 ```
 
 
-* Get Pipeline tasks
-
-```
-curl -XGET http://127.0.0.1:8001/pipeline/tasks/
-{
-"tasks":[
-{
-    "crawler":{ }
-}
-]
-}
-```
-
 * Assign a pipeline to host
 
 ```
-curl -XPOST http://127.0.0.1:8001/host/pipeline_config/
+curl -XPOST "http://localhost:8001/host/pipeline_config/" -H 'Content-Type: application/json' -d'
 {
- "host":"baidu.com",
- "url_pattern":".*",
- "sort_order":1,
- "runner":"fetch"
- "pipeline_id":"123123123"
-}
+  "host":"discuss.elastic.co",
+  "url_pattern":".*",
+  "sort_order":1,
+  "runner":"fetch",
+  "pipeline_id":"b9154g2ihf5ln4c9ie10"
+ }'
 ```
 
 
