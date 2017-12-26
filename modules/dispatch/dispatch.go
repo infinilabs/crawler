@@ -145,8 +145,8 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				pop := stats.Stat("queue.fetch", "pop")
 				push := stats.Stat("queue.fetch", "push")
 				if lastPop == pop || pop == push {
+					log.Tracef("fetch tasks stalled/finished, try to dispatch some tasks from db,lastPop:%s,pop:%s,push:%s", lastPop, pop, push)
 					lastPop = pop
-					log.Trace("fetch tasks stalled/finished, try to dispatch some tasks from db")
 					err := queue.Push(config.DispatcherChannel, []byte("5s auto"))
 					if err != nil {
 						log.Error(err)
@@ -155,6 +155,7 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				} else {
 					log.Trace("no new data in fetch queue, wait 20s")
 					time.Sleep(20 * time.Second)
+					queue.Push(config.DispatcherChannel, []byte("20s deplay"))
 					continue
 				}
 			}
