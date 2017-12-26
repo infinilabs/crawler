@@ -267,7 +267,7 @@ FONT[size='3'] A FONT {
     border:1px solid #999; background:#FFF; cursor:default;
     text-align:left; max-height:350px; overflow:auto; margin:-6px 6px 6px -6px; /* IE6 specific: */ _height:150px;  _margin:0; _overflow-x:hidden; }
 .autocomplete .selected { background:#F0F0F0;  }
-.autocomplete div { padding:5px 5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.autocomplete div { padding: 10px 10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .autocomplete strong { font-weight:normal; color:blue; }
 
 .copyright{font-size:12px; line-height:140%;color: #cccccc;text-align:center}
