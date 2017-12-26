@@ -81,7 +81,7 @@ document.querySelector('.searchbox [type="reset"]').addEventListener('click', fu
 
 
 //<![CDATA[
-function onsubmit() {
+function submitSearch() {
     var kw = document.getElementById('query').value;
     console.log(kw)
 //mpq.track(kw);

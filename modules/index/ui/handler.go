@@ -12,8 +12,9 @@ import (
 	"github.com/infinitbyte/gopa/core/persist"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
-	cfg "github.com/infinitbyte/gopa/modules/index/ui/config"
+	common "github.com/infinitbyte/gopa/modules/index/ui/common"
 	handler "github.com/infinitbyte/gopa/modules/index/ui/handler"
+	mobileHandler "github.com/infinitbyte/gopa/modules/index/ui/m/handler"
 	"net/http"
 	"strings"
 )
@@ -21,17 +22,26 @@ import (
 // UserUI is the user namespace, public web
 type UserUI struct {
 	api.Handler
-	Config       *cfg.UIConfig
+	Config       *common.UIConfig
 	SearchClient *core.ElasticsearchClient
 }
 
-// IndexPageAction index page
+// IndexPageAction index page is for PC
 func (h *UserUI) IndexPageAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	h.searchPageAction(w, req, ps, false)
+}
+
+// MobileIndexPageAction is for mobile
+func (h *UserUI) MobileIndexPageAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	h.searchPageAction(w, req, ps, true)
+}
+
+func (h *UserUI) MobileAJAXMoreItemAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	rawQuery := h.GetParameter(req, "q")
 	query := util.FilterSpecialChar(rawQuery)
 	query = util.XSSHandle(query)
 	if strings.TrimSpace(query) == "" {
-		handler.Index(w, h.Config)
+		mobileHandler.Index(w, h.Config)
 	} else {
 
 		size := h.GetIntOrDefault(req, "size", 10)
@@ -47,7 +57,19 @@ func (h *UserUI) IndexPageAction(w http.ResponseWriter, req *http.Request, ps ht
 			},`, arr[0], util.UrlDecode(arr[1]))
 		}
 
-		format := `
+		response, err := h.execute(filterQuery, query, from, size)
+		if err != nil {
+			h.Error(w, err)
+			return
+		}
+
+		mobileHandler.Block(w, req, rawQuery, filter, from, size, h.Config, response)
+	}
+}
+
+func (h *UserUI) execute(filterQuery, query string, from, size int) (*core.SearchResponse, error) {
+
+	format := `
 		{
 
   "query": {
@@ -124,14 +146,48 @@ func (h *UserUI) IndexPageAction(w http.ResponseWriter, req *http.Request, ps ht
 }
 		`
 
-		q := fmt.Sprintf(format, filterQuery, query, from, size)
+	q := fmt.Sprintf(format, filterQuery, query, from, size)
 
-		response, err := h.SearchClient.SearchWithRawQueryDSL("index", []byte(q))
+	return h.SearchClient.SearchWithRawQueryDSL("index", []byte(q))
+}
+
+func (h *UserUI) searchPageAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params, mobile bool) {
+	rawQuery := h.GetParameter(req, "q")
+	query := util.FilterSpecialChar(rawQuery)
+	query = util.XSSHandle(query)
+	if strings.TrimSpace(query) == "" {
+		if mobile {
+			mobileHandler.Index(w, h.Config)
+		} else {
+			handler.Index(w, h.Config)
+		}
+	} else {
+
+		size := h.GetIntOrDefault(req, "size", 10)
+		from := h.GetIntOrDefault(req, "from", 0)
+		filter := h.GetParameterOrDefault(req, "filter", "")
+		filterQuery := ""
+		if filter != "" && strings.Contains(filter, "|") {
+			arr := strings.Split(filter, "|")
+			filterQuery = fmt.Sprintf(`{
+				"match": {
+			"%s": "%s"
+			}
+			},`, arr[0], util.UrlDecode(arr[1]))
+		}
+
+		response, err := h.execute(filterQuery, query, from, size)
 		if err != nil {
 			h.Error(w, err)
 			return
 		}
-		handler.Search(w, req, rawQuery, filter, from, size, h.Config, response)
+
+		if mobile {
+			mobileHandler.Search(w, req, rawQuery, filter, from, size, h.Config, response)
+		} else {
+			handler.Search(w, req, rawQuery, filter, from, size, h.Config, response)
+		}
+
 	}
 }
 

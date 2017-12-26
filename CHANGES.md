@@ -18,6 +18,7 @@
 4. support extract tags by css path
 5. add chrome fetch v2 joint, via chrome debug protocol
 6. add auto-completion to search ui
+7. search ui support mobile
 
 ##### improvement
 1. remove goleveldb due to memory leak

@@ -15,11 +15,12 @@
 <link rel="icon" href="<%= config.SiteFavicon %>" type="image/x-icon" />
 
 <link rel="stylesheet" href="/static/assets/uikit-2.27.1/css/uikit.min.css" />
-<link rel="stylesheet" href="/static/assets/css/style.css?v=5" rel="stylesheet" type="text/css"/>
-<link rel="stylesheet" href="/static/assets/css/search_style.css?v=1" rel="stylesheet" type="text/css"/>
+<link rel="stylesheet" href="/static/assets/css/m/style.css?v=4" rel="stylesheet" type="text/css"/>
+<link rel="stylesheet" href="/static/assets/css/m/search_style.css" rel="stylesheet" type="text/css"/>
+<link rel="stylesheet" href="/static/assets/css/m/loadmore.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript"  src="/static/assets/js/jquery.min.js"></script>
 <script>
-    if(/Android|Windows Phone|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)){
-        window.location.href = location.origin + "/m/" + location.search;
+    if(! /Android|Windows Phone|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)){
+        window.location.href = location.origin + location.search;
     }
 </script>

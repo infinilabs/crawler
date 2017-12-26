@@ -11,7 +11,7 @@ import (
 	"github.com/infinitbyte/gopa/core/queue"
 	"github.com/infinitbyte/gopa/modules/config"
 	"github.com/infinitbyte/gopa/modules/index/ui"
-	cfg "github.com/infinitbyte/gopa/modules/index/ui/config"
+	common "github.com/infinitbyte/gopa/modules/index/ui/common"
 	"runtime"
 )
 
@@ -25,12 +25,12 @@ func (this IndexModule) Name() string {
 var signalChannel chan bool
 
 var (
-	defaultConfig = cfg.IndexConfig{
+	defaultConfig = common.IndexConfig{
 		Elasticsearch: &core.ElasticsearchConfig{
 			Endpoint:    "http://localhost:9200",
 			IndexPrefix: "gopa-",
 		},
-		UIConfig: &cfg.UIConfig{
+		UIConfig: &common.UIConfig{
 			Enabled:     true,
 			SiteName:    "Gopa",
 			SiteFavicon: "/static/assets/img/favicon.ico",
@@ -53,6 +53,8 @@ func (module IndexModule) Start(cfg *Config) {
 		ui.Config = indexConfig.UIConfig
 		ui.SearchClient = &core.ElasticsearchClient{Config: indexConfig.Elasticsearch}
 		api.HandleUIMethod(api.GET, "/", ui.IndexPageAction)
+		api.HandleUIMethod(api.GET, "/m/", ui.MobileIndexPageAction)
+		api.HandleUIMethod(api.GET, "/m/ajax_more_item/", ui.MobileAJAXMoreItemAction)
 		api.HandleUIMethod(api.GET, "/snapshot/:id", ui.GetSnapshotPayloadAction)
 		api.HandleUIMethod(api.GET, "/suggest/", ui.SuggestAction)
 	}

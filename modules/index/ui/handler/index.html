@@ -1,5 +1,5 @@
-<%! func Index(w io.Writer,config *config.UIConfig) error %>
-<%% import "github.com/infinitbyte/gopa/modules/index/ui/config" %%>
+<%! func Index(w io.Writer,config *common.UIConfig) error %>
+<%% import "github.com/infinitbyte/gopa/modules/index/ui/common" %%>
 
 <!DOCTYPE html>
 <!--[if lt IE 7 ]> <html class="no-js ie6" lang="en-US"> <![endif]-->
@@ -18,7 +18,7 @@
 
     <div class=nv align="center" style="padding-bottom: 50px;">
         <a  href="/">
-            <img border=0 style="max-height: 100px;height:100px"  src="<%= config.SiteLogo %>">
+            <img alt="<%= config.SiteName %>" border=0 style="max-height: 100px;height:100px"  src="<%= config.SiteLogo %>">
         </a>
 
     </div>
@@ -34,7 +34,7 @@
             </symbol>
         </svg>
 
-        <form name="f" id="f" novalidate="novalidate" class="searchbox sbx-custom" action="/" onSubmit="onsubmit()">
+        <form name="f" id="f" novalidate="novalidate" class="searchbox sbx-custom" action="/" onSubmit="submitSearch()">
             <div role="search" class="sbx-custom__wrapper">
                 <input type="q" name="q" placeholder="Please type to search ..."
                 autocomplete="off" required="required"

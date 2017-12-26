@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package handler
+package common
 
 import (
 	"bytes"
@@ -23,39 +23,40 @@ import (
 	"strings"
 )
 
-func safeGetField(v interface{}, nullValue string) string {
+func SafeGetField(v interface{}, nullValue string) string {
 	if v != nil {
 		return v.(string)
 	}
 	return nullValue
 }
 
-func smartGetField(v1 []interface{}, v2 interface{}, nullValue string) string {
+func SmartGetField(v1 []interface{}, v2 interface{}, nullValue string) string {
 
 	if len(v1) > 0 {
-		vv1 := safeGetField(v1[0], "")
+		vv1 := SafeGetField(v1[0], "")
 		if vv1 != "" {
 			return vv1
 		}
 	}
 
-	return safeGetField(v2, nullValue)
+	return SafeGetField(v2, nullValue)
 }
 
-func getBucketLabel(k string) string {
+func GetBucketLabel(k string) string {
 	if strings.Contains(k, "|") {
 		return strings.Split(k, "|")[1]
 	}
 	return k
 }
-func getBucketKey(k string) string {
+
+func GetBucketKey(k string) string {
 	if strings.Contains(k, "|") {
 		return strings.Split(k, "|")[0]
 	}
 	return k
 }
 
-func getNavBlock(w io.Writer, r *http.Request) string {
+func GetNavBlock(w io.Writer, r *http.Request) string {
 	var buffer bytes.Buffer
 
 	buffer.WriteString("<div style='clear:both;'>")

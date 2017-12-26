@@ -1,6 +1,6 @@
-<%! func Search(w io.Writer,r *http.Request,q string,filter string,from int,size int,config *config.UIConfig, response *index.SearchResponse) error %>
+<%! func Search(w io.Writer,r *http.Request,q string,filter string,from int,size int,config *common.UIConfig, response *index.SearchResponse) error %>
 <%% import "net/http" %%>
-<%% import "github.com/infinitbyte/gopa/modules/index/ui/config" %%>
+<%% import "github.com/infinitbyte/gopa/modules/index/ui/common" %%>
 <%% import "github.com/infinitbyte/gopa/core/index" %%>
 <%% import "github.com/infinitbyte/gopa/core/util" %%>
 <%% import api "github.com/infinitbyte/gopa/core/http" %%>
@@ -49,7 +49,7 @@
                                 <path d="M8.114 10L.944 2.83 0 1.885 1.886 0l.943.943L10 8.113l7.17-7.17.944-.943L20 1.886l-.943.943-7.17 7.17 7.17 7.17.943.944L18.114 20l-.943-.943-7.17-7.17-7.17 7.17-.944.943L0 18.114l.943-.943L8.113 10z" fill-rule="evenodd" />
                             </symbol>
                         </svg>
-                        <form name="f" id="f" novalidate="novalidate" class="searchbox sbx-custom" action="/" onSubmit="onsubmit()">
+                        <form name="f" id="f" novalidate="novalidate" class="searchbox sbx-custom" action="/" onSubmit="submitSearch()">
                             <div role="search" class="sbx-custom__wrapper">
                                 <input type="q" name="q"
                                        placeholder="Please type to search ..."
@@ -72,7 +72,7 @@
                     </div>
                     <div id="toolbar_baseline" class="toolbar_baseline"></div>
                     <div style="padding-top:5px;padding-bottom: 5px;">
-                        <SPAN style="float: left;" class=nums>Found about <%= response.Hits.Total %> results (<span><%= response.Took %>ms</span>)</SPAN>
+                        <SPAN style="float: left;" class=nums>About <%= response.Hits.Total %> results (<span><%= response.Took %>ms</span>)</SPAN>
                     </div>
                 </div>
             </div>
@@ -95,7 +95,7 @@
                                     if(len(v.Buckets)>0){
                                 %>
                                     <li style="background: #eeeeee; " >
-                                        <div style="padding:5px 10px; font-size: 14px;"><%= getBucketLabel(k) %></div>
+                                        <div style="padding:5px 10px; font-size: 14px;"><%= common.GetBucketLabel(k) %></div>
 
                                         <div style="padding:0px 0px; background:#f8f8f8;text-decoration: none;">
                                             <ul >
@@ -104,7 +104,7 @@
                                 key:=bkt.Key
                                 c:=bkt.DocCount
                                 %>
-                                <li><a href=<%==fmt.Sprintf("?q=%s&filter=%s|%v&from=0",q,getBucketKey(k),util.UrlEncode(key)) %> ><%= key %><count>(<%= c %>)</count></a></li>
+                                <li><a href=<%==fmt.Sprintf("?q=%s&filter=%s|%v&from=0",q,common.GetBucketKey(k),util.UrlEncode(key)) %> ><%= key %><count>(<%= c %>)</count></a></li>
 
                                 <% } %>
                                             </ul>
@@ -125,11 +125,11 @@
 
                         <%
                         for seq,hit:=range response.Hits.Hits{
-                            url:=safeGetField(hit.Source["snapshot"].(map[string]interface{})["url"],"N/A")
-                            snapshotId:=safeGetField(hit.Source["snapshot"].(map[string]interface{})["id"],"")
-                            screenshot:=safeGetField(hit.Source["task"].(map[string]interface{})["last_screenshot_id"],"")
-                            title:=smartGetField(hit.Highlight["snapshot.title"],hit.Source["snapshot"].(map[string]interface{})["title"],"N/A")
-                            summary:=util.SubStringWithSuffix(smartGetField(hit.Highlight["snapshot.text"],hit.Source["snapshot"].(map[string]interface{})["text"],"N/A"),500,"...")
+                            url:=common.SafeGetField(hit.Source["snapshot"].(map[string]interface{})["url"],"N/A")
+                            snapshotId:=common.SafeGetField(hit.Source["snapshot"].(map[string]interface{})["id"],"")
+                            screenshot:=common.SafeGetField(hit.Source["task"].(map[string]interface{})["last_screenshot_id"],"")
+                            title:=common.SmartGetField(hit.Highlight["snapshot.title"],hit.Source["snapshot"].(map[string]interface{})["title"],"N/A")
+                            summary:=util.SubStringWithSuffix(common.SmartGetField(hit.Highlight["snapshot.text"],hit.Source["snapshot"].(map[string]interface{})["text"],"N/A"),500,"...")
                         %>
                             <TABLE id=result_<%= seq %> class=result cellSpacing=0 cellPadding=0> <TBODY><TR>
                                 <TD class=f>
@@ -161,7 +161,7 @@
 
 
                         <%== api.GetPagination(from,size, response.Hits.Total, "", paras) %>
-                        <% getNavBlock(w,r) %>
+                        <% common.GetNavBlock(w,r) %>
 
                         <%}else{%>
                         Nothing found.
