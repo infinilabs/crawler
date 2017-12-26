@@ -29,6 +29,10 @@ func GetPagination(from, size, total int, url string, param map[string]interface
 		total = 10000
 	}
 
+	if total <= size {
+		return ""
+	}
+
 	var cur = from / size
 
 	var buffer bytes.Buffer
