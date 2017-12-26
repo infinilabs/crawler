@@ -138,9 +138,7 @@
                         if hasResult { %>
                         <% Block(w,r,q ,filter ,from ,size ,config , response ) %>
                         <%
-                        }else{%>
-                        <div class="uk-alert uk-alert-warning"> Nothing found.</div>
-                        <%}%>
+                        }%>
 
                     </div>
                     <!--filter end-->
@@ -153,6 +151,9 @@
                         </div>
                         <p class="load-tips"></p>
                     </div>
+                    <%
+                    }else{%>
+                    <div class="uk-alert uk-alert-warning"> Nothing found.</div>
                     <%}%>
 
                     <div class="c-back">
