@@ -209,7 +209,7 @@ func FilterSpecialChar(keyword string) string {
 	keyword = Replace(keyword, ">", " ", -1)
 	keyword = Replace(keyword, "<", " ", -1)
 	keyword = Replace(keyword, "%", " ", -1)
-	keyword = Replace(keyword, ".", " ", -1)
+	//keyword = Replace(keyword, ".", " ", -1)
 	keyword = Replace(keyword, ",", " ", -1)
 	keyword = Replace(keyword, "|", " ", -1)
 
