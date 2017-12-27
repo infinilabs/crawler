@@ -31,6 +31,7 @@ import (
 	"github.com/mafredri/cdp/protocol/runtime"
 	"github.com/mafredri/cdp/rpcc"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -53,12 +54,16 @@ type signal struct {
 	status int
 }
 
+var lock sync.Mutex
+
 func (joint ChromeFetchV2Joint) Name() string {
 	return "chrome_fetch_v2"
 }
 
 func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 
+	lock.Lock()
+	defer lock.Unlock()
 	joint.timeout = time.Duration(joint.GetInt64OrDefault(timeoutInSeconds, 10)) * time.Second
 
 	snapshot := context.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
