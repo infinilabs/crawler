@@ -418,10 +418,10 @@ func (pipe *Pipeline) Run() *Context {
 		}
 
 		pipe.setCurrentJoint(v.Name())
-		startTime := time.Now()
+		startTime := time.Now().UTC()
 		err = v.Process(pipe.context)
 
-		elapsedTime := time.Now().Sub(startTime)
+		elapsedTime := time.Now().UTC().Sub(startTime)
 		stats.Timing(pipe.name+".pipeline", v.Name(), elapsedTime.Nanoseconds())
 		if err != nil {
 			stats.Increment(pipe.name+".pipeline", "error")

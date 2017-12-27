@@ -17,6 +17,7 @@ limitations under the License.
 package http
 
 import (
+	"github.com/ararog/timeago"
 	"github.com/infinitbyte/gopa/core/env"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/julienschmidt/httprouter"
@@ -40,6 +41,8 @@ func (handler API) IndexAction(w http.ResponseWriter, req *http.Request, _ httpr
 	version["build_date"] = env.GetBuildDate()
 	data["version"] = version
 	data["tagline"] = "You Know, for Web"
+	uptime, _ := timeago.TimeAgoFromNowWithTime(env.GetStartTime())
+	data["uptime"] = uptime
 
 	handler.WriteJSON(w, &data, http.StatusOK)
 }

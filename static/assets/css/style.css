@@ -274,7 +274,7 @@ FONT[size='3'] A FONT {
 .autocomplete strong { font-weight:normal; color:blue; }
 
 .copyright{font-size:12px; line-height:140%;color: #cccccc;}
-.copyright a{font-size: 12px; text-decoration: none;color: #07D;}
+.copyright a{font-size: 12px; text-decoration: none;color: #cccccc;}
 .copyright a:hover{font-size: 12px; text-decoration: underline;color: #07D;}
 
 .middle_column_ul {

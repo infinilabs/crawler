@@ -140,6 +140,7 @@ fetch-depends:
 	$(GO) get github.com/go-sql-driver/mysql
 	$(GO) get github.com/jbowles/cld2_nlpt
 	$(GO) get github.com/mafredri/cdp
+	$(GO) get github.com/ararog/timeago
 
 
 dist: cross-build package

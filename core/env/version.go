@@ -16,6 +16,8 @@ limitations under the License.
 
 package env
 
+import "strings"
+
 // VERSION is the version of this gopa
 const VERSION = "0.10.0_SNAPSHOT"
 
@@ -30,7 +32,7 @@ func GetWelcomeMessage() string {
 
 	commitLog := ""
 	if len(lastCommitLog) > 0 {
-		commitLog = "\n///last commit: " + lastCommitLog + "///"
+		commitLog = "\n///last commit: " + GetLastCommitLog() + "///"
 	}
 	s += ("[gopa] " + VERSION + commitLog + "\n")
 	return (s)
@@ -38,10 +40,19 @@ func GetWelcomeMessage() string {
 
 // GetLastCommitLog returns last commit information of source code
 func GetLastCommitLog() string {
-	return lastCommitLog
+	return strings.TrimSpace(lastCommitLog)
+}
+
+func GetLastCommitHash() string {
+	log := GetLastCommitLog()
+	array := strings.Split(log, ",")
+	if len(array) == 0 {
+		return "N/A"
+	}
+	return array[0]
 }
 
 // GetBuildDate returns the build datetime of current gopa package
 func GetBuildDate() string {
-	return buildDate
+	return strings.TrimSpace(buildDate)
 }

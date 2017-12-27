@@ -42,13 +42,11 @@ import (
 
 var (
 	environment     *env.Env
-	startTime       time.Time
 	finalQuitSignal chan bool
 )
 
 func onStart() {
 	fmt.Println(env.GetWelcomeMessage())
-	startTime = time.Now()
 }
 
 func onShutdown(isDaemon bool) {
@@ -67,7 +65,7 @@ func onShutdown(isDaemon bool) {
 	fmt.Println("   _` |   _ \\   _ \\   _` |     _ \\  |  |   -_) ")
 	fmt.Println(" \\__, | \\___/ \\___/ \\__,_|   _.__/ \\_, | \\___| ")
 	fmt.Println(" ____/                             ___/        ")
-	fmt.Println("[gopa] "+env.VERSION+", uptime:", time.Since(startTime))
+	fmt.Println("[gopa] "+env.VERSION+", uptime:", time.Since(env.GetStartTime()))
 	fmt.Println(" ")
 }
 

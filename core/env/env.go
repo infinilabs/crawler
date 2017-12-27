@@ -26,6 +26,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // Env is environment object of gopa
@@ -65,6 +66,7 @@ func Environment(configFile string) *Env {
 
 var moduleConfig map[string]*config.Config
 var pluginConfig map[string]*config.Config
+var startTime = time.Now().UTC()
 
 var (
 	defaultSystemConfig = config.SystemConfig{
@@ -196,4 +198,8 @@ func getModuleName(c *config.Config) string {
 func EmptyEnv() *Env {
 	system := defaultSystemConfig
 	return &Env{SystemConfig: &system, RuntimeConfig: &config.RuntimeConfig{}}
+}
+
+func GetStartTime() time.Time {
+	return startTime
 }

@@ -185,9 +185,9 @@ function updateLogging(enabled){
 
 
 
-window.onload = function(){
-    var s = setInterval("scrollDiv()", 10000);
-};
+//window.onload = function(){
+//    var s = setInterval("scrollDiv()", 60000);
+//};
 
 function scrollDiv(){
     var logging = document.getElementById("logging");
