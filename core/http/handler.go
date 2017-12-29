@@ -250,3 +250,43 @@ func BasicAuth(h httprouter.Handle, requiredUser, requiredPassword string) httpr
 		}
 	}
 }
+
+var authEnabled = false
+
+// BasicAuth register api with basic auth
+func NeedLogin(role string, h httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		if !authEnabled || CheckLogin(w, r, role) {
+			// Delegate request to the given handle
+			h(w, r, ps)
+		} else {
+			http.Redirect(w, r, "/auth/login/?redirect_url="+util.UrlEncode(r.URL.String()), 302)
+		}
+	}
+}
+
+func EnableAuth(enable bool) {
+	authEnabled = enable
+}
+
+func Login(w http.ResponseWriter, r *http.Request, user, role string) {
+	SetSession(w, r, "user", user)
+	SetSession(w, r, "role", role)
+}
+
+func Logout(w http.ResponseWriter, r *http.Request) {
+	SetSession(w, r, "user", "")
+	SetSession(w, r, "role", "")
+}
+
+func CheckLogin(w http.ResponseWriter, r *http.Request, role string) bool {
+	ok1, u := GetSession(w, r, "user")
+	ok2, v := GetSession(w, r, "role")
+	if ok1 && ok2 && u.(string) != "" && v.(string) != "" {
+		if role != "" && role != v {
+			return false
+		}
+		return true
+	}
+	return false
+}

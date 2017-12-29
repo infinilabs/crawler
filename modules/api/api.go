@@ -23,7 +23,6 @@ import (
 	"errors"
 	log "github.com/cihub/seelog"
 	"github.com/gorilla/context"
-	"github.com/gorilla/sessions"
 	"github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/env"
 	"github.com/infinitbyte/gopa/core/global"
@@ -38,17 +37,7 @@ import (
 var router *httprouter.Router
 var mux *http.ServeMux
 
-var store = sessions.NewCookieStore([]byte("1c6f2afbccef959ac5c8b81f690c1be7"))
-
 func (module APIModule) internalStart(env *env.Env) {
-
-	store.Options = &sessions.Options{
-		Domain:   "localhost", //TODO config　http　domain
-		Path:     "/",
-		MaxAge:   60 * 15,
-		Secure:   true,
-		HttpOnly: true,
-	}
 
 	router = httprouter.New()
 	mux = http.NewServeMux()

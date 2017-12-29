@@ -141,6 +141,8 @@ fetch-depends:
 	$(GO) get github.com/jbowles/cld2_nlpt
 	$(GO) get github.com/mafredri/cdp
 	$(GO) get github.com/ararog/timeago
+	$(GO) get github.com/google/go-github/github
+	$(GO) get golang.org/x/oauth2
 
 
 dist: cross-build package

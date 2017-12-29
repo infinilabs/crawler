@@ -288,7 +288,15 @@ modules:
 
 - name: web
   enabled: true
-
+  auth:
+    enabled: true
+    oauth_provider: github
+    oauth_authorize_url: https://github.com/login/oauth/authorize
+    oauth_token_url: https://github.com/login/oauth/access_token
+    client_id: XXXXXX
+    client_secret: YYYYYY
+    authorized_admin:
+      github_login_name
 
 - name: filter
   enabled: true

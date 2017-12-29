@@ -31,7 +31,7 @@ import (
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
 	"github.com/infinitbyte/gopa/modules/storage/boltdb/ui"
-	"github.com/infinitbyte/gopa/modules/ui/admin/common"
+	"github.com/infinitbyte/gopa/modules/ui/common"
 	"net/http"
 	"strconv"
 	"strings"

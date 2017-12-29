@@ -8,7 +8,7 @@ import (
 	api "github.com/infinitbyte/gopa/core/http"
 	"github.com/infinitbyte/gopa/core/i18n"
 	"github.com/infinitbyte/gopa/core/model"
-	"github.com/infinitbyte/gopa/modules/ui/admin/common"
+	"github.com/infinitbyte/gopa/modules/ui/common"
 	"html"
 	"io"
 	"net/http"

@@ -27,11 +27,12 @@ import (
 	"errors"
 	log "github.com/cihub/seelog"
 	"github.com/gorilla/context"
-	"github.com/gorilla/sessions"
 	. "github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/logger"
 	"github.com/infinitbyte/gopa/core/util"
+	"github.com/infinitbyte/gopa/modules/ui/common"
+	"github.com/infinitbyte/gopa/modules/ui/public"
 	"github.com/julienschmidt/httprouter"
 	_ "net/http/pprof"
 	"path"
@@ -41,22 +42,12 @@ import (
 var router *httprouter.Router
 var mux *http.ServeMux
 
-var store = sessions.NewCookieStore([]byte("1c6f2afbccef959ac5c8b81f690c1be7"))
-
 var faviconAction = func(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	w.Header().Set("Location", "/static/assets/img/favicon.ico")
 	w.WriteHeader(301)
 }
 
 func (module UIModule) internalStart(cfg *Config) {
-
-	store.Options = &sessions.Options{
-		Domain:   "localhost", //TODO config　http　domain
-		Path:     "/",
-		MaxAge:   60 * 15,
-		Secure:   true,
-		HttpOnly: true,
-	}
 
 	router = httprouter.New()
 	mux = http.NewServeMux()
@@ -164,8 +155,17 @@ func (module UIModule) Name() string {
 
 func (module UIModule) Start(cfg *Config) {
 
-	//init admin ui //TODO ui module enable/disable config
+	adminConfig := common.UIConfig{}
+	cfg.Unpack(&adminConfig)
+
+	uis.EnableAuth(adminConfig.AuthConfig.Enabled)
+
+	//init admin ui
 	admin.InitUI()
+
+	//init public ui
+	public.InitUI(adminConfig.AuthConfig)
+
 	//register websocket logger
 	logger.RegisterWebsocketHandler(LoggerReceiver)
 

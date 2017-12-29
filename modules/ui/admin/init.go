@@ -19,7 +19,7 @@ package admin
 import (
 	api "github.com/infinitbyte/gopa/core/http"
 	"github.com/infinitbyte/gopa/modules/ui/admin/ajax"
-	"github.com/infinitbyte/gopa/modules/ui/admin/common"
+	"github.com/infinitbyte/gopa/modules/ui/common"
 )
 
 // InitUI register ui handlers
@@ -35,13 +35,13 @@ func InitUI() {
 	//UI pages init
 	ui := AdminUI{}
 
-	api.HandleUIMethod(api.GET, "/admin/", ui.DashboardAction)
-	api.HandleUIMethod(api.POST, "/admin/setting/", ui.UpdateSettingAction)
-	api.HandleUIMethod(api.GET, "/screenshot/:id", ui.GetScreenshotAction)
-	api.HandleUIMethod(api.GET, "/admin/dashboard/", ui.DashboardAction)
-	api.HandleUIMethod(api.GET, "/admin/tasks/", ui.TasksPageAction)
-	api.HandleUIMethod(api.GET, "/admin/task/view/:id", ui.TaskViewPageAction)
-	api.HandleUIMethod(api.GET, "/admin/console/", ui.ConsolePageAction)
+	api.HandleUIMethod(api.GET, "/admin/", api.NeedLogin("admin", ui.DashboardAction))
+	api.HandleUIMethod(api.POST, "/admin/setting/", api.NeedLogin("admin", ui.UpdateSettingAction))
+	api.HandleUIMethod(api.GET, "/screenshot/:id", api.NeedLogin("admin", ui.GetScreenshotAction))
+	api.HandleUIMethod(api.GET, "/admin/dashboard/", api.NeedLogin("admin", ui.DashboardAction))
+	api.HandleUIMethod(api.GET, "/admin/tasks/", api.NeedLogin("admin", ui.TasksPageAction))
+	api.HandleUIMethod(api.GET, "/admin/task/view/:id", api.NeedLogin("admin", ui.TaskViewPageAction))
+	api.HandleUIMethod(api.GET, "/admin/console/", api.NeedLogin("admin", ui.ConsolePageAction))
 
 	api.HandleUIFunc("/admin/explore/", ui.ExplorePageAction)
 	api.HandleUIFunc("/admin/setting/", ui.SettingPageAction)

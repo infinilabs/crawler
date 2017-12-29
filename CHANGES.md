@@ -19,6 +19,7 @@
 5. add chrome fetch v2 joint, via chrome debug protocol
 6. add auto-completion to search ui
 7. search ui support mobile
+8. support access control by github oauth
 
 ##### improvement
 1. remove goleveldb due to memory leak

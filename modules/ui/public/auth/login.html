@@ -1,0 +1,16 @@
+<%! func Login(w io.Writer,url string) error %>
+<%% import "github.com/infinitbyte/gopa/modules/ui/common" %%>
+
+<% common.Head(w, "Explore","") %>
+<% common.Body(w) %>
+<div class="tm-middle">
+    <div class="uk-container uk-container-center">
+        <br/>
+        <div class="uk-grid">
+            <div class="uk-align-center"><br>
+                <a href="/auth/github/<%= url %>" class="uk-icon-hover uk-icon-medium uk-icon-github"> Github login</a>
+            </div>
+        </div>
+    </div>
+</div>
+<% common.Footer(w) %>

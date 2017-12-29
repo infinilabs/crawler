@@ -22,9 +22,13 @@ import (
 	"net/http"
 )
 
-var store = sessions.NewCookieStore([]byte("gopa-secret")) //TODO generate secret or configurable
+var store = sessions.NewCookieStore([]byte("GOPA-SECRET"))
 
-const sessionName string = "session-name"
+const sessionName string = "gopa-session"
+
+func GetSessionStore(r *http.Request, key string) (*sessions.Session, error) {
+	return store.Get(r, key)
+}
 
 // GetSession return session by session key
 func GetSession(w http.ResponseWriter, r *http.Request, key string) (bool, interface{}) {

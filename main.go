@@ -129,24 +129,29 @@ func main() {
 
 	//cleanup
 	defer func() {
+
 		util.ClearInstanceLock()
 
-		if r := recover(); r != nil {
-			if r == nil {
-				return
+		if !global.Env().IsDebug {
+			if r := recover(); r != nil {
+				if r == nil {
+					return
+				}
+				var v string
+				switch r.(type) {
+				case error:
+					v = r.(error).Error()
+				case runtime.Error:
+					v = r.(runtime.Error).Error()
+				case string:
+					v = r.(string)
+				}
+				log.Error("main: ", v)
 			}
-			var v string
-			switch r.(type) {
-			case error:
-				v = r.(error).Error()
-			case runtime.Error:
-				v = r.(runtime.Error).Error()
-			case string:
-				v = r.(string)
-			}
-			log.Error("main: ", v)
 		}
+
 		util.SnapshotPersistID()
+
 		log.Flush()
 		logger.Flush()
 

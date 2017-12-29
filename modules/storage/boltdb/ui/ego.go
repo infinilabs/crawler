@@ -6,7 +6,7 @@ package ui
 import (
 	"fmt"
 	"github.com/boltdb/bolt"
-	"github.com/infinitbyte/gopa/modules/ui/admin/common"
+	"github.com/infinitbyte/gopa/modules/ui/common"
 	"html"
 	"io"
 	"net/http"

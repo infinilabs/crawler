@@ -5,7 +5,7 @@ package setting
 
 import (
 	"fmt"
-	"github.com/infinitbyte/gopa/modules/ui/admin/common"
+	"github.com/infinitbyte/gopa/modules/ui/common"
 	"io"
 )
 
