@@ -289,7 +289,7 @@ modules:
 - name: web
   enabled: true
   auth:
-    enabled: true
+    enabled: false
     oauth_provider: github
     oauth_authorize_url: https://github.com/login/oauth/authorize
     oauth_token_url: https://github.com/login/oauth/access_token
