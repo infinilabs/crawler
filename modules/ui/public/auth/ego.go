@@ -15,7 +15,7 @@ var _ = fmt.Sprint("") // just so that we can keep the fmt import for now
 func Login(w io.Writer, url string) error {
 	_, _ = io.WriteString(w, "\n")
 	_, _ = io.WriteString(w, "\n\n")
-	common.Head(w, "Explore", "")
+	common.Head(w, "Login", "")
 	_, _ = io.WriteString(w, "\n")
 	common.Body(w)
 	_, _ = io.WriteString(w, "\n<div class=\"tm-middle\">\n    <div class=\"uk-container uk-container-center\">\n        <br/>\n        <div class=\"uk-grid\">\n            <div class=\"uk-align-center\"><br>\n                <a href=\"/auth/github/")
