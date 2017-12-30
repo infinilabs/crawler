@@ -43,6 +43,9 @@ var (
 
 func InitUI(cfg common.AuthConfig) {
 
+	ui := PublicUI{}
+	api.HandleUIMethod(api.GET, "/redirect/", ui.RedirectHandler)
+
 	if !cfg.Enabled {
 		return
 	}
@@ -58,7 +61,6 @@ func InitUI(cfg common.AuthConfig) {
 		Scopes:      scopes,
 	}
 
-	ui := PublicUI{}
 	ui.Admins = hashset.New()
 	for _, v := range cfg.AuthorizedAdmins {
 		if v != "" {
@@ -68,7 +70,6 @@ func InitUI(cfg common.AuthConfig) {
 
 	api.HandleUIMethod(api.GET, "/auth/github/", ui.AuthHandler)
 	api.HandleUIMethod(api.GET, "/auth/callback/", ui.CallbackHandler)
-
 	api.HandleUIMethod(api.GET, "/auth/login/", ui.Login)
 	api.HandleUIMethod(api.GET, "/auth/success/", ui.LoginSuccess)
 	api.HandleUIMethod(api.GET, "/auth/fail/", ui.LoginFail)

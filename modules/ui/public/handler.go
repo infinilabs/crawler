@@ -153,3 +153,9 @@ func (h PublicUI) LoginSuccess(w http.ResponseWriter, r *http.Request, p httprou
 func (h PublicUI) LoginFail(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	auth.LoginFail(w)
 }
+
+func (h PublicUI) RedirectHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	url := h.Get(r, "url", "")
+	http.Redirect(w, r, util.UrlDecode(url), 302)
+	return
+}
