@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <title>Gopa</title>
+    <link rel="stylesheet" href="/static/assets/uikit-2.27.1/css/uikit.min.css" />
+    <link rel="stylesheet" href="/static/assets/uikit-2.27.1/css/components/sortable.min.css" />
+    <link rel="icon" href="/static/assets/img/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="/static/assets/img/favicon.ico" type="image/x-icon" />
+    <script src="/static/assets/js/jquery.min.js"></script>
+    <script src="/static/assets/uikit-2.27.1/js/uikit.min.js"></script>
+    <script src="/static/assets/uikit-2.27.1/js/components/sortable.min.js"></script>
+    <meta charset="utf-8">
+</head>
+<body class="tm-background">
+
+<nav class="tm-navbar uk-navbar uk-navbar-attached">
+    <div class="uk-container uk-container-center">
+
+        <a class="uk-navbar-brand uk-hidden-small" href="../index.html"><img class="uk-margin uk-margin-remove" src="/static/assets/img/logo.svg" width="90" height="30" title="UIkit" alt="UIkit"></a>
+
+        <ul class="uk-navbar-nav uk-hidden-small">
+            <li class="uk-active"><a href="documentation_get-started.html">Dashboard</a></li>
+            <li ><a href="documentation_get-started.html">Tasks</a></li>
+            <li><a href="core.html">Explore</a></li>
+            <li><a href="customizer.html">Console</a></li>
+
+        </ul>
+
+        <div class="uk-navbar-flip">
+
+            <a href="#search-modal" data-uk-modal class="uk-navbar-toggle uk-navbar-toggle-alt uk-visible-small"></a>
+
+            <ul class="uk-navbar-nav uk-hidden-small">
+                <!--<li>-->
+                    <!--<div class="uk-form-icon">-->
+                        <!--<i class="uk-icon-search"></i>-->
+                        <!--<input type="text" placeholder="" class="uk-form-large uk-width-1-1">-->
+                    <!--</div>-->
+
+                <!--</li>-->
+                <li class="uk-parent" data-uk-dropdown="" aria-haspopup="true" aria-expanded="false">
+                    <a href=""><i class="uk-icon-plus-square"></i>&nbsp;Menu</a>
+
+                    <div class="uk-dropdown uk-dropdown-navbar uk-dropdown-bottom" aria-hidden="true" tabindex="" style="top: 40px; left: 0px;">
+                        <ul class="uk-nav uk-nav-navbar">
+                            <li class="uk-nav-header"><i class="uk-icon-tasks"></i>&nbsp;Tasks</li>
+                            <li><a href="#create-task-modal" data-uk-modal>Create a task</a></li>
+                            <!--<li class="uk-nav-divider"></li>-->
+                            <!--<li><a href="#"><i class="uk-icon-power-off"></i> Logout</a></li>-->
+                        </ul>
+                    </div>
+
+                </li>
+            </ul>
+
+        </div>
+
+        <a href="#tm-offcanvas" class="uk-navbar-toggle uk-visible-small" data-uk-offcanvas=""></a>
+
+        <div class="uk-navbar-brand uk-navbar-center uk-visible-small"><img src="/static/assets/img/logo.svg" width="90" height="30" title="UIkit" alt="UIkit"></div>
+
+    </div>
+</nav>
+
+<div class="tm-middle">
+    <div class="uk-container uk-container-center">
+
+        <div class="uk-grid" data-uk-grid-margin="">
+            <div class="tm-sidebar uk-width-medium-1-4 uk-hidden-small uk-row-first">
+
+                <ul class="tm-nav uk-nav" data-uk-nav="">
+                    <li class="uk-nav-header">布局类组件</li>
+                    <li><a href="grid-js.html">动态网格</a></li>
+                    <li><a href="grid-parallax.html">视差网格</a></li>
+                    <li class="uk-nav-header">导航类组件</li>
+                    <li><a href="dotnav.html">圆点导航</a></li>
+                    <li><a href="slidenav.html">滑动导航</a></li>
+                    <li><a href="pagination-js.html">动态分页</a></li>
+                </ul>
+
+            </div>
+            <div class="tm-main uk-width-medium-3-4">
+
+                <article class="uk-article">
+                    <h1>Pipeline Config</h1>
+
+                    <h3 class="tm-article-subtitle">Start</h3>
+
+                    <div class="uk-grid" data-uk-grid-margin="">
+
+                        <ul class="uk-grid uk-grid-small" style="">
+                            <li class="uk-grid-margin" style=""><div class="uk-panel uk-panel-box">
+                                <i class="uk-icon uk-icon-play uk-margin-small-right"></i>End</div></li>
+                        </ul>
+                    </div>
+
+                    <h3 class="tm-article-subtitle">Process</h3>
+
+                    <ul class="uk-sortable uk-grid uk-grid-small uk-grid-width-1-5" data-uk-sortable="{handleClass:'uk-sortable-handle'}" style="">
+
+                        <li class="uk-grid-margin" style=""><div class="uk-panel uk-panel-box"><i class="uk-sortable-handle uk-icon uk-icon-bars uk-margin-small-right"></i>url_normalization</div></li>
+                        <li class="uk-grid-margin" style=""><div class="uk-panel uk-panel-box"><i class="uk-sortable-handle uk-icon uk-icon-bars uk-margin-small-right"></i>ignore_timeout</div></li>
+                        <li class="uk-grid-margin" style=""><div class="uk-panel uk-panel-box"><i class="uk-sortable-handle uk-icon uk-icon-bars uk-margin-small-right"></i>fetch</div></li>
+                        <li class="uk-grid-margin" style=""><div class="uk-panel uk-panel-box"><i class="uk-sortable-handle uk-icon uk-icon-bars uk-margin-small-right"></i>parse</div></li>
+                        <li class="uk-grid-margin" style=""><div class="uk-panel uk-panel-box"><i class="uk-sortable-handle uk-icon uk-icon-bars uk-margin-small-right"></i>extract</div></li>
+                        <li class="uk-grid-margin" style=""><div class="uk-panel uk-panel-box"><i class="uk-sortable-handle uk-icon uk-icon-bars uk-margin-small-right"></i>html2text</div></li>
+                        <li class="uk-grid-margin" style=""><div class="uk-panel uk-panel-box"><i class="uk-sortable-handle uk-icon uk-icon-bars uk-margin-small-right"></i>hash</div></li>
+                        <li class="uk-grid-margin" style=""><div class="uk-panel uk-panel-box"><i class="uk-sortable-handle uk-icon uk-icon-bars uk-margin-small-right"></i>content_deduplication</div></li>
+                        <li class="uk-grid-margin" style=""><div class="uk-panel uk-panel-box"><i class="uk-sortable-handle uk-icon uk-icon-bars uk-margin-small-right"></i>update_check_time</div></li>
+                        <li class="uk-grid-margin" style=""><div class="uk-panel uk-panel-box"><i class="uk-sortable-handle uk-icon uk-icon-bars uk-margin-small-right"></i>lang_detect</div></li>
+                    </ul>
+
+                    <h3 class="tm-article-subtitle">End</h3>
+
+                    <div class="uk-grid" data-uk-grid-margin="">
+
+                        <ul class="uk-grid uk-grid-small" style="">
+                            <li class="uk-grid-margin" style=""><div class="uk-panel uk-panel-box">
+                                <i class="uk-icon uk-icon-stop uk-margin-small-right"></i>End</div></li>
+                        </ul>
+                    </div>
+
+
+                </article>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- modal start -->
+
+<div id="create-task-modal" class="uk-modal" aria-hidden="true" style="display: none; overflow-y: auto;">
+    <div class="uk-modal-dialog uk-modal-dialog-blank">
+        <button class="uk-modal-close uk-close" type="button"></button>
+        <div class="uk-grid uk-flex-middle" data-uk-grid-margin="">
+            <div class="uk-width-medium-1-3 uk-height-viewport uk-cover-background uk-row-first" style="background:#000000;"></div>
+            <div class="uk-width-medium-2-3 uk-row-first ">
+                <h1>Create Task</h1>
+                <div class="uk-width-medium-3-4">
+                    <form class="uk-form">
+                        <fieldset data-uk-margin>
+                            <textarea type="text" placeholder="Paste your urls here, one line one url" rows="10" class="uk-width-1-1"></textarea>
+                            <input type="text" placeholder="MaxDepth, eg: 30">
+                            <input type="text" placeholder="MaxBreadth, eg: 3">
+                            <br/>
+
+                            <label for="form-s-c"><input type="checkbox" checked id="form-s-c" />Follow Sub-domain; </label>
+
+                            <label for="img-ext"><input name="include-ext" checked type="checkbox" id="img-ext" />Include Images; </label>
+
+                            <label for="css-ext"><input  name="include-ext" checked type="checkbox" id="css-ext" />Include Css; </label>
+
+                            <label for="js-ext"><input  name="include-ext" checked type="checkbox" id="js-ext" />Include JS; </label>
+
+                        </fieldset>
+                        <button class="uk-button">Create</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="search-modal" class="uk-modal">
+    <div class="uk-modal-dialog">
+        <a class="uk-modal-close uk-close"></a>
+        <input type="text" placeholder="" class="uk-form-large uk-width-1-1">
+    </div>
+</div>
+<!-- modal end -->
+
+
+<div class="tm-footer">
+    <div class="uk-container uk-container-center uk-text-center">
+        <br>
+        <hr class="uk-article-divider" >
+        <ul class="uk-subnav uk-subnav-line uk-flex-center">
+            <li><a href="http://github.com/medcl/gopa">GitHub</a></li>
+            <li><a href="http://github.com/medcl/gopa/issues">Issues</a></li>
+            <li><a href="https://github.com/medcl/gopa/releases">Releases</a></li>
+            <li><a href="http://github.com/medcl/gopa/blob/master/CHANGES.md">Changelog</a></li>
+        </ul>
+
+        <div class="uk-panel">
+            <p>Made by <a href="http://log.medcl.net">Medcl</a> with love and tea.<br>Licensed under <a target="_blank" href=" http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>.</p>
+            <a href="/static/"><img src="/static/assets/img/logo.svg" height="30" title="GOPA" alt="GOPA"></a>
+        </div>
+
+    </div>
+</div>
+
+<div id="tm-offcanvas" class="uk-offcanvas">
+
+    <div class="uk-offcanvas-bar">
+
+        <ul class="uk-nav uk-nav-offcanvas uk-nav-parent-icon" data-uk-nav="{multiple:true}">
+            <li class="uk-parent uk-active uk-open" aria-expanded="true"><a href="#">Documentation</a>
+                <div style="overflow: hidden; height: auto; position: relative;"><ul class="uk-nav-sub" role="menu">
+                    <li><a href="documentation_get-started.html">Get started</a></li>
+                    <li><a href="documentation_how-to-customize.html">How to customize</a></li>
+                    <li><a href="documentation_layouts.html">Layout examples</a></li>
+                    <li><a href="core.html">Core</a></li>
+                    <li><a href="components.html">Components</a></li>
+                    <li><a href="documentation_project-structure.html">Project structure</a></li>
+                    <li><a href="documentation_less-sass.html">Less &amp; Sass files</a></li>
+                    <li><a href="documentation_create-a-theme.html">Create a theme</a></li>
+                    <li><a href="documentation_create-a-style.html">Create a style</a></li>
+                    <li><a href="documentation_customizer-json.html">Customizer.json</a></li>
+                    <li><a href="documentation_javascript.html">JavaScript</a></li>
+                    <li><a href="documentation_custom-prefix.html">Custom prefix</a></li>
+                </ul></div>
+            </li>
+            <li class="uk-nav-header">Core</li>
+            <li class="uk-parent" aria-expanded="false"><a href="#"><i class="uk-icon-wrench"></i> Defaults</a>
+                <div style="overflow:hidden;height:0;position:relative;" class="uk-hidden"><ul class="uk-nav-sub" role="menu">
+                    <li><a href="base.html">Base</a></li>
+                    <li><a href="print.html">Print</a></li>
+                </ul></div>
+            </li>
+            <li class="uk-parent" aria-expanded="false"><a href="#"><i class="uk-icon-th-large"></i> Layout</a>
+                <div style="overflow:hidden;height:0;position:relative;" class="uk-hidden"><ul class="uk-nav-sub" role="menu">
+                    <li><a href="grid.html">Grid</a></li>
+                    <li><a href="panel.html">Panel</a></li>
+                    <li><a href="block.html">Block</a></li>
+                    <li><a href="article.html">Article</a></li>
+                    <li><a href="comment.html">Comment</a></li>
+                    <li><a href="utility.html">Utility</a></li>
+                    <li><a href="flex.html">Flex</a></li>
+                    <li><a href="cover.html">Cover</a></li>
+                </ul></div>
+            </li>
+            <li class="uk-parent" aria-expanded="false"><a href="#"><i class="uk-icon-bars"></i> Navigations</a>
+                <div style="overflow:hidden;height:0;position:relative;" class="uk-hidden"><ul class="uk-nav-sub" role="menu">
+                    <li><a href="nav.html">Nav</a></li>
+                    <li><a href="navbar.html">Navbar</a></li>
+                    <li><a href="subnav.html">Subnav</a></li>
+                    <li><a href="breadcrumb.html">Breadcrumb</a></li>
+                    <li><a href="pagination.html">Pagination</a></li>
+                    <li><a href="tab.html">Tab</a></li>
+                    <li><a href="thumbnav.html">Thumbnav</a></li>
+                </ul></div>
+            </li>
+            <li class="uk-parent" aria-expanded="false"><a href="#"><i class="uk-icon-check"></i> Elements</a>
+                <div style="overflow:hidden;height:0;position:relative;" class="uk-hidden"><ul class="uk-nav-sub" role="menu">
+                    <li><a href="list.html">List</a></li>
+                    <li><a href="description-list.html">Description list</a></li>
+                    <li><a href="table.html">Table</a></li>
+                    <li><a href="form.html">Form</a></li>
+                </ul></div>
+            </li>
+            <li class="uk-parent" aria-expanded="false"><a href="#"><i class="uk-icon-folder-open"></i> Common</a>
+                <div style="overflow:hidden;height:0;position:relative;" class="uk-hidden"><ul class="uk-nav-sub" role="menu">
+                    <li><a href="button.html">Button</a></li>
+                    <li><a href="icon.html">Icon</a></li>
+                    <li><a href="close.html">Close</a></li>
+                    <li><a href="badge.html">Badge</a></li>
+                    <li><a href="alert.html">Alert</a></li>
+                    <li><a href="thumbnail.html">Thumbnail</a></li>
+                    <li><a href="overlay.html">Overlay</a></li>
+                    <li><a href="text.html">Text</a></li>
+                    <li><a href="column.html">Column</a></li>
+                    <li><a href="animation.html">Animation</a></li>
+                    <li><a href="contrast.html">Contrast</a></li>
+                </ul></div>
+            </li>
+            <li class="uk-parent" aria-expanded="false"><a href="#"><i class="uk-icon-magic"></i> JavaScript</a>
+                <div style="overflow:hidden;height:0;position:relative;" class="uk-hidden"><ul class="uk-nav-sub" role="menu">
+                    <li><a href="dropdown.html">Dropdown</a></li>
+                    <li><a href="modal.html">Modal</a></li>
+                    <li><a href="offcanvas.html">Off-canvas</a></li>
+                    <li><a href="switcher.html">Switcher</a></li>
+                    <li><a href="toggle.html">Toggle</a></li>
+                    <li><a href="scrollspy.html">Scrollspy</a></li>
+                    <li><a href="smooth-scroll.html">Smooth scroll</a></li>
+                </ul></div>
+            </li>
+            <li class="uk-nav-header">Components</li>
+            <li class="uk-parent" aria-expanded="false"><a href="#"><i class="uk-icon-th-large"></i> Layout</a>
+                <div style="overflow:hidden;height:0;position:relative;" class="uk-hidden"><ul class="uk-nav-sub" role="menu">
+                    <li><a href="grid-js.html">Dynamic Grid</a></li>
+                    <li><a href="grid-parallax.html">Parallax Grid</a></li>
+                </ul></div>
+            </li>
+            <li class="uk-parent" aria-expanded="false"><a href="#"><i class="uk-icon-bars"></i> Navigations</a>
+                <div style="overflow:hidden;height:0;position:relative;" class="uk-hidden"><ul class="uk-nav-sub" role="menu">
+                    <li><a href="dotnav.html">Dotnav</a></li>
+                    <li><a href="slidenav.html">Slidenav</a></li>
+                    <li><a href="pagination-js.html">Dynamic Pagination</a></li>
+                </ul></div>
+            </li>
+            <li class="uk-parent" aria-expanded="false"><a href="#"><i class="uk-icon-folder-open"></i> Common</a>
+                <div style="overflow:hidden;height:0;position:relative;" class="uk-hidden"><ul class="uk-nav-sub" role="menu">
+                    <li><a href="form-advanced.html">Form advanced</a></li>
+                    <li><a href="form-file.html">Form file</a></li>
+                    <li><a href="form-password.html">Form password</a></li>
+                    <li><a href="form-select.html">Form select</a></li>
+                    <li><a href="placeholder.html">Placeholder</a></li>
+                    <li><a href="progress.html">Progress</a></li>
+                </ul></div>
+            </li>
+            <li class="uk-parent" aria-expanded="false"><a href="#"><i class="uk-icon-magic"></i> JavaScript</a>
+                <div style="overflow:hidden;height:0;position:relative;" class="uk-hidden"><ul class="uk-nav-sub" role="menu">
+                    <li><a href="lightbox.html">Lightbox</a></li>
+                    <li><a href="autocomplete.html">Autocomplete</a></li>
+                    <li><a href="datepicker.html">Datepicker</a></li>
+                    <li><a href="htmleditor.html">HTML editor</a></li>
+                    <li><a href="slider.html">Slider</a></li>
+                    <li><a href="slideset.html">Slideset</a></li>
+                    <li><a href="slideshow.html">Slideshow</a></li>
+                    <li><a href="parallax.html">Parallax</a></li>
+                    <li><a href="accordion.html">Accordion</a></li>
+                    <li><a href="notify.html">Notify</a></li>
+                    <li><a href="search.html">Search</a></li>
+                    <li><a href="nestable.html">Nestable</a></li>
+                    <li><a href="sortable.html">Sortable</a></li>
+                    <li><a href="sticky.html">Sticky</a></li>
+                    <li><a href="timepicker.html">Timepicker</a></li>
+                    <li><a href="tooltip.html">Tooltip</a></li>
+                    <li><a href="upload.html">Upload</a></li>
+                </ul></div>
+            </li>
+            <li class="uk-nav-divider"></li>
+            <li><a href="../showcase/index.html">Showcase</a></li>
+            <li><a href="tutorials.html">Tutorials</a></li>
+            <li><a href="/">UIkit 3</a></li>
+        </ul>
+
+    </div>
+
+</div>
+
+</body>
+</html>

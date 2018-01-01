@@ -23,7 +23,7 @@
 
 ##### improvement
 1. remove goleveldb due to memory leak
-
+2. update logo
 ##### bugfix
 
 
