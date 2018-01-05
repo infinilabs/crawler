@@ -101,14 +101,14 @@ init-version:
 
 update-generated-file:
 	@echo "update generated info"
-	@echo -e "package env\nconst lastCommitLog  =\""`git log -1 --pretty=format:"%h, %ad, %an, %s"` "\"\nconst buildDate  =\"`date`\"" > core/env/generated.go
-	@echo -e "\nconst version  =\"$(GOPA_VERSION)\"" >> core/env/generated.go
+	@echo -e "package env\n\nconst lastCommitLog = \""`git log -1 --pretty=format:"%h, %ad, %an, %s"` "\"\nconst buildDate = \"`date`\"" > core/env/generated.go
+	@echo -e "\nconst version  = \"$(GOPA_VERSION)\"" >> core/env/generated.go
 
 
 restore-generated-file:
 	@echo "restore generated info"
-	@echo -e "package env\nconst lastCommitLog  =\"N/A\"\nconst buildDate  =\"N/A\"" > core/env/generated.go
-	@echo -e "\nconst version  =\"0.0.1\"" >> core/env/generated.go
+	@echo -e "package env\n\nconst lastCommitLog = \"N/A\"\nconst buildDate = \"N/A\"" > core/env/generated.go
+	@echo -e "\nconst version = \"0.0.1\"" >> core/env/generated.go
 
 
 update-ui:
