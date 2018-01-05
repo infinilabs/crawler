@@ -17,11 +17,11 @@ limitations under the License.
 package http
 
 import (
-	"github.com/ararog/timeago"
 	"github.com/infinitbyte/gopa/core/env"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
+	"time"
 )
 
 // IndexAction returns cluster health information
@@ -35,14 +35,15 @@ func (handler API) IndexAction(w http.ResponseWriter, req *http.Request, _ httpr
 	data := map[string]interface{}{}
 	data["cluster_name"] = global.Env().SystemConfig.ClusterConfig.Name
 	data["name"] = global.Env().SystemConfig.NodeConfig.Name
+
 	version := map[string]interface{}{}
-	version["number"] = env.VERSION
+	version["number"] = env.GetVersion()
 	version["build_commit"] = env.GetLastCommitLog()
 	version["build_date"] = env.GetBuildDate()
+
 	data["version"] = version
 	data["tagline"] = "You Know, for Web"
-	uptime, _ := timeago.TimeAgoFromNowWithTime(env.GetStartTime())
-	data["uptime"] = uptime
+	data["uptime"] = time.Since(env.GetStartTime()).String()
 
 	handler.WriteJSON(w, &data, http.StatusOK)
 }

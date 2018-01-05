@@ -65,7 +65,7 @@ func onShutdown(isDaemon bool) {
 	fmt.Println("   _` |   _ \\   _ \\   _` |     _ \\  |  |   -_) ")
 	fmt.Println(" \\__, | \\___/ \\___/ \\__,_|   _.__/ \\_, | \\___| ")
 	fmt.Println(" ____/                             ___/        ")
-	fmt.Println("[gopa] "+env.VERSION+", uptime:", time.Since(env.GetStartTime()))
+	fmt.Println("[gopa] "+env.GetVersion()+", uptime:", time.Since(env.GetStartTime()))
 	fmt.Println(" ")
 }
 

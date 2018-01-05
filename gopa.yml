@@ -320,8 +320,8 @@ modules:
   ui:
     enabled: true
     site_name: Elasticsearch
-    logo: https://static-www.elastic.co/cn/assets/blt6050efb80ceabd47/elastic-logo (2).svg?q=294
-    favicon: https://www.elastic.co/favicon.ico
+#    logo: https://static-www.elastic.co/cn/assets/blt6050efb80ceabd47/elastic-logo (2).svg?q=294
+#    favicon: https://www.elastic.co/favicon.ico
   elasticsearch:
     endpoint: http://dev:9200
     index_prefix: gopa-

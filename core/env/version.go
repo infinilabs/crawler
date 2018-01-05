@@ -18,9 +18,6 @@ package env
 
 import "strings"
 
-// VERSION is the version of this gopa
-const VERSION = "0.10.0_SNAPSHOT"
-
 // GetWelcomeMessage print welcome message
 func GetWelcomeMessage() string {
 	s := ("  ________ ________ __________  _____   \n")
@@ -34,7 +31,7 @@ func GetWelcomeMessage() string {
 	if len(lastCommitLog) > 0 {
 		commitLog = "\n///last commit: " + GetLastCommitLog() + "///"
 	}
-	s += ("[gopa] " + VERSION + commitLog + "\n")
+	s += ("[gopa] " + GetVersion() + commitLog + "\n")
 	return (s)
 }
 
@@ -55,4 +52,9 @@ func GetLastCommitHash() string {
 // GetBuildDate returns the build datetime of current gopa package
 func GetBuildDate() string {
 	return strings.TrimSpace(buildDate)
+}
+
+// GetVersion returns the version of this gopa build
+func GetVersion() string {
+	return strings.TrimSpace(version)
 }

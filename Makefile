@@ -1,10 +1,19 @@
 SHELL=/bin/bash
 
+# Default GOPA version
+GOPA_VERSION := 0.10.0_SNAPSHOT
+
+# Get release version from environment
+ifneq "$(VERSION)" ""
+   GOPA_VERSION := $(VERSION)
+endif
+
 # Ensure GOPATH is set before running build process.
 ifeq "$(GOPATH)" ""
   $(error Please set the environment variable GOPATH before running `make`)
 endif
 
+# Go environment
 CURDIR := $(shell pwd)
 OLDGOPATH:= $(GOPATH)
 NEWGOPATH:= $(CURDIR):$(CURDIR)/vendor:$(GOPATH)
@@ -24,9 +33,10 @@ PKGS=$(go list ./... | grep -v /vendor/)
 default: build
 
 build: config
-	@echo $(GOPATH)
+	@#echo $(GOPATH)
 	@echo $(NEWGOPATH)
 	$(GOBUILD) -o bin/gopa
+	$(MAKE) restore-generated-file
 
 build-cluster-test: build
 	cd bin && mkdir node1 node2 node3 && cp gopa node1 && cp gopa node2 && cp gopa node3
@@ -34,16 +44,7 @@ build-cluster-test: build
 # used to build the binary for gdb debugging
 build-race: clean config update-ui
 	$(GOBUILD) -gcflags "-m -N -l" -race -o bin/gopa
-
-update-ui:
-	$(GO) get github.com/infinitbyte/esc
-	(cd static&& esc -ignore="static.go|build_static.sh|.DS_Store" -o static.go -pkg static ../static )
-
-update-template-ui:
-	$(GO) get github.com/infinitbyte/ego/cmd/ego
-	cd modules/ui/ && ego
-	cd modules/index/ui/ && ego
-	cd plugins/ && ego
+	$(MAKE) restore-generated-file
 
 tar: build
 	cd bin && tar cfz ../bin/gopa.tar.gz gopa config gopa.yml
@@ -53,6 +54,8 @@ cross-build: clean config update-ui
 	GOOS=windows GOARCH=amd64 $(GOBUILD) -o bin/gopa-windows64.exe
 	GOOS=darwin  GOARCH=amd64 $(GOBUILD) -o bin/gopa-darwin64
 	GOOS=linux  GOARCH=amd64 $(GOBUILD) -o bin/gopa-linux64
+	$(MAKE) restore-generated-file
+
 
 build-win:
 	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64     $(GOBUILD) -o bin/gopa-windows64.exe
@@ -66,12 +69,6 @@ build-darwin:
 	GOOS=darwin  GOARCH=amd64     $(GOBUILD) -o bin/gopa-darwin64
 	GOOS=darwin  GOARCH=386       $(GOBUILD) -o bin/gopa-darwin32
 
-all: clean config update-ui cross-build
-
-all-platform: clean config update-ui cross-build-all-platform
-
-cross-build-all-platform: clean config build-bsd build-linux build-darwin build-win
-
 build-bsd:
 	GOOS=freebsd  GOARCH=amd64    $(GOBUILD) -o bin/gopa-freebsd64
 	GOOS=freebsd  GOARCH=386      $(GOBUILD) -o bin/gopa-freebsd32
@@ -79,6 +76,12 @@ build-bsd:
 	GOOS=netbsd  GOARCH=386       $(GOBUILD) -o bin/gopa-netbsd32
 	GOOS=openbsd  GOARCH=amd64    $(GOBUILD) -o bin/gopa-openbsd64
 	GOOS=openbsd  GOARCH=386      $(GOBUILD) -o bin/gopa-openbsd32
+
+all: clean config update-ui cross-build restore-generated-file
+
+all-platform: clean config update-ui cross-build-all-platform restore-generated-file
+
+cross-build-all-platform: clean config build-bsd build-linux build-darwin build-win  restore-generated-file
 
 format:
 	gofmt -l -s -w .
@@ -92,21 +95,45 @@ clean: clean_data
 	rm -rif bin
 	mkdir bin
 
+init-version:
+	@echo building GOPA $(GOPA_VERSION)
 
-update-commit-log:
-	echo -e "package env\nconst lastCommitLog  =\""`git log -1 --pretty=format:"%h, %ad, %an, %s"` "\"\nconst buildDate  =\"`date`\"" > core/env/commit_log.go
 
-config: update-commit-log update-ui update-template-ui
-	@echo "init config"
-	$(GO) env
-	mkdir -p bin
-	cp stop.sh bin/stop.sh
-	cp gopa.yml bin/gopa.yml
-	cp -r config bin
+update-generated-file:
+	@echo "update generated info"
+	@echo -e "package env\nconst lastCommitLog  =\""`git log -1 --pretty=format:"%h, %ad, %an, %s"` "\"\nconst buildDate  =\"`date`\"" > core/env/generated.go
+	@echo -e "\nconst version  =\"$(GOPA_VERSION)\"" >> core/env/generated.go
+
+
+restore-generated-file:
+	@echo "restore generated info"
+	@echo -e "package env\nconst lastCommitLog  =\"N/A\"\nconst buildDate  =\"N/A\"" > core/env/generated.go
+	@echo -e "\nconst version  =\"0.0.1\"" >> core/env/generated.go
+
+
+update-ui:
+	@echo "generate static files"
+	@$(GO) get github.com/infinitbyte/esc
+	@(cd static&& esc -ignore="static.go|build_static.sh|.DS_Store" -o static.go -pkg static ../static )
+
+update-template-ui:
+	@echo "generate UI pages"
+	@$(GO) get github.com/infinitbyte/ego/cmd/ego
+	@cd modules/ui/ && ego
+	@cd modules/index/ui/ && ego
+	@cd plugins/ && ego
+
+config: init-version update-ui update-template-ui update-generated-file
+	@echo "update configs"
+	@# $(GO) env
+	@mkdir -p bin
+	@cp stop.sh bin/stop.sh
+	@cp gopa.yml bin/gopa.yml
+	@cp -r config bin
 
 
 fetch-depends:
-	@echo "get Dependencies"
+	@echo "fetch dependencies"
 	$(GO) get github.com/cihub/seelog
 	$(GO) get github.com/PuerkitoBio/purell
 	$(GO) get github.com/clarkduvall/hyperloglog
