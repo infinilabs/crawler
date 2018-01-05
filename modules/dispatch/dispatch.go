@@ -74,6 +74,9 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				//get update task
 				if moduleConfig.UpdateTaskEnabled && (tasks == nil || total <= 0) {
 					total, tasks, err = model.GetPendingUpdateFetchTasks(offset)
+					if err != nil {
+						log.Error(err)
+					}
 					log.Debugf("get %v update task, with offset, %v", total, offset)
 					isUpdate = true
 					if total == 0 {
@@ -85,6 +88,9 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				// get failed task
 				if moduleConfig.FailedTaskEnabled && (tasks == nil || total <= 0) {
 					total, tasks, err = model.GetFailedTasks(offset)
+					if err != nil {
+						log.Error(err)
+					}
 					log.Debugf("get %v failed task, with offset, %v", total, offset)
 					if total == 0 {
 						log.Tracef("%v hit 0 failed task, reset offset to %v ", offset, defaultOffset)
@@ -95,11 +101,6 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				if tasks != nil && total > 0 {
 					for _, v := range tasks {
 						log.Trace("get task from db, ", v.ID)
-
-						if err != nil {
-							log.Error(err)
-							panic(err)
-						}
 
 						//update offset
 						if v.Created.After(offset) && isUpdate {
