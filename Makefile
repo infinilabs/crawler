@@ -108,7 +108,7 @@ update-generated-file:
 restore-generated-file:
 	@echo "restore generated info"
 	@echo -e "package env\n\nconst lastCommitLog = \"N/A\"\nconst buildDate = \"N/A\"" > core/env/generated.go
-	@echo -e "\nconst version = \"0.0.1\"" >> core/env/generated.go
+	@echo -e "\nconst version = \"0.0.1-SNAPSHOT\"" >> core/env/generated.go
 
 
 update-ui:
