@@ -39,7 +39,7 @@ type UserGroup struct {
 	DepartName string
 }
 
-func Test1(t *testing.T) {
+func SmokeTest1(t *testing.T) {
 	util.FileDelete("/tmp/test_database12.db")
 
 	fileName := fmt.Sprintf("file:%s?cache=shared&mode=rwc", "/tmp/test_database12.db")
