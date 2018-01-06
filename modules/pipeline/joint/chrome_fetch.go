@@ -62,7 +62,7 @@ func (joint ChromeFetchJoint) Process(context *model.Context) error {
 	flg := make(chan signal, 1)
 	go func() {
 
-		cmd := exec.Command(command, "--headless", "-disable-gpu", "--dump-dom", "--remote-debugging-port=9223", "--no-sandbox", requestUrl)
+		cmd := exec.Command(command, "--headless", "-disable-gpu", "--dump-dom", "--no-sandbox", requestUrl)
 		stdout, err := cmd.StdoutPipe()
 		if err == nil {
 			err = cmd.Start()
