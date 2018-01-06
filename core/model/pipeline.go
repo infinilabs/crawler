@@ -426,6 +426,7 @@ func (pipe *Pipeline) Run() *Context {
 		if err != nil {
 			stats.Increment(pipe.name+".pipeline", "error")
 			log.Debugf("%s-%s: %v", pipe.name, v.Name(), err)
+			pipe.context.End(err.Error())
 			return pipe.context
 		}
 		log.Trace(pipe.name, ", end joint,", v.Name())
