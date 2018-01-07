@@ -20,7 +20,6 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/modules/pipeline/joint"
-	"github.com/infinitbyte/gopa/modules/pipeline/joint/cdp"
 )
 
 var inited bool = false
@@ -53,9 +52,7 @@ func InitJoints() {
 	model.RegisterPipeJoint(joint.ContentDeduplicationJoint{})
 	model.RegisterPipeJoint(joint.UpdateCheckTimeJoint{})
 	model.RegisterPipeJoint(joint.LanguageDetectJoint{})
-	model.RegisterPipeJoint(joint.ChromeFetchJoint{})
 	model.RegisterPipeJoint(joint.ExtractJoint{})
-	model.RegisterPipeJoint(cdp.ChromeFetchV2Joint{})
 	log.Debug("end register joints")
 
 }

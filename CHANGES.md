@@ -13,13 +13,12 @@
 
 ##### features
 1. dynamic create pipelines
-2. add chrome headless fetch joint
-3. init plugin architecture
-4. support extract tags by css path
-5. add chrome fetch v2 joint, via chrome debug protocol
-6. add auto-completion to search ui
-7. search ui support mobile
-8. support access control by github oauth
+2. init plugin architecture
+3. support extract tags by css path
+4. add chrome fetch joint, via chrome debug protocol
+5. add auto-completion to search ui
+6. search ui support mobile
+7. support access control by github oauth
 
 ##### improvement
 1. remove goleveldb due to memory leak
