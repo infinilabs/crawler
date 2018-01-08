@@ -92,7 +92,7 @@ func (module IndexModule) Start(cfg *Config) {
 				er, v := queue.Pop(config.IndexChannel)
 				log.Trace("got index signal, ", string(v))
 				if er != nil {
-					log.Trace(er)
+					log.Error(er)
 					continue
 				}
 				//indexing to es or blevesearch

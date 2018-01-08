@@ -1,6 +1,7 @@
 package tools_generator
 
 import (
+	log "github.com/cihub/seelog"
 	. "github.com/infinitbyte/gopa/core/config"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/queue"
@@ -30,14 +31,20 @@ func (plugin GeneratorPlugin) Start(cfg *Config) {
 			if generatorConfig.TaskUrl != "" {
 				context := model.Context{IgnoreBroken: true}
 				context.Set(model.CONTEXT_TASK_URL, generatorConfig.TaskUrl)
-				queue.Push(config.CheckChannel, util.ToJSONBytes(context))
+				err := queue.Push(config.CheckChannel, util.ToJSONBytes(context))
+				if err != nil {
+					log.Error(err)
+				}
 			}
 
 			if generatorConfig.TaskID != "" {
 
 				context := model.Context{}
 				context.Set(model.CONTEXT_TASK_ID, generatorConfig.TaskID)
-				queue.Push(config.FetchChannel, util.ToJSONBytes(context))
+				err := queue.Push(config.FetchChannel, util.ToJSONBytes(context))
+				if err != nil {
+					log.Error(err)
+				}
 			}
 			time.Sleep(100 * time.Millisecond)
 		}

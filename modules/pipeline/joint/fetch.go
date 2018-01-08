@@ -148,8 +148,10 @@ func (joint FetchJoint) Process(context *model.Context) error {
 				context.Set(model.CONTEXT_TASK_Reference, requestUrl)
 				context.Set(model.CONTEXT_TASK_Depth, depth)
 				context.Set(model.CONTEXT_TASK_Breadth, breadth)
-				queue.Push(config.CheckChannel, util.ToJSONBytes(context))
-
+				err = queue.Push(config.CheckChannel, util.ToJSONBytes(context))
+				if err != nil {
+					log.Error(err)
+				}
 				flg <- signal{flag: false, err: err, status: model.TaskRedirected}
 				return
 			}

@@ -33,14 +33,16 @@ type Queue interface {
 var handler Queue
 
 func Push(k string, v []byte) error {
+	var err error = nil
 	if handler != nil {
-		o := handler.Push(k, v)
-		if o == nil {
+		err = handler.Push(k, v)
+		if err == nil {
 			stats.Increment("queue."+k, "push")
+			return nil
 		}
-		return o
+		stats.Increment("queue."+k, "push_error")
+		return err
 	}
-	stats.Increment("queue."+k, "push_error")
 	panic(errors.New("channel is not registered"))
 }
 
@@ -57,10 +59,11 @@ func Pop(k string) (error, []byte) {
 		er, o := handler.Pop(k, -1)
 		if er == nil {
 			stats.Increment("queue."+k, "pop")
+			return er, o
 		}
+		stats.Increment("queue."+k, "pop_error")
 		return er, o
 	}
-	stats.Increment("queue."+k, "pop_error")
 	panic(errors.New("channel is not registered"))
 }
 
@@ -74,9 +77,9 @@ func PopTimeout(k string, timeoutInSeconds time.Duration) (error, []byte) {
 		if er == nil {
 			stats.Increment("queue."+k, "pop")
 		}
+		stats.Increment("queue."+k, "pop_error")
 		return er, o
 	}
-	stats.Increment("queue."+k, "pop_error")
 	panic(errors.New("channel is not registered"))
 }
 

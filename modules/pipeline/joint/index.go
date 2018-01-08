@@ -64,7 +64,6 @@ func (joint IndexJoint) Process(c *model.Context) error {
 	}
 
 	err = queue.Push(config.IndexChannel, bytes)
-
 	if err != nil {
 		log.Error(err)
 		return err

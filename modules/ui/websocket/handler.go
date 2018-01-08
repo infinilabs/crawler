@@ -18,6 +18,7 @@ package websocket
 
 import (
 	"encoding/json"
+	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/global"
 	logging "github.com/infinitbyte/gopa/core/logger"
 	"github.com/infinitbyte/gopa/core/model"
@@ -50,8 +51,10 @@ func (command Command) AddSeed(c *WebsocketConnection, a []string) {
 	if len(url) > 0 {
 		context := model.Context{IgnoreBroken: true}
 		context.Set(model.CONTEXT_TASK_URL, url)
-		queue.Push(config.CheckChannel, util.ToJSONBytes(context))
-
+		err := queue.Push(config.CheckChannel, util.ToJSONBytes(context))
+		if err != nil {
+			log.Error(err)
+		}
 		c.WritePrivateMessage("url " + url + " success added to pending fetch queue")
 		return
 	}

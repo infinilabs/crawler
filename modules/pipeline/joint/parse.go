@@ -174,7 +174,10 @@ func (joint ParsePageJoint) Process(context *model.Context) error {
 			context.Set(model.CONTEXT_TASK_Reference, refUrl)
 			context.Set(model.CONTEXT_TASK_Depth, 0)
 			context.Set(model.CONTEXT_TASK_Breadth, 0)
-			queue.Push(config.CheckChannel, util.ToJSONBytes(context))
+			err := queue.Push(config.CheckChannel, util.ToJSONBytes(context))
+			if err != nil {
+				log.Error(err)
+			}
 		}
 
 	})
@@ -232,7 +235,10 @@ func (joint ParsePageJoint) Process(context *model.Context) error {
 				context.Set(model.CONTEXT_TASK_Reference, refUrl)
 				context.Set(model.CONTEXT_TASK_Depth, d)
 				context.Set(model.CONTEXT_TASK_Breadth, b)
-				queue.Push(config.CheckChannel, util.ToJSONBytes(context))
+				err := queue.Push(config.CheckChannel, util.ToJSONBytes(context))
+				if err != nil {
+					log.Error(err)
+				}
 			}
 
 		}
