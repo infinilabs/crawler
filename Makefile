@@ -36,7 +36,7 @@ build: config
 	@#echo $(GOPATH)
 	@echo $(NEWGOPATH)
 	$(GOBUILD) -o bin/gopa
-	$(MAKE) restore-generated-file
+	@$(MAKE) restore-generated-file
 
 build-cluster-test: build
 	cd bin && mkdir node1 node2 node3 && cp gopa node1 && cp gopa node2 && cp gopa node3
@@ -44,7 +44,7 @@ build-cluster-test: build
 # used to build the binary for gdb debugging
 build-race: clean config update-ui
 	$(GOBUILD) -gcflags "-m -N -l" -race -o bin/gopa
-	$(MAKE) restore-generated-file
+	@$(MAKE) restore-generated-file
 
 tar: build
 	cd bin && tar cfz ../bin/gopa.tar.gz gopa config gopa.yml
@@ -54,7 +54,7 @@ cross-build: clean config update-ui
 	GOOS=windows GOARCH=amd64 $(GOBUILD) -o bin/gopa-windows64.exe
 	GOOS=darwin  GOARCH=amd64 $(GOBUILD) -o bin/gopa-darwin64
 	GOOS=linux  GOARCH=amd64 $(GOBUILD) -o bin/gopa-linux64
-	$(MAKE) restore-generated-file
+	@$(MAKE) restore-generated-file
 
 
 build-win:
