@@ -62,7 +62,7 @@ func (this UpdateCheckTimeJoint) Process(c *model.Context) error {
 	current := time.Now().UTC()
 
 	//update task's snapshot, detect duplicated snapshot
-	if snapshot.Hash == lastSnapshotHash {
+	if snapshot.Hash != "" && snapshot.Hash == lastSnapshotHash {
 
 		//increase next check time
 		updateNextCheckTime(c, current, decelerateSteps, false)

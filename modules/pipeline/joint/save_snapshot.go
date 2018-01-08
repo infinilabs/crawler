@@ -53,7 +53,7 @@ func (this SaveSnapshotToDBJoint) Process(c *model.Context) error {
 	}
 
 	//update task's snapshot, detect duplicated snapshot
-	if snapshot.Hash == taskSnapshotHash {
+	if snapshot.Hash != "" && snapshot.Hash == taskSnapshotHash {
 		msg := fmt.Sprintf("content unchanged, snapshot with same hash: %s, %s", snapshot.Hash, taskUrl)
 		c.End(msg)
 		return nil
