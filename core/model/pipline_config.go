@@ -28,8 +28,8 @@ import (
 
 // JointConfig configs for each joint
 type JointConfig struct {
-	JointName  string                 `json:"joint" config:"joint"`           //the joint name
-	Parameters map[string]interface{} `json:"parameters" config:"parameters"` //kv parameters for this joint
+	JointName  string                 `json:"joint" config:"joint"`                     //the joint name
+	Parameters map[string]interface{} `json:"parameters,omitempty" config:"parameters"` //kv parameters for this joint
 	Enabled    bool                   `json:"enabled" config:"enabled"`
 }
 
@@ -91,14 +91,17 @@ func DeletePipelineConfig(id string) error {
 }
 
 type HostConfig struct {
-	ID         string    `json:"id,omitempty" gorm:"not null;unique;primary_key" index:"id"`
-	Host       string    `gorm:"index" json:"host"`
-	UrlPattern string    `gorm:"index" json:"url_pattern"`
-	PipelineID string    `gorm:"index" json:"pipeline_id"`
-	Runner     string    `gorm:"index" json:"runner"`
-	SortOrder  int       `gorm:"index" json:"sort_order"`
-	Created    time.Time `gorm:"index" json:"created,omitempty"`
-	Updated    time.Time `gorm:"index" json:"updated,omitempty"`
+	ID         string `json:"id,omitempty" gorm:"not null;unique;primary_key" index:"id"`
+	Host       string `gorm:"index" json:"host"`
+	UrlPattern string `gorm:"index" json:"url_pattern"`
+	Runner     string `gorm:"index" json:"runner"`
+	SortOrder  int    `gorm:"index" json:"sort_order"`
+
+	PipelineID string `gorm:"index" json:"pipeline_id"`
+	Cookies    string `json:"cookies,omitempty"`
+
+	Created time.Time `gorm:"index" json:"created,omitempty"`
+	Updated time.Time `gorm:"index" json:"updated,omitempty"`
 }
 
 func CreateHostConfig(config *HostConfig) error {
@@ -156,22 +159,23 @@ func GetHostConfig(runner, host string) []HostConfig {
 	return configs
 }
 
-func GetPipelineIDByUrl(runner, host, url string) string {
+func GetHostConfigByHostAndUrl(runner, host, url string) *HostConfig {
 	configs := GetHostConfig(runner, host)
 	if len(configs) > 0 {
 		for _, c := range configs {
 			ok, err := regexp.Match(c.UrlPattern, []byte(url))
 			if err != nil {
-				panic(err)
-			}
-			log.Debugf("match url:%v %v %v %v", host, url, c.UrlPattern, ok)
-			if ok {
-				return c.PipelineID
+				log.Error(err)
+				return nil
 			}
 
+			log.Debugf("match url:%v %v %v %v", host, url, c.UrlPattern, ok)
+			if ok {
+				return &c
+			}
 		}
 	}
-	return ""
+	return nil
 }
 
 func convertHostConfig(result persist.Result, configs *[]HostConfig) {

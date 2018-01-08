@@ -41,11 +41,10 @@ const (
 type Context struct {
 	Parameters
 
-	SequenceID       int64       `json:"sequence"`
-	PipelineConfigID string      `json:"pipeline_config_id"`
-	Simulate         bool        `json:"simulate"`
-	IgnoreBroken     bool        `json:"ignore_broken"`
-	Payload          interface{} `json:"-"`
+	SequenceID   int64       `json:"sequence"`
+	Simulate     bool        `json:"simulate"`
+	IgnoreBroken bool        `json:"ignore_broken"`
+	Payload      interface{} `json:"-"`
 
 	//private parameters
 	breakFlag bool
@@ -426,7 +425,9 @@ func (pipe *Pipeline) Run() *Context {
 		if err != nil {
 			stats.Increment(pipe.name+".pipeline", "error")
 			log.Debugf("%s-%s: %v", pipe.name, v.Name(), err)
-			pipe.context.End(err.Error())
+
+			//TODO catch error
+			pipe.context.Payload = err.Error()
 			return pipe.context
 		}
 		log.Trace(pipe.name, ", end joint,", v.Name())

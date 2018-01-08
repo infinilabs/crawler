@@ -87,6 +87,7 @@ curl -XPOST "http://localhost:8001/host/pipeline_config/" -H 'Content-Type: appl
 {
   "host":"discuss.elastic.co",
   "url_pattern":".*",
+  "cookies":"c_lang=%2Fcn%2F; olfsk=olfsk312616649025; hblid=FpKwJs7jE1PzWPdO0REmbu2; _parsely_visitor=b5843653fbe2c2c5dbb=1509289290;",
   "sort_order":1,
   "runner":"fetch",
   "pipeline_id":"b9154g2ihf5ln4c9ie10"

@@ -73,7 +73,8 @@ type Task struct {
 	SnapshotCreated  time.Time `json:"snapshot_created,omitempty"`
 	LastScreenshotID string    `json:"last_screenshot_id,omitempty"`
 
-	PipelineConfigID string `json:"pipline_config_id,omitempty"`
+	PipelineConfigID string      `json:"pipline_config_id,omitempty"`
+	HostConfig       *HostConfig `json:"host_config,omitempty"`
 
 	// transient properties
 	Snapshots     []Snapshot `json:"-"`
@@ -103,6 +104,7 @@ const (
 	CONTEXT_TASK_SnapshotVersion  ParaKey = "GOPA_TASK_SnapshotVersion"
 	CONTEXT_TASK_LastScreenshotID ParaKey = "GOPA_TASK_LastScreenshotID"
 	CONTEXT_TASK_PipelineConfigID ParaKey = "GOPA_TASK_PipelineConfigID"
+	CONTEXT_TASK_Cookies          ParaKey = "GOPA_TASK_Cookies"
 
 	CONTEXT_SNAPSHOT_ContentType ParaKey = "GOPA_SNAPSHOT_ContentType"
 )

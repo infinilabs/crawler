@@ -10,6 +10,7 @@ import (
 type Host struct {
 	Host        string        `storm:"id,unique" json:"host,omitempty" gorm:"not null;unique;primary_key" index:"id"`
 	Favicon     string        `json:"favicon,omitempty"`
+	Enabled     bool          `storm:"index" json:"enabled"`
 	HostConfigs *[]HostConfig `json:"host_configs,omitempty"`
 	Created     *time.Time    `storm:"index" json:"created,omitempty"`
 	Updated     *time.Time    `storm:"index" json:"updated,omitempty"`

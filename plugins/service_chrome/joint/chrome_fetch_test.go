@@ -1,4 +1,4 @@
-package cdp
+package joint
 
 import (
 	"context"

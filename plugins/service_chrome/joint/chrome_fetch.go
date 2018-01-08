@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cdp
+package joint
 
 import (
 	c "context"
@@ -27,9 +27,11 @@ import (
 	"github.com/mafredri/cdp"
 	"github.com/mafredri/cdp/devtool"
 	"github.com/mafredri/cdp/protocol/dom"
+	"github.com/mafredri/cdp/protocol/network"
 	"github.com/mafredri/cdp/protocol/page"
 	"github.com/mafredri/cdp/protocol/runtime"
 	"github.com/mafredri/cdp/rpcc"
+	"golang.org/x/net/context"
 	"strings"
 	"sync"
 	"time"
@@ -54,10 +56,38 @@ type signal struct {
 	status int
 }
 
+// Cookie represents a browser cookie.
+type Cookie struct {
+	URL   string `json:"url"`
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
 var lock sync.Mutex
 
 func (joint ChromeFetchV2Joint) Name() string {
-	return "chrome_fetch_v2"
+	return "chrome_fetch"
+}
+
+func setCookie(url, cookies string, c *cdp.Client, ctx context.Context) error {
+	items := strings.Split(cookies, ";")
+	for _, item := range items {
+		cookie := strings.Split(item, "=")
+		if (len(cookie)) == 2 {
+			cookieArgs := network.NewSetCookieArgs(strings.TrimSpace(cookie[0]), strings.TrimSpace(cookie[1])).
+				SetURL(url)
+			reply, err := c.Network.SetCookie(ctx, cookieArgs)
+			if err != nil {
+				log.Error(err)
+				return err
+			}
+			if !reply.Success {
+				log.Error(err)
+				return errors.New("could not set cookie")
+			}
+		}
+	}
+	return nil
 }
 
 func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
@@ -70,6 +100,7 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 
 	requestUrl := context.MustGetString(model.CONTEXT_TASK_URL)
 	reference := context.MustGetString(model.CONTEXT_TASK_Reference)
+	cookies := context.GetStringOrDefault(model.CONTEXT_TASK_Cookies, "")
 
 	if len(requestUrl) == 0 {
 		log.Error("invalid fetchUrl,", requestUrl)
@@ -104,6 +135,9 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 	defer conn.Close() // Leaving connections open will leak memory.
 
 	c := cdp.NewClient(conn)
+
+	// Setting cookies
+	setCookie(requestUrl, cookies, c, ctx)
 
 	// Open a DOMContentEventFired client to buffer this event.
 	domContent, err := c.Page.DOMContentEventFired(ctx)

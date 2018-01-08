@@ -17,6 +17,7 @@ limitations under the License.
 package http
 
 import (
+	log "github.com/cihub/seelog"
 	logger "github.com/cihub/seelog"
 	api "github.com/infinitbyte/gopa/core/http"
 	"github.com/infinitbyte/gopa/core/model"
@@ -59,7 +60,6 @@ func (handler API) TaskGetAction(w http.ResponseWriter, req *http.Request, ps ht
 }
 
 // TaskAction handle task creation and return task list which support parameter: `from`, `size` and `host`, eg:
-
 //curl -XGET http://127.0.0.1:8001/task?from=100&size=10&host=elasticsearch.cn
 func (handler API) TaskAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
@@ -108,9 +108,13 @@ func (handler API) CreateTaskAction(w http.ResponseWriter, req *http.Request, ps
 
 	context := model.Context{IgnoreBroken: true}
 	context.Set(model.CONTEXT_TASK_URL, url)
-	context.PipelineConfigID = pipelineID
+	context.Set(model.CONTEXT_TASK_PipelineConfigID, pipelineID)
 
-	queue.Push(config.CheckChannel, util.ToJSONBytes(context))
+	err = queue.Push(config.CheckChannel, util.ToJSONBytes(context))
+	if err != nil {
+		log.Error(err)
+		return
+	}
 
 	handler.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
 

@@ -57,6 +57,8 @@ modules:
                     - "javascript:"
                     contain:
                     - "crond/run"
+                    - "login"
+                    - "logout"
                     suffix: []
                   must:
                     prefix: []
@@ -143,10 +145,6 @@ modules:
           - joint: chrome_fetch
             enabled: false
             parameters:
-              command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-          - joint: chrome_fetch_v2
-            enabled: false
-            parameters:
               chrome_host: http://127.0.0.1:9223
               save_screenshot: true
               compress_enabled: true
@@ -225,7 +223,11 @@ modules:
           - joint: chrome_fetch
             enabled: false
             parameters:
-              command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+              chrome_host: http://127.0.0.1:9223
+              save_screenshot: true
+              compress_enabled: true
+              timeout_in_seconds: 60
+              screenshot_quality: 50
           - joint: fetch
             enabled: true
             parameters:
@@ -279,9 +281,9 @@ modules:
 
 - name: dispatch
   enabled: true
-  failed_retry: true
+  failed_retry: false
   new_task: true
-  update_task: true
+  update_task: false
 
 - name: api
   enabled: true
@@ -319,7 +321,7 @@ modules:
   enabled: true
   ui:
     enabled: true
-    site_name: Elasticsearch
+#    site_name: Elasticsearch
 #    logo: https://static-www.elastic.co/cn/assets/blt6050efb80ceabd47/elastic-logo (2).svg?q=294
 #    favicon: https://www.elastic.co/favicon.ico
   elasticsearch:

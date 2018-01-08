@@ -50,8 +50,8 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				//slow down while too many task already in the queue
 				depth := queue.Depth(config.FetchChannel)
 				if depth > 100 { //TODO configable
-					log.Debugf("too many tasks already in the queue, depth: %v, wait 10s", depth)
-					time.Sleep(10 * time.Second)
+					log.Debugf("too many tasks already in the queue, depth: %v, wait 5s", depth)
+					time.Sleep(5 * time.Second)
 					return
 				}
 
@@ -102,42 +102,51 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 					for _, v := range tasks {
 						log.Trace("get task from db, ", v.ID)
 
+						context := model.Context{}
+						context.Init()
+
+						context.Set(model.CONTEXT_TASK_ID, v.ID)
+
 						//update offset
 						if v.Created.After(offset) && isUpdate {
 							offset = v.Created
 						}
 
 						runner := "fetch"
-						if v.PipelineConfigID == "" {
+						if v.HostConfig == nil {
 							//assign pipeline config
-							configID := model.GetPipelineIDByUrl(runner, v.Host, v.Url)
-							if configID != "" {
-								v.PipelineConfigID = configID
+							config := model.GetHostConfigByHostAndUrl(runner, v.Host, v.Url)
+							if config != nil {
+								v.HostConfig = config
+								context.Set(model.CONTEXT_TASK_Cookies, v.HostConfig.Cookies)
+								context.Set(model.CONTEXT_TASK_PipelineConfigID, v.HostConfig.PipelineID)
 							}
+							log.Trace("get host config: ", util.ToJson(config, true))
 						}
 
-						context := model.Context{}
-						context.Init()
-						context.Set(model.CONTEXT_TASK_ID, v.ID)
-						context.PipelineConfigID = v.PipelineConfigID
+						if v.PipelineConfigID != "" {
+							context.Set(model.CONTEXT_TASK_PipelineConfigID, v.PipelineConfigID)
+						}
 
-						queue.Push(config.FetchChannel, util.ToJSONBytes(context))
+						err := queue.Push(config.FetchChannel, util.ToJSONBytes(context))
+						if err != nil {
+							log.Error(err)
+							return
+						}
 						if isUpdate {
 							stats.Increment("dispatch", "update.enqueue")
 						}
 					}
 				}
-
-				//minimum  wait time
-				time.Sleep(5 * time.Second)
 			}
 
 		}
 	}()
 
 	go func() {
+		var lastPop int64
+
 		for {
-			var lastPop int64
 			select {
 			case <-signalChannel:
 				log.Trace("auto dispatcher exited")
@@ -146,17 +155,16 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				pop := stats.Stat("queue.fetch", "pop")
 				push := stats.Stat("queue.fetch", "push")
 				if lastPop == pop || pop == push {
-					log.Tracef("fetch tasks stalled/finished, try to dispatch some tasks from db,lastPop:%v,pop:%v,push:%v", lastPop, pop, push)
+					log.Tracef("fetch tasks stalled/finished, lastPop:%v,pop:%v,push:%v", lastPop, pop, push)
 					lastPop = pop
-					err := queue.Push(config.DispatcherChannel, []byte("5s auto"))
+					err := queue.Push(config.DispatcherChannel, []byte("10s deplay"))
 					if err != nil {
 						log.Error(err)
+						continue
 					}
-					time.Sleep(5 * time.Second)
 				} else {
-					log.Trace("no new data in fetch queue, wait 20s")
-					time.Sleep(20 * time.Second)
-					queue.Push(config.DispatcherChannel, []byte("20s deplay"))
+					log.Trace("no new data in fetch queue, wait 10s")
+					time.Sleep(10 * time.Second)
 					continue
 				}
 			}

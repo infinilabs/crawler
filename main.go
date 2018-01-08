@@ -218,7 +218,7 @@ func main() {
 
 			runtime.UnlockOSThread()
 		} else {
-			fmt.Println("daemon only available in linux and darwin")
+			fmt.Println("daemon mode only available on linux and darwin")
 		}
 
 	}

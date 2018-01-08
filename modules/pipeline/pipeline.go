@@ -117,10 +117,11 @@ func (pipe *PipeRunner) runPipeline(signal *chan bool, shard int) {
 
 			pipelineConfig := pipe.config.DefaultConfig
 			url := context.GetStringOrDefault(model.CONTEXT_TASK_URL, "")
-			if context.PipelineConfigID != "" {
+			pipelineConfigID := context.GetStringOrDefault(model.CONTEXT_TASK_PipelineConfigID, "")
+			if pipelineConfigID != "" {
 				var err error
-				pipelineConfig, err = model.GetPipelineConfig(context.PipelineConfigID)
-				log.Debug("get pipeline config,", pipelineConfig.Name, ",", url, ",", context.PipelineConfigID)
+				pipelineConfig, err = model.GetPipelineConfig(pipelineConfigID)
+				log.Debug("get pipeline config,", pipelineConfig.Name, ",", url, ",", pipelineConfigID)
 				if err != nil {
 					panic(err)
 				}
