@@ -18,8 +18,11 @@ package util
 
 import (
 	"bytes"
+	"crypto/sha1"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/url"
 	"runtime"
 	"strconv"
@@ -221,4 +224,10 @@ func FilterSpecialChar(keyword string) string {
 
 	keyword = TrimSpace(keyword)
 	return keyword
+}
+
+func Sha1Hash(str string) string {
+	h := sha1.New()
+	io.WriteString(h, str)
+	return base64.URLEncoding.EncodeToString(h.Sum(nil))
 }
