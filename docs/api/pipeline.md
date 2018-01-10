@@ -7,7 +7,7 @@ curl -XGET http://localhost:8001/pipeline/configs/
 * Create pipeline
 
 ```
-curl -XPOST "http://localhost:9200/pipeline/config/" -H 'Content-Type: application/json' -d'
+curl -XPOST "http://localhost:8001/pipeline/config/" -H 'Content-Type: application/json' -d'
 {
   "name": "discuss.elastic.co",
   "start": {
@@ -92,7 +92,7 @@ curl -XPOST "http://localhost:9200/pipeline/config/" -H 'Content-Type: applicati
 * Assign a pipeline to host
 
 ```
-curl -XPOST "http://localhost:8001/host_configs/" -H 'Content-Type: application/json' -d'
+curl -XPOST "http://localhost:8001/host_config/" -H 'Content-Type: application/json' -d'
 {
   "host":"discuss.elastic.co",
   "url_pattern":".*",

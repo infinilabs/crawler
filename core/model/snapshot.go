@@ -112,16 +112,8 @@ func GetSnapshotList(from, size int, taskId string) (int, []Snapshot, error) {
 		log.Error(err)
 		return 0, snapshots, err
 	}
-	if snapshots == nil && result.Result != nil {
-		t, ok := result.Result.([]interface{})
-		if ok {
-			for _, i := range t {
-				js := util.ToJson(i, false)
-				t := Snapshot{}
-				util.FromJson(js, &t)
-				snapshots = append(snapshots, t)
-			}
-		}
+	if result.Result != nil && snapshots == nil || len(snapshots) == 0 {
+		convertSnapshot(result, &snapshots)
 	}
 
 	return result.Total, snapshots, err

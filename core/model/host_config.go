@@ -64,28 +64,20 @@ func GetHostConfigByID(id string) (HostConfig, error) {
 }
 
 func GetHostConfigList(from, size int, host string) (int, []HostConfig, error) {
-	var hosts []HostConfig
+	var configs []HostConfig
 
 	query := persist.Query{From: from, Size: size}
 	if len(host) > 0 {
 		query.Conds = persist.And(persist.Eq("host", host))
 	}
 
-	err, r := persist.Search(HostConfig{}, &hosts, &query)
+	err, result := persist.Search(HostConfig{}, &configs, &query)
 
-	if hosts == nil && r.Result != nil {
-		t, ok := r.Result.([]interface{})
-		if ok {
-			for _, i := range t {
-				js := util.ToJson(i, false)
-				t := HostConfig{}
-				util.FromJson(js, &t)
-				hosts = append(hosts, t)
-			}
-		}
+	if result.Result != nil && configs == nil || len(configs) == 0 {
+		convertHostConfig(result, &configs)
 	}
 
-	return r.Total, hosts, err
+	return result.Total, configs, err
 }
 
 func GetHostConfig(runner, host string) []HostConfig {

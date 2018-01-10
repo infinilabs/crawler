@@ -67,7 +67,9 @@ func GetPipelineList(from, size int) (int, []PipelineConfig, error) {
 	query := persist.Query{From: from, Size: size}
 
 	err, r := persist.Search(PipelineConfig{}, &configs, &query)
-
+	if r.Result != nil && configs == nil || len(configs) == 0 {
+		convertPipeline(r, &configs)
+	}
 	return r.Total, configs, err
 }
 
@@ -84,7 +86,7 @@ func CreatePipelineConfig(cfg *PipelineConfig) error {
 	if err != nil {
 		return err
 	}
-	return persist.Save(&cfg)
+	return persist.Save(cfg)
 }
 
 func UpdatePipelineConfig(id string, cfg *PipelineConfig) error {
@@ -99,7 +101,7 @@ func UpdatePipelineConfig(id string, cfg *PipelineConfig) error {
 	if err != nil {
 		return err
 	}
-	return persist.Update(&cfg)
+	return persist.Update(cfg)
 }
 
 func DeletePipelineConfig(id string) error {
@@ -109,4 +111,20 @@ func DeletePipelineConfig(id string) error {
 	}
 	o := PipelineConfig{ID: id}
 	return persist.Delete(&o)
+}
+
+func convertPipeline(result persist.Result, pipelines *[]PipelineConfig) {
+	if result.Result == nil {
+		return
+	}
+
+	t, ok := result.Result.([]interface{})
+	if ok {
+		for _, i := range t {
+			js := util.ToJson(i, false)
+			t := PipelineConfig{}
+			util.FromJson(js, &t)
+			*pipelines = append(*pipelines, t)
+		}
+	}
 }

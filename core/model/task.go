@@ -16,6 +16,7 @@ const TaskRedirected int = 5
 const TaskTimeout int = 6
 const TaskDuplicated int = 7
 const TaskInterrupted int = 8
+const TaskPendingFetch int = 9
 
 func GetTaskStatusText(status int) string {
 	switch status {
@@ -35,6 +36,8 @@ func GetTaskStatusText(status int) string {
 		return "duplicated"
 	case TaskInterrupted:
 		return "interrupted"
+	case TaskPendingFetch:
+		return "pending_fetch"
 	}
 	return "unknow"
 }
@@ -116,6 +119,9 @@ func CreateTask(task *Task) error {
 	task.Status = TaskCreated
 	task.Created = time
 	task.Updated = time
+	if task.Url == "" {
+		return errors.New("url can't be nil")
+	}
 	err := persist.Save(task)
 	if err != nil {
 		log.Error(task.ID, ", ", err)
@@ -129,6 +135,9 @@ func UpdateTask(task *Task) error {
 	log.Trace("start update task, ", task.Url)
 	time := time.Now().UTC()
 	task.Updated = time
+	if task.Url == "" {
+		return errors.New("url can't be nil")
+	}
 	return persist.Update(task)
 }
 
@@ -203,8 +212,9 @@ func GetPendingNewFetchTasks(offset time.Time) (int, []Task, error) {
 	sort = append(sort, persist.Sort{Field: "created", SortType: persist.ASC})
 	queryO := persist.Query{Sort: &sort, Conds: persist.And(
 		persist.Eq("status", TaskCreated),
-		persist.Gt("created", offset),
-	)}
+		persist.Gt("created", offset)),
+		From: 0, Size: 100}
+	queryO.Size = 50
 	err, result := persist.Search(Task{}, &tasks, &queryO)
 	if err != nil {
 		log.Error(err)
@@ -225,6 +235,7 @@ func GetFailedTasks(offset time.Time) (int, []Task, error) {
 	queryO := persist.Query{Sort: &sort, Conds: persist.And(
 		persist.Gt("created", offset),
 		persist.Eq("status", TaskFailed)),
+		From: 0, Size: 100,
 	}
 	err, result := persist.Search(Task{}, &tasks, &queryO)
 	if err != nil {

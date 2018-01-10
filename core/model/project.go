@@ -75,8 +75,24 @@ func GetProjectList(from, size int) (int, []Project, error) {
 	if err != nil {
 		return 0, projects, err
 	}
-	//if result.Result != nil && projects == nil || len(projects) == 0 {
-	//	convertProject(result, &projects)
-	//}
+	if result.Result != nil && projects == nil || len(projects) == 0 {
+		convertProject(result, &projects)
+	}
 	return result.Total, projects, err
+}
+
+func convertProject(result persist.Result, projects *[]Project) {
+	if result.Result == nil {
+		return
+	}
+
+	t, ok := result.Result.([]interface{})
+	if ok {
+		for _, i := range t {
+			js := util.ToJson(i, false)
+			t := Project{}
+			util.FromJson(js, &t)
+			*projects = append(*projects, t)
+		}
+	}
 }
