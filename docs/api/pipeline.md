@@ -1,8 +1,13 @@
+* Get pipelines
+
+```
+curl -XGET http://localhost:8001/pipeline/configs/
+```
 
 * Create pipeline
 
 ```
-curl -XPOST "http://localhost:8001/pipeline/config/" -H 'Content-Type: application/json' -d'
+curl -XPOST "http://localhost:9200/pipeline/config/" -H 'Content-Type: application/json' -d'
 {
   "name": "discuss.elastic.co",
   "start": {
@@ -18,10 +23,10 @@ curl -XPOST "http://localhost:8001/pipeline/config/" -H 'Content-Type: applicati
       }
     },
     {
-      "joint": "chrome_fetch_v2",
+      "joint": "chrome_fetch",
       "enabled": true,
       "parameters": {
-        "command": "google-chrome"
+        "save_screenshot": true
       }
     },
     {
@@ -37,6 +42,10 @@ curl -XPOST "http://localhost:8001/pipeline/config/" -H 'Content-Type: applicati
     {
       "joint": "html2text",
       "parameters": {},
+      "enabled": true
+    },
+    {
+      "joint": "hash",
       "enabled": true
     },
     {
@@ -83,7 +92,7 @@ curl -XPOST "http://localhost:8001/pipeline/config/" -H 'Content-Type: applicati
 * Assign a pipeline to host
 
 ```
-curl -XPOST "http://localhost:8001/host/pipeline_config/" -H 'Content-Type: application/json' -d'
+curl -XPOST "http://localhost:8001/host_configs/" -H 'Content-Type: application/json' -d'
 {
   "host":"discuss.elastic.co",
   "url_pattern":".*",

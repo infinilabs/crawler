@@ -125,14 +125,11 @@ func CreateTask(task *Task) error {
 	return err
 }
 
-func UpdateTask(task *Task) {
+func UpdateTask(task *Task) error {
 	log.Trace("start update task, ", task.Url)
 	time := time.Now().UTC()
 	task.Updated = time
-	err := persist.Update(task)
-	if err != nil {
-		panic(err)
-	}
+	return persist.Update(task)
 }
 
 func DeleteTask(id string) error {
@@ -153,8 +150,9 @@ func GetTask(id string) (Task, error) {
 	if err != nil {
 		log.Error(id, ", ", err)
 	}
-	if len(task.ID) == 0 || task.Created.IsZero() {
-		panic(errors.New("not found," + id))
+
+	if len(task.ID) == 0 || task.Updated.IsZero() {
+		err = errors.New("not found," + id)
 	}
 
 	return task, err
@@ -198,12 +196,15 @@ func GetTaskList(from, size int, host string) (int, []Task, error) {
 	return result.Total, tasks, err
 }
 
-func GetPendingNewFetchTasks() (int, []Task, error) {
-	log.Trace("start get all tasks")
+func GetPendingNewFetchTasks(offset time.Time) (int, []Task, error) {
+	log.Tracef("start get pending fetch tasks,last offset: %s,", offset.String())
 	var tasks []Task
 	sort := []persist.Sort{}
-	sort = append(sort, persist.Sort{Field: "created", SortType: persist.DESC})
-	queryO := persist.Query{Sort: &sort, Conds: persist.And(persist.Eq("status", TaskCreated))}
+	sort = append(sort, persist.Sort{Field: "created", SortType: persist.ASC})
+	queryO := persist.Query{Sort: &sort, Conds: persist.And(
+		persist.Eq("status", TaskCreated),
+		persist.Gt("created", offset),
+	)}
 	err, result := persist.Search(Task{}, &tasks, &queryO)
 	if err != nil {
 		log.Error(err)

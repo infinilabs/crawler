@@ -55,25 +55,23 @@ func (joint SaveTaskJoint) Process(context *model.Context) error {
 
 	if !context.GetBool(keepRedirected, false) && t.Status == model.TaskRedirected {
 		if context.Has(model.CONTEXT_TASK_ID) {
-			model.DeleteTask(context.MustGetString(model.CONTEXT_TASK_ID))
+			return model.DeleteTask(context.MustGetString(model.CONTEXT_TASK_ID))
 		}
 		return nil
 	}
 
 	if !context.GetBool(keep404, false) && t.Status == model.Task404 {
 		if context.Has(model.CONTEXT_TASK_ID) {
-			model.DeleteTask(context.MustGetString(model.CONTEXT_TASK_ID))
+			return model.DeleteTask(context.MustGetString(model.CONTEXT_TASK_ID))
 		}
 		return nil
 	}
 
 	if joint.GetBool(isCreate, false) {
-		model.CreateTask(t)
+		return model.CreateTask(t)
 	} else {
-		model.UpdateTask(t)
+		return model.UpdateTask(t)
 	}
-
-	return nil
 }
 
 func getTask(context *model.Context) *model.Task {

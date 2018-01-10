@@ -17,6 +17,7 @@ limitations under the License.
 package http
 
 import (
+	"encoding/json"
 	log "github.com/cihub/seelog"
 	logger "github.com/cihub/seelog"
 	api "github.com/infinitbyte/gopa/core/http"
@@ -57,6 +58,32 @@ func (handler API) TaskGetAction(w http.ResponseWriter, req *http.Request, ps ht
 
 	}
 
+}
+
+func (api API) TaskUpdateAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	task := model.Task{}
+	id := ps.ByName("id")
+
+	data, err := api.GetRawBody(req)
+	if err != nil {
+		api.Error(w, err)
+		return
+	}
+
+	err = json.Unmarshal(data, &task)
+	if err != nil {
+		api.Error(w, err)
+		return
+	}
+
+	task.ID = id
+	err = model.UpdateTask(&task)
+	if err != nil {
+		api.Error(w, err)
+		return
+	}
+
+	api.WriteJSON(w, task, http.StatusOK)
 }
 
 // TaskAction handle task creation and return task list which support parameter: `from`, `size` and `host`, eg:
@@ -118,70 +145,4 @@ func (handler API) CreateTaskAction(w http.ResponseWriter, req *http.Request, ps
 
 	handler.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
 
-}
-
-// DeleteHostAction handle host deletion, only support delete by id, eg:
-//curl -XDELETE http://127.0.0.1:8001/host/1
-func (handler API) DeleteHostAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	if req.Method == api.DELETE.String() {
-		id := ps.ByName("id")
-		err := model.DeleteTask(id)
-		if err != nil {
-			handler.Error(w, err)
-		} else {
-			handler.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
-		}
-	} else {
-		handler.Error404(w)
-	}
-}
-
-// GetHostAction return host by id, eg:
-//curl -XGET http://127.0.0.1:8001/host/1
-func (handler API) GetHostAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	id := ps.ByName("id")
-	task, err := model.GetHost(id)
-	if err != nil {
-		handler.Error(w, err)
-	} else {
-		handler.WriteJSON(w, task, http.StatusOK)
-
-	}
-
-}
-
-// GetHostsAction return host list, support parameter: `from`, `size` and `host`, eg:
-//curl -XGET http://127.0.0.1:8001/host?from=0&size=10
-func (handler API) GetHostsAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-
-	if req.Method == api.GET.String() {
-
-		fr := handler.GetParameter(req, "from")
-		si := handler.GetParameter(req, "size")
-		host := handler.GetParameter(req, "host")
-
-		from, err := strconv.Atoi(fr)
-		if err != nil {
-			from = 0
-		}
-		size, err := strconv.Atoi(si)
-		if err != nil {
-			size = 10
-		}
-
-		total, hosts, err := model.GetHostList(from, size, host)
-
-		newDomains := []model.Host{}
-		for _, v := range hosts {
-
-			//total := stats.Stat("host.stats", v.Host+"."+config.STATS_FETCH_TOTAL_COUNT)
-			newDomains = append(newDomains, v)
-		}
-
-		if err != nil {
-			handler.Error(w, err)
-		} else {
-			handler.WriteJSONListResult(w, total, newDomains, http.StatusOK)
-		}
-	}
 }

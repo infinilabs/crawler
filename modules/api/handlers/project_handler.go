@@ -17,20 +17,14 @@ limitations under the License.
 package http
 
 import (
+	"encoding/json"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
-
-	"encoding/json"
 	"strconv"
 )
 
-func (api API) handleGetPipelineJointsRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	joints := model.GetAllRegisteredJoints()
-	api.WriteJSON(w, joints, http.StatusOK)
-}
-
-func (api API) handleGetPipelineConfigsRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (api API) GetProjectsAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	fr := api.GetParameter(req, "from")
 	si := api.GetParameter(req, "size")
 
@@ -43,7 +37,7 @@ func (api API) handleGetPipelineConfigsRequest(w http.ResponseWriter, req *http.
 		size = 10
 	}
 
-	total, configs, err := model.GetPipelineList(from, size)
+	total, configs, err := model.GetProjectList(from, size)
 	if err != nil {
 		api.Error(w, err)
 	} else {
@@ -51,8 +45,8 @@ func (api API) handleGetPipelineConfigsRequest(w http.ResponseWriter, req *http.
 	}
 }
 
-func (api API) handleCreatePipelineConfigRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	config := model.PipelineConfig{}
+func (api API) CreateProjectAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	config := model.Project{}
 
 	data, err := api.GetRawBody(req)
 	if err != nil {
@@ -66,7 +60,7 @@ func (api API) handleCreatePipelineConfigRequest(w http.ResponseWriter, req *htt
 		return
 	}
 
-	err = model.CreatePipelineConfig(&config)
+	err = model.CreateProject(&config)
 	if err != nil {
 		api.Error(w, err)
 		return
@@ -75,19 +69,20 @@ func (api API) handleCreatePipelineConfigRequest(w http.ResponseWriter, req *htt
 	api.WriteJSON(w, config, http.StatusOK)
 }
 
-func (api API) handleGetPipelineConfigRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-
+func (api API) GetProjectAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
-	cfg, err := model.GetPipelineConfig(id)
+	cfg, err := model.GetProject(id)
+
 	if err != nil {
 		api.Error(w, err)
-	} else {
-		api.WriteJSON(w, cfg, http.StatusOK)
+		return
 	}
+
+	api.WriteJSON(w, cfg, http.StatusOK)
 }
 
-func (api API) handleUpdatePipelineConfigRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
-	config := model.PipelineConfig{}
+func (api API) UpdateProjectAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	config := model.Project{}
 	id := ps.ByName("id")
 
 	data, err := api.GetRawBody(req)
@@ -102,7 +97,8 @@ func (api API) handleUpdatePipelineConfigRequest(w http.ResponseWriter, req *htt
 		return
 	}
 
-	err = model.UpdatePipelineConfig(id, &config)
+	config.ID = id
+	err = model.UpdateProject(&config)
 	if err != nil {
 		api.Error(w, err)
 		return
@@ -111,10 +107,9 @@ func (api API) handleUpdatePipelineConfigRequest(w http.ResponseWriter, req *htt
 	api.WriteJSON(w, config, http.StatusOK)
 }
 
-func (api API) handleDeletePipelineConfigRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (api API) DeleteProjectAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	id := ps.ByName("id")
-
-	err := model.DeletePipelineConfig(id)
+	err := model.DeleteProject(id)
 	if err != nil {
 		api.Error(w, err)
 		return
