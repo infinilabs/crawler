@@ -78,7 +78,7 @@ func (context *Context) Exit(msg interface{}) {
 }
 
 type Parameters struct {
-	Data   map[string]interface{} `json:"data"`
+	Data   map[string]interface{} `json:"data,omitempty"`
 	l      *sync.RWMutex
 	inited bool
 }
