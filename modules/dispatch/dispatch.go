@@ -16,7 +16,7 @@ type DispatchModule struct {
 }
 
 type DispatchConfig struct {
-	FailedTaskEnabled bool `config:"failed_retry"`
+	FailedTaskEnabled bool `config:"failure_retry"`
 	NewTaskEnabled    bool `config:"new_task"`
 	UpdateTaskEnabled bool `config:"update_task"`
 }
@@ -28,17 +28,63 @@ func (module DispatchModule) Name() string {
 
 var signalChannel chan bool
 
+func dispatchTasks(name string, tasks []model.Task, offset *time.Time) {
+	for _, v := range tasks {
+		log.Trace("get task from db, ", v.ID)
+
+		context := model.Context{}
+		context.Init()
+
+		context.Set(model.CONTEXT_TASK_ID, v.ID)
+
+		//update offset
+		if v.Created.After(*offset) {
+			offset = &v.Created
+		}
+
+		if v.Url == "https://elasticsearch.cn/" {
+			log.Error(name, ", dispatch task:", v.Url)
+		}
+
+		runner := "fetch"
+		if v.HostConfig == nil {
+			//assign pipeline config
+			config, _ := model.GetHostConfigByHostAndUrl(runner, v.Host, v.Url)
+			if config != nil {
+				v.HostConfig = config
+				context.Set(model.CONTEXT_TASK_Cookies, v.HostConfig.Cookies)
+				context.Set(model.CONTEXT_TASK_PipelineConfigID, v.HostConfig.PipelineID)
+				log.Trace("get host config: ", util.ToJson(config, true))
+			}
+		}
+
+		if v.PipelineConfigID != "" {
+			context.Set(model.CONTEXT_TASK_PipelineConfigID, v.PipelineConfigID)
+		}
+
+		err := queue.Push(config.FetchChannel, util.ToJSONBytes(context))
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+	}
+
+}
+
 // Start dispatch module
 func (module DispatchModule) Start(cfg *cfg.Config) {
 	moduleConfig := DispatchConfig{FailedTaskEnabled: false, UpdateTaskEnabled: true, NewTaskEnabled: true}
 	cfg.Unpack(&moduleConfig)
 
 	signalChannel = make(chan bool, 2)
+
 	go func() {
 		now := time.Now().UTC()
 		dd, _ := time.ParseDuration("-240h")
 		defaultOffset := now.Add(dd)
-		offset := defaultOffset
+		newOffset := defaultOffset
+		updateOffset := defaultOffset
+		failureOffset := defaultOffset
 
 		for {
 			select {
@@ -47,15 +93,16 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				return
 			case data := <-queue.ReadChan(config.DispatcherChannel):
 
+				stats.Increment("queue."+string(config.DispatcherChannel), "pop")
+
 				//slow down while too many task already in the queue
 				depth := queue.Depth(config.FetchChannel)
-				if depth > 100 { //TODO configable
+				if depth > 1 { //TODO configable
 					log.Debugf("too many tasks already in the queue, depth: %v, wait 5s", depth)
 					time.Sleep(5 * time.Second)
-					return
+					continue
 				}
 
-				stats.Increment("queue."+string(config.DispatcherChannel), "pop")
 				log.Trace("got dispatcher signal, ", string(data))
 
 				var total int
@@ -63,83 +110,61 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				var err error
 				//get new task
 				if moduleConfig.NewTaskEnabled {
-					total, tasks, err = model.GetPendingNewFetchTasks()
+					total, tasks, err = model.GetPendingNewFetchTasks(newOffset)
 					if err != nil {
 						log.Error(err)
 					}
-					log.Debugf("get %v new task", total)
+					log.Debugf("get %v new task, with offset, %v", total, newOffset)
+
+					if tasks != nil && total > 0 {
+						dispatchTasks("new", tasks, &newOffset)
+					}
+
+					//if total == 0 {
+					//	log.Tracef("%v hit 0 new task, reset offset to %v ", newOffset, defaultOffset)
+					//	newOffset = defaultOffset
+					//}
+
+					continue
 				}
 
-				isUpdate := false
 				//get update task
 				if moduleConfig.UpdateTaskEnabled && (tasks == nil || total <= 0) {
-					total, tasks, err = model.GetPendingUpdateFetchTasks(offset)
+					total, tasks, err = model.GetPendingUpdateFetchTasks(updateOffset)
 					if err != nil {
 						log.Error(err)
 					}
-					log.Debugf("get %v update task, with offset, %v", total, offset)
-					isUpdate = true
-					if total == 0 {
-						log.Tracef("%v hit 0 update task, reset offset to %v ", offset, defaultOffset)
-						offset = defaultOffset
+					log.Debugf("get %v update task, with offset, %v", total, updateOffset)
+
+					if tasks != nil && total > 0 {
+						dispatchTasks("update", tasks, &updateOffset)
 					}
+
+					//if total == 0 {
+					//	log.Tracef("%v hit 0 update task, reset offset to %v ", updateOffset, defaultOffset)
+					//	updateOffset = defaultOffset
+					//}
+					continue
 				}
 
-				// get failed task
+				// get failure task
 				if moduleConfig.FailedTaskEnabled && (tasks == nil || total <= 0) {
-					total, tasks, err = model.GetFailedTasks(offset)
+					total, tasks, err = model.GetFailedTasks(failureOffset)
 					if err != nil {
 						log.Error(err)
 					}
-					log.Debugf("get %v failed task, with offset, %v", total, offset)
-					if total == 0 {
-						log.Tracef("%v hit 0 failed task, reset offset to %v ", offset, defaultOffset)
-						offset = defaultOffset
+					log.Debugf("get %v failure task, with offset, %v", total, failureOffset)
+
+					if tasks != nil && total > 0 {
+						dispatchTasks("failure", tasks, &failureOffset)
 					}
-				}
 
-				if tasks != nil && total > 0 {
-					for _, v := range tasks {
-						log.Trace("get task from db, ", v.ID)
-
-						context := model.Context{}
-						context.Init()
-
-						context.Set(model.CONTEXT_TASK_ID, v.ID)
-
-						//update offset
-						if v.Created.After(offset) && isUpdate {
-							offset = v.Created
-						}
-
-						runner := "fetch"
-						if v.HostConfig == nil {
-							//assign pipeline config
-							config := model.GetHostConfigByHostAndUrl(runner, v.Host, v.Url)
-							if config != nil {
-								v.HostConfig = config
-								context.Set(model.CONTEXT_TASK_Cookies, v.HostConfig.Cookies)
-								context.Set(model.CONTEXT_TASK_PipelineConfigID, v.HostConfig.PipelineID)
-							}
-							log.Trace("get host config: ", util.ToJson(config, true))
-						}
-
-						if v.PipelineConfigID != "" {
-							context.Set(model.CONTEXT_TASK_PipelineConfigID, v.PipelineConfigID)
-						}
-
-						err := queue.Push(config.FetchChannel, util.ToJSONBytes(context))
-						if err != nil {
-							log.Error(err)
-							return
-						}
-						if isUpdate {
-							stats.Increment("dispatch", "update.enqueue")
-						}
-					}
+					//if total == 0 {
+					//	log.Tracef("%v hit 0 failure task, reset offset to %v ", faileOffset, defaultOffset)
+					//	faileOffset = defaultOffset
+					//}
 				}
 			}
-
 		}
 	}()
 
@@ -152,21 +177,27 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				log.Trace("auto dispatcher exited")
 				return
 			default:
+				time.Sleep(5 * time.Second)
+
+				if queue.Depth(config.DispatcherChannel) > 1 {
+					continue
+				}
 				pop := stats.Stat("queue.fetch", "pop")
 				push := stats.Stat("queue.fetch", "push")
 				if lastPop == pop || pop == push {
 					log.Tracef("fetch tasks stalled/finished, lastPop:%v,pop:%v,push:%v", lastPop, pop, push)
-					lastPop = pop
 					err := queue.Push(config.DispatcherChannel, []byte("10s deplay"))
 					if err != nil {
 						log.Error(err)
 						continue
 					}
 				} else {
-					log.Trace("no new data in fetch queue, wait 10s")
+					log.Trace("fetch in progress, wait 10s")
 					time.Sleep(10 * time.Second)
 					continue
 				}
+				//update lastPop
+				lastPop = pop
 			}
 		}
 
