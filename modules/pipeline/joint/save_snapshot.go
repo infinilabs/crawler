@@ -87,6 +87,7 @@ func (this SaveSnapshotToDBJoint) Process(c *model.Context) error {
 	model.CreateSnapshot(snapshot)
 
 	c.Set(model.CONTEXT_TASK_SnapshotID, snapshot.ID)
+	c.Set(model.CONTEXT_TASK_SnapshotVersion, taskSnapshotVersion)
 	c.Set(model.CONTEXT_TASK_SnapshotHash, snapshot.Hash)
 	c.Set(model.CONTEXT_TASK_SnapshotSimHash, snapshot.SimHash)
 	c.Set(model.CONTEXT_TASK_SnapshotCreated, snapshot.Created)
