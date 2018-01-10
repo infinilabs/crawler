@@ -124,10 +124,10 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 						dispatchTasks("new", tasks, &newOffset)
 					}
 
-					//if total == 0 {
-					//	log.Tracef("%v hit 0 new task, reset offset to %v ", newOffset, defaultOffset)
-					//	newOffset = defaultOffset
-					//}
+					if total == 0 {
+						log.Tracef("%v hit 0 new task, reset offset to %v ", newOffset, defaultOffset)
+						newOffset = defaultOffset
+					}
 
 					continue
 				}
@@ -144,10 +144,10 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 						dispatchTasks("update", tasks, &updateOffset)
 					}
 
-					//if total == 0 {
-					//	log.Tracef("%v hit 0 update task, reset offset to %v ", updateOffset, defaultOffset)
-					//	updateOffset = defaultOffset
-					//}
+					if total == 0 {
+						log.Tracef("%v hit 0 update task, reset offset to %v ", updateOffset, defaultOffset)
+						updateOffset = defaultOffset
+					}
 					continue
 				}
 
@@ -163,10 +163,10 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 						dispatchTasks("failure", tasks, &failureOffset)
 					}
 
-					//if total == 0 {
-					//	log.Tracef("%v hit 0 failure task, reset offset to %v ", faileOffset, defaultOffset)
-					//	faileOffset = defaultOffset
-					//}
+					if total == 0 {
+						log.Tracef("%v hit 0 failure task, reset offset to %v ", failureOffset, defaultOffset)
+						failureOffset = defaultOffset
+					}
 				}
 			}
 		}
