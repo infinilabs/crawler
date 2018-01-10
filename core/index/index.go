@@ -3,6 +3,7 @@ package index
 import (
 	"encoding/json"
 	log "github.com/cihub/seelog"
+	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/util"
 )
@@ -22,7 +23,7 @@ type ElasticsearchClient struct {
 
 // InsertResponse is a index response object
 type InsertResponse struct {
-	Created bool   `json:"created"`
+	Result  string `json:"result"`
 	Index   string `json:"_index"`
 	Type    string `json:"_type"`
 	ID      string `json:"_id"`
@@ -41,8 +42,7 @@ type GetResponse struct {
 
 // DeleteResponse is a delete response object
 type DeleteResponse struct {
-	Found   bool   `json:"found"`
-	Result  bool   `json:"result"`
+	Result  string `json:"result"`
 	Index   string `json:"_index"`
 	Type    string `json:"_type"`
 	ID      string `json:"_id"`
@@ -192,6 +192,9 @@ func (c *ElasticsearchClient) Index(indexName, id string, data interface{}) (*In
 	if err != nil {
 		return &InsertResponse{}, err
 	}
+	if !(esResp.Result == "created" || esResp.Result == "updated") {
+		return nil, errors.New(string(response.Body))
+	}
 
 	return esResp, nil
 }
@@ -220,6 +223,9 @@ func (c *ElasticsearchClient) Get(indexName, id string) (*GetResponse, error) {
 	if err != nil {
 		return &GetResponse{}, err
 	}
+	if !esResp.Found {
+		return nil, errors.New(string(response.Body))
+	}
 
 	return esResp, nil
 }
@@ -246,6 +252,9 @@ func (c *ElasticsearchClient) Delete(indexName, id string) (*DeleteResponse, err
 	err = json.Unmarshal(response.Body, esResp)
 	if err != nil {
 		return &DeleteResponse{}, err
+	}
+	if esResp.Result != "deleted" {
+		return nil, errors.New(string(response.Body))
 	}
 
 	return esResp, nil
