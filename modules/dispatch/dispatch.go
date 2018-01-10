@@ -16,9 +16,10 @@ type DispatchModule struct {
 }
 
 type DispatchConfig struct {
-	FailedTaskEnabled bool `config:"failure_retry"`
-	NewTaskEnabled    bool `config:"new_task"`
-	UpdateTaskEnabled bool `config:"update_task"`
+	FailedTaskEnabled       bool  `config:"failure_retry"`
+	NewTaskEnabled          bool  `config:"new_task"`
+	UpdateTaskEnabled       bool  `config:"update_task"`
+	MaxConcurrentFetchTasks int64 `config:"max_concurrent_fetch_tasks"`
 }
 
 // Name return Dispatch
@@ -42,10 +43,6 @@ func dispatchTasks(name string, tasks []model.Task, offset *time.Time) {
 			offset = &v.Created
 		}
 
-		if v.Url == "https://elasticsearch.cn/" {
-			log.Error(name, ", dispatch task:", v.Url)
-		}
-
 		runner := "fetch"
 		if v.HostConfig == nil {
 			//assign pipeline config
@@ -62,6 +59,9 @@ func dispatchTasks(name string, tasks []model.Task, offset *time.Time) {
 			context.Set(model.CONTEXT_TASK_PipelineConfigID, v.PipelineConfigID)
 		}
 
+		//Update task status
+		v.Status = model.TaskPendingFetch
+		model.UpdateTask(&v)
 		err := queue.Push(config.FetchChannel, util.ToJSONBytes(context))
 		if err != nil {
 			log.Error(err)
@@ -73,7 +73,11 @@ func dispatchTasks(name string, tasks []model.Task, offset *time.Time) {
 
 // Start dispatch module
 func (module DispatchModule) Start(cfg *cfg.Config) {
-	moduleConfig := DispatchConfig{FailedTaskEnabled: false, UpdateTaskEnabled: true, NewTaskEnabled: true}
+	moduleConfig := DispatchConfig{
+		FailedTaskEnabled:       false,
+		UpdateTaskEnabled:       true,
+		NewTaskEnabled:          true,
+		MaxConcurrentFetchTasks: 100}
 	cfg.Unpack(&moduleConfig)
 
 	signalChannel = make(chan bool, 2)
@@ -97,9 +101,9 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 
 				//slow down while too many task already in the queue
 				depth := queue.Depth(config.FetchChannel)
-				if depth > 1 { //TODO configable
+				if depth > moduleConfig.MaxConcurrentFetchTasks {
 					log.Debugf("too many tasks already in the queue, depth: %v, wait 5s", depth)
-					time.Sleep(5 * time.Second)
+					time.Sleep(1 * time.Second)
 					continue
 				}
 
@@ -177,7 +181,7 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				log.Trace("auto dispatcher exited")
 				return
 			default:
-				time.Sleep(5 * time.Second)
+				time.Sleep(1 * time.Second)
 
 				if queue.Depth(config.DispatcherChannel) > 1 {
 					continue
@@ -191,10 +195,6 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 						log.Error(err)
 						continue
 					}
-				} else {
-					log.Trace("fetch in progress, wait 10s")
-					time.Sleep(10 * time.Second)
-					continue
 				}
 				//update lastPop
 				lastPop = pop
