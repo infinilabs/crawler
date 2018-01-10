@@ -46,15 +46,15 @@ func (module FilterModule) CheckThenAdd(bucket Key, key []byte) (b bool, err err
 }
 
 func initFilter(key Key) {
-	f := impl.BoltdbImpl{FilterBucket: string(key)}
+	f := impl.PersistFilter{FilterBucket: string(key)}
 	filters[key] = &f
 }
 
-var filters map[Key]*impl.BoltdbImpl
+var filters map[Key]*impl.PersistFilter
 
 func (module FilterModule) Start(cfg *Config) {
 
-	filters = map[Key]*impl.BoltdbImpl{}
+	filters = map[Key]*impl.PersistFilter{}
 
 	//TODO dynamic config
 	initFilter(config.DispatchFilter)
