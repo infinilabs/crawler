@@ -31,7 +31,6 @@ import (
 
 type ParsePageJoint struct {
 	model.Parameters
-	MaxPageOfBreadth map[int]int //max page to fetch in each level's breadth, eg: 1:100;2:50;3:5;4:1
 	//TODO support save link,script
 }
 
