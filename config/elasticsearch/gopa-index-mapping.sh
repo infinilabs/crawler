@@ -1,3 +1,6 @@
+#curl --user elastic:changeme -XDELETE "http://localhost:9200/gopa-index"
+
+
 curl --user elastic:changeme -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json' -d'
 {
 "mappings": {
