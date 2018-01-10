@@ -21,6 +21,7 @@ import (
 	"github.com/infinitbyte/gopa/core/filter"
 	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/stats"
+	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
 	"regexp"
 )
@@ -48,22 +49,21 @@ func (joint FilterCheckJoint) Process(context *model.Context) error {
 	//key := joint.GetStringOrDefault(filterKey, "check_filter")
 	//v := filter.Key(key)
 
-	v := config.CheckFilter
+	hash := util.Sha1Hash(url)
 
 	//the url input here should not be a relative path
-	b, err := filter.CheckThenAdd(v, []byte(url))
+	b, err := filter.CheckThenAdd(config.CheckFilter, []byte(hash))
 	log.Trace("cheking url:", url, ",hit:", b)
-
+	if err != nil {
+		log.Error(err)
+		context.End("check url error, url: " + url + ", " + err.Error())
+	}
 	//checking
 	if b {
 		stats.Increment("checker.url", "duplicated")
 		log.Trace("duplicated url,already checked,  url:", url)
 		context.Exit("duplicated url,already checked,  url:" + url)
 		return nil
-	}
-	if err != nil {
-		log.Error(err)
-		context.End("check url error, url: " + url + ", " + err.Error())
 	}
 
 	return nil
