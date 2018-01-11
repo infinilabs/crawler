@@ -36,7 +36,6 @@ func TestProcessText(t *testing.T) {
 		" </div> </body> </html>"
 
 	context := model.Context{}
-	context.Init()
 	context.Set(model.CONTEXT_TASK_URL, "http://elasticsearch.cn/")
 	context.Set(model.CONTEXT_TASK_Depth, 1)
 	snapshot := model.Snapshot{}

@@ -89,9 +89,8 @@ func TestPipeline(t *testing.T) {
 
 	pipeline := NewPipeline("crawler_test")
 	context := &Context{}
-	context.Init()
-	context.Data["url"] = "gogol.com"
-	context.Data["webpage"] = "hello world gogo "
+	context.Set("url", "gogol.com")
+	context.Set("webpage", "hello world gogo ")
 
 	crawler := crawlerJoint{}
 
@@ -116,7 +115,6 @@ const key2 ParaKey = "DEPTH2"
 func TestContext(t *testing.T) {
 	global.RegisterEnv(env.EmptyEnv())
 	context := &Context{}
-	context.Parameters.Init()
 	context.Parameters.Set(key1, 23)
 	fmt.Println(util.ToJson(context, true))
 	v := context.MustGetInt(key1)

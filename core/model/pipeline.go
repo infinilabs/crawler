@@ -83,7 +83,7 @@ type Parameters struct {
 	inited bool
 }
 
-func (para *Parameters) Init() {
+func (para *Parameters) init() {
 	if para.inited {
 		return
 	}
@@ -134,7 +134,7 @@ func (para *Parameters) GetBool(key ParaKey, defaultV bool) bool {
 }
 
 func (para *Parameters) Has(key ParaKey) bool {
-	para.Init()
+	para.init()
 	_, ok := para.Data[string(key)]
 	return ok
 }
@@ -190,7 +190,7 @@ func (para *Parameters) GetInt64(key ParaKey, defaultV int64) (int64, bool) {
 }
 
 func (para *Parameters) MustGet(key ParaKey) interface{} {
-	para.Init()
+	para.init()
 
 	s := string(key)
 
@@ -219,7 +219,7 @@ func (para *Parameters) GetStringArray(key ParaKey) ([]string, bool) {
 }
 
 func (para *Parameters) Get(key ParaKey) interface{} {
-	para.Init()
+	para.init()
 	para.l.RLock()
 	s := string(key)
 	v := para.Data[s]
@@ -228,7 +228,7 @@ func (para *Parameters) Get(key ParaKey) interface{} {
 }
 
 func (para *Parameters) GetOrDefault(key ParaKey, val interface{}) interface{} {
-	para.Init()
+	para.init()
 	para.l.RLock()
 	s := string(key)
 	v := para.Data[s]
@@ -240,7 +240,7 @@ func (para *Parameters) GetOrDefault(key ParaKey, val interface{}) interface{} {
 }
 
 func (para *Parameters) Set(key ParaKey, value interface{}) {
-	para.Init()
+	para.init()
 	para.l.Lock()
 	s := string(key)
 	para.Data[s] = value
@@ -316,14 +316,14 @@ func NewPipeline(name string) *Pipeline {
 	pipe.id = util.GetIncrementID("pipe")
 	pipe.name = strings.TrimSpace(name)
 	pipe.context = &Context{}
-	pipe.context.Parameters.Init()
+	pipe.context.Parameters.init()
 	return pipe
 }
 
 func (pipe *Pipeline) Context(s *Context) *Pipeline {
 	if s != nil {
 		pipe.context = s
-		pipe.context.Init()
+		pipe.context.init()
 	}
 
 	return pipe

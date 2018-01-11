@@ -27,7 +27,6 @@ func TestProcessHash(t *testing.T) {
 	body := "Just some test content,你好"
 
 	context := model.Context{}
-	context.Init()
 	task := model.Task{}
 	task.Url = "http://elasticsearch.cn/"
 	task.Depth = 1

@@ -35,9 +35,8 @@ func TestPipelineConfig(t *testing.T) {
 
 	config := PipelineConfig{}
 	context := &Context{}
-	context.Init()
-	context.Data["url"] = "gogol.com"
-	context.Data["webpage"] = "hello world gogo "
+	context.Set("url", "gogol.com")
+	context.Set("webpage", "hello world gogo ")
 
 	fmt.Println(util.ToJson(context, true))
 
@@ -59,7 +58,7 @@ func TestPipelineConfig(t *testing.T) {
 
 	fmt.Println("pipeline context")
 	fmt.Println(context)
-	fmt.Println(context.Data["received_url"])
+	fmt.Println(context.GetStringOrDefault("received_url", ""))
 
 	assert.Equal(t, "http://baidu12.com", context.Data["received_url"])
 	assert.Equal(t, "true", context.Data["published"])

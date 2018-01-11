@@ -25,7 +25,6 @@ import (
 func TestNormailzeLinks(t *testing.T) {
 
 	context := &model.Context{}
-	context.Init()
 	task := model.Task{}
 	task.Url = "http://elasticsearch.cn/"
 	task.OriginalUrl = "http://elasticsearch.cn/"
@@ -78,7 +77,6 @@ func TestNormailzeLinks(t *testing.T) {
 func TestNormailzeLinks1(t *testing.T) {
 
 	context := &model.Context{}
-	context.Init()
 	task := model.Task{}
 	task.Url = "http://localhost/"
 	task.Depth = 1
@@ -139,7 +137,6 @@ func TestNormailzeLinks1(t *testing.T) {
 func TestNormailzeLinks2(t *testing.T) {
 
 	context := &model.Context{}
-	context.Init()
 
 	task := model.Task{}
 	task.Url = "http://127.0.0.1:8080/modeling-your-data.html"
@@ -176,7 +173,6 @@ func TestNormailzeLinks2(t *testing.T) {
 func TestNormailzeLinks3(t *testing.T) {
 
 	context := &model.Context{}
-	context.Init()
 	parse := UrlNormalizationJoint{}
 	task := model.Task{}
 	task.Url = "http://conf.elasticsearch.cn/2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/../2015/beijing.html?c=3&a=1&b=9&c=0#targetsa"
@@ -198,7 +194,6 @@ func TestNormailzeLinks3(t *testing.T) {
 func TestNormailzeLinks4(t *testing.T) {
 
 	context := &model.Context{}
-	context.Init()
 	parse := UrlNormalizationJoint{}
 
 	task := model.Task{}
@@ -223,7 +218,6 @@ func TestNormailzeLinks4(t *testing.T) {
 func TestNormailzeLinks5(t *testing.T) {
 
 	context := &model.Context{}
-	context.Init()
 	parse := UrlNormalizationJoint{}
 
 	task := model.Task{}

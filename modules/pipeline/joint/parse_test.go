@@ -45,7 +45,6 @@ func TestProcessLinks(t *testing.T) {
 		" </div> </body> </html>"
 
 	context := model.Context{}
-	context.Init()
 	context.Set(model.CONTEXT_TASK_Depth, 0)
 	context.Set(model.CONTEXT_TASK_Breadth, 0)
 	context.Set(model.CONTEXT_TASK_URL, "http://elasticsearch.cn/")
@@ -97,7 +96,6 @@ func TestProcessDiscussLinks(t *testing.T) {
 	}
 
 	context := model.Context{}
-	context.Init()
 	context.Set(model.CONTEXT_TASK_Depth, 0)
 	context.Set(model.CONTEXT_TASK_Breadth, 0)
 	context.Set(model.CONTEXT_TASK_URL, "http://discuss.elastic.co/")

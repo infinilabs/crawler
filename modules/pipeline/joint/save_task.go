@@ -35,7 +35,6 @@ const keep404 model.ParaKey = "keep_404"
 const keepRedirected model.ParaKey = "keep_redirected"
 
 func (joint SaveTaskJoint) IsCreate(v bool) SaveTaskJoint {
-	joint.Init()
 	joint.Set(isCreate, v)
 	return joint
 }

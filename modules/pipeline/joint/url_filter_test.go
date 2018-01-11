@@ -26,8 +26,6 @@ import (
 func TestUrlFilter(t *testing.T) {
 
 	context := &model.Context{}
-	context.Init()
-
 	task := model.Task{}
 	task.Url = "http://elasticsearch.cn/"
 	task.OriginalUrl = "http://elasticsearch.cn/"
