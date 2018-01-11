@@ -122,6 +122,7 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 	if err != nil {
 		pt, err = devt.Create(ctx)
 		if err != nil {
+			context.End(err)
 			return err
 		}
 	}
@@ -270,6 +271,8 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 	}
 
 	log.Debug("exit chrome v2 fetch method:", requestUrl)
+
+	context.Set(model.CONTEXT_TASK_Status, model.TaskSuccess)
 
 	return nil
 }
