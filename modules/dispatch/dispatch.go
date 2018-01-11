@@ -102,7 +102,7 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				//slow down while too many task already in the queue
 				depth := queue.Depth(config.FetchChannel)
 				if depth > moduleConfig.MaxConcurrentFetchTasks {
-					log.Debugf("too many tasks already in the queue, depth: %v, wait 5s", depth)
+					log.Tracef("too many tasks already in the queue, depth: %v, wait 1s", depth)
 					time.Sleep(1 * time.Second)
 					continue
 				}
@@ -120,16 +120,15 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 					}
 					log.Debugf("get %v new task, with offset, %v", total, newOffset)
 
-					if tasks != nil && total > 0 {
+					if tasks != nil && len(tasks) > 0 {
 						dispatchTasks("new", tasks, &newOffset)
+						continue
 					}
 
 					if total == 0 {
 						log.Tracef("%v hit 0 new task, reset offset to %v ", newOffset, defaultOffset)
 						newOffset = defaultOffset
 					}
-
-					continue
 				}
 
 				//get update task
@@ -140,15 +139,15 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 					}
 					log.Debugf("get %v update task, with offset, %v", total, updateOffset)
 
-					if tasks != nil && total > 0 {
+					if tasks != nil && len(tasks) > 0 {
 						dispatchTasks("update", tasks, &updateOffset)
+						continue
 					}
 
 					if total == 0 {
 						log.Tracef("%v hit 0 update task, reset offset to %v ", updateOffset, defaultOffset)
 						updateOffset = defaultOffset
 					}
-					continue
 				}
 
 				// get failure task
@@ -159,8 +158,9 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 					}
 					log.Debugf("get %v failure task, with offset, %v", total, failureOffset)
 
-					if tasks != nil && total > 0 {
+					if tasks != nil && len(tasks) > 0 {
 						dispatchTasks("failure", tasks, &failureOffset)
+						continue
 					}
 
 					if total == 0 {
