@@ -2,6 +2,7 @@ package persist
 
 import (
 	"fmt"
+	log "github.com/cihub/seelog"
 	api "github.com/infinitbyte/gopa/core/persist"
 	"github.com/jinzhu/gorm"
 	"sync"
@@ -110,6 +111,7 @@ func (handler SQLORM) Search(t interface{}, o interface{}, q *api.Query) (error,
 			where = where + c1.Field + c1.SQLOperator + " ?"
 			args = append(args, c1.Value)
 		}
+		log.Tracef("search where: %s - %v", where, args)
 		err = db1.Limit(q.Size).Offset(q.From).Where(where, args...).Find(o).Error
 		db1.Where(where, args...).Count(&c)
 	} else {
