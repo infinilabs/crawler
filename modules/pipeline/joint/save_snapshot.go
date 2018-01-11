@@ -43,8 +43,8 @@ func (this SaveSnapshotToDBJoint) Process(c *model.Context) error {
 	taskID := c.MustGetString(model.CONTEXT_TASK_ID)
 	taskUrl := c.MustGetString(model.CONTEXT_TASK_URL)
 	taskHost := c.MustGetString(model.CONTEXT_TASK_Host)
-	taskSnapshotHash := c.MustGetString(model.CONTEXT_TASK_SnapshotHash)
-	taskSnapshotVersion := c.GetIntOrDefault(model.CONTEXT_TASK_SnapshotVersion, 0)
+	previousSnapshotHash := c.MustGetString(model.CONTEXT_TASK_SnapshotHash)
+	previousSnapshotVersion := c.GetIntOrDefault(model.CONTEXT_TASK_SnapshotVersion, 0)
 
 	snapshot := c.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
 
@@ -53,15 +53,15 @@ func (this SaveSnapshotToDBJoint) Process(c *model.Context) error {
 	}
 
 	//update task's snapshot, detect duplicated snapshot
-	if snapshot.Hash != "" && snapshot.Hash == taskSnapshotHash {
-		msg := fmt.Sprintf("content unchanged, snapshot with same hash: %s, %s", snapshot.Hash, taskUrl)
+	if snapshot.Hash != "" && snapshot.Hash == previousSnapshotHash {
+		msg := fmt.Sprintf("content unchanged, snapshot with same hash: %s, %s, prev hash: %s,prev version: %s", snapshot.Hash, taskUrl, previousSnapshotHash, previousSnapshotVersion)
 		c.End(msg)
 		return nil
 	}
 
-	taskSnapshotVersion = taskSnapshotVersion + 1
+	previousSnapshotVersion = previousSnapshotVersion + 1
 
-	snapshot.Version = taskSnapshotVersion
+	snapshot.Version = previousSnapshotVersion
 	snapshot.Url = taskUrl
 	snapshot.TaskID = taskID
 
@@ -87,7 +87,7 @@ func (this SaveSnapshotToDBJoint) Process(c *model.Context) error {
 	model.CreateSnapshot(snapshot)
 
 	c.Set(model.CONTEXT_TASK_SnapshotID, snapshot.ID)
-	c.Set(model.CONTEXT_TASK_SnapshotVersion, taskSnapshotVersion)
+	c.Set(model.CONTEXT_TASK_SnapshotVersion, previousSnapshotVersion)
 	c.Set(model.CONTEXT_TASK_SnapshotHash, snapshot.Hash)
 	c.Set(model.CONTEXT_TASK_SnapshotSimHash, snapshot.SimHash)
 	c.Set(model.CONTEXT_TASK_SnapshotCreated, snapshot.Created)
