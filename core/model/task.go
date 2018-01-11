@@ -214,7 +214,6 @@ func GetPendingNewFetchTasks(offset time.Time) (int, []Task, error) {
 		persist.Eq("status", TaskCreated),
 		persist.Gt("created", offset)),
 		From: 0, Size: 100}
-	queryO.Size = 50
 	err, result := persist.Search(Task{}, &tasks, &queryO)
 	if err != nil {
 		log.Error(err)
