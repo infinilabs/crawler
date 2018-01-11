@@ -33,9 +33,12 @@ func dispatchTasks(name string, tasks []model.Task, offset *time.Time) {
 	for _, v := range tasks {
 		log.Trace("get task from db, ", v.ID)
 
-		context := model.Context{}
-		context.Init()
+		if v.Status == model.TaskPendingFetch {
+			log.Tracef("task %v alrady in fetch, ingore", v.ID)
+			continue
+		}
 
+		context := model.Context{}
 		context.Set(model.CONTEXT_TASK_ID, v.ID)
 
 		//update offset
