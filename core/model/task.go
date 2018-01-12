@@ -116,6 +116,9 @@ func CreateTask(task *Task) error {
 	log.Trace("start create task, ", task.Url)
 	time := time.Now().UTC()
 	task.ID = util.GetUUID()
+	if task.OriginalUrl == "" {
+		task.OriginalUrl = task.Url
+	}
 	task.Status = TaskCreated
 	task.Created = time
 	task.Updated = time
@@ -184,7 +187,7 @@ func GetTaskByField(k, v string) ([]Task, error) {
 	return tasks, err
 }
 
-func GetTaskList(from, size int, host string) (int, []Task, error) {
+func GetTaskList(from, size int, host string, status int) (int, []Task, error) {
 	log.Tracef("start get tasks, %v-%v, %v", from, size, host)
 	var tasks []Task
 	sort := []persist.Sort{}
@@ -193,6 +196,11 @@ func GetTaskList(from, size int, host string) (int, []Task, error) {
 	if len(host) > 0 {
 		queryO.Conds = persist.And(persist.Eq("host", host))
 	}
+
+	if status >= 0 {
+		queryO.Conds = persist.Combine(queryO.Conds, persist.And(persist.Eq("status", status)))
+	}
+
 	err, result := persist.Search(Task{}, &tasks, &queryO)
 	if err != nil {
 		log.Error(err)

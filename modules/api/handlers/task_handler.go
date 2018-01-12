@@ -95,6 +95,7 @@ func (handler API) TaskAction(w http.ResponseWriter, req *http.Request, ps httpr
 	fr := handler.GetParameter(req, "from")
 	si := handler.GetParameter(req, "size")
 	host := handler.GetParameter(req, "host")
+	status := handler.GetIntOrDefault(req, "status", -1)
 
 	from, err := strconv.Atoi(fr)
 	if err != nil {
@@ -105,7 +106,7 @@ func (handler API) TaskAction(w http.ResponseWriter, req *http.Request, ps httpr
 		size = 10
 	}
 
-	total, tasks, err := model.GetTaskList(from, size, host)
+	total, tasks, err := model.GetTaskList(from, size, host, status)
 	if err != nil {
 		handler.Error(w, err)
 	} else {

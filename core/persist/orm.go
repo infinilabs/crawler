@@ -133,6 +133,16 @@ func Le(field string, value interface{}) *Cond {
 	return &c
 }
 
+func Combine(conds ...[]*Cond) []*Cond {
+	t := []*Cond{}
+	for _, cs := range conds {
+		for _, c := range cs {
+			t = append(t, c)
+		}
+	}
+	return t
+}
+
 func And(conds ...*Cond) []*Cond {
 	t := []*Cond{}
 	for _, c := range conds {
