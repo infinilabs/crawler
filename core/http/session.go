@@ -19,20 +19,21 @@ package api
 import (
 	log "github.com/cihub/seelog"
 	"github.com/gorilla/sessions"
+	"github.com/infinitbyte/gopa/core/global"
 	"net/http"
+	"sync"
 )
-
-var store = sessions.NewCookieStore([]byte("GOPA-SECRET"))
 
 const sessionName string = "gopa-session"
 
 func GetSessionStore(r *http.Request, key string) (*sessions.Session, error) {
-	return store.Get(r, key)
+	return getStore().Get(r, key)
 }
 
 // GetSession return session by session key
 func GetSession(w http.ResponseWriter, r *http.Request, key string) (bool, interface{}) {
-	session, err := store.Get(r, sessionName)
+	s := getStore()
+	session, err := s.Get(r, sessionName)
 	if err != nil {
 		log.Error(err)
 		return false, nil
@@ -44,20 +45,24 @@ func GetSession(w http.ResponseWriter, r *http.Request, key string) (bool, inter
 
 // SetSession set session by session key and session value
 func SetSession(w http.ResponseWriter, r *http.Request, key string, value interface{}) bool {
-	session, err := store.Get(r, sessionName)
+	s := getStore()
+	session, err := s.Get(r, sessionName)
 	if err != nil {
 		log.Error(err)
 		return false
 	}
 	session.Values[key] = value
-	session.Save(r, w)
+	err = session.Save(r, w)
+	if err != nil {
+		log.Error(err)
+	}
 	return true
 }
 
 // GetFlash get flash value
 func GetFlash(w http.ResponseWriter, r *http.Request) (bool, []interface{}) {
 	log.Trace("get flash")
-	session, err := store.Get(r, sessionName)
+	session, err := getStore().Get(r, sessionName)
 	if err != nil {
 		log.Error(err)
 		return false, nil
@@ -70,7 +75,7 @@ func GetFlash(w http.ResponseWriter, r *http.Request) (bool, []interface{}) {
 // SetFlash set flash value
 func SetFlash(w http.ResponseWriter, r *http.Request, msg string) bool {
 	log.Trace("set flash")
-	session, err := store.Get(r, sessionName)
+	session, err := getStore().Get(r, sessionName)
 	if err != nil {
 		log.Error(err)
 		return false
@@ -78,4 +83,34 @@ func SetFlash(w http.ResponseWriter, r *http.Request, msg string) bool {
 	session.AddFlash(msg)
 	session.Save(r, w)
 	return true
+}
+
+var store *sessions.CookieStore
+var lock sync.Mutex
+
+func getStore() *sessions.CookieStore {
+	lock.Lock()
+	defer lock.Unlock()
+
+	if store != nil {
+		return store
+	}
+
+	secret := global.Env().SystemConfig.CookieSecret
+	if secret == "" {
+		log.Trace("use default cookie secret")
+		store = sessions.NewCookieStore([]byte("GOPA-SECRET"))
+	} else {
+		log.Trace("get cookie secret from config,", secret)
+		store = sessions.NewCookieStore([]byte(secret))
+	}
+
+	store.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 1,
+		HttpOnly: true,
+	}
+
+	return store
+
 }

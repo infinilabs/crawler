@@ -23,7 +23,7 @@ type AdminUI struct {
 
 func (h AdminUI) DashboardAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
-	dashboard.Index(w)
+	dashboard.Index(w, r)
 }
 
 func (h AdminUI) TasksPageAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -33,11 +33,12 @@ func (h AdminUI) TasksPageAction(w http.ResponseWriter, r *http.Request, p httpr
 	var host = h.GetParameterOrDefault(r, "host", "")
 	var from = h.GetIntOrDefault(r, "from", 0)
 	var size = h.GetIntOrDefault(r, "size", 20)
-	count1, task, _ = model.GetTaskList(from, size, host)
+	var status = h.GetIntOrDefault(r, "status", -1)
+	count1, task, _ = model.GetTaskList(from, size, host, status)
 
 	var hosts []model.Host
 	count2, hosts, _ = model.GetHostList(0, 35, "")
-	tasks.Index(w, r, host, from, size, count1, task, count2, hosts)
+	tasks.Index(w, r, host, status, from, size, count1, task, count2, hosts)
 }
 
 func (h AdminUI) TaskViewPageAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -61,12 +62,12 @@ func (h AdminUI) TaskViewPageAction(w http.ResponseWriter, r *http.Request, p ht
 
 func (h AdminUI) ConsolePageAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
-	console.Index(w)
+	console.Index(w, r)
 }
 
 func (h AdminUI) ExplorePageAction(w http.ResponseWriter, r *http.Request) {
 
-	explore.Index(w)
+	explore.Index(w, r)
 }
 
 func (h AdminUI) GetScreenshotAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -82,7 +83,7 @@ func (h AdminUI) GetScreenshotAction(w http.ResponseWriter, r *http.Request, p h
 func (h AdminUI) SettingPageAction(w http.ResponseWriter, r *http.Request) {
 
 	o, _ := yaml.Marshal(global.Env().RuntimeConfig)
-	setting.Setting(w, string(o))
+	setting.Setting(w, r, string(o))
 }
 
 func (h AdminUI) UpdateSettingAction(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -92,5 +93,5 @@ func (h AdminUI) UpdateSettingAction(w http.ResponseWriter, r *http.Request, _ h
 
 	o, _ := yaml.Marshal(global.Env().RuntimeConfig)
 
-	setting.Setting(w, string(o))
+	setting.Setting(w, r, string(o))
 }

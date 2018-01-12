@@ -1,4 +1,4 @@
-<%! func Index(w io.Writer,r *http.Request,domain string,from,size,taskCount int,tasks []model.Task,domainsCount int,domains []model.Host) error %>
+<%! func Index(w http.ResponseWriter,r *http.Request,domain string,status int,from,size,taskCount int,tasks []model.Task,domainsCount int,domains []model.Host) error %>
 
 <%% import "github.com/infinitbyte/gopa/modules/ui/common" %%>
 <%% import "github.com/infinitbyte/gopa/core/model" %%>
@@ -12,11 +12,12 @@
 <script src="/static/assets/uikit-2.27.1/js/components/pagination.min.js"></script>
 
 <% common.Body(w) %>
-<% common.Nav(w,"Tasks") %>
+<% common.Nav(w,r,"Tasks") %>
 
 <%
 paras:=map[string]interface{}{}
 paras["host"]=domain
+paras["status"]=status
 %>
 
 <div class="tm-middle">

@@ -48,6 +48,7 @@ type SystemConfig struct {
 
 	APIBinding     string `config:"api_bind"`
 	HTTPBinding    string `config:"http_bind"`
+	CookieSecret   string `config:"cookie_secret"`
 	ClusterBinding string `config:"cluster_bind"`
 
 	AllowMultiInstance bool `config:"allow_multi_instance"`

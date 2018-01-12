@@ -119,8 +119,7 @@ update-ui:
 update-template-ui:
 	@echo "generate UI pages"
 	@$(GO) get github.com/infinitbyte/ego/cmd/ego
-	@cd modules/ui/ && ego
-	@cd modules/index/ui/ && ego
+	@cd modules/ && ego
 	@cd plugins/ && ego
 
 config: init-version update-ui update-template-ui update-generated-file

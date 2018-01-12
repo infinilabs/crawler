@@ -32,7 +32,14 @@ import (
 
 type PublicUI struct {
 	api.Handler
-	Admins *hashset.Set
+	admins *hashset.Set
+}
+
+func (h *PublicUI) IsAdmin(user string) bool {
+	if h.admins != nil && h.admins.Contains(user) {
+		return true
+	}
+	return false
 }
 
 const oauthSession string = "oauth-session"
@@ -95,18 +102,20 @@ func (h *PublicUI) CallbackHandler(w http.ResponseWriter, r *http.Request, p htt
 
 	if user != nil {
 
-		session.Values["provider"] = "github"
-		session.Values["user"] = user.Login
-		session.Values["name"] = user.Name
-		session.Values["accessToken"] = tkn.AccessToken
+		//session.Values["provider"] = "github"
+		//session.Values["user"] = user.Login
+		//session.Values["name"] = user.Name
+		//session.Values["accessToken"] = tkn.AccessToken
 
 		role := "guest"
-		if h.Admins.Contains(*user.Login) {
+
+		if h.IsAdmin(*user.Login) {
 			role = "admin"
 		}
-		session.Values["role"] = role
 
-		log.Debugf("%s(%s) logged in as %s", user.Name, user.Login, role)
+		//session.Values["role"] = role
+
+		log.Debugf("%s(%s) logged in as %s", *user.Name, *user.Login, role)
 
 		err := session.Save(r, w)
 		if err != nil {
@@ -130,6 +139,11 @@ func (h PublicUI) Login(w http.ResponseWriter, r *http.Request, p httprouter.Par
 		url = "?redirect_url=" + util.UrlEncode(url)
 	}
 	auth.Login(w, url)
+}
+
+func (h PublicUI) Logout(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	api.Logout(w, r)
+	auth.Logout(w, "/")
 }
 
 func (h PublicUI) LoginSuccess(w http.ResponseWriter, r *http.Request, p httprouter.Params) {

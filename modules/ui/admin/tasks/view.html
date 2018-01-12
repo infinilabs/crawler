@@ -1,4 +1,4 @@
-<%! func View(w io.Writer,r *http.Request,task model.Task) error %>
+<%! func View(w http.ResponseWriter,r *http.Request,task model.Task) error %>
 
 <%% import "github.com/infinitbyte/gopa/modules/ui/common" %%>
 <%% import "github.com/infinitbyte/gopa/core/model" %%>
@@ -13,7 +13,7 @@
 <script src="/static/assets/uikit-2.27.1/js/components/pagination.min.js"></script>
 
 <% common.Body(w) %>
-<% common.Nav(w,"Tasks") %>
+<% common.Nav(w,r,"Tasks") %>
 <style>
      strong{
         margin-right: 10px;;

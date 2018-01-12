@@ -1,4 +1,4 @@
-<%! func Page(w io.Writer, r *http.Request, tx *bolt.Tx, indexes []int, directID int, showUsage bool) error %>
+<%! func Page(w http.ResponseWriter, r *http.Request, tx *bolt.Tx, indexes []int, directID int, showUsage bool) error %>
 
 <%% import "net/http" %%>
 <%% import "strings" %%>
@@ -46,7 +46,7 @@ if showUsage {
   </style>
 
 <% common.Body(w) %>
-<% common.Nav(w,"BoltDB") %>
+<% common.Nav(w,r,"BoltDB") %>
 
 <div class="uk-container uk-container-center">
 

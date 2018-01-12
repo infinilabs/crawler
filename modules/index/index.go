@@ -32,7 +32,7 @@ var (
 		},
 		UIConfig: &common.UIConfig{
 			Enabled:     true,
-			SiteName:    "Gopa",
+			SiteName:    "GOPA",
 			SiteFavicon: "/static/assets/img/favicon.ico",
 			SiteLogo:    "/static/assets/img/logo.svg",
 		},

@@ -1,10 +1,11 @@
-<%! func Setting(w io.Writer,str string) error %>
+<%! func Setting(w http.ResponseWriter,r *http.Request,str string) error %>
 
 <%% import "github.com/infinitbyte/gopa/modules/ui/common" %%>
+<%% import "net/http" %%>
 
 <% common.Head(w, "pprof","") %>
 <% common.Body(w) %>
-<% common.Nav(w,"pprof") %>
+<% common.Nav(w,r,"pprof") %>
 
 
 

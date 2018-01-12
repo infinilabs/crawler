@@ -1,11 +1,11 @@
-<%! func LoginSuccess(w http.ResponseWriter,url string) error %>
+<%! func Logout(w http.ResponseWriter,url string) error %>
 <%% import "github.com/infinitbyte/gopa/modules/ui/common" %%>
 <%% import "github.com/infinitbyte/gopa/core/util" %%>
 <%% import "net/http" %%>
 
-<% common.Head(w, "Login Success","") %>
+<% common.Head(w, "Logout Success","") %>
 
-<META HTTP-EQUIV="refresh" CONTENT="0;URL=<%= url %>">
+<META HTTP-EQUIV="refresh" CONTENT="5;URL=<%= url %>">
 
 <% common.Body(w) %>
 <div class="tm-middle">
@@ -16,7 +16,7 @@
                 <div>Redirecting to: <%= url %></div>
 
                 <div class="uk-alert uk-alert-success">
-                    <a href="<%= util.UrlDecode(url) %>" class="uk-icon-hover uk-icon-medium"> Login success, click to continue.</a></div>
+                    <a href="<%= util.UrlDecode(url) %>" class="uk-icon-hover uk-icon-medium"> Logout success, click to continue.</a></div>
             </div>
         </div>
     </div>

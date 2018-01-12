@@ -18,6 +18,7 @@ package api
 
 import (
 	"encoding/json"
+	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/util"
@@ -269,6 +270,10 @@ func EnableAuth(enable bool) {
 	authEnabled = enable
 }
 
+func IsAuthEnable() bool {
+	return authEnabled
+}
+
 func Login(w http.ResponseWriter, r *http.Request, user, role string) {
 	SetSession(w, r, "user", user)
 	SetSession(w, r, "role", role)
@@ -279,14 +284,27 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	SetSession(w, r, "role", "")
 }
 
-func CheckLogin(w http.ResponseWriter, r *http.Request, role string) bool {
+func GetLoginInfo(w http.ResponseWriter, r *http.Request) (user, role string) {
 	ok1, u := GetSession(w, r, "user")
 	ok2, v := GetSession(w, r, "role")
-	if ok1 && ok2 && u.(string) != "" && v.(string) != "" {
-		if role != "" && role != v {
+	if !(ok1 && ok2) {
+		return "", ""
+	}
+	return u.(string), v.(string)
+}
+
+func CheckLogin(w http.ResponseWriter, r *http.Request, requiredRole string) bool {
+	user, role := GetLoginInfo(w, r)
+	log.Trace("check user, ", user, ",", role, ",", requiredRole)
+	if user != "" && role != "" {
+		if requiredRole != "" && role != requiredRole {
+			log.Trace("not match role,, ", user, ",", role, ",", requiredRole)
 			return false
 		}
+		log.Trace("user logged in, ", user, ",", role, ",", requiredRole)
 		return true
 	}
+
+	log.Trace("user not logged in, ", user, ",", role, ",", requiredRole)
 	return false
 }

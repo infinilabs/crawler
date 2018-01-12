@@ -48,7 +48,6 @@ var faviconAction = func(w http.ResponseWriter, req *http.Request, ps httprouter
 }
 
 func (module UIModule) internalStart(cfg *Config) {
-
 	router = httprouter.New()
 	mux = http.NewServeMux()
 	websocket.InitWebSocket(global.Env())

@@ -6,6 +6,8 @@ path.data: data
 path.logs: log
 path.certs: cert
 
+cookie_secret: YOUR-GOPA-SECRET
+
 allow_multi_instance: true
 max_num_of_instances: 5
 
@@ -291,14 +293,15 @@ modules:
 - name: web
   enabled: true
   auth:
-    enabled: false
+    enabled: true
     oauth_provider: github
     oauth_authorize_url: https://github.com/login/oauth/authorize
     oauth_token_url: https://github.com/login/oauth/access_token
-    client_id: XXXXXX
-    client_secret: YYYYYY
+    client_id: 850d747174ace88ce889
+    client_secret: 3d437b64e06371d6f62769320438d3dfc95a8d8e
     authorized_admin:
-      github_login_name
+      - medcl
+      - your_github_login_name
 
 - name: filter
   enabled: true

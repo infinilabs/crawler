@@ -15,7 +15,7 @@ func Copyright(w io.Writer, config *UIConfig) error {
 	_, _ = io.WriteString(w, "\n")
 	_, _ = io.WriteString(w, "\n")
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(config.SiteName)))
-	_, _ = io.WriteString(w, " ©2017, Powered by <a target=\"_blank\" href=\"https://github.com/infinitbyte/gopa\" >Gopa</a> v")
+	_, _ = io.WriteString(w, " ©2017, Powered by <a target=\"_blank\" href=\"https://github.com/infinitbyte/gopa\" >GOPA</a> v")
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(env.GetVersion())))
 	_, _ = io.WriteString(w, " #<a title=\"")
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(env.GetLastCommitLog())))

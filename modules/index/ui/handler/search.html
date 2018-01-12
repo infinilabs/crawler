@@ -51,11 +51,11 @@
                         </svg>
                         <form name="f" id="f" novalidate="novalidate" class="searchbox sbx-custom" action="/" onSubmit="submitSearch()">
                             <div role="search" class="sbx-custom__wrapper">
-                                <input type="q" name="q"
+                                <input name="q"
                                        placeholder="Please type to search ..."
-                                       value="<%= q %>"                                       autocomplete="off" required="required"
-                                       id="query" name="query" maxLength=100 role="textbox"
-                                       accesskey="s" type="text" x-webkit-speech="" speech="" spellcheck="false" autocomplete="off"
+                                       value="<%= q %>"   autocomplete="off" required="required"
+                                       id="query"  maxLength=100 role="textbox"
+                                       accesskey="s" type="text" x-webkit-speech="" speech="" spellcheck="false"
                                        class="sbx-custom__input" >
                                 <button type="submit" title="Submit your search query." class="sbx-custom__submit">
                                     <svg role="img" aria-label="Search">

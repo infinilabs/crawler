@@ -1,6 +1,7 @@
-<%! func Index(w io.Writer) error %>
+<%! func Index(w http.ResponseWriter,r *http.Request) error %>
 
 <%% import "github.com/infinitbyte/gopa/modules/ui/common" %%>
+<%% import "net/http" %%>
 
 <% common.Head(w, "Dashboard","") %>
 <link rel="stylesheet" href="/static/assets/css/tasks.css" />
@@ -11,7 +12,7 @@
 <META HTTP-EQUIV="refresh" CONTENT="0;URL=/admin/console/">
 
 <% common.Body(w) %>
-<% common.Nav(w,"Dashboard") %>
+<% common.Nav(w,r,"Dashboard") %>
 
 
 

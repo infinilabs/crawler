@@ -1,5 +1,6 @@
-<%! func Login(w io.Writer,url string) error %>
+<%! func Login(w http.ResponseWriter,url string) error %>
 <%% import "github.com/infinitbyte/gopa/modules/ui/common" %%>
+<%% import "net/http" %%>
 
 <% common.Head(w, "Login","") %>
 <% common.Body(w) %>

@@ -24,11 +24,6 @@ import (
 )
 
 const (
-	defaultLayout = "templates/layout.html"
-	templateDir   = "templates/"
-
-	defaultConfigFile = "config.json"
-
 	githubAuthorizeUrl = "https://github.com/login/oauth/authorize"
 	githubTokenUrl     = "https://github.com/login/oauth/access_token"
 	redirectUrl        = ""
@@ -61,16 +56,17 @@ func InitUI(cfg common.AuthConfig) {
 		Scopes:      scopes,
 	}
 
-	ui.Admins = hashset.New()
+	ui.admins = hashset.New()
 	for _, v := range cfg.AuthorizedAdmins {
 		if v != "" {
-			ui.Admins.Add(v)
+			ui.admins.Add(v)
 		}
 	}
 
 	api.HandleUIMethod(api.GET, "/auth/github/", ui.AuthHandler)
 	api.HandleUIMethod(api.GET, "/auth/callback/", ui.CallbackHandler)
 	api.HandleUIMethod(api.GET, "/auth/login/", ui.Login)
+	api.HandleUIMethod(api.GET, "/auth/logout/", ui.Logout)
 	api.HandleUIMethod(api.GET, "/auth/success/", ui.LoginSuccess)
 	api.HandleUIMethod(api.GET, "/auth/fail/", ui.LoginFail)
 

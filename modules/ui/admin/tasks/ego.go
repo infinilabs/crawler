@@ -15,7 +15,7 @@ import (
 )
 
 var _ = fmt.Sprint("") // just so that we can keep the fmt import for now
-func Index(w io.Writer, r *http.Request, domain string, from, size, taskCount int, tasks []model.Task, domainsCount int, domains []model.Host) error {
+func Index(w http.ResponseWriter, r *http.Request, domain string, status int, from, size, taskCount int, tasks []model.Task, domainsCount int, domains []model.Host) error {
 	_, _ = io.WriteString(w, "\n\n")
 	_, _ = io.WriteString(w, "\n")
 	_, _ = io.WriteString(w, "\n")
@@ -25,11 +25,12 @@ func Index(w io.Writer, r *http.Request, domain string, from, size, taskCount in
 	_, _ = io.WriteString(w, "\n<link rel=\"stylesheet\" href=\"/static/assets/css/tasks.css\" />\n<script src=\"/static/assets/js/jquery.timeago.js\"></script>\n<script src=\"/static/assets/js/page/tasks.js\"></script>\n<script src=\"/static/assets/uikit-2.27.1/js/components/pagination.min.js\"></script>\n\n")
 	common.Body(w)
 	_, _ = io.WriteString(w, "\n")
-	common.Nav(w, "Tasks")
+	common.Nav(w, r, "Tasks")
 	_, _ = io.WriteString(w, "\n\n")
 
 	paras := map[string]interface{}{}
 	paras["host"] = domain
+	paras["status"] = status
 
 	_, _ = io.WriteString(w, "\n\n<div class=\"tm-middle\">\n\n    <div class=\"uk-container uk-container-center\">\n\n        <div class=\"uk-grid\" data-uk-grid-margin=\"\">\n            <div class=\"tm-sidebar uk-width-medium-1-4 uk-hidden-small uk-row-first\">\n\n                <ul class=\"tm-nav uk-nav\" data-uk-nav=\"\">\n\n                    <!--<li class=\"uk-nav-header\">Tasks</li>-->\n                    <!--<li class=\"uk-active\"><a href=\"#create-task-modal\" data-uk-modal>Create a task</a></li>-->\n                </ul>\n\n            </div>\n            <div class=\"tm-main uk-width-medium-3-4\">\n\n                <article class=\"uk-article\">\n\n\n                </article>\n\n            </div>\n        </div>\n\n        <div class=\"uk-grid\" data-uk-grid-margin>\n\n\n            <div class=\"uk-width-2-10\">\n                <div class=\"uk-alert\" ><span id=\"domain-alert\">Total ")
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(domainsCount)))
@@ -66,7 +67,7 @@ func Index(w io.Writer, r *http.Request, domain string, from, size, taskCount in
 	_, _ = io.WriteString(w, "\n")
 	return nil
 }
-func View(w io.Writer, r *http.Request, task model.Task) error {
+func View(w http.ResponseWriter, r *http.Request, task model.Task) error {
 	_, _ = io.WriteString(w, "\n\n")
 	_, _ = io.WriteString(w, "\n")
 	_, _ = io.WriteString(w, "\n")
@@ -77,7 +78,7 @@ func View(w io.Writer, r *http.Request, task model.Task) error {
 	_, _ = io.WriteString(w, "\n<link rel=\"stylesheet\" href=\"/static/assets/css/tasks.css\" />\n<script src=\"/static/assets/js/jquery.timeago.js\"></script>\n<script src=\"/static/assets/js/page/tasks.js\"></script>\n<script src=\"/static/assets/uikit-2.27.1/js/components/pagination.min.js\"></script>\n\n")
 	common.Body(w)
 	_, _ = io.WriteString(w, "\n")
-	common.Nav(w, "Tasks")
+	common.Nav(w, r, "Tasks")
 	_, _ = io.WriteString(w, "\n<style>\n     strong{\n        margin-right: 10px;;\n    }\n</style>\n<div class=\"tm-middle\">\n\n    <div class=\"uk-container uk-container-center\">\n\n        <div class=\"uk-grid\" data-uk-grid-margin=\"\">\n\n            <div class=\"tm-main uk-width-medium-3-4\">\n                <div class=\"uk-overflow-container\">\n                    <div class=\"tm-middle-header\">\n                        <div class=\"uk-grid \" data-uk-grid-margin=\"\">\n                            <div class=\"uk-width-1-1\">\n                                <h2>")
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(i18n.GetLocalizedText("Task"))))
 	_, _ = io.WriteString(w, "</h2>\n                            </div>\n                        </div>\n                    </div>\n\n                    <div class=\"p\"><strong>")

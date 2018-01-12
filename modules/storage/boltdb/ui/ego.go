@@ -33,7 +33,7 @@ func nav(w io.Writer, tx *bolt.Tx) error {
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(filepath.Base(tx.DB().Path()))))
 	return nil
 }
-func Page(w io.Writer, r *http.Request, tx *bolt.Tx, indexes []int, directID int, showUsage bool) error {
+func Page(w http.ResponseWriter, r *http.Request, tx *bolt.Tx, indexes []int, directID int, showUsage bool) error {
 	_, _ = io.WriteString(w, "\n\n")
 	_, _ = io.WriteString(w, "\n")
 	_, _ = io.WriteString(w, "\n")
@@ -62,7 +62,7 @@ func Page(w io.Writer, r *http.Request, tx *bolt.Tx, indexes []int, directID int
 	_, _ = io.WriteString(w, "\n\n  <link rel=\"stylesheet\" href=\"/static/assets/css/tasks.css\" />\n  <script src=\"/static/assets/js/jquery.timeago.js\"></script>\n  <script src=\"/static/assets/js/page/tasks.js\"></script>\n <style>\n    table {\n      border-collapse:collapse;\n      word-break:break-all; word-wrap:break-word;\n    }\n\n    table, th, td {\n      border: 1px solid black;\n    }\n\n    th, td {\n      min-width: 100px;\n      padding: 2px 5px;\n    }\n  </style>\n\n")
 	common.Body(w)
 	_, _ = io.WriteString(w, "\n")
-	common.Nav(w, "BoltDB")
+	common.Nav(w, r, "BoltDB")
 	_, _ = io.WriteString(w, "\n\n<div class=\"uk-container uk-container-center\">\n\n    <div class=\"uk-grid\" data-uk-grid-margin>\n        <div class=\"uk-width-large-1-1 uk-visible-large\">\n            <div class=\"uk-alert\" >Database: ")
 	nav(w, tx)
 	_, _ = io.WriteString(w, "</div>\n\n\n          <h2>\n                ")

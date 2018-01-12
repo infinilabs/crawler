@@ -5,8 +5,10 @@ package common
 
 import (
 	"fmt"
+	"github.com/infinitbyte/gopa/core/http"
 	"html"
 	"io"
+	"net/http"
 )
 
 var _ = fmt.Sprint("") // just so that we can keep the fmt import for now
@@ -15,7 +17,7 @@ func Body(w io.Writer) error {
 	return nil
 }
 func Footer(w io.Writer) error {
-	_, _ = io.WriteString(w, "\n\n<div class=\"tm-footer\">\n    <div class=\"uk-container uk-container-center uk-text-center\">\n        <br>\n        <hr class=\"uk-article-divider\" >\n        <ul class=\"uk-subnav uk-subnav-line uk-flex-center\">\n            <li><a href=\"http://github.com/infinitbyte/gopa\">GitHub</a></li>\n            <li><a href=\"http://github.com/infinitbyte/gopa/issues\">Issues</a></li>\n            <li><a href=\"https://github.com/infinitbyte/gopa/releases\">Releases</a></li>\n            <li><a href=\"http://github.com/infinitbyte/gopa/blob/master/CHANGES.md\">Changelog</a></li>\n        </ul>\n\n        <div class=\"uk-panel\">\n            <p>Licensed under <a target=\"_blank\" href=\"https://github.com/infinitbyte/gopa/blob/master/LICENSE\">Apache License, Version 2.0</a>.</p>\n            <a href=\"/admin/\"><svg  height=\"12\" width=\"64\">\n                <image xlink:href=\"/static/assets/img/logo.svg\" src=\"/static/assets/img/logo.svg\" height=\"12\" />\n            </svg></a>\n        </div>\n\n    </div>\n</div>\n</body>\n<script src=\"/static/assets/js/ie_detect.js\"></script>\n</html>\n")
+	_, _ = io.WriteString(w, "\n\n<div class=\"tm-footer\">\n    <div class=\"uk-container uk-container-center uk-text-center\">\n        <br>\n        <hr class=\"uk-article-divider\" >\n        <ul class=\"uk-subnav uk-subnav-line uk-flex-center\">\n            <li><a href=\"http://github.com/infinitbyte/gopa\">GitHub</a></li>\n            <li><a href=\"http://github.com/infinitbyte/gopa/issues\">Issues</a></li>\n            <li><a href=\"https://github.com/infinitbyte/gopa/releases\">Releases</a></li>\n            <li><a href=\"http://github.com/infinitbyte/gopa/blob/master/CHANGES.md\">Changelog</a></li>\n        </ul>\n\n        <div class=\"uk-panel\">\n            <p>Licensed under <a target=\"_blank\" href=\"https://github.com/infinitbyte/gopa/blob/master/LICENSE\">Apache License, Version 2.0</a>.</p>\n            <a href=\"/admin/\"><img src=\"/static/assets/img/logo.svg\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></a>\n        </div>\n\n    </div>\n</div>\n</body>\n<script src=\"/static/assets/js/ie_detect.js\"></script>\n</html>\n")
 	return nil
 }
 func Head(w io.Writer, title string, customHeaderBlock string) error {
@@ -30,7 +32,9 @@ func Head(w io.Writer, title string, customHeaderBlock string) error {
 	_, _ = io.WriteString(w, "\n")
 	return nil
 }
-func Nav(w io.Writer, current string) error {
+func Nav(w http.ResponseWriter, r *http.Request, current string) error {
+	_, _ = io.WriteString(w, "\n")
+	_, _ = io.WriteString(w, "\n")
 	_, _ = io.WriteString(w, "\n\n<nav class=\"tm-navbar uk-navbar uk-navbar-attached\">\n  <div class=\"uk-container uk-container-center\">\n    ")
 
 	logoUrl := "/admin/"
@@ -40,7 +44,7 @@ func Nav(w io.Writer, current string) error {
 
 	_, _ = io.WriteString(w, "\n    <a class=\"uk-navbar-brand uk-hidden-small\" href=\"")
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(logoUrl)))
-	_, _ = io.WriteString(w, "\"><img class=\"uk-margin uk-margin-remove\" src=\"/static/assets/img/logo.svg\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></a>\n\n    <ul class=\"uk-navbar-nav uk-hidden-small\">\n\n      ")
+	_, _ = io.WriteString(w, "\"><img class=\"uk-margin uk-margin-remove\" src=\"/static/assets/img/logo.svg\" width=\"90\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></a>\n\n    <ul class=\"uk-navbar-nav uk-hidden-small\">\n\n      ")
 	if len(navs) > 0 {
 		for _, obj := range navs {
 
@@ -55,7 +59,15 @@ func Nav(w io.Writer, current string) error {
 		}
 	}
 
-	_, _ = io.WriteString(w, "\n    </ul>\n\n    <a href=\"#tm-offcanvas\" class=\"uk-navbar-toggle uk-visible-small\" data-uk-offcanvas=\"\"></a>\n\n    <div class=\"uk-navbar-brand uk-navbar-center uk-visible-small\"><img src=\"/static/assets/img/logo.svg\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></div>\n\n  </div>\n</nav>\n\n<div style=\"height: 15px;clear: both\"></div>\n")
+	_, _ = io.WriteString(w, "\n    </ul>\n\n    <div class=\"uk-navbar-flip\">\n\n      <a href=\"#search-modal\" data-uk-modal=\"\" class=\"uk-navbar-toggle uk-navbar-toggle-alt uk-visible-small\"></a>\n      <div id=\"search-modal\" class=\"uk-modal\">\n        <div class=\"uk-modal-dialog\">\n          <a class=\"uk-modal-close uk-close\"></a>\n          <form  action=\"/\">\n            <input name=\"q\" type=\"text\" placeholder=\"Please type to search\" class=\"uk-form-large uk-width-1-1\">\n          </form>\n        </div>\n      </div>\n\n      <ul class=\"uk-navbar-nav uk-hidden-small\">\n        <li>\n          <div class=\"uk-form-icon\">\n              <form  action=\"/\">\n                <input name=\"q\" type=\"text\" placeholder=\"Please type to search\" class=\"uk-form-large uk-width-1-1\">\n              </form>\n          </div>\n        </li>\n        <li class=\"uk-parent\" data-uk-dropdown=\"\" aria-haspopup=\"true\" aria-expanded=\"false\">\n          <a href=\"\"><i class=\"uk-icon-plus-square\"></i>&nbsp;Menu</a>\n\n          <div class=\"uk-dropdown uk-dropdown-navbar uk-dropdown-bottom\" aria-hidden=\"true\" tabindex=\"\" style=\"top: 40px; left: -119px;\">\n            <ul class=\"uk-nav uk-nav-navbar\">\n              <li class=\"uk-nav-header\"><i class=\"uk-icon-tasks\"></i>&nbsp;Tasks</li>\n              <li><a href=\"#create-task-modal\" data-uk-modal=\"\">Create a task</a></li>\n              ")
+	if api.IsAuthEnable() {
+		user, _ := api.GetLoginInfo(w, r)
+
+		_, _ = io.WriteString(w, "\n                <li class=\"uk-nav-divider\"></li>\n                <li><a href=\"/auth/logout/\"><i class=\"uk-icon-power-off\"></i> Logout(")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(user)))
+		_, _ = io.WriteString(w, ")</a></li>\n              ")
+	}
+	_, _ = io.WriteString(w, "\n            </ul>\n          </div>\n\n        </li>\n      </ul>\n\n    </div>\n\n    <a href=\"#tm-offcanvas\" class=\"uk-navbar-toggle uk-visible-small\" data-uk-offcanvas=\"\"></a>\n\n    <div class=\"uk-navbar-brand uk-navbar-center uk-visible-small\"><img src=\"/static/assets/img/logo.svg\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></div>\n\n  </div>\n</nav>\n\n<div style=\"height: 15px;clear: both\"></div>\n")
 	return nil
 }
 func OffCanvas(w io.Writer) error {

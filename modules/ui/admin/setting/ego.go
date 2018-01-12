@@ -7,17 +7,19 @@ import (
 	"fmt"
 	"github.com/infinitbyte/gopa/modules/ui/common"
 	"io"
+	"net/http"
 )
 
 var _ = fmt.Sprint("") // just so that we can keep the fmt import for now
-func Setting(w io.Writer, str string) error {
+func Setting(w http.ResponseWriter, r *http.Request, str string) error {
 	_, _ = io.WriteString(w, "\n\n")
+	_, _ = io.WriteString(w, "\n")
 	_, _ = io.WriteString(w, "\n\n")
 	common.Head(w, "Setting", "")
 	_, _ = io.WriteString(w, "\n")
 	common.Body(w)
 	_, _ = io.WriteString(w, "\n")
-	common.Nav(w, "Setting")
+	common.Nav(w, r, "Setting")
 	_, _ = io.WriteString(w, "\n\n\n\n<div class=\"tm-middle\">\n    <div class=\"uk-container uk-container-center\">\n\n        <div class=\"uk-grid\" data-uk-grid-margin=\"\">\n            <div class=\"tm-sidebar uk-width-medium-1-4 uk-hidden-small uk-row-first\">\n\n\n\n            </div>\n            <div class=\"tm-main uk-width-medium-3-4\">\n\n                <div class=\"uk-alert\" ><span id=\"domain-alert\">Settings</span></div>\n\n                <article class=\"uk-article\">\n                    <style type=\"text/css\" media=\"screen\">\n                        #editor {\n                            height:850px;\n                            width: 100%;\n                        }\n                    </style>\n                    <pre id=\"editor\">")
 	_, _ = fmt.Fprint(w, str)
 	_, _ = io.WriteString(w, "</pre>\n\n                    <script src=\"/static/assets/ace/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n                    <script src=\"/static/assets/ace/ext-language_tools.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n                    <script>\n\n\n\n                        var langTools = ace.require(\"ace/ext/language_tools\");\n                        var editor = ace.edit(\"editor\");\n                        editor.session.setMode(\"ace/mode/yaml\");\n                        editor.setTheme(\"ace/theme/tomorrow\");\n\n                        editor.setOptions({\n                            enableBasicAutocompletion: true,\n                            enableSnippets: true,\n                            enableLiveAutocompletion: true\n                        });\n\n\n                        var suggestions = [\n                            {name: 'if', value: 'if', score: '1', meta: 'keyword'},\n                        ];\n                        var completer = {\n                            getCompletions: function(editor, session, pos, prefix, callback) {\n//                                for (var param in window.playerSkills) {\n//                                    if (window.playerSkills.hasOwnProperty(param)) {\n//                                        suggestions.push({name: param, value: param, score: '1', meta: 'spell'});\n//                                    }\n//                                }\n                                callback(null, suggestions);\n                            }\n                        };\n\n                        langTools.addCompleter(completer);\n\n                    </script>\n\n                </article>\n                <button class=\"uk-button uk-button-primary\" type=\"button\">Save</button>\n\n            </div>\n        </div>\n\n    </div>\n</div>\n\n")
