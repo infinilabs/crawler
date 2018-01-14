@@ -32,7 +32,7 @@ func Index(w http.ResponseWriter, r *http.Request, domain string, status int, fr
 	paras["host"] = domain
 	paras["status"] = status
 
-	_, _ = io.WriteString(w, "\n\n<div class=\"tm-middle\">\n\n    <div class=\"uk-container uk-container-center\">\n\n        <div class=\"uk-grid\" data-uk-grid-margin>\n\n            <div class=\"uk-width-2-10\">\n                <div class=\"uk-alert\" ><span>Hosts</span></div>\n                <ul class=\"uk-list uk-list-striped\" style=\"max-height: 800px; overflow: scroll\">\n                    ")
+	_, _ = io.WriteString(w, "\n\n<div class=\"tm-middle\">\n\n    <div class=\"uk-container uk-container-center\">\n\n        <div class=\"uk-grid\" data-uk-grid-margin>\n\n            <div class=\"uk-width-2-10\">\n                <div class=\"uk-alert\" ><span>Hosts</span></div>\n                <ul class=\"uk-list uk-list-striped\" style=\"max-height: 730px; overflow: scroll\">\n                    ")
 	if len(domains) > 0 {
 		for k, v := range domains {
 
