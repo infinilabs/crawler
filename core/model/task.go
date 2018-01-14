@@ -187,7 +187,12 @@ func GetTaskByField(k, v string) ([]Task, error) {
 	return tasks, err
 }
 
+func GetTaskStatus() (error,map[string]interface{}) {
+	return persist.GroupBy(Task{},"status")
+}
+
 func GetTaskList(from, size int, host string, status int) (int, []Task, error) {
+
 	log.Tracef("start get tasks, %v-%v, %v", from, size, host)
 	var tasks []Task
 	sort := []persist.Sort{}

@@ -32,6 +32,8 @@ type ORM interface {
 	GetBy(field string, value interface{}, t interface{}, to interface{}) (error, Result)
 
 	Count(o interface{}) (int, error)
+
+	GroupBy(o interface{},field string)(error,map[string]interface{})
 }
 
 type Sort struct {
@@ -184,6 +186,10 @@ func Count(o interface{}) (int, error) {
 
 func Search(t interface{}, to interface{}, q *Query) (error, Result) {
 	return getHandler().Search(t, to, q)
+}
+
+func GroupBy(o interface{},field string)(error,map[string]interface{}) {
+	return getHandler().GroupBy(o, field)
 }
 
 var handler ORM

@@ -56,3 +56,18 @@ func writeTag(buff *bytes.Buffer, tag string, innerblock string) {
 	buff.WriteString(tag)
 	buff.WriteString(">")
 }
+
+func GetStatusCount(key string, kvs map[string]interface{}) interface{} {
+	v := kvs[key]
+	if v == nil {
+		return 0
+	}
+	return v
+}
+
+func GetActive(i,j int)string {
+	if(i==j){
+		return "class=uk-active"
+	}
+	return ""
+}

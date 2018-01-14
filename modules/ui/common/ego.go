@@ -67,7 +67,7 @@ func Nav(w http.ResponseWriter, r *http.Request, current string) error {
 		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(user)))
 		_, _ = io.WriteString(w, ")</a></li>\n              ")
 	}
-	_, _ = io.WriteString(w, "\n            </ul>\n          </div>\n\n        </li>\n      </ul>\n\n    </div>\n\n    <a href=\"#tm-offcanvas\" class=\"uk-navbar-toggle uk-visible-small\" data-uk-offcanvas=\"\"></a>\n\n    <div class=\"uk-navbar-brand uk-navbar-center uk-visible-small\"><img src=\"/static/assets/img/logo.svg\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></div>\n\n  </div>\n</nav>\n\n<div style=\"height: 15px;clear: both\"></div>\n")
+	_, _ = io.WriteString(w, "\n            </ul>\n          </div>\n\n        </li>\n      </ul>\n\n    </div>\n\n    <a href=\"#tm-offcanvas\" class=\"uk-navbar-toggle uk-visible-small\" data-uk-offcanvas=\"\"></a>\n\n    <div class=\"uk-navbar-brand uk-navbar-center uk-visible-small\"><img src=\"/static/assets/img/logo.svg\" width=\"90\" height=\"30\" title=\"GOPA\" alt=\"GOPA\"></div>\n\n  </div>\n</nav>\n\n<div style=\"height: 15px;clear: both\"></div>\n")
 	return nil
 }
 func OffCanvas(w io.Writer) error {

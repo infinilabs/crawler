@@ -38,7 +38,13 @@ func (h AdminUI) TasksPageAction(w http.ResponseWriter, r *http.Request, p httpr
 
 	var hosts []model.Host
 	count2, hosts, _ = model.GetHostList(0, 35, "")
-	tasks.Index(w, r, host, status, from, size, count1, task, count2, hosts)
+
+	err,kvs:=model.GetTaskStatus()
+	if err != nil {
+		panic(err)
+	}
+
+	tasks.Index(w, r, host, status, from, size, count1, task, count2, hosts,kvs)
 }
 
 func (h AdminUI) TaskViewPageAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {

@@ -79,6 +79,33 @@ func (handler SQLORM) Count(o interface{}) (int, error) {
 	return count, handler.conn.Model(&o).Count(count).Error
 }
 
+
+func (handler SQLORM) GroupBy(o interface{},field string)(error,map[string]interface{}) {
+	if handler.useLock {
+		dbLock.Lock()
+		defer dbLock.Unlock()
+	}
+	result:=map[string]interface{}{}
+	db1 := handler.conn.Model(o)
+	rows, err :=db1.Select(fmt.Sprintf("%s,count(*)",field)).Group(field).Rows()
+	if(err!=nil){
+		return err,result
+	}
+	type row struct {
+		Field  string
+		Count int
+	}
+	for rows.Next() {
+		var r row
+		err = rows.Scan(&r.Field, &r.Count)
+		if(err!=nil){
+			return err,result
+		}
+		result[r.Field]=r.Count
+	}
+	return err,result
+}
+
 func (handler SQLORM) Search(t interface{}, o interface{}, q *api.Query) (error, api.Result) {
 	if handler.useLock {
 		dbLock.Lock()
