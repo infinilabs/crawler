@@ -128,8 +128,6 @@ func CreateTask(task *Task) error {
 	err := persist.Save(task)
 	if err != nil {
 		log.Error(task.ID, ", ", err)
-	} else {
-		IncrementHostLinkCount(task.Host)
 	}
 	return err
 }
@@ -187,8 +185,12 @@ func GetTaskByField(k, v string) ([]Task, error) {
 	return tasks, err
 }
 
-func GetTaskStatus() (error,map[string]interface{}) {
-	return persist.GroupBy(Task{},"status")
+func GetTaskStatus() (error, map[string]interface{}) {
+	return persist.GroupBy(Task{}, "status")
+}
+
+func GetHostStatus() (error, map[string]interface{}) {
+	return persist.GroupBy(Task{}, "host")
 }
 
 func GetTaskList(from, size int, host string, status int) (int, []Task, error) {

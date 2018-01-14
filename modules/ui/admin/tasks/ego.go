@@ -15,7 +15,7 @@ import (
 )
 
 var _ = fmt.Sprint("") // just so that we can keep the fmt import for now
-func Index(w http.ResponseWriter, r *http.Request, domain string, status int, from, size, taskCount int, tasks []model.Task, domainsCount int, domains []model.Host, kvs map[string]interface{}) error {
+func Index(w http.ResponseWriter, r *http.Request, domain string, status int, from, size, taskCount int, tasks []model.Task, domainsCount int, domains map[string]interface{}, kvs map[string]interface{}) error {
 	_, _ = io.WriteString(w, "\n\n")
 	_, _ = io.WriteString(w, "\n")
 	_, _ = io.WriteString(w, "\n")
@@ -32,14 +32,12 @@ func Index(w http.ResponseWriter, r *http.Request, domain string, status int, fr
 	paras["host"] = domain
 	paras["status"] = status
 
-	_, _ = io.WriteString(w, "\n\n<div class=\"tm-middle\">\n\n    <div class=\"uk-container uk-container-center\">\n\n        <div class=\"uk-grid\" data-uk-grid-margin=\"\">\n            <div class=\"tm-sidebar uk-width-medium-1-4 uk-hidden-small uk-row-first\">\n\n                <ul class=\"tm-nav uk-nav\" data-uk-nav=\"\">\n\n                    <!--<li class=\"uk-nav-header\">Tasks</li>-->\n                    <!--<li class=\"uk-active\"><a href=\"#create-task-modal\" data-uk-modal>Create a task</a></li>-->\n                </ul>\n\n            </div>\n            <div class=\"tm-main uk-width-medium-3-4\">\n\n                <article class=\"uk-article\">\n\n\n                </article>\n\n            </div>\n        </div>\n\n        <div class=\"uk-grid\" data-uk-grid-margin>\n\n\n            <div class=\"uk-width-2-10\">\n                <div class=\"uk-alert\" ><span id=\"domain-alert\">Total ")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(domainsCount)))
-	_, _ = io.WriteString(w, "</span></div>\n                <ul id=\"domain-records\" class=\"uk-list\">\n                    ")
+	_, _ = io.WriteString(w, "\n\n<div class=\"tm-middle\">\n\n    <div class=\"uk-container uk-container-center\">\n\n        <div class=\"uk-grid\" data-uk-grid-margin>\n\n            <div class=\"uk-width-2-10\">\n                <div class=\"uk-alert\" ><span>Hosts</span></div>\n                <ul class=\"uk-list uk-list-striped\" style=\"max-height: 800px; overflow: scroll\">\n                    ")
 	if len(domains) > 0 {
-		for _, domain := range domains {
+		for k, v := range domains {
 
 			_, _ = io.WriteString(w, "\n                    ")
-			_, _ = fmt.Fprint(w, GetDomainRow(domain))
+			_, _ = fmt.Fprint(w, GetDomainRow(k, v))
 			_, _ = io.WriteString(w, "\n                    ")
 
 		}

@@ -8,12 +8,12 @@ import (
 
 // Host is host struct
 type Host struct {
-	Host        string        `storm:"id,unique" json:"host,omitempty" gorm:"not null;unique;primary_key" index:"id"`
+	Host        string        `json:"host,omitempty" gorm:"not null;unique;primary_key" index:"id"`
 	Favicon     string        `json:"favicon,omitempty"`
-	Enabled     bool          `storm:"index" json:"enabled"`
+	Enabled     bool          `json:"enabled"`
 	HostConfigs *[]HostConfig `json:"host_configs,omitempty"`
-	Created     *time.Time    `storm:"index" json:"created,omitempty"`
-	Updated     *time.Time    `storm:"index" json:"updated,omitempty"`
+	Created     *time.Time    `json:"created,omitempty"`
+	Updated     *time.Time    `json:"updated,omitempty"`
 }
 
 // CreateHost create a domain host
@@ -28,19 +28,6 @@ func CreateHost(host string) Host {
 		panic(err)
 	}
 	return h
-}
-
-// IncrementHostLinkCount update host's link count //TODO fix stats
-func IncrementHostLinkCount(hostName string) error {
-	host := Host{}
-	host.Host = hostName
-
-	persist.Get(&host)
-
-	if host.Created == nil {
-		host = CreateHost(hostName)
-	}
-	return nil
 }
 
 // GetHostList return host list

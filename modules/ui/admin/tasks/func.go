@@ -8,10 +8,10 @@ import (
 )
 
 // GetDomainRow return html blocks to display a domain info
-func GetDomainRow(host model.Host) string {
+func GetDomainRow(host string, count interface{}) string {
 	var buffer bytes.Buffer
-	link := fmt.Sprintf("<a href=\"?host=%v\">%v</a>", host.Host, host.Host)
-	writeTag(&buffer, "span", link)
+	link := fmt.Sprintf("<a href=\"?host=%v\">%v(%v)</a>", host, host, count)
+	writeTag(&buffer, "li", link)
 	return buffer.String()
 }
 
@@ -65,8 +65,8 @@ func GetStatusCount(key string, kvs map[string]interface{}) interface{} {
 	return v
 }
 
-func GetActive(i,j int)string {
-	if(i==j){
+func GetActive(i, j int) string {
+	if i == j {
 		return "class=uk-active"
 	}
 	return ""
