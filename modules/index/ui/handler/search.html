@@ -170,7 +170,7 @@
 
 
                         <%
-                        if hasResult {
+                        if hasResult && response.Hits.Total>10{
                         %>
                         <div class="loadmore">
                             <div class="pnnext" data-total="<%= response.Hits.Total %>" data-from="<%= from %>" data-size="<%= size %>" data-load-text="Loading ...">
@@ -179,9 +179,7 @@
                             <p class="load-tips"></p>
                         </div>
                         <%
-                        }else{%>
-                        <div class="uk-alert uk-alert-warning"> Nothing found.</div>
-                        <%}%>
+                        }%>
 
                         <div class="c-back">
                             <div class="back-top">

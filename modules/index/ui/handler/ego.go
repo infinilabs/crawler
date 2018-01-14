@@ -154,7 +154,7 @@ func Search(w io.Writer, r *http.Request, q string, filter string, from int, siz
 	}
 	_, _ = io.WriteString(w, "\n\n\n\n                        ")
 
-	if hasResult {
+	if hasResult && response.Hits.Total > 10 {
 
 		_, _ = io.WriteString(w, "\n                        <div class=\"loadmore\">\n                            <div class=\"pnnext\" data-total=\"")
 		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(response.Hits.Total)))
@@ -164,8 +164,6 @@ func Search(w io.Writer, r *http.Request, q string, filter string, from int, siz
 		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(size)))
 		_, _ = io.WriteString(w, "\" data-load-text=\"Loading ...\">\n                                <span class=\"load-icon\"></span><span class=\"load-text\">Load More</span>\n                            </div>\n                            <p class=\"load-tips\"></p>\n                        </div>\n                        ")
 
-	} else {
-		_, _ = io.WriteString(w, "\n                        <div class=\"uk-alert uk-alert-warning\"> Nothing found.</div>\n                        ")
 	}
 	_, _ = io.WriteString(w, "\n\n                        <div class=\"c-back\">\n                            <div class=\"back-top\">\n                                <svg class=\"icon\" viewBox=\"0 0 1024 1024\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" p-id=\"519\">\n                                    <path d=\"M873.6 419.2l-355.2-361.6c-9.6-9.6-22.4-9.6-32 0l-355.2 368c-9.6 9.6-9.6 22.4 0 32 9.6 9.6 22.4 9.6 32 0l316.8-329.6 0 828.8c0 12.8 9.6 22.4 22.4 22.4s22.4-9.6 22.4-22.4l0-822.4 310.4 316.8c9.6 9.6 22.4 9.6 32 0C883.2 441.6 883.2 425.6 873.6 419.2z\" p-id=\"520\">\n                                    </path>\n                                </svg>\n                            </div>\n                        </div>\n\n                    </div>\n\n                    <div class=\"copyright\">\n                        <br/>\n                        ")
 	common.Copyright(w, config)
