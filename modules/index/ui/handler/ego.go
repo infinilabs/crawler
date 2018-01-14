@@ -5,7 +5,6 @@ package handler
 
 import (
 	"fmt"
-	api "github.com/infinitbyte/gopa/core/http"
 	"github.com/infinitbyte/gopa/core/index"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/index/ui/common"
@@ -17,14 +16,14 @@ import (
 
 var _ = fmt.Sprint("") // just so that we can keep the fmt import for now
 func CommonFooter(w io.Writer) error {
-	_, _ = io.WriteString(w, "\n\n<script type=\"text/javascript\"  src=\"/static/assets/uikit-2.27.1/js/uikit.min.js\"></script>\n<script type=\"text/javascript\" charset=\"ISO-8859-1\" src=\"/static/assets/js/jquery.autocomplete.js\"></script>\n<script type=\"text/javascript\" charset=\"utf-8\"  src=\"/static/assets/js/footer.js?v=2\"></script>\n<script src=\"/static/assets/js/ie_detect.js\"></script>\n")
+	_, _ = io.WriteString(w, "\n\n<script type=\"text/javascript\"  src=\"/static/assets/uikit-2.27.1/js/uikit.min.js\"></script>\n<script type=\"text/javascript\" charset=\"ISO-8859-1\" src=\"/static/assets/js/jquery.autocomplete.js\"></script>\n<script type=\"text/javascript\" charset=\"utf-8\"  src=\"/static/assets/js/footer.js?v=2\"></script>\n<script src=\"/static/assets/js/loadmore.js\"></script>\n<script src=\"/static/assets/js/ie_detect.js\"></script>\n")
 	return nil
 }
 func CommonHeader(w io.Writer, config *common.UIConfig) error {
 	_, _ = io.WriteString(w, "\n")
 	_, _ = io.WriteString(w, "\n\n<meta content=IE=7 http-equiv=X-UA-Compatible>\n<meta content=text/html;charset=utf-8 http-equiv=content-type>\n\n<meta name=\"robots\" content=\"all\">\n<meta name=\"license\" content=\"keep-copyright-footprint,no-KPI-shit,respect-first\">\n<meta name=\"creator\" content=\"medcl\">\n<meta name=\"generator\" content=\"https://github.com/infinitbyte/gopa\">\n<meta name=\"copyright\" content=\"Apache License, Version 2.0\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no, minimal-ui\">\n\n<link rel=\"icon\" href=\"")
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(config.SiteFavicon)))
-	_, _ = io.WriteString(w, "\" type=\"image/x-icon\" />\n\n<link rel=\"stylesheet\" href=\"/static/assets/uikit-2.27.1/css/uikit.min.css\" />\n<link rel=\"stylesheet\" href=\"/static/assets/css/style.css?v=5\" rel=\"stylesheet\" type=\"text/css\"/>\n<link rel=\"stylesheet\" href=\"/static/assets/css/search_style.css?v=1\" rel=\"stylesheet\" type=\"text/css\"/>\n<script type=\"text/javascript\"  src=\"/static/assets/js/jquery.min.js\"></script>\n<script>\n    if(/Android|Windows Phone|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)){\n        window.location.href = location.origin + \"/m/\" + location.search;\n    }\n</script>\n")
+	_, _ = io.WriteString(w, "\" type=\"image/x-icon\" />\n\n<link rel=\"stylesheet\" href=\"/static/assets/uikit-2.27.1/css/uikit.min.css\" />\n<link rel=\"stylesheet\" href=\"/static/assets/css/style.css?v=5\" rel=\"stylesheet\" type=\"text/css\"/>\n<link rel=\"stylesheet\" href=\"/static/assets/css/search_style.css?v=1\" rel=\"stylesheet\" type=\"text/css\"/>\n<link rel=\"stylesheet\" href=\"/static/assets/css/loadmore.css\" rel=\"stylesheet\" type=\"text/css\"/>\n\n<script type=\"text/javascript\"  src=\"/static/assets/js/jquery.min.js\"></script>\n<script>\n    if(/Android|Windows Phone|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)){\n        window.location.href = location.origin + \"/m/\" + location.search;\n    }\n</script>\n")
 	return nil
 }
 func Index(w io.Writer, config *common.UIConfig) error {
@@ -45,7 +44,6 @@ func Index(w io.Writer, config *common.UIConfig) error {
 	return nil
 }
 func Search(w io.Writer, r *http.Request, q string, filter string, from int, size int, config *common.UIConfig, response *index.SearchResponse) error {
-	_, _ = io.WriteString(w, "\n")
 	_, _ = io.WriteString(w, "\n")
 	_, _ = io.WriteString(w, "\n")
 	_, _ = io.WriteString(w, "\n")
@@ -99,8 +97,11 @@ func Search(w io.Writer, r *http.Request, q string, filter string, from int, siz
 	}
 
 	_, _ = io.WriteString(w, "\n                            </div>\n                        </div>\n\n                        ")
-	if len(response.Hits.Hits) > 0 {
-		_, _ = io.WriteString(w, "\n\n                        ")
+
+	hasResult := len(response.Hits.Hits) > 0
+
+	if hasResult {
+		_, _ = io.WriteString(w, "\n                        <div class=\"item-view\">\n                        ")
 
 		for seq, hit := range response.Hits.Hits {
 			url := common.SafeGetField(hit.Source["snapshot"].(map[string]interface{})["url"], "N/A")
@@ -138,6 +139,7 @@ func Search(w io.Writer, r *http.Request, q string, filter string, from int, siz
 			_, _ = io.WriteString(w, "\n                                        </div>\n                                    </FONT>\n                                </TD>\n                            </TR></TBODY></TABLE>\n                        ")
 
 		}
+		_, _ = io.WriteString(w, "\n                        </div>\n                        ")
 
 		paras := map[string]interface{}{}
 		paras["q"] = q
@@ -146,15 +148,26 @@ func Search(w io.Writer, r *http.Request, q string, filter string, from int, siz
 			paras["filter"] = filter
 		}
 
-		_, _ = io.WriteString(w, "\n\n\n                        ")
-		_, _ = fmt.Fprint(w, api.GetPagination(from, size, response.Hits.Total, "", paras))
-		_, _ = io.WriteString(w, "\n                        ")
-		common.GetNavBlock(w, r)
 		_, _ = io.WriteString(w, "\n\n                        ")
 	} else {
 		_, _ = io.WriteString(w, "\n                        <div class=\"uk-alert uk-alert-warning\"> Nothing found.</div>\n                        ")
 	}
-	_, _ = io.WriteString(w, "\n\n                    </div>\n\n                    <div class=\"copyright\">\n                        <br/>\n                        ")
+	_, _ = io.WriteString(w, "\n\n\n\n                        ")
+
+	if hasResult {
+
+		_, _ = io.WriteString(w, "\n                        <div class=\"loadmore\">\n                            <div class=\"pnnext\" data-total=\"")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(response.Hits.Total)))
+		_, _ = io.WriteString(w, "\" data-from=\"")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(from)))
+		_, _ = io.WriteString(w, "\" data-size=\"")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(size)))
+		_, _ = io.WriteString(w, "\" data-load-text=\"Loading ...\">\n                                <span class=\"load-icon\"></span><span class=\"load-text\">Load More</span>\n                            </div>\n                            <p class=\"load-tips\"></p>\n                        </div>\n                        ")
+
+	} else {
+		_, _ = io.WriteString(w, "\n                        <div class=\"uk-alert uk-alert-warning\"> Nothing found.</div>\n                        ")
+	}
+	_, _ = io.WriteString(w, "\n\n                        <div class=\"c-back\">\n                            <div class=\"back-top\">\n                                <svg class=\"icon\" viewBox=\"0 0 1024 1024\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" p-id=\"519\">\n                                    <path d=\"M873.6 419.2l-355.2-361.6c-9.6-9.6-22.4-9.6-32 0l-355.2 368c-9.6 9.6-9.6 22.4 0 32 9.6 9.6 22.4 9.6 32 0l316.8-329.6 0 828.8c0 12.8 9.6 22.4 22.4 22.4s22.4-9.6 22.4-22.4l0-822.4 310.4 316.8c9.6 9.6 22.4 9.6 32 0C883.2 441.6 883.2 425.6 873.6 419.2z\" p-id=\"520\">\n                                    </path>\n                                </svg>\n                            </div>\n                        </div>\n\n                    </div>\n\n                    <div class=\"copyright\">\n                        <br/>\n                        ")
 	common.Copyright(w, config)
 	_, _ = io.WriteString(w, "\n                    </div>\n\n                </div>\n\n            </div>\n\n        </div>\n    </div>\n</div>\n\n")
 	CommonFooter(w)

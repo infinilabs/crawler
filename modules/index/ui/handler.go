@@ -36,15 +36,13 @@ func (h *UserUI) MobileIndexPageAction(w http.ResponseWriter, req *http.Request,
 	h.searchPageAction(w, req, ps, true)
 }
 
-func (h *UserUI) MobileAJAXMoreItemAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+func (h *UserUI) AJAXMoreItemAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 	rawQuery := h.GetParameter(req, "q")
 	query := util.FilterSpecialChar(rawQuery)
 	query = util.XSSHandle(query)
-	if strings.TrimSpace(query) == "" {
-		mobileHandler.Index(w, h.Config)
-	} else {
+	if strings.TrimSpace(query) != "" {
 
-		size := h.GetIntOrDefault(req, "size", 10)
+		size := h.GetIntOrDefault(req, "size", 5)
 		from := h.GetIntOrDefault(req, "from", 0)
 		filter := h.GetParameterOrDefault(req, "filter", "")
 		filterQuery := ""
@@ -57,59 +55,24 @@ func (h *UserUI) MobileAJAXMoreItemAction(w http.ResponseWriter, req *http.Reque
 			},`, arr[0], util.UrlDecode(arr[1]))
 		}
 
-		response, err := h.execute(filterQuery, query, from, size)
+		response, err := h.execute(filterQuery, query, false, from, size)
 		if err != nil {
 			h.Error(w, err)
 			return
 		}
 
-		mobileHandler.Block(w, req, rawQuery, filter, from, size, h.Config, response)
+		if len(response.Hits.Hits) > 0 {
+			mobileHandler.Block(w, req, rawQuery, filter, from, size, h.Config, response)
+		}
 	}
 }
 
-func (h *UserUI) execute(filterQuery, query string, from, size int) (*core.SearchResponse, error) {
+func (h *UserUI) execute(filterQuery, query string, agg bool, from, size int) (*core.SearchResponse, error) {
 
-	format := `
-		{
-
-  "query": {
-    "bool": {
-      "must": [
-       %s
-        {
-          "query_string": {
-            "query": "%s",
-            "default_operator": "and",
-            "fields": [
-              "snapshot.title^100",
-              "snapshot.summary",
-              "snapshot.text"
-            ],
-            "allow_leading_wildcard": false
-          }
-        }
-      ]
-    }
-  },
-    "highlight": {
-        "pre_tags": [
-            "<span class=highlight_snippet >"
-        ],
-        "post_tags": [
-            "</span>"
-        ],
-        "fields": {
-            "snapshot.title": {
-                "fragment_size": 100,
-                "number_of_fragments": 5
-            },
-            "snapshot.text": {
-                "fragment_size": 150,
-                "number_of_fragments": 5
-            }
-        }
-    },
-    "aggs": {
+	aggStr := ""
+	if agg {
+		aggStr = `
+	"aggs": {
         "host|Host": {
             "terms": {
                 "field": "host",
@@ -141,12 +104,63 @@ func (h *UserUI) execute(filterQuery, query string, from, size int) (*core.Searc
             }
         }
     },
+	`
+	}
+
+	format := `
+		{
+
+  "query": {
+    "bool": {
+      "must": [
+       %s
+        {
+          "query_string": {
+            "query": "%s",
+            "default_operator": "and",
+            "fields": [
+              "snapshot.title^100",
+              "snapshot.summary",
+              "snapshot.text"
+            ],
+            "allow_leading_wildcard": false
+          }
+        }
+      ]
+    }
+  },
+  "collapse": {
+    "field": "snapshot.title.keyword",
+    "inner_hits": {
+      "name": "collpased_docs",
+      "size": 5
+    }
+  },
+    "highlight": {
+        "pre_tags": [
+            "<span class=highlight_snippet >"
+        ],
+        "post_tags": [
+            "</span>"
+        ],
+        "fields": {
+            "snapshot.title": {
+                "fragment_size": 100,
+                "number_of_fragments": 5
+            },
+            "snapshot.text": {
+                "fragment_size": 150,
+                "number_of_fragments": 5
+            }
+        }
+    },
+    %s
     "from": %v,
     "size": %v
 }
 		`
 
-	q := fmt.Sprintf(format, filterQuery, query, from, size)
+	q := fmt.Sprintf(format, filterQuery, query, aggStr, from, size)
 
 	return h.SearchClient.SearchWithRawQueryDSL("index", []byte(q))
 }
@@ -176,7 +190,7 @@ func (h *UserUI) searchPageAction(w http.ResponseWriter, req *http.Request, ps h
 			},`, arr[0], util.UrlDecode(arr[1]))
 		}
 
-		response, err := h.execute(filterQuery, query, from, size)
+		response, err := h.execute(filterQuery, query, true, from, size)
 		if err != nil {
 			h.Error(w, err)
 			return

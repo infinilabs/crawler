@@ -41,7 +41,7 @@ $(function () {
         var from = parseInt($this.attr("data-from"));
         var queryObj = parseQueryString(location.href);
         queryObj.from = from + size;
-        var url = "ajax_more_item/";
+        var url = "/ajax_more_item/";
 
         if (from < total) {
             if ($this.hasClass("disabled")) {
@@ -64,7 +64,10 @@ $(function () {
                         $this.attr("data-from", queryObj.from);
                         $(".item-view").append(res);
                     } else {
-                        $tips.text("Error with data loading, please try again!").show();
+                       // $tips.text("Error with data loading, please try again!").show();
+                        $tips.text("No more results.").show();
+                        $this.addClass("disabled");
+                        $this.fadeOut();
                     }
                 },
                 complete: function () {
@@ -74,7 +77,7 @@ $(function () {
                 }
             });
         } else {
-            $tips.text("No more data!").show();
+            $tips.text("No more results.").show();
             $this.addClass("disabled");
             setTimeout(function () {
                 $this.fadeOut();

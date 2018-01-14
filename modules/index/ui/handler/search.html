@@ -3,7 +3,6 @@
 <%% import "github.com/infinitbyte/gopa/modules/index/ui/common" %%>
 <%% import "github.com/infinitbyte/gopa/core/index" %%>
 <%% import "github.com/infinitbyte/gopa/core/util" %%>
-<%% import api "github.com/infinitbyte/gopa/core/http" %%>
 <%% import "fmt" %%>
 <%% import "strings" %%>
 
@@ -121,8 +120,11 @@
                             </div>
                         </div>
 
-                        <% if len(response.Hits.Hits)>0 { %>
+                        <%
+                        hasResult:= len(response.Hits.Hits)>0
 
+                        if hasResult { %>
+                        <div class="item-view">
                         <%
                         for seq,hit:=range response.Hits.Hits{
                             url:=common.SafeGetField(hit.Source["snapshot"].(map[string]interface{})["url"],"N/A")
@@ -148,7 +150,9 @@
                                 </TD>
                             </TR></TBODY></TABLE>
                         <%
-                        }
+                        }%>
+                        </div>
+                        <%
 
 
                         paras:=map[string]interface{}{}
@@ -159,13 +163,34 @@
                         }
                         %>
 
-
-                        <%== api.GetPagination(from,size, response.Hits.Total, "", paras) %>
-                        <% common.GetNavBlock(w,r) %>
-
                         <%}else{%>
                         <div class="uk-alert uk-alert-warning"> Nothing found.</div>
                         <%}%>
+
+
+
+                        <%
+                        if hasResult {
+                        %>
+                        <div class="loadmore">
+                            <div class="pnnext" data-total="<%= response.Hits.Total %>" data-from="<%= from %>" data-size="<%= size %>" data-load-text="Loading ...">
+                                <span class="load-icon"></span><span class="load-text">Load More</span>
+                            </div>
+                            <p class="load-tips"></p>
+                        </div>
+                        <%
+                        }else{%>
+                        <div class="uk-alert uk-alert-warning"> Nothing found.</div>
+                        <%}%>
+
+                        <div class="c-back">
+                            <div class="back-top">
+                                <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="519">
+                                    <path d="M873.6 419.2l-355.2-361.6c-9.6-9.6-22.4-9.6-32 0l-355.2 368c-9.6 9.6-9.6 22.4 0 32 9.6 9.6 22.4 9.6 32 0l316.8-329.6 0 828.8c0 12.8 9.6 22.4 22.4 22.4s22.4-9.6 22.4-22.4l0-822.4 310.4 316.8c9.6 9.6 22.4 9.6 32 0C883.2 441.6 883.2 425.6 873.6 419.2z" p-id="520">
+                                    </path>
+                                </svg>
+                            </div>
+                        </div>
 
                     </div>
 

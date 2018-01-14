@@ -259,7 +259,7 @@ By default, Gopa works well except indexing, if you want to use elasticsearch as
 </pre>
 </details></p>
 
-_Note: Elasticsearch version should > v5.0_
+_Note: Elasticsearch version should >= v5.3_
 
 - Enable index module in `gopa.yml`, update the elasticsearch's setting:
 ```

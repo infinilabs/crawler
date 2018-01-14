@@ -54,7 +54,7 @@ func (module IndexModule) Start(cfg *Config) {
 		ui.SearchClient = &core.ElasticsearchClient{Config: indexConfig.Elasticsearch}
 		api.HandleUIMethod(api.GET, "/", ui.IndexPageAction)
 		api.HandleUIMethod(api.GET, "/m/", ui.MobileIndexPageAction)
-		api.HandleUIMethod(api.GET, "/m/ajax_more_item/", ui.MobileAJAXMoreItemAction)
+		api.HandleUIMethod(api.GET, "/ajax_more_item/", ui.AJAXMoreItemAction)
 		api.HandleUIMethod(api.GET, "/snapshot/:id", api.NeedLogin("", ui.GetSnapshotPayloadAction))
 		api.HandleUIMethod(api.GET, "/suggest/", ui.SuggestAction)
 	}
