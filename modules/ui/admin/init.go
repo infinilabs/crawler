@@ -35,9 +35,10 @@ func InitUI() {
 	//UI pages init
 	ui := AdminUI{}
 
+	api.HandleUIMethod(api.GET, "/screenshot/:id", ui.GetScreenshotAction)
+
 	api.HandleUIMethod(api.GET, "/admin/", api.NeedLogin("admin", ui.DashboardAction))
 	api.HandleUIMethod(api.POST, "/admin/setting/", api.NeedLogin("admin", ui.UpdateSettingAction))
-	api.HandleUIMethod(api.GET, "/screenshot/:id", api.NeedLogin("admin", ui.GetScreenshotAction))
 	api.HandleUIMethod(api.GET, "/admin/dashboard/", api.NeedLogin("admin", ui.DashboardAction))
 	api.HandleUIMethod(api.GET, "/admin/tasks/", api.NeedLogin("admin", ui.TasksPageAction))
 	api.HandleUIMethod(api.GET, "/admin/task/view/:id", api.NeedLogin("admin", ui.TaskViewPageAction))
