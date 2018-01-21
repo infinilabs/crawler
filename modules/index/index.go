@@ -55,7 +55,7 @@ func (module IndexModule) Start(cfg *Config) {
 		api.HandleUIMethod(api.GET, "/", ui.IndexPageAction)
 		api.HandleUIMethod(api.GET, "/m/", ui.MobileIndexPageAction)
 		api.HandleUIMethod(api.GET, "/ajax_more_item/", ui.AJAXMoreItemAction)
-		api.HandleUIMethod(api.GET, "/snapshot/:id", api.NeedLogin("", ui.GetSnapshotPayloadAction))
+		api.HandleUIMethod(api.GET, "/snapshot/:id", api.NeedPermission(model.PERMISSION_SNAPSHOT_VIEW, ui.GetSnapshotPayloadAction))
 		api.HandleUIMethod(api.GET, "/suggest/", ui.SuggestAction)
 	}
 

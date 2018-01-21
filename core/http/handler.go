@@ -21,6 +21,7 @@ import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/global"
+	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/jmoiron/jsonq"
 	"github.com/julienschmidt/httprouter"
@@ -254,10 +255,9 @@ func BasicAuth(h httprouter.Handle, requiredUser, requiredPassword string) httpr
 
 var authEnabled = false
 
-// BasicAuth register api with basic auth
-func NeedLogin(role string, h httprouter.Handle) httprouter.Handle {
+func NeedPermission(permission string, h httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		if !authEnabled || CheckLogin(w, r, role) {
+		if !authEnabled || CheckPermission(w, r, permission) {
 			// Delegate request to the given handle
 			h(w, r, ps)
 		} else {
@@ -293,18 +293,38 @@ func GetLoginInfo(w http.ResponseWriter, r *http.Request) (user, role string) {
 	return u.(string), v.(string)
 }
 
-func CheckLogin(w http.ResponseWriter, r *http.Request, requiredRole string) bool {
+func CheckPermission(w http.ResponseWriter, r *http.Request, requiredPermission string) bool {
+	permissions := []string{}
+	permissions = append(permissions, requiredPermission)
+	return CheckPermissions(w, r, permissions)
+}
+
+func CheckPermissions(w http.ResponseWriter, r *http.Request, requiredPermissions []string) bool {
 	user, role := GetLoginInfo(w, r)
-	log.Trace("check user, ", user, ",", role, ",", requiredRole)
+	log.Trace("check user, ", user, ",", role, ",", requiredPermissions)
 	if user != "" && role != "" {
-		if requiredRole != "" && role != requiredRole {
-			log.Trace("not match role,, ", user, ",", role, ",", requiredRole)
+		//TODO remove hard-coded permission check
+		if role == model.ROLE_ADMIN {
+			return true
+		}
+
+		perms, err := model.GetPermissionsByRole(role)
+		if err != nil {
+			log.Error(err)
 			return false
 		}
-		log.Trace("user logged in, ", user, ",", role, ",", requiredRole)
+
+		for _, v := range requiredPermissions {
+			if v != "" && !perms.Contains(v) {
+				log.Tracef("user %s with role: %s do not have permission: %s", user, role, v)
+				return false
+			}
+		}
+
+		log.Trace("user logged in, ", user, ",", role, ",", requiredPermissions)
 		return true
 	}
 
-	log.Trace("user not logged in, ", user, ",", role, ",", requiredRole)
+	log.Trace("user not logged in, ", user, ",", role, ",", requiredPermissions)
 	return false
 }

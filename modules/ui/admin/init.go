@@ -18,6 +18,7 @@ package admin
 
 import (
 	api "github.com/infinitbyte/gopa/core/http"
+	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/modules/ui/admin/ajax"
 	"github.com/infinitbyte/gopa/modules/ui/common"
 )
@@ -37,12 +38,12 @@ func InitUI() {
 
 	api.HandleUIMethod(api.GET, "/screenshot/:id", ui.GetScreenshotAction)
 
-	api.HandleUIMethod(api.GET, "/admin/", api.NeedLogin("admin", ui.DashboardAction))
-	api.HandleUIMethod(api.POST, "/admin/setting/", api.NeedLogin("admin", ui.UpdateSettingAction))
-	api.HandleUIMethod(api.GET, "/admin/dashboard/", api.NeedLogin("admin", ui.DashboardAction))
-	api.HandleUIMethod(api.GET, "/admin/tasks/", api.NeedLogin("admin", ui.TasksPageAction))
-	api.HandleUIMethod(api.GET, "/admin/task/view/:id", api.NeedLogin("admin", ui.TaskViewPageAction))
-	api.HandleUIMethod(api.GET, "/admin/console/", api.NeedLogin("admin", ui.ConsolePageAction))
+	api.HandleUIMethod(api.GET, "/admin/", api.NeedPermission(model.PERMISSION_ADMIN_MINIMAL, ui.DashboardAction))
+	api.HandleUIMethod(api.POST, "/admin/setting/", api.NeedPermission(model.PERMISSION_ADMIN_MINIMAL, ui.UpdateSettingAction))
+	api.HandleUIMethod(api.GET, "/admin/dashboard/", api.NeedPermission(model.PERMISSION_ADMIN_MINIMAL, ui.DashboardAction))
+	api.HandleUIMethod(api.GET, "/admin/tasks/", api.NeedPermission(model.PERMISSION_ADMIN_MINIMAL, ui.TasksPageAction))
+	api.HandleUIMethod(api.GET, "/admin/task/view/:id", api.NeedPermission(model.PERMISSION_ADMIN_MINIMAL, ui.TaskViewPageAction))
+	api.HandleUIMethod(api.GET, "/admin/console/", api.NeedPermission(model.PERMISSION_ADMIN_MINIMAL, ui.ConsolePageAction))
 
 	api.HandleUIFunc("/admin/explore/", ui.ExplorePageAction)
 	api.HandleUIFunc("/admin/setting/", ui.SettingPageAction)

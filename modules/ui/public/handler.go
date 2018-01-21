@@ -23,6 +23,7 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/google/go-github/github"
 	"github.com/infinitbyte/gopa/core/http"
+	"github.com/infinitbyte/gopa/core/model"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/ui/public/auth"
 	"github.com/julienschmidt/httprouter"
@@ -107,10 +108,10 @@ func (h *PublicUI) CallbackHandler(w http.ResponseWriter, r *http.Request, p htt
 		//session.Values["name"] = user.Name
 		//session.Values["accessToken"] = tkn.AccessToken
 
-		role := "guest"
+		role := model.ROLE_GUEST
 
 		if h.IsAdmin(*user.Login) {
-			role = "admin"
+			role = model.ROLE_ADMIN
 		}
 
 		//session.Values["role"] = role
