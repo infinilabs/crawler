@@ -5,6 +5,7 @@ GOPA, A Spider Written in Go.
 [![Travis](https://travis-ci.org/infinitbyte/gopa.svg?branch=master)](https://travis-ci.org/infinitbyte/gopa)
 [![Go Report Card](https://goreportcard.com/badge/github.com/infinitbyte/gopa)](https://goreportcard.com/report/github.com/infinitbyte/gopa)
 [![Join the chat at https://gitter.im/infinitbyte/gopa](https://badges.gitter.im/infinitbyte/gopa.svg)](https://gitter.im/infinitbyte/gopa?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Finfinitbyte%2Fgopa.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Finfinitbyte%2Fgopa?ref=badge_shield)
 
 
 ## Goal
@@ -373,3 +374,7 @@ welcome! let's make it better.
 License
 =======
 Released under the [Apache License, Version 2.0](https://github.com/infinitbyte/gopa/blob/master/LICENSE) .
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Finfinitbyte%2Fgopa.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Finfinitbyte%2Fgopa?ref=badge_large)
