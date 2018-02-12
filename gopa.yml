@@ -314,7 +314,7 @@ modules:
   enabled: true
 #  driver: elasticsearch
 #  elasticsearch:
-#    endpoint: http://dev:9200
+#    endpoint: http://localhost:9200
 #    index_prefix: gopa-
 #    username: elastic
 #    password: changeme
@@ -328,7 +328,7 @@ modules:
 #    logo: https://static-www.elastic.co/cn/assets/blt6050efb80ceabd47/elastic-logo (2).svg?q=294
 #    favicon: https://www.elastic.co/favicon.ico
   elasticsearch:
-    endpoint: http://dev:9200
+    endpoint: http://localhost:9200
     index_prefix: gopa-
     username: elastic
     password: changeme
@@ -337,7 +337,7 @@ modules:
   enabled: true
 #  driver: elasticsearch
 #  elasticsearch:
-#    endpoint: http://dev:9200
+#    endpoint: http://localhost:9200
 #    index_prefix: gopa-
 #    username: elastic
 #    password: changeme
@@ -348,7 +348,7 @@ modules:
 #  // CREATE DATABASE IF NOT EXISTS gopa DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
 #  driver: mysql
 #  mysql:
-#    connection: root:password@tcp(dev:3306)/gopa?charset=utf8&parseTime=true&loc=Local
+#    connection: root:password@tcp(localhost:3306)/gopa?charset=utf8&parseTime=true&loc=Local
 
 - name: stats
   enabled: true
