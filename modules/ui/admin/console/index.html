@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="/static/assets/uikit-2.27.1/css/components/notify.min.css" />
 <script src="/static/assets/js/jquery.hotkeys-0.7.9.min.js"></script>
 <script src="/static/assets/uikit-2.27.1/js/components/notify.min.js"></script>
-<script src="/static/assets/js/page/console.js"></script>
+<script src="/static/assets/js/page/console.js?v=1"></script>
 <style type="text/css">
     pre{
         margin-top:0px;
@@ -39,7 +39,10 @@
         <div class="uk-grid " data-uk-grid-margin>
             <div class="uk-width-1-1 ">
 
-                <div id="connect_status" class="uk-alert" ></div>
+                <div class="uk-alert uk-alert-success" data-uk-alert="">
+                    <a href="#" class="uk-alert-close uk-close"></a>
+                    <p id="connect_status"></p>
+                </div>
 
                 <div id="log" class="uk-scrollable-text"></div>
                 <form id="form" class="uk-form">

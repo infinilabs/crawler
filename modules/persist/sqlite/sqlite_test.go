@@ -39,7 +39,7 @@ type UserGroup struct {
 	DepartName string
 }
 
-func SmokeTest1(t *testing.T) {
+func TestSmokeTest1(t *testing.T) {
 	util.FileDelete("/tmp/test_database12.db")
 
 	fileName := fmt.Sprintf("file:%s?cache=shared&mode=rwc", "/tmp/test_database12.db")
@@ -62,7 +62,9 @@ func SmokeTest1(t *testing.T) {
 	u = UserInfo{Username: "joe", DepartName: "design"}
 	db.Create(&u)
 
-	rows, _ := db.Table("user_infos").Select("depart_name,count(*) as count").Group("depart_name").Rows()
+	rows, _ := db.Table("user_infos").Select("depart_name,count(*) as count").Group("depart_name").
+		Having("username=?", "medcl").
+		Rows()
 	columns, _ := rows.Columns()
 	fmt.Println(columns)
 

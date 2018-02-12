@@ -100,14 +100,14 @@ $(function () {
                 var msg="Connection established.";
                 log.children().remove();
                 $("#connect_status").text(msg);
-                $("#connect_status").removeClass("uk-alert-danger").addClass("uk-alert-success");
+                $(".uk-alert").removeClass("uk-alert-danger").addClass("uk-alert-success");
                 clearInterval(tm);
                 console.log("remove refresh trigger")
             };
             conn.onclose = function (evt) {
                 var msg="Connection closed.";
                 $("#connect_status").text(msg);
-                $("#connect_status").removeClass("uk-alert-success").addClass("uk-alert-danger");
+                $(".uk-alert").removeClass("uk-alert-success").addClass("uk-alert-danger");
                 tm=setInterval(refreshFunc, 5000);
                 console.log("set refresh trigger")
             };

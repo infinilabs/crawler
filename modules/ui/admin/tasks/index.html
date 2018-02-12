@@ -27,15 +27,23 @@ paras["status"]=status
 
         <div class="uk-grid" data-uk-grid-margin>
 
-            <div class="uk-width-2-10">
+            <div class="uk-width-2-10 uk-hidden-small">
                 <div class="uk-alert" ><span>Hosts</span></div>
                 <ul class="uk-list uk-list-striped" style="max-height: 730px; overflow: scroll">
-                    <% if len(domains)>0 {
-                    for k,v:=range domains{
-                    %>
-                    <%== GetDomainRow(k,v) %>
                     <%
-                    }
+
+                    if(domain!=""){
+                       %>
+                    <li><a href="?"><i class="uk-icon-filter">:&nbsp;</i><%== domain %></a></li>
+                    <%
+                    }else{
+                        if len(domains)>0 {
+                        for k,v:=range domains{
+                        %>
+                        <%== GetDomainRow(k,v) %>
+                        <%
+                        }
+                        }
                     }
                     %>
                 </ul>
@@ -44,25 +52,35 @@ paras["status"]=status
             <div class="uk-width-8-10">
 
                 <ul class="uk-tab" data-uk-tab="">
-                    <li <%= GetActive(status,-1)%> ><a href="/admin/tasks/">All</a></li>
-                    <li  <%= GetActive(status,0)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=0">New(<%= GetStatusCount("0",kvs)%>)</a></li>
-                    <li  <%= GetActive(status,9)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=9">PendingFetch(<%= GetStatusCount("9",kvs)%>)</a></li>
-                    <li  <%= GetActive(status,3)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=3">Success(<%= GetStatusCount("3",kvs)%>)</a></li>
+                    <%
+                    if(status>-1){
+                    %>
+                    <li><a href="/admin/tasks/?host=<%= domain%>"><i class="uk-icon-filter">:&nbsp;</i><%== model.GetTaskStatusText(status) %></a></li>
+                    <%
+                    }else{
+                    %>
+                    <li <%= GetActive(status,-1)%> ><a href="/admin/tasks/?host=<%= domain%>">All</a></li>
+                    <li  <%= GetActive(status,0)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=0&host=<%= domain%>">New(<%= GetStatusCount("0",kvs)%>)</a></li>
+                    <li  <%= GetActive(status,9)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=9&host=<%= domain%>">PendingFetch(<%= GetStatusCount("9",kvs)%>)</a></li>
+                    <li  <%= GetActive(status,3)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=3&host=<%= domain%>">Success(<%= GetStatusCount("3",kvs)%>)</a></li>
                     <li data-uk-dropdown="{mode:'click'}" aria-haspopup="true" aria-expanded="false">
                         <a href="#">More <i class="uk-icon-caret-down"></i></a>
                         <div class="uk-dropdown uk-dropdown-small" aria-hidden="true">
                             <ul class="uk-nav uk-nav-dropdown">
-                                <li  <%= GetActive(status,2)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=2">Failed(<%= GetStatusCount("2",kvs)%>)</a></li>
-                                <li  <%= GetActive(status,4)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=4">404(<%= GetStatusCount("4",kvs)%>)</a></li>
-                                <li  <%= GetActive(status,5)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=5">Redirected(<%= GetStatusCount("5",kvs)%>)</a></li>
-                                <li  <%= GetActive(status,6)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=6">Timeout(<%= GetStatusCount("6",kvs)%>)</a></li>
-                                <li  <%= GetActive(status,7)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=7">Duplicated(<%= GetStatusCount("7",kvs)%>)</a></li>
-                                <li  <%= GetActive(status,8)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=8">Interrupted(<%= GetStatusCount("8",kvs)%>)</a></li>
+                                <li  <%= GetActive(status,2)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=2&host=<%= domain%>">Failed(<%= GetStatusCount("2",kvs)%>)</a></li>
+                                <li  <%= GetActive(status,4)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=4&host=<%= domain%>">404(<%= GetStatusCount("4",kvs)%>)</a></li>
+                                <li  <%= GetActive(status,5)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=5&host=<%= domain%>">Redirected(<%= GetStatusCount("5",kvs)%>)</a></li>
+                                <li  <%= GetActive(status,6)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=6&host=<%= domain%>">Timeout(<%= GetStatusCount("6",kvs)%>)</a></li>
+                                <li  <%= GetActive(status,7)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=7&host=<%= domain%>">Duplicated(<%= GetStatusCount("7",kvs)%>)</a></li>
+                                <li  <%= GetActive(status,8)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=8&host=<%= domain%>">Interrupted(<%= GetStatusCount("8",kvs)%>)</a></li>
                             </ul>
                         </div>
                     </li>
                     <li class="uk-tab-responsive uk-active uk-hidden" aria-haspopup="true" aria-expanded="false"><a>Item</a><div class="uk-dropdown uk-dropdown-small" aria-hidden="true"><ul class="uk-nav uk-nav-dropdown"></ul><div></div></div></li>
 
+                    <%
+                    }
+                    %>
                     <script language="javascript">
                         function locate(url){
                             if(url!=undefined)
@@ -79,6 +97,7 @@ paras["status"]=status
                             });
                         });
                     </script>
+
                 </ul>
 
                 <div class="uk-overflow-container">

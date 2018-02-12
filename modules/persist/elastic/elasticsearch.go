@@ -145,7 +145,7 @@ func (handler ElasticORM) Search(t interface{}, to interface{}, q *api.Query) (e
 	return err, result
 }
 
-func (handler ElasticORM) GroupBy(o interface{}, field string) (error, map[string]interface{}) {
+func (handler ElasticORM) GroupBy(o interface{}, selectField, groupField string, haveQuery string, haveValue interface{}) (error, map[string]interface{}) {
 	panic(errors.New("not implemented yet"))
 	result := map[string]interface{}{}
 	return nil, result

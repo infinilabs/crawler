@@ -32,56 +32,101 @@ func Index(w http.ResponseWriter, r *http.Request, domain string, status int, fr
 	paras["host"] = domain
 	paras["status"] = status
 
-	_, _ = io.WriteString(w, "\n\n<div class=\"tm-middle\">\n\n    <div class=\"uk-container uk-container-center\">\n\n        <div class=\"uk-grid\" data-uk-grid-margin>\n\n            <div class=\"uk-width-2-10\">\n                <div class=\"uk-alert\" ><span>Hosts</span></div>\n                <ul class=\"uk-list uk-list-striped\" style=\"max-height: 730px; overflow: scroll\">\n                    ")
-	if len(domains) > 0 {
-		for k, v := range domains {
+	_, _ = io.WriteString(w, "\n\n<div class=\"tm-middle\">\n\n    <div class=\"uk-container uk-container-center\">\n\n        <div class=\"uk-grid\" data-uk-grid-margin>\n\n            <div class=\"uk-width-2-10 uk-hidden-small\">\n                <div class=\"uk-alert\" ><span>Hosts</span></div>\n                <ul class=\"uk-list uk-list-striped\" style=\"max-height: 730px; overflow: scroll\">\n                    ")
 
-			_, _ = io.WriteString(w, "\n                    ")
-			_, _ = fmt.Fprint(w, GetDomainRow(k, v))
-			_, _ = io.WriteString(w, "\n                    ")
+	if domain != "" {
 
+		_, _ = io.WriteString(w, "\n                    <li><a href=\"?\"><i class=\"uk-icon-filter\">:&nbsp;</i>")
+		_, _ = fmt.Fprint(w, domain)
+		_, _ = io.WriteString(w, "</a></li>\n                    ")
+
+	} else {
+		if len(domains) > 0 {
+			for k, v := range domains {
+
+				_, _ = io.WriteString(w, "\n                        ")
+				_, _ = fmt.Fprint(w, GetDomainRow(k, v))
+				_, _ = io.WriteString(w, "\n                        ")
+
+			}
 		}
 	}
 
-	_, _ = io.WriteString(w, "\n                </ul>\n            </div>\n\n            <div class=\"uk-width-8-10\">\n\n                <ul class=\"uk-tab\" data-uk-tab=\"\">\n                    <li ")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, -1))))
-	_, _ = io.WriteString(w, " ><a href=\"/admin/tasks/\">All</a></li>\n                    <li  ")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 0))))
-	_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=0\">New(")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("0", kvs))))
-	_, _ = io.WriteString(w, ")</a></li>\n                    <li  ")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 9))))
-	_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=9\">PendingFetch(")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("9", kvs))))
-	_, _ = io.WriteString(w, ")</a></li>\n                    <li  ")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 3))))
-	_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=3\">Success(")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("3", kvs))))
-	_, _ = io.WriteString(w, ")</a></li>\n                    <li data-uk-dropdown=\"{mode:'click'}\" aria-haspopup=\"true\" aria-expanded=\"false\">\n                        <a href=\"#\">More <i class=\"uk-icon-caret-down\"></i></a>\n                        <div class=\"uk-dropdown uk-dropdown-small\" aria-hidden=\"true\">\n                            <ul class=\"uk-nav uk-nav-dropdown\">\n                                <li  ")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 2))))
-	_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=2\">Failed(")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("2", kvs))))
-	_, _ = io.WriteString(w, ")</a></li>\n                                <li  ")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 4))))
-	_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=4\">404(")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("4", kvs))))
-	_, _ = io.WriteString(w, ")</a></li>\n                                <li  ")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 5))))
-	_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=5\">Redirected(")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("5", kvs))))
-	_, _ = io.WriteString(w, ")</a></li>\n                                <li  ")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 6))))
-	_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=6\">Timeout(")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("6", kvs))))
-	_, _ = io.WriteString(w, ")</a></li>\n                                <li  ")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 7))))
-	_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=7\">Duplicated(")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("7", kvs))))
-	_, _ = io.WriteString(w, ")</a></li>\n                                <li  ")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 8))))
-	_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=8\">Interrupted(")
-	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("8", kvs))))
-	_, _ = io.WriteString(w, ")</a></li>\n                            </ul>\n                        </div>\n                    </li>\n                    <li class=\"uk-tab-responsive uk-active uk-hidden\" aria-haspopup=\"true\" aria-expanded=\"false\"><a>Item</a><div class=\"uk-dropdown uk-dropdown-small\" aria-hidden=\"true\"><ul class=\"uk-nav uk-nav-dropdown\"></ul><div></div></div></li>\n\n                    <script language=\"javascript\">\n                        function locate(url){\n                            if(url!=undefined)\n                            {\n                                window.location.replace(url)\n                            }\n                        }\n                        $(function () {\n                            $('.uk-tab').on('change.uk.tab', function(e, active, previous) {\n                                locate(active.context.firstChild.href);\n                            });\n                            $('.uk-nav-dropdown').click(function(e){\n                                locate(e.target.href);\n                            });\n                        });\n                    </script>\n                </ul>\n\n                <div class=\"uk-overflow-container\">\n                    <table id=\"tasks\" class=\"uk-table uk-table-hover uk-table-striped\" cellspacing=\"0\" width=\"100%\">\n                    <thead>\n                    <tr>\n                        <th>URL</th>\n                        <th>LastUpdate</th>\n                        <th>NextCheck</th>\n                        <th>Status</th>\n                    </tr>\n                    </thead>\n                    <tbody id=\"records\">\n                    ")
+	_, _ = io.WriteString(w, "\n                </ul>\n            </div>\n\n            <div class=\"uk-width-8-10\">\n\n                <ul class=\"uk-tab\" data-uk-tab=\"\">\n                    ")
+
+	if status > -1 {
+
+		_, _ = io.WriteString(w, "\n                    <li><a href=\"/admin/tasks/?host=")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(domain)))
+		_, _ = io.WriteString(w, "\"><i class=\"uk-icon-filter\">:&nbsp;</i>")
+		_, _ = fmt.Fprint(w, model.GetTaskStatusText(status))
+		_, _ = io.WriteString(w, "</a></li>\n                    ")
+
+	} else {
+
+		_, _ = io.WriteString(w, "\n                    <li ")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, -1))))
+		_, _ = io.WriteString(w, " ><a href=\"/admin/tasks/?host=")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(domain)))
+		_, _ = io.WriteString(w, "\">All</a></li>\n                    <li  ")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 0))))
+		_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=0&host=")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(domain)))
+		_, _ = io.WriteString(w, "\">New(")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("0", kvs))))
+		_, _ = io.WriteString(w, ")</a></li>\n                    <li  ")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 9))))
+		_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=9&host=")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(domain)))
+		_, _ = io.WriteString(w, "\">PendingFetch(")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("9", kvs))))
+		_, _ = io.WriteString(w, ")</a></li>\n                    <li  ")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 3))))
+		_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=3&host=")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(domain)))
+		_, _ = io.WriteString(w, "\">Success(")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("3", kvs))))
+		_, _ = io.WriteString(w, ")</a></li>\n                    <li data-uk-dropdown=\"{mode:'click'}\" aria-haspopup=\"true\" aria-expanded=\"false\">\n                        <a href=\"#\">More <i class=\"uk-icon-caret-down\"></i></a>\n                        <div class=\"uk-dropdown uk-dropdown-small\" aria-hidden=\"true\">\n                            <ul class=\"uk-nav uk-nav-dropdown\">\n                                <li  ")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 2))))
+		_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=2&host=")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(domain)))
+		_, _ = io.WriteString(w, "\">Failed(")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("2", kvs))))
+		_, _ = io.WriteString(w, ")</a></li>\n                                <li  ")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 4))))
+		_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=4&host=")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(domain)))
+		_, _ = io.WriteString(w, "\">404(")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("4", kvs))))
+		_, _ = io.WriteString(w, ")</a></li>\n                                <li  ")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 5))))
+		_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=5&host=")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(domain)))
+		_, _ = io.WriteString(w, "\">Redirected(")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("5", kvs))))
+		_, _ = io.WriteString(w, ")</a></li>\n                                <li  ")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 6))))
+		_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=6&host=")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(domain)))
+		_, _ = io.WriteString(w, "\">Timeout(")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("6", kvs))))
+		_, _ = io.WriteString(w, ")</a></li>\n                                <li  ")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 7))))
+		_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=7&host=")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(domain)))
+		_, _ = io.WriteString(w, "\">Duplicated(")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("7", kvs))))
+		_, _ = io.WriteString(w, ")</a></li>\n                                <li  ")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 8))))
+		_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=8&host=")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(domain)))
+		_, _ = io.WriteString(w, "\">Interrupted(")
+		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetStatusCount("8", kvs))))
+		_, _ = io.WriteString(w, ")</a></li>\n                            </ul>\n                        </div>\n                    </li>\n                    <li class=\"uk-tab-responsive uk-active uk-hidden\" aria-haspopup=\"true\" aria-expanded=\"false\"><a>Item</a><div class=\"uk-dropdown uk-dropdown-small\" aria-hidden=\"true\"><ul class=\"uk-nav uk-nav-dropdown\"></ul><div></div></div></li>\n\n                    ")
+
+	}
+
+	_, _ = io.WriteString(w, "\n                    <script language=\"javascript\">\n                        function locate(url){\n                            if(url!=undefined)\n                            {\n                                window.location.replace(url)\n                            }\n                        }\n                        $(function () {\n                            $('.uk-tab').on('change.uk.tab', function(e, active, previous) {\n                                locate(active.context.firstChild.href);\n                            });\n                            $('.uk-nav-dropdown').click(function(e){\n                                locate(e.target.href);\n                            });\n                        });\n                    </script>\n\n                </ul>\n\n                <div class=\"uk-overflow-container\">\n                    <table id=\"tasks\" class=\"uk-table uk-table-hover uk-table-striped\" cellspacing=\"0\" width=\"100%\">\n                    <thead>\n                    <tr>\n                        <th>URL</th>\n                        <th>LastUpdate</th>\n                        <th>NextCheck</th>\n                        <th>Status</th>\n                    </tr>\n                    </thead>\n                    <tbody id=\"records\">\n                    ")
 	if len(tasks) > 0 {
 		for _, task := range tasks {
 

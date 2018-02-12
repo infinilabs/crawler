@@ -185,12 +185,21 @@ func GetTaskByField(k, v string) ([]Task, error) {
 	return tasks, err
 }
 
-func GetTaskStatus() (error, map[string]interface{}) {
-	return persist.GroupBy(Task{}, "status")
+func GetTaskStatus(host string) (error, map[string]interface{}) {
+	if host != "" {
+		return persist.GroupBy(Task{}, "status", "host,status", "host = ?", host)
+
+	} else {
+		return persist.GroupBy(Task{}, "status", "status", "", nil)
+	}
 }
 
-func GetHostStatus() (error, map[string]interface{}) {
-	return persist.GroupBy(Task{}, "host")
+func GetHostStatus(status int) (error, map[string]interface{}) {
+	if status >= 0 {
+		return persist.GroupBy(Task{}, "host", "host,status", "status = ?", status)
+	} else {
+		return persist.GroupBy(Task{}, "host", "host", "", nil)
+	}
 }
 
 func GetTaskList(from, size int, host string, status int) (int, []Task, error) {

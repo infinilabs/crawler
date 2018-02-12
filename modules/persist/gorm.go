@@ -79,14 +79,20 @@ func (handler SQLORM) Count(o interface{}) (int, error) {
 	return count, handler.conn.Model(&o).Count(count).Error
 }
 
-func (handler SQLORM) GroupBy(o interface{}, field string) (error, map[string]interface{}) {
+func (handler SQLORM) GroupBy(o interface{}, selectField, groupField string, haveQuery string, haveValue interface{}) (error, map[string]interface{}) {
 	if handler.useLock {
 		dbLock.Lock()
 		defer dbLock.Unlock()
 	}
 	result := map[string]interface{}{}
-	db1 := handler.conn.Model(o)
-	rows, err := db1.Select(fmt.Sprintf("%s,count(*)", field)).Group(field).Rows()
+
+	db1 := handler.conn.Model(o).Select(fmt.Sprintf("%s,count(*)", selectField)).Group(groupField)
+	if haveQuery != "" {
+		db1 = db1.Having(haveQuery, haveValue)
+		log.Tracef("group have: %s - %v", haveQuery, haveValue)
+	}
+	rows, err := db1.Rows()
+
 	if err != nil {
 		return err, result
 	}
@@ -94,6 +100,7 @@ func (handler SQLORM) GroupBy(o interface{}, field string) (error, map[string]in
 		Field string
 		Count int
 	}
+
 	for rows.Next() {
 		var r row
 		err = rows.Scan(&r.Field, &r.Count)

@@ -7,6 +7,7 @@
     <link rel="icon" href="/static/assets/img/favicon.ico" type="image/x-icon" />
     <link rel="shortcut icon" href="/static/assets/img/favicon.ico" type="image/x-icon" />
     <script src="/static/assets/js/jquery.min.js"></script>
+    <script src="/static/assets/js/split.min.js"></script>
     <script src="/static/assets/uikit-2.27.1/js/uikit.min.js"></script>
     <script src="/static/assets/uikit-2.27.1/js/components/sortable.min.js"></script>
     <meta charset="utf-8">
@@ -64,6 +65,75 @@
 
 <div class="tm-middle">
     <div class="uk-container uk-container-center">
+
+        <div class="uk-grid" data-uk-grid-margin="">
+            <div class="tm-main uk-width-medium-1-1">
+                <div class="container">
+                    <style>
+
+
+                        hr {
+                            margin-top: 2px;
+                        }
+                        .split-container {
+                            height: 250px;
+                            border: 1px solid #ddd;
+                            border-radius: 4px;
+                        }
+
+                        .split p, .split-flex p {
+                            padding: 20px;
+                        }
+
+                        .split, .split-flex {
+                            -webkit-box-sizing: border-box;
+                            -moz-box-sizing: border-box;
+                            box-sizing: border-box;
+
+                            overflow-y: auto;
+                            overflow-x: hidden;
+                        }
+
+                        .gutter {
+                            background-color: #eee;
+
+                            background-repeat: no-repeat;
+                            background-position: 50%;
+                        }
+
+                        .gutter.gutter-horizontal {
+                            background-image: url('/static/assets/img/grips/vertical.png');
+                            cursor: ew-resize;
+                        }
+
+                        .gutter.gutter-vertical {
+                            background-image: url('/static/assets/img/grips/horizontal.png');
+                            cursor: ns-resize;
+                        }
+
+                        .split.split-horizontal, .gutter.gutter-horizontal {
+                            height: 100%;
+                            float: left;
+                        }
+                    </style>
+                    <div class="split-container">
+                        <div id="eight" class="split split-vertical" style="height: calc(50% - 5px);">
+                            <p>#eight</p>
+                        </div>
+                        <div id="nine" class="split split-vertical" style="height: calc(50% - 5px);">
+                            <p>#nine</p>
+                        </div>
+                    </div>
+                <script>
+                    Split(['#eight', '#nine'], {
+                        direction: 'vertical',
+                        sizes: [70, 30],
+                        minSize: 0,
+                    });
+                </script>
+            </div>
+            </div>
+        </div>
 
         <div class="uk-grid" data-uk-grid-margin="">
             <div class="tm-sidebar uk-width-medium-1-4 uk-hidden-small uk-row-first">
