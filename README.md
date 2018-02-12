@@ -374,5 +374,3 @@ welcome! let's make it better.
 License
 =======
 Released under the [Apache License, Version 2.0](https://github.com/infinitbyte/gopa/blob/master/LICENSE) .
-
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Finfinitbyte%2Fgopa.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Finfinitbyte%2Fgopa?ref=badge_large)
