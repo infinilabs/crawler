@@ -24,6 +24,8 @@
 1. remove goleveldb due to memory leak
 2. update logo
 3. remove hard coded version
+4. update task UI, support filter by status and host
+5. clean offset_canvas menu
 ##### bugfix
 
 

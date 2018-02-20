@@ -206,8 +206,6 @@ func Page(w http.ResponseWriter, r *http.Request, tx *bolt.Tx, indexes []int, di
 		_, _ = io.WriteString(w, "\">Show Page Usage</a></p>\n              ")
 	}
 	_, _ = io.WriteString(w, "\n\n              <br/><br/>\n              <form action=\"boltdb\" method=\"GET\">\n                Go to page: <input type=\"text\" name=\"id\"/>\n                <button type=\"submit\">Go</button>\n              </form>\n\n            </div>\n    </div>\n\n</div>\n\n")
-	common.OffCanvas(w)
-	_, _ = io.WriteString(w, "\n\n")
 	common.Footer(w)
 	_, _ = io.WriteString(w, "\n")
 	return nil
