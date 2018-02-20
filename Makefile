@@ -1,7 +1,7 @@
 SHELL=/bin/bash
 
 # Default GOPA version
-GOPA_VERSION := 0.10.0_SNAPSHOT
+GOPA_VERSION := 0.11.0_SNAPSHOT
 
 # Get release version from environment
 ifneq "$(VERSION)" ""
