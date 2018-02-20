@@ -1,7 +1,6 @@
 package impl
 
 import (
-	log "github.com/cihub/seelog"
 	f "github.com/seiflotfy/cuckoofilter"
 	"sync"
 )
@@ -21,9 +20,7 @@ func (filter *CuckooFilterImpl) Open(fileName string) error {
 func (filter *CuckooFilterImpl) Close() error {
 	filter.l.Lock()
 	defer filter.l.Unlock()
-	log.Debug("start persist leveldb, file:", filter.persistFileName)
 	return nil
-
 }
 
 func (filter *CuckooFilterImpl) Exists(key []byte) bool {
