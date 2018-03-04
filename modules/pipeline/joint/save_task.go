@@ -97,19 +97,19 @@ func getTask(context *model.Context) *model.Task {
 	}
 
 	if context.Has(model.CONTEXT_TASK_Created) {
-		task.Created = context.MustGetTime(model.CONTEXT_TASK_Created)
+		task.Created = context.MustGetInt64(model.CONTEXT_TASK_Created)
 	}
 	if context.Has(model.CONTEXT_TASK_Updated) {
-		task.Updated = context.MustGetTime(model.CONTEXT_TASK_Updated)
+		task.Updated = context.MustGetInt64(model.CONTEXT_TASK_Updated)
 	}
 	if context.Has(model.CONTEXT_TASK_LastFetch) {
-		task.LastFetch = context.MustGetTime(model.CONTEXT_TASK_LastFetch)
+		task.LastFetch = context.MustGetInt64(model.CONTEXT_TASK_LastFetch)
 	}
 	if context.Has(model.CONTEXT_TASK_LastCheck) {
-		task.LastCheck = context.MustGetTime(model.CONTEXT_TASK_LastCheck)
+		task.LastCheck = context.MustGetInt64(model.CONTEXT_TASK_LastCheck)
 	}
 	if context.Has(model.CONTEXT_TASK_NextCheck) {
-		task.NextCheck = context.MustGetTime(model.CONTEXT_TASK_NextCheck)
+		task.NextCheck = context.MustGetInt64(model.CONTEXT_TASK_NextCheck)
 	}
 	if context.Has(model.CONTEXT_TASK_SnapshotID) {
 		task.SnapshotID = context.GetStringOrDefault(model.CONTEXT_TASK_SnapshotID, "")
@@ -121,7 +121,7 @@ func getTask(context *model.Context) *model.Task {
 		task.SnapshotHash = context.GetStringOrDefault(model.CONTEXT_TASK_SnapshotHash, "")
 	}
 	if context.Has(model.CONTEXT_TASK_SnapshotCreated) {
-		task.SnapshotCreated = context.MustGetTime(model.CONTEXT_TASK_SnapshotCreated)
+		task.SnapshotCreated = context.MustGetInt64(model.CONTEXT_TASK_SnapshotCreated)
 	}
 	if context.Has(model.CONTEXT_TASK_SnapshotVersion) {
 		task.SnapshotVersion = context.GetIntOrDefault(model.CONTEXT_TASK_SnapshotVersion, 0)

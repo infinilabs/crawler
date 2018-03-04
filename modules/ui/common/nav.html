@@ -1,6 +1,7 @@
 <%! func Nav(w http.ResponseWriter,r *http.Request, current string) error %>
 <%% import "net/http" %%>
 <%% import "github.com/infinitbyte/gopa/core/http" %%>
+<%% import "github.com/infinitbyte/gopa/core/model" %%>
 
 <nav class="tm-navbar uk-navbar uk-navbar-attached">
   <div class="uk-container uk-container-center">
@@ -51,7 +52,7 @@
             <ul class="uk-nav uk-nav-navbar">
               <li class="uk-nav-header"><i class="uk-icon-tasks"></i>&nbsp;Tasks</li>
               <li><a href="#create-task-modal" data-uk-modal="">Create a task</a></li>
-              <% if api.IsAuthEnable(){
+              <% if api.IsAuthEnable() && api.CheckPermission(w,r,model.PERMISSION_ADMIN_MINIMAL){
               user,_:=api.GetLoginInfo(w,r)
               %>
                 <li class="uk-nav-divider"></li>
@@ -65,6 +66,7 @@
 
     </div>
 
+    <% OffCanvas(w,current) %>
     <a href="#tm-offcanvas" class="uk-navbar-toggle uk-visible-small" data-uk-offcanvas=""></a>
 
     <div class="uk-navbar-brand uk-navbar-center uk-visible-small"><img src="/static/assets/img/logo.svg" width="90" height="30" title="GOPA" alt="GOPA"></div>
@@ -74,5 +76,4 @@
 
 <div style="height: 15px;clear: both"></div>
 
-<% OffCanvas(w,current) %>
 

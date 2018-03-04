@@ -9,9 +9,10 @@ import (
 	"github.com/infinitbyte/gopa/modules/config"
 	"github.com/infinitbyte/gopa/modules/ui/admin/console"
 	"github.com/infinitbyte/gopa/modules/ui/admin/dashboard"
-	"github.com/infinitbyte/gopa/modules/ui/admin/explore"
+	//"github.com/infinitbyte/gopa/modules/ui/admin/explore"
 	"github.com/infinitbyte/gopa/modules/ui/admin/setting"
 	"github.com/infinitbyte/gopa/modules/ui/admin/tasks"
+	"github.com/infinitbyte/gopa/modules/ui/common"
 	"github.com/julienschmidt/httprouter"
 	"gopkg.in/yaml.v2"
 	"net/http"
@@ -74,8 +75,8 @@ func (h AdminUI) ConsolePageAction(w http.ResponseWriter, r *http.Request, p htt
 }
 
 func (h AdminUI) ExplorePageAction(w http.ResponseWriter, r *http.Request) {
-
-	explore.Index(w, r)
+	common.Message(w, r, "hello", "world")
+	//explore.Index(w, r)
 }
 
 func (h AdminUI) GetScreenshotAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {

@@ -59,7 +59,6 @@ paras["status"]=status
                     <%
                     }else{
                     %>
-                    <li <%= GetActive(status,-1)%> ><a href="/admin/tasks/?host=<%= domain%>">All</a></li>
                     <li  <%= GetActive(status,0)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=0&host=<%= domain%>">New(<%= GetStatusCount("0",kvs)%>)</a></li>
                     <li  <%= GetActive(status,9)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=9&host=<%= domain%>">PendingFetch(<%= GetStatusCount("9",kvs)%>)</a></li>
                     <li  <%= GetActive(status,3)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=3&host=<%= domain%>">Success(<%= GetStatusCount("3",kvs)%>)</a></li>

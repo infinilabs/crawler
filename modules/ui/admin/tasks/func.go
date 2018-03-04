@@ -25,15 +25,15 @@ func GetTaskRow(task model.Task) string {
 
 	writeTag(&buffer, "td", title)
 
-	if !task.SnapshotCreated.IsZero() {
-		date1 := util.FormatTimeWithLocalTZ(task.SnapshotCreated)
+	if task.SnapshotCreated > 0 {
+		date1 := util.FormatUnixTimestamp(task.SnapshotCreated)
 		buffer.WriteString("<td class='timeago' title='" + date1 + "' >" + date1 + "</td>")
 	} else {
 		buffer.WriteString("<td >N/A</td>")
 	}
 
-	if !task.NextCheck.IsZero() {
-		date2 := util.FormatTimeWithLocalTZ(task.NextCheck)
+	if task.NextCheck > 0 {
+		date2 := util.FormatUnixTimestamp(task.NextCheck)
 		buffer.WriteString("<td class='timeago' title='" + date2 + "' >" + date2 + "</td>")
 
 	} else {

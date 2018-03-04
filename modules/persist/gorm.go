@@ -87,6 +87,8 @@ func (handler SQLORM) GroupBy(o interface{}, selectField, groupField string, hav
 	result := map[string]interface{}{}
 
 	db1 := handler.conn.Model(o).Select(fmt.Sprintf("%s,count(*)", selectField)).Group(groupField)
+	log.Tracef("select:%s, group: %s", selectField, groupField)
+
 	if haveQuery != "" {
 		db1 = db1.Having(haveQuery, haveValue)
 		log.Tracef("group have: %s - %v", haveQuery, haveValue)

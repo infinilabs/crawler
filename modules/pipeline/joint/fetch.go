@@ -66,7 +66,7 @@ func (joint FetchJoint) Process(context *model.Context) error {
 		return errors.New("invalid fetchUrl")
 	}
 
-	t1 := time.Now().UTC()
+	t1 := time.Now().UTC().Unix()
 	context.Set(model.CONTEXT_TASK_LastFetch, t1)
 
 	log.Debug("start fetch url,", requestUrl)

@@ -34,12 +34,12 @@ type HostConfig struct {
 	PipelineID string `gorm:"index" json:"pipeline_id"`
 	Cookies    string `json:"cookies,omitempty"`
 
-	Created time.Time `gorm:"index" json:"created,omitempty"`
-	Updated time.Time `gorm:"index" json:"updated,omitempty"`
+	Created int64 `gorm:"index" json:"created,omitempty"`
+	Updated int64 `gorm:"index" json:"updated,omitempty"`
 }
 
 func CreateHostConfig(config *HostConfig) error {
-	time := time.Now().UTC()
+	time := time.Now().UTC().Unix()
 	config.ID = util.GetUUID()
 	config.Created = time
 	config.Updated = time
@@ -47,7 +47,7 @@ func CreateHostConfig(config *HostConfig) error {
 }
 
 func UpdateHostConfig(config *HostConfig) error {
-	time := time.Now().UTC()
+	time := time.Now().UTC().Unix()
 	config.Updated = time
 	return persist.Update(config)
 }

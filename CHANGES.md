@@ -8,12 +8,15 @@
 #### v0.11
 
 ##### breaking changes
+1. change field created/updated from date to unix timestamp
 
 ##### features
 
 ##### improvement
+1. speed up task list, especially when sort by date
 
 ##### bugfix
+1. fix mysql as database option
 
 
 #### v0.10

@@ -64,11 +64,7 @@ func Index(w http.ResponseWriter, r *http.Request, domain string, status int, fr
 
 	} else {
 
-		_, _ = io.WriteString(w, "\n                    <li ")
-		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, -1))))
-		_, _ = io.WriteString(w, " ><a href=\"/admin/tasks/?host=")
-		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(domain)))
-		_, _ = io.WriteString(w, "\">All</a></li>\n                    <li  ")
+		_, _ = io.WriteString(w, "\n                    <li  ")
 		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(GetActive(status, 0))))
 		_, _ = io.WriteString(w, "  aria-expanded=\"false\" class=\"\"><a href=\"/admin/tasks/?status=0&host=")
 		_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(domain)))

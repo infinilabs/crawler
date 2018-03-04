@@ -68,7 +68,7 @@ func (joint InitTaskJoint) Process(context *model.Context) error {
 		panic(errors.New("task not set"))
 	}
 
-	t1 := time.Now().UTC()
+	t1 := time.Now().UTC().Unix()
 
 	//init snapshot
 	var snapshot = &model.Snapshot{

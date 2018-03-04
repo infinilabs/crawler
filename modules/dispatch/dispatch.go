@@ -20,6 +20,8 @@ type DispatchConfig struct {
 	NewTaskEnabled          bool  `config:"new_task"`
 	UpdateTaskEnabled       bool  `config:"update_task"`
 	MaxConcurrentFetchTasks int64 `config:"max_concurrent_fetch_tasks"`
+	FetchSize               int   `config:"fetch_size"`
+	GetHostConfigByUrl      bool  `config:"get_host_config_by_url"`
 }
 
 // Name return Dispatch
@@ -29,7 +31,7 @@ func (module DispatchModule) Name() string {
 
 var signalChannel chan bool
 
-func dispatchTasks(name string, tasks []model.Task, offset *time.Time) {
+func dispatchTasks(name string, cfg *DispatchConfig, tasks []model.Task, offset int64) {
 	for _, v := range tasks {
 		log.Trace("get task from db, ", v.ID)
 
@@ -42,12 +44,13 @@ func dispatchTasks(name string, tasks []model.Task, offset *time.Time) {
 		context.Set(model.CONTEXT_TASK_ID, v.ID)
 
 		//update offset
-		if v.Created.After(*offset) {
-			offset = &v.Created
+		if v.Created > offset {
+			offset = v.Created
 		}
 
 		runner := "fetch"
-		if v.HostConfig == nil {
+
+		if v.HostConfig == nil && cfg.GetHostConfigByUrl {
 			//assign pipeline config
 			config, _ := model.GetHostConfigByHostAndUrl(runner, v.Host, v.Url)
 			if config != nil {
@@ -66,6 +69,8 @@ func dispatchTasks(name string, tasks []model.Task, offset *time.Time) {
 		v.Status = model.TaskPendingFetch
 		model.UpdateTask(&v)
 		err := queue.Push(config.FetchChannel, util.ToJSONBytes(context))
+		log.Trace("push task to fetch queue, ", v.ID)
+
 		if err != nil {
 			log.Error(err)
 			continue
@@ -80,7 +85,10 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 		FailedTaskEnabled:       false,
 		UpdateTaskEnabled:       true,
 		NewTaskEnabled:          true,
-		MaxConcurrentFetchTasks: 100}
+		MaxConcurrentFetchTasks: 100,
+		FetchSize:               100,
+		GetHostConfigByUrl:      false,
+	}
 	cfg.Unpack(&moduleConfig)
 
 	signalChannel = make(chan bool, 2)
@@ -88,7 +96,7 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 	go func() {
 		now := time.Now().UTC()
 		dd, _ := time.ParseDuration("-240h")
-		defaultOffset := now.Add(dd)
+		defaultOffset := now.Add(dd).Unix()
 		newOffset := defaultOffset
 		updateOffset := defaultOffset
 		failureOffset := defaultOffset
@@ -117,14 +125,14 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 				var err error
 				//get new task
 				if moduleConfig.NewTaskEnabled {
-					total, tasks, err = model.GetPendingNewFetchTasks(newOffset)
+					total, tasks, err = model.GetPendingNewFetchTasks(newOffset, moduleConfig.FetchSize)
 					if err != nil {
 						log.Error(err)
 					}
 					log.Debugf("get %v new task, with offset, %v", total, newOffset)
 
 					if tasks != nil && len(tasks) > 0 {
-						dispatchTasks("new", tasks, &newOffset)
+						dispatchTasks("new", &moduleConfig, tasks, newOffset)
 						continue
 					}
 
@@ -143,7 +151,7 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 					log.Debugf("get %v update task, with offset, %v", total, updateOffset)
 
 					if tasks != nil && len(tasks) > 0 {
-						dispatchTasks("update", tasks, &updateOffset)
+						dispatchTasks("update", &moduleConfig, tasks, updateOffset)
 						continue
 					}
 
@@ -162,7 +170,7 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 					log.Debugf("get %v failure task, with offset, %v", total, failureOffset)
 
 					if tasks != nil && len(tasks) > 0 {
-						dispatchTasks("failure", tasks, &failureOffset)
+						dispatchTasks("failure", &moduleConfig, tasks, failureOffset)
 						continue
 					}
 

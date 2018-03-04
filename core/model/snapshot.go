@@ -21,7 +21,6 @@ import (
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/persist"
 	"github.com/infinitbyte/gopa/core/util"
-	"time"
 )
 
 type KV struct {
@@ -37,7 +36,7 @@ type LinkGroup struct {
 type Snapshot struct {
 	ID      string `json:"id,omitempty" gorm:"not null;unique;primary_key" index:"id"`
 	Version int    `json:"version,omitempty"`
-	Url     string `json:"url,omitempty"`
+	Url     string `json:"url,omitempty" gorm:"type:varchar(500)"`
 	TaskID  string `json:"task_id,omitempty"`
 	Path    string `json:"path,omitempty"  gorm:"-"` //path of this file
 	File    string `json:"file,omitempty"  gorm:"-"` //filename of this page
@@ -55,7 +54,7 @@ type Snapshot struct {
 
 	Language string `json:"lang,omitempty" gorm:"-"`
 
-	Title       string `json:"title,omitempty"`
+	Title       string `json:"title,omitempty" gorm:"type:varchar(500)"`
 	Summary     string `json:"summary,omitempty" gorm:"-"`
 	Text        string `json:"text,omitempty" gorm:"-"`
 	ContentType string `json:"content_type,omitempty"`
@@ -83,7 +82,7 @@ type Snapshot struct {
 	Hash    string `json:"hash,omitempty"`
 	SimHash string `json:"sim_hash,omitempty"`
 
-	Created time.Time `json:"created,omitempty"`
+	Created int64 `json:"created,omitempty"`
 }
 
 type PageLink struct {
@@ -144,7 +143,7 @@ func GetSnapshot(id string) (Snapshot, error) {
 		log.Error(err)
 		return snapshot, err
 	}
-	if len(snapshot.ID) == 0 || snapshot.Created.IsZero() {
+	if len(snapshot.ID) == 0 || snapshot.Created == 0 {
 		panic(errors.New("not found," + id))
 	}
 

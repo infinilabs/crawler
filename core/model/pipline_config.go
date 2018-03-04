@@ -38,8 +38,8 @@ type PipelineConfig struct {
 	StartJoint    *JointConfig   `gorm:"-" json:"start,omitempty" config:"start"`
 	ProcessJoints []*JointConfig `gorm:"-" json:"process,omitempty" config:"process"`
 	EndJoint      *JointConfig   `gorm:"-" json:"end,omitempty" config:"end"`
-	Created       *time.Time     `json:"created,omitempty"`
-	Updated       *time.Time     `json:"updated,omitempty"`
+	Created       int64          `json:"created,omitempty"`
+	Updated       int64          `json:"updated,omitempty"`
 	Tags          []string       `gorm:"-" json:"tags,omitempty" config:"tags"`
 }
 
@@ -74,10 +74,10 @@ func GetPipelineList(from, size int) (int, []PipelineConfig, error) {
 }
 
 func CreatePipelineConfig(cfg *PipelineConfig) error {
-	time := time.Now().UTC()
+	time := time.Now().UTC().Unix()
 	cfg.ID = util.GetUUID()
-	cfg.Created = &time
-	cfg.Updated = &time
+	cfg.Created = time
+	cfg.Updated = time
 	b, err := json.Marshal(cfg)
 	if err != nil {
 		return err
@@ -90,9 +90,9 @@ func CreatePipelineConfig(cfg *PipelineConfig) error {
 }
 
 func UpdatePipelineConfig(id string, cfg *PipelineConfig) error {
-	time := time.Now().UTC()
+	time := time.Now().UTC().Unix()
 	cfg.ID = id
-	cfg.Updated = &time
+	cfg.Updated = time
 	b, err := json.Marshal(cfg)
 	if err != nil {
 		return err

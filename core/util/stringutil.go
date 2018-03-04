@@ -145,6 +145,14 @@ func FormatTime(date time.Time) string {
 	return date.Format("2006-01-02 15:04:05")
 }
 
+func FormatUnixTimestamp(unix int64) string {
+	date := FromUnixTimestamp(unix)
+	return date.Format("2006-01-02 15:04:05")
+}
+func FromUnixTimestamp(unix int64) time.Time {
+	return time.Unix(unix, 0)
+}
+
 func FormatTimeWithLocalTZ(date time.Time) string {
 	localLoc, err := time.LoadLocation("Local")
 	if err != nil {
