@@ -25,9 +25,10 @@ import (
 // GetPagination return a pagination html code snippet
 func GetPagination(from, size, total int, url string, param map[string]interface{}) string {
 
-	if total > 10000 {
-		total = 10000
-	}
+	//TODO limit when es is the database driver
+	//if total > 10000 {
+	//	total = 10000
+	//}
 
 	if total <= size {
 		return ""
