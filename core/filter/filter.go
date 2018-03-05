@@ -21,6 +21,9 @@ type Filter interface {
 	Exists(bucket string, key []byte) bool
 	Add(bucket string, key []byte) error
 	Delete(bucket string, key []byte) error
+
+	// CheckThenAdd will check if the key was exist in the bucket or not,
+	// will return the previous status, and also add the key to the bucket if not exists
 	CheckThenAdd(bucket string, key []byte) (bool, error)
 	Open() error
 	Close() error

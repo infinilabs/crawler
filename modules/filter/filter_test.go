@@ -27,6 +27,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+	"time"
 )
 
 func Test(t *testing.T) {
@@ -45,21 +46,23 @@ func Test(t *testing.T) {
 	assert.Equal(t, false, b)
 
 	//Memory pressure test
-	//for i := 0; i < 1; i++ {
-	//	go run(&filter, i, t)
-	//}
-	//
-	//time.Sleep(1 * time.Minute)
+	for i := 0; i < 1; i++ {
+		go run(i, t)
+	}
+
+	time.Sleep(10 * time.Second)
+
+	//For BoltDB KV filter, 19k unique will consume 100MB memory, 40K:230MB
 }
 
-func run(m *FilterModule, seed int, t *testing.T) {
+func run(seed int, t *testing.T) {
 	for i := 0; i < 100000000; i++ {
 		fmt.Println(i)
 		k := fmt.Sprintf("key-%v-%v", seed, i)
 		b := filter.Exists(config.CheckFilter, []byte(k))
 		assert.Equal(t, false, b)
 		b, _ = filter.CheckThenAdd(config.CheckFilter, []byte(k))
-		assert.Equal(t, true, b)
+		assert.Equal(t, false, b)
 		b = filter.Exists(config.CheckFilter, []byte(k))
 		assert.Equal(t, true, b)
 		if !b {
