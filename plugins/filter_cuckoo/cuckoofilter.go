@@ -6,12 +6,11 @@ import (
 )
 
 type CuckooFilterImpl struct {
-	persistFileName string
-	l               sync.Mutex
-	cf              *f.CuckooFilter
+	l  sync.Mutex
+	cf *f.CuckooFilter
 }
 
-func (filter *CuckooFilterImpl) Open(fileName string) error {
+func (filter *CuckooFilterImpl) Open() error {
 
 	filter.cf = f.NewCuckooFilter(10000000)
 	return nil

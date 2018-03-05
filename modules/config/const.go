@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/infinitbyte/gopa/core/errors"
-	"github.com/infinitbyte/gopa/core/filter"
 	"github.com/infinitbyte/gopa/core/global"
 )
 
@@ -13,10 +12,10 @@ const (
 	DispatcherChannel string = "dispatch"
 	IndexChannel      string = "index"
 
-	DispatchFilter    filter.Key = "dispatch_filter"
-	CheckFilter       filter.Key = "check_filter"
-	FetchFilter       filter.Key = "fetch_filter"
-	ContentHashFilter filter.Key = "content_hash_filter"
+	DispatchFilter    string = "dispatch_filter"
+	CheckFilter       string = "check_filter"
+	FetchFilter       string = "fetch_filter"
+	ContentHashFilter string = "content_hash_filter"
 )
 
 const KVBucketKey string = "Kv"

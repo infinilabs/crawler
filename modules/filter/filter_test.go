@@ -19,6 +19,7 @@ package filter
 import (
 	"fmt"
 	. "github.com/infinitbyte/gopa/core/env"
+	"github.com/infinitbyte/gopa/core/filter"
 	"github.com/infinitbyte/gopa/core/global"
 	"github.com/infinitbyte/gopa/core/util"
 	"github.com/infinitbyte/gopa/modules/config"
@@ -38,9 +39,8 @@ func Test(t *testing.T) {
 	storage := storage.StorageModule{}
 	storage.Start(GetModuleConfig(storage.Name()))
 
-	var filter FilterModule
-	filter = FilterModule{}
-	filter.Start(GetModuleConfig(filter.Name()))
+	m := FilterModule{}
+	m.Start(GetModuleConfig(m.Name()))
 	b, _ := filter.CheckThenAdd(config.CheckFilter, []byte("key"))
 	assert.Equal(t, false, b)
 
@@ -52,7 +52,7 @@ func Test(t *testing.T) {
 	//time.Sleep(1 * time.Minute)
 }
 
-func run(filter *FilterModule, seed int, t *testing.T) {
+func run(m *FilterModule, seed int, t *testing.T) {
 	for i := 0; i < 100000000; i++ {
 		fmt.Println(i)
 		k := fmt.Sprintf("key-%v-%v", seed, i)

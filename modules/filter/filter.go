@@ -3,71 +3,62 @@ package filter
 import (
 	log "github.com/cihub/seelog"
 	. "github.com/infinitbyte/gopa/core/config"
+	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/filter"
-	. "github.com/infinitbyte/gopa/core/filter"
-	"github.com/infinitbyte/gopa/modules/config"
-	"github.com/infinitbyte/gopa/modules/filter/impl"
-	"sync"
+	"github.com/infinitbyte/gopa/modules/filter/kv"
 )
 
 type FilterModule struct {
 }
 
+type FilterConfig struct {
+	Driver string `config:"driver"`
+	Bloom  *BloomFilterConfig
+	Cuckoo *CuckooFilterConfig
+	KV     *KVFilterConfig
+}
+
+type BloomFilterConfig struct{}
+type CuckooFilterConfig struct{}
+type KVFilterConfig struct{}
+
+var (
+	defaultConfig = FilterConfig{
+		Driver: "kv",
+		Bloom:  &BloomFilterConfig{},
+		Cuckoo: &CuckooFilterConfig{},
+		KV:     &KVFilterConfig{},
+	}
+)
+
 func (module FilterModule) Name() string {
 	return "Filter"
 }
 
-func (module FilterModule) Exists(bucket Key, key []byte) bool {
-	f := filters[bucket]
-	return f.Exists(key)
-}
-
-func (module FilterModule) Add(bucket Key, key []byte) error {
-	f := filters[bucket]
-	return f.Add(key)
-}
-
-func (module FilterModule) Delete(bucket Key, key []byte) error {
-	f := filters[bucket]
-	return f.Delete(key)
-}
-
-var l sync.RWMutex
-
-func (module FilterModule) CheckThenAdd(bucket Key, key []byte) (b bool, err error) {
-	f := filters[bucket]
-	l.Lock()
-	defer l.Unlock()
-	b = f.Exists(key)
-	if !b {
-		err = f.Add(key)
-	}
-	return b, err
-}
-
-func initFilter(key Key) {
-	f := impl.PersistFilter{FilterBucket: string(key)}
-	filters[key] = &f
-}
-
-var filters map[Key]*impl.PersistFilter
+var handler filter.Filter
 
 func (module FilterModule) Start(cfg *Config) {
 
-	filters = map[Key]*impl.PersistFilter{}
+	//init config
+	cfg.Unpack(&defaultConfig)
 
-	//TODO dynamic config
-	initFilter(config.DispatchFilter)
-	initFilter(config.FetchFilter)
-	initFilter(config.CheckFilter)
-	initFilter(config.ContentHashFilter)
+	if defaultConfig.Driver == "kv" {
+		handler = kv.KVFilter{}
+		filter.Register(handler)
+		return
 
-	filter.Register(module)
+	} else if defaultConfig.Driver == "bloom" {
+		//TODO
+	} else if defaultConfig.Driver == "cuckoo" {
+		//TODO
+	} else {
+		panic(errors.Errorf("invalid driver, %s", defaultConfig.Driver))
+	}
 }
 
 func (module FilterModule) Stop() error {
-	for _, v := range filters {
-		err := (*v).Close()
+	if handler != nil {
+		err := handler.Close()
 		if err != nil {
 			log.Error(err)
 		}
