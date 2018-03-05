@@ -24,6 +24,7 @@ GOPA, A Spider Written in Go.
 
 
 - [How to use](#how-to-use)
+  - [Requirements](#requirements)
   - [Setup](#setup)
     - [Download Pre Built Package](#download-pre-built-package)
     - [Compile The Package Manually](#compile-the-package-manually)
@@ -40,6 +41,12 @@ GOPA, A Spider Written in Go.
 
 
 ## How to use
+
+### Requirements
+
+* Must have: Nothing
+* Optional have: Elasticsearch v5.3+
+
 
 ### Setup
 
@@ -216,7 +223,8 @@ By default, Gopa works well except indexing, if you want to use elasticsearch as
        "type": "long"
        },
        "created": {
-       "type": "date"
+       "type": "date",
+       "format": "epoch_second"
        },
        "depth": {
        "type": "long"
@@ -241,7 +249,8 @@ By default, Gopa works well except indexing, if you want to use elasticsearch as
        "type": "integer"
        },
        "updated": {
-       "type": "date"
+       "type": "date",
+       "format": "epoch_second"
        },
        "url": {
        "type": "keyword",
