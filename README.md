@@ -269,7 +269,7 @@ _Note: Elasticsearch version should >= v5.3_
     ui:
       enabled: true
     elasticsearch:
-      endpoint: http://dev:9200
+      endpoint: http://localhost:9200
       index_prefix: gopa-
       username: elastic
       password: changeme
