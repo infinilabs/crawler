@@ -225,8 +225,14 @@ func main() {
 
 	//modules
 	module.New()
+
+	//load core modules first
 	modules.Register()
+
+	//load plugins
 	plugins.Register()
+
+	//start each module, with enabled provider
 	module.Start()
 
 	finalQuitSignal = make(chan bool)

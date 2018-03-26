@@ -15,3 +15,5 @@ limitations under the License.
 */
 
 package plugin
+
+//TODO generate plugin register file and merge plugin config to gopa.yml

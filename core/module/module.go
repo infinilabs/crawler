@@ -57,19 +57,6 @@ func RegisterPlugin(moduleType string, mod Module) {
 	m.plugins = append(m.plugins, mod)
 }
 
-//module.Register(persist.DatabaseModule{})
-//module.Register(storage.StorageModule{})
-//module.Register(filter.FilterModule{})
-//module.Register(stats.SimpleStatsModule{})
-//module.Register(stats.StatsDModule{})
-//module.Register(queue.DiskQueue{})
-//module.Register(pipeline.PipelineFrameworkModule{})
-//module.Register(dispatch.DispatchModule{})
-//module.Register(index.IndexModule{})
-//module.Register(cluster.ClusterModule{})
-//module.Register(ui.UIModule{})
-//module.Register(api.APIModule{})
-
 func Start() {
 
 	log.Trace("start to load plugins")
