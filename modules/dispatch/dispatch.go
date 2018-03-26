@@ -44,8 +44,8 @@ func dispatchTasks(name string, cfg *DispatchConfig, tasks []model.Task, offset 
 		context.Set(model.CONTEXT_TASK_ID, v.ID)
 
 		//update offset
-		if v.Created > offset {
-			offset = v.Created
+		if v.Created.Unix() > offset {
+			offset = v.Created.Unix()
 		}
 
 		runner := "fetch"

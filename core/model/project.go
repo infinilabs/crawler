@@ -25,16 +25,16 @@ import (
 
 // Project is a definition, include a collection of Host
 type Project struct {
-	ID          string `storm:"id,unique" json:"id,omitempty" gorm:"not null;unique;primary_key" index:"id"`
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-	Enabled     bool   `json:"enabled"`
-	Created     int64  `json:"created,omitempty"`
-	Updated     int64  `json:"updated,omitempty"`
+	ID          string    `storm:"id,unique" json:"id,omitempty" gorm:"not null;unique;primary_key" index:"id"`
+	Name        string    `json:"name,omitempty"`
+	Description string    `json:"description,omitempty"`
+	Enabled     bool      `json:"enabled"`
+	Created     time.Time `json:"created,omitempty"`
+	Updated     time.Time `json:"updated,omitempty"`
 }
 
 func CreateProject(project *Project) error {
-	time := time.Now().UTC().Unix()
+	time := time.Now().UTC()
 	project.ID = util.GetUUID()
 	project.Created = time
 	project.Updated = time
@@ -42,7 +42,7 @@ func CreateProject(project *Project) error {
 }
 
 func UpdateProject(project *Project) error {
-	time := time.Now().UTC().Unix()
+	time := time.Now().UTC()
 	project.Updated = time
 	return persist.Update(project)
 }
@@ -59,7 +59,7 @@ func GetProject(id string) (Project, error) {
 	if err != nil {
 		return project, err
 	}
-	if len(project.ID) == 0 || project.Updated == 0 {
+	if len(project.ID) == 0 || project.Updated.IsZero() {
 		return project, errors.New("not found," + id)
 	}
 

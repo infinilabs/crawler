@@ -313,7 +313,7 @@ type Pipeline struct {
 
 func NewPipeline(name string) *Pipeline {
 	pipe := &Pipeline{}
-	pipe.id = util.GetIncrementID("pipe")
+	pipe.id = util.GetUUID()
 	pipe.name = strings.TrimSpace(name)
 	pipe.context = &Context{}
 	pipe.context.Parameters.init()
@@ -456,7 +456,7 @@ func NewPipelineFromConfig(name string, config *PipelineConfig, context *Context
 	}
 
 	pipe := &Pipeline{}
-	pipe.id = util.GetIncrementID("pipe")
+	pipe.id = util.GetUUID()
 	pipe.name = strings.TrimSpace(name)
 
 	pipe.Context(context)

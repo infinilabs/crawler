@@ -3,7 +3,6 @@ package util
 import (
 	"bytes"
 	"encoding/gob"
-	"fmt"
 	"github.com/rs/xid"
 	"io/ioutil"
 	"sync"
@@ -41,7 +40,7 @@ var lock1 sync.Mutex
 var persistedPath string
 
 // GetIncrementID return incremented id in specify bucket
-func GetIncrementID(bucket string) string {
+func GetIncrementID(bucket string) int64 {
 
 	count.l.Lock()
 	o := count.ID[bucket]
@@ -51,7 +50,7 @@ func GetIncrementID(bucket string) string {
 	}
 	v := o.Increment()
 	count.l.Unlock()
-	return fmt.Sprintf("%d", v)
+	return v
 }
 
 // SnapshotPersistID will make a snapshot and persist id stats to disk

@@ -12,15 +12,15 @@ type Host struct {
 	Favicon     string        `json:"favicon,omitempty"`
 	Enabled     bool          `json:"enabled"`
 	HostConfigs *[]HostConfig `json:"host_configs,omitempty"`
-	Created     int64         `json:"created,omitempty"`
-	Updated     int64         `json:"updated,omitempty"`
+	Created     time.Time     `json:"created,omitempty"`
+	Updated     time.Time     `json:"updated,omitempty"`
 }
 
 // CreateHost create a domain host
 func CreateHost(host string) Host {
 	h := Host{}
 	h.Host = host
-	time := time.Now().UTC().Unix()
+	time := time.Now().UTC()
 	h.Created = time
 	h.Updated = time
 	err := persist.Save(&h)

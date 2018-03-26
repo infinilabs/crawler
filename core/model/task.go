@@ -54,27 +54,27 @@ func NewTask(url, ref string, depth int, breadth int) *Task {
 type Task struct {
 	ID string `gorm:"not null;unique;primary_key" json:"id" index:"id"`
 	// the url may not cleaned, may miss the host part, need reference to provide the complete url information
-	Url         string `storm:"index" json:"url,omitempty" gorm:"type:varchar(500)"`
-	Reference   string `json:"reference_url,omitempty"`
-	Depth       int    `storm:"index" json:"depth"`
-	Breadth     int    `storm:"index" json:"breadth"`
-	Host        string `gorm:"index" json:"host"`
-	Schema      string `json:"schema,omitempty"`
-	OriginalUrl string `json:"original_url,omitempty" gorm:"type:varchar(500)"`
-	Status      int    `gorm:"index" json:"status"`
-	Message     string `json:"message,omitempty" gorm:"type:varchar(500)"`
-	Created     int64  `gorm:"index" json:"created,omitempty"`
-	Updated     int64  `gorm:"index" json:"updated,omitempty"`
-	LastFetch   int64  `gorm:"index" json:"last_fetch,omitempty"`
-	LastCheck   int64  `gorm:"index" json:"last_check,omitempty"`
-	NextCheck   int64  `gorm:"index" json:"next_check,omitempty"`
+	Url         string    `storm:"index" json:"url,omitempty" gorm:"type:varchar(500)"`
+	Reference   string    `json:"reference_url,omitempty"`
+	Depth       int       `storm:"index" json:"depth"`
+	Breadth     int       `storm:"index" json:"breadth"`
+	Host        string    `gorm:"index" json:"host"`
+	Schema      string    `json:"schema,omitempty"`
+	OriginalUrl string    `json:"original_url,omitempty" gorm:"type:varchar(500)"`
+	Status      int       `gorm:"index" json:"status"`
+	Message     string    `json:"message,omitempty" gorm:"type:varchar(500)"`
+	Created     time.Time `gorm:"index" json:"created,omitempty"`
+	Updated     time.Time `gorm:"index" json:"updated,omitempty"`
+	LastFetch   time.Time `gorm:"index" json:"last_fetch,omitempty"`
+	LastCheck   time.Time `gorm:"index" json:"last_check,omitempty"`
+	NextCheck   time.Time `gorm:"index" json:"next_check,omitempty"`
 
-	SnapshotVersion  int    `json:"snapshot_version,omitempty"`
-	SnapshotID       string `json:"snapshot_id,omitempty"`
-	SnapshotHash     string `json:"snapshot_hash,omitempty"`
-	SnapshotSimHash  string `json:"snapshot_simhash,omitempty"`
-	SnapshotCreated  int64  `json:"snapshot_created,omitempty"`
-	LastScreenshotID string `json:"last_screenshot_id,omitempty"`
+	SnapshotVersion  int       `json:"snapshot_version,omitempty"`
+	SnapshotID       string    `json:"snapshot_id,omitempty"`
+	SnapshotHash     string    `json:"snapshot_hash,omitempty"`
+	SnapshotSimHash  string    `json:"snapshot_simhash,omitempty"`
+	SnapshotCreated  time.Time `json:"snapshot_created,omitempty"`
+	LastScreenshotID string    `json:"last_screenshot_id,omitempty"`
 
 	PipelineConfigID string      `json:"pipline_config_id,omitempty"`
 	HostConfig       *HostConfig `json:"host_config,omitempty"`
@@ -114,7 +114,7 @@ const (
 
 func CreateTask(task *Task) error {
 	log.Trace("start create task, ", task.Url)
-	time := time.Now().UTC().Unix()
+	time := time.Now().UTC()
 	task.ID = util.GetUUID()
 	if task.OriginalUrl == "" {
 		task.OriginalUrl = task.Url
@@ -134,7 +134,7 @@ func CreateTask(task *Task) error {
 
 func UpdateTask(task *Task) error {
 	log.Trace("start update task, ", task.Url)
-	time := time.Now().UTC().Unix()
+	time := time.Now().UTC()
 	task.Updated = time
 	if task.Url == "" {
 		return errors.New("url can't be nil")
@@ -161,7 +161,7 @@ func GetTask(id string) (Task, error) {
 		log.Error(id, ", ", err)
 	}
 
-	if len(task.ID) == 0 || task.Updated == 0 {
+	if len(task.ID) == 0 || task.Updated.IsZero() {
 		err = errors.New("not found," + id)
 	}
 
@@ -273,7 +273,7 @@ func GetFailedTasks(offset int64) (int, []Task, error) {
 }
 
 func GetPendingUpdateFetchTasks(offset int64) (int, []Task, error) {
-	t := time.Now().UTC().Unix()
+	t := time.Now().UTC()
 	log.Tracef("start get all tasks,last offset: %s,", offset)
 	var tasks []Task
 	sort := []persist.Sort{}

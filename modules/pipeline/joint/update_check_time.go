@@ -18,6 +18,7 @@ package joint
 
 import (
 	"fmt"
+	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/gopa/core/errors"
 	"github.com/infinitbyte/gopa/core/model"
 	"strings"
@@ -27,6 +28,8 @@ import (
 type UpdateCheckTimeJoint struct {
 	model.Parameters
 }
+
+var oneSecond, _ = time.ParseDuration("1s")
 
 const decelerateSteps model.ParaKey = "decelerate_steps"
 const accelerateSteps model.ParaKey = "accelerate_steps"
@@ -57,10 +60,10 @@ func (this UpdateCheckTimeJoint) Process(c *model.Context) error {
 	//but you can change the configuration
 	accelerateSteps := initFetchRateArr(this.GetStringOrDefault(accelerateSteps, "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"))
 
-	current := time.Now().UTC().Unix()
+	current := time.Now().UTC()
 
 	//update task's snapshot, detect duplicated snapshot
-	if snapshot.Hash != "" && snapshot.Hash == lastSnapshotHash {
+	if lastSnapshotHash != "" && snapshot.Hash != "" && snapshot.Hash == lastSnapshotHash {
 
 		//increase next check time
 		updateNextCheckTime(c, current, decelerateSteps, false)
@@ -93,7 +96,7 @@ func initFetchRateArr(velocityStr string) []int {
 }
 
 //update the snapshot's next check time
-func updateNextCheckTime(c *model.Context, current int64, steps []int, changed bool) {
+func updateNextCheckTime(c *model.Context, current time.Time, steps []int, changed bool) {
 
 	if len(steps) < 1 {
 		panic(errors.New("invalid steps"))
@@ -101,8 +104,8 @@ func updateNextCheckTime(c *model.Context, current int64, steps []int, changed b
 
 	lastSnapshotHash := c.GetStringOrDefault(model.CONTEXT_TASK_SnapshotHash, "")
 	lastSnapshotVer := c.GetIntOrDefault(model.CONTEXT_TASK_SnapshotVersion, 0)
-	taskLastCheck, b1 := c.GetInt64(model.CONTEXT_TASK_LastCheck, 0)
-	taskNextCheck, b2 := c.GetInt64(model.CONTEXT_TASK_NextCheck, 0)
+	taskLastCheck, b1 := c.GetTime(model.CONTEXT_TASK_LastCheck)
+	taskNextCheck, b2 := c.GetTime(model.CONTEXT_TASK_NextCheck)
 
 	if lastSnapshotHash == "" {
 
@@ -111,7 +114,7 @@ func updateNextCheckTime(c *model.Context, current int64, steps []int, changed b
 	//set one day as default next check time, unit is the second
 	var timeIntervalNext = 24 * 60 * 60
 
-	if lastSnapshotVer <= 1 && !b1 && !b2 {
+	if lastSnapshotVer <= 1 || !b1 || !b2 {
 
 		timeIntervalNext = steps[0]
 
@@ -163,12 +166,13 @@ func updateNextCheckTime(c *model.Context, current int64, steps []int, changed b
 	}
 
 	c.Set(model.CONTEXT_TASK_LastCheck, current)
-	nextT := current + int64(timeIntervalNext)
+	nextT := current.Add(oneSecond * time.Duration(timeIntervalNext))
 	c.Set(model.CONTEXT_TASK_NextCheck, nextT)
+	log.Tracef("current:%v,interval:%v, next:%v", current, timeIntervalNext, nextT)
 }
 
-func getTimeInterval(timeStart int64, timeEnd int64) int {
-	ts := timeStart - timeEnd
+func getTimeInterval(timeStart time.Time, timeEnd time.Time) int {
+	ts := timeStart.Unix() - timeEnd.Unix()
 	if ts < 0 {
 		ts = -ts
 	}
