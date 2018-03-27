@@ -328,7 +328,7 @@ Usage of ./bin/gopa:
   -daemon
     	run in background as daemon
   -debug
-    	run in debug mode, wi
+    	run in debug mode, gopa will quit with panic error
   -log string
     	the log level,options:trace,debug,info,warn,error (default "info")
   -log_path string

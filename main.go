@@ -107,7 +107,7 @@ func main() {
 	var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to this file")
 	var memprofile = flag.String("memprofile", "", "write memory profile to this file")
 	var httpprof = flag.String("pprof", "", "enable and setup pprof/expvar service, eg: localhost:6060 , the endpoint will be: http://localhost:6060/debug/pprof/ and http://localhost:6060/debug/vars")
-	var isDebug = flag.Bool("debug", false, "run in debug mode, wi")
+	var isDebug = flag.Bool("debug", false, "run in debug mode, gopa will quit with panic error")
 
 	var logDir = flag.String("log_path", "log", "the log path")
 
