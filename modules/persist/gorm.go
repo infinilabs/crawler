@@ -6,6 +6,7 @@ import (
 	api "github.com/infinitbyte/gopa/core/persist"
 	"github.com/jinzhu/gorm"
 	"sync"
+	"time"
 )
 
 type SQLORM struct {
@@ -86,12 +87,11 @@ func (handler SQLORM) GroupBy(o interface{}, selectField, groupField string, hav
 	}
 	result := map[string]interface{}{}
 
+	start := time.Now()
 	db1 := handler.conn.Model(o).Select(fmt.Sprintf("%s,count(*)", selectField)).Group(groupField)
-	log.Tracef("select:%s, group: %s", selectField, groupField)
 
 	if haveQuery != "" {
 		db1 = db1.Having(haveQuery, haveValue)
-		log.Tracef("group have: %s - %v", haveQuery, haveValue)
 	}
 	rows, err := db1.Rows()
 
@@ -111,6 +111,7 @@ func (handler SQLORM) GroupBy(o interface{}, selectField, groupField string, hav
 		}
 		result[r.Field] = r.Count
 	}
+	log.Tracef("groupby,select:%s, group: %s, group have: %s - %v, elapsed:%vs", selectField, groupField, haveQuery, haveValue, time.Now().Sub(start).Seconds())
 	return err, result
 }
 
@@ -129,6 +130,7 @@ func (handler SQLORM) Search(t interface{}, o interface{}, q *api.Query) (error,
 
 	var c int
 	var err error
+	start := time.Now()
 	db1 := handler.conn.Model(o)
 	if q.Sort != nil && len(*q.Sort) > 0 {
 		for _, i := range *q.Sort {
@@ -157,5 +159,7 @@ func (handler SQLORM) Search(t interface{}, o interface{}, q *api.Query) (error,
 	result := api.Result{}
 	result.Result = o
 	result.Total = c
+
+	log.Tracef("search,t:%v, q: %v, elapsed:%vs", t, q, time.Now().Sub(start).Seconds())
 	return err, result
 }
