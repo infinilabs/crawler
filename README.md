@@ -223,8 +223,7 @@ By default, Gopa works well except indexing, if you want to use elasticsearch as
        "type": "long"
        },
        "created": {
-       "type": "date",
-       "format": "epoch_second"
+       "type": "date"
        },
        "depth": {
        "type": "long"
@@ -249,8 +248,7 @@ By default, Gopa works well except indexing, if you want to use elasticsearch as
        "type": "integer"
        },
        "updated": {
-       "type": "date",
-       "format": "epoch_second"
+       "type": "date"
        },
        "url": {
        "type": "keyword",
