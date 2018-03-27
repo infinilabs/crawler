@@ -74,7 +74,7 @@ So far, we have:
 
 By default, Gopa works well except indexing, if you want to use elasticsearch as indexing, follow these steps:
 
-- Create a index in elasticsearch with script `config/gopa-index-mapping.sh`
+- Create a index in elasticsearch with script `config/elasticsearch/gopa-index-mapping.sh` (!important settings!)
 <p><details>
   <summary>Example</summary>
   <pre>curl -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json' -d'
@@ -276,7 +276,7 @@ _Note: Elasticsearch version should >= v5.3_
     ui:
       enabled: true
     elasticsearch:
-      endpoint: http://dev:9200
+      endpoint: http://localhost:9200
       index_prefix: gopa-
       username: elastic
       password: changeme
