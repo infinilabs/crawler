@@ -1,4 +1,4 @@
-<img width="200" alt="What a Spider!" src="https://raw.githubusercontent.com/infinitbyte/gopa/master/static/assets/img/logo.svg?sanitize=true">
+<img width="200" alt="What a Spider!" src="https://raw.githubusercontent.com/infinitbyte/gopa/master/docs/assets/img/logo.svg?sanitize=true">
 
 GOPA, A Spider Written in Go.
 
