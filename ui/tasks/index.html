@@ -1,0 +1,172 @@
+<%! func Index(w http.ResponseWriter,r *http.Request,domain string,status int,from,size,taskCount int,tasks []model.Task,domainsCount int,domains map[string]interface{},kvs map[string]interface{}) error %>
+
+<%% import "github.com/infinitbyte/framework/modules/ui/common" %%>
+<%% import "github.com/infinitbyte/gopa/model" %%>
+<%% import "github.com/infinitbyte/framework/core/ui" %%>
+<%% import "net/http" %%>
+
+<% common.Head(w, "Tasks","") %>
+<link rel="stylesheet" href="/static/assets/css/tasks.css" />
+<script src="/static/assets/js/jquery.timeago.js"></script>
+<script src="/static/assets/js/page/tasks.js"></script>
+<script src="/static/assets/uikit-2.27.1/js/core/dropdown.min.js"></script>
+<script src="/static/assets/uikit-2.27.1/js/components/pagination.min.js"></script>
+
+<% common.Body(w) %>
+<% common.Nav(w,r,"Tasks") %>
+
+<%
+paras:=map[string]interface{}{}
+paras["host"]=domain
+paras["status"]=status
+%>
+
+<div class="tm-middle">
+
+    <div class="uk-container uk-container-center">
+
+        <div class="uk-grid" data-uk-grid-margin>
+
+            <div class="uk-width-2-10 uk-hidden-small">
+                <div class="uk-alert" ><span>Hosts</span></div>
+                <ul class="uk-list uk-list-striped" style="max-height: 730px; overflow: scroll">
+                    <%
+
+                    if(domain!=""){
+                       %>
+                    <li><a href="?"><i class="uk-icon-filter">:&nbsp;</i><%== domain %></a></li>
+                    <%
+                    }else{
+                        if len(domains)>0 {
+                        for k,v:=range domains{
+                        %>
+                        <%== GetDomainRow(k,v) %>
+                        <%
+                        }
+                        }
+                    }
+                    %>
+                </ul>
+            </div>
+
+            <div class="uk-width-8-10">
+
+                <ul class="uk-tab" data-uk-tab="">
+                    <%
+                    if(status>-1){
+                    %>
+                    <li><a href="/admin/tasks/?host=<%= domain%>"><i class="uk-icon-filter">:&nbsp;</i><%== model.GetTaskStatusText(status) %></a></li>
+                    <%
+                    }else{
+                    %>
+                    <li  <%= GetActive(status,0)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=0&host=<%= domain%>">New(<%= GetStatusCount("0",kvs)%>)</a></li>
+                    <li  <%= GetActive(status,9)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=9&host=<%= domain%>">PendingFetch(<%= GetStatusCount("9",kvs)%>)</a></li>
+                    <li  <%= GetActive(status,3)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=3&host=<%= domain%>">Success(<%= GetStatusCount("3",kvs)%>)</a></li>
+                    <li data-uk-dropdown="{mode:'click'}" aria-haspopup="true" aria-expanded="false">
+                        <a href="#">More <i class="uk-icon-caret-down"></i></a>
+                        <div class="uk-dropdown uk-dropdown-small" aria-hidden="true">
+                            <ul class="uk-nav uk-nav-dropdown">
+                                <li  <%= GetActive(status,2)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=2&host=<%= domain%>">Failed(<%= GetStatusCount("2",kvs)%>)</a></li>
+                                <li  <%= GetActive(status,4)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=4&host=<%= domain%>">404(<%= GetStatusCount("4",kvs)%>)</a></li>
+                                <li  <%= GetActive(status,5)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=5&host=<%= domain%>">Redirected(<%= GetStatusCount("5",kvs)%>)</a></li>
+                                <li  <%= GetActive(status,6)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=6&host=<%= domain%>">Timeout(<%= GetStatusCount("6",kvs)%>)</a></li>
+                                <li  <%= GetActive(status,7)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=7&host=<%= domain%>">Duplicated(<%= GetStatusCount("7",kvs)%>)</a></li>
+                                <li  <%= GetActive(status,8)%>  aria-expanded="false" class=""><a href="/admin/tasks/?status=8&host=<%= domain%>">Interrupted(<%= GetStatusCount("8",kvs)%>)</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="uk-tab-responsive uk-active uk-hidden" aria-haspopup="true" aria-expanded="false"><a>Item</a><div class="uk-dropdown uk-dropdown-small" aria-hidden="true"><ul class="uk-nav uk-nav-dropdown"></ul><div></div></div></li>
+
+                    <%
+                    }
+                    %>
+                    <script language="javascript">
+                        function locate(url){
+                            if(url!=undefined)
+                            {
+                                window.location.replace(url)
+                            }
+                        }
+                        $(function () {
+                            $('.uk-tab').on('change.uk.tab', function(e, active, previous) {
+                                locate(active.context.firstChild.href);
+                            });
+                            $('.uk-nav-dropdown').click(function(e){
+                                locate(e.target.href);
+                            });
+                        });
+                    </script>
+
+                </ul>
+
+                <div class="uk-overflow-container">
+                    <table id="tasks" class="uk-table uk-table-hover uk-table-striped" cellspacing="0" width="100%">
+                    <thead>
+                    <tr>
+                        <th>URL</th>
+                        <th>LastUpdate</th>
+                        <th>NextCheck</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody id="records">
+                    <% if len(tasks)>0 {
+                    for _,task:=range tasks{
+                    %>
+                    <%== GetTaskRow(task) %>
+                    <%
+                    }
+                    }
+                    %>
+                    </tbody>
+                </table>
+
+                    <%== ui.GetPagination(from,size, taskCount, "", paras) %>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+</div>
+
+<!-- modal start -->
+
+<div id="create-task-modal" class="uk-modal" aria-hidden="true" style="display: none; overflow-y: auto;">
+    <div class="uk-modal-dialog uk-modal-dialog-blank">
+        <button class="uk-modal-close uk-close" type="button"></button>
+        <div class="uk-grid uk-flex-middle" data-uk-grid-margin="">
+            <div class="uk-width-medium-1-3 uk-height-viewport uk-cover-background uk-row-first" style="background:#000000;"></div>
+            <div class="uk-width-medium-2-3 uk-row-first ">
+                <h1>Create Task</h1>
+                <div class="uk-width-medium-3-4">
+                    <form class="uk-form">
+                        <fieldset data-uk-margin>
+                            <textarea type="text" placeholder="Paste your urls here, one line one url" rows="10" class="uk-width-1-1"></textarea>
+                            <input type="text" placeholder="MaxDepth, eg: 30">
+                            <input type="text" placeholder="MaxBreadth, eg: 3">
+
+                            <input type="checkbox" id="form-s-c" />
+                            <label for="form-s-c">Follow Sub-domain</label>
+                            <br/>
+                            <input name="include-ext" type="checkbox" id="img-ext" />
+                            <label for="img-ext">Include Images</label>
+                            <input  name="include-ext" type="checkbox" id="css-ext" />
+                            <label for="css-ext">Include Css</label>
+                            <input  name="include-ext" type="checkbox" id="js-ext" />
+                            <label for="js-ext">Include JS</label>
+                        </fieldset>
+                        <button class="uk-button">Create</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- modal end -->
+
+<% common.Footer(w) %>

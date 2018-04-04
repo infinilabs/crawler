@@ -8,6 +8,7 @@
 #### v0.11
 
 ##### breaking changes
+1. extract common codebase to another repo: https://github.com/infinitbyte/framework
 
 ##### features
 

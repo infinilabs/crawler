@@ -14,15 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package plugins
+package api
 
 import (
-	"github.com/infinitbyte/framework/core/module"
-	"github.com/infinitbyte/gopa/plugins/service_chrome"
-	"github.com/infinitbyte/gopa/plugins/tools_generator"
+	"github.com/infinitbyte/framework/core/api"
+	"github.com/julienschmidt/httprouter"
+	"net/http"
+	"time"
 )
 
-func Register() {
-	module.RegisterPlugin(module.Tools, service_chrome.ChromePlugin{})
-	module.RegisterPlugin(module.Tools, tools_generator.GeneratorPlugin{})
+func (handler API) handleUserLoginRequest(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+
+	b, v := api.GetSession(w, req, "key")
+	if !b {
+		api.SetSession(w, req, "key", "hello "+time.Now().String())
+		api.SetFlash(w, req, "user logged in")
+	}
+
+	b, v = api.GetFlash(w, req)
+	if b {
+		handler.WriteJSON(w, v, 200)
+		return
+	}
+
+	handler.WriteJSON(w, v, 200)
+
+	return
 }

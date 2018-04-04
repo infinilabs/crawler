@@ -14,15 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package plugins
+package joint
 
 import (
-	"github.com/infinitbyte/framework/core/module"
-	"github.com/infinitbyte/gopa/plugins/service_chrome"
-	"github.com/infinitbyte/gopa/plugins/tools_generator"
+	"crypto/sha1"
+	"fmt"
+	"github.com/infinitbyte/framework/core/pipeline"
+	"github.com/infinitbyte/gopa/model"
 )
 
-func Register() {
-	module.RegisterPlugin(module.Tools, service_chrome.ChromePlugin{})
-	module.RegisterPlugin(module.Tools, tools_generator.GeneratorPlugin{})
+type HashJoint struct {
+	pipeline.Parameters
+}
+
+func (joint HashJoint) Name() string {
+	return "hash"
+}
+
+func (joint HashJoint) Process(context *pipeline.Context) error {
+
+	snapshot := context.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
+
+	h := sha1.New()
+	h.Write(snapshot.Payload)
+	bs := h.Sum(nil)
+
+	snapshot.Hash = fmt.Sprintf("%x", bs)
+
+	return nil
 }

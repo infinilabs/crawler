@@ -14,15 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package plugins
+package joint
 
 import (
-	"github.com/infinitbyte/framework/core/module"
-	"github.com/infinitbyte/gopa/plugins/service_chrome"
-	"github.com/infinitbyte/gopa/plugins/tools_generator"
+	"github.com/infinitbyte/framework/core/pipeline"
 )
 
-func Register() {
-	module.RegisterPlugin(module.Tools, service_chrome.ChromePlugin{})
-	module.RegisterPlugin(module.Tools, tools_generator.GeneratorPlugin{})
+// EmptyJoint is a place holder
+type EmptyJoint struct {
+}
+
+// Name return empty
+func (joint EmptyJoint) Name() string {
+	return "empty"
+}
+
+// Process do nothing
+func (joint EmptyJoint) Process(s *pipeline.Context) error {
+
+	return nil
 }

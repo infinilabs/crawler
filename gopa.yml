@@ -4,7 +4,7 @@ cluster:
 
 path.data: data
 path.logs: log
-path.certs: cert
+path.certs: test/cert
 
 cookie_secret: YOUR-GOPA-SECRET
 
@@ -138,8 +138,6 @@ modules:
               follow_all_domain: false
               follow_sub_domain: true
               max_filename_length: 1000
-          - joint: load_metadata
-            enabled: true
           - joint: ignore_timeout
             parameters:
               ignore_timeout_after_count: 500

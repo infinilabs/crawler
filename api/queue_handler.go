@@ -14,15 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package plugins
+package api
 
 import (
-	"github.com/infinitbyte/framework/core/module"
-	"github.com/infinitbyte/gopa/plugins/service_chrome"
-	"github.com/infinitbyte/gopa/plugins/tools_generator"
+	"github.com/infinitbyte/framework/core/queue"
+	"github.com/infinitbyte/framework/core/util"
+	"net/http"
 )
 
-func Register() {
-	module.RegisterPlugin(module.Tools, service_chrome.ChromePlugin{})
-	module.RegisterPlugin(module.Tools, tools_generator.GeneratorPlugin{})
+// QueueStatsAction return queue stats information
+func (handler API) QueueStatsAction(w http.ResponseWriter, req *http.Request) {
+
+	data := map[string]int64{}
+	queues := queue.GetQueues()
+	for _, q := range queues {
+		data[q] = queue.Depth(q)
+	}
+	handler.WriteJSON(w, util.MapStr{
+		"depth": data,
+	}, 200)
 }

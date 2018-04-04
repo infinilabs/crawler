@@ -14,15 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package plugins
+package common
 
 import (
-	"github.com/infinitbyte/framework/core/module"
-	"github.com/infinitbyte/gopa/plugins/service_chrome"
-	"github.com/infinitbyte/gopa/plugins/tools_generator"
+	core "github.com/infinitbyte/framework/core/index"
 )
 
-func Register() {
-	module.RegisterPlugin(module.Tools, service_chrome.ChromePlugin{})
-	module.RegisterPlugin(module.Tools, tools_generator.GeneratorPlugin{})
+type UIConfig struct {
+	Enabled     bool   `config:"enabled"`
+	SiteName    string `config:"site_name"`
+	SiteLogo    string `config:"logo"`
+	SiteFavicon string `config:"favicon"`
+}
+
+type IndexConfig struct {
+	Elasticsearch *core.ElasticsearchConfig `config:"elasticsearch"`
+	UIConfig      *UIConfig                 `config:"ui"`
 }

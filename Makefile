@@ -101,14 +101,14 @@ init-version:
 
 update-generated-file:
 	@echo "update generated info"
-	@echo -e "package env\n\nconst lastCommitLog = \""`git log -1 --pretty=format:"%h, %ad, %an, %s"` "\"\nconst buildDate = \"`date`\"" > core/env/generated.go
-	@echo -e "\nconst version  = \"$(GOPA_VERSION)\"" >> core/env/generated.go
+	@echo -e "package config\n\nconst LastCommitLog = \""`git log -1 --pretty=format:"%h, %ad, %an, %s"` "\"\nconst BuildDate = \"`date`\"" > config/generated.go
+	@echo -e "\nconst Version  = \"$(GOPA_VERSION)\"" >> config/generated.go
 
 
 restore-generated-file:
 	@echo "restore generated info"
-	@echo -e "package env\n\nconst lastCommitLog = \"N/A\"\nconst buildDate = \"N/A\"" > core/env/generated.go
-	@echo -e "\nconst version = \"0.0.1-SNAPSHOT\"" >> core/env/generated.go
+	@echo -e "package config\n\nconst LastCommitLog = \"N/A\"\nconst BuildDate = \"N/A\"" > config/generated.go
+	@echo -e "\nconst Version = \"0.0.1-SNAPSHOT\"" >> config/generated.go
 
 
 update-ui:
@@ -119,9 +119,10 @@ update-ui:
 update-template-ui:
 	@echo "generate UI pages"
 	@$(GO) get github.com/infinitbyte/ego/cmd/ego
-	@cd modules/ && ego
+	@cd ui/ && ego
 	@cd plugins/ && ego
 
+#config: init-version update-ui update-template-ui
 config: init-version update-ui update-template-ui update-generated-file
 	@echo "update configs"
 	@# $(GO) env

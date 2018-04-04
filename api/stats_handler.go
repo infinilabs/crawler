@@ -14,15 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package plugins
+package api
 
 import (
-	"github.com/infinitbyte/framework/core/module"
-	"github.com/infinitbyte/gopa/plugins/service_chrome"
-	"github.com/infinitbyte/gopa/plugins/tools_generator"
+	"github.com/infinitbyte/framework/core/stats"
+	"net/http"
 )
 
-func Register() {
-	module.RegisterPlugin(module.Tools, service_chrome.ChromePlugin{})
-	module.RegisterPlugin(module.Tools, tools_generator.GeneratorPlugin{})
+func getMapValue(mapData map[string]int, key string, defaultValue int32) int {
+	data := mapData[key]
+	return data
+}
+
+// StatsAction return stats information
+func (handler API) StatsAction(w http.ResponseWriter, req *http.Request) {
+
+	m := stats.StatsAll()
+	handler.WriteJSONHeader(w)
+	handler.Write(w, *m)
 }
