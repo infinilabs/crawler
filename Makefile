@@ -35,6 +35,7 @@ default: build
 build: config
 	@#echo $(GOPATH)
 	@echo $(NEWGOPATH)
+	@$(GO) get github.com/infinitbyte/framework
 	$(GOBUILD) -o bin/gopa
 	@$(MAKE) restore-generated-file
 
