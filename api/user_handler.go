@@ -18,7 +18,7 @@ package api
 
 import (
 	"github.com/infinitbyte/framework/core/api"
-	"github.com/julienschmidt/httprouter"
+	"github.com/infinitbyte/framework/core/api/router"
 	"net/http"
 	"time"
 )

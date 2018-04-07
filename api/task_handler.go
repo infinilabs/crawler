@@ -21,12 +21,12 @@ import (
 	log "github.com/cihub/seelog"
 	logger "github.com/cihub/seelog"
 	api "github.com/infinitbyte/framework/core/api"
+	"github.com/infinitbyte/framework/core/api/router"
 	"github.com/infinitbyte/framework/core/pipeline"
 	"github.com/infinitbyte/framework/core/queue"
 	"github.com/infinitbyte/framework/core/util"
 	"github.com/infinitbyte/gopa/config"
 	"github.com/infinitbyte/gopa/model"
-	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
 )

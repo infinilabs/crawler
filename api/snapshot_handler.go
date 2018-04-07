@@ -19,11 +19,11 @@ package api
 import (
 	log "github.com/cihub/seelog"
 	. "github.com/infinitbyte/framework/core/api"
+	"github.com/infinitbyte/framework/core/api/router"
 	"github.com/infinitbyte/framework/core/persist"
 	"github.com/infinitbyte/gopa/config"
 	"github.com/infinitbyte/gopa/model"
 	_ "github.com/jmoiron/jsonq"
-	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
 )

@@ -148,7 +148,6 @@ fetch-depends:
 	$(GO) get github.com/kardianos/osext
 	$(GO) get github.com/zeebo/sbloom
 	$(GO) get github.com/asdine/storm
-	$(GO) get github.com/julienschmidt/httprouter
 	$(GO) get github.com/rs/xid
 	$(GO) get github.com/seiflotfy/cuckoofilter
 	$(GO) get github.com/hashicorp/raft

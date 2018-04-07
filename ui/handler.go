@@ -3,12 +3,11 @@ package ui
 import (
 	"errors"
 	"github.com/infinitbyte/framework/core/api"
+	"github.com/infinitbyte/framework/core/api/router"
 	"github.com/infinitbyte/framework/core/persist"
-	//"github.com/infinitbyte/gopa/modules/ui/admin/explore"
 	"github.com/infinitbyte/gopa/config"
 	"github.com/infinitbyte/gopa/model"
 	"github.com/infinitbyte/gopa/ui/tasks"
-	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
 

@@ -1,7 +1,7 @@
 package search
 
 import (
-	"github.com/julienschmidt/httprouter"
+	"github.com/infinitbyte/framework/core/api/router"
 
 	"fmt"
 	"github.com/emirpasic/gods/sets/hashset"

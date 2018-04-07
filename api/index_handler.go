@@ -17,9 +17,9 @@ limitations under the License.
 package api
 
 import (
+	"github.com/infinitbyte/framework/core/api/router"
 	"github.com/infinitbyte/framework/core/env"
 	"github.com/infinitbyte/framework/core/global"
-	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"time"
 )
