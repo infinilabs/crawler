@@ -1,3 +1,0 @@
-<%! func Copyright(w io.Writer,config *UIConfig) error %>
-<%% import "github.com/infinitbyte/gopa/core/env" %%>
-<%= config.SiteName %> ©2017, Powered by <a target="_blank" href="https://github.com/infinitbyte/gopa" >GOPA</a> v<%= env.GetVersion() %> #<a title="<%= env.GetLastCommitLog() %>" href="https://github.com/infinitbyte/gopa/commit/<%= env.GetLastCommitHash() %>"><%= env.GetLastCommitHash() %></a>.

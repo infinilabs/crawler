@@ -17,12 +17,12 @@ limitations under the License.
 package plugins
 
 import (
-	"github.com/infinitbyte/gopa/core/module"
+	"github.com/infinitbyte/framework/core/module"
 	"github.com/infinitbyte/gopa/plugins/service_chrome"
 	"github.com/infinitbyte/gopa/plugins/tools_generator"
 )
 
 func Register() {
-	module.RegisterPlugin(module.Tools, tools_generator.GeneratorPlugin{})
 	module.RegisterPlugin(module.Tools, service_chrome.ChromePlugin{})
+	module.RegisterPlugin(module.Tools, tools_generator.GeneratorPlugin{})
 }

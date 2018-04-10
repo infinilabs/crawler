@@ -3,8 +3,8 @@ package service_chrome
 import (
 	"fmt"
 	log "github.com/cihub/seelog"
-	. "github.com/infinitbyte/gopa/core/config"
-	"github.com/infinitbyte/gopa/core/model"
+	. "github.com/infinitbyte/framework/core/config"
+	"github.com/infinitbyte/framework/core/pipeline"
 	"github.com/infinitbyte/gopa/plugins/service_chrome/joint"
 	"os"
 	"os/exec"
@@ -49,7 +49,7 @@ func (plugin ChromePlugin) Start(cfg *Config) {
 
 	// register pipeline joint
 	// TODO dealing with chrome start failure
-	model.RegisterPipeJoint(joint.ChromeFetchV2Joint{})
+	pipeline.RegisterPipeJoint(joint.ChromeFetchV2Joint{})
 }
 
 func (plugin ChromePlugin) Stop() error {

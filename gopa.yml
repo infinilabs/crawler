@@ -4,7 +4,7 @@ cluster:
 
 path.data: data
 path.logs: log
-path.certs: cert
+path.certs: test/cert
 
 cookie_secret: YOUR-GOPA-SECRET
 
@@ -138,8 +138,6 @@ modules:
               follow_all_domain: false
               follow_sub_domain: true
               max_filename_length: 1000
-          - joint: load_metadata
-            enabled: true
           - joint: ignore_timeout
             parameters:
               ignore_timeout_after_count: 500
@@ -200,84 +198,9 @@ modules:
         end:
           joint: save_task
           enabled: true
-    - name: update
-      enabled: true
-      input_queue: update
-      max_go_routine: 4
-      threshold_in_ms: 0
-      # default timeout is 60s
-      timeout_in_ms: 30000
-      default_config:
-        start:
-          joint: init_task
-          enabled: true
-        process:
-          - joint: url_normalization
-            enabled: true
-            parameters:
-              follow_all_domain: false
-              follow_sub_domain: true
-              max_filename_length: 1000
-          - joint: ignore_timeout
-            parameters:
-              ignore_timeout_after_count: 500
-            enabled: true
-          - joint: chrome_fetch
-            enabled: false
-            parameters:
-              chrome_host: http://127.0.0.1:9223
-              save_screenshot: true
-              compress_enabled: true
-              timeout_in_seconds: 60
-              screenshot_quality: 50
-          - joint: fetch
-            enabled: true
-            parameters:
-              timeout_in_seconds: 100
-    #          proxy: "socks5://127.0.0.1:1080"
-    #          cookie: ""
-          - joint: parse
-            enabled: true
-            parameters:
-              dispatch_links: true
-              save_images: true
-              max_depth: 100
-              max_breadth: 1
-          - joint: extract
-            enabled: false
-            parameters:
-              html_block:
-                your_tag_name1: ".tag_class"
-                your_tag_name2: "#tag_id"
-          - joint: html2text
-            parameters:
-              remove_nonscript: true
-              merge_whitespace: false
-            enabled: true
-          - joint: hash
-            enabled: true
-          - joint: content_deduplication
-            enabled: true
-          - joint: update_check_time
-            enabled: true
-            parameters:
-              decelerate_steps: "24h,48h,72h,168h,360h,720h"
-              accelerate_steps: "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
-          - joint: lang_detect
-            enabled: true
-          - joint : save_snapshot_fs
-            enabled: false
-          - joint : save_snapshot_db
-            enabled: true
-            parameters:
-              compress_enabled: true
-              bucket: "Snapshot"
-              max_revision: 5
-          - joint: index
-            enabled: true
-        end:
-          joint: save_task
-          enabled: true
+          keep_404: false
+          keep_redirected: false
+
 - name: cluster
   enabled: true
 
@@ -285,7 +208,10 @@ modules:
   enabled: true
   failed_retry: false
   new_task: true
-  update_task: false
+  update_task: true
+  max_concurrent_fetch_tasks: 10
+  fetch_size: 1000
+  get_host_config_by_url: false
 
 - name: api
   enabled: true
@@ -305,6 +231,7 @@ modules:
 
 - name: filter
   enabled: true
+  driver: kv
 
 - name: queue
   enabled: true

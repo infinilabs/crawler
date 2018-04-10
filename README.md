@@ -1,4 +1,4 @@
-<img width="200" alt="What a Spider!" src="https://raw.githubusercontent.com/infinitbyte/gopa/master/static/assets/img/logo.svg?sanitize=true">
+<img width="200" alt="What a Spider!" src="https://raw.githubusercontent.com/infinitbyte/gopa/master/docs/assets/img/logo.svg?sanitize=true">
 
 GOPA, A Spider Written in Go.
 
@@ -24,6 +24,7 @@ GOPA, A Spider Written in Go.
 
 
 - [How to use](#how-to-use)
+  - [Requirements](#requirements)
   - [Setup](#setup)
     - [Download Pre Built Package](#download-pre-built-package)
     - [Compile The Package Manually](#compile-the-package-manually)
@@ -40,6 +41,12 @@ GOPA, A Spider Written in Go.
 
 
 ## How to use
+
+### Requirements
+
+* Must have: Nothing
+* Optional have: Elasticsearch v5.3+
+
 
 ### Setup
 
@@ -67,7 +74,7 @@ So far, we have:
 
 By default, Gopa works well except indexing, if you want to use elasticsearch as indexing, follow these steps:
 
-- Create a index in elasticsearch with script `config/gopa-index-mapping.sh`
+- Create a index in elasticsearch with script `config/elasticsearch/gopa-index-mapping.sh` (!important settings!)
 <p><details>
   <summary>Example</summary>
   <pre>curl -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json' -d'
@@ -269,7 +276,7 @@ _Note: Elasticsearch version should >= v5.3_
     ui:
       enabled: true
     elasticsearch:
-      endpoint: http://dev:9200
+      endpoint: http://localhost:9200
       index_prefix: gopa-
       username: elastic
       password: changeme
@@ -321,7 +328,7 @@ Usage of ./bin/gopa:
   -daemon
     	run in background as daemon
   -debug
-    	run in debug mode, wi
+    	run in debug mode, gopa will quit with panic error
   -log string
     	the log level,options:trace,debug,info,warn,error (default "info")
   -log_path string

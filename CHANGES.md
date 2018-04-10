@@ -8,15 +8,16 @@
 #### v0.11
 
 ##### breaking changes
-1. change field created/updated from date to unix timestamp
+1. extract common codebase to another repo: https://github.com/infinitbyte/framework
 
 ##### features
 
 ##### improvement
-1. speed up task list, especially when sort by date
+1. optimize sql, speed up task list
 
 ##### bugfix
 1. fix mysql as database option
+2. update update_check_time, fix init next_fetch time
 
 
 #### v0.10

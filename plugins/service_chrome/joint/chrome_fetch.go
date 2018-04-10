@@ -20,10 +20,11 @@ import (
 	c "context"
 	"fmt"
 	log "github.com/cihub/seelog"
-	"github.com/infinitbyte/gopa/core/errors"
-	"github.com/infinitbyte/gopa/core/model"
-	"github.com/infinitbyte/gopa/core/persist"
-	"github.com/infinitbyte/gopa/core/util"
+	"github.com/infinitbyte/framework/core/errors"
+	"github.com/infinitbyte/framework/core/persist"
+	"github.com/infinitbyte/framework/core/pipeline"
+	"github.com/infinitbyte/framework/core/util"
+	"github.com/infinitbyte/gopa/model"
 	"github.com/mafredri/cdp"
 	"github.com/mafredri/cdp/devtool"
 	"github.com/mafredri/cdp/protocol/dom"
@@ -37,16 +38,16 @@ import (
 	"time"
 )
 
-const timeoutInSeconds model.ParaKey = "timeout_in_seconds"
-const chromeHost model.ParaKey = "chrome_host"
-const saveScreenshot model.ParaKey = "save_screenshot"
-const screenshotQuality model.ParaKey = "screenshot_quality"
-const screenshotFormat model.ParaKey = "screenshot_format"
+const timeoutInSeconds pipeline.ParaKey = "timeout_in_seconds"
+const chromeHost pipeline.ParaKey = "chrome_host"
+const saveScreenshot pipeline.ParaKey = "save_screenshot"
+const screenshotQuality pipeline.ParaKey = "screenshot_quality"
+const screenshotFormat pipeline.ParaKey = "screenshot_format"
 
-const bucket model.ParaKey = "bucket"
+const bucket pipeline.ParaKey = "bucket"
 
 type ChromeFetchV2Joint struct {
-	model.Parameters
+	pipeline.Parameters
 	timeout time.Duration
 }
 
@@ -90,7 +91,7 @@ func setCookie(url, cookies string, c *cdp.Client, ctx context.Context) error {
 	return nil
 }
 
-func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
+func (joint ChromeFetchV2Joint) Process(context *pipeline.Context) error {
 
 	lock.Lock()
 	defer lock.Unlock()
@@ -167,7 +168,7 @@ func (joint ChromeFetchV2Joint) Process(context *model.Context) error {
 		return err
 	}
 
-	go func(c *model.Context) {
+	go func(c *pipeline.Context) {
 		defer console.Close()
 		for {
 			ev, err := console.Recv()

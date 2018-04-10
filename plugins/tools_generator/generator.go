@@ -2,11 +2,12 @@ package tools_generator
 
 import (
 	log "github.com/cihub/seelog"
-	. "github.com/infinitbyte/gopa/core/config"
-	"github.com/infinitbyte/gopa/core/model"
-	"github.com/infinitbyte/gopa/core/queue"
-	"github.com/infinitbyte/gopa/core/util"
-	"github.com/infinitbyte/gopa/modules/config"
+	. "github.com/infinitbyte/framework/core/config"
+	"github.com/infinitbyte/framework/core/pipeline"
+	"github.com/infinitbyte/framework/core/queue"
+	"github.com/infinitbyte/framework/core/util"
+	"github.com/infinitbyte/gopa/config"
+	"github.com/infinitbyte/gopa/model"
 	"time"
 )
 
@@ -29,7 +30,7 @@ func (plugin GeneratorPlugin) Start(cfg *Config) {
 	go func() {
 		for {
 			if generatorConfig.TaskUrl != "" {
-				context := model.Context{IgnoreBroken: true}
+				context := pipeline.Context{IgnoreBroken: true}
 				context.Set(model.CONTEXT_TASK_URL, generatorConfig.TaskUrl)
 				err := queue.Push(config.CheckChannel, util.ToJSONBytes(context))
 				if err != nil {
@@ -39,7 +40,7 @@ func (plugin GeneratorPlugin) Start(cfg *Config) {
 
 			if generatorConfig.TaskID != "" {
 
-				context := model.Context{}
+				context := pipeline.Context{}
 				context.Set(model.CONTEXT_TASK_ID, generatorConfig.TaskID)
 				err := queue.Push(config.FetchChannel, util.ToJSONBytes(context))
 				if err != nil {

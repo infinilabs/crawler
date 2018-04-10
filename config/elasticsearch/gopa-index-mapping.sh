@@ -147,12 +147,10 @@ curl --user elastic:changeme -XPUT "http://localhost:9200/gopa-index" -H 'Conten
 "type": "long"
 },
 "created": {
-"type": "date",
-"format": "epoch_second"
+"type": "date"
 },
 "updated": {
-"type": "date",
-"format": "epoch_second"
+"type": "date"
 },
 "depth": {
 "type": "long"
