@@ -120,8 +120,7 @@ func (joint FetchJoint) Process(context *pipeline.Context) error {
 								snapshot.ContentType = contentType
 							}
 							//normalize content-type
-							snapshot.ContentType = strings.ToLower(snapshot.ContentType)
-							snapshot.ContentType = strings.TrimSpace(snapshot.ContentType)
+							snapshot.ContentType = util.RemoveSpaces(strings.ToLower(snapshot.ContentType))
 						}
 
 					}

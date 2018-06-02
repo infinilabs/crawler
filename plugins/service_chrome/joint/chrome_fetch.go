@@ -181,7 +181,8 @@ func (joint ChromeFetchV2Joint) Process(context *pipeline.Context) error {
 				if util.ContainStr(txt, ":") {
 					array := strings.Split(txt, ":")
 					if array[0] == string(model.CONTEXT_SNAPSHOT_ContentType) {
-						c.Set(model.CONTEXT_SNAPSHOT_ContentType, array[1])
+						contentType := util.RemoveSpaces(strings.ToLower(array[1]))
+						c.Set(model.CONTEXT_SNAPSHOT_ContentType, contentType)
 					}
 				}
 			}
