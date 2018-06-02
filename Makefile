@@ -43,6 +43,9 @@ build: config
 	$(GOBUILD) -o bin/gopa
 	@$(MAKE) restore-generated-file
 
+build_cmd: config
+	cd cmd/backup && $(GOBUILD) -o ../../bin/backup
+
 build-cluster-test: build
 	cd bin && mkdir node1 node2 node3 && cp gopa node1 && cp gopa node2 && cp gopa node3
 
@@ -135,7 +138,6 @@ config: init-version update-ui update-template-ui update-generated-file
 	@cp stop.sh bin/stop.sh
 	@cp gopa.yml bin/gopa.yml
 	@cp -r config bin
-
 
 fetch-depends:
 	@echo "fetch dependencies"
