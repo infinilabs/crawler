@@ -18,6 +18,7 @@ package ui
 
 import (
 	"github.com/infinitbyte/framework/core/api"
+	"github.com/infinitbyte/framework/core/env"
 	"github.com/infinitbyte/framework/core/index"
 	"github.com/infinitbyte/framework/core/ui"
 	core "github.com/infinitbyte/framework/modules/ui/common"
@@ -56,8 +57,8 @@ func InitUI() {
 
 	indexConfig := defaultConfig
 
-	//TODO resolve cfg
-	//cfg.Unpack(&indexConfig)
+	cfg := env.GetModuleConfig("index")
+	cfg.Unpack(&indexConfig)
 
 	//register UI
 	if indexConfig.UIConfig.Enabled {
