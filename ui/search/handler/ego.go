@@ -32,7 +32,7 @@ func Index(w io.Writer, config *common.UIConfig) error {
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(config.SiteName)))
 	_, _ = io.WriteString(w, "</title>\n    ")
 	CommonHeader(w, config)
-	_, _ = io.WriteString(w, "\n    <link rel=\"stylesheet\" href=\"/static/assets/css/search/index.css\" rel=\"stylesheet\" type=\"text/css\"/>\n</head>\n\n<body link=#0000cc>\n\n<div style=\"clear: both;display: block; padding-top: -50px;\">\n\n    <div align=\"center\" style=\"padding-bottom: 10px;\">\n        <a  href=\"/\">\n            <img alt=\"")
+	_, _ = io.WriteString(w, "\n    <link rel=\"stylesheet\" href=\"/static/assets/css/search/index.css\" rel=\"stylesheet\" type=\"text/css\"/>\n</head>\n\n<body link=#0000cc>\n\n<div style=\"max-width:600px;clear: both;display: block; padding-top: -50px;\">\n\n    <div align=\"center\" style=\"padding-bottom: 10px;\">\n        <a  href=\"/\">\n            <img alt=\"")
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(config.SiteName)))
 	_, _ = io.WriteString(w, "\" border=0 style=\"width: 100%\"  src=\"")
 	_, _ = io.WriteString(w, html.EscapeString(fmt.Sprint(config.SiteLogo)))
