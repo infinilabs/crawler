@@ -44,8 +44,7 @@ GOPA, A Spider Written in Go.
 
 ### Requirements
 
-* Must have: Nothing
-* Optional have: Elasticsearch v5.3+
+* Elasticsearch v5.3+
 
 
 ### Setup

@@ -262,14 +262,12 @@ modules:
 
 - name: persist
   enabled: true
-#  driver: elasticsearch
-#  elasticsearch:
-#    endpoint: http://localhost:9200
-#    index_prefix: gopa-
-#    username: elastic
-#    password: changeme
-  driver: sqlite
-
+  driver: elasticsearch
+  elasticsearch:
+    endpoint: http://localhost:9200
+    index_prefix: gopa-
+    username: elastic
+    password: changeme
 #  // before use MySQL, you should create database first:
 #  // DROP DATABASE gopa;
 #  // CREATE DATABASE IF NOT EXISTS gopa DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
