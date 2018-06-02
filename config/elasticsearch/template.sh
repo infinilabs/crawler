@@ -4,7 +4,8 @@ curl --user elastic:changeme -XPUT "http://localhost:9200/_template/gopa" -H 'Co
 {
 "index_patterns": "gopa-*",
 "settings": {
-    "number_of_shards": 1
+    "number_of_shards": 1,
+    "index.max_result_window":10000000
   },
   "mappings": {
     "doc": {
