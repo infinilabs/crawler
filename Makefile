@@ -10,8 +10,12 @@ endif
 
 # Ensure GOPATH is set before running build process.
 ifeq "$(GOPATH)" ""
-  $(error Please set the environment variable GOPATH before running `make`)
+  GOPATH := ~/go
+  #$(error Please set the environment variable GOPATH before running `make`)
 endif
+
+
+PATH := $(PATH):$(GOPATH)/bin
 
 # Go environment
 CURDIR := $(shell pwd)
@@ -35,7 +39,7 @@ default: build
 build: config
 	@#echo $(GOPATH)
 	@echo $(NEWGOPATH)
-	#@$(GO) get github.com/infinitbyte/framework
+	@$(GO) get github.com/infinitbyte/framework
 	$(GOBUILD) -o bin/gopa
 	@$(MAKE) restore-generated-file
 
