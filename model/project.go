@@ -69,7 +69,7 @@ func GetProject(id string) (Project, error) {
 func GetProjectList(from, size int) (int, []Project, error) {
 	var projects []Project
 	sort := []persist.Sort{}
-	sort = append(sort, persist.Sort{Field: "created", SortType: persist.DESC})
+	sort = append(sort, persist.Sort{Field: "created", SortType: persist.ASC})
 	queryO := persist.Query{Sort: &sort, From: from, Size: size}
 	err, result := persist.Search(Project{}, &projects, &queryO)
 	if err != nil {

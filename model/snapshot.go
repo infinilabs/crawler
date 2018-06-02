@@ -102,7 +102,7 @@ func DeleteSnapshot(snapshot *Snapshot) error {
 func GetSnapshotList(from, size int, taskId string) (int, []Snapshot, error) {
 	var snapshots []Snapshot
 	sort := []persist.Sort{}
-	sort = append(sort, persist.Sort{Field: "created", SortType: persist.DESC})
+	sort = append(sort, persist.Sort{Field: "created", SortType: persist.ASC})
 	query := persist.Query{Sort: &sort, From: from, Size: size}
 	if len(taskId) > 0 {
 		query.Conds = persist.And(persist.Eq("task_id", taskId))

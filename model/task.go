@@ -214,7 +214,7 @@ func GetTaskList(from, size int, host string, status int) (int, []Task, error) {
 	log.Tracef("start get tasks, %v-%v, %v", from, size, host)
 	var tasks []Task
 	sort := []persist.Sort{}
-	sort = append(sort, persist.Sort{Field: "created", SortType: persist.DESC})
+	sort = append(sort, persist.Sort{Field: "created", SortType: persist.ASC})
 	queryO := persist.Query{Sort: &sort, From: from, Size: size}
 	if len(host) > 0 {
 		queryO.Conds = persist.And(persist.Eq("host", host))

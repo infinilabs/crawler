@@ -83,7 +83,7 @@ func GetHostConfigList(from, size int, host string) (int, []HostConfig, error) {
 func GetHostConfig(runner, host string) []HostConfig {
 	var configs []HostConfig
 	sort := []persist.Sort{}
-	sort = append(sort, persist.Sort{Field: "sort_order", SortType: persist.DESC})
+	sort = append(sort, persist.Sort{Field: "sort_order", SortType: persist.ASC})
 	queryO := persist.Query{Sort: &sort, From: 0, Size: 100}
 	if len(host) > 0 {
 		if runner != "" {
