@@ -8,7 +8,7 @@ import (
 
 // Host is host struct
 type Host struct {
-	Host        string        `json:"host,omitempty" gorm:"not null;unique;primary_key" index:"id"`
+	Host        string        `json:"host,omitempty" index:"id"`
 	Favicon     string        `json:"favicon,omitempty"`
 	Enabled     bool          `json:"enabled"`
 	HostConfigs *[]HostConfig `json:"host_configs,omitempty"`

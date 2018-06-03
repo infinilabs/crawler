@@ -35,50 +35,50 @@ type LinkGroup struct {
 }
 
 type Snapshot struct {
-	ID      string `json:"id,omitempty" gorm:"not null;unique;primary_key" index:"id"`
+	ID      string `json:"id,omitempty" index:"id"`
 	Version int    `json:"version,omitempty"`
-	Url     string `json:"url,omitempty" gorm:"type:varchar(500)"`
+	Url     string `json:"url,omitempty"`
 	TaskID  string `json:"task_id,omitempty"`
-	Path    string `json:"path,omitempty"  gorm:"-"` //path of this file
-	File    string `json:"file,omitempty"  gorm:"-"` //filename of this page
-	Ext     string `json:"ext,omitempty"  gorm:"-"`  //extension of filename
+	Path    string `json:"path,omitempty"` //path of this file
+	File    string `json:"file,omitempty"` //filename of this page
+	Ext     string `json:"ext,omitempty"`  //extension of filename
 
-	StatusCode int    `json:"-" gorm:"-"`
-	Payload    []byte `json:"-" gorm:"-"`
+	StatusCode int    `json:"-"`
+	Payload    []byte `json:"-"`
 	Size       uint64 `json:"size,omitempty"`
 
 	ScreenshotID string `json:"screenshot_id,omitempty"`
 
-	Headers    map[string][]string     `json:"-" gorm:"-"`
-	Metadata   *map[string]interface{} `json:"-" gorm:"-"`
-	Parameters []KV                    `json:"-" gorm:"-"`
+	Headers    map[string][]string     `json:"-"`
+	Metadata   *map[string]interface{} `json:"-"`
+	Parameters []KV                    `json:"-"`
 
-	Language string `json:"lang,omitempty" gorm:"-"`
+	Language string `json:"lang,omitempty"`
 
-	Title       string `json:"title,omitempty" gorm:"type:varchar(500)"`
-	Summary     string `json:"summary,omitempty" gorm:"-"`
-	Text        string `json:"text,omitempty" gorm:"-"`
+	Title       string `json:"title,omitempty"`
+	Summary     string `json:"summary,omitempty"`
+	Text        string `json:"text,omitempty"`
 	ContentType string `json:"content_type,omitempty"`
 
-	Tags []string `json:"tags,omitempty" gorm:"-"`
+	Tags []string `json:"tags,omitempty"`
 
-	Links LinkGroup `json:"links,omitempty" gorm:"-"`
+	Links LinkGroup `json:"links,omitempty"`
 
 	Images struct {
 		Internal []PageLink `json:"internal,omitempty"`
 		External []PageLink `json:"external,omitempty"`
-	} `json:"images,omitempty" gorm:"-"`
+	} `json:"images,omitempty"`
 
-	H1     []string `json:"h1,omitempty" gorm:"-"`
-	H2     []string `json:"h2,omitempty" gorm:"-"`
-	H3     []string `json:"h3,omitempty" gorm:"-"`
-	H4     []string `json:"h4,omitempty" gorm:"-"`
-	H5     []string `json:"h5,omitempty" gorm:"-"`
-	Bold   []string `json:"bold,omitempty" gorm:"-"`
-	Italic []string `json:"italic,omitempty" gorm:"-"`
+	H1     []string `json:"h1,omitempty"`
+	H2     []string `json:"h2,omitempty"`
+	H3     []string `json:"h3,omitempty"`
+	H4     []string `json:"h4,omitempty"`
+	H5     []string `json:"h5,omitempty"`
+	Bold   []string `json:"bold,omitempty"`
+	Italic []string `json:"italic,omitempty"`
 
-	Classifications  []string                `json:"classifications,omitempty" gorm:"-"`
-	EnrichedFeatures *map[string]interface{} `json:"enriched_features,omitempty" gorm:"-"`
+	Classifications  []string                `json:"classifications,omitempty"`
+	EnrichedFeatures *map[string]interface{} `json:"enriched_features,omitempty"`
 
 	Hash    string `json:"hash,omitempty"`
 	SimHash string `json:"sim_hash,omitempty"`

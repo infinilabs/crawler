@@ -25,17 +25,17 @@ import (
 )
 
 type HostConfig struct {
-	ID         string `json:"id,omitempty" gorm:"not null;unique;primary_key" index:"id"`
-	Host       string `gorm:"index" json:"host"`
-	UrlPattern string `gorm:"index" json:"url_pattern"`
-	Runner     string `gorm:"index" json:"runner"`
-	SortOrder  int    `gorm:"index" json:"sort_order"`
+	ID         string `json:"id,omitempty" index:"id"`
+	Host       string `json:"host"`
+	UrlPattern string `json:"url_pattern"`
+	Runner     string `json:"runner"`
+	SortOrder  int    `json:"sort_order"`
 
-	PipelineID string `gorm:"index" json:"pipeline_id"`
+	PipelineID string `json:"pipeline_id"`
 	Cookies    string `json:"cookies,omitempty"`
 
-	Created time.Time `gorm:"index" json:"created,omitempty"`
-	Updated time.Time `gorm:"index" json:"updated,omitempty"`
+	Created time.Time `json:"created,omitempty"`
+	Updated time.Time `json:"updated,omitempty"`
 }
 
 func CreateHostConfig(config *HostConfig) error {

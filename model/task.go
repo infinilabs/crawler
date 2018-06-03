@@ -59,22 +59,22 @@ func NewTask(url, ref string, depth int, breadth int) *Task {
 }
 
 type Task struct {
-	ID string `gorm:"not null;unique;primary_key" json:"id" index:"id"`
+	ID string `json:"id" index:"id"`
 	// the url may not cleaned, may miss the host part, need reference to provide the complete url information
-	Url         string    `storm:"index" json:"url,omitempty" gorm:"type:varchar(500)"`
+	Url         string    `storm:"index" json:"url,omitempty"`
 	Reference   string    `json:"reference_url,omitempty"`
 	Depth       int       `storm:"index" json:"depth"`
 	Breadth     int       `storm:"index" json:"breadth"`
-	Host        string    `gorm:"index" json:"host"`
+	Host        string    `json:"host"`
 	Schema      string    `json:"schema,omitempty"`
-	OriginalUrl string    `json:"original_url,omitempty" gorm:"type:varchar(500)"`
-	Status      int       `gorm:"index" json:"status"`
-	Message     string    `json:"message,omitempty" gorm:"type:varchar(500)"`
-	Created     time.Time `gorm:"index" json:"created,omitempty"`
-	Updated     time.Time `gorm:"index" json:"updated,omitempty"`
-	LastFetch   time.Time `gorm:"index" json:"last_fetch,omitempty"`
-	LastCheck   time.Time `gorm:"index" json:"last_check,omitempty"`
-	NextCheck   time.Time `gorm:"index" json:"next_check,omitempty"`
+	OriginalUrl string    `json:"original_url,omitempty"`
+	Status      int       `json:"status"`
+	Message     string    `json:"message,omitempty"`
+	Created     time.Time `json:"created,omitempty"`
+	Updated     time.Time `json:"updated,omitempty"`
+	LastFetch   time.Time `json:"last_fetch,omitempty"`
+	LastCheck   time.Time `json:"last_check,omitempty"`
+	NextCheck   time.Time `json:"next_check,omitempty"`
 
 	SnapshotVersion  int       `json:"snapshot_version,omitempty"`
 	SnapshotID       string    `json:"snapshot_id,omitempty"`

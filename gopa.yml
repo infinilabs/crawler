@@ -268,12 +268,6 @@ modules:
     index_prefix: gopa-
     username: elastic
     password: changeme
-#  // before use MySQL, you should create database first:
-#  // DROP DATABASE gopa;
-#  // CREATE DATABASE IF NOT EXISTS gopa DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
-#  driver: mysql
-#  mysql:
-#    connection: root:password@tcp(localhost:3306)/gopa?charset=utf8&parseTime=true&loc=Local
 
 - name: stats
   enabled: true

@@ -166,15 +166,12 @@ fetch-depends:
 	$(GO) get github.com/asdine/storm/codec/protobuf
 	$(GO) get github.com/ryanuber/go-glob
 	$(GO) get github.com/gorilla/sessions
-	$(GO) get github.com/mattn/go-sqlite3
-	$(GO) get github.com/jinzhu/gorm
 	$(GO) get github.com/stretchr/testify/assert
 	$(GO) get github.com/spf13/viper
 	$(GO) get -t github.com/RoaringBitmap/roaring
 	$(GO) get github.com/elastic/go-ucfg
 	$(GO) get github.com/jasonlvhit/gocron
 	$(GO) get github.com/quipo/statsd
-	$(GO) get github.com/go-sql-driver/mysql
 	$(GO) get github.com/jbowles/cld2_nlpt
 	$(GO) get github.com/mafredri/cdp
 	$(GO) get github.com/ararog/timeago

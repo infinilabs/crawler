@@ -25,7 +25,7 @@ import (
 
 // Project is a definition, include a collection of Host
 type Project struct {
-	ID          string    `storm:"id,unique" json:"id,omitempty" gorm:"not null;unique;primary_key" index:"id"`
+	ID          string    `storm:"id,unique" json:"id,omitempty" index:"id"`
 	Name        string    `json:"name,omitempty"`
 	Description string    `json:"description,omitempty"`
 	Enabled     bool      `json:"enabled"`
