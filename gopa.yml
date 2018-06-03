@@ -260,7 +260,7 @@ modules:
     username: elastic
     password: changeme
 
-- name: persist
+- name: elastic
   enabled: true
   driver: elasticsearch
   elasticsearch:
