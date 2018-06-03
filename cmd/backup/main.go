@@ -36,19 +36,21 @@ func main() {
 	flag.StringVar(&host, "host", "localhost:8001", "the host,eg: localhost:8001")
 	flag.StringVar(&backupOutput, "out", "data/backup/", "the output path,eg: data/backup/")
 	flag.StringVar(&scope, "scope", "tasks,snapshots,hosts,projects", "the scope to do the snapshot,eg:tasks")
+	var from int64 = 0
+	var size int = 100
+	flag.Int64Var(&from, "from", 0, "the initial from,eg:0")
+	flag.IntVar(&size, "size", 100, "the initial size,eg:100")
 	flag.Parse()
 
 	objs := strings.Split(scope, ",")
 	for _, x := range objs {
-		execute(x)
+		execute(x, from, size)
 	}
 
 }
 
-func execute(x string) {
+func execute(x string, from int64, size int) {
 	url := "http://%s/%s/?from=%v&size=%v"
-	from := 0
-	size := 100
 	os.MkdirAll(backupOutput, 0777)
 
 	output := path.Join(backupOutput, "/", x+"_"+util.FormatTimeForFileName(time.Now())+".json")
@@ -77,7 +79,7 @@ begin:
 
 	if len(v.Result) >= size {
 		//continue
-		from = from + size
+		from = from + int64(size)
 		goto begin
 	}
 }
