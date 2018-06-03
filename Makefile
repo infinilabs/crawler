@@ -24,6 +24,7 @@ NEWGOPATH:= $(CURDIR):$(CURDIR)/vendor:$(GOPATH)
 
 GO        := GO15VENDOREXPERIMENT="1" go
 GOBUILD  := GOPATH=$(NEWGOPATH) CGO_ENABLED=1  $(GO) build -ldflags -s
+GOBUILDNCGO  := GOPATH=$(NEWGOPATH) CGO_ENABLED=0  $(GO) build -ldflags -s
 GOTEST   := GOPATH=$(NEWGOPATH) CGO_ENABLED=1  $(GO) test -ldflags -s
 
 ARCH      := "`uname -s`"
@@ -44,7 +45,9 @@ build: config
 	@$(MAKE) restore-generated-file
 
 build_cmd: config
-	cd cmd/backup && $(GOBUILD) -o ../../bin/backup
+	cd cmd/backup && GOOS=darwin GOARCH=amd64 $(GOBUILDNCGO) -o ../../bin/backup-darwin
+	cd cmd/backup && GOOS=linux  GOARCH=amd64 $(GOBUILDNCGO) -o ../../bin/backup-linux64
+	cd cmd/backup && GOOS=windows GOARCH=amd64 $(GOBUILDNCGO) -o ../../bin/backup-windows64.exe
 	@$(MAKE) restore-generated-file
 
 build-cluster-test: build
