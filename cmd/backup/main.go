@@ -36,6 +36,7 @@ func main() {
 	flag.StringVar(&host, "host", "localhost:8001", "the host,eg: localhost:8001")
 	flag.StringVar(&backupOutput, "out", "data/backup/", "the output path,eg: data/backup/")
 	flag.StringVar(&scope, "scope", "tasks,snapshots,hosts,projects", "the scope to do the snapshot,eg:tasks")
+	flag.Parse()
 
 	objs := strings.Split(scope, ",")
 	for _, x := range objs {
