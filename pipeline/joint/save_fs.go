@@ -39,7 +39,7 @@ func (joint SaveSnapshotToFileSystemJoint) Name() string {
 func (joint SaveSnapshotToFileSystemJoint) Process(c *pipeline.Context) error {
 
 	if len(joint.baseDir) == 0 {
-		joint.baseDir = global.Env().SystemConfig.GetWorkingDir() + "/web"
+		joint.baseDir = global.Env().GetWorkingDir() + "/web"
 	}
 
 	snapshot := c.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
