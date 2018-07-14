@@ -5,20 +5,42 @@
 
 
 
+#### v0.11
+
+##### breaking changes
+1. extract common codebase to another repo: https://github.com/infinitbyte/framework
+
+##### features
+
+##### improvement
+1. optimize sql, speed up task list
+
+##### bugfix
+1. fix mysql as database option
+2. update update_check_time, fix init next_fetch time
+
+
 #### v0.10
 
 ##### breaking changes
 1. refactor domain to host, api and mapping has changed
+2. refactor module, update yml settings: module->name
 
 ##### features
 1. dynamic create pipelines
-2. add chrome headless fetch joint
-3. init plugin architecture
-4. support extract tags by css path
+2. init plugin architecture
+3. support extract tags by css path
+4. add chrome fetch joint, via chrome debug protocol
+5. add auto-completion to search ui
+6. search ui support mobile
+7. support access control by github oauth
 
 ##### improvement
 1. remove goleveldb due to memory leak
-
+2. update logo
+3. remove hard coded version
+4. update task UI, support filter by status and host
+5. clean offset_canvas menu
 ##### bugfix
 
 
@@ -115,6 +137,7 @@
 1. crawling speed control
 2. cookie supported
 3. brief logging format
+
 ##### bugfix:
 1. shutdown nil exception
 2. wrong relative link in parse phrase
@@ -132,8 +155,10 @@
 2. disable pprof by default
 3. use local storage instead of kafka,kafka will be removed later
 5. check local file's exists first before fetch the remote page
+
 ##### bugfix:
 1. resolve memory leak caused by sbloom filter
+
 ##### feature:
 1. download by url template
 2. list page download

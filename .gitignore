@@ -44,7 +44,6 @@ bin/
 .DS_Store
 /bin-run/
 /leveldb
-core/env/commit_log.go*
 /dist
 gopa
 gopa.exe

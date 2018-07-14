@@ -18,21 +18,21 @@ curl -XGET http://localhost:8001/stats
 
 ```
 curl -XPOST "http://localhost:8001/task/" -d '{
-"seed":"http://elasticsearch.cn"
+"url":"http://elasticsearch.cn"
 }' 
 ```
 
 * Get hosts
 
 ```
-curl -XGET http://127.0.0.1:8001/host
+curl -XGET http://127.0.0.1:8001/hosts
 ```
 
 
 * Get tasks
 
 ```
-curl -XGET http://127.0.0.1:8001/task?from=100&size=10&host=elasticsearch.cn
+curl -XGET http://127.0.0.1:8001/tasks?from=100&size=10&host=elasticsearch.cn
 
 ```
 

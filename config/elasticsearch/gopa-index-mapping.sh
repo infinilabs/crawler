@@ -1,4 +1,7 @@
-curl -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json' -d'
+#curl --user elastic:changeme -XDELETE "http://localhost:9200/gopa-index"
+
+
+curl --user elastic:changeme -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json' -d'
 {
 "mappings": {
 "doc": {
@@ -146,6 +149,9 @@ curl -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json
 "created": {
 "type": "date"
 },
+"updated": {
+"type": "date"
+},
 "depth": {
 "type": "long"
 },
@@ -167,9 +173,6 @@ curl -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json
 },
 "status": {
 "type": "integer"
-},
-"updated": {
-"type": "date"
 },
 "url": {
 "type": "keyword",

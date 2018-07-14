@@ -1,4 +1,4 @@
-curl -XPUT "http://localhost:9200/gopa-blob/" -H 'Content-Type: application/json' -d'
+curl --user elastic:changeme -XPUT "http://localhost:9200/gopa-blob/" -H 'Content-Type: application/json' -d'
 {
 "mappings": {
 "doc": {

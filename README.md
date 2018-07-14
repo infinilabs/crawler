@@ -1,10 +1,11 @@
-<img width="200" alt="What a Spider!" src="https://raw.githubusercontent.com/infinitbyte/gopa/master/static/assets/img/logo.svg?sanitize=true">
+<img width="200" alt="What a Spider!" src="https://raw.githubusercontent.com/infinitbyte/gopa/master/docs/assets/img/logo.svg?sanitize=true">
 
 GOPA, A Spider Written in Go.
 
 [![Travis](https://travis-ci.org/infinitbyte/gopa.svg?branch=master)](https://travis-ci.org/infinitbyte/gopa)
 [![Go Report Card](https://goreportcard.com/badge/github.com/infinitbyte/gopa)](https://goreportcard.com/report/github.com/infinitbyte/gopa)
 [![Join the chat at https://gitter.im/infinitbyte/gopa](https://badges.gitter.im/infinitbyte/gopa.svg)](https://gitter.im/infinitbyte/gopa?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Finfinitbyte%2Fgopa.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Finfinitbyte%2Fgopa?ref=badge_shield)
 
 
 ## Goal
@@ -23,6 +24,7 @@ GOPA, A Spider Written in Go.
 
 
 - [How to use](#how-to-use)
+  - [Requirements](#requirements)
   - [Setup](#setup)
     - [Download Pre Built Package](#download-pre-built-package)
     - [Compile The Package Manually](#compile-the-package-manually)
@@ -32,12 +34,18 @@ GOPA, A Spider Written in Go.
 - [Configuration](#configuration)
 - [UI](#ui)
 - [API](#api)
+- [Architecture](#architecture)
 - [Contributing](#contributing)
 - [License](#license)
 
 
 
 ## How to use
+
+### Requirements
+
+* Elasticsearch v5.3+
+
 
 ### Setup
 
@@ -65,187 +73,200 @@ So far, we have:
 
 By default, Gopa works well except indexing, if you want to use elasticsearch as indexing, follow these steps:
 
-- Create a index in elasticsearch with script `config/gopa-index-mapping.sh`
+- Create a index in elasticsearch with script `config/elasticsearch/gopa-index-mapping.sh` (!important settings!)
 <p><details>
   <summary>Example</summary>
   <pre>curl -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json' -d'
-{
-  "mappings": {
-    "doc": {
-      "properties": {
-        "host": {
-            "type": "keyword",
-            "ignore_above": 256
-        },
-        "snapshot": {
-          "properties": {
-            "bold": {
-              "type": "text"
-            },
-            "url": {
-              "type": "keyword",
-              "ignore_above": 256
-            },
-            "content_type": {
-              "type": "keyword",
-              "ignore_above": 256
-            },
-            "file": {
-              "type": "keyword",
-              "ignore_above": 256
-            },
-            "h1": {
-              "type": "text"
-            },
-            "h2": {
-              "type": "text"
-            },
-            "h3": {
-              "type": "text"
-            },
-            "h4": {
-              "type": "text"
-            },
-            "hash": {
-              "type": "keyword",
-              "ignore_above": 256
-            },
-            "id": {
-              "type": "keyword",
-              "ignore_above": 256
-            },
-            "images": {
-              "properties": {
-                "external": {
-                  "properties": {
-                    "label": {
-                      "type": "text"
-                    },
-                    "url": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "internal": {
-                  "properties": {
-                    "label": {
-                      "type": "text"
-                    },
-                    "url": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                }
-              }
-            },
-            "italic": {
-              "type": "text"
-            },
-            "links": {
-              "properties": {
-                "external": {
-                  "properties": {
-                    "label": {
-                      "type": "text"
-                    },
-                    "url": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                },
-                "internal": {
-                  "properties": {
-                    "label": {
-                      "type": "text"
-                    },
-                    "url": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                }
-              }
-            },
-            "path": {
-              "type": "keyword",
-              "ignore_above": 256
-            },
-            "sim_hash": {
-              "type": "keyword",
-              "ignore_above": 256
-            },
-            "lang": {
-              "type": "keyword",
-              "ignore_above": 256
-            },
-            "size": {
-              "type": "long"
-            },
-            "text": {
-              "type": "text"
-            },
-            "title": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword"
-                }
-              }
-            },
-            "version": {
-              "type": "long"
-            }
-          }
-        },
-        "task": {
-          "properties": {
-            "breadth": {
-              "type": "long"
-            },
-            "created": {
-              "type": "date"
-            },
-            "depth": {
-              "type": "long"
-            },
-            "id": {
-              "type": "keyword",
-              "ignore_above": 256
-            },
-            "original_url": {
-              "type": "keyword",
-              "ignore_above": 256
-            },
-            "reference_url": {
-              "type": "keyword",
-              "ignore_above": 256
-            },
-            "schema": {
-              "type": "keyword",
-              "ignore_above": 256
-            },
-            "status": {
-              "type": "integer"
-            },
-            "updated": {
-              "type": "date"
-            },
-            "url": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
-        }
-      }
-    }
-  }
-}'</pre>
+       {
+       "mappings": {
+       "doc": {
+       "properties": {
+       "host": {
+       "type": "keyword",
+       "ignore_above": 256
+       },
+       "snapshot": {
+       "properties": {
+       "bold": {
+       "type": "text"
+       },
+       "url": {
+       "type": "keyword",
+       "ignore_above": 256
+       },
+       "content_type": {
+       "type": "keyword",
+       "ignore_above": 256
+       },
+       "file": {
+       "type": "keyword",
+       "ignore_above": 256
+       },
+       "ext": {
+       "type": "keyword",
+       "ignore_above": 256
+       },
+       "h1": {
+       "type": "text"
+       },
+       "h2": {
+       "type": "text"
+       },
+       "h3": {
+       "type": "text"
+       },
+       "h4": {
+       "type": "text"
+       },
+       "hash": {
+       "type": "keyword",
+       "ignore_above": 256
+       },
+       "id": {
+       "type": "keyword",
+       "ignore_above": 256
+       },
+       "images": {
+       "properties": {
+       "external": {
+       "properties": {
+       "label": {
+       "type": "text"
+       },
+       "url": {
+       "type": "keyword",
+       "ignore_above": 256
+       }
+       }
+       },
+       "internal": {
+       "properties": {
+       "label": {
+       "type": "text"
+       },
+       "url": {
+       "type": "keyword",
+       "ignore_above": 256
+       }
+       }
+       }
+       }
+       },
+       "italic": {
+       "type": "text"
+       },
+       "links": {
+       "properties": {
+       "external": {
+       "properties": {
+       "label": {
+       "type": "text"
+       },
+       "url": {
+       "type": "keyword",
+       "ignore_above": 256
+       }
+       }
+       },
+       "internal": {
+       "properties": {
+       "label": {
+       "type": "text"
+       },
+       "url": {
+       "type": "keyword",
+       "ignore_above": 256
+       }
+       }
+       }
+       }
+       },
+       "path": {
+       "type": "keyword",
+       "ignore_above": 256
+       },
+       "sim_hash": {
+       "type": "keyword",
+       "ignore_above": 256
+       },
+       "lang": {
+       "type": "keyword",
+       "ignore_above": 256
+       },
+       "screenshot_id": {
+       "type": "keyword",
+       "ignore_above": 256
+       },
+       "size": {
+       "type": "long"
+       },
+       "text": {
+       "type": "text"
+       },
+       "title": {
+       "type": "text",
+       "fields": {
+       "keyword": {
+       "type": "keyword"
+       }
+       }
+       },
+       "version": {
+       "type": "long"
+       }
+       }
+       },
+       "task": {
+       "properties": {
+       "breadth": {
+       "type": "long"
+       },
+       "created": {
+       "type": "date"
+       },
+       "depth": {
+       "type": "long"
+       },
+       "id": {
+       "type": "keyword",
+       "ignore_above": 256
+       },
+       "original_url": {
+       "type": "keyword",
+       "ignore_above": 256
+       },
+       "reference_url": {
+       "type": "keyword",
+       "ignore_above": 256
+       },
+       "schema": {
+       "type": "keyword",
+       "ignore_above": 256
+       },
+       "status": {
+       "type": "integer"
+       },
+       "updated": {
+       "type": "date"
+       },
+       "url": {
+       "type": "keyword",
+       "ignore_above": 256
+       },
+       "last_screenshot_id": {
+       "type": "keyword",
+       "ignore_above": 256
+       }
+       }
+       }
+       }
+       }
+       }
+       }'
+</pre>
 </details></p>
 
-_Note: Elasticsearch version should > v5.0_
+_Note: Elasticsearch version should >= v5.3_
 
 - Enable index module in `gopa.yml`, update the elasticsearch's setting:
 ```
@@ -254,7 +275,7 @@ _Note: Elasticsearch version should > v5.0_
     ui:
       enabled: true
     elasticsearch:
-      endpoint: http://dev:9200
+      endpoint: http://localhost:9200
       index_prefix: gopa-
       username: elastic
       password: changeme
@@ -306,7 +327,7 @@ Usage of ./bin/gopa:
   -daemon
     	run in background as daemon
   -debug
-    	run in debug mode, wi
+    	run in debug mode, gopa will quit with panic error
   -log string
     	the log level,options:trace,debug,info,warn,error (default "info")
   -log_path string
