@@ -19,7 +19,6 @@ package api
 import (
 	"encoding/json"
 	log "github.com/cihub/seelog"
-	logger "github.com/cihub/seelog"
 	api "github.com/infinitbyte/framework/core/api"
 	"github.com/infinitbyte/framework/core/api/router"
 	"github.com/infinitbyte/framework/core/pipeline"
@@ -91,7 +90,7 @@ func (api API) TaskUpdateAction(w http.ResponseWriter, req *http.Request, ps htt
 //curl -XGET http://127.0.0.1:8001/task?from=100&size=10&host=elasticsearch.cn
 func (handler API) TaskAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
 
-	logger.Trace("get all tasks")
+	log.Trace("get all tasks")
 
 	fr := handler.GetParameter(req, "from")
 	si := handler.GetParameter(req, "size")
@@ -123,16 +122,16 @@ func (handler API) CreateTaskAction(w http.ResponseWriter, req *http.Request, ps
 
 	jsonq, err := handler.GetJSON(req)
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 
 	url, err := jsonq.String("url")
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 	pipelineID, err := jsonq.String("pipeline_id")
 	if err == nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 
 	context := pipeline.Context{IgnoreBroken: true}
