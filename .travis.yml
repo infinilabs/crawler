@@ -6,9 +6,9 @@ os:
 before_install:
   - GO_FILES=$(find . -iname '*.go' | grep -v /vendor/)  # All the .go files, excluding vendor/
   - PKGS=$(go list ./... | grep -v /vendor/)             # All the import paths, excluding vendor/
-  - go get github.com/mattn/goveralls
-  - go get github.com/golang/lint/golint
-  - go get honnef.co/go/tools/cmd/megacheck
+#  - go get github.com/mattn/goveralls
+#  - go get github.com/golang/lint/golint
+#  - go get honnef.co/go/tools/cmd/megacheck
   - go get github.com/infinitbyte/framework
 
 script:
