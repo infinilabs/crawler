@@ -22,9 +22,11 @@ import (
 	"github.com/infinitbyte/framework/core/index"
 	"github.com/infinitbyte/framework/core/ui"
 	core "github.com/infinitbyte/framework/modules/ui/common"
+	"github.com/infinitbyte/gopa/static"
 	"github.com/infinitbyte/gopa/ui/search"
 	"github.com/infinitbyte/gopa/ui/search/common"
 	"github.com/infinitbyte/gopa/ui/websocket"
+	"net/http"
 )
 
 var (
@@ -49,6 +51,8 @@ func InitUI() {
 
 	//UI pages init
 	admin := AdminUI{}
+
+	ui.HandleUI("/favicon.ico", http.FileServer(static.StaticFS{BaseFolder: "static", CheckLocalFirst: true}))
 
 	ui.HandleUIMethod(api.GET, "/screenshot/:id", admin.GetScreenshotAction)
 

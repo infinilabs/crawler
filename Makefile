@@ -125,8 +125,8 @@ restore-generated-file:
 
 update-ui:
 	@echo "generate static files"
-	@$(GO) get github.com/infinitbyte/esc
-	@(cd static&& esc -ignore="static.go|build_static.sh|.DS_Store" -o static.go -pkg static ../static )
+	@$(GO) get github.com/infinitbyte/framework/cmd/static_fs
+	@(cd static && static_fs -ignore="static.go|.DS_Store" -o static.go -pkg static . )
 
 update-template-ui:
 	@echo "generate UI pages"
