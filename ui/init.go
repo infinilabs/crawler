@@ -19,6 +19,7 @@ package ui
 import (
 	"github.com/infinitbyte/framework/core/api"
 	"github.com/infinitbyte/framework/core/env"
+	"github.com/infinitbyte/framework/core/fs"
 	"github.com/infinitbyte/framework/core/index"
 	"github.com/infinitbyte/framework/core/ui"
 	core "github.com/infinitbyte/framework/modules/ui/common"
@@ -52,7 +53,13 @@ func InitUI() {
 	//UI pages init
 	admin := AdminUI{}
 
-	ui.HandleUI("/favicon.ico", http.FileServer(static.StaticFS{BaseFolder: "static", CheckLocalFirst: true}))
+	//Index
+	fs.RegisterFS(static.StaticFS{StaticFolder: "static", TrimLeftPath: "/static", CheckLocalFirst: true})
+
+	//init common
+	ui.HandleUI("/", http.FileServer(fs.FS()))
+
+	ui.HandleUI("/favicon.ico", http.FileServer(static.StaticFS{StaticFolder: "static", CheckLocalFirst: true}))
 
 	ui.HandleUIMethod(api.GET, "/screenshot/:id", admin.GetScreenshotAction)
 
