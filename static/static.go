@@ -1,20 +1,21 @@
 package static
+
 import (
 	"bytes"
 	"compress/gzip"
 	"encoding/base64"
+	log "github.com/cihub/seelog"
+	"github.com/infinitbyte/framework/core/fs"
+	"github.com/infinitbyte/framework/core/util"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
 	"sync"
-	log "github.com/cihub/seelog"
-	"github.com/infinitbyte/framework/core/fs"
-    "github.com/infinitbyte/framework/core/util"
 )
 
 func (fs StaticFS) prepare(name string) (*fs.VFile, error) {
-	name=path.Clean(name)
+	name = path.Clean(name)
 	f, present := data[name]
 	if !present {
 		return nil, os.ErrNotExist
@@ -45,24 +46,24 @@ func (fs StaticFS) prepare(name string) (*fs.VFile, error) {
 
 func (fs StaticFS) Open(name string) (http.File, error) {
 
-	name=path.Clean(name)
+	name = path.Clean(name)
 
-	if fs.CheckLocalFirst{
-		
-		name=util.TrimLeftStr(name,fs.TrimLeftPath)
-		
-		localFile:= path.Join(fs.StaticFolder, name)
-		
-		log.Trace("check local file, ",localFile)
-		
-		if util.FileExists(localFile){
+	if fs.CheckLocalFirst {
+
+		name = util.TrimLeftStr(name, fs.TrimLeftPath)
+
+		localFile := path.Join(fs.StaticFolder, name)
+
+		log.Trace("check local file, ", localFile)
+
+		if util.FileExists(localFile) {
 
 			f2, err := os.Open(localFile)
 			if err == nil {
 				return f2, err
 			}
 		}
-		
+
 		log.Debug("local file not found,", localFile)
 	}
 
@@ -74,92 +75,17 @@ func (fs StaticFS) Open(name string) (http.File, error) {
 }
 
 type StaticFS struct {
-	once sync.Once
-	StaticFolder      string
-	TrimLeftPath string
+	once            sync.Once
+	StaticFolder    string
+	TrimLeftPath    string
 	CheckLocalFirst bool
 }
 
 var data = map[string]*fs.VFile{
 
-	"/_index.html": {
-		FileName:   "_index.html",
-		FileSize:    22047,
-		ModifyTime: 1532084744,
-		Compressed: `
-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
-83Ow/xsAAP//3PTtUR9WAAA=
-`,
-	},
-
 	"/assets/css/loadmore.css": {
 		FileName:   "assets/css/loadmore.css",
-		FileSize:    1721,
+		FileSize:   1721,
 		ModifyTime: 1514271253,
 		Compressed: `
 H4sIAAAAAAAA/5xUsW7bPBDe9RQH/AiQBD8VOY0cm1kK9ElokZIPpkiBYmIlhacuRZfuDVCkQIeOHYp2
@@ -178,7 +104,7 @@ gHUkRSkpJJfGyf+Vm3CXzy6C3wEAAP//R/EYirkGAAA=
 
 	"/assets/css/m/search_style.css": {
 		FileName:   "assets/css/m/search_style.css",
-		FileSize:    3422,
+		FileSize:   3422,
 		ModifyTime: 1514270523,
 		Compressed: `
 H4sIAAAAAAAA/+RW227jNhB991cMEAS7C4SGfMkGZV9aFOhvLChybBGhSIGkbGeL9NsLkpItyZLspC8F
@@ -201,7 +127,7 @@ GeZpkqOQLv8EAAD//zt4y59eDQAA
 
 	"/assets/css/m/style.css": {
 		FileName:   "assets/css/m/style.css",
-		FileSize:    6705,
+		FileSize:   6705,
 		ModifyTime: 1514282340,
 		Compressed: `
 H4sIAAAAAAAA/6RYX2/byBF/Fj/FnIXgWtXUX0uxSfSBlmVbOMVyJeWcXFEIK3IlbUNy2eXKViL4rX1L
@@ -250,7 +176,7 @@ KY09gZKEaqmilN+8fnX31R937OBW+28AAAD//whlhpgxGgAA
 
 	"/assets/css/search/index.css": {
 		FileName:   "assets/css/search/index.css",
-		FileSize:    209,
+		FileSize:   209,
 		ModifyTime: 1506164087,
 		Compressed: `
 H4sIAAAAAAAA/0yNzQ6CMAyA73uKJsabJPMgieNpBi1bdSsESpQY3t0o+JOevu9L26g5HeoOZ3gYAIAb
@@ -261,7 +187,7 @@ Jtq2fOIgBSvl0UFDojSs4TKNyu1cNJ0oif7iYp4BAAD//1s9SIXRAAAA
 
 	"/assets/css/search/search.css": {
 		FileName:   "assets/css/search/search.css",
-		FileSize:    86,
+		FileSize:   86,
 		ModifyTime: 1506166595,
 		Compressed: `
 H4sIAAAAAAAA/xTGzQmAMAwG0Hun+AbIoeBNp6kmlmK0tT8giLtL3ukF5iqtEVbN23GP3IXAStiTKDfp
@@ -271,7 +197,7 @@ tjiqELISCqHYh+J1MGeoMV0zPDym8sAv7nN/AAAA//+r5oC4VgAAAA==
 
 	"/assets/css/search_style.css": {
 		FileName:   "assets/css/search_style.css",
-		FileSize:    3460,
+		FileSize:   3460,
 		ModifyTime: 1527928282,
 		Compressed: `
 H4sIAAAAAAAA/+RXbW/jNgz+nl9BoCjuDqgC56VXTPuyYcD+xkGWmFioLBmSnKY3dL99kGQljmO7afdl
@@ -294,7 +220,7 @@ NpRzP6/tlGGeJjoK6fJPAAAA//8L3V9jhA0AAA==
 
 	"/assets/css/style.css": {
 		FileName:   "assets/css/style.css",
-		FileSize:    7061,
+		FileSize:   7061,
 		ModifyTime: 1520233310,
 		Compressed: `
 H4sIAAAAAAAA/6RZT2/byBU/W4C+w8RCsK1rypJsyTaJHmhZtoVVLFdS1skWhTAih9I0JIclR5YSIbf2
@@ -344,7 +270,7 @@ AA==
 
 	"/assets/css/tasks.css": {
 		FileName:   "assets/css/tasks.css",
-		FileSize:    143,
+		FileSize:   143,
 		ModifyTime: 1496674736,
 		Compressed: `
 H4sIAAAAAAAA/zTLUQrCMAzG8feeIheoB2gOI2kTRfphRjYpIru7uNWXkO8H/8tNHjC9brL2TyIiqtL6
@@ -355,7 +281,7 @@ Eo8AAAA=
 
 	"/assets/js/footer.js": {
 		FileName:   "assets/js/footer.js",
-		FileSize:    2572,
+		FileSize:   2572,
 		ModifyTime: 1514271647,
 		Compressed: `
 H4sIAAAAAAAA/5RV227bRhO+N+B3GDM/QtKRSMv+g7pUGUNWjCJF6qaxjRZwDWO1HEpbkbv07lKHxrov
@@ -381,7 +307,7 @@ jr2JemFoaSIVXIkEvUSMnencNZRp9uBpSejUHKxf+NKkvwMAAP//Wmg4PAwKAAA=
 
 	"/assets/js/page/console.js": {
 		FileName:   "assets/js/page/console.js",
-		FileSize:    5350,
+		FileSize:   5350,
 		ModifyTime: 1518269207,
 		Compressed: `
 H4sIAAAAAAAA/7RYX2/rthV/96fg5QJYmh0pfegenChDm5vuZsh6uyR361AUAS0dy0woUiEpO1ma7z6Q
@@ -416,7 +342,7 @@ cTUc3OMYNYmmUILc5oudDwQ8R385qftvHL+5Vd4Reu1ytv9pr+0tUQ76koH59/uXqyzA3u99zWtUw92J
 
 	"/assets/js/page/index.js": {
 		FileName:   "assets/js/page/index.js",
-		FileSize:    1072,
+		FileSize:   1072,
 		ModifyTime: 1496674736,
 		Compressed: `
 H4sIAAAAAAAA/4xTz2rbThC+71MM+v3AkmNWii8BG9NDC22vrSmFEsxaGsVrr1fO7qyTNBh6DvTYngpt
@@ -433,7 +359,7 @@ C8ZITrEv0wkS9MAivdWEZi5UuD5DaLWTJCnZ28Pssn8BAAD//w3N87swBAAA
 
 	"/assets/js/page/tasks.js": {
 		FileName:   "assets/js/page/tasks.js",
-		FileSize:    532,
+		FileSize:   532,
 		ModifyTime: 1515907893,
 		Compressed: `
 H4sIAAAAAAAA/2SRzWrjMBSF93qKQwhIcoJ/MjAb402GySyGQAvdtCELxZYTNbYVZCWt2+Tdi2U7LlSL
@@ -447,7 +373,7 @@ mCjr5z5lk2EzE37fEY/JjcfkKwAA//9Y+UgoFAIAAA==
 
 	"/assets/js/snapshot_footprint.js": {
 		FileName:   "assets/js/snapshot_footprint.js",
-		FileSize:    254,
+		FileSize:   254,
 		ModifyTime: 1509258526,
 		Compressed: `
 H4sIAAAAAAAA/1yNMUvEQBBG+/0VH6k2BHL2cREUCxsL0Uoslt1JMrCZkb2Jp8j9dwl3itxUA2/emwNL
@@ -459,7 +385,7 @@ nopHd3TO/QQAAP//nDYkC/4AAAA=
 
 	"/favicon.ico": {
 		FileName:   "favicon.ico",
-		FileSize:    9662,
+		FileSize:   9662,
 		ModifyTime: 1514805677,
 		Compressed: `
 H4sIAAAAAAAA/7RaeWwc1RnfFDSevW9742N37bV314699vqMbeKkOCmhKmmbQlo1aUsgmF5QKFWgf0AS
