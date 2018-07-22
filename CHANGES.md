@@ -11,9 +11,11 @@
 1. extract common codebase to another repo: https://github.com/infinitbyte/framework
 
 ##### features
+1. add a new cmd `static_fs` to support load static files from folder
 
 ##### improvement
 1. optimize sql, speed up task list
+2. enable cross domain requests
 
 ##### bugfix
 1. fix mysql as database option
