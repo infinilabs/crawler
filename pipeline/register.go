@@ -19,7 +19,9 @@ package pipeline
 import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/framework/core/pipeline"
-	"github.com/infinitbyte/gopa/pipeline/joint"
+	"github.com/infinitbyte/gopa/pipeline/joints/filter"
+	"github.com/infinitbyte/gopa/pipeline/joints/input"
+	"github.com/infinitbyte/gopa/pipeline/joints/output"
 )
 
 var inited bool = false
@@ -33,25 +35,25 @@ func InitJoints() {
 	inited = true
 
 	log.Debug("start register joints")
-	pipeline.RegisterPipeJoint(joint.EmptyJoint{})
-	pipeline.RegisterPipeJoint(joint.FilterCheckJoint{})
-	pipeline.RegisterPipeJoint(joint.FetchJoint{})
-	pipeline.RegisterPipeJoint(joint.UrlNormalizationJoint{})
-	pipeline.RegisterPipeJoint(joint.SaveTaskJoint{})
-	pipeline.RegisterPipeJoint(joint.HtmlToTextJoint{})
-	pipeline.RegisterPipeJoint(joint.IgnoreTimeoutJoint{})
-	pipeline.RegisterPipeJoint(joint.ParsePageJoint{})
-	pipeline.RegisterPipeJoint(joint.SaveSnapshotToDBJoint{})
-	pipeline.RegisterPipeJoint(joint.SaveSnapshotToFileSystemJoint{})
-	pipeline.RegisterPipeJoint(joint.InitTaskJoint{})
-	pipeline.RegisterPipeJoint(joint.UrlFilterJoint{})
-	pipeline.RegisterPipeJoint(joint.HashJoint{})
-	pipeline.RegisterPipeJoint(joint.IndexJoint{})
-	pipeline.RegisterPipeJoint(joint.TaskDeduplicationJoint{})
-	pipeline.RegisterPipeJoint(joint.ContentDeduplicationJoint{})
-	pipeline.RegisterPipeJoint(joint.UpdateCheckTimeJoint{})
-	pipeline.RegisterPipeJoint(joint.LanguageDetectJoint{})
-	pipeline.RegisterPipeJoint(joint.ExtractJoint{})
+	pipeline.RegisterPipeJoint(filter.EmptyJoint{})
+	pipeline.RegisterPipeJoint(filter.FilterCheckJoint{})
+	pipeline.RegisterPipeJoint(filter.FetchJoint{})
+	pipeline.RegisterPipeJoint(filter.UrlNormalizationJoint{})
+	pipeline.RegisterPipeJoint(output.SaveTaskJoint{})
+	pipeline.RegisterPipeJoint(filter.HtmlToTextJoint{})
+	pipeline.RegisterPipeJoint(filter.IgnoreTimeoutJoint{})
+	pipeline.RegisterPipeJoint(filter.ParsePageJoint{})
+	pipeline.RegisterPipeJoint(filter.SaveSnapshotToDBJoint{})
+	pipeline.RegisterPipeJoint(filter.SaveSnapshotToFileSystemJoint{})
+	pipeline.RegisterPipeJoint(input.InitTaskJoint{})
+	pipeline.RegisterPipeJoint(filter.UrlFilterJoint{})
+	pipeline.RegisterPipeJoint(filter.HashJoint{})
+	pipeline.RegisterPipeJoint(filter.IndexJoint{})
+	pipeline.RegisterPipeJoint(filter.TaskDeduplicationJoint{})
+	pipeline.RegisterPipeJoint(filter.ContentDeduplicationJoint{})
+	pipeline.RegisterPipeJoint(filter.UpdateCheckTimeJoint{})
+	pipeline.RegisterPipeJoint(filter.LanguageDetectJoint{})
+	pipeline.RegisterPipeJoint(filter.ExtractJoint{})
 	log.Debug("end register joints")
 
 }

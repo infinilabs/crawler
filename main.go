@@ -19,7 +19,6 @@ package main
 import (
 	_ "expvar"
 	"github.com/infinitbyte/framework"
-	"github.com/infinitbyte/framework/core/fs"
 	"github.com/infinitbyte/framework/core/module"
 	"github.com/infinitbyte/framework/core/persist"
 	"github.com/infinitbyte/framework/modules"
@@ -29,7 +28,6 @@ import (
 	"github.com/infinitbyte/gopa/model"
 	"github.com/infinitbyte/gopa/pipeline"
 	"github.com/infinitbyte/gopa/plugins"
-	"github.com/infinitbyte/gopa/static"
 	"github.com/infinitbyte/gopa/ui"
 )
 
@@ -70,8 +68,6 @@ func main() {
 
 		//register joints
 		pipeline.InitJoints()
-
-		fs.RegisterFS(static.StaticFS{BaseFolder: "static", CheckLocalFirst: false})
 
 		//load plugins
 		plugins.Register()
