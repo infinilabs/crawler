@@ -1,5 +1,4 @@
 package static
-
 import (
 	"bytes"
 	"compress/gzip"
@@ -9,200 +8,83 @@ import (
 	"os"
 	"path"
 	"sync"
-	"time"
+	log "github.com/cihub/seelog"
+	"github.com/infinitbyte/framework/core/fs"
 )
 
-type _escLocalFS struct{}
-
-var _escLocal _escLocalFS
-
-type _escStaticFS struct{}
-
-var _escStatic _escStaticFS
-
-type _escDirectory struct {
-	fs   http.FileSystem
-	name string
-}
-
-type _escFile struct {
-	compressed string
-	size       int64
-	modtime    int64
-	local      string
-	isDir      bool
-
-	once sync.Once
-	data []byte
-	name string
-}
-
-func (_escLocalFS) Open(name string) (http.File, error) {
-	f, present := _escData[path.Clean(name)]
-	if !present {
-		return nil, os.ErrNotExist
-	}
-	return os.Open(f.local)
-}
-
-func (_escStaticFS) prepare(name string) (*_escFile, error) {
-	f, present := _escData[path.Clean(name)]
+func (fs StaticFS) prepare(name string) (*fs.VFile, error) {
+	name=path.Clean(name)
+	f, present := data[name]
 	if !present {
 		return nil, os.ErrNotExist
 	}
 	var err error
-	f.once.Do(func() {
-		f.name = path.Base(name)
-		if f.size == 0 {
+	fs.once.Do(func() {
+		f.FileName = path.Base(name)
+
+		if f.FileSize == 0 {
 			return
 		}
 		var gr *gzip.Reader
-		b64 := base64.NewDecoder(base64.StdEncoding, bytes.NewBufferString(f.compressed))
+		b64 := base64.NewDecoder(base64.StdEncoding, bytes.NewBufferString(f.Compressed))
 		gr, err = gzip.NewReader(b64)
 		if err != nil {
+			log.Error(err)
 			return
 		}
-		f.data, err = ioutil.ReadAll(gr)
+		f.Data, err = ioutil.ReadAll(gr)
+
 	})
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 	return f, nil
 }
 
-func (fs _escStaticFS) Open(name string) (http.File, error) {
+func (fs StaticFS) Open(name string) (http.File, error) {
+
+	name=path.Clean(name)
+
+	if fs.CheckLocalFirst {
+		p := path.Join(fs.BaseFolder, ".", )
+		f2, err := os.Open(p)
+		if err == nil {
+			return f2, err
+		}
+	}
+
 	f, err := fs.prepare(name)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 	return f.File()
 }
 
-func (dir _escDirectory) Open(name string) (http.File, error) {
-	return dir.fs.Open(dir.name + name)
+type StaticFS struct {
+	once sync.Once
+	BaseFolder      string
+	CheckLocalFirst bool
 }
 
-func (f *_escFile) File() (http.File, error) {
-	type httpFile struct {
-		*bytes.Reader
-		*_escFile
-	}
-	return &httpFile{
-		Reader:   bytes.NewReader(f.data),
-		_escFile: f,
-	}, nil
-}
+var data = map[string]*fs.VFile{
 
-func (f *_escFile) Close() error {
-	return nil
-}
-
-func (f *_escFile) Readdir(count int) ([]os.FileInfo, error) {
-	return nil, nil
-}
-
-func (f *_escFile) Stat() (os.FileInfo, error) {
-	return f, nil
-}
-
-func (f *_escFile) Name() string {
-	return f.name
-}
-
-func (f *_escFile) Size() int64 {
-	return f.size
-}
-
-func (f *_escFile) Mode() os.FileMode {
-	return 0
-}
-
-func (f *_escFile) ModTime() time.Time {
-	return time.Unix(f.modtime, 0)
-}
-
-func (f *_escFile) IsDir() bool {
-	return f.isDir
-}
-
-func (f *_escFile) Sys() interface{} {
-	return f
-}
-
-// FS returns a http.Filesystem for the embedded assets. If useLocal is true,
-// the filesystem's contents are instead used.
-func FS(useLocal bool) http.FileSystem {
-	if useLocal {
-		return _escLocal
-	}
-	return _escStatic
-}
-
-// Dir returns a http.Filesystem for the embedded assets on a given prefix dir.
-// If useLocal is true, the filesystem's contents are instead used.
-func Dir(useLocal bool, name string) http.FileSystem {
-	if useLocal {
-		return _escDirectory{fs: _escLocal, name: name}
-	}
-	return _escDirectory{fs: _escStatic, name: name}
-}
-
-// FSByte returns the named file from the embedded assets. If useLocal is
-// true, the filesystem's contents are instead used.
-func FSByte(useLocal bool, name string) ([]byte, error) {
-	if useLocal {
-		f, err := _escLocal.Open(name)
-		if err != nil {
-			return nil, err
-		}
-		b, err := ioutil.ReadAll(f)
-		f.Close()
-		return b, err
-	}
-	f, err := _escStatic.prepare(name)
-	if err != nil {
-		return nil, err
-	}
-	return f.data, nil
-}
-
-// FSMustByte is the same as FSByte, but panics if name is not present.
-func FSMustByte(useLocal bool, name string) []byte {
-	b, err := FSByte(useLocal, name)
-	if err != nil {
-		panic(err)
-	}
-	return b
-}
-
-// FSString is the string version of FSByte.
-func FSString(useLocal bool, name string) (string, error) {
-	b, err := FSByte(useLocal, name)
-	return string(b), err
-}
-
-// FSMustString is the string version of FSMustByte.
-func FSMustString(useLocal bool, name string) string {
-	return string(FSMustByte(useLocal, name))
-}
-
-var _escData = map[string]*_escFile{
-
-	"/static/assets/config/common-config.js": {
-		local:   "../static/assets/config/common-config.js",
-		size:    58,
-		modtime: 1513268105,
-		compressed: `
+	"/assets/config/common-config.js": {
+		FileName:   "assets/config/common-config.js",
+		FileSize:    58,
+		ModifyTime: 1513268105,
+		Compressed: `
 H4sIAAAAAAAA/ypLLFJIzs/Nzc9Lzs9Ly0xXsFWo5lJQUEosyCwtylGyUlDKKCkpsNLXz8lPTszJyC8u
 sbIwMDBU4qoFBAAA///AVh1/OgAAAA==
 `,
 	},
 
-	"/static/assets/css/layout.css": {
-		local:   "../static/assets/css/layout.css",
-		size:    3386,
-		modtime: 1511010150,
-		compressed: `
+	"/assets/css/layout.css": {
+		FileName:   "assets/css/layout.css",
+		FileSize:    3386,
+		ModifyTime: 1511010150,
+		Compressed: `
 H4sIAAAAAAAA/6xWwY7bNhC96ysGzmXXlWzZsXc3Mhq0TRqkQBMESHvoLZRISawpUiAprx3BQD6jP9Ci
 ubT3Fu1h90/yJQVJSSvZ3uayq4NX5Axn+ObNG03HHozhmShKwQnXEbi/5yJRZuM5UYmkpaaCu63nJKWc
 KFB6x4iCVEjQOYEfv1tTDVgkVUG4Rsbegy8f7A/GU8/zpmN4IbhWD35yLPDOh3zmQz73IX/sQ77wIV/6
@@ -228,28 +110,18 @@ DQAA
 `,
 	},
 
-	"/": {
-		isDir: true,
-		local: "/",
+	"/assets": {
+		IsFolder: true,
+		FileName: "/assets",
 	},
 
-	"/static": {
-		isDir: true,
-		local: "/static",
+	"/assets/config": {
+		IsFolder: true,
+		FileName: "/assets/config",
 	},
 
-	"/static/assets": {
-		isDir: true,
-		local: "/static/assets",
-	},
-
-	"/static/assets/config": {
-		isDir: true,
-		local: "/static/assets/config",
-	},
-
-	"/static/assets/css": {
-		isDir: true,
-		local: "/static/assets/css",
+	"/assets/css": {
+		IsFolder: true,
+		FileName: "/assets/css",
 	},
 }

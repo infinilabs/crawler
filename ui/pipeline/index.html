@@ -23,7 +23,9 @@
         max-height: 1000px;
     }
     .dialog-display-none {display:none;}
-    .uk-modal-dialog {width: 800px;}
+    .uk-modal-dialog {width: 1000px;}
+    .block-joint {background:#eee; color: #000; margin: 5px; height:40px;}
+    .td-joint {word-wrap: break-word; text-align:center;}
 </style>
 
 <% common.Body(w) %>
@@ -53,8 +55,6 @@
                 <div class="uk-width-medium-1-3" v-bind:class="{ 'uk-grid-margin': (index > 2) }" v-for="(pipeline, index) in pipelines">
                     <div class="uk-panel uk-panel-box uk-panel-header">
                         <h3 class="uk-panel-title"><a href="#" class="uk-icon-small uk-icon-hover uk-icon-github"></a> {{ pipeline.name }}</h3>
-                        created: {{ pipeline.created }}
-                        updated: {{ pipeline.updated }}
                         <div class="uk-modal-footer uk-text-right">
                             <button class="uk-button" type="button" @click="showEditPipelineModal(pipeline)">edit</button>
                             <button type="button" class="uk-button" @click="UIkit.modal.confirm('Are you sure?', function(){ removePipeLine(pipeline, index) })">remove</button>
@@ -65,40 +65,34 @@
             <div v-if="editPipelineVisible" v-bind:class="{ 'dialog-display-none': editPipelineVisible }" class="uk-modal uk-open" aria-hidden="false" style="display: block; overflow-y: scroll;">
                 <div class="uk-modal-dialog">
                     <a class="uk-modal-close uk-close" @click="closeEditPipelineModal"></a>
-                    <h3>{{ pipelineSeleted.name }}-joint</h3>
+                    <h3>{{ pipelineSeleted.name }} joints</h3>
                     <select v-model="addJointName" @change='changeJoint'>
                         <option v-for="(val, key, index) in joints" :value="key">{{key}}</option>
                     </select>
                     <button class="uk-button" type="button" @click="showJoint(addJointName, 'add')">addJoint</button>
-                    <table class="uk-table uk-table-hover">
-                        <thead>
-                        <tr>
-                            <th>joint</th>
-                            <th>enabled</th>
-                            <th>setting</th>
-                        </tr>
-                        </thead>
+                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout:fixed; margin-top: 10px;">
                         <tbody>
-                        <tr v-for="(joint, index) in pipelineSeleted.process">
-                            <td>{{ joint.joint }}</td>
-                            <td><input type="checkbox" id="checkbox" v-model="joint.enabled"></td>
-                            <td>
-                                <button class="uk-button" type="button" @click="showJoint(joint.joint, 'modify')">edit</button>
-                                <button type="button" class="uk-button" @click="UIkit.modal.confirm('Are you sure?', function(){ deleteJoint(index) })">remove</button>
+                        <tr>
+                            <td class="td-joint">
+                                <div class="block-joint">
+                                    <a @click="showJoint('init_task', 'modify')">init_task</a>
+                                </div>
+                            </td>
+                            <td class="td-joint" v-for="(joint, index) in pipelineSeleted.process">
+                                <div class="block-joint">
+                                    <a @click="showJoint(joint.joint, 'modify')">{{ joint.joint }}</a>
+                                </div>
+                            </td>
+                            <td class="td-joint">
+                                <div class="block-joint">
+                                    <a @click="showJoint('save_task', 'modify')">save_task</a>
+                                </div>
                             </td>
                         </tr>
                         </tbody>
                     </table>
-                    <div class="uk-modal-footer uk-text-right">
-                        <button class="uk-button js-modal-confirm-cancel" @click="closeEditPipelineModal">cancel</button>
-                        <button class="uk-button uk-button-primary js-modal-confirm" @click="modifyPipeline(pipelineSeleted.id)">confirm</button>
-                    </div>
-                </div>
-            </div>
-            <div v-if="jointSettingVisible" v-bind:class="{ 'dialog-display-none': jointSettingVisible }" class="uk-modal uk-open" aria-hidden="false" style="display: block; overflow-y: scroll;">
-                <div class="uk-modal-dialog">
-                    <a class="uk-modal-close uk-close" @click="closeJointSettingModal"></a>
-                    <h3>{{ jointForm.title }}: {{ jointForm.jointName }}</h3>
+                    <h3>{{ jointForm.jointName }}</h3>
+                    <label>enable:</label><input type="checkbox" v-model="jointForm.enabled">
                     <template v-if="jointForm.jointName === 'url_filter'">
                         <div>
                             <ul class="uk-tab" data-uk-tab>
@@ -111,10 +105,10 @@
                             <template v-if="index0 === jointTabIndex">
                                 <div v-for="(val1, key1, index1) in val0">
                                     <template v-if="typeof val1 === 'object'">
-                                        &nbsp;&nbsp;<label>{{ key1 }}</label>
+                                        <label>{{ key1 }}</label>
                                         <div v-for="(val2, key2, index2) in val1">
                                             <template v-if="typeof val2 === 'string'">
-                                                &nbsp;&nbsp;&nbsp;&nbsp;<label>{{ key2 }}:</label>
+                                                <label style="margin-left: 40px;">{{ key2 }}:</label>
                                                 <input v-model="jointForm.jointParameters[key0][key1][key2]">
                                             </template>
                                         </div>
@@ -140,11 +134,11 @@
                         </div>
                     </template>
                     <template v-if="emptyObject(jointForm.jointParameters)">
-                        this joint has no parameters
+                        <br>this joint has no parameters
                     </template>
                     <div class="uk-modal-footer uk-text-right">
-                        <button class="uk-button js-modal-confirm-cancel" @click="closeJointSettingModal">cancel</button>
-                        <button class="uk-button uk-button-primary js-modal-confirm" @click="editJoint">confirm</button>
+                        <button type="button" v-if="jointForm.canRemove" class="uk-button" @click="UIkit.modal.confirm('Are you sure to remove this joint?', function(){ deleteJoint() })">remove</button>
+                        <button class="uk-button uk-button-primary js-modal-confirm" @click="modifyPipeline">confirm</button>
                     </div>
                 </div>
             </div>
@@ -256,7 +250,17 @@
                 title: '',
                 action: '',
                 jointName: '',
+                enabled: true,
+                canRemove: true,
                 jointParameters: {}
+            }
+        },
+        watch: {
+            jointForm: {
+                handler: function (val, oldVal) {
+                    this.modifyJoint()
+                },
+                deep: true
             }
         },
         mounted: function() {
@@ -308,7 +312,7 @@
                 }
 
                 var vm = this
-                axios.post('http://127.0.0.1:8001/pipeline/configs/', newPipeline).then(function (response) {
+                axios.post('http://127.0.0.1:8001/pipeline/config/', newPipeline).then(function (response) {
                     vm.pipelines.push(response.data)
                     vm.pipelineForm.name = ''
                 }).catch(function (error) {
@@ -316,8 +320,9 @@
                 });
             },
             modifyPipeline: function (id) {
+                console.log(JSON.stringify(this.pipelineSeleted))
                 var vm = this
-                axios.put('http://127.0.0.1:8001/pipeline/configs/' + id, this.pipelineSeleted).then(function (response) {
+                axios.put('http://127.0.0.1:8001/pipeline/config/' + id, this.pipelineSeleted).then(function (response) {
                     var pipelineOri = vm.pipelines.find(function(obj) {return obj.id === id})
                     pipelineOri = response.data
                 }).catch(function (error) {
@@ -330,12 +335,13 @@
                 axios.delete('http://127.0.0.1:8001/pipeline/config/' + pipeline.id).then(function (response) {
                     vm.pipelines.splice(index, 1)
                 }).catch(function (error) {
-                   console.log(error);
+                    console.log(error);
                 });
             },
             showEditPipelineModal: function (pipeline) {
                 this.editPipelineVisible = true
                 this.pipelineSeleted = pipeline
+                this.showJoint('init_task', 'modify')
             },
             closeEditPipelineModal: function () {
                 this.editPipelineVisible = false
@@ -345,6 +351,9 @@
                 if (action === 'add') {
                     // check this joint is exist or not
                     var joint = this.jointSeleted.joint
+                    if (this.pipelineSeleted.process === undefined) {
+                        this.pipelineSeleted.process = []
+                    }
                     var pipelineOri = this.pipelineSeleted.process.find(function(obj) {return obj.joint === jointName})
                     if (pipelineOri !== undefined) {
                         UIkit.modal.alert("this joint is already exists!")
@@ -365,10 +374,22 @@
                         title: 'add new joint',
                         action: 'add',
                         jointName: jointName,
+                        enabled: true,
+                        canRemove: true,
                         jointParameters: jointSeletedClone
                     }
                 } else if (action === 'modify'){
-                    var pipelineOri = this.pipelineSeleted.process.find(function(obj) {return obj.joint === jointName})
+                    var canRemove = true
+                    var pipelineOri = undefined
+                    if (jointName === 'init_task') {
+                        canRemove = false
+                        pipelineOri = this.pipelineSeleted.start
+                    } else if (jointName === 'save_task') {
+                        canRemove = false
+                        pipelineOri = this.pipelineSeleted.end
+                    } else {
+                        pipelineOri = this.pipelineSeleted.process.find(function(obj) {return obj.joint === jointName})
+                    }
                     var jointSeletedClone = this.deepClone(this.jointSeleted || pipelineOri.parameters || {})
                     if (jointName === 'url_filter') {
                         for (var prop0 in jointSeletedClone) {
@@ -408,31 +429,19 @@
                         title: 'modify joint',
                         action: 'modify',
                         jointName: jointName,
+                        enabled: pipelineOri.enabled,
+                        canRemove: canRemove,
                         jointParameters: jointSeletedClone
                     }
                 }
-                this.jointSettingVisible = true
-            },
-            closeJointSettingModal: function () {
-                this.jointSettingVisible = false
             },
             changeJoint: function (ele) {
                 var optionTxt = $(ele.target).find("option:selected").text()
                 var optionVal = ele.target.value
                 this.addJointName = optionVal
             },
-            editJoint: function() {
+            modifyJoint: function() {
                 var jointName = this.jointForm.jointName
-                var pipelineOri = this.pipelineSeleted.process.find(function(obj) {return obj.joint === jointName})
-                if (jointName === 'url_filter') {
-                    for (var prop0 in this.jointForm.jointParameters) {
-                        for (var prop1 in this.jointForm.jointParameters[prop0]) {
-                            for (var prop2 in this.jointForm.jointParameters[prop0][prop1]) {
-                                this.jointForm.jointParameters[prop0][prop1][prop2] = this.jointForm.jointParameters[prop0][prop1][prop2].split(',')
-                            }
-                        }
-                    }
-                }
                 if (this.jointForm.action === 'add') {
                     if (pipelineOri !== undefined) {
                         UIkit.modal.alert("this joint is already exists!")
@@ -440,21 +449,50 @@
                     }
                     var newJoint = {
                         joint: jointName,
-                        enabled: true,
+                        enabled: this.jointForm.enabled,
                         parameters: this.deepClone(this.jointForm.jointParameters)
                     }
                     this.pipelineSeleted.process.push(newJoint)
+                    this.showJoint(jointName, 'modify')
                 } else if (this.jointForm.action === 'modify') {
+                    var pipelineOri = undefined
+                    if (jointName === 'init_task') {
+                        pipelineOri = this.pipelineSeleted.start
+                    } else if (jointName === 'save_task') {
+                        pipelineOri = this.pipelineSeleted.end
+                    } else {
+                        if (this.pipelineSeleted.process === undefined) {
+                            this.pipelineSeleted.process = []
+                        }
+                        pipelineOri = this.pipelineSeleted.process.find(function(obj) {return obj.joint === jointName})
+                    }
+
+                    var jointParameters = this.deepClone(this.jointForm.jointParameters)
+                    if (jointName === 'url_filter') {
+                        for (var prop0 in this.jointForm.jointParameters) {
+                            for (var prop1 in this.jointForm.jointParameters[prop0]) {
+                                for (var prop2 in this.jointForm.jointParameters[prop0][prop1]) {
+                                    jointParameters[prop0][prop1][prop2] = this.jointForm.jointParameters[prop0][prop1][prop2].split(',')
+                                }
+                            }
+                        }
+                    }
                     if (pipelineOri === undefined) {
                         UIkit.modal.alert("this joint is not find!")
                         return
                     }
-                    pipelineOri.parameters = this.deepClone(this.jointForm.jointParameters)
+                    pipelineOri.enabled = this.jointForm.enabled
+                    pipelineOri.parameters = this.deepClone(jointParameters)
                 }
-                this.jointSettingVisible = false
             },
-            deleteJoint: function(index) {
-                this.pipelineSeleted.process.splice(index, 1)
+            deleteJoint: function() {
+                for (var i=0; i < this.pipelineSeleted.process.length; i++) {
+                    if (this.pipelineSeleted.process[i].joint === this.jointForm.jointName) {
+                        this.pipelineSeleted.process.splice(i, 1)
+                        this.showJoint('init_task', 'modify')
+                        break
+                    }
+                }
             }
         }
     })

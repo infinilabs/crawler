@@ -26,17 +26,17 @@ func (h AdminUI) TasksPageAction(w http.ResponseWriter, r *http.Request, p httpr
 	var status = h.GetIntOrDefault(r, "status", -1)
 	count1, task, _ = model.GetTaskList(from, size, host, status)
 
-	err, hvs := model.GetHostStatus(status)
-	if err != nil {
-		panic(err)
-	}
+	//err, hvs := model.GetHostStatus(status)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//err, kvs := model.GetTaskStatus(host)
+	//if err != nil {
+	//	panic(err)
+	//}
 
-	err, kvs := model.GetTaskStatus(host)
-	if err != nil {
-		panic(err)
-	}
-
-	tasks.Index(w, r, host, status, from, size, count1, task, count2, hvs, kvs)
+	tasks.Index(w, r, host, status, from, size, count1, task, count2, nil, nil)
 }
 
 func (h AdminUI) TaskViewPageAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
