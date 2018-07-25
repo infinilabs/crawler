@@ -83,10 +83,50 @@ type StaticFS struct {
 
 var data = map[string]*fs.VFile{
 
+	"/assets/config/common-config.js": {
+		FileName:   "assets/config/common-config.js",
+		FileSize:   58,
+		ModifyTime: 1513268105,
+		Compressed: `
+H4sIAAAAAAAA/ypLLFJIzs/Nzc9Lzs9Ly0xXsFWo5lJQUEosyCwtylGyUlDKKCkpsNLXz8lPTszJyC8u
+sbIwMDBU4qoFBAAA///AVh1/OgAAAA==
+`,
+	},
+
+	"/assets/css/layout.css": {
+		FileName:   "assets/css/layout.css",
+		FileSize:   3386,
+		ModifyTime: 1511010150,
+		Compressed: `
+H4sIAAAAAAAA/6xWwY7bNhC96ysGzmXXlWzZsXc3Mhq0TRqkQBMESHvoLZRISawpUiAprx3BQD6jP9Ci
+ubT3Fu1h90/yJQVJSSvZ3uayq4NX5Axn+ObNG03HHozhmShKwQnXEbi/5yJRZuM5UYmkpaaCu63nJKWc
+KFB6x4iCVEjQOYEfv1tTDVgkVUG4Rsbegy8f7A/GU8/zpmN4IbhWD35yLPDOh3zmQz73IX/sQ77wIV/6
+kF/43qRaBxxtYiTNDzwFRuEpIKghFVwHKSoo20UweiPFlhYIXosNGvkweknYhmiaIHhNKjLyoVvwR28o
+z14gnsHbZyN/9IomUiiRavgJvSR05I9uf7359+aP299v/rn58/bjpw9/ffrw2+3Hm78/ffhl5MPXkiLm
+g0JcBYpImq5g7/D5Biny4PDkumBQe6b8YkNkysR1sItAJVIwtrLrwTWJ11QHFhFVCKFzyrMIENcUMYoU
+wY1hId4HQm2PLDOJdipBjKy8vWcxjyutBYc6FhITGUiEaaUiWJTbVWOhUcwIaOxD7y1vUm3cYqG1KCKY
+lVtQglEMj8jSPDbOdAzfo52o9MOz1XOt9YpizIhn1ya6CAr7DjXEKFlnUlQcR/AoTW0NewbmRongGlFO
+ZA0F5UFOaJbrCC7C0GJwnzWYDUUxiZF0WJQIY8qzgJFURxC6UhwfaZEfHmpBnTgs+7gOAP12aZ4D9yAn
+CBMJdT/O48PMW6tJJikOCiQzymv3E2hRRrPloYNp1qbE/ZMXS3sDu2zdI5iH5dZcduCeCqHvycqw4Qdz
+Xw2IY4hplhFpCvdVQTBFcGZ8rinWeQSXF1fl9hxqz0bsAd6k1mOgdEFO4HVg6Kpzj93+OJKpT4k4YVB3
+FW6CmatbUXC3cvKctCoPhcA0pUQ+vJQ60r9GG8t4k22rmYOuNKW976alUNQNHEkY0nRD2hK2R0UMKR0k
+OWX4c71+QM1OwCeMBomouK4PYqJYCVZp4nJpa9dxyyXevSaCCen617SwS6Zr7KDdDkN0RS5W/V6MQlj2
+Wm44WVq/y8vL1f7EvkuFbHWAGM14BAnhmkgXYMBqu8IoJ8HxspNg+p5EMLtocpmO4aUR+cPqmbhRbnb8
+4/VUJJUarhtuosQUz2bcanJf814szTPEcbFYtGm8reJAxD+TREfwjqNNoxTv+pk1o7mTmsFZ8/m8d8/r
+5vpcyAKxPu62lZoBb+vtjkmZQDpyDGhy6lPbeqsq7jjJde4oeca/mJ9D3chQ09VdQ07HY898x8iiOaZa
+B6mQBbT/WB2XgimYMBQTZgefgPqgw2eNkvbdVRUXVEPdaNSVMWnF0Ni7LA6cEsQTIyF9p3YCI5yRBlVM
+VcnQLgLKLZ1iJpL1kNHQUNqsTceDWofhE4yvVuPpEfGGbGyrdBmGJ6g7W5zou9X/NsOGSPPFxdo9NwV6
+PloirgwYhhq82TmecTKL0Vnom2cyP18dq07b633Dx+dHiiAkteXofE/gFdACZSTqPqoMBkgGmSEC4fpM
+i9J/FIbxIl2a3yucLM9baE+dc+wPLud7Tzn45Jp36mcQUznC4tpUOzD4hEfY7L0TE/PJRVhuzx2XOqrn
+QtL35rOF3a1Z0t8N0YaWs7AjykG5mwZtdwY0igXD7fj8bOCu7+6CD1p4NuvYvff23n8BAAD//x/s7pY6
+DQAA
+`,
+	},
+
 	"/assets/css/loadmore.css": {
 		FileName:   "assets/css/loadmore.css",
 		FileSize:   1721,
-		ModifyTime: 1514271253,
+		ModifyTime: 1532530300,
 		Compressed: `
 H4sIAAAAAAAA/5xUsW7bPBDe9RQH/AiQBD8VOY0cm1kK9ElokZIPpkiBYmIlhacuRZfuDVCkQIeOHYp2
 aR7HQfMWBU1JluU4dRsggny6j3f3Hb/v5Pg4IO3f8t3dr/v7h9tvy88fHu5+LH++X38jwfFJEIRSM55r
@@ -105,7 +145,7 @@ gHUkRSkpJJfGyf+Vm3CXzy6C3wEAAP//R/EYirkGAAA=
 	"/assets/css/m/search_style.css": {
 		FileName:   "assets/css/m/search_style.css",
 		FileSize:   3422,
-		ModifyTime: 1514270523,
+		ModifyTime: 1532530300,
 		Compressed: `
 H4sIAAAAAAAA/+RW227jNhB991cMEAS7C4SGfMkGZV9aFOhvLChybBGhSIGkbGeL9NsLkpItyZLspC8F
 SiVIeJkZ8pyZQy5dfiK8dt6U8NcCQEhXKfZGQWolNZJcGf766wKgMk56aTQFi4p5ecAwepTCFxS+Z1l1
@@ -128,7 +168,7 @@ GeZpkqOQLv8EAAD//zt4y59eDQAA
 	"/assets/css/m/style.css": {
 		FileName:   "assets/css/m/style.css",
 		FileSize:   6705,
-		ModifyTime: 1514282340,
+		ModifyTime: 1532530300,
 		Compressed: `
 H4sIAAAAAAAA/6RYX2/byBF/Fj/FnIXgWtXUX0uxSfSBlmVbOMVyJeWcXFEIK3IlbUNy2eXKViL4rX1L
 cejDoTgcWiAFWrRAr33oW65pvkwTJ0/9CsXukhJJUZegtRBE2p2Z3Zn5zW9nV+teXD4cwUorTKnP9Sny
@@ -177,7 +217,7 @@ KY09gZKEaqmilN+8fnX31R937OBW+28AAAD//whlhpgxGgAA
 	"/assets/css/search/index.css": {
 		FileName:   "assets/css/search/index.css",
 		FileSize:   209,
-		ModifyTime: 1506164087,
+		ModifyTime: 1532530300,
 		Compressed: `
 H4sIAAAAAAAA/0yNzQ6CMAyA73uKJsabJPMgieNpBi1bdSsESpQY3t0o+JOevu9L26g5HeoOZ3gYAIAb
 o0YHR2v31VtE4hDVwfkjsh8CiwO7Yu8RWcKXM0uxHSlPtr+vtvbNNQzdJOhg15avqcxizN9n5LFPfnbQ
@@ -188,7 +228,7 @@ Jtq2fOIgBSvl0UFDojSs4TKNyu1cNJ0oif7iYp4BAAD//1s9SIXRAAAA
 	"/assets/css/search/search.css": {
 		FileName:   "assets/css/search/search.css",
 		FileSize:   86,
-		ModifyTime: 1506166595,
+		ModifyTime: 1532530300,
 		Compressed: `
 H4sIAAAAAAAA/xTGzQmAMAwG0Hun+AbIoeBNp6kmlmK0tT8giLtL3ukF5iqtEVbN23GP3IXAStiTKDfp
 tjiqELISCqHYh+J1MGeoMV0zPDym8sAv7nN/AAAA//+r5oC4VgAAAA==
@@ -198,7 +238,7 @@ tjiqELISCqHYh+J1MGeoMV0zPDym8sAv7nN/AAAA//+r5oC4VgAAAA==
 	"/assets/css/search_style.css": {
 		FileName:   "assets/css/search_style.css",
 		FileSize:   3460,
-		ModifyTime: 1527928282,
+		ModifyTime: 1532530300,
 		Compressed: `
 H4sIAAAAAAAA/+RXbW/jNgz+nl9BoCjuDqgC56VXTPuyYcD+xkGWmFioLBmSnKY3dL99kGQljmO7afdl
 wJQWrV5Iig/JR8zSlUfCW+dNDX8tAIR0jWKvFKRWUiMpleHPvy4AGuOkl0ZTsKiYlwcMq7XU5EUKX9Ft
@@ -221,7 +261,7 @@ NpRzP6/tlGGeJjoK6fJPAAAA//8L3V9jhA0AAA==
 	"/assets/css/style.css": {
 		FileName:   "assets/css/style.css",
 		FileSize:   7061,
-		ModifyTime: 1520233310,
+		ModifyTime: 1532530300,
 		Compressed: `
 H4sIAAAAAAAA/6RZT2/byBU/W4C+w8RCsK1rypJsyTaJHmhZtoVVLFdS1skWhTAih9I0JIclR5YSIbf2
 lmLRw6JYLFogBVq0QLc99JZtmi/TxMmpX6GYfxT/KTFaE0HimffezPvz+82bSbnUvbx6OAKrcmnLIT7V
@@ -271,7 +311,7 @@ AA==
 	"/assets/css/tasks.css": {
 		FileName:   "assets/css/tasks.css",
 		FileSize:   143,
-		ModifyTime: 1496674736,
+		ModifyTime: 1532530300,
 		Compressed: `
 H4sIAAAAAAAA/zTLUQrCMAzG8feeIheoB2gOI2kTRfphRjYpIru7uNWXkO8H/8tNHjC9brL2TyIiqtL6
 Pfz11EJvA3zw4c3hUShMOe1pkwqjWXioRW4OyLJa+T9nNzw01zDp5bhZAD51hCwTf5vT/g0AAP//ivV6
@@ -282,7 +322,7 @@ Eo8AAAA=
 	"/assets/js/footer.js": {
 		FileName:   "assets/js/footer.js",
 		FileSize:   2572,
-		ModifyTime: 1514271647,
+		ModifyTime: 1532530300,
 		Compressed: `
 H4sIAAAAAAAA/5RV227bRhO+N+B3GDM/QtKRSMv+g7pUGUNWjCJF6qaxjRZwDWO1HEpbkbv07lKHxrov
 UPR9+kDtexRLUTwoqltTF9rDzPfNef3Dw/09OIShRKIxgtESvkF9LgnjCj5MsistZOoVIjcKZQDfYkST
@@ -308,7 +348,7 @@ jr2JemFoaSIVXIkEvUSMnencNZRp9uBpSejUHKxf+NKkvwMAAP//Wmg4PAwKAAA=
 	"/assets/js/page/console.js": {
 		FileName:   "assets/js/page/console.js",
 		FileSize:   5350,
-		ModifyTime: 1518269207,
+		ModifyTime: 1532530300,
 		Compressed: `
 H4sIAAAAAAAA/7RYX2/rthV/96fg5QJYmh0pfegenChDm5vuZsh6uyR361AUAS0dy0woUiEpO1ma7z6Q
 +kfRcuZeoHoIIvLwd8758fyTj4JVxVNNBUdBiF4nE4QQ2hCJUsH5afdWqBwl6CjAfypUjsN+g4l2gwl/
@@ -343,7 +383,7 @@ cTUc3OMYNYmmUILc5oudDwQ8R385qftvHL+5Vd4Reu1ytv9pr+0tUQ76koH59/uXqyzA3u99zWtUw92J
 	"/assets/js/page/index.js": {
 		FileName:   "assets/js/page/index.js",
 		FileSize:   1072,
-		ModifyTime: 1496674736,
+		ModifyTime: 1532530300,
 		Compressed: `
 H4sIAAAAAAAA/4xTz2rbThC+71MM+v3AkmNWii8BG9NDC22vrSmFEsxaGsVrr1fO7qyTNBh6DvTYngpt
 XyDkbvI2jZvHKFrF/4gC0UGH+b6Z/Wbmm7jZZNCElwYFYQbDC5hiliooNLSTw6P4MD7iDJoxy51OSRYa
@@ -360,7 +400,7 @@ C8ZITrEv0wkS9MAivdWEZi5UuD5DaLWTJCnZ28Pssn8BAAD//w3N87swBAAA
 	"/assets/js/page/tasks.js": {
 		FileName:   "assets/js/page/tasks.js",
 		FileSize:   532,
-		ModifyTime: 1515907893,
+		ModifyTime: 1532530300,
 		Compressed: `
 H4sIAAAAAAAA/2SRzWrjMBSF93qKQwhIcoJ/MjAb402GySyGQAvdtCELxZYTNbYVZCWt2+Tdi2U7LlSL
 D6F77tH9CTyPwMMfI4WVGXYNSpmlBXSFRRj9DqJFsAh9Ai8gJD9XqVW6glWlFHvNLvyTAIA1TXdpj5H2
@@ -374,7 +414,7 @@ mCjr5z5lk2EzE37fEY/JjcfkKwAA//9Y+UgoFAIAAA==
 	"/assets/js/snapshot_footprint.js": {
 		FileName:   "assets/js/snapshot_footprint.js",
 		FileSize:   254,
-		ModifyTime: 1509258526,
+		ModifyTime: 1532530300,
 		Compressed: `
 H4sIAAAAAAAA/1yNMUvEQBBG+/0VH6k2BHL2cREUCxsL0Uoslt1JMrCZkb2Jp8j9dwl3itxUA2/emwNL
 1kOvUjRmBIyrJGMV3+LbOQD4iBVR0qx1j4CsaV1IrJ/I7gtt6/726zlOj3Eh38SmHU7aqBV+cxkBVwMY
@@ -386,7 +426,7 @@ nopHd3TO/QQAAP//nDYkC/4AAAA=
 	"/favicon.ico": {
 		FileName:   "favicon.ico",
 		FileSize:   9662,
-		ModifyTime: 1514805677,
+		ModifyTime: 1532530300,
 		Compressed: `
 H4sIAAAAAAAA/7RaeWwc1RnfFDSevW9742N37bV314699vqMbeKkOCmhKmmbQlo1aUsgmF5QKFWgf0AS
 DrUUFRXlKIfSgloolWpjE8TREEhpUSsFSiAJOSDEIaTBAePYzikUfdXvm3nTmb28m01X+vRmd97M/H7f
@@ -444,6 +484,11 @@ js+s/KeuVcft6jiqjreoY0AdbQUB+D9/1L9JpYGT1PESdcykB5c6yup4qTqWiGtUjcxSNXLJCR7+GwAA
 	"/assets": {
 		IsFolder: true,
 		FileName: "/assets",
+	},
+
+	"/assets/config": {
+		IsFolder: true,
+		FileName: "/assets/config",
 	},
 
 	"/assets/css": {
