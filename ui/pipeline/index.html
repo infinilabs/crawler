@@ -319,10 +319,9 @@
                     console.log(error);
                 });
             },
-            modifyPipeline: function (id) {
-                console.log(JSON.stringify(this.pipelineSeleted))
+            modifyPipeline: function () {
                 var vm = this
-                axios.put('http://127.0.0.1:8001/pipeline/config/' + id, this.pipelineSeleted).then(function (response) {
+                axios.put('http://127.0.0.1:8001/pipeline/config/' + this.pipelineSeleted.id, this.pipelineSeleted).then(function (response) {
                     var pipelineOri = vm.pipelines.find(function(obj) {return obj.id === id})
                     pipelineOri = response.data
                 }).catch(function (error) {
