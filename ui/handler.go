@@ -8,6 +8,7 @@ import (
 	"github.com/infinitbyte/gopa/config"
 	"github.com/infinitbyte/gopa/model"
 	"github.com/infinitbyte/gopa/ui/tasks"
+	"github.com/infinitbyte/gopa/ui/pipeline"
 	"net/http"
 )
 
@@ -65,4 +66,8 @@ func (h AdminUI) GetScreenshotAction(w http.ResponseWriter, r *http.Request, p h
 		return
 	}
 	w.Write(bytes)
+}
+
+func (h AdminUI) PipelinePageAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	pipeline.Index(w, r)
 }
