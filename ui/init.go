@@ -49,6 +49,7 @@ var (
 func InitUI() {
 	//Nav init
 	core.RegisterNav("Tasks", "Tasks", "/admin/tasks/")
+	core.RegisterNav("Pipeline", "Pipeline", "/admin/pipeline/")
 
 	//UI pages init
 	admin := AdminUI{}
@@ -62,7 +63,7 @@ func InitUI() {
 	ui.HandleUI("/favicon.ico", http.FileServer(static.StaticFS{StaticFolder: "static", CheckLocalFirst: true}))
 
 	ui.HandleUIMethod(api.GET, "/screenshot/:id", admin.GetScreenshotAction)
-
+	ui.HandleUIMethod(api.GET, "/admin/pipeline/", admin.PipelinePageAction)
 	ui.HandleUIMethod(api.GET, "/admin/tasks/", api.NeedPermission(api.PERMISSION_ADMIN_MINIMAL, admin.TasksPageAction))
 	ui.HandleUIMethod(api.GET, "/admin/task/view/:id", api.NeedPermission(api.PERMISSION_ADMIN_MINIMAL, admin.TaskViewPageAction))
 

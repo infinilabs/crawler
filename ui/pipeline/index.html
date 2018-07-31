@@ -1,0 +1,515 @@
+<%! func Index(w http.ResponseWriter,r *http.Request) error %>
+
+<%% import "github.com/infinitbyte/framework/modules/ui/common" %%>
+<%% import "net/http" %%>
+<% common.Head(w, "Pipeline","") %>
+
+<script src="/static/assets/js/common.js"></script>
+<script src="/static/assets/js/axios.min.js"></script>
+<script src="/static/assets/js/Sortable.min.js"></script>
+<script src="/static/assets/js/vuedraggable.min.js"></script>
+<style type="text/css">
+    pre{
+        margin-top:0px;
+        margin-bottom:0px;
+        padding-top:4px;
+        padding-bottom:4px;
+    }
+    .request pre{
+        color:royalblue;
+    }
+    #log {
+        max-height: 200px;
+    }
+    #logging {
+        height: 500px;
+        max-height: 1000px;
+    }
+    .dialog-display-none {display:none;}
+    .uk-modal-dialog {width: 1000px;}
+    .block__list_tags {
+        padding-left: 0px;
+    }
+    .block__list_tags:after {
+        clear: both;
+        content: '';
+        display: block;
+    }
+    .block__list_tags li {
+        list-style-type:none;
+        color: #fff;
+        float: left;
+        margin: 8px 2px 10px 0;
+        padding: 2px 5px;
+        min-width: 10px;
+        background-color: #eee;
+        text-align: center;
+    }
+</style>
+
+<% common.Body(w) %>
+<% common.Nav(w,r,"Pipeline") %>
+
+
+
+<div class="tm-middle">
+
+    <div class="uk-container uk-container-center">
+
+        <div class="uk-overflow-container" id="app-pipeline-manage">
+            <div class="uk-width-medium-1-3">
+                <div class="uk-panel uk-panel-box">
+                    <h3 class="uk-panel-title">Type the name of pipline here</h3>
+                    <form class="uk-form uk-width-medium-1-3">
+                        <div class="uk-form-row">
+                            <input placeholder="pipeline name" v-model="pipelineForm.name">
+                        </div>
+                    </form>
+                    <hr>
+                    <button class="uk-button" type="button" @click="addPipeline">Create Pipeline</button>
+                </div>
+            </div>
+            <hr>
+            <div class="uk-grid" data-uk-grid-margin="">
+                <div class="uk-width-medium-1-3" v-bind:class="{ 'uk-grid-margin': (index > 2) }" v-for="(pipeline, index) in pipelines">
+                    <div class="uk-panel uk-panel-box uk-panel-header">
+                        <h3 class="uk-panel-title"><a href="#" class="uk-icon-small uk-icon-hover uk-icon-github"></a> {{ pipeline.name }}</h3>
+                        <div class="uk-modal-footer uk-text-right">
+                            <button class="uk-button" type="button" @click="showEditPipelineModal(pipeline)">edit</button>
+                            <button type="button" class="uk-button" @click="UIkit.modal.confirm('Are you sure?', function(){ removePipeLine(pipeline, index) })">remove</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-if="editPipelineVisible" v-bind:class="{ 'dialog-display-none': editPipelineVisible }" class="uk-modal uk-open" aria-hidden="false" style="display: block; overflow-y: scroll;">
+                <div class="uk-modal-dialog">
+                    <a class="uk-modal-close uk-close" @click="closeEditPipelineModal"></a>
+                    pipelineName: <input v-model="pipelineSeleted.name">
+                    <div>
+                        <ul class="block__list_tags">
+                            <li><a @click="showJoint('init_task', 'modify')">init_task</a></li>
+                            <draggable v-model="pipelineSeleted.process">
+                                <transition-group>
+                                    <li v-for="(joint, index) in pipelineSeleted.process" :key="index">
+                                        <a @click="showJoint(joint.joint, 'modify')">{{ joint.joint }}</a>
+                                    </li>
+                                </transition-group>
+                            </draggable>
+                            <li><a @click="showJoint('save_task', 'modify')">save_task</a></li>
+                        </ul>
+                    </div>
+                    <select v-model="addJointName" @change='changeJoint'>
+                        <option v-for="(val, key, index) in joints" :value="key">{{key}}</option>
+                    </select>
+                    <button class="uk-button" type="button" @click="showJoint(addJointName, 'add')">addJoint</button>
+                    <hr>
+                    <h3>{{ jointForm.jointName }}</h3>
+                    <label>enable:</label><input type="checkbox" v-model="jointForm.enabled">
+                    <template v-if="jointForm.jointName === 'url_filter'">
+                        <div>
+                            <ul class="uk-tab" data-uk-tab>
+                                <li v-bind:class="{ 'uk-active' : (index0 === jointTabIndex) }" @click="jointTabIndex = index0" v-for="(val0, key0, index0) in jointForm.jointParameters">
+                                    <a>{{ key0 }}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div v-for="(val0, key0, index0) in jointForm.jointParameters">
+                            <template v-if="index0 === jointTabIndex">
+                                <div v-for="(val1, key1, index1) in val0">
+                                    <template v-if="typeof val1 === 'object'">
+                                        <label>{{ key1 }}</label>
+                                        <div v-for="(val2, key2, index2) in val1">
+                                            <template v-if="typeof val2 === 'string'">
+                                                <label style="margin-left: 40px;">{{ key2 }}:</label>
+                                                <input v-model="jointForm.jointParameters[key0][key1][key2]">
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template v-if="jointForm.jointName !== 'url_filter'">
+                        <div v-for="(val, key, index) in jointForm.jointParameters">
+                            <template v-if="typeof val === 'boolean'">
+                                <label>{{ key }}:</label>
+                                <input type="checkbox" v-model="jointForm.jointParameters[key]">
+                            </template>
+                            <template v-if="typeof val === 'number'">
+                                <label>{{ key }}:</label>
+                                <input v-model="jointForm.jointParameters[key]">
+                            </template>
+                            <template v-if="typeof val === 'string'">
+                                <label>{{ key }}:</label>
+                                <input v-model="jointForm.jointParameters[key]">
+                            </template>
+                        </div>
+                    </template>
+                    <template v-if="emptyObject(jointForm.jointParameters)">
+                        <br>this joint has no parameters
+                    </template>
+                    <div class="uk-modal-footer uk-text-right">
+                        <button type="button" v-if="jointForm.canRemove" class="uk-button" @click="UIkit.modal.confirm('Are you sure to remove this joint?', function(){ deleteJoint() })">remove</button>
+                        <button class="uk-button uk-button-primary js-modal-confirm" @click="modifyPipeline">confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    new Vue({
+        el: '#app-pipeline-manage',
+        data: {
+            pipelines: [],
+            joints: {
+                extract: {
+                    htmlBlock: ''
+                },
+                fetch: {
+                    proxy: 'socks5://127.0.0.1:1080',
+                    cookie: '',
+                    timeoutInSeconds: 100
+                },
+                filter_check: {
+                    filter_key: 'check_filter'
+                },
+                html2text: {
+                    mergeWhitespace: false,
+                    removeNonScript: true
+                },
+                ignore_timeout: {
+                    ignoreTimeoutAfterCount: 5
+                },
+                parse: {
+                    dispatchLinks: true,
+                    saveImages: false,
+                    maxDepth: 10,
+                    maxBreadth: 10,
+                    replaceNoscript: true
+                },
+                save_snapshot: {
+                    compressEnabled: true,
+                    bucket: 'Snapshot',
+                    maxRevision: 5
+                },
+                update_check_time: {
+                    decelerate_steps: '24h,48h,72h,168h,360h,720h',
+                    accelerate_steps: '24h,12h,6h,3h,1h30m,45m,30m,20m,10m'
+                },
+                url_filter: {
+                    url_match_rule: {
+                        must_not: {
+                            prefix: ['mailto:', 'data:image/', '#', 'javascript:'],
+                            contain: ['crond/run', 'login', 'logout'],
+                            suffix: []
+                        },
+                        contain: {prefix: [], contain: [], suffix: []},
+                        suffix: {prefix: [], contain: [], suffix: []}
+                    },
+                    host_match_rule: {
+                        must_not: {prefix: [], contain: [], suffix: []},
+                        contain: {prefix: [], contain: [], suffix: []},
+                        suffix: {prefix: [], contain: [], suffix: []}
+                    },
+                    path_match_rule: {
+                        must_not: {prefix: [], contain: [], suffix: []},
+                        contain: {prefix: [], contain: [], suffix: []},
+                        suffix: {prefix: [], contain: [], suffix: []}
+                    },
+                    file_match_rule: {
+                        must_not: {prefix: [], contain: [], suffix: []},
+                        contain: {prefix: [], contain: [], suffix: []},
+                        suffix: {prefix: [], contain: [], suffix: []}
+                    },
+                    file_ext_match_rule: {
+                        must_not: {prefix: [], contain: [], suffix: []},
+                        contain: {prefix: [], contain: [], suffix: []},
+                        suffix: {prefix: [], contain: [], suffix: []}
+                    }
+                },
+                url_normalization: {
+                    follow_all_domain: false,
+                    follow_sub_domain: true,
+                    max_filename_length: 1000
+                },
+                chrome_fetch: {
+                    timeout_in_seconds: 60,
+                    chrome_host: 'http://127.0.0.1:9223',
+                    save_screenshot: true,
+                    screenshot_quality: 50,
+                    screenshot_format: '',
+                    compress_enabled: true
+                },
+                hash: {},
+                content_deduplication: {},
+                lang_detect: {},
+                index: {}
+            },
+            pipelineSeleted: null,
+            addJointName: '',
+            jointSeleted: null,
+            editPipelineVisible: false,
+            jointSettingVisible: false,
+            jointTabIndex: 0,
+            pipelineForm: {
+                name: ''
+            },
+            jointForm: {
+                title: '',
+                action: '',
+                jointName: '',
+                enabled: true,
+                canRemove: true,
+                jointParameters: {}
+            }
+        },
+        watch: {
+            jointForm: {
+                handler: function (val, oldVal) {
+                    this.modifyJoint()
+                },
+                deep: true
+            }
+        },
+        mounted: function() {
+            for (var jointInfo in this.joints) {
+                this.addJointName = jointInfo
+                break
+            }
+            this.getPipeLines()
+        },
+        methods: {
+            deepClone: function(initalObj) {
+                var obj = {}
+                try {
+                    obj = JSON.parse(JSON.stringify(initalObj))
+                }
+                catch (ex){
+                    console.log('deepClone exception')
+                }
+                return obj
+            },
+            emptyObject: function (data) {
+                return (JSON.stringify(data) === '{}')
+            },
+            getPipeLines: function() {
+                var vm = this
+                axios.get(commonConfig.gopaApiUrl + '/pipeline/configs/').then(function (response) {
+                    vm.pipelines = response.data.result
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            addPipeline: function () {
+                if (this.pipelineForm.name.length <= 0) {
+                    UIkit.modal.alert("please input pipeline name!")
+                    return
+                }
+
+                var newPipeline = {
+                    name: this.pipelineForm.name,
+                    start: {
+                        joint: 'init_task',
+                        enabled: true
+                    },
+                    process: [],
+                    end: {
+                        joint: 'save_task',
+                        enabled: true
+                    }
+                }
+
+                var vm = this
+                axios.post(commonConfig.gopaApiUrl + '/pipeline/config/', newPipeline).then(function (response) {
+                    vm.pipelines.push(response.data)
+                    vm.pipelineForm.name = ''
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            modifyPipeline: function () {
+                var vm = this
+                axios.put(commonConfig.gopaApiUrl + '/pipeline/config/' + this.pipelineSeleted.id, this.pipelineSeleted).then(function (response) {
+                    console.log('modify success')
+                }).catch(function (error) {
+                    console.log(error);
+                });
+                this.editPipelineVisible = false
+            },
+            removePipeLine: function (pipeline, index) {
+                var vm = this
+                axios.delete(commonConfig.gopaApiUrl + '/pipeline/config/' + pipeline.id).then(function (response) {
+                    vm.pipelines.splice(index, 1)
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            showEditPipelineModal: function (pipeline) {
+                this.editPipelineVisible = true
+                this.pipelineSeleted = pipeline
+                this.showJoint('init_task', 'modify')
+            },
+            closeEditPipelineModal: function () {
+                this.editPipelineVisible = false
+            },
+            showJoint: function (jointName, action) {
+                this.jointSeleted = this.joints[jointName]
+                if (action === 'add') {
+                    // check this joint is exist or not
+                    var joint = this.jointSeleted.joint
+                    if (this.pipelineSeleted.process === undefined) {
+                        this.pipelineSeleted.process = []
+                    }
+                    var pipelineOri = this.pipelineSeleted.process.find(function(obj) {return obj.joint === jointName})
+                    if (pipelineOri !== undefined) {
+                        UIkit.modal.alert("this joint is already exists!")
+                        return
+                    }
+                    var jointSeletedClone = this.deepClone(this.jointSeleted)
+                    if (jointName === 'url_filter') {
+                        for (var prop0 in jointSeletedClone) {
+                            for (var prop1 in jointSeletedClone[prop0]) {
+                                for (var prop2 in jointSeletedClone[prop0][prop1]) {
+                                    jointSeletedClone[prop0][prop1][prop2] = jointSeletedClone[prop0][prop1][prop2].join()
+                                }
+                            }
+                        }
+                    }
+                    // add joint
+                    this.jointForm = {
+                        title: 'add new joint',
+                        action: 'add',
+                        jointName: jointName,
+                        enabled: true,
+                        canRemove: true,
+                        jointParameters: jointSeletedClone
+                    }
+                } else if (action === 'modify'){
+                    var canRemove = true
+                    var pipelineOri = undefined
+                    if (jointName === 'init_task') {
+                        canRemove = false
+                        pipelineOri = this.pipelineSeleted.start
+                    } else if (jointName === 'save_task') {
+                        canRemove = false
+                        pipelineOri = this.pipelineSeleted.end
+                    } else {
+                        pipelineOri = this.pipelineSeleted.process.find(function(obj) {return obj.joint === jointName})
+                    }
+                    var jointSeletedClone = this.deepClone(this.jointSeleted || pipelineOri.parameters || {})
+                    if (jointName === 'url_filter') {
+                        for (var prop0 in jointSeletedClone) {
+                            for (var prop1 in jointSeletedClone[prop0]) {
+                                for (var prop2 in jointSeletedClone[prop0][prop1]) {
+                                    jointSeletedClone[prop0][prop1][prop2] = ''
+                                    var propOriValue = pipelineOri.parameters[prop0][prop1][prop2]
+                                    if (propOriValue !== undefined) {
+                                        if (Array.isArray(propOriValue)) {
+                                            jointSeletedClone[prop0][prop1][prop2] = propOriValue.join()
+                                        } else {
+                                            jointSeletedClone[prop0][prop1][prop2] = propOriValue
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        for (var prop in jointSeletedClone) {
+                            if (typeof jointSeletedClone[prop] === 'boolean') {
+                                jointSeletedClone[prop] = false
+                            }
+                            if (typeof jointSeletedClone[prop] === 'number') {
+                                jointSeletedClone[prop] = 0
+                            }
+                            if (typeof jointSeletedClone[prop] === 'string') {
+                                jointSeletedClone[prop] = ''
+                            }
+                            if (pipelineOri.parameters !== undefined) {
+                                if(pipelineOri.parameters.hasOwnProperty(prop)) {
+                                    var propOriValue = pipelineOri.parameters[prop]
+                                    if (propOriValue !== undefined) {
+                                        jointSeletedClone[prop] = propOriValue
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // modify joint
+                    this.jointForm = {
+                        title: 'modify joint',
+                        action: 'modify',
+                        jointName: jointName,
+                        enabled: pipelineOri.enabled,
+                        canRemove: canRemove,
+                        jointParameters: jointSeletedClone
+                    }
+                }
+            },
+            changeJoint: function (ele) {
+                var optionTxt = $(ele.target).find("option:selected").text()
+                var optionVal = ele.target.value
+                this.addJointName = optionVal
+            },
+            modifyJoint: function() {
+                var jointName = this.jointForm.jointName
+                if (this.jointForm.action === 'add') {
+                    if (pipelineOri !== undefined) {
+                        UIkit.modal.alert("this joint is already exists!")
+                        return
+                    }
+                    var newJoint = {
+                        joint: jointName,
+                        enabled: this.jointForm.enabled,
+                        parameters: this.deepClone(this.jointForm.jointParameters)
+                    }
+                    this.pipelineSeleted.process.push(newJoint)
+                    this.showJoint(jointName, 'modify')
+                } else if (this.jointForm.action === 'modify') {
+                    var pipelineOri = undefined
+                    if (jointName === 'init_task') {
+                        pipelineOri = this.pipelineSeleted.start
+                    } else if (jointName === 'save_task') {
+                        pipelineOri = this.pipelineSeleted.end
+                    } else {
+                        if (this.pipelineSeleted.process === undefined) {
+                            this.pipelineSeleted.process = []
+                        }
+                        pipelineOri = this.pipelineSeleted.process.find(function(obj) {return obj.joint === jointName})
+                    }
+
+                    var jointParameters = this.deepClone(this.jointForm.jointParameters)
+                    if (jointName === 'url_filter') {
+                        for (var prop0 in this.jointForm.jointParameters) {
+                            for (var prop1 in this.jointForm.jointParameters[prop0]) {
+                                for (var prop2 in this.jointForm.jointParameters[prop0][prop1]) {
+                                    jointParameters[prop0][prop1][prop2] = this.jointForm.jointParameters[prop0][prop1][prop2].split(',')
+                                }
+                            }
+                        }
+                    }
+                    if (pipelineOri === undefined) {
+                        UIkit.modal.alert("this joint is not find!")
+                        return
+                    }
+                    pipelineOri.enabled = this.jointForm.enabled
+                    pipelineOri.parameters = this.deepClone(jointParameters)
+                }
+            },
+            deleteJoint: function() {
+                for (var i=0; i < this.pipelineSeleted.process.length; i++) {
+                    if (this.pipelineSeleted.process[i].joint === this.jointForm.jointName) {
+                        this.pipelineSeleted.process.splice(i, 1)
+                        this.showJoint('init_task', 'modify')
+                        break
+                    }
+                }
+            }
+        }
+    })
+</script>
+
+<% common.Footer(w) %>
