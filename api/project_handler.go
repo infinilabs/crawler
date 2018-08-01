@@ -66,7 +66,7 @@ func (api API) CreateProjectAction(w http.ResponseWriter, req *http.Request, ps 
 		return
 	}
 
-	api.WriteJSON(w, config, http.StatusOK)
+	api.WriteAckJSON(w, true)
 }
 
 func (api API) GetProjectAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
@@ -104,7 +104,7 @@ func (api API) UpdateProjectAction(w http.ResponseWriter, req *http.Request, ps 
 		return
 	}
 
-	api.WriteJSON(w, config, http.StatusOK)
+	api.WriteAckJSON(w, true)
 }
 
 func (api API) DeleteProjectAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
@@ -115,5 +115,17 @@ func (api API) DeleteProjectAction(w http.ResponseWriter, req *http.Request, ps 
 		return
 	}
 
-	api.WriteJSON(w, map[string]interface{}{"ok": true}, http.StatusOK)
+	api.WriteAckJSON(w, true)
+}
+
+func (api API) EnableProjectAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params) {
+	//id := ps.ByName("id")
+	//v:=api.Get(req)["enabled"]
+	//err := model.EnableProject(id,)
+	//if err != nil {
+	//	api.Error(w, err)
+	//	return
+	//}
+
+	api.WriteAckJSON(w, true)
 }
