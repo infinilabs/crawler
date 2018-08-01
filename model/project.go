@@ -17,6 +17,7 @@ limitations under the License.
 package model
 
 import (
+	"github.com/infinitbyte/framework/core/config"
 	"github.com/infinitbyte/framework/core/errors"
 	"github.com/infinitbyte/framework/core/persist"
 	"github.com/infinitbyte/framework/core/util"
@@ -31,6 +32,11 @@ type Project struct {
 	Enabled     bool      `json:"enabled"`
 	Created     time.Time `json:"created,omitempty"`
 	Updated     time.Time `json:"updated,omitempty"`
+	Banner      string    `json:"banner,omitempty"`
+	Favicon     string    `json:"favicon,omitempty"`
+
+	DomainRules config.Rules `json:"domain_rules,omitempty"`
+	UrlRules    config.Rules `json:"url_rules,omitempty"`
 }
 
 func CreateProject(project *Project) error {
