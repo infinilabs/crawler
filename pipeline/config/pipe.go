@@ -6,7 +6,7 @@ import (
 	"github.com/infinitbyte/gopa/config"
 )
 
-// getDefaultCrawlerConfig return a default PipeConfig
+// getDefaultCrawlerConfig return a default PipeRunnerConfig
 func GetDefaultPipeConfig() []pipeline.PipeConfig {
 
 	crawler := pipeline.PipelineConfig{}
