@@ -17,9 +17,9 @@ logging.level: debug
 
 network:
   host: 127.0.0.1
+#  http_bind: 0.0.0.0:9001
+#  api_bind: 0.0.0.0:8001
 
-#http_bind: 0.0.0.0:9001
-#api_bind: 0.0.0.0:8001
 
 cluster.seeds:
   - 127.0.0.1:13001
