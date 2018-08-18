@@ -26,7 +26,7 @@ import (
 
 type KV struct {
 	Key   string   `json:"key,omitempty"`
-	Value []string `storm:"inline" json:"value,omitempty"`
+	Value []string `json:"value,omitempty"`
 }
 
 type LinkGroup struct {

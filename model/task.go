@@ -61,10 +61,10 @@ func NewTask(url, ref string, depth int, breadth int) *Task {
 type Task struct {
 	ID string `json:"id" index:"id"`
 	// the url may not cleaned, may miss the host part, need reference to provide the complete url information
-	Url         string    `storm:"index" json:"url,omitempty"`
+	Url         string    `json:"url,omitempty"`
 	Reference   string    `json:"reference_url,omitempty"`
-	Depth       int       `storm:"index" json:"depth"`
-	Breadth     int       `storm:"index" json:"breadth"`
+	Depth       int       `json:"depth"`
+	Breadth     int       `json:"breadth"`
 	Host        string    `json:"host"`
 	Schema      string    `json:"schema,omitempty"`
 	OriginalUrl string    `json:"original_url,omitempty"`
