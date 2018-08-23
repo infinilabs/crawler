@@ -20,7 +20,7 @@ import (
 	"fmt"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/framework/core/errors"
-	"github.com/infinitbyte/framework/core/persist"
+	"github.com/infinitbyte/framework/core/kv"
 	"github.com/infinitbyte/framework/core/pipeline"
 	"github.com/infinitbyte/framework/core/stats"
 	"github.com/infinitbyte/gopa/config"
@@ -77,9 +77,9 @@ func (this SaveSnapshotToDBJoint) Process(c *pipeline.Context) error {
 
 	var err error
 	if this.GetBool(compressEnabled, true) {
-		err = persist.AddValueCompress(bucketName, saveKey, snapshot.Payload)
+		err = kv.AddValueCompress(bucketName, saveKey, snapshot.Payload)
 	} else {
-		err = persist.AddValue(bucketName, saveKey, snapshot.Payload)
+		err = kv.AddValue(bucketName, saveKey, snapshot.Payload)
 	}
 	if err != nil {
 		return err
@@ -115,7 +115,7 @@ func deleteRedundantSnapShot(maxRevisionNum int, bucketStr string, taskId string
 			if errReadList == nil {
 				for i := 0; i < len(snapshotsList); i++ {
 					model.DeleteSnapshot(&snapshotsList[i])
-					persist.DeleteKey(bucketStr, []byte(snapshotsList[i].ID))
+					kv.DeleteKey(bucketStr, []byte(snapshotsList[i].ID))
 				}
 			}
 		}

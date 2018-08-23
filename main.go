@@ -20,11 +20,10 @@ import (
 	_ "expvar"
 	"github.com/infinitbyte/framework"
 	"github.com/infinitbyte/framework/core/module"
-	"github.com/infinitbyte/framework/core/persist"
+	"github.com/infinitbyte/framework/core/orm"
 	"github.com/infinitbyte/framework/modules"
 	"github.com/infinitbyte/gopa/api"
 	"github.com/infinitbyte/gopa/config"
-	"github.com/infinitbyte/gopa/dispatch"
 	"github.com/infinitbyte/gopa/model"
 	"github.com/infinitbyte/gopa/pipeline"
 	"github.com/infinitbyte/gopa/plugins"
@@ -58,8 +57,6 @@ func main() {
 		//load core modules first
 		modules.Register()
 
-		module.Register(module.System, dispatch.DispatchModule{})
-
 		//register API
 		api.InitAPI()
 
@@ -75,12 +72,13 @@ func main() {
 		//start each module, with enabled provider
 		module.Start()
 
-		persist.RegisterSchema(&model.Host{})
-		persist.RegisterSchema(&model.Task{})
-		persist.RegisterSchema(&model.Snapshot{})
-		persist.RegisterSchema(&model.HostConfig{})
-		persist.RegisterSchema(&model.Project{})
+	}, func() {
 
+		orm.RegisterSchema(&model.Host{})
+		orm.RegisterSchema(&model.Task{})
+		orm.RegisterSchema(&model.Snapshot{})
+		orm.RegisterSchema(&model.HostConfig{})
+		orm.RegisterSchema(&model.Project{})
 	})
 
 }

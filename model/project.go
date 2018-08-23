@@ -19,7 +19,7 @@ package model
 import (
 	"github.com/infinitbyte/framework/core/config"
 	"github.com/infinitbyte/framework/core/errors"
-	"github.com/infinitbyte/framework/core/persist"
+	"github.com/infinitbyte/framework/core/orm"
 	"github.com/infinitbyte/framework/core/util"
 	"time"
 )
@@ -44,24 +44,24 @@ func CreateProject(project *Project) error {
 	project.ID = util.GetUUID()
 	project.Created = time
 	project.Updated = time
-	return persist.Save(project)
+	return orm.Save(project)
 }
 
 func UpdateProject(project *Project) error {
 	time := time.Now().UTC()
 	project.Updated = time
-	return persist.Update(project)
+	return orm.Update(project)
 }
 
 func DeleteProject(id string) error {
 	project := Project{ID: id}
-	return persist.Delete(&project)
+	return orm.Delete(&project)
 }
 
 func GetProject(id string) (Project, error) {
 	project := Project{}
 	project.ID = id
-	err := persist.Get(&project)
+	err := orm.Get(&project)
 	if err != nil {
 		return project, err
 	}
@@ -74,10 +74,10 @@ func GetProject(id string) (Project, error) {
 
 func GetProjectList(from, size int) (int, []Project, error) {
 	var projects []Project
-	sort := []persist.Sort{}
-	sort = append(sort, persist.Sort{Field: "created", SortType: persist.ASC})
-	queryO := persist.Query{Sort: &sort, From: from, Size: size}
-	err, result := persist.Search(Project{}, &projects, &queryO)
+	sort := []orm.Sort{}
+	sort = append(sort, orm.Sort{Field: "created", SortType: orm.ASC})
+	queryO := orm.Query{Sort: &sort, From: from, Size: size}
+	err, result := orm.Search(Project{}, &projects, &queryO)
 	if err != nil {
 		return 0, projects, err
 	}
@@ -87,7 +87,7 @@ func GetProjectList(from, size int) (int, []Project, error) {
 	return result.Total, projects, err
 }
 
-func convertProject(result persist.Result, projects *[]Project) {
+func convertProject(result orm.Result, projects *[]Project) {
 	if result.Result == nil {
 		return
 	}

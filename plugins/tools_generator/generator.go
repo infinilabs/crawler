@@ -18,15 +18,18 @@ func (plugin GeneratorPlugin) Name() string {
 	return "Generator"
 }
 
-func (plugin GeneratorPlugin) Start(cfg *Config) {
+var generatorConfig = struct {
+	TaskID  string `config:"task_id"`
+	TaskUrl string `config:"task_url"`
+}{}
 
-	generatorConfig := struct {
-		TaskID  string `config:"task_id"`
-		TaskUrl string `config:"task_url"`
-	}{}
+func (plugin GeneratorPlugin) Setup(cfg *Config) {
 
 	cfg.Unpack(&generatorConfig)
 
+}
+
+func (plugin GeneratorPlugin) Start() error {
 	go func() {
 		for {
 			if generatorConfig.TaskUrl != "" {
@@ -50,8 +53,9 @@ func (plugin GeneratorPlugin) Start(cfg *Config) {
 			time.Sleep(100 * time.Millisecond)
 		}
 	}()
-}
 
+	return nil
+}
 func (plugin GeneratorPlugin) Stop() error {
 	return nil
 }

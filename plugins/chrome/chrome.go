@@ -1,11 +1,11 @@
-package service_chrome
+package chrome
 
 import (
 	"fmt"
 	log "github.com/cihub/seelog"
 	. "github.com/infinitbyte/framework/core/config"
 	"github.com/infinitbyte/framework/core/pipeline"
-	"github.com/infinitbyte/gopa/plugins/service_chrome/joint"
+	"github.com/infinitbyte/gopa/plugins/chrome/joint"
 	"os"
 	"os/exec"
 )
@@ -20,7 +20,7 @@ func (plugin ChromePlugin) Name() string {
 var cmd *exec.Cmd
 var pid int
 
-func (plugin ChromePlugin) Start(cfg *Config) {
+func (plugin ChromePlugin) Setup(cfg *Config) {
 
 	config := struct {
 		Command   string `config:"command"`
@@ -50,6 +50,10 @@ func (plugin ChromePlugin) Start(cfg *Config) {
 	// register pipeline joint
 	// TODO dealing with chrome start failure
 	pipeline.RegisterPipeJoint(joint.ChromeFetchV2Joint{})
+}
+
+func (plugin ChromePlugin) Start() error {
+	return nil
 }
 
 func (plugin ChromePlugin) Stop() error {

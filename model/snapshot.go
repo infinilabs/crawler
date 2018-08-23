@@ -19,7 +19,7 @@ package model
 import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/framework/core/errors"
-	"github.com/infinitbyte/framework/core/persist"
+	"github.com/infinitbyte/framework/core/orm"
 	"github.com/infinitbyte/framework/core/util"
 	"time"
 )
@@ -92,22 +92,22 @@ type PageLink struct {
 }
 
 func CreateSnapshot(snapshot *Snapshot) error {
-	return persist.Save(snapshot)
+	return orm.Save(snapshot)
 }
 
 func DeleteSnapshot(snapshot *Snapshot) error {
-	return persist.Delete(snapshot)
+	return orm.Delete(snapshot)
 }
 
 func GetSnapshotList(from, size int, taskId string) (int, []Snapshot, error) {
 	var snapshots []Snapshot
-	sort := []persist.Sort{}
-	sort = append(sort, persist.Sort{Field: "created", SortType: persist.ASC})
-	query := persist.Query{Sort: &sort, From: from, Size: size}
+	sort := []orm.Sort{}
+	sort = append(sort, orm.Sort{Field: "created", SortType: orm.ASC})
+	query := orm.Query{Sort: &sort, From: from, Size: size}
 	if len(taskId) > 0 {
-		query.Conds = persist.And(persist.Eq("task_id", taskId))
+		query.Conds = orm.And(orm.Eq("task_id", taskId))
 	}
-	err, result := persist.Search(Snapshot{}, &snapshots, &query)
+	err, result := orm.Search(Snapshot{}, &snapshots, &query)
 	if err != nil {
 		log.Error(err)
 		return 0, snapshots, err
@@ -123,7 +123,7 @@ func GetSnapshotByField(k, v string) ([]Snapshot, error) {
 	log.Trace("start get snapshot: ", k, ", ", v)
 	snapshot := Snapshot{}
 	snapshots := []Snapshot{}
-	err, result := persist.GetBy(k, v, snapshot, &snapshots)
+	err, result := orm.GetBy(k, v, snapshot, &snapshots)
 
 	if err != nil {
 		log.Error(k, ", ", err)
@@ -139,7 +139,7 @@ func GetSnapshotByField(k, v string) ([]Snapshot, error) {
 func GetSnapshot(id string) (Snapshot, error) {
 	snapshot := Snapshot{}
 	snapshot.ID = id
-	err := persist.Get(&snapshot)
+	err := orm.Get(&snapshot)
 	if err != nil {
 		log.Error(err)
 		return snapshot, err
@@ -151,7 +151,7 @@ func GetSnapshot(id string) (Snapshot, error) {
 	return snapshot, err
 }
 
-func convertSnapshot(result persist.Result, snapshots *[]Snapshot) {
+func convertSnapshot(result orm.Result, snapshots *[]Snapshot) {
 	if result.Result == nil {
 		return
 	}

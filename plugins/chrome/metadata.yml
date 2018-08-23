@@ -1,4 +1,4 @@
-package: service_chrome
+package: chrome
 struct: ChromePlugin
 type: service
 name: Chrome

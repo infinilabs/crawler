@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/infinitbyte/framework/core/persist"
+	"github.com/infinitbyte/framework/core/orm"
 	"github.com/infinitbyte/framework/core/util"
 	"time"
 )
@@ -23,7 +23,7 @@ func CreateHost(host string) Host {
 	time := time.Now().UTC()
 	h.Created = time
 	h.Updated = time
-	err := persist.Save(&h)
+	err := orm.Save(&h)
 	if err != nil {
 		panic(err)
 	}
@@ -34,12 +34,12 @@ func CreateHost(host string) Host {
 func GetHostList(from, size int, host string) (int, []Host, error) {
 	var hosts []Host
 
-	query := persist.Query{From: from, Size: size}
+	query := orm.Query{From: from, Size: size}
 	if len(host) > 0 {
-		query.Conds = persist.And(persist.Eq("host", host))
+		query.Conds = orm.And(orm.Eq("host", host))
 	}
 
-	err, r := persist.Search(Host{}, &hosts, &query)
+	err, r := orm.Search(Host{}, &hosts, &query)
 
 	if hosts == nil && r.Result != nil {
 		t, ok := r.Result.([]interface{})
@@ -63,7 +63,7 @@ func GetHostList(from, size int, host string) (int, []Host, error) {
 // GetHost return a single host
 func GetHost(host string) (Host, error) {
 	var d = Host{Host: host}
-	err := persist.Get(&d)
+	err := orm.Get(&d)
 	hosts := GetHostConfig("", host)
 	if len(hosts) > 0 {
 		d.HostConfigs = &hosts

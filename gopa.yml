@@ -17,13 +17,11 @@ logging.level: debug
 
 network:
   host: 127.0.0.1
-#  http_bind: 0.0.0.0:9001
-#  api_bind: 0.0.0.0:8001
-
+#  http_bind: 0.0.0.0:9000
+#  api_bind: 0.0.0.0:8000
 
 cluster.seeds:
-  - 127.0.0.1:13001
-
+  - 127.0.0.1:10000
 
 modules:
 - name: pipeline
@@ -231,21 +229,17 @@ modules:
 
 - name: filter
   enabled: true
-  driver: kv
 
 - name: queue
   enabled: true
 
-
 - name: storage
   enabled: true
-#  driver: elasticsearch
-#  elasticsearch:
-#    endpoint: http://localhost:9200
-#    index_prefix: gopa-
-#    username: elastic
-#    password: changeme
-  driver: boltdb
+  elasticsearch:
+    endpoint: http://localhost:9200
+    index_prefix: gopa-
+    username: elastic
+    password: changeme
 
 - name: index
   enabled: true
@@ -262,7 +256,8 @@ modules:
 
 - name: elastic
   enabled: true
-  driver: elasticsearch
+  kv_enabled: true
+  orm_enabled: true
   elasticsearch:
     endpoint: http://localhost:9200
     index_prefix: gopa-

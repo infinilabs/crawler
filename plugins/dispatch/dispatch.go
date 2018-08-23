@@ -80,9 +80,11 @@ func dispatchTasks(name string, cfg *DispatchConfig, tasks []model.Task, offset 
 
 }
 
+var moduleConfig DispatchConfig
+
 // Start dispatch module
-func (module DispatchModule) Start(cfg *cfg.Config) {
-	moduleConfig := DispatchConfig{
+func (module DispatchModule) Setup(cfg *cfg.Config) {
+	moduleConfig = DispatchConfig{
 		FailedTaskEnabled:       false,
 		UpdateTaskEnabled:       true,
 		NewTaskEnabled:          true,
@@ -93,6 +95,9 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 	cfg.Unpack(&moduleConfig)
 
 	signalChannel = make(chan bool, 2)
+
+}
+func (module DispatchModule) Start() error {
 
 	go func() {
 		now := time.Now().UTC()
@@ -214,6 +219,8 @@ func (module DispatchModule) Start(cfg *cfg.Config) {
 		}
 
 	}()
+
+	return nil
 }
 
 // Stop dispatch module

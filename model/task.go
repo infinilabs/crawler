@@ -3,7 +3,7 @@ package model
 import (
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/framework/core/errors"
-	"github.com/infinitbyte/framework/core/persist"
+	"github.com/infinitbyte/framework/core/orm"
 	"github.com/infinitbyte/framework/core/pipeline"
 	"github.com/infinitbyte/framework/core/util"
 	"time"
@@ -132,7 +132,7 @@ func CreateTask(task *Task) error {
 	if task.Url == "" {
 		return errors.New("url can't be nil")
 	}
-	err := persist.Save(task)
+	err := orm.Save(task)
 	if err != nil {
 		log.Error(task, ", ", err)
 	}
@@ -146,13 +146,13 @@ func UpdateTask(task *Task) error {
 	if task.Url == "" {
 		return errors.New("url can't be nil")
 	}
-	return persist.Update(task)
+	return orm.Update(task)
 }
 
 func DeleteTask(id string) error {
 	log.Trace("start delete task: ", id)
 	task := Task{ID: id}
-	err := persist.Delete(&task)
+	err := orm.Delete(&task)
 	if err != nil {
 		log.Error(id, ", ", err)
 	}
@@ -163,7 +163,7 @@ func GetTask(id string) (Task, error) {
 	log.Trace("start get seed: ", id)
 	task := Task{}
 	task.ID = id
-	err := persist.Get(&task)
+	err := orm.Get(&task)
 	if err != nil {
 		log.Error(id, ", ", err)
 	}
@@ -179,7 +179,7 @@ func GetTaskByField(k, v string) ([]Task, error) {
 	log.Trace("start get seed: ", k, ", ", v)
 	task := Task{}
 	tasks := []Task{}
-	err, result := persist.GetBy(k, v, task, &tasks)
+	err, result := orm.GetBy(k, v, task, &tasks)
 
 	if err != nil {
 		log.Error(k, ", ", err)
@@ -194,18 +194,18 @@ func GetTaskByField(k, v string) ([]Task, error) {
 
 func GetTaskStatus(host string) (error, map[string]interface{}) {
 	if host != "" {
-		return persist.GroupBy(Task{}, "status", "host,status", "host = ?", host)
+		return orm.GroupBy(Task{}, "status", "host,status", "host = ?", host)
 
 	} else {
-		return persist.GroupBy(Task{}, "status", "status", "", nil)
+		return orm.GroupBy(Task{}, "status", "status", "", nil)
 	}
 }
 
 func GetHostStatus(status int) (error, map[string]interface{}) {
 	if status >= 0 {
-		return persist.GroupBy(Task{}, "host", "host,status", "status = ?", status)
+		return orm.GroupBy(Task{}, "host", "host,status", "status = ?", status)
 	} else {
-		return persist.GroupBy(Task{}, "host", "host", "", nil)
+		return orm.GroupBy(Task{}, "host", "host", "", nil)
 	}
 }
 
@@ -213,18 +213,18 @@ func GetTaskList(from, size int, host string, status int) (int, []Task, error) {
 
 	log.Tracef("start get tasks, %v-%v, %v", from, size, host)
 	var tasks []Task
-	sort := []persist.Sort{}
-	sort = append(sort, persist.Sort{Field: "created", SortType: persist.ASC})
-	queryO := persist.Query{Sort: &sort, From: from, Size: size}
+	sort := []orm.Sort{}
+	sort = append(sort, orm.Sort{Field: "created", SortType: orm.ASC})
+	queryO := orm.Query{Sort: &sort, From: from, Size: size}
 	if len(host) > 0 {
-		queryO.Conds = persist.And(persist.Eq("host", host))
+		queryO.Conds = orm.And(orm.Eq("host", host))
 	}
 
 	if status >= 0 {
-		queryO.Conds = persist.Combine(queryO.Conds, persist.And(persist.Eq("status", status)))
+		queryO.Conds = orm.Combine(queryO.Conds, orm.And(orm.Eq("status", status)))
 	}
 
-	err, result := persist.Search(Task{}, &tasks, &queryO)
+	err, result := orm.Search(Task{}, &tasks, &queryO)
 	if err != nil {
 		log.Error(err)
 		return 0, tasks, err
@@ -239,13 +239,13 @@ func GetTaskList(from, size int, host string, status int) (int, []Task, error) {
 func GetPendingNewFetchTasks(offset int64, size int) (int, []Task, error) {
 	log.Tracef("start get pending fetch tasks,last offset: %v,", offset)
 	var tasks []Task
-	sort := []persist.Sort{}
-	sort = append(sort, persist.Sort{Field: "created", SortType: persist.ASC})
-	queryO := persist.Query{Sort: &sort, Conds: persist.And(
-		persist.Eq("status", TaskCreated),
-		persist.Gt("created", offset)),
+	sort := []orm.Sort{}
+	sort = append(sort, orm.Sort{Field: "created", SortType: orm.ASC})
+	queryO := orm.Query{Sort: &sort, Conds: orm.And(
+		orm.Eq("status", TaskCreated),
+		orm.Gt("created", offset)),
 		From: 0, Size: size}
-	err, result := persist.Search(Task{}, &tasks, &queryO)
+	err, result := orm.Search(Task{}, &tasks, &queryO)
 	if err != nil {
 		log.Error(err)
 	}
@@ -260,14 +260,14 @@ func GetPendingNewFetchTasks(offset int64, size int) (int, []Task, error) {
 func GetFailedTasks(offset int64) (int, []Task, error) {
 	log.Trace("start get all failed tasks")
 	var tasks []Task
-	sort := []persist.Sort{}
-	sort = append(sort, persist.Sort{Field: "created", SortType: persist.ASC})
-	queryO := persist.Query{Sort: &sort, Conds: persist.And(
-		persist.Gt("created", offset),
-		persist.Eq("status", TaskFailed)),
+	sort := []orm.Sort{}
+	sort = append(sort, orm.Sort{Field: "created", SortType: orm.ASC})
+	queryO := orm.Query{Sort: &sort, Conds: orm.And(
+		orm.Gt("created", offset),
+		orm.Eq("status", TaskFailed)),
 		From: 0, Size: 100,
 	}
-	err, result := persist.Search(Task{}, &tasks, &queryO)
+	err, result := orm.Search(Task{}, &tasks, &queryO)
 	if err != nil {
 		log.Error(err)
 	}
@@ -283,16 +283,16 @@ func GetPendingUpdateFetchTasks(offset int64) (int, []Task, error) {
 	t := time.Now().UTC()
 	log.Tracef("start get all tasks,last offset: %v,", offset)
 	var tasks []Task
-	sort := []persist.Sort{}
-	sort = append(sort, persist.Sort{Field: "created", SortType: persist.ASC})
-	queryO := persist.Query{Sort: &sort,
-		Conds: persist.And(
-			persist.Lt("next_check", t),
-			persist.Gt("created", offset),
-			persist.Eq("status", TaskSuccess)),
+	sort := []orm.Sort{}
+	sort = append(sort, orm.Sort{Field: "created", SortType: orm.ASC})
+	queryO := orm.Query{Sort: &sort,
+		Conds: orm.And(
+			orm.Lt("next_check", t),
+			orm.Gt("created", offset),
+			orm.Eq("status", TaskSuccess)),
 		From: 0, Size: 100,
 	}
-	err, result := persist.Search(Task{}, &tasks, &queryO)
+	err, result := orm.Search(Task{}, &tasks, &queryO)
 	if err != nil {
 		log.Error(err)
 	}
@@ -304,7 +304,7 @@ func GetPendingUpdateFetchTasks(offset int64) (int, []Task, error) {
 	return result.Total, tasks, err
 }
 
-func convertTask(result persist.Result, tasks *[]Task) {
+func convertTask(result orm.Result, tasks *[]Task) {
 	if result.Result == nil {
 		return
 	}

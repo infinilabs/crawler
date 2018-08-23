@@ -18,7 +18,7 @@ package model
 
 import (
 	"github.com/infinitbyte/framework/core/errors"
-	"github.com/infinitbyte/framework/core/persist"
+	"github.com/infinitbyte/framework/core/orm"
 	"github.com/infinitbyte/framework/core/util"
 	"regexp"
 	"time"
@@ -43,35 +43,35 @@ func CreateHostConfig(config *HostConfig) error {
 	config.ID = util.GetUUID()
 	config.Created = time
 	config.Updated = time
-	return persist.Save(config)
+	return orm.Save(config)
 }
 
 func UpdateHostConfig(config *HostConfig) error {
 	time := time.Now().UTC()
 	config.Updated = time
-	return persist.Update(config)
+	return orm.Update(config)
 }
 
 func DeleteHostConfig(id string) error {
 	config := HostConfig{ID: id}
-	return persist.Delete(&config)
+	return orm.Delete(&config)
 }
 
 func GetHostConfigByID(id string) (HostConfig, error) {
 	o := HostConfig{ID: id}
-	err := persist.Get(&o)
+	err := orm.Get(&o)
 	return o, err
 }
 
 func GetHostConfigList(from, size int, host string) (int, []HostConfig, error) {
 	var configs []HostConfig
 
-	query := persist.Query{From: from, Size: size}
+	query := orm.Query{From: from, Size: size}
 	if len(host) > 0 {
-		query.Conds = persist.And(persist.Eq("host", host))
+		query.Conds = orm.And(orm.Eq("host", host))
 	}
 
-	err, result := persist.Search(HostConfig{}, &configs, &query)
+	err, result := orm.Search(HostConfig{}, &configs, &query)
 
 	if result.Result != nil && configs == nil || len(configs) == 0 {
 		convertHostConfig(result, &configs)
@@ -82,17 +82,17 @@ func GetHostConfigList(from, size int, host string) (int, []HostConfig, error) {
 
 func GetHostConfig(runner, host string) []HostConfig {
 	var configs []HostConfig
-	sort := []persist.Sort{}
-	sort = append(sort, persist.Sort{Field: "sort_order", SortType: persist.ASC})
-	queryO := persist.Query{Sort: &sort, From: 0, Size: 100}
+	sort := []orm.Sort{}
+	sort = append(sort, orm.Sort{Field: "sort_order", SortType: orm.ASC})
+	queryO := orm.Query{Sort: &sort, From: 0, Size: 100}
 	if len(host) > 0 {
 		if runner != "" {
-			queryO.Conds = persist.And(persist.Eq("host", host), persist.Eq("runner", runner))
+			queryO.Conds = orm.And(orm.Eq("host", host), orm.Eq("runner", runner))
 		} else {
-			queryO.Conds = persist.And(persist.Eq("host", host))
+			queryO.Conds = orm.And(orm.Eq("host", host))
 		}
 	}
-	err, result := persist.Search(HostConfig{}, &configs, &queryO)
+	err, result := orm.Search(HostConfig{}, &configs, &queryO)
 	if err != nil {
 		panic(err)
 	}
@@ -121,7 +121,7 @@ func GetHostConfigByHostAndUrl(runner, host, url string) (*HostConfig, error) {
 	return nil, errors.New("not found")
 }
 
-func convertHostConfig(result persist.Result, configs *[]HostConfig) {
+func convertHostConfig(result orm.Result, configs *[]HostConfig) {
 	if result.Result == nil {
 		return
 	}

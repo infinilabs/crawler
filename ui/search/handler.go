@@ -8,7 +8,7 @@ import (
 	"github.com/infinitbyte/framework/core/api"
 	"github.com/infinitbyte/framework/core/errors"
 	core "github.com/infinitbyte/framework/core/index"
-	"github.com/infinitbyte/framework/core/persist"
+	"github.com/infinitbyte/framework/core/kv"
 	"github.com/infinitbyte/framework/core/util"
 	"github.com/infinitbyte/gopa/config"
 	"github.com/infinitbyte/gopa/model"
@@ -305,9 +305,9 @@ func (h *UserUI) GetSnapshotPayloadAction(w http.ResponseWriter, req *http.Reque
 	compressed := h.GetParameterOrDefault(req, "compressed", "true")
 	var bytes []byte
 	if compressed == "true" {
-		bytes, err = persist.GetCompressedValue(config.SnapshotBucketKey, []byte(id))
+		bytes, err = kv.GetCompressedValue(config.SnapshotBucketKey, []byte(id))
 	} else {
-		bytes, err = persist.GetValue(config.SnapshotBucketKey, []byte(id))
+		bytes, err = kv.GetValue(config.SnapshotBucketKey, []byte(id))
 	}
 
 	if err != nil {

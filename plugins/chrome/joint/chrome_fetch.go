@@ -21,7 +21,7 @@ import (
 	"fmt"
 	log "github.com/cihub/seelog"
 	"github.com/infinitbyte/framework/core/errors"
-	"github.com/infinitbyte/framework/core/persist"
+	"github.com/infinitbyte/framework/core/kv"
 	"github.com/infinitbyte/framework/core/pipeline"
 	"github.com/infinitbyte/framework/core/util"
 	"github.com/infinitbyte/gopa/model"
@@ -252,7 +252,7 @@ func (joint ChromeFetchV2Joint) Process(context *pipeline.Context) error {
 		uuid := []byte(util.GetUUID())
 
 		//for picture, no need to compress
-		err = persist.AddValue(bucketName, uuid, screenshot.Data)
+		err = kv.AddValue(bucketName, uuid, screenshot.Data)
 		if err != nil {
 			context.End(err)
 			return err

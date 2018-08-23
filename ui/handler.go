@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/infinitbyte/framework/core/api"
 	"github.com/infinitbyte/framework/core/api/router"
-	"github.com/infinitbyte/framework/core/persist"
+	"github.com/infinitbyte/framework/core/kv"
 	"github.com/infinitbyte/gopa/config"
 	"github.com/infinitbyte/gopa/model"
 	"github.com/infinitbyte/gopa/ui/tasks"
@@ -59,7 +59,7 @@ func (h AdminUI) TaskViewPageAction(w http.ResponseWriter, r *http.Request, p ht
 
 func (h AdminUI) GetScreenshotAction(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	id := p.ByName("id")
-	bytes, err := persist.GetValue(config.ScreenshotBucketKey, []byte(id))
+	bytes, err := kv.GetValue(config.ScreenshotBucketKey, []byte(id))
 	if err != nil {
 		h.Error(w, err)
 		return
