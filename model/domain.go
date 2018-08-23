@@ -17,7 +17,7 @@ limitations under the License.
 package model
 
 type Domain struct {
-	ID      string
+	ID      string `json:"id,omitempty" elastic_meta:"_id"`
 	Host    string
 	Port    string
 	Favicon string

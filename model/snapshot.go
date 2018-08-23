@@ -35,7 +35,7 @@ type LinkGroup struct {
 }
 
 type Snapshot struct {
-	ID      string `json:"id,omitempty" index:"id"`
+	ID      string `json:"id,omitempty" elastic_meta:"_id"`
 	Version int    `json:"version,omitempty"`
 	Url     string `json:"url,omitempty"`
 	TaskID  string `json:"task_id,omitempty"`

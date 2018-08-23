@@ -26,7 +26,7 @@ import (
 
 // Project is a definition, include a collection of Host
 type Project struct {
-	ID          string    `json:"id,omitempty" index:"id"`
+	ID          string    `json:"id,omitempty" elastic_meta:"_id"`
 	Name        string    `json:"name,omitempty"`
 	Description string    `json:"description,omitempty"`
 	Enabled     bool      `json:"enabled"`

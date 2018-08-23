@@ -25,7 +25,7 @@ import (
 )
 
 type HostConfig struct {
-	ID         string `json:"id,omitempty" index:"id"`
+	ID         string `json:"id,omitempty" elastic_meta:"_id"`
 	Host       string `json:"host"`
 	UrlPattern string `json:"url_pattern"`
 	Runner     string `json:"runner"`

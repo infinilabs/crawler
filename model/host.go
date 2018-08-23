@@ -8,7 +8,7 @@ import (
 
 // Host is host struct
 type Host struct {
-	Host        string        `json:"host,omitempty" index:"id"`
+	Host        string        `json:"host,omitempty" elastic_meta:"_id"`
 	Favicon     string        `json:"favicon,omitempty"`
 	Enabled     bool          `json:"enabled"`
 	HostConfigs *[]HostConfig `json:"host_configs,omitempty"`

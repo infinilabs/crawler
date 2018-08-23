@@ -59,7 +59,7 @@ func NewTask(url, ref string, depth int, breadth int) *Task {
 }
 
 type Task struct {
-	ID string `json:"id" index:"id"`
+	ID string `json:"id" elastic_meta:"_id"`
 	// the url may not cleaned, may miss the host part, need reference to provide the complete url information
 	Url         string    `json:"url,omitempty"`
 	Reference   string    `json:"reference_url,omitempty"`
