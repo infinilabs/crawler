@@ -1,7 +1,7 @@
 SHELL=/bin/bash
 
 # Default GOPA version
-GOPA_VERSION := 0.11.0_SNAPSHOT
+GOPA_VERSION := 0.12.0_SNAPSHOT
 
 # Get release version from environment
 ifneq "$(VERSION)" ""
@@ -44,7 +44,7 @@ build: config
 	$(GOBUILD) -o bin/gopa
 	@$(MAKE) restore-generated-file
 
-build_cmd: config
+build-cmd: config
 	cd cmd/backup && GOOS=darwin GOARCH=amd64 $(GOBUILDNCGO) -o ../../bin/backup-darwin
 	cd cmd/backup && GOOS=linux  GOARCH=amd64 $(GOBUILDNCGO) -o ../../bin/backup-linux64
 	cd cmd/backup && GOOS=windows GOARCH=amd64 $(GOBUILDNCGO) -o ../../bin/backup-windows64.exe
