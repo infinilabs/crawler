@@ -59,7 +59,7 @@ build-race: clean config update-ui
 	@$(MAKE) restore-generated-file
 
 tar: build
-	cd bin && tar cfz ../bin/gopa.tar.gz gopa config gopa.yml
+	cd bin && tar cfz ../bin/gopa.tar.gz gopa gopa.yml
 
 cross-build: clean config update-ui
 	$(GO) test
@@ -141,7 +141,6 @@ config: init-version update-ui update-template-ui update-generated-file
 	@mkdir -p bin
 	@cp stop.sh bin/stop.sh
 	@cp gopa.yml bin/gopa.yml
-	@cp -r config bin
 
 fetch-depends:
 	@echo "fetch dependencies"
@@ -188,34 +187,34 @@ dist-all-platform: all-platform package-all-platform
 
 package:
 	@echo "Packaging"
-	cd bin && tar cfz ../bin/darwin64.tar.gz darwin64 config gopa.yml stop.sh
-	cd bin && tar cfz ../bin/linux64.tar.gz linux64 config gopa.yml stop.sh
-	cd bin && tar cfz ../bin/windows64.tar.gz windows64 config gopa.yml stop.sh
+	cd bin && tar cfz ../bin/darwin64.tar.gz darwin64  gopa.yml stop.sh
+	cd bin && tar cfz ../bin/linux64.tar.gz linux64  gopa.yml stop.sh
+	cd bin && tar cfz ../bin/windows64.tar.gz windows64  gopa.yml stop.sh
 
 package-all-platform: package-darwin-platform package-linux-platform package-windows-platform
 	@echo "Packaging all"
-	cd bin && tar cfz ../bin/freebsd64.tar.gz     gopa-freebsd64 config gopa.yml stop.sh
-	cd bin && tar cfz ../bin/freebsd32.tar.gz     gopa-freebsd32 config gopa.yml stop.sh
-	cd bin && tar cfz ../bin/netbsd64.tar.gz      gopa-netbsd64 config gopa.yml stop.sh
-	cd bin && tar cfz ../bin/netbsd32.tar.gz      gopa-netbsd32 config gopa.yml stop.sh
-	cd bin && tar cfz ../bin/openbsd64.tar.gz     gopa-openbsd64 config gopa.yml stop.sh
-	cd bin && tar cfz ../bin/openbsd32.tar.gz     gopa-openbsd32 config gopa.yml stop.sh
+	cd bin && tar cfz ../bin/freebsd64.tar.gz     gopa-freebsd64  gopa.yml stop.sh
+	cd bin && tar cfz ../bin/freebsd32.tar.gz     gopa-freebsd32  gopa.yml stop.sh
+	cd bin && tar cfz ../bin/netbsd64.tar.gz      gopa-netbsd64  gopa.yml stop.sh
+	cd bin && tar cfz ../bin/netbsd32.tar.gz      gopa-netbsd32  gopa.yml stop.sh
+	cd bin && tar cfz ../bin/openbsd64.tar.gz     gopa-openbsd64  gopa.yml stop.sh
+	cd bin && tar cfz ../bin/openbsd32.tar.gz     gopa-openbsd32  gopa.yml stop.sh
 
 
 package-darwin-platform:
 	@echo "Packaging Darwin"
-	cd bin && tar cfz ../bin/darwin64.tar.gz      gopa-darwin64 config gopa.yml stop.sh
-	cd bin && tar cfz ../bin/darwin32.tar.gz      gopa-darwin32 config gopa.yml stop.sh
+	cd bin && tar cfz ../bin/darwin64.tar.gz      gopa-darwin64 gopa.yml stop.sh
+	cd bin && tar cfz ../bin/darwin32.tar.gz      gopa-darwin32 gopa.yml stop.sh
 
 package-linux-platform:
 	@echo "Packaging Linux"
-	cd bin && tar cfz ../bin/linux64.tar.gz     gopa-linux64 config gopa.yml stop.sh
-	cd bin && tar cfz ../bin/linux32.tar.gz     gopa-linux32 config gopa.yml stop.sh
+	cd bin && tar cfz ../bin/linux64.tar.gz     gopa-linux64 gopa.yml stop.sh
+	cd bin && tar cfz ../bin/linux32.tar.gz     gopa-linux32 gopa.yml stop.sh
 
 package-windows-platform:
 	@echo "Packaging Windows"
-	cd bin && tar cfz ../bin/windows64.tar.gz   gopa-windows64.exe config gopa.yml stop.sh
-	cd bin && tar cfz ../bin/windows32.tar.gz   gopa-windows32.exe config gopa.yml stop.sh
+	cd bin && tar cfz ../bin/windows64.tar.gz   gopa-windows64.exe gopa.yml stop.sh
+	cd bin && tar cfz ../bin/windows32.tar.gz   gopa-windows32.exe gopa.yml stop.sh
 
 test:
 	go get -u github.com/kardianos/govendor
