@@ -28,7 +28,7 @@ GOPA, A Spider Written in Go.
   - [Setup](#setup)
     - [Download Pre Built Package](#download-pre-built-package)
     - [Compile The Package Manually](#compile-the-package-manually)
-  - [Optional Config](#optional-config)
+  - [Required Config](#required-config)
   - [Start](#start)
   - [Stop](#stop)
 - [Configuration](#configuration)
@@ -65,7 +65,6 @@ _Note: Darwin is for Mac_
 So far, we have:
 
 > `gopa`, the main program, a single binary.<br/>
-> `config/`, elasticsearch related scripts etc.<br/>
 > `gopa.yml`, main configuration for gopa.<br/>
 
 
