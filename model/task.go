@@ -70,17 +70,17 @@ type Task struct {
 	OriginalUrl string    `json:"original_url,omitempty"`
 	Status      int       `json:"status"`
 	Message     string    `json:"message,omitempty"`
-	Created     time.Time `json:"created,omitempty"`
-	Updated     time.Time `json:"updated,omitempty"`
-	LastFetch   time.Time `json:"last_fetch,omitempty"`
-	LastCheck   time.Time `json:"last_check,omitempty"`
-	NextCheck   time.Time `json:"next_check,omitempty"`
+	Created     time.Time `json:"created,omitempty" elastic_mapping:"created: { type: date }"`
+	Updated     time.Time `json:"updated,omitempty" elastic_mapping:"updated: { type: date }"`
+	LastFetch   time.Time `json:"last_fetch,omitempty" elastic_mapping:"last_fetch: { type: date }"`
+	LastCheck   time.Time `json:"last_check,omitempty" elastic_mapping:"last_check: { type: date }"`
+	NextCheck   time.Time `json:"next_check,omitempty" elastic_mapping:"next_check: { type: date }"`
 
 	SnapshotVersion  int       `json:"snapshot_version,omitempty"`
 	SnapshotID       string    `json:"snapshot_id,omitempty"`
 	SnapshotHash     string    `json:"snapshot_hash,omitempty"`
 	SnapshotSimHash  string    `json:"snapshot_simhash,omitempty"`
-	SnapshotCreated  time.Time `json:"snapshot_created,omitempty"`
+	SnapshotCreated  time.Time `json:"snapshot_created,omitempty" elastic_mapping:"snapshot_created: { type: date }"`
 	LastScreenshotID string    `json:"last_screenshot_id,omitempty"`
 
 	PipelineConfigID string      `json:"pipline_config_id,omitempty"`

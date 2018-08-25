@@ -79,6 +79,7 @@ func main() {
 		orm.RegisterSchema(&model.Snapshot{})
 		orm.RegisterSchema(&model.HostConfig{})
 		orm.RegisterSchema(&model.Project{})
+		orm.RegisterSchema(&model.Index{})
 	})
 
 }

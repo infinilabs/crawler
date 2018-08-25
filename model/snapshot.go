@@ -30,8 +30,8 @@ type KV struct {
 }
 
 type LinkGroup struct {
-	Internal []PageLink `json:"internal,omitempty"`
-	External []PageLink `json:"external,omitempty"`
+	Internal []PageLink `json:"internal,omitempty" elastic_mapping:"internal:{type:object}"`
+	External []PageLink `json:"external,omitempty" elastic_mapping:"external:{type:object}"`
 }
 
 type Snapshot struct {
@@ -55,26 +55,26 @@ type Snapshot struct {
 
 	Language string `json:"lang,omitempty"`
 
-	Title       string `json:"title,omitempty"`
+	Title       string `json:"title,omitempty" elastic_mapping:"title: { type: text, fields: { keyword: { type: keyword } } }"`
 	Summary     string `json:"summary,omitempty"`
-	Text        string `json:"text,omitempty"`
+	Text        string `json:"text,omitempty" elastic_mapping:"text: { type: text }"`
 	ContentType string `json:"content_type,omitempty"`
 
 	Tags []string `json:"tags,omitempty"`
 
-	Links LinkGroup `json:"links,omitempty"`
+	Links LinkGroup `json:"links,omitempty" elastic_mapping:"links:{type:object}"`
 
 	Images struct {
-		Internal []PageLink `json:"internal,omitempty"`
-		External []PageLink `json:"external,omitempty"`
-	} `json:"images,omitempty"`
+		Internal []PageLink `json:"internal,omitempty" elastic_mapping:"internal:{type:object}"`
+		External []PageLink `json:"external,omitempty" elastic_mapping:"external:{type:object}"`
+	} `json:"images,omitempty" elastic_mapping:"images:{type:object}"`
 
-	H1     []string `json:"h1,omitempty"`
-	H2     []string `json:"h2,omitempty"`
-	H3     []string `json:"h3,omitempty"`
-	H4     []string `json:"h4,omitempty"`
-	H5     []string `json:"h5,omitempty"`
-	Bold   []string `json:"bold,omitempty"`
+	H1     []string `json:"h1,omitempty" elastic_mapping:"h1: { type: text }"`
+	H2     []string `json:"h2,omitempty" elastic_mapping:"h2: { type: text }"`
+	H3     []string `json:"h3,omitempty" elastic_mapping:"h3: { type: text }"`
+	H4     []string `json:"h4,omitempty" elastic_mapping:"h4: { type: text }"`
+	H5     []string `json:"h5,omitempty" elastic_mapping:"h5: { type: text }"`
+	Bold   []string `json:"bold,omitempty" elastic_mapping:"bold: { type: text }"`
 	Italic []string `json:"italic,omitempty"`
 
 	Classifications  []string                `json:"classifications,omitempty"`
@@ -87,8 +87,8 @@ type Snapshot struct {
 }
 
 type PageLink struct {
-	Url   string `json:"url,omitempty"`
-	Label string `json:"label,omitempty"`
+	Url   string `json:"url,omitempty" elastic_mapping:"url: { type: keyword }"`
+	Label string `json:"label,omitempty" elastic_mapping:"label: { type: text }"`
 }
 
 func CreateSnapshot(snapshot *Snapshot) error {

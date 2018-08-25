@@ -69,223 +69,28 @@ So far, we have:
 > `gopa.yml`, main configuration for gopa.<br/>
 
 
-### Optional Config
-
-By default, Gopa works well except indexing, if you want to use elasticsearch as indexing, follow these steps:
-
-- Create a index in elasticsearch with script `config/elasticsearch/gopa-index-mapping.sh` (!important settings!)
-<p><details>
-  <summary>Example</summary>
-  <pre>curl -XPUT "http://localhost:9200/gopa-index" -H 'Content-Type: application/json' -d'
-       {
-       "mappings": {
-       "doc": {
-       "properties": {
-       "host": {
-       "type": "keyword",
-       "ignore_above": 256
-       },
-       "snapshot": {
-       "properties": {
-       "bold": {
-       "type": "text"
-       },
-       "url": {
-       "type": "keyword",
-       "ignore_above": 256
-       },
-       "content_type": {
-       "type": "keyword",
-       "ignore_above": 256
-       },
-       "file": {
-       "type": "keyword",
-       "ignore_above": 256
-       },
-       "ext": {
-       "type": "keyword",
-       "ignore_above": 256
-       },
-       "h1": {
-       "type": "text"
-       },
-       "h2": {
-       "type": "text"
-       },
-       "h3": {
-       "type": "text"
-       },
-       "h4": {
-       "type": "text"
-       },
-       "hash": {
-       "type": "keyword",
-       "ignore_above": 256
-       },
-       "id": {
-       "type": "keyword",
-       "ignore_above": 256
-       },
-       "images": {
-       "properties": {
-       "external": {
-       "properties": {
-       "label": {
-       "type": "text"
-       },
-       "url": {
-       "type": "keyword",
-       "ignore_above": 256
-       }
-       }
-       },
-       "internal": {
-       "properties": {
-       "label": {
-       "type": "text"
-       },
-       "url": {
-       "type": "keyword",
-       "ignore_above": 256
-       }
-       }
-       }
-       }
-       },
-       "italic": {
-       "type": "text"
-       },
-       "links": {
-       "properties": {
-       "external": {
-       "properties": {
-       "label": {
-       "type": "text"
-       },
-       "url": {
-       "type": "keyword",
-       "ignore_above": 256
-       }
-       }
-       },
-       "internal": {
-       "properties": {
-       "label": {
-       "type": "text"
-       },
-       "url": {
-       "type": "keyword",
-       "ignore_above": 256
-       }
-       }
-       }
-       }
-       },
-       "path": {
-       "type": "keyword",
-       "ignore_above": 256
-       },
-       "sim_hash": {
-       "type": "keyword",
-       "ignore_above": 256
-       },
-       "lang": {
-       "type": "keyword",
-       "ignore_above": 256
-       },
-       "screenshot_id": {
-       "type": "keyword",
-       "ignore_above": 256
-       },
-       "size": {
-       "type": "long"
-       },
-       "text": {
-       "type": "text"
-       },
-       "title": {
-       "type": "text",
-       "fields": {
-       "keyword": {
-       "type": "keyword"
-       }
-       }
-       },
-       "version": {
-       "type": "long"
-       }
-       }
-       },
-       "task": {
-       "properties": {
-       "breadth": {
-       "type": "long"
-       },
-       "created": {
-       "type": "date"
-       },
-       "depth": {
-       "type": "long"
-       },
-       "id": {
-       "type": "keyword",
-       "ignore_above": 256
-       },
-       "original_url": {
-       "type": "keyword",
-       "ignore_above": 256
-       },
-       "reference_url": {
-       "type": "keyword",
-       "ignore_above": 256
-       },
-       "schema": {
-       "type": "keyword",
-       "ignore_above": 256
-       },
-       "status": {
-       "type": "integer"
-       },
-       "updated": {
-       "type": "date"
-       },
-       "url": {
-       "type": "keyword",
-       "ignore_above": 256
-       },
-       "last_screenshot_id": {
-       "type": "keyword",
-       "ignore_above": 256
-       }
-       }
-       }
-       }
-       }
-       }
-       }'
-</pre>
-</details></p>
+### Required Config
 
 _Note: Elasticsearch version should >= v5.3_
 
-- Enable index module in `gopa.yml`, update the elasticsearch's setting:
+- Enable elastic module in `gopa.yml`, update the elasticsearch's setting:
 ```
-  - module: index
-    enabled: true
-    ui:
-      enabled: true
-    elasticsearch:
-      endpoint: http://localhost:9200
-      index_prefix: gopa-
-      username: elastic
-      password: changeme
+- name: elastic
+  enabled: true
+  kv_enabled: true
+  orm_enabled: true
+  elasticsearch:
+    endpoint: http://localhost:9200
+    index_prefix: gopa-
+    username: elastic
+    password: changeme
 ```
 </details></p>
 
 
 ### Start
 
-Gopa doesn't require any dependencies, simply run `./gopa` to start the program.
+Besides Elasticsearch, Gopa doesn't require any other dependencies, just simply run `./gopa` to start the program.
 
 Gopa can be run as daemon(_Note: Only available on Linux and Mac_):
 <p><details>
@@ -361,8 +166,6 @@ If you are running `Gopa` as daemon, you may stop it like this:
 
 ## API
 
-* TBD
-
 ## Architecture
 
 <img width="800" alt="What a Spider! GOPA Spider!" src="https://raw.githubusercontent.com/infinitbyte/gopa/master/docs/assets/img/architecture-v1.png">
@@ -371,10 +174,7 @@ If you are running `Gopa` as daemon, you may stop it like this:
 
 ## Contributing
 
-You are sincerely and warmly welcomed to play with this project,
-from UI style to core features,
-or just a piece of document,
-welcome! let's make it better.
+You are sincerely and warmly welcomed to play with this project, from UI style to core features, or just a piece of document, welcome! let's make it better.
 
 
 License

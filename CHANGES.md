@@ -9,9 +9,11 @@
 
 ##### breaking changes
 1. extract common codebase to another repo: https://github.com/infinitbyte/framework
+2. sqlite retired, elasticsearch is the first citizen
 
 ##### features
 1. add a new cmd `static_fs` to support load static files from folder
+2. auto generate elasticsearch mapping and template, no need to manual create mapping first
 
 ##### improvement
 1. optimize sql, speed up task list
