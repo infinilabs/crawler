@@ -161,8 +161,8 @@ If you are running `Gopa` as daemon, you may stop it like this:
 
 ## UI
 
-* Search Console `http://127.0.0.1:9001/`
-* Admin Console  `http://127.0.0.1:9001/admin/`
+* Search Console `http://127.0.0.1:9000/`
+* Admin Console  `http://127.0.0.1:9000/admin/`
 
 ## API
 
