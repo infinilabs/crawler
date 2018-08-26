@@ -24,6 +24,7 @@
 ##### features
 1. add a new cmd `static_fs` to support load static files from folder
 2. auto generate elasticsearch mapping and template, no need to manual create mapping first
+3. add new `backup` command to support migration
 
 ##### improvement
 1. optimize sql, speed up task list
