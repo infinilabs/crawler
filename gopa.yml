@@ -104,7 +104,7 @@ modules:
                     contain: []
                     suffix: []
                   must_not:
-                    contain: [zip, exe, jar, js, css, rar, gz, zip, bmp, jpeg, gif, png, jpg, apk]
+                    contain: [zip, exe, jar, js, css, rar, gz, zip, bmp, jpeg, gif,svg, png, jpg, apk]
                     prefix: []
                     suffix: []
             - joint: filter_check
