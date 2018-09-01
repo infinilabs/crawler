@@ -9,7 +9,7 @@ path.certs: test/cert
 cookie_secret: YOUR-GOPA-SECRET
 
 allow_multi_instance: true
-max_num_of_instances: 5
+max_num_of_instances: 1
 
 tls_enabled: false
 
@@ -233,14 +233,6 @@ modules:
 - name: queue
   enabled: true
 
-- name: storage
-  enabled: true
-  elasticsearch:
-    endpoint: http://localhost:9200
-    index_prefix: gopa-
-    username: elastic
-    password: changeme
-
 - name: index
   enabled: true
   ui:
@@ -256,7 +248,7 @@ modules:
 
 - name: elastic
   enabled: true
-  kv_enabled: true
+  store_enabled: true
   orm_enabled: true
   elasticsearch:
     endpoint: http://localhost:9200
