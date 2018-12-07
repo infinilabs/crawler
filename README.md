@@ -5,7 +5,6 @@ GOPA, A Spider Written in Go.
 [![Travis](https://travis-ci.org/infinitbyte/gopa.svg?branch=master)](https://travis-ci.org/infinitbyte/gopa)
 [![Go Report Card](https://goreportcard.com/badge/github.com/infinitbyte/gopa)](https://goreportcard.com/report/github.com/infinitbyte/gopa)
 [![Join the chat at https://gitter.im/infinitbyte/gopa](https://badges.gitter.im/infinitbyte/gopa.svg)](https://gitter.im/infinitbyte/gopa?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Finfinitbyte%2Fgopa.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Finfinitbyte%2Fgopa?ref=badge_shield)
 
 
 ## Goal
@@ -53,7 +52,7 @@ First of all, get it, two opinions: download the pre-built package or compile it
 
 #### Download Pre Built Package
 
-Go to [Release](https://github.com/infinitbyte/gopa/releases) or [Snapshot](https://github.com/infinitbyte/gopa-snapshot/releases) page, download the right package for your platform.
+Go to [Release](https://github.com/infinitbyte/gopa/releases) page, download the right package for your platform.
 
 _Note: Darwin is for Mac_
 
@@ -148,7 +147,7 @@ Usage of ./bin/gopa:
 ### Stop
 
 It's safety to press `ctrl+c` stop the current running Gopa, Gopa will handle the rest,saving the checkpoint,
-you may restore the job later,the world is still in your hand.
+you may restore the job later, the world is still in your hand.
 
 If you are running `Gopa` as daemon, you may stop it like this:
 
