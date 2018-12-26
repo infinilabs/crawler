@@ -33,6 +33,8 @@ MAC       := "Darwin"
 GO_FILES=$(find . -iname '*.go' | grep -v /vendor/)
 PKGS=$(go list ./... | grep -v /vendor/)
 
+FRAMEWORK_FOLDER := $(CURDIR)/../framework/
+
 .PHONY: all build update test clean
 
 default: build
@@ -40,7 +42,6 @@ default: build
 build: config
 	@#echo $(GOPATH)
 	@echo $(NEWGOPATH)
-	@$(GO) get github.com/infinitbyte/framework
 	$(GOBUILD) -o bin/gopa
 	@$(MAKE) restore-generated-file
 
@@ -107,8 +108,10 @@ clean: clean_data
 	rm -rif bin
 	mkdir bin
 
-init-version:
+init:
 	@echo building GOPA $(GOPA_VERSION)
+	@if [ ! -d $(FRAMEWORK_FOLDER) ]; then echo "framework not exists";(cd ../&&git clone https://github.com/infinitbyte/framework.git) fi
+
 
 
 update-generated-file:
@@ -125,8 +128,8 @@ restore-generated-file:
 
 update-ui:
 	@echo "generate static files"
-	@$(GO) get github.com/infinitbyte/framework/cmd/static_fs
-	@(cd static && static_fs -ignore="static.go|.DS_Store" -o static.go -pkg static . )
+	@$(GO) get github.com/infinitbyte/framework/cmd/vfs
+	@(cd static && vfs -ignore="static.go|.DS_Store" -o static.go -pkg static . )
 
 update-template-ui:
 	@echo "generate UI pages"
@@ -134,8 +137,8 @@ update-template-ui:
 	@cd ui/ && ego
 	@cd plugins/ && ego
 
-#config: init-version update-ui update-template-ui
-config: init-version update-ui update-template-ui update-generated-file
+#config: init update-ui update-template-ui
+config: init update-ui update-template-ui update-generated-file
 	@echo "update configs"
 	@# $(GO) env
 	@mkdir -p bin

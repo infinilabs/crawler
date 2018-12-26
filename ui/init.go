@@ -19,9 +19,9 @@ package ui
 import (
 	"github.com/infinitbyte/framework/core/api"
 	"github.com/infinitbyte/framework/core/env"
-	"github.com/infinitbyte/framework/core/fs"
 	"github.com/infinitbyte/framework/core/index"
 	"github.com/infinitbyte/framework/core/ui"
+	"github.com/infinitbyte/framework/core/vfs"
 	core "github.com/infinitbyte/framework/modules/ui/common"
 	"github.com/infinitbyte/gopa/static"
 	"github.com/infinitbyte/gopa/ui/search"
@@ -54,10 +54,10 @@ func InitUI() {
 	admin := AdminUI{}
 
 	//Index
-	fs.RegisterFS(static.StaticFS{StaticFolder: "static", TrimLeftPath: "/static", CheckLocalFirst: true})
+	vfs.RegisterFS(static.StaticFS{StaticFolder: "static", TrimLeftPath: "/static", CheckLocalFirst: true})
 
 	//init common
-	ui.HandleUI("/", http.FileServer(fs.FS()))
+	ui.HandleUI("/", http.FileServer(vfs.VFS()))
 
 	ui.HandleUI("/favicon.ico", http.FileServer(static.StaticFS{StaticFolder: "static", CheckLocalFirst: true}))
 
