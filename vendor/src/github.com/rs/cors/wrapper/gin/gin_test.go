@@ -44,7 +44,7 @@ func TestCorsWrapper_buildAbortsWhenPreflight(t *testing.T) {
 	res.Code = http.StatusAccepted
 
 	handler := corsWrapper{Cors: cors.New(Options{
-	// Intentionally left blank.
+		// Intentionally left blank.
 	})}.build()
 
 	handler(ctx)

@@ -143,9 +143,9 @@ func TestAPIMeta(t *testing.T) {
 	}
 
 	want := &APIMeta{
-		Hooks: []string{"h"},
-		Git:   []string{"g"},
-		Pages: []string{"p"},
+		Hooks:                            []string{"h"},
+		Git:                              []string{"g"},
+		Pages:                            []string{"p"},
 		VerifiablePasswordAuthentication: Bool(true),
 	}
 	if !reflect.DeepEqual(want, meta) {

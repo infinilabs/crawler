@@ -574,11 +574,11 @@ func TestTrueTypeSegments(t *testing.T) {
 		lineTo(136, 1297),
 		lineTo(136, 68),
 	}, {
-	// .null
-	// Empty glyph.
+		// .null
+		// Empty glyph.
 	}, {
-	// nonmarkingreturn
-	// Empty glyph.
+		// nonmarkingreturn
+		// Empty glyph.
 	}, {
 		// zero
 		// - contour #0
