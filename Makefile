@@ -34,6 +34,7 @@ GO_FILES=$(find . -iname '*.go' | grep -v /vendor/)
 PKGS=$(go list ./... | grep -v /vendor/)
 
 FRAMEWORK_FOLDER := $(CURDIR)/../framework/
+FRAMEWORK_BRANCH := master
 
 .PHONY: all build update test clean
 
@@ -111,6 +112,7 @@ clean: clean_data
 init:
 	@echo building GOPA $(GOPA_VERSION)
 	@if [ ! -d $(FRAMEWORK_FOLDER) ]; then echo "framework not exists";(cd ../&&git clone https://github.com/infinitbyte/framework.git) fi
+	(cd ../framework && git pull origin $(FRAMEWORK_BRANCH))
 
 
 
