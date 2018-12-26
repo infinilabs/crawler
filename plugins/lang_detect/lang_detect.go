@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package filter
+package lang_detect
 
 import (
 	"github.com/infinitbyte/framework/core/errors"

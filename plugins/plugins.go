@@ -16,15 +16,9 @@ limitations under the License.
 
 package plugins
 
-import (
-	"github.com/infinitbyte/framework/core/module"
-	"github.com/infinitbyte/gopa/plugins/chrome"
-	"github.com/infinitbyte/gopa/plugins/dispatch"
-	"github.com/infinitbyte/gopa/plugins/tools_generator"
-)
-
 func Register() {
-	module.RegisterUserPlugin(dispatch.DispatchModule{})
-	module.RegisterUserPlugin(chrome.ChromePlugin{})
-	module.RegisterUserPlugin(tools_generator.GeneratorPlugin{})
+	//module.RegisterUserPlugin(dispatch.DispatchModule{})
+	//module.RegisterUserPlugin(chrome.ChromePlugin{})
+	//module.RegisterUserPlugin(tools_generator.GeneratorPlugin{})
+	//pipeline.RegisterPipeJoint(lang_detect.LanguageDetectJoint{})
 }

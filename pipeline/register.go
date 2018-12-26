@@ -52,7 +52,6 @@ func InitJoints() {
 	pipeline.RegisterPipeJoint(filter.TaskDeduplicationJoint{})
 	pipeline.RegisterPipeJoint(filter.ContentDeduplicationJoint{})
 	pipeline.RegisterPipeJoint(filter.UpdateCheckTimeJoint{})
-	pipeline.RegisterPipeJoint(filter.LanguageDetectJoint{})
 	pipeline.RegisterPipeJoint(filter.ExtractJoint{})
 	log.Debug("end register joints")
 
