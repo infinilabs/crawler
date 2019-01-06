@@ -35,6 +35,8 @@ PKGS=$(go list ./... | grep -v /vendor/)
 
 FRAMEWORK_FOLDER := $(CURDIR)/../framework/
 FRAMEWORK_BRANCH := master
+FRAMEWORK_VENDOR_FOLDER := $(CURDIR)/vendor/
+FRAMEWORK_VENDOR_BRANCH := master
 
 .PHONY: all build update test clean
 
@@ -78,6 +80,7 @@ build-win:
 build-linux:
 	GOOS=linux  GOARCH=amd64  $(GOBUILD) -o bin/gopa-linux64
 	GOOS=linux  GOARCH=386    $(GOBUILD) -o bin/gopa-linux32
+	GOOS=linux  GOARCH=arm   GOARM=5    $(GOBUILD) -o bin/gopa-armv5
 
 build-darwin:
 	GOOS=darwin  GOARCH=amd64     $(GOBUILD) -o bin/gopa-darwin64
@@ -111,8 +114,10 @@ clean: clean_data
 
 init:
 	@echo building GOPA $(GOPA_VERSION)
-	@if [ ! -d $(FRAMEWORK_FOLDER) ]; then echo "framework not exists";(cd ../&&git clone https://github.com/infinitbyte/framework.git) fi
+	@if [ ! -d $(FRAMEWORK_FOLDER) ]; then echo "framework does not exist";(cd ../&&git clone -b $(FRAMEWORK_BRANCH) https://github.com/infinitbyte/framework.git) fi
+	@if [ ! -d $(FRAMEWORK_VENDOR_FOLDER) ]; then echo "framework vendor does not exist";(git clone  -b $(FRAMEWORK_VENDOR_BRANCH) https://github.com/infinitbyte/framework-vendor.git vendor) fi
 	(cd ../framework && git pull origin $(FRAMEWORK_BRANCH))
+	(cd vendor && git pull origin $(FRAMEWORK_VENDOR_BRANCH))
 
 
 
@@ -179,6 +184,7 @@ package-linux-platform:
 	@echo "Packaging Linux"
 	cd bin && tar cfz ../bin/linux64.tar.gz     gopa-linux64 gopa.yml stop.sh
 	cd bin && tar cfz ../bin/linux32.tar.gz     gopa-linux32 gopa.yml stop.sh
+	cd bin && tar cfz ../bin/armv5.tar.gz     bin/gopa-armv5 gopa.yml stop.sh
 
 package-windows-platform:
 	@echo "Packaging Windows"
