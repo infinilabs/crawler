@@ -47,3 +47,4 @@ bin/
 /dist
 gopa
 gopa.exe
+vendor/
