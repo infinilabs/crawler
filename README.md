@@ -58,6 +58,10 @@ _Note: Darwin is for Mac_
 
 #### Compile The Package Manually
 
+Requirements
+* Golang 1.9+
+
+Supported platform
 - Mac/Linux: Run `make build` to build the Gopa. <br/>
 - Windows:  Checkout this wiki page - [How to build GOPA on windows](https://github.com/infinitbyte/gopa/wiki/How-to-build-GOPA-on-windows).
 
