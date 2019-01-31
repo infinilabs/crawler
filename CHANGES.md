@@ -7,12 +7,17 @@
 #### v0.12
 
 ##### breaking changes
+1. pipeline config moved to dedicated section, can be reference by id
 
 ##### features
+1. add parse_pdf joint to parse PDF files
 
 ##### improvement
+1. auto clone and update framework/vendor repo
+2. move vendor out of this repo
 
 ##### bugfix
+1. fix relative link was not proper resolved with https
 
 
 #### v0.11
