@@ -53,6 +53,7 @@ func InitJoints() {
 	pipeline.RegisterPipeJoint(filter.ContentDeduplicationJoint{})
 	pipeline.RegisterPipeJoint(filter.UpdateCheckTimeJoint{})
 	pipeline.RegisterPipeJoint(filter.ExtractJoint{})
+	pipeline.RegisterPipeJoint(filter.ParsePDFJoint{})
 	log.Debug("end register joints")
 
 }

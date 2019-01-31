@@ -1,5 +1,10 @@
 cluster:
   name: gopa
+  minimum_nodes: 1
+#  seeds:
+#  - 192.168.1.121:10000
+#  - 192.168.1.121:10001
+#  - 192.168.1.121:10002
 #node.name: node1
 
 path.data: data
@@ -9,19 +14,189 @@ path.certs: test/cert
 cookie_secret: YOUR-GOPA-SECRET
 
 allow_multi_instance: true
-max_num_of_instances: 1
+max_num_of_instances: 30
 
 tls_enabled: false
 
-logging.level: debug
+logging.level: info
+
+node.master: true
+node.data: true
+node.proxy: true
+
+node.tag: ["external","hot"]
+
 
 network:
-  host: 127.0.0.1
-#  http_bind: 0.0.0.0:9000
-#  api_bind: 0.0.0.0:8000
+  http_bind: 0.0.0.0:9000
+  api_bind: 0.0.0.0:8000
+  rpc_bind: 0.0.0.0:20000
+  broadcast_bind: 224.3.2.2:9876
 
-cluster.seeds:
-  - 127.0.0.1:10000
+pipelines:
+- name: url_filter_flow
+  start:
+    joint: init_task
+    enabled: true
+  process:
+    - joint: url_normalization
+      enabled: true
+      parameters:
+        follow_all_domain: false
+        follow_sub_domain: true
+        max_filename_length: 1000
+    - joint: url_filter
+      enabled: true
+      parameters:
+        url_match_rule:
+          must_not:
+            prefix:
+            - "mailto:"
+            - "data:image/"
+            - "#"
+            - "javascript:"
+            contain:
+            - "crond/run"
+            - "login"
+            - "logout"
+            suffix: []
+          must:
+            prefix: []
+            contain: []
+            suffix: []
+          should:
+            prefix: []
+            contain: []
+            suffix: []
+        host_match_rule:
+          must:
+            prefix: []
+            contain: []
+            suffix: []
+          should:
+            prefix: []
+            contain: []
+            suffix: []
+          must_not:
+            prefix: []
+            contain: []
+            suffix: []
+        file_match_rule:
+          must:
+            prefix: []
+            contain: []
+            suffix: []
+          should:
+            prefix: []
+            contain: []
+            suffix: []
+          must_not:
+            prefix: []
+            contain: []
+            suffix: []
+        file_ext_match_rule:
+          should:
+            prefix: []
+            contain: []
+            suffix: []
+          must:
+            prefix: []
+            contain: []
+            suffix: []
+          must_not:
+            contain: [zip, exe, jar, js, css, rar, gz, zip, bmp, jpeg, gif,svg, png, jpg, apk]
+            prefix: []
+            suffix: []
+    - joint: filter_check
+      enabled: true
+      parameters:
+        filter_key: check_filter
+    - joint: task_deduplication
+      enabled: true
+  end:
+    joint: save_task
+    enabled: true
+    parameters:
+      is_create: true
+- name: url_fetch_flow
+  start:
+    joint: init_task
+    enabled: true
+  process:
+    - joint: url_normalization
+      enabled: true
+      parameters:
+        follow_all_domain: false
+        follow_sub_domain: true
+        max_filename_length: 1000
+    - joint: ignore_timeout
+      parameters:
+        ignore_timeout_after_count: 500
+      enabled: true
+    - joint: chrome_fetch
+      enabled: false
+      parameters:
+        chrome_host: http://127.0.0.1:9223
+        save_screenshot: true
+        compress_enabled: true
+        timeout_in_seconds: 60
+        screenshot_quality: 50
+    - joint: fetch
+      enabled: true
+      parameters:
+        timeout_in_seconds: 100
+#          proxy: "socks5://127.0.0.1:1080"
+#          cookie: ""
+    - joint: parse_pdf
+      enabled: true
+      parameters:
+        accepted_content_type:
+        - application/octet-stream
+        - application/pdf
+    - joint: parse
+      enabled: true
+      parameters:
+        dispatch_links: true
+        save_images: true
+        max_depth: 100
+        max_breadth: 1
+    - joint: extract
+      enabled: false
+      parameters:
+        html_block:
+          your_tag_name1: ".tag_class"
+          your_tag_name2: "#tag_id"
+    - joint: html2text
+      parameters:
+        remove_nonscript: true
+        merge_whitespace: false
+      enabled: true
+    - joint: hash
+      enabled: true
+    - joint: content_deduplication
+      enabled: true
+    - joint: update_check_time
+      enabled: true
+      parameters:
+        decelerate_steps: "24h,48h,72h,168h,360h,720h"
+        accelerate_steps: "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
+#          - joint: lang_detect
+#            enabled: true
+    - joint : save_snapshot_fs
+      enabled: false
+    - joint : save_snapshot_db
+      enabled: true
+      parameters:
+        compress_enabled: true
+        bucket: "Snapshot"
+        max_revision: 5
+    - joint: index
+      enabled: true
+  end:
+    joint: save_task
+    enabled: true
+    keep_404: false
+    keep_redirected: false
 
 modules:
 - name: pipeline
@@ -30,185 +205,28 @@ modules:
     - name: checker
       enabled: true
       input_queue: check
-      max_go_routine: 5
+      pipeline_id: url_filter_flow
+      max_go_routine: 1
       threshold_in_ms: 0
-      # default timeout is 60s
       timeout_in_ms: 5000
-      default_config:
-          start:
-            joint: init_task
-            enabled: true
-          process:
-            - joint: url_normalization
-              enabled: true
-              parameters:
-                follow_all_domain: false
-                follow_sub_domain: true
-                max_filename_length: 1000
-            - joint: url_filter
-              enabled: true
-              parameters:
-                url_match_rule:
-                  must_not:
-                    prefix:
-                    - "mailto:"
-                    - "data:image/"
-                    - "#"
-                    - "javascript:"
-                    contain:
-                    - "crond/run"
-                    - "login"
-                    - "logout"
-                    suffix: []
-                  must:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                  should:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                host_match_rule:
-                  must:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                  should:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                  must_not:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                file_match_rule:
-                  must:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                  should:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                  must_not:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                file_ext_match_rule:
-                  should:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                  must:
-                    prefix: []
-                    contain: []
-                    suffix: []
-                  must_not:
-                    contain: [zip, exe, jar, js, css, rar, gz, zip, bmp, jpeg, gif,svg, png, jpg, apk]
-                    prefix: []
-                    suffix: []
-            - joint: filter_check
-              enabled: true
-              parameters:
-                filter_key: check_filter
-            - joint: task_deduplication
-              enabled: true
-          end:
-            joint: save_task
-            enabled: true
-            parameters:
-              is_create: true
     - name: fetch
       enabled: true
       input_queue: fetch
+      pipeline_id: url_fetch_flow
       max_go_routine: 1
       threshold_in_ms: 0
-      # default timeout is 60s
       timeout_in_ms: 30000
-      default_config:
-        start:
-          joint: init_task
-          enabled: true
-        process:
-          - joint: url_normalization
-            enabled: true
-            parameters:
-              follow_all_domain: false
-              follow_sub_domain: true
-              max_filename_length: 1000
-          - joint: ignore_timeout
-            parameters:
-              ignore_timeout_after_count: 500
-            enabled: true
-          - joint: chrome_fetch
-            enabled: false
-            parameters:
-              chrome_host: http://127.0.0.1:9223
-              save_screenshot: true
-              compress_enabled: true
-              timeout_in_seconds: 60
-              screenshot_quality: 50
-          - joint: fetch
-            enabled: true
-            parameters:
-              timeout_in_seconds: 100
-    #          proxy: "socks5://127.0.0.1:1080"
-    #          cookie: ""
-          - joint: parse
-            enabled: true
-            parameters:
-              dispatch_links: true
-              save_images: true
-              max_depth: 100
-              max_breadth: 1
-          - joint: extract
-            enabled: false
-            parameters:
-              html_block:
-                your_tag_name1: ".tag_class"
-                your_tag_name2: "#tag_id"
-          - joint: html2text
-            parameters:
-              remove_nonscript: true
-              merge_whitespace: false
-            enabled: true
-          - joint: hash
-            enabled: true
-          - joint: content_deduplication
-            enabled: true
-          - joint: update_check_time
-            enabled: true
-            parameters:
-              decelerate_steps: "24h,48h,72h,168h,360h,720h"
-              accelerate_steps: "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
-          - joint: lang_detect
-            enabled: true
-          - joint : save_snapshot_fs
-            enabled: false
-          - joint : save_snapshot_db
-            enabled: true
-            parameters:
-              compress_enabled: true
-              bucket: "Snapshot"
-              max_revision: 5
-          - joint: index
-            enabled: true
-        end:
-          joint: save_task
-          enabled: true
-          keep_404: false
-          keep_redirected: false
 
 - name: cluster
   enabled: true
 
 - name: dispatch
   enabled: true
-  failed_retry: false
+  failed_retry: true
   new_task: true
-  update_task: true
+  update_task: false
   max_concurrent_fetch_tasks: 10
-  fetch_size: 1000
+  fetch_size: 10
   get_host_config_by_url: false
 
 - name: api
@@ -272,3 +290,11 @@ plugins:
   enabled: true
   command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
   debug_port: 9223
+
+
+rpc:
+  enabled: true
+  tls_enabled: true
+  tls_cert_file: test/cert/server.crt
+  tls_key_file: test/cert/server.key
+#  tls_skip_insecure_verify: false

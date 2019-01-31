@@ -1,11 +1,16 @@
 SHELL=/bin/bash
 
-# Default GOPA version
-GOPA_VERSION := 0.12.0_SNAPSHOT
+# APP info
+APP_NAME := gopa
+APP_VERSION := 0.12.0_SNAPSHOT
+APP_CONFIG := $(APP_NAME).yml
+APP_STATIC_FOLDER := static
+APP_UI_FOLDER := ui
+APP_PLUGIN_FOLDER := plugin
 
 # Get release version from environment
 ifneq "$(VERSION)" ""
-   GOPA_VERSION := $(VERSION)
+   APP_VERSION := $(VERSION)
 endif
 
 # Ensure GOPATH is set before running build process.
@@ -45,7 +50,7 @@ default: build
 build: config
 	@#echo $(GOPATH)
 	@echo $(NEWGOPATH)
-	$(GOBUILD) -o bin/gopa
+	$(GOBUILD) -o bin/$(APP_NAME)
 	@$(MAKE) restore-generated-file
 
 build-cmd: config
@@ -54,54 +59,51 @@ build-cmd: config
 	cd cmd/backup && GOOS=windows GOARCH=amd64 $(GOBUILDNCGO) -o ../../bin/backup-windows64.exe
 	@$(MAKE) restore-generated-file
 
-build-cluster-test: build
-	cd bin && mkdir node1 node2 node3 && cp gopa node1 && cp gopa node2 && cp gopa node3
-
 # used to build the binary for gdb debugging
-build-race: clean config update-ui
-	$(GOBUILD) -gcflags "-m -N -l" -race -o bin/gopa
+build-race: clean config update-vfs
+	$(GOBUILD) -gcflags "-m -N -l" -race -o bin/$(APP_NAME)
 	@$(MAKE) restore-generated-file
 
 tar: build
-	cd bin && tar cfz ../bin/gopa.tar.gz gopa gopa.yml
+	cd bin && tar cfz ../bin/$(APP_NAME).tar.gz $(APP_NAME) $(APP_CONFIG)
 
-cross-build: clean config update-ui
+cross-build: clean config update-vfs
 	$(GO) test
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -o bin/gopa-windows64.exe
-	GOOS=darwin  GOARCH=amd64 $(GOBUILD) -o bin/gopa-darwin64
-	GOOS=linux  GOARCH=amd64 $(GOBUILD) -o bin/gopa-linux64
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -o bin/$(APP_NAME)-windows64.exe
+	GOOS=darwin  GOARCH=amd64 $(GOBUILD) -o bin/$(APP_NAME)-darwin64
+	GOOS=linux  GOARCH=amd64 $(GOBUILD) -o bin/$(APP_NAME)-linux64
 	@$(MAKE) restore-generated-file
 
 
 build-win:
-	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64     $(GOBUILD) -o bin/gopa-windows64.exe
-	CC=i686-w64-mingw32-gcc   CXX=i686-w64-mingw32-g++ GOOS=windows GOARCH=386         $(GOBUILD) -o bin/gopa-windows32.exe
+	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64     $(GOBUILD) -o bin/$(APP_NAME)-windows64.exe
+	CC=i686-w64-mingw32-gcc   CXX=i686-w64-mingw32-g++ GOOS=windows GOARCH=386         $(GOBUILD) -o bin/$(APP_NAME)-windows32.exe
 
 build-linux:
-	GOOS=linux  GOARCH=amd64  $(GOBUILD) -o bin/gopa-linux64
-	GOOS=linux  GOARCH=386    $(GOBUILD) -o bin/gopa-linux32
-	GOOS=linux  GOARCH=arm   GOARM=5    $(GOBUILD) -o bin/gopa-armv5
+	GOOS=linux  GOARCH=amd64  $(GOBUILD) -o bin/$(APP_NAME)-linux64
+	GOOS=linux  GOARCH=386    $(GOBUILD) -o bin/$(APP_NAME)-linux32
+	GOOS=linux  GOARCH=arm   GOARM=5    $(GOBUILD) -o bin/$(APP_NAME)-armv5
 
 build-darwin:
-	GOOS=darwin  GOARCH=amd64     $(GOBUILD) -o bin/gopa-darwin64
-	GOOS=darwin  GOARCH=386       $(GOBUILD) -o bin/gopa-darwin32
+	GOOS=darwin  GOARCH=amd64     $(GOBUILD) -o bin/$(APP_NAME)-darwin64
+	GOOS=darwin  GOARCH=386       $(GOBUILD) -o bin/$(APP_NAME)-darwin32
 
 build-bsd:
-	GOOS=freebsd  GOARCH=amd64    $(GOBUILD) -o bin/gopa-freebsd64
-	GOOS=freebsd  GOARCH=386      $(GOBUILD) -o bin/gopa-freebsd32
-	GOOS=netbsd  GOARCH=amd64     $(GOBUILD) -o bin/gopa-netbsd64
-	GOOS=netbsd  GOARCH=386       $(GOBUILD) -o bin/gopa-netbsd32
-	GOOS=openbsd  GOARCH=amd64    $(GOBUILD) -o bin/gopa-openbsd64
-	GOOS=openbsd  GOARCH=386      $(GOBUILD) -o bin/gopa-openbsd32
+	GOOS=freebsd  GOARCH=amd64    $(GOBUILD) -o bin/$(APP_NAME)-freebsd64
+	GOOS=freebsd  GOARCH=386      $(GOBUILD) -o bin/$(APP_NAME)-freebsd32
+	GOOS=netbsd  GOARCH=amd64     $(GOBUILD) -o bin/$(APP_NAME)-netbsd64
+	GOOS=netbsd  GOARCH=386       $(GOBUILD) -o bin/$(APP_NAME)-netbsd32
+	GOOS=openbsd  GOARCH=amd64    $(GOBUILD) -o bin/$(APP_NAME)-openbsd64
+	GOOS=openbsd  GOARCH=386      $(GOBUILD) -o bin/$(APP_NAME)-openbsd32
 
-all: clean config update-ui cross-build restore-generated-file
+all: clean config update-vfs cross-build restore-generated-file
 
-all-platform: clean config update-ui cross-build-all-platform restore-generated-file
+all-platform: clean config update-vfs cross-build-all-platform restore-generated-file
 
 cross-build-all-platform: clean config build-bsd build-linux build-darwin build-win  restore-generated-file
 
 format:
-	gofmt -l -s -w .
+	go fmt $$(go list ./... | grep -v /vendor/)
 
 clean_data:
 	rm -rif dist
@@ -113,18 +115,19 @@ clean: clean_data
 	mkdir bin
 
 init:
-	@echo building GOPA $(GOPA_VERSION)
+	@echo building $(APP_NAME) $(APP_VERSION)
 	@if [ ! -d $(FRAMEWORK_FOLDER) ]; then echo "framework does not exist";(cd ../&&git clone -b $(FRAMEWORK_BRANCH) https://github.com/infinitbyte/framework.git) fi
 	@if [ ! -d $(FRAMEWORK_VENDOR_FOLDER) ]; then echo "framework vendor does not exist";(git clone  -b $(FRAMEWORK_VENDOR_BRANCH) https://github.com/infinitbyte/framework-vendor.git vendor) fi
 	(cd ../framework && git pull origin $(FRAMEWORK_BRANCH))
 	(cd vendor && git pull origin $(FRAMEWORK_VENDOR_BRANCH))
+	$(GO) get -u github.com/ledongthuc/pdf
 
 
 
 update-generated-file:
 	@echo "update generated info"
 	@echo -e "package config\n\nconst LastCommitLog = \""`git log -1 --pretty=format:"%h, %ad, %an, %s"` "\"\nconst BuildDate = \"`date`\"" > config/generated.go
-	@echo -e "\nconst Version  = \"$(GOPA_VERSION)\"" >> config/generated.go
+	@echo -e "\nconst Version  = \"$(APP_VERSION)\"" >> config/generated.go
 
 
 restore-generated-file:
@@ -133,24 +136,19 @@ restore-generated-file:
 	@echo -e "\nconst Version = \"0.0.1-SNAPSHOT\"" >> config/generated.go
 
 
-update-ui:
-	@echo "generate static files"
-	@$(GO) get github.com/infinitbyte/framework/cmd/vfs
-	@(cd static && vfs -ignore="static.go|.DS_Store" -o static.go -pkg static . )
+update-vfs:
+	@if [ -d $(APP_STATIC_FOLDER) ]; then  echo "generate static files";$(GO) get github.com/infinitbyte/framework/cmd/vfs;(cd $(APP_STATIC_FOLDER) && vfs -ignore="static.go|.DS_Store" -o static.go -pkg static . ) fi
 
 update-template-ui:
-	@echo "generate UI pages"
-	@$(GO) get github.com/infinitbyte/ego/cmd/ego
-	@cd ui/ && ego
-	@cd plugins/ && ego
+	@if [ -d $(APP_UI_FOLDER) ]; then  (echo "generate main UI pages";$(GO) get github.com/infinitbyte/ego/cmd/ego;cd $(APP_UI_FOLDER)/ && ego) fi
+	@if [ -d $(APP_PLUGIN_FOLDER) ]; then  (echo "generate plugin UI pages";$(GO) get github.com/infinitbyte/ego/cmd/ego;cd $(APP_PLUGIN_FOLDER)/ && ego) fi
 
-#config: init update-ui update-template-ui
-config: init update-ui update-template-ui update-generated-file
+#config: init update-vfs update-template-ui
+config: init update-vfs update-template-ui update-generated-file
 	@echo "update configs"
 	@# $(GO) env
 	@mkdir -p bin
-	@cp stop.sh bin/stop.sh
-	@cp gopa.yml bin/gopa.yml
+	@cp $(APP_CONFIG) bin/$(APP_CONFIG)
 
 
 dist: cross-build package
@@ -161,35 +159,35 @@ dist-all-platform: all-platform package-all-platform
 
 package:
 	@echo "Packaging"
-	cd bin && tar cfz ../bin/darwin64.tar.gz darwin64  gopa.yml stop.sh
-	cd bin && tar cfz ../bin/linux64.tar.gz linux64  gopa.yml stop.sh
-	cd bin && tar cfz ../bin/windows64.tar.gz windows64  gopa.yml stop.sh
+	cd bin && tar cfz ../bin/darwin64.tar.gz darwin64  $(APP_CONFIG) 
+	cd bin && tar cfz ../bin/linux64.tar.gz linux64  $(APP_CONFIG) 
+	cd bin && tar cfz ../bin/windows64.tar.gz windows64  $(APP_CONFIG) 
 
 package-all-platform: package-darwin-platform package-linux-platform package-windows-platform
 	@echo "Packaging all"
-	cd bin && tar cfz ../bin/freebsd64.tar.gz     gopa-freebsd64  gopa.yml stop.sh
-	cd bin && tar cfz ../bin/freebsd32.tar.gz     gopa-freebsd32  gopa.yml stop.sh
-	cd bin && tar cfz ../bin/netbsd64.tar.gz      gopa-netbsd64  gopa.yml stop.sh
-	cd bin && tar cfz ../bin/netbsd32.tar.gz      gopa-netbsd32  gopa.yml stop.sh
-	cd bin && tar cfz ../bin/openbsd64.tar.gz     gopa-openbsd64  gopa.yml stop.sh
-	cd bin && tar cfz ../bin/openbsd32.tar.gz     gopa-openbsd32  gopa.yml stop.sh
+	cd bin && tar cfz ../bin/freebsd64.tar.gz     $(APP_NAME)-freebsd64  $(APP_CONFIG) 
+	cd bin && tar cfz ../bin/freebsd32.tar.gz     $(APP_NAME)-freebsd32  $(APP_CONFIG) 
+	cd bin && tar cfz ../bin/netbsd64.tar.gz      $(APP_NAME)-netbsd64  $(APP_CONFIG) 
+	cd bin && tar cfz ../bin/netbsd32.tar.gz      $(APP_NAME)-netbsd32  $(APP_CONFIG) 
+	cd bin && tar cfz ../bin/openbsd64.tar.gz     $(APP_NAME)-openbsd64  $(APP_CONFIG) 
+	cd bin && tar cfz ../bin/openbsd32.tar.gz     $(APP_NAME)-openbsd32  $(APP_CONFIG) 
 
 
 package-darwin-platform:
 	@echo "Packaging Darwin"
-	cd bin && tar cfz ../bin/darwin64.tar.gz      gopa-darwin64 gopa.yml stop.sh
-	cd bin && tar cfz ../bin/darwin32.tar.gz      gopa-darwin32 gopa.yml stop.sh
+	cd bin && tar cfz ../bin/darwin64.tar.gz      $(APP_NAME)-darwin64 $(APP_CONFIG) 
+	cd bin && tar cfz ../bin/darwin32.tar.gz      $(APP_NAME)-darwin32 $(APP_CONFIG) 
 
 package-linux-platform:
 	@echo "Packaging Linux"
-	cd bin && tar cfz ../bin/linux64.tar.gz     gopa-linux64 gopa.yml stop.sh
-	cd bin && tar cfz ../bin/linux32.tar.gz     gopa-linux32 gopa.yml stop.sh
-	cd bin && tar cfz ../bin/armv5.tar.gz     bin/gopa-armv5 gopa.yml stop.sh
+	cd bin && tar cfz ../bin/linux64.tar.gz     $(APP_NAME)-linux64 $(APP_CONFIG) 
+	cd bin && tar cfz ../bin/linux32.tar.gz     $(APP_NAME)-linux32 $(APP_CONFIG) 
+	cd bin && tar cfz ../bin/armv5.tar.gz       $(APP_NAME)-armv5   $(APP_CONFIG) 
 
 package-windows-platform:
 	@echo "Packaging Windows"
-	cd bin && tar cfz ../bin/windows64.tar.gz   gopa-windows64.exe gopa.yml stop.sh
-	cd bin && tar cfz ../bin/windows32.tar.gz   gopa-windows32.exe gopa.yml stop.sh
+	cd bin && tar cfz ../bin/windows64.tar.gz   $(APP_NAME)-windows64.exe $(APP_CONFIG) 
+	cd bin && tar cfz ../bin/windows32.tar.gz   $(APP_NAME)-windows32.exe $(APP_CONFIG) 
 
 test:
 	go get -u github.com/kardianos/govendor
@@ -227,4 +225,4 @@ cyclo:
 
 benchmarks:
 	go test github.com/infinitbyte/gopa/core/util -benchtime=1s -bench ^Benchmark -run ^$
-	go test github.com/infinitbyte/gopa//modules/crawler/pipe -benchtime=1s -bench  ^Benchmark -run ^$
+	go test github.com/infinitbyte/gopa/modules/crawler/pipe -benchtime=1s -bench  ^Benchmark -run ^$
