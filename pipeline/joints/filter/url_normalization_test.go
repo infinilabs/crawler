@@ -17,6 +17,8 @@ limitations under the License.
 package filter
 
 import (
+	"github.com/infinitbyte/framework/core/env"
+	"github.com/infinitbyte/framework/core/global"
 	"github.com/infinitbyte/framework/core/pipeline"
 	"github.com/infinitbyte/gopa/model"
 	"github.com/stretchr/testify/assert"
@@ -212,6 +214,31 @@ func TestNormailzeLinks4(t *testing.T) {
 	parse.Process(context)
 
 	assert.Equal(t, "http://conf.elasticsearch.cn/2015/chengdu.html", context.MustGetString(model.CONTEXT_TASK_URL))
+	assert.Equal(t, "/2015", snapshot.Path)
+	assert.Equal(t, "/chengdu.html", snapshot.File)
+}
+
+func TestNormailzeLinks6(t *testing.T) {
+	global.RegisterEnv(env.EmptyEnv())
+
+	context := &pipeline.Context{}
+	parse := UrlNormalizationJoint{}
+
+	task := model.Task{}
+	task.Url = "../2015/chengdu.html"
+	task.Reference = "https://conf.elasticsearch.cn/2018/beijing.html"
+	task.Depth = 1
+	task.Breadth = 1
+
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
+	context.Set(model.CONTEXT_TASK_Reference, task.Reference)
+	context.Set(model.CONTEXT_TASK_Host, task.Host)
+	snapshot := model.Snapshot{}
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
+
+	parse.Process(context)
+
+	assert.Equal(t, "https://conf.elasticsearch.cn/2015/chengdu.html", context.MustGetString(model.CONTEXT_TASK_URL))
 	assert.Equal(t, "/2015", snapshot.Path)
 	assert.Equal(t, "/chengdu.html", snapshot.File)
 }

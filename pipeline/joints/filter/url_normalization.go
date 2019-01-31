@@ -55,6 +55,7 @@ func (joint UrlNormalizationJoint) Process(context *pipeline.Context) error {
 	reference := context.GetStringOrDefault(model.CONTEXT_TASK_Reference, "")
 	host := context.GetStringOrDefault(model.CONTEXT_TASK_Host, "")
 	var currentURI, referenceURI *u.URL
+
 	var err error
 
 	if len(url) <= 0 {
@@ -78,11 +79,14 @@ func (joint UrlNormalizationJoint) Process(context *pipeline.Context) error {
 
 	refUrlStr := reference
 	var refExists bool
+	schema := "http://"
 	if refUrlStr != "" {
 		log.Trace("ref url exists, ", refUrlStr)
 		referenceURI, err = u.ParseRequestURI(refUrlStr)
 		if err == nil {
 			refExists = true
+			log.Trace("get default schema from reference: ", referenceURI.Scheme)
+			schema = referenceURI.Scheme + "://"
 		} else {
 			log.Warn("ref url parsed failed, ", refUrlStr, ", ", err)
 		}
@@ -101,7 +105,7 @@ func (joint UrlNormalizationJoint) Process(context *pipeline.Context) error {
 			var parentPath = "/"
 
 			if strings.HasPrefix(url, "/") {
-				url = "http://" + referenceURI.Host + url
+				url = schema + referenceURI.Host + url
 				log.Trace("new relatived url,", url)
 			} else {
 				var parentUrlFullPath string
@@ -117,9 +121,9 @@ func (joint UrlNormalizationJoint) Process(context *pipeline.Context) error {
 							parentPath = parentPath + "/"
 						}
 					}
-					parentUrlFullPath = "http://" + referenceURI.Host + parentPath
+					parentUrlFullPath = schema + referenceURI.Host + parentPath
 				} else {
-					parentUrlFullPath = "http://" + referenceURI.Host
+					parentUrlFullPath = schema + referenceURI.Host
 				}
 
 				log.Trace("parent url fullpath:", parentUrlFullPath)
@@ -131,7 +135,7 @@ func (joint UrlNormalizationJoint) Process(context *pipeline.Context) error {
 				} else {
 					//page based relative urls
 					urlPath := util.GetRootUrl(referenceURI)
-					url = "http://" + urlPath + url
+					url = schema + urlPath + url
 					log.Trace("new relatived url,", url)
 				}
 			}
@@ -142,9 +146,9 @@ func (joint UrlNormalizationJoint) Process(context *pipeline.Context) error {
 		//try to fix link with host
 		if host != "" {
 			if strings.HasPrefix(url, "/") {
-				url = "http://" + host + url
+				url = schema + host + url
 			} else {
-				url = "http://" + host + "/" + url
+				url = schema + host + "/" + url
 			}
 			log.Trace("new relatived url with host,", url)
 		}
@@ -155,7 +159,7 @@ func (joint UrlNormalizationJoint) Process(context *pipeline.Context) error {
 		}
 
 		if !strings.HasPrefix(url, "http") {
-			tempUrl = "http://" + url
+			tempUrl = schema + url
 		}
 		currentURI, err = u.Parse(tempUrl)
 		if err != nil {
