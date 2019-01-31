@@ -34,7 +34,7 @@ var (
 	defaultConfig = common.IndexConfig{
 		Elasticsearch: &index.ElasticsearchConfig{
 			Endpoint:    "http://localhost:9200",
-			IndexPrefix: "gopa-",
+			IndexPrefix: "",
 		},
 		UIConfig: &common.UIConfig{
 			Enabled:     true,
