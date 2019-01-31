@@ -26,7 +26,7 @@ import (
 )
 
 func TestNormailzeLinks(t *testing.T) {
-
+	global.RegisterEnv(env.EmptyEnv())
 	context := &pipeline.Context{}
 	task := model.Task{}
 	task.Url = "http://elasticsearch.cn/"
@@ -78,7 +78,7 @@ func TestNormailzeLinks(t *testing.T) {
 }
 
 func TestNormailzeLinks1(t *testing.T) {
-
+	global.RegisterEnv(env.EmptyEnv())
 	context := &pipeline.Context{}
 	task := model.Task{}
 	task.Url = "http://localhost/"
@@ -138,7 +138,7 @@ func TestNormailzeLinks1(t *testing.T) {
 }
 
 func TestNormailzeLinks2(t *testing.T) {
-
+	global.RegisterEnv(env.EmptyEnv())
 	context := &pipeline.Context{}
 
 	task := model.Task{}
@@ -174,7 +174,7 @@ func TestNormailzeLinks2(t *testing.T) {
 }
 
 func TestNormailzeLinks3(t *testing.T) {
-
+	global.RegisterEnv(env.EmptyEnv())
 	context := &pipeline.Context{}
 	parse := UrlNormalizationJoint{}
 	task := model.Task{}
@@ -195,7 +195,7 @@ func TestNormailzeLinks3(t *testing.T) {
 }
 
 func TestNormailzeLinks4(t *testing.T) {
-
+	global.RegisterEnv(env.EmptyEnv())
 	context := &pipeline.Context{}
 	parse := UrlNormalizationJoint{}
 
@@ -216,6 +216,28 @@ func TestNormailzeLinks4(t *testing.T) {
 	assert.Equal(t, "http://conf.elasticsearch.cn/2015/chengdu.html", context.MustGetString(model.CONTEXT_TASK_URL))
 	assert.Equal(t, "/2015", snapshot.Path)
 	assert.Equal(t, "/chengdu.html", snapshot.File)
+}
+
+func TestNormailzeLinks5(t *testing.T) {
+	global.RegisterEnv(env.EmptyEnv())
+	context := &pipeline.Context{}
+	parse := UrlNormalizationJoint{}
+
+	task := model.Task{}
+	task.Url = "../../../../articles/%E4%BF%A1/%E4%B9%89/%E5%AE%97/%E4%BF%A1%E4%B9%89%E5%AE%97.html"
+	task.Reference = "http://wiki.example.org/articles/%E8%82%AF/%E5%A1%94/%E5%9F%BA/%E8%82%AF%E5%A1%94%E5%9F%BA%E5%B7%9E.html"
+	task.Depth = 1
+	task.Breadth = 1
+
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
+	context.Set(model.CONTEXT_TASK_Reference, task.Reference)
+	context.Set(model.CONTEXT_TASK_Host, task.Host)
+	snapshot := model.Snapshot{}
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
+
+	parse.Process(context)
+
+	assert.Equal(t, "http://wiki.example.org/articles/%E4%BF%A1/%E4%B9%89/%E5%AE%97/%E4%BF%A1%E4%B9%89%E5%AE%97.html", context.MustGetString(model.CONTEXT_TASK_URL))
 }
 
 func TestNormailzeLinks6(t *testing.T) {
@@ -243,14 +265,15 @@ func TestNormailzeLinks6(t *testing.T) {
 	assert.Equal(t, "/chengdu.html", snapshot.File)
 }
 
-func TestNormailzeLinks5(t *testing.T) {
+func TestNormailzeLinks7(t *testing.T) {
+	global.RegisterEnv(env.EmptyEnv())
 
 	context := &pipeline.Context{}
 	parse := UrlNormalizationJoint{}
 
 	task := model.Task{}
-	task.Url = "../../../../articles/%E4%BF%A1/%E4%B9%89/%E5%AE%97/%E4%BF%A1%E4%B9%89%E5%AE%97.html"
-	task.Reference = "http://wiki.example.org/articles/%E8%82%AF/%E5%A1%94/%E5%9F%BA/%E8%82%AF%E5%A1%94%E5%9F%BA%E5%B7%9E.html"
+	task.Url = "https://elasticsearch.cn/uploads/slides/20181210/b7bd754819da284a606842dadbd563d0"
+	task.Reference = "https://conf.elasticsearch.cn/2018/beijing.html"
 	task.Depth = 1
 	task.Breadth = 1
 
@@ -262,5 +285,28 @@ func TestNormailzeLinks5(t *testing.T) {
 
 	parse.Process(context)
 
-	assert.Equal(t, "http://wiki.example.org/articles/%E4%BF%A1/%E4%B9%89/%E5%AE%97/%E4%BF%A1%E4%B9%89%E5%AE%97.html", context.MustGetString(model.CONTEXT_TASK_URL))
+	assert.Equal(t, "b7bd754819da284a606842dadbd563d0", snapshot.RawFileName)
+}
+
+func TestNormailzeLinks8(t *testing.T) {
+	global.RegisterEnv(env.EmptyEnv())
+
+	context := &pipeline.Context{}
+	parse := UrlNormalizationJoint{}
+
+	task := model.Task{}
+	task.Url = "https://elasticsearch.cn/uploads/slides/20181210/b7bd754819da284a606842dadbd563d0.pdf"
+	task.Reference = "https://conf.elasticsearch.cn/2018/beijing.html"
+	task.Depth = 1
+	task.Breadth = 1
+
+	context.Set(model.CONTEXT_TASK_URL, task.Url)
+	context.Set(model.CONTEXT_TASK_Reference, task.Reference)
+	context.Set(model.CONTEXT_TASK_Host, task.Host)
+	snapshot := model.Snapshot{}
+	context.Set(model.CONTEXT_SNAPSHOT, &snapshot)
+
+	parse.Process(context)
+
+	assert.Equal(t, "b7bd754819da284a606842dadbd563d0.pdf", snapshot.RawFileName)
 }

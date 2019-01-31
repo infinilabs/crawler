@@ -35,13 +35,14 @@ type LinkGroup struct {
 }
 
 type Snapshot struct {
-	ID      string `json:"id,omitempty" elastic_meta:"_id"`
-	Version int    `json:"version,omitempty"`
-	Url     string `json:"url,omitempty"`
-	TaskID  string `json:"task_id,omitempty"`
-	Path    string `json:"path,omitempty"` //path of this file
-	File    string `json:"file,omitempty"` //filename of this page
-	Ext     string `json:"ext,omitempty"`  //extension of filename
+	ID          string `json:"id,omitempty" elastic_meta:"_id"`
+	Version     int    `json:"version,omitempty"`
+	Url         string `json:"url,omitempty"`
+	TaskID      string `json:"task_id,omitempty"`
+	Path        string `json:"path,omitempty"` //path of this file
+	File        string `json:"file,omitempty"` //filename of this page
+	RawFileName string `json:"raw_file_name,omitempty"`
+	Ext         string `json:"ext,omitempty"` //extension of filename
 
 	StatusCode int    `json:"-"`
 	Payload    []byte `json:"-"`

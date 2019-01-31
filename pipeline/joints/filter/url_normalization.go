@@ -214,6 +214,7 @@ func (joint UrlNormalizationJoint) Process(context *pipeline.Context) error {
 
 	filePath := ""
 	filename := ""
+	rawFileName := ""
 
 	filenamePrefix := ""
 
@@ -268,12 +269,15 @@ func (joint UrlNormalizationJoint) Process(context *pipeline.Context) error {
 		//if the page extension is missing
 		if !strings.Contains(currentURI.Path, ".") {
 			if strings.HasSuffix(currentURI.Path, "/") {
-				filename = currentURI.Path[index:len(currentURI.Path)] + defaultFileName
+				rawFileName = currentURI.Path[index:len(currentURI.Path)]
+				filename = rawFileName + defaultFileName
 			} else {
-				filename = currentURI.Path[index:len(currentURI.Path)] + ".html"
+				rawFileName = currentURI.Path[index:len(currentURI.Path)]
+				filename = rawFileName + ".html"
 			}
 		} else {
-			filename = currentURI.Path[index:len(currentURI.Path)]
+			rawFileName = currentURI.Path[index:len(currentURI.Path)]
+			filename = rawFileName
 		}
 	} else {
 		//file in the root folder
@@ -322,6 +326,7 @@ func (joint UrlNormalizationJoint) Process(context *pipeline.Context) error {
 	snapshot.Path = filePath
 	snapshot.File = filename
 	snapshot.Ext = util.FileExtension(filename)
+	snapshot.RawFileName = util.TrimLeftStr(rawFileName, "/")
 
 	log.Debugf("finished normalization,%s, %s, %s", url, filePath, filename)
 
