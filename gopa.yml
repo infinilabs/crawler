@@ -2,9 +2,9 @@ cluster:
   name: gopa
   minimum_nodes: 1
 #  seeds:
-#  - 192.168.1.121:10000
-#  - 192.168.1.121:10001
-#  - 192.168.1.121:10002
+#  - localhost:20000
+#  - localhost:20001
+#  - localhost:20002
 #node.name: node1
 
 path.data: data
@@ -180,8 +180,8 @@ pipelines:
       parameters:
         decelerate_steps: "24h,48h,72h,168h,360h,720h"
         accelerate_steps: "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
-#          - joint: lang_detect
-#            enabled: true
+    - joint: lang_detect
+      enabled: true
     - joint : save_snapshot_fs
       enabled: false
     - joint : save_snapshot_db
@@ -287,7 +287,7 @@ modules:
 
 plugins:
 - name: chrome
-  enabled: true
+  enabled: false
   command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
   debug_port: 9223
 
