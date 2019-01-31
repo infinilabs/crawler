@@ -136,6 +136,7 @@ func (joint FetchJoint) Process(context *pipeline.Context) error {
 			code, payload := errors.CodeWithPayload(err)
 
 			if code == errors.URLRedirected {
+				log.Debug("url is redirected, ", requestUrl)
 				if global.Env().IsDebug {
 					log.Debug(util.ToJson(context, true))
 				}
@@ -174,17 +175,19 @@ func (joint FetchJoint) Process(context *pipeline.Context) error {
 		return errors.New("fetch url time out")
 	case value := <-flg:
 		host := context.MustGetString(model.CONTEXT_TASK_Host)
+		var err error
 		if value.flag {
 			log.Debug("fetching url normal exit, ", requestUrl)
 			stats.Increment("host.stats", host+"."+config.STATS_FETCH_SUCCESS_COUNT)
 		} else {
 			log.Debug("fetching url error exit, ", requestUrl)
 			if value.err != nil {
-				context.End(value.err.Error())
+				err = value.err
+				context.Exit(value.err.Error())
 			}
 			stats.Increment("host.stats", host+"."+config.STATS_FETCH_FAIL_COUNT)
 		}
 		context.Set(model.CONTEXT_TASK_Status, value.status)
-		return nil
+		return err
 	}
 }
