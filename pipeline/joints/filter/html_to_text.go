@@ -127,7 +127,7 @@ func lowercaseTag(str []byte) {
 			endLowercase = true
 			endLowercaseIndex = i
 		}
-		if startLowercase && endLowercase {
+		if startLowercase && endLowercase && endLowercaseIndex > startLowercaseIndex {
 			for j := startLowercaseIndex; j < endLowercaseIndex; j++ {
 				x := str[j]
 				if x > 64 && x < 91 {

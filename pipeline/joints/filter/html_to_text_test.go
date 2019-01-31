@@ -96,16 +96,8 @@ func BenchmarkReplaceAll(t *testing.B) {
 func TestToLowercase(t *testing.T) {
 	str := []byte("<AZ class=123>azUPPERcase<Az />")
 
-	printStr(str)
+	fmt.Println(str)
 	lowercaseTag(str)
-	fmt.Println("lowercased:")
+	fmt.Println(str)
 	assert.Equal(t, "<az class=123>azUPPERcase<az />", string(str))
-	printStr(str)
-	print(string(str))
-}
-
-func printStr(str []byte) {
-	for i, s := range str {
-		fmt.Println(i, "-", s, "-", string(s))
-	}
 }
