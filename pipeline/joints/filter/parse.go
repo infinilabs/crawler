@@ -40,6 +40,7 @@ const saveImages pipeline.ParaKey = "save_images"
 const maxDepth pipeline.ParaKey = "max_depth"
 const maxBreadth pipeline.ParaKey = "max_breadth"
 const replaceNoscript pipeline.ParaKey = "replace_noscript"
+const noFollowEnabled pipeline.ParaKey = "nofollow_enabled"
 
 func (joint ParsePageJoint) Name() string {
 	return "parse"
@@ -77,7 +78,7 @@ func (joint ParsePageJoint) Process(context *pipeline.Context) error {
 
 	links := map[string]string{}
 
-	metadata := map[string]interface{}{}
+	metadata := map[string]string{}
 
 	doc.Find("meta").Each(func(i int, s *goquery.Selection) {
 		name, exist := s.Attr("name")
@@ -110,24 +111,46 @@ func (joint ParsePageJoint) Process(context *pipeline.Context) error {
 
 	})
 
-	doc.Find("a").Each(func(i int, s *goquery.Selection) {
-		href, exist := s.Attr("href")
-		href = strings.TrimSpace(href)
-		if exist && len(href) > 0 && !(strings.HasPrefix(href, "javascript")) && !(strings.HasPrefix(href, "#")) && href != "/" {
-			if strings.Contains(href, "#") {
-				hrefs := strings.Split(href, "#")
-				href = hrefs[0]
-			}
-			text := strings.TrimSpace(s.Text())
-			text = strings.Replace(text, "\t", "", -1)
-
-			if len(text) > 0 {
-				log.Trace("get link: ", text, " , ", href)
-				links[href] = text
-			}
+	//check meta for nofollow
+	noFollowEnabledInMeta := false
+	if context.GetBool(noFollowEnabled, true) && len(metadata) > 0 {
+		robots, ok := metadata["robots"]
+		if ok && util.ContainStr(robots, "nofollow") {
+			noFollowEnabledInMeta = true
 		}
+	}
 
-	})
+	if !noFollowEnabledInMeta {
+		doc.Find("a").Each(func(i int, s *goquery.Selection) {
+
+			if context.GetBool(noFollowEnabled, true) {
+				rel, exist := s.Attr("rel")
+				if exist && util.TrimSpaces(strings.ToLower(rel)) == "nofollow" {
+					log.Trace("nofollow enabled, skip: ", s.Text())
+					return
+				}
+			}
+
+			href, exist := s.Attr("href")
+			href = strings.TrimSpace(href)
+			if exist && len(href) > 0 && !(strings.HasPrefix(href, "javascript")) && !(strings.HasPrefix(href, "#")) && href != "/" {
+				if strings.Contains(href, "#") {
+					hrefs := strings.Split(href, "#")
+					href = hrefs[0]
+				}
+				text := strings.TrimSpace(s.Text())
+				text = strings.Replace(text, "\t", "", -1)
+
+				if len(text) > 0 {
+					log.Trace("get link: ", text, " , ", href)
+					links[href] = text
+				}
+			}
+
+		})
+	} else {
+		log.Trace("nofollow enabled in meta, skip all")
+	}
 
 	if len(links) > 0 {
 		context.Set(model.CONTEXT_PAGE_LINKS, links)
@@ -207,6 +230,7 @@ func (joint ParsePageJoint) Process(context *pipeline.Context) error {
 		context.End(fmt.Sprintf("skip while reach max depth: %v", depth))
 		return nil
 	}
+
 	//if reach max breadth, skip for future fetch
 	if breadth > joint.GetIntOrDefault(maxBreadth, 10) {
 		log.Debug("skip while reach max breadth, ", breadth, ", ", refUrl)
