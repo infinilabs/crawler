@@ -1,7 +1,7 @@
-<%! func Search(w io.Writer,r *http.Request,q string,filter string,from int,size int,config *common.UIConfig, response *index.SearchResponse) error %>
+<%! func Search(w io.Writer,r *http.Request,q string,filter string,from int,size int,config *common.UIConfig, response *elastic.SearchResponse) error %>
 <%% import "net/http" %%>
 <%% import "github.com/infinitbyte/gopa/ui/search/common" %%>
-<%% import "github.com/infinitbyte/framework/core/index" %%>
+<%% import "github.com/infinitbyte/framework/core/elastic" %%>
 <%% import "github.com/infinitbyte/framework/core/util" %%>
 <%% import "fmt" %%>
 <%% import "strings" %%>
@@ -71,7 +71,7 @@
                     </div>
                     <div id="toolbar_baseline" class="toolbar_baseline"></div>
                     <div style="padding-top:5px;padding-bottom: 5px;">
-                        <SPAN style="float: left;" class=nums>About <%= response.Hits.Total %> results (<span><%= response.Took %>ms</span>)</SPAN>
+                        <SPAN style="float: left;" class=nums>About <%= response.GetTotal() %> results (<span><%= response.Took %>ms</span>)</SPAN>
                     </div>
                 </div>
             </div>
@@ -170,10 +170,10 @@
 
 
                         <%
-                        if hasResult && response.Hits.Total>10{
+                        if hasResult && response.GetTotal()>10{
                         %>
                         <div class="loadmore">
-                            <div class="pnnext" data-total="<%= response.Hits.Total %>" data-from="<%= from %>" data-size="<%= size %>" data-load-text="Loading ...">
+                            <div class="pnnext" data-total="<%= response.GetTotal() %>" data-from="<%= from %>" data-size="<%= size %>" data-load-text="Loading ...">
                                 <span class="load-icon"></span><span class="load-text">Load More</span>
                             </div>
                             <p class="load-tips"></p>

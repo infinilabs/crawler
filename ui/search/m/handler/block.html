@@ -1,7 +1,7 @@
-<%! func Block(w io.Writer,r *http.Request,q string,filter string,from int,size int,config *common.UIConfig, response *index.SearchResponse) error %>
+<%! func Block(w io.Writer,r *http.Request,q string,filter string,from int,size int,config *common.UIConfig, response *elastic.SearchResponse) error %>
 <%% import "net/http" %%>
 <%% import "github.com/infinitbyte/gopa/ui/search/common" %%>
-<%% import "github.com/infinitbyte/framework/core/index" %%>
+<%% import "github.com/infinitbyte/framework/core/elastic" %%>
 <%% import "github.com/infinitbyte/framework/core/util" %%>
 <%% import "fmt" %%>
 

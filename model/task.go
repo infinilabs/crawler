@@ -18,6 +18,7 @@ const TaskTimeout int = 6
 const TaskDuplicated int = 7
 const TaskInterrupted int = 8
 const TaskPendingFetch int = 9
+const TaskFetchFailed int = 10
 
 //  Common pipeline context keys
 const (
@@ -45,6 +46,8 @@ func GetTaskStatusText(status int) string {
 		return "interrupted"
 	case TaskPendingFetch:
 		return "pending_fetch"
+	case TaskFetchFailed:
+		return "fetch_failed"
 	}
 	return "unknow"
 }
@@ -180,6 +183,25 @@ func GetTaskByField(k, v string) ([]Task, error) {
 	task := Task{}
 	tasks := []Task{}
 	err, result := orm.GetBy(k, v, task, &tasks)
+
+	if err != nil {
+		log.Error(k, ", ", err)
+		return tasks, err
+	}
+	if result.Result != nil && tasks == nil || len(tasks) == 0 {
+		convertTask(result, &tasks)
+	}
+
+	return tasks, err
+}
+
+func GetTaskByFieldAndStatus(k, v string, status int) ([]Task, error) {
+	task := Task{}
+	tasks := []Task{}
+
+	query := orm.Query{}
+	query.Conds = orm.And(orm.Eq(k, v), orm.Eq("status", status))
+	err, result := orm.Search(task, &tasks, &query)
 
 	if err != nil {
 		log.Error(k, ", ", err)

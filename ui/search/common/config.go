@@ -16,10 +16,6 @@ limitations under the License.
 
 package common
 
-import (
-	core "github.com/infinitbyte/framework/core/index"
-)
-
 type UIConfig struct {
 	Enabled     bool   `config:"enabled"`
 	SiteName    string `config:"site_name"`
@@ -28,6 +24,6 @@ type UIConfig struct {
 }
 
 type IndexConfig struct {
-	Elasticsearch *core.ElasticsearchConfig `config:"elasticsearch"`
-	UIConfig      *UIConfig                 `config:"ui"`
+	Elasticsearch string    `config:"elasticsearch"`
+	UIConfig      *UIConfig `config:"ui"`
 }

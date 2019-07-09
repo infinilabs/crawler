@@ -28,7 +28,7 @@ OLDGOPATH:= $(GOPATH)
 NEWGOPATH:= $(CURDIR):$(CURDIR)/vendor:$(GOPATH)
 
 GO        := GO15VENDOREXPERIMENT="1" go
-GOBUILD  := GOPATH=$(NEWGOPATH) CGO_ENABLED=1  $(GO) build -ldflags -s
+GOBUILD  := GOPATH=$(NEWGOPATH) CGO_ENABLED=1  $(GO) build -ldflags -s -gcflags "-m -m"
 GOBUILDNCGO  := GOPATH=$(NEWGOPATH) CGO_ENABLED=0  $(GO) build -ldflags -s
 GOTEST   := GOPATH=$(NEWGOPATH) CGO_ENABLED=1  $(GO) test -ldflags -s
 
@@ -42,6 +42,11 @@ FRAMEWORK_FOLDER := $(CURDIR)/../framework/
 FRAMEWORK_BRANCH := master
 FRAMEWORK_VENDOR_FOLDER := $(CURDIR)/vendor/
 FRAMEWORK_VENDOR_BRANCH := master
+
+FRAMEWORK_OFFLINE_BUILD := ""
+ifneq "$(OFFLINE_BUILD)" ""
+   FRAMEWORK_OFFLINE_BUILD := $(OFFLINE_BUILD)
+endif
 
 .PHONY: all build update test clean
 
@@ -118,10 +123,9 @@ init:
 	@echo building $(APP_NAME) $(APP_VERSION)
 	@if [ ! -d $(FRAMEWORK_FOLDER) ]; then echo "framework does not exist";(cd ../&&git clone -b $(FRAMEWORK_BRANCH) https://github.com/infinitbyte/framework.git) fi
 	@if [ ! -d $(FRAMEWORK_VENDOR_FOLDER) ]; then echo "framework vendor does not exist";(git clone  -b $(FRAMEWORK_VENDOR_BRANCH) https://github.com/infinitbyte/framework-vendor.git vendor) fi
-	(cd ../framework && git pull origin $(FRAMEWORK_BRANCH))
-	(cd vendor && git pull origin $(FRAMEWORK_VENDOR_BRANCH))
-	$(GO) get -u github.com/ledongthuc/pdf
-
+    @if [ "" == $(FRAMEWORK_OFFLINE_BUILD) ]; then (cd ../framework && git pull origin $(FRAMEWORK_BRANCH)); fi;
+    @if [ "" == $(FRAMEWORK_OFFLINE_BUILD) ]; then (cd vendor && git pull origin $(FRAMEWORK_VENDOR_BRANCH)); fi;
+    @if [ "" == $(FRAMEWORK_OFFLINE_BUILD) ]; then $(GO) get -u github.com/ledongthuc/pdf; fi;
 
 
 update-generated-file:

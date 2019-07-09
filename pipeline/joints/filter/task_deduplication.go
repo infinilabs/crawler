@@ -17,11 +17,12 @@ limitations under the License.
 package filter
 
 import (
+	"errors"
 	"fmt"
 	log "github.com/cihub/seelog"
-	"github.com/infinitbyte/framework/core/errors"
 	"github.com/infinitbyte/framework/core/pipeline"
 	"github.com/infinitbyte/gopa/model"
+	"github.com/infinitbyte/framework/core/global"
 )
 
 // TaskDeduplicationJoint is used to find whether the task already in the database
@@ -36,18 +37,37 @@ func (joint TaskDeduplicationJoint) Name() string {
 // Process deduplication
 func (joint TaskDeduplicationJoint) Process(c *pipeline.Context) error {
 	url := c.MustGetString(model.CONTEXT_TASK_URL)
-	log.Trace("check duplication, ", url)
+
+	if global.Env().IsDebug{
+		log.Trace("check duplication, ", url)
+	}
 
 	items, err := model.GetTaskByField("url", url)
-
 	if err != nil {
 		panic(err)
 	}
 	if len(items) > 0 {
-		msg := fmt.Sprintf("task already exists, %s", url)
-		c.Set(model.CONTEXT_TASK_Status, model.TaskDuplicated)
-		c.Exit(msg)
-		return errors.New(msg)
+
+		log.Trace("duplication: ", items)
+
+		//double check
+		for _, v := range items {
+			if v.Url == url {
+				//if v.Status==model.TaskCreated{
+				//	return nil
+				//}
+
+				msg := fmt.Sprintf("task already exists, %s", url)
+				c.Set(model.CONTEXT_TASK_Status, model.TaskDuplicated)
+				c.Exit(msg)
+				return errors.New(msg)
+			} else {
+				log.Error(url, " vs ", v.Url, ", mismatch, but said was duplication")
+			}
+		}
+
+		//panic(errors.New(fmt.Sprintln("duplication false alarm,",url,",",items)))
+
 	}
 
 	return nil

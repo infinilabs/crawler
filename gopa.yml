@@ -33,6 +33,22 @@ network:
   rpc_bind: 0.0.0.0:20000
   broadcast_bind: 224.3.2.2:9876
 
+elasticsearch:
+- name: default
+  endpoint: http://localhost:9200
+  index_prefix: gopa-
+  basic_auth:
+    username: elastic
+    password: changeme
+
+- name: monitoring
+  endpoint: http://localhost:9200
+  index_prefix: gopa-
+  basic_auth:
+    username: elastic
+    password: changeme
+
+
 pipelines:
 - name: url_filter_flow
   start:
@@ -118,6 +134,9 @@ pipelines:
     enabled: true
     parameters:
       is_create: true
+  error:
+    joint: save_task
+    enabled: true
 - name: url_fetch_flow
   start:
     joint: init_task
@@ -195,8 +214,11 @@ pipelines:
   end:
     joint: save_task
     enabled: true
-    keep_404: false
-    keep_redirected: false
+    keep_404: true
+    keep_redirected: true
+  error:
+    joint: save_task
+    enabled: true
 
 modules:
 - name: pipeline
@@ -220,14 +242,6 @@ modules:
 - name: cluster
   enabled: true
 
-- name: dispatch
-  enabled: true
-  failed_retry: true
-  new_task: true
-  update_task: false
-  max_concurrent_fetch_tasks: 10
-  fetch_size: 10
-  get_host_config_by_url: false
 
 - name: api
   enabled: true
@@ -258,21 +272,14 @@ modules:
 #    site_name: Elasticsearch
 #    logo: https://static-www.elastic.co/cn/assets/blt6050efb80ceabd47/elastic-logo (2).svg?q=294
 #    favicon: https://www.elastic.co/favicon.ico
-  elasticsearch:
-    endpoint: http://localhost:9200
-    index_prefix: gopa-
-    username: elastic
-    password: changeme
+  elasticsearch: default
 
 - name: elastic
   enabled: true
   store_enabled: true
   orm_enabled: true
-  elasticsearch:
-    endpoint: http://localhost:9200
-    index_prefix: gopa-
-    username: elastic
-    password: changeme
+  indexer_enabled: true
+  elasticsearch: default
 
 - name: stats
   enabled: true
@@ -290,6 +297,15 @@ plugins:
   enabled: false
   command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
   debug_port: 9223
+
+- name: dispatch
+  enabled: true
+  failed_retry: true
+  new_task: true
+  update_task: true
+  max_concurrent_fetch_tasks: 10
+  fetch_size: 10
+  get_host_config_by_url: false
 
 
 rpc:

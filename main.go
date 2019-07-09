@@ -51,8 +51,6 @@ func main() {
 	defer app.Shutdown()
 
 	app.Start(func() {
-		//modules
-		module.New()
 
 		//load core modules first
 		modules.Register()
@@ -74,12 +72,12 @@ func main() {
 
 	}, func() {
 
-		orm.RegisterSchema(&model.Host{})
-		orm.RegisterSchema(&model.Task{})
-		orm.RegisterSchema(&model.Snapshot{})
-		orm.RegisterSchema(&model.HostConfig{})
-		orm.RegisterSchema(&model.Project{})
-		orm.RegisterSchema(&model.Index{})
+		orm.RegisterSchema(model.Host{})
+		orm.RegisterSchema(model.Task{})
+		orm.RegisterSchema(model.Snapshot{})
+		orm.RegisterSchema(model.HostConfig{})
+		orm.RegisterSchema(model.Project{})
+		orm.RegisterSchema(model.Index{})
 	})
 
 }

@@ -136,6 +136,7 @@ func (joint FetchJoint) Process(context *pipeline.Context) error {
 			code, payload := errors.CodeWithPayload(err)
 
 			if code == errors.URLRedirected {
+
 				log.Debug("url is redirected, ", requestUrl)
 				if global.Env().IsDebug {
 					log.Debug(util.ToJson(context, true))

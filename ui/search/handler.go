@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/infinitbyte/framework/core/api"
+	core "github.com/infinitbyte/framework/core/elastic"
 	"github.com/infinitbyte/framework/core/errors"
-	core "github.com/infinitbyte/framework/core/index"
+	"github.com/infinitbyte/framework/core/global"
 	"github.com/infinitbyte/framework/core/kv"
 	"github.com/infinitbyte/framework/core/util"
 	"github.com/infinitbyte/gopa/config"
@@ -22,8 +23,11 @@ import (
 // UserUI is the user namespace, public web
 type UserUI struct {
 	api.Handler
-	Config       *common.UIConfig
-	SearchClient *core.ElasticsearchClient
+	Config *common.IndexConfig
+}
+
+func (h *UserUI) GetSearchClient() core.API {
+	return core.GetClient(h.Config.Elasticsearch)
 }
 
 // IndexPageAction index page is for PC
@@ -62,7 +66,7 @@ func (h *UserUI) AJAXMoreItemAction(w http.ResponseWriter, req *http.Request, ps
 		}
 
 		if len(response.Hits.Hits) > 0 {
-			mobileHandler.Block(w, req, rawQuery, filter, from, size, h.Config, response)
+			mobileHandler.Block(w, req, rawQuery, filter, from, size, h.Config.UIConfig, response)
 		}
 	}
 }
@@ -162,7 +166,7 @@ func (h *UserUI) execute(filterQuery, query string, agg bool, from, size int) (*
 
 	q := fmt.Sprintf(format, filterQuery, query, aggStr, from, size)
 
-	return h.SearchClient.SearchWithRawQueryDSL("index", []byte(q))
+	return h.GetSearchClient().SearchWithRawQueryDSL("index", []byte(q))
 }
 
 func (h *UserUI) searchPageAction(w http.ResponseWriter, req *http.Request, ps httprouter.Params, mobile bool) {
@@ -171,9 +175,9 @@ func (h *UserUI) searchPageAction(w http.ResponseWriter, req *http.Request, ps h
 	query = util.XSSHandle(query)
 	if strings.TrimSpace(query) == "" {
 		if mobile {
-			mobileHandler.Index(w, h.Config)
+			mobileHandler.Index(w, h.Config.UIConfig)
 		} else {
-			handler.Index(w, h.Config)
+			handler.Index(w, h.Config.UIConfig)
 		}
 	} else {
 
@@ -197,9 +201,9 @@ func (h *UserUI) searchPageAction(w http.ResponseWriter, req *http.Request, ps h
 		}
 
 		if mobile {
-			mobileHandler.Search(w, req, rawQuery, filter, from, size, h.Config, response)
+			mobileHandler.Search(w, req, rawQuery, filter, from, size, h.Config.UIConfig, response)
 		} else {
-			handler.Search(w, req, rawQuery, filter, from, size, h.Config, response)
+			handler.Search(w, req, rawQuery, filter, from, size, h.Config.UIConfig, response)
 		}
 
 	}
@@ -257,13 +261,13 @@ func (h *UserUI) SuggestAction(w http.ResponseWriter, req *http.Request, ps http
 
 		query := fmt.Sprintf(template, q, field, q, field, field)
 
-		response, err := h.SearchClient.SearchWithRawQueryDSL("index", []byte(query))
+		response, err := h.GetSearchClient().SearchWithRawQueryDSL("index", []byte(query))
 		if err != nil {
 			h.Error(w, err)
 			return
 		}
 
-		if response.Hits.Total > 0 {
+		if response.GetTotal() > 0 {
 			terms := []string{}
 			docs := []interface{}{}
 			hash := hashset.New()
@@ -320,9 +324,20 @@ func (h *UserUI) GetSnapshotPayloadAction(w http.ResponseWriter, req *http.Reque
 
 		//add link rewrite
 		if util.ContainStr(snapshot.ContentType, "text/html") {
+
+			siteLogo := h.Config.UIConfig.SiteLogo
+			if !util.PrefixStr(siteLogo, "http") {
+				if global.Env().SystemConfig.TLSEnabled {
+					siteLogo = util.JoinPath("https://", global.Env().SystemConfig.NetworkConfig.HTTPBinding, siteLogo)
+				} else {
+					siteLogo = util.JoinPath("http://", global.Env().SystemConfig.NetworkConfig.HTTPBinding, siteLogo)
+				}
+
+			}
+
 			h.Write(w, []byte("<script language='JavaScript' type='text/javascript'>"))
 			h.Write(w, []byte(`var dom=document.createElement("div");dom.innerHTML='<div style="overflow: hidden;z-index: 99999999999999999;width:100%;height:18px;position: absolute top:1px;background:#ebebeb;font-size: 12px;text-align:center;">`))
-			h.Write(w, []byte(fmt.Sprintf(`<a href="/"><img border=0 style="float:left;height:18px" src="%s"></a><span style="font-size: 12px;">Saved by Gopa, %v, <a title="%v" href="%v">View original</a></span></div>';var first=document.body.firstChild;  document.body.insertBefore(dom,first);`, h.Config.SiteLogo, snapshot.Created, snapshot.Url, snapshot.Url)))
+			h.Write(w, []byte(fmt.Sprintf(`<a href="/"><img border=0 style="float:left;height:18px" src="%s"></a><span style="font-size: 12px;">Saved by Gopa, %v, <a title="%v" href="%v">View original</a></span></div>';var first=document.body.firstChild;  document.body.insertBefore(dom,first);`, siteLogo, snapshot.Created, snapshot.Url, snapshot.Url)))
 			h.Write(w, []byte("</script>"))
 			h.Write(w, []byte("<script src=\"/static/assets/js/snapshot_footprint.js?v=1\"></script> "))
 		}

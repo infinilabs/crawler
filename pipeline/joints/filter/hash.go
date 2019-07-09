@@ -19,6 +19,8 @@ package filter
 import (
 	"crypto/sha1"
 	"fmt"
+	log "github.com/cihub/seelog"
+	"github.com/infinitbyte/framework/core/global"
 	"github.com/infinitbyte/framework/core/pipeline"
 	"github.com/infinitbyte/gopa/model"
 )
@@ -35,11 +37,23 @@ func (joint HashJoint) Process(context *pipeline.Context) error {
 
 	snapshot := context.MustGet(model.CONTEXT_SNAPSHOT).(*model.Snapshot)
 
+	if snapshot.Payload == nil || len(snapshot.Payload) == 0 {
+		log.Trace("snapshot payload is empty, skip hash,", snapshot.Payload)
+		return nil
+	}
+
+	if global.Env().IsDebug {
+		log.Trace("cal hash,", snapshot.Payload)
+	}
 	h := sha1.New()
 	h.Write(snapshot.Payload)
 	bs := h.Sum(nil)
 
 	snapshot.Hash = fmt.Sprintf("%x", bs)
+
+	if global.Env().IsDebug {
+		log.Trace("get hash,", snapshot.Hash)
+	}
 
 	return nil
 }

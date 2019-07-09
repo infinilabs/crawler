@@ -21,7 +21,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	log "github.com/cihub/seelog"
-	"github.com/infinitbyte/framework/core/index"
+	"github.com/infinitbyte/framework/core/elastic"
 	"github.com/infinitbyte/framework/core/pipeline"
 	"github.com/infinitbyte/framework/core/queue"
 	"github.com/infinitbyte/gopa/config"
@@ -54,7 +54,7 @@ func (joint IndexJoint) Process(c *pipeline.Context) error {
 	data["task"] = common.ParseTask(c)
 	data["snapshot"] = snapshot
 
-	docs := index.IndexDocument{
+	docs := elastic.IndexDocument{
 		Index:  "index",
 		ID:     id,
 		Source: data,

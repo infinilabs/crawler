@@ -19,7 +19,6 @@ package ui
 import (
 	"github.com/infinitbyte/framework/core/api"
 	"github.com/infinitbyte/framework/core/env"
-	"github.com/infinitbyte/framework/core/index"
 	"github.com/infinitbyte/framework/core/ui"
 	"github.com/infinitbyte/framework/core/vfs"
 	core "github.com/infinitbyte/framework/modules/ui/common"
@@ -32,10 +31,7 @@ import (
 
 var (
 	defaultConfig = common.IndexConfig{
-		Elasticsearch: &index.ElasticsearchConfig{
-			Endpoint:    "http://localhost:9200",
-			IndexPrefix: "",
-		},
+		Elasticsearch: "default",
 		UIConfig: &common.UIConfig{
 			Enabled:     true,
 			SiteName:    "GOPA",
@@ -74,8 +70,7 @@ func InitUI() {
 	//register UI
 	if indexConfig.UIConfig.Enabled {
 		search := search.UserUI{}
-		search.Config = indexConfig.UIConfig
-		search.SearchClient = &index.ElasticsearchClient{Config: indexConfig.Elasticsearch}
+		search.Config = &indexConfig
 		ui.HandleUIMethod(api.GET, "/", search.IndexPageAction)
 		ui.HandleUIMethod(api.GET, "/m/", search.MobileIndexPageAction)
 		ui.HandleUIMethod(api.GET, "/ajax_more_item/", search.AJAXMoreItemAction)
