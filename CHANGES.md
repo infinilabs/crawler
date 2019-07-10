@@ -8,9 +8,12 @@
 
 ##### breaking changes
 1. pipeline config moved to dedicated section, can be reference by id
+2. elasticsearch config moved to dedicated section, can be reference by id
+3. remove indexer module, nested to elastic module
 
 ##### features
 1. add parse_pdf joint to parse PDF files
+2. support major elasticsearch version, auto handle API differences
 
 ##### improvement
 1. auto clone and update framework/vendor repo
@@ -18,6 +21,7 @@
 
 ##### bugfix
 1. fix relative link was not proper resolved with https
+2. fix redirected link not handled exception
 
 
 #### v0.11
