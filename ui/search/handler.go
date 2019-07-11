@@ -4,6 +4,7 @@ import (
 	"github.com/infinitbyte/framework/core/api/router"
 
 	"fmt"
+	log "github.com/cihub/seelog"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/infinitbyte/framework/core/api"
 	core "github.com/infinitbyte/framework/core/elastic"
@@ -166,6 +167,10 @@ func (h *UserUI) execute(filterQuery, query string, agg bool, from, size int) (*
 
 	q := fmt.Sprintf(format, filterQuery, query, aggStr, from, size)
 
+	if global.Env().IsDebug {
+		log.Trace(q)
+	}
+
 	return h.GetSearchClient().SearchWithRawQueryDSL("index", []byte(q))
 }
 
@@ -235,7 +240,6 @@ func (h *UserUI) SuggestAction(w http.ResponseWriter, req *http.Request, ps http
             "query":  "%s",
             "default_operator": "OR",
              "fields" : ["%s"],
-            "use_dis_max": true,
             "allow_leading_wildcard": false,
             "boost": 1
           }
@@ -245,7 +249,6 @@ func (h *UserUI) SuggestAction(w http.ResponseWriter, req *http.Request, ps http
             "query":  "%s",
             "default_operator": "AND",
             "fields" : ["%s"],
-            "use_dis_max": true,
             "allow_leading_wildcard": false,
             "boost": 10
           }
