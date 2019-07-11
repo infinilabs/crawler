@@ -77,15 +77,15 @@ _Note: Elasticsearch version should >= v5.3_
 
 - Enable elastic module in `gopa.yml`, update the elasticsearch's setting:
 ```
-- name: elastic
+elasticsearch:
+- name: default
   enabled: true
-  kv_enabled: true
-  orm_enabled: true
-  elasticsearch:
-    endpoint: http://localhost:9200
-    index_prefix: gopa-
+  endpoint: http://localhost:9200
+  index_prefix: gopa-
+  basic_auth:
     username: elastic
     password: changeme
+
 ```
 </details></p>
 
