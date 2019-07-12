@@ -65,7 +65,18 @@ Supported platform
 - Mac/Linux: Run `make build` to build the Gopa. <br/>
 - Windows:  Checkout this wiki page - [How to build GOPA on windows](https://github.com/infinitbyte/gopa/wiki/How-to-build-GOPA-on-windows).
 
-So far, we have:
+For example:
+```
+#apt  install golang-go
+#brew install golang
+mkdir ~/go/src/github.com/infinitbyte/ -p
+cd ~/go/src/github.com/infinitbyte/
+git clone https://github.com/infinitbyte/gopa.git
+cd gopa
+make
+```
+
+After a few minutes, you should have:
 
 > `gopa`, the main program, a single binary.<br/>
 > `gopa.yml`, main configuration for gopa.<br/>
@@ -174,9 +185,11 @@ If you are running `Gopa` as daemon, you may stop it like this:
 
 
 
-## Contributing
+## Who uses it?
 
-You are sincerely and warmly welcomed to play with this project, from UI style to core features, or just a piece of document, welcome! let's make it better.
+You use GOPA and you want to be listed there? [Contact me](https://medcl.com).
+
+
 
 
 License
