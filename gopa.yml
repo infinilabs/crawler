@@ -35,6 +35,7 @@ network:
 
 elasticsearch:
 - name: default
+  enabled: true
   endpoint: http://localhost:9200
   index_prefix: gopa-
   basic_auth:
@@ -42,6 +43,7 @@ elasticsearch:
     password: changeme
 
 - name: monitoring
+  enabled: true
   endpoint: http://localhost:9200
   index_prefix: gopa-
   basic_auth:
@@ -296,6 +298,7 @@ plugins:
 - name: chrome
   enabled: false
   command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+#  command: "/usr/bin/google-chrome"
   debug_port: 9223
 
 - name: dispatch
