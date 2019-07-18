@@ -11,6 +11,7 @@ import (
 	"github.com/infinitbyte/framework/core/errors"
 	"github.com/infinitbyte/framework/core/global"
 	"github.com/infinitbyte/framework/core/kv"
+	"github.com/infinitbyte/framework/core/ui"
 	"github.com/infinitbyte/framework/core/util"
 	"github.com/infinitbyte/gopa/config"
 	"github.com/infinitbyte/gopa/model"
@@ -330,10 +331,10 @@ func (h *UserUI) GetSnapshotPayloadAction(w http.ResponseWriter, req *http.Reque
 
 			siteLogo := h.Config.UIConfig.SiteLogo
 			if !util.PrefixStr(siteLogo, "http") {
-				if global.Env().SystemConfig.TLSEnabled {
-					siteLogo = util.JoinPath("https://", global.Env().SystemConfig.NetworkConfig.HTTPBinding, siteLogo)
+				if ui.GetUIConfig().TLSConfig.TLSEnabled {
+					siteLogo = util.JoinPath("https://", ui.GetBindAddress(), siteLogo)
 				} else {
-					siteLogo = util.JoinPath("http://", global.Env().SystemConfig.NetworkConfig.HTTPBinding, siteLogo)
+					siteLogo = util.JoinPath("http://", ui.GetBindAddress(), siteLogo)
 				}
 
 			}
