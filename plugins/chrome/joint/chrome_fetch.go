@@ -234,7 +234,8 @@ func (joint ChromeFetchV2Joint) Process(context *pipeline.Context) error {
 
 	if strings.TrimSpace(result.OuterHTML) == "" || result.OuterHTML == "<html><head></head><body></body></html>" {
 		err := errors.Errorf("the response is empty, %s", requestUrl)
-		panic(err)
+		context.End(err)
+		return err
 	}
 
 	if joint.GetBool(saveScreenshot, false) {
