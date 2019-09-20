@@ -46,6 +46,12 @@
 
     `go tool pprof --web --lines  http://localhost:6060/debug/pprof/profile`
 
+* Builtin Web
+
+  ```
+    ./bin/gopa -pprof=localhost:6060
+    go tool pprof -http :9090 http://localhost:6060/debug/pprof/heap
+   ```
 
 * Go-torch analysis CPU cycles
 

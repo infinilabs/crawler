@@ -20,9 +20,9 @@ import (
 	"errors"
 	"fmt"
 	log "github.com/cihub/seelog"
+	"github.com/infinitbyte/framework/core/global"
 	"github.com/infinitbyte/framework/core/pipeline"
 	"github.com/infinitbyte/gopa/model"
-	"github.com/infinitbyte/framework/core/global"
 )
 
 // TaskDeduplicationJoint is used to find whether the task already in the database
@@ -38,7 +38,7 @@ func (joint TaskDeduplicationJoint) Name() string {
 func (joint TaskDeduplicationJoint) Process(c *pipeline.Context) error {
 	url := c.MustGetString(model.CONTEXT_TASK_URL)
 
-	if global.Env().IsDebug{
+	if global.Env().IsDebug {
 		log.Trace("check duplication, ", url)
 	}
 

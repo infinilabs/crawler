@@ -1,12 +1,3 @@
-cluster:
-  name: gopa
-  minimum_nodes: 1
-#  seeds:
-#  - localhost:20000
-#  - localhost:20001
-#  - localhost:20002
-#node.name: node1
-
 path.data: data
 path.logs: log
 path.certs: test/cert
@@ -14,24 +5,12 @@ path.certs: test/cert
 cookie_secret: YOUR-GOPA-SECRET
 
 allow_multi_instance: true
-max_num_of_instances: 30
+max_num_of_instances: 1
 
-tls_enabled: false
+cluster.name: gopa
 
-logging.level: info
+logging.level: debug
 
-node.master: true
-node.data: true
-node.proxy: true
-
-node.tag: ["external","hot"]
-
-
-network:
-  http_bind: 0.0.0.0:9000
-  api_bind: 0.0.0.0:8000
-  rpc_bind: 0.0.0.0:20000
-  broadcast_bind: 224.3.2.2:9876
 
 elasticsearch:
 - name: default
@@ -40,18 +19,80 @@ elasticsearch:
   index_prefix: gopa-
   basic_auth:
     username: elastic
-    password: changeme
-
-- name: monitoring
-  enabled: true
-  endpoint: http://localhost:9200
-  index_prefix: gopa-
-  basic_auth:
-    username: elastic
-    password: changeme
-
+    password: WYOWoQq28mp07fDoPIvc
 
 pipelines:
+- name: url_fetch_flow
+  start:
+    joint: init_task
+    enabled: true
+  process:
+    - joint: url_normalization
+      enabled: true
+      parameters:
+        follow_all_domain: false
+        follow_sub_domain: true
+        max_filename_length: 1000
+    - joint: ignore_timeout
+      parameters:
+        ignore_timeout_after_count: 500
+      enabled: true
+    - joint: chrome_fetch
+      enabled: true
+      parameters:
+        chrome_host: http://127.0.0.1:9223
+        save_screenshot: true
+        compress_enabled: true
+        timeout_in_seconds: 60
+        screenshot_quality: 50
+    - joint: fetch
+      enabled: false
+      parameters:
+        timeout_in_seconds: 100
+    - joint: parse
+      enabled: true
+      parameters:
+        dispatch_links: true
+        save_images: true
+        max_depth: 2
+        max_breadth: 1
+    - joint: extract
+      enabled: false
+      parameters:
+        html_block:
+          your_tag_name1: ".tag_class"
+          your_tag_name2: "#tag_id"
+    - joint: html2text
+      parameters:
+        remove_nonscript: true
+        merge_whitespace: false
+      enabled: true
+    - joint: hash
+      enabled: true
+    - joint: content_deduplication
+      enabled: true
+    - joint: update_check_time
+      enabled: true
+      parameters:
+        decelerate_steps: "72h,168h,360h,720h"
+        accelerate_steps: "360h,120h,72h"
+    - joint: lang_detect
+      enabled: true
+    - joint : save_snapshot_fs
+      enabled: false
+    - joint : save_snapshot_db
+      enabled: true
+      parameters:
+        compress_enabled: true
+        bucket: "Snapshot"
+        max_revision: 5
+    - joint: index
+      enabled: true
+  end:
+    joint: save_task
+    enabled: true
+    keep_404: false
+    keep_redirected: false
 - name: url_filter_flow
   start:
     joint: init_task
@@ -77,14 +118,20 @@ pipelines:
             - "crond/run"
             - "login"
             - "logout"
+            - "/account/"
+            - "/blob/"
+            - "/tree/"
+            - "/commit/"
+            - "/compare/"
+            - "/releases"
             suffix: []
           must:
             prefix: []
-            contain: []
+            contain: ["elastic"]
             suffix: []
           should:
-            prefix: []
-            contain: []
+            prefix: ["https://stackoverflow.com/questions/tagged/elasticsearch","/questions/tagged/elasticsearch"]
+            contain: ["https://stackoverflow.com/questions/","/issues","elastic.co","elasticsearch.cn","elastic"]
             suffix: []
         host_match_rule:
           must:
@@ -97,7 +144,7 @@ pipelines:
             suffix: []
           must_not:
             prefix: []
-            contain: []
+            contain: ["elasticsearch-ci","github.com"]
             suffix: []
         file_match_rule:
           must:
@@ -122,7 +169,7 @@ pipelines:
             contain: []
             suffix: []
           must_not:
-            contain: [zip, exe, jar, js, css, rar, gz, zip, bmp, jpeg, gif,svg, png, jpg, apk]
+            contain: [zip, exe, jar, js, css, rar, gz, zip, bmp, jpeg, gif, svg, png, jpg, apk]
             prefix: []
             suffix: []
     - joint: filter_check
@@ -136,91 +183,37 @@ pipelines:
     enabled: true
     parameters:
       is_create: true
-  error:
-    joint: save_task
+
+api:
+  enabled: true
+  auth:
+    basic_auth:
+      users: users.txt
+      roles: roles.txt
+  network:
+    binding: 0.0.0.0:8000
+  tls:
     enabled: true
-- name: url_fetch_flow
-  start:
-    joint: init_task
-    enabled: true
-  process:
-    - joint: url_normalization
-      enabled: true
-      parameters:
-        follow_all_domain: false
-        follow_sub_domain: true
-        max_filename_length: 1000
-    - joint: ignore_timeout
-      parameters:
-        ignore_timeout_after_count: 500
-      enabled: true
-    - joint: chrome_fetch
-      enabled: false
-      parameters:
-        chrome_host: http://127.0.0.1:9223
-        save_screenshot: true
-        compress_enabled: true
-        timeout_in_seconds: 60
-        screenshot_quality: 50
-    - joint: fetch
-      enabled: true
-      parameters:
-        timeout_in_seconds: 100
-#          proxy: "socks5://127.0.0.1:1080"
-#          cookie: ""
-    - joint: parse_pdf
-      enabled: true
-      parameters:
-        accepted_content_type:
-        - application/octet-stream
-        - application/pdf
-    - joint: parse
-      enabled: true
-      parameters:
-        dispatch_links: true
-        save_images: true
-        max_depth: 100
-        max_breadth: 1
-    - joint: extract
-      enabled: false
-      parameters:
-        html_block:
-          your_tag_name1: ".tag_class"
-          your_tag_name2: "#tag_id"
-    - joint: html2text
-      parameters:
-        remove_nonscript: true
-        merge_whitespace: false
-      enabled: true
-    - joint: hash
-      enabled: true
-    - joint: content_deduplication
-      enabled: true
-    - joint: update_check_time
-      enabled: true
-      parameters:
-        decelerate_steps: "24h,48h,72h,168h,360h,720h"
-        accelerate_steps: "24h,12h,6h,3h,1h30m,45m,30m,20m,10m"
-    - joint: lang_detect
-      enabled: true
-    - joint : save_snapshot_fs
-      enabled: false
-    - joint : save_snapshot_db
-      enabled: true
-      parameters:
-        compress_enabled: true
-        bucket: "Snapshot"
-        max_revision: 5
-    - joint: index
-      enabled: true
-  end:
-    joint: save_task
-    enabled: true
-    keep_404: true
-    keep_redirected: true
-  error:
-    joint: save_task
-    enabled: true
+#    cert_file: test/cert/client.crt
+#    key_file: test/cert/client.key
+    skip_insecure_verify: true
+
+cluster:
+  enabled: true
+  name: gopa
+  minimum_nodes: 1
+  seeds:
+    - 127.0.0.1:10000
+  broadcast:
+     binding: 224.3.2.2:9876
+  rpc:
+    network:
+       binding: 0.0.0.0:10000
+    tls:
+       enabled: true
+       cert_file: test/cert/client.crt
+       key_file: test/cert/client.key
+       skip_insecure_verify: true
 
 modules:
 - name: pipeline
@@ -230,36 +223,37 @@ modules:
       enabled: true
       input_queue: check
       pipeline_id: url_filter_flow
-      max_go_routine: 1
+      max_go_routine: 5
       threshold_in_ms: 0
       timeout_in_ms: 5000
+      default_config:
     - name: fetch
       enabled: true
       input_queue: fetch
       pipeline_id: url_fetch_flow
-      max_go_routine: 1
+      max_go_routine: 10
       threshold_in_ms: 0
       timeout_in_ms: 30000
-
-- name: cluster
-  enabled: true
-
-
-- name: api
-  enabled: true
+      default_config:
 
 - name: web
   enabled: true
+  tls:
+     enabled: false
+#     cert_file: test/cert/client.crt
+#     key_file: test/cert/client.key
+     skip_insecure_verify: true
+  network:
+     binding: 127.0.0.1:9000
   auth:
     enabled: false
     oauth_provider: github
     oauth_authorize_url: https://github.com/login/oauth/authorize
     oauth_token_url: https://github.com/login/oauth/access_token
-    client_id: 850d747174ace88ce889
-    client_secret: 3d437b64e06371d6f62769320438d3dfc95a8d8e
+    client_id: 1ebc947823769bbe0532
+    client_secret: 13c04410a7e41bb76329929ca0ad8995afc8b887
     authorized_admin:
       - medcl
-      - your_github_login_name
 
 - name: filter
   enabled: true
@@ -267,53 +261,44 @@ modules:
 - name: queue
   enabled: true
 
+- name: boltdb
+  enabled: false
+
+
 - name: index
   enabled: true
   ui:
     enabled: true
-#    site_name: Elasticsearch
-#    logo: https://static-www.elastic.co/cn/assets/blt6050efb80ceabd47/elastic-logo (2).svg?q=294
-#    favicon: https://www.elastic.co/favicon.ico
+    site_name: Elastic Intelligence Ageney
+    logo: https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt280217a63b82a734/5bbdaacf63ed239936a7dd56/elastic-logo.svg
+    favicon: https://www.elastic.co/favicon.ico
   elasticsearch: default
 
 - name: elastic
   enabled: true
+  indexer_enabled: true
   store_enabled: true
   orm_enabled: true
-  indexer_enabled: true
   elasticsearch: default
 
 - name: stats
   enabled: true
 
-- name: statsd
+- name: boltdb
   enabled: false
-  host: 127.0.0.1
-  port: 8125
-  namespace: gopa.
-  interval_in_seconds: 1
-
 
 plugins:
 - name: chrome
-  enabled: false
+  enabled: true
   command: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 #  command: "/usr/bin/google-chrome"
   debug_port: 9223
 
 - name: dispatch
   enabled: true
-  failed_retry: true
+  failed_retry: false
   new_task: true
-  update_task: true
-  max_concurrent_fetch_tasks: 10
+  update_task: false
+  max_concurrent_fetch_tasks: 50
   fetch_size: 10
   get_host_config_by_url: false
-
-
-rpc:
-  enabled: true
-  tls_enabled: true
-  tls_cert_file: test/cert/server.crt
-  tls_key_file: test/cert/server.key
-#  tls_skip_insecure_verify: false

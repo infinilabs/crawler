@@ -21,6 +21,7 @@ import (
 	"github.com/infinitbyte/framework"
 	"github.com/infinitbyte/framework/core/module"
 	"github.com/infinitbyte/framework/core/orm"
+	pipeline2 "github.com/infinitbyte/framework/core/pipeline"
 	"github.com/infinitbyte/framework/modules"
 	"github.com/infinitbyte/gopa/api"
 	"github.com/infinitbyte/gopa/config"
@@ -71,7 +72,7 @@ func main() {
 		module.Start()
 
 	}, func() {
-
+		orm.RegisterSchema(pipeline2.PipelineConfig{})
 		orm.RegisterSchema(model.Host{})
 		orm.RegisterSchema(model.Task{})
 		orm.RegisterSchema(model.Snapshot{})
