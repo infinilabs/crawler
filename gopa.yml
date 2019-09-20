@@ -1,16 +1,12 @@
 path.data: data
 path.logs: log
-path.certs: test/cert
 
 cookie_secret: YOUR-GOPA-SECRET
 
 allow_multi_instance: true
 max_num_of_instances: 1
 
-cluster.name: gopa
-
 logging.level: debug
-
 
 elasticsearch:
 - name: default
@@ -194,8 +190,6 @@ api:
     binding: 0.0.0.0:8000
   tls:
     enabled: true
-#    cert_file: test/cert/client.crt
-#    key_file: test/cert/client.key
     skip_insecure_verify: true
 
 cluster:
@@ -211,8 +205,6 @@ cluster:
        binding: 0.0.0.0:10000
     tls:
        enabled: true
-       cert_file: test/cert/client.crt
-       key_file: test/cert/client.key
        skip_insecure_verify: true
 
 modules:
@@ -240,8 +232,6 @@ modules:
   enabled: true
   tls:
      enabled: false
-#     cert_file: test/cert/client.crt
-#     key_file: test/cert/client.key
      skip_insecure_verify: true
   network:
      binding: 127.0.0.1:9000
